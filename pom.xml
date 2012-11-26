@@ -32,22 +32,25 @@
     </parent>
 
     <groupId>org.mybatch</groupId>
-    <artifactId>mybatch</artifactId>
+    <artifactId>mybatch-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>mybatch</name>
+    <name>mybatch-parent</name>
     <description>Impl of JSR 352: Batch Applications for the Java Platform</description>
 
     <packaging>pom</packaging>
 
     <properties>
+
         <!-- Dependency versions. Please keep alphabetical -->
         <version.junit>4.11</version.junit>
         <version.org.jboss.logging>3.1.2.GA</version.org.jboss.logging>
+        <version.org.jvnet.jaxb2.maven2>0.8.2</version.org.jvnet.jaxb2.maven2>
     </properties>
 
     <modules>
         <module>javax.batch</module>
+        <module>mybatch</module>
     </modules>
 
     <build>

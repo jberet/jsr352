@@ -28,8 +28,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>mybatch</artifactId>
         <groupId>org.mybatch</groupId>
+        <artifactId>mybatch-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
