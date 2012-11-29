@@ -43,9 +43,10 @@
     <properties>
 
         <!-- Dependency versions. Please keep alphabetical -->
-        <version.junit>4.11</version.junit>
+        <version.junit>4.10</version.junit>
         <version.org.jboss.logging>3.1.2.GA</version.org.jboss.logging>
         <version.org.jvnet.jaxb2.maven2>0.8.2</version.org.jvnet.jaxb2.maven2>
+        <version.org.scannotation>1.0.3</version.org.scannotation>
     </properties>
 
     <modules>
@@ -93,6 +94,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.scannotation</groupId>
+                <artifactId>scannotation</artifactId>
+                <version>${version.org.scannotation}</version>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>

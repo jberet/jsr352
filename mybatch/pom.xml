@@ -59,5 +59,20 @@
         </plugins>
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.mybatch</groupId>
+            <artifactId>javax.batch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scannotation</groupId>
+            <artifactId>scannotation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

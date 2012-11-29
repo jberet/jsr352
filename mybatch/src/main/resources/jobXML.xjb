@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <!--
   ~ JBoss, Home of Professional Open Source.
@@ -22,10 +22,18 @@
   ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
   -->
 
-<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-               xmlns:xs="http://www.w3.org/2001/XMLSchema" version="2.0" schemaLocation="jobXML.xsd">
-    <jaxb:schemaBindings>
-        <jaxb:package name="org.mybatch.job" />
-    </jaxb:schemaBindings>
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb"
+          xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
+          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+          xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd"
+          schemaLocation="jobXML.xsd"
+          version="2.1">
+    <globalBindings>
+        <serializable uid="1" />
+    </globalBindings>
 
-</jaxb:bindings>
+    <schemaBindings>
+        <package name="org.mybatch.job" />
+    </schemaBindings>
+
+</bindings>
