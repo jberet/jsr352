@@ -20,58 +20,54 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.mybatch.org.mybatch.state;
+package org.mybatch.state;
 
-import java.sql.Timestamp;
-import javax.batch.state.JobExecution;
+import java.util.Properties;
 import javax.batch.state.JobInstance;
 
-public class JobExecutionImpl implements JobExecution {
+import org.mybatch.creation.ArtifactFactory;
+import org.mybatch.creation.SimpleArtifactFactory;
+import org.mybatch.job.Job;
+import org.mybatch.metadata.ApplicationMetaData;
+
+public class JobInstanceImpl implements JobInstance {
     private long id;
+    private Job job;
+    private ApplicationMetaData appData;
+    private ArtifactFactory artifactFactory;
 
-    private JobInstanceImpl instance;
-
-    public JobExecutionImpl(JobInstanceImpl in) {
-        this.instance = in;
+    public JobInstanceImpl(Job job, ApplicationMetaData appData, ArtifactFactory artifactFactory) {
+        this.job = job;
+        this.appData = appData;
+        this.artifactFactory = artifactFactory;
     }
 
     @Override
-    public long getExecutionId() {
-        return 0;
+    public String getJobName() {
+        return job.getId();
     }
 
     @Override
     public long getInstanceId() {
-        return instance.getInstanceId();
+        return 0;
     }
 
     @Override
-    public Timestamp getCreateTime() {
+    public String getJobXML() {
         return null;
     }
 
     @Override
-    public Timestamp getStartTime() {
+    public Properties getOriginalJobParams() {
         return null;
     }
 
-    @Override
-    public Timestamp getEndTime() {
-        return null;
+    public ApplicationMetaData getApplicationMetaData() {
+        return this.appData;
     }
 
-    @Override
-    public Timestamp getLastUpdateTime() {
-        return null;
+    public ArtifactFactory getArtifactFactory() {
+        return artifactFactory;
     }
 
-    @Override
-    public String getBatchStatus() {
-        return null;
-    }
-
-    @Override
-    public String getExitStatus() {
-        return null;
-    }
 }

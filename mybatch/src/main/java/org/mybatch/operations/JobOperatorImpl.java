@@ -51,11 +51,11 @@ import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.creation.SimpleArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
-import org.mybatch.org.mybatch.state.JobExecutionImpl;
-import org.mybatch.org.mybatch.state.JobInstanceImpl;
 import org.mybatch.repository.JobRepository;
 import org.mybatch.repository.impl.MemoryRepository;
 import org.mybatch.runtime.runner.JobExecutionRunner;
+import org.mybatch.state.JobExecutionImpl;
+import org.mybatch.state.JobInstanceImpl;
 import org.mybatch.util.BatchUtil;
 
 public class JobOperatorImpl implements JobOperator {

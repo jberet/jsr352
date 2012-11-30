@@ -23,14 +23,12 @@
 package org.mybatch.runtime.runner;
 
 import java.io.Serializable;
-import javax.batch.state.JobExecution;
-import javax.batch.state.JobInstance;
 
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
-import org.mybatch.org.mybatch.state.JobExecutionImpl;
-import org.mybatch.org.mybatch.state.JobInstanceImpl;
-import org.mybatch.org.mybatch.state.StepExecutionImpl;
+import org.mybatch.state.JobExecutionImpl;
+import org.mybatch.state.JobInstanceImpl;
+import org.mybatch.state.StepExecutionImpl;
 
 public class JobExecutionRunner implements Runnable {
     private Job job;

@@ -31,6 +31,7 @@ public class BatchThreadFactory implements ThreadFactory {
 
     public Thread newThread(Runnable r) {
         Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
+        t.setContextClassLoader(null);
         return t;
     }
 }

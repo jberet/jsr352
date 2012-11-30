@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.runtime.runner;
 
 import java.util.HashMap;
@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.util.BatchUtil;
 
 public class BatchletRunner implements Callable<Void> {
     private static final Logger logger = Logger.getLogger(BatchletRunner.class.getName());
@@ -44,17 +45,24 @@ public class BatchletRunner implements Callable<Void> {
 
     @Override
     public Void call() {
-        String ref = batchlet.getRef();
-        ApplicationMetaData appData = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getApplicationMetaData();
-        Map<String, ApplicationMetaData> m = new HashMap<String, ApplicationMetaData>();
-        m.put(ApplicationMetaData.class.getName(), appData);
-
+        Thread thread = Thread.currentThread();
+        ClassLoader originalCL = thread.getContextClassLoader();
         try {
-            Object artifactObj = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, m);
-            StepExecutionRunner.invokeFunctionMethods(artifactObj, StepExecutionRunner.methodAnnotations);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to run batchlet " + batchlet, e);
+            thread.setContextClassLoader(BatchUtil.getBatchApplicationClassLoader());
+            String ref = batchlet.getRef();
+            ApplicationMetaData appData = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getApplicationMetaData();
+            Map<String, ApplicationMetaData> m = new HashMap<String, ApplicationMetaData>();
+            m.put(ApplicationMetaData.class.getName(), appData);
+
+            try {
+                Object artifactObj = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, m);
+                StepExecutionRunner.invokeFunctionMethods(artifactObj, StepExecutionRunner.methodAnnotations);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Failed to run batchlet " + batchlet, e);
+            }
+            return null;
+        } finally {
+            thread.setContextClassLoader(originalCL);
         }
-        return null;
     }
 }

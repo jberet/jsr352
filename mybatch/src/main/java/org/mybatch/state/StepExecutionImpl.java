@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.mybatch.org.mybatch.state;
+package org.mybatch.state;
 
 import java.sql.Timestamp;
 import javax.batch.state.StepExecution;
