@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.batch.state.StepExecution;
@@ -38,6 +40,7 @@ import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Step;
 import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.util.BatchUtil;
 
 public class StepExecutionRunner implements Runnable {
     private static final Logger logger = Logger.getLogger(StepExecutionRunner.class.getName());
@@ -46,7 +49,7 @@ public class StepExecutionRunner implements Runnable {
     private StepExecution stepExecution;
     private JobExecutionRunner jobExecutionRunner;
 
-    private List<Class<? extends Annotation>> methodAnnotations = Arrays.asList(
+    public static List<Class<? extends Annotation>> methodAnnotations = Arrays.asList(
             javax.batch.annotation.BeginStep.class,
             javax.batch.annotation.Process.class,
             javax.batch.annotation.EndStep.class
@@ -59,6 +62,10 @@ public class StepExecutionRunner implements Runnable {
         this.jobExecutionRunner = jobExecutionRunner;
     }
 
+    public JobExecutionRunner getJobExecutionRunner() {
+        return jobExecutionRunner;
+    }
+
     @Override
     public void run() {
         Chunk chunk = step.getChunk();
@@ -67,23 +74,18 @@ public class StepExecutionRunner implements Runnable {
             throw new IllegalStateException("A step cannot contain both Chunk type step and batchlet type step.");
         }
 
+        BatchletRunner batchletRunner = new BatchletRunner(batchlet, this);
+        FutureTask<?> futureTask = new FutureTask(batchletRunner);
+        Future<?> future = BatchUtil.getExecutorService().submit(futureTask);
+        logger.log(Level.INFO, "Submitted batchlet task {0} in {1}", new Object[]{batchlet.getRef(), Thread.currentThread()});
         //TODO handle chunk type step
-        String ref = batchlet.getRef();
-        ApplicationMetaData appData = jobExecutionRunner.getJobInstance().getApplicationMetaData();
-        Map<String, ApplicationMetaData> m = new HashMap<String, ApplicationMetaData>();
-        m.put(ApplicationMetaData.class.getName(), appData);
 
-        try {
-            Object artifactObj = jobExecutionRunner.getJobInstance().getArtifactFactory().create(ref, m);
-            invokeFunctionMethods(artifactObj);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to run step " + step, e);
-        }
     }
 
-    public void invokeFunctionMethods(Object artifact) throws InvocationTargetException, IllegalAccessException {
+    public static void invokeFunctionMethods(Object artifact, List<Class<? extends Annotation>> methodAnnotations)
+            throws InvocationTargetException, IllegalAccessException {
         for(Class<? extends Annotation> ann : methodAnnotations) {
-            Method m = getAnnotatedMethod(artifact, ann);
+            Method m = StepExecutionRunner.getAnnotatedMethod(artifact, ann);
             if(m != null) {
                 m.invoke(artifact);
             } else {

@@ -19,33 +19,18 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
-package org.mybatch.test;
 
-import javax.batch.annotation.*;
-import javax.batch.annotation.Process;
+package org.mybatch.util;
 
-@Batchlet("Batchlet1")
-public class Batchlet1 {
-    @BeginStep
-    public void begin() throws Exception {
-        System.out.printf("in @BeginStep, %s%n", Thread.currentThread());
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class BatchThreadFactory implements ThreadFactory {
+    final AtomicInteger threadNumber = new AtomicInteger(1);
+    final String namePrefix = "mybatch-";
+
+    public Thread newThread(Runnable r) {
+        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
+        return t;
     }
-
-    @Process
-    public String process() throws Exception {
-        System.out.printf("in @Process, %s%n", Thread.currentThread());
-        return "Processed";
-    }
-
-    @Stop
-    public void stop() throws Exception {
-        System.out.printf("in @Stop, %s%n", Thread.currentThread());
-    }
-
-    @EndStep
-    public void end() throws Exception {
-        System.out.printf("in @EndStep, %s%n", Thread.currentThread());
-    }
-
 }

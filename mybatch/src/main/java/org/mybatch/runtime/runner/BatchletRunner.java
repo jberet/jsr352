@@ -22,17 +22,39 @@
  
 package org.mybatch.runtime.runner;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.mybatch.job.Batchlet;
+import org.mybatch.metadata.ApplicationMetaData;
 
-public class BatchletRunner implements Runnable {
+public class BatchletRunner implements Callable<Void> {
+    private static final Logger logger = Logger.getLogger(BatchletRunner.class.getName());
+
     private Batchlet batchlet;
+    private StepExecutionRunner stepExecutionRunner;
 
-    public BatchletRunner(Batchlet batchlet) {
+    public BatchletRunner(Batchlet batchlet, StepExecutionRunner stepExecutionRunner) {
         this.batchlet = batchlet;
+        this.stepExecutionRunner = stepExecutionRunner;
     }
 
     @Override
-    public void run() {
-        batchlet.getRef();
+    public Void call() {
+        String ref = batchlet.getRef();
+        ApplicationMetaData appData = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getApplicationMetaData();
+        Map<String, ApplicationMetaData> m = new HashMap<String, ApplicationMetaData>();
+        m.put(ApplicationMetaData.class.getName(), appData);
+
+        try {
+            Object artifactObj = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, m);
+            StepExecutionRunner.invokeFunctionMethods(artifactObj, StepExecutionRunner.methodAnnotations);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to run batchlet " + batchlet, e);
+        }
+        return null;
     }
 }

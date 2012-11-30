@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 
 public class BatchUtil {
 
-    private static ExecutorService executorService = Executors.newCachedThreadPool();
+    private static ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
 
     public static ClassLoader getBatchApplicationClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();

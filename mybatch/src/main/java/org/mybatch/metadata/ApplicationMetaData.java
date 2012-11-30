@@ -63,9 +63,9 @@ public class ApplicationMetaData {
         }
         URL[] urls = ClasspathUrlFinder.findClassPaths();
 //        System.out.println("classpath urls: ");
-        for (URL u : urls) {
-            System.out.println(u);
-        }
+//        for (URL u : urls) {
+//            System.out.println(u);
+//        }
 
         annotationDB.setScanClassAnnotations(true);
         annotationDB.setScanMethodAnnotations(false);
