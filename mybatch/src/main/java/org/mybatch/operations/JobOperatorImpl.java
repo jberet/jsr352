@@ -41,25 +41,27 @@ import javax.batch.operations.exception.NoSuchJobException;
 import javax.batch.operations.exception.NoSuchJobExecutionException;
 import javax.batch.operations.exception.NoSuchJobInstanceException;
 import javax.batch.state.JobExecution;
-import javax.batch.state.JobInstance;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
 
+import org.mybatch.creation.ArtifactFactory;
+import org.mybatch.creation.SimpleArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.org.mybatch.state.JobExecutionImpl;
 import org.mybatch.org.mybatch.state.JobInstanceImpl;
 import org.mybatch.repository.JobRepository;
 import org.mybatch.repository.impl.MemoryRepository;
+import org.mybatch.runtime.runner.JobExecutionRunner;
 import org.mybatch.util.BatchUtil;
 
 public class JobOperatorImpl implements JobOperator {
     //TODO use factory
     JobRepository repository = new MemoryRepository();
+    ArtifactFactory artifactFactory = new SimpleArtifactFactory();
 
     @Override
     public List<Long> getExecutions(long instanceId) throws NoSuchJobInstanceException {
@@ -120,9 +122,10 @@ public class JobOperatorImpl implements JobOperator {
         } catch (IOException e) {
             throw new JobStartException(e, "Failed to process batch application metadata.");
         }
-        JobInstanceImpl instance = new JobInstanceImpl(jobDefined, appData);
+        JobInstanceImpl instance = new JobInstanceImpl(jobDefined, appData, artifactFactory);
         JobExecutionImpl jobExecution = new JobExecutionImpl(instance);
-
+        JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobDefined, instance, jobExecution);
+        jobExecutionRunner.run();
         return jobExecution.getExecutionId();
     }
 

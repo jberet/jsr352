@@ -62,7 +62,7 @@ public class ApplicationMetaData {
             annotationDB.addIgnoredPackages(s);
         }
         URL[] urls = ClasspathUrlFinder.findClassPaths();
-        System.out.println("classpath urls: ");
+//        System.out.println("classpath urls: ");
         for (URL u : urls) {
             System.out.println(u);
         }
@@ -76,6 +76,15 @@ public class ApplicationMetaData {
         initArtifactAnnotations();
         identifyArtifacts();
         outputBatchArtifactXml();
+    }
+
+    public Class<?> getClassForRef(String ref) {
+        Class<?> cls = null;
+        ArtifactClassAndAnnotation a = artifactCatalog.get(ref);
+        if (a != null) {
+            cls = a.artifactClass;
+        }
+        return cls;
     }
 
     private void outputBatchArtifactXml() {

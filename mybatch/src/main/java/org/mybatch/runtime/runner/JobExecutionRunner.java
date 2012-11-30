@@ -30,6 +30,7 @@ import org.mybatch.job.Job;
 import org.mybatch.job.Step;
 import org.mybatch.org.mybatch.state.JobExecutionImpl;
 import org.mybatch.org.mybatch.state.JobInstanceImpl;
+import org.mybatch.org.mybatch.state.StepExecutionImpl;
 
 public class JobExecutionRunner implements Runnable {
     private Job job;
@@ -53,10 +54,13 @@ public class JobExecutionRunner implements Runnable {
     @Override
     public void run() {
         // is the first element the beginning of the job?
+        // need to collect into an ordered collection first.
         for(Serializable e : job.getDecisionOrFlowOrSplit()) {
             if(e instanceof Step) {
                 Step step = (Step) e;
-
+                StepExecutionImpl stepExecution = new StepExecutionImpl(step);
+                StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(step, stepExecution, this);
+                stepExecutionRunner.run();
             }
         }
     }

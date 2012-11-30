@@ -19,25 +19,30 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
-package org.mybatch.util;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+package org.mybatch.creation;
 
-public class BatchUtil {
+import java.util.Map;
 
-    private static ExecutorService executorService = Executors.newCachedThreadPool();
+import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.util.BatchUtil;
+//import javax.batch.spiArtifactFactory;
 
-    public static ClassLoader getBatchApplicationClassLoader() {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl == null) {
-            cl = BatchUtil.class.getClassLoader();
-        }
-        return cl;
+public class SimpleArtifactFactory implements ArtifactFactory {
+    public void initialize() throws Exception {
+
     }
 
-    public static ExecutorService getExecutorService() {
-        return executorService;
+    public Object create(String ref, Map<?, ?> data) throws Exception {
+        ApplicationMetaData appData = (ApplicationMetaData) data.get(ApplicationMetaData.class.getName());
+        Class<?> cls = appData.getClassForRef(ref);
+        if (cls == null) {
+            throw new IllegalStateException(String.format("Unable to create artifact for ref %s", ref));
+        }
+        return cls.newInstance();
+    }
+
+    public void destroy(Object instance) throws Exception {
+
     }
 }
