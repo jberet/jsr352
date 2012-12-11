@@ -25,7 +25,9 @@ package org.mybatch.creation;
 import java.util.Map;
 
 import org.mybatch.metadata.ApplicationMetaData;
-import org.mybatch.util.BatchUtil;
+
+import static org.mybatch.util.BatchLogger.LOGGER;
+
 //import javax.batch.spiArtifactFactory;
 
 public class SimpleArtifactFactory implements ArtifactFactory {
@@ -37,7 +39,7 @@ public class SimpleArtifactFactory implements ArtifactFactory {
         ApplicationMetaData appData = (ApplicationMetaData) data.get(ApplicationMetaData.class.getName());
         Class<?> cls = appData.getClassForRef(ref);
         if (cls == null) {
-            throw new IllegalStateException(String.format("Unable to create artifact for ref %s", ref));
+            throw LOGGER.failToCreateArtifact(ref);
         }
         return cls.newInstance();
     }

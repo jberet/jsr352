@@ -58,6 +58,8 @@ import org.mybatch.state.JobExecutionImpl;
 import org.mybatch.state.JobInstanceImpl;
 import org.mybatch.util.BatchUtil;
 
+import static org.mybatch.util.BatchLogger.LOGGER;
+
 public class JobOperatorImpl implements JobOperator {
     //TODO use factory
     JobRepository repository = new MemoryRepository();
@@ -95,7 +97,7 @@ public class JobOperatorImpl implements JobOperator {
         try {
             is = getJobXml(job);
         } catch (IOException e) {
-            throw new JobStartException(e, "Failed to get job xml file: " + job);
+            throw LOGGER.failToGetJobXml(e, job);
         }
 
         try {
@@ -104,9 +106,9 @@ public class JobOperatorImpl implements JobOperator {
             JAXBElement<Job> root = um.unmarshal(new StreamSource(is), Job.class);
             jobDefined = root.getValue();
         } catch (JAXBException e) {
-            throw new JobStartException(e, "Failed to parse and bind XML: " + job);
+            throw LOGGER.failToParseBindJobXml(e, job);
         } finally {
-            if(is != null) {
+            if (is != null) {
                 try {
                     is.close();
                 } catch (IOException e) {
@@ -120,7 +122,7 @@ public class JobOperatorImpl implements JobOperator {
         try {
             appData = new ApplicationMetaData();
         } catch (IOException e) {
-            throw new JobStartException(e, "Failed to process batch application metadata.");
+            throw LOGGER.failToProcessMetaData(e, job);
         }
         JobInstanceImpl instance = new JobInstanceImpl(jobDefined, appData, artifactFactory);
         JobExecutionImpl jobExecution = new JobExecutionImpl(instance);

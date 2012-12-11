@@ -25,12 +25,13 @@ package org.mybatch.runtime.runner;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.util.BatchUtil;
+
+import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class BatchletRunner implements Callable<Void> {
     private static final Logger logger = Logger.getLogger(BatchletRunner.class.getName());
@@ -58,7 +59,7 @@ public class BatchletRunner implements Callable<Void> {
                 Object artifactObj = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, m);
                 StepExecutionRunner.invokeFunctionMethods(artifactObj, StepExecutionRunner.methodAnnotations);
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Failed to run batchlet " + batchlet, e);
+                LOGGER.failToRunBatchlet(e, batchlet);
             }
             return null;
         } finally {

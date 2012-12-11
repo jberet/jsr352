@@ -33,16 +33,15 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
 import org.scannotation.AnnotationDB;
 import org.scannotation.ClasspathUrlFinder;
 
-public class ApplicationMetaData {
-    private static final Logger logger = Logger.getLogger(ApplicationMetaData.class.getName());
+import static org.mybatch.util.BatchLogger.LOGGER;
 
+public class ApplicationMetaData {
     private static final String batchArtifactFileName = "batch-artifacts.xml";
 
     private AnnotationDB annotationDB;
@@ -108,7 +107,7 @@ public class ApplicationMetaData {
             pw.println("</batch-artifacts>");
             pw.flush();
         } catch (IOException e) {
-            logger.log(Level.WARNING, e.getMessage());
+            BatchLogger.LOGGER.failToWriteBatchXml(e);
         } finally {
             if (pw != null) {
                 pw.close();
@@ -132,16 +131,16 @@ public class ApplicationMetaData {
                         Class<? extends Annotation> annType = ann.annotationType();
                         artifactName = (String) annType.getMethod("value").invoke(ann);
                     } catch (ClassNotFoundException e) {
-                        logger.log(Level.WARNING, e.getMessage());
+                        LOGGER.failToIdentifyArtifact(e);
                         continue;
                     } catch (NoSuchMethodException e) {
-                        logger.log(Level.WARNING, e.getMessage());
+                        LOGGER.failToIdentifyArtifact(e);
                         continue;
                     } catch (IllegalAccessException e) {
-                        logger.log(Level.WARNING, e.getMessage());
+                        LOGGER.failToIdentifyArtifact(e);
                         continue;
                     } catch (InvocationTargetException e) {
-                        logger.log(Level.WARNING, e.getMessage());
+                        LOGGER.failToIdentifyArtifact(e);
                         continue;
                     }
                     if (artifactName == null || artifactName.isEmpty()) {

@@ -26,10 +26,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
@@ -39,7 +36,6 @@ import javax.batch.state.StepExecution;
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Step;
-import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.util.BatchUtil;
 
 public class StepExecutionRunner implements Runnable {

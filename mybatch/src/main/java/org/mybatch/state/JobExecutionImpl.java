@@ -24,7 +24,6 @@ package org.mybatch.state;
 
 import java.sql.Timestamp;
 import javax.batch.state.JobExecution;
-import javax.batch.state.JobInstance;
 
 public class JobExecutionImpl implements JobExecution {
     private long id;

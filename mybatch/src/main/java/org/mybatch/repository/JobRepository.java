@@ -24,7 +24,6 @@
 package org.mybatch.repository;
 
 import java.util.Collection;
-import javax.batch.state.JobInstance;
 
 import org.mybatch.job.Job;
 

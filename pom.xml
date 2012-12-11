@@ -45,6 +45,8 @@
         <!-- Dependency versions. Please keep alphabetical -->
         <version.junit>4.10</version.junit>
         <version.org.jboss.logging>3.1.2.GA</version.org.jboss.logging>
+        <version.org.jboss.logging.jboss-logging>3.1.2.GA</version.org.jboss.logging.jboss-logging>
+        <version.org.jboss.logging.jboss-logging-processor>1.1.0.Beta1</version.org.jboss.logging.jboss-logging-processor>
         <version.org.jvnet.jaxb2.maven2>0.8.2</version.org.jvnet.jaxb2.maven2>
         <version.org.scannotation>1.0.3</version.org.scannotation>
     </properties>
@@ -56,7 +58,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
@@ -99,17 +100,24 @@
                 <artifactId>scannotation</artifactId>
                 <version>${version.org.scannotation}</version>
             </dependency>
+
+            <dependency>
+              <groupId>org.jboss.logging</groupId>
+              <artifactId>jboss-logging</artifactId>
+              <version>${version.org.jboss.logging.jboss-logging}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-processor</artifactId>
+                <version>${version.org.jboss.logging.jboss-logging-processor}</version>
+            </dependency>
+
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${version.junit}</version>
                 <scope>test</scope>
-            </dependency>
-
-            <dependency>
-              <groupId>org.jboss.logging</groupId>
-              <artifactId>jboss-logging</artifactId>
-              <version>${version.org.jboss.logging}</version>
             </dependency>
 
             <dependency>
@@ -126,6 +134,18 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-processor</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+        </dependency>
+    </dependencies>
 
     <repositories>
         <repository>

@@ -26,7 +26,6 @@ import java.util.Properties;
 import javax.batch.state.JobInstance;
 
 import org.mybatch.creation.ArtifactFactory;
-import org.mybatch.creation.SimpleArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
 

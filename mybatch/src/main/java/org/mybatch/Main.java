@@ -27,6 +27,8 @@ import javax.batch.operations.JobOperator;
 
 import org.mybatch.operations.JobOperatorImpl;
 
+import static org.mybatch.util.BatchLogger.LOGGER;
+
 public class Main {
     public static void main(String[] args) {
         if(args.length == 0) {
@@ -47,7 +49,6 @@ public class Main {
     }
 
     private static void usage(String[] args) {
-        System.out.printf("Usage: java -classpath ... -Dkey1=val1 ... org.mybatch.Main jobXML%n");
-        System.out.printf("The following application args are invalid:%n%s", Arrays.asList(args));
+        LOGGER.mainUsage(Arrays.asList(args));
     }
 }
