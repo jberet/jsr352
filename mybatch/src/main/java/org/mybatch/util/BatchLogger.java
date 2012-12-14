@@ -22,8 +22,10 @@
 
 package org.mybatch.util;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import javax.batch.operations.exception.JobStartException;
+import javax.batch.operations.exception.NoSuchJobExecutionException;
 
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
@@ -64,4 +66,17 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     @Message(id = 8, value = "Failed to identify batch artifact")
     void failToIdentifyArtifact(@Cause Throwable e);
+
+    @Message(id = 9, value = "A step cannot contain both chunk type and batchlet type: %s")
+    IllegalStateException cannotContainBothChunkAndBatchlet(String stepId);
+
+    @LogMessage(level = Logger.Level.INFO)
+    @Message(id = 10, value = "Submitted batchlet task %s in thread %s")
+    void submittedBatchletTask(String b, Thread th);
+
+    @Message(id = 11, value = "No method matches the annotation %s in artifact %s")
+    IllegalStateException noMethodMatchingAnnotation(Class<? extends Annotation> ann, Object artifact);
+
+    @Message(id = 12, value = "No job execution with id %s")
+    NoSuchJobExecutionException noSuchJobExecution(Long executionId);
 }

@@ -27,9 +27,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Future;
 import javax.batch.operations.JobEndCallback;
 import javax.batch.operations.JobOperator;
 import javax.batch.operations.exception.CallbackRegistrationException;
@@ -57,13 +60,16 @@ import org.mybatch.runtime.runner.JobExecutionRunner;
 import org.mybatch.state.JobExecutionImpl;
 import org.mybatch.state.JobInstanceImpl;
 import org.mybatch.util.BatchUtil;
+import org.mybatch.util.ConcurrencyService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class JobOperatorImpl implements JobOperator {
     //TODO use factory
-    JobRepository repository = new MemoryRepository();
-    ArtifactFactory artifactFactory = new SimpleArtifactFactory();
+    private JobRepository repository = new MemoryRepository();
+    private ArtifactFactory artifactFactory = new SimpleArtifactFactory();
+    private Map<Long, Future<?>> jobExecutionResults = new HashMap<Long, Future<?>>();
+
 
     @Override
     public List<Long> getExecutions(long instanceId) throws NoSuchJobInstanceException {
@@ -127,8 +133,10 @@ public class JobOperatorImpl implements JobOperator {
         JobInstanceImpl instance = new JobInstanceImpl(jobDefined, appData, artifactFactory);
         JobExecutionImpl jobExecution = new JobExecutionImpl(instance);
         JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobDefined, instance, jobExecution);
-        jobExecutionRunner.run();
-        return jobExecution.getExecutionId();
+        Future<?> result = ConcurrencyService.submit(jobExecutionRunner);
+        Long jobExecutionId = jobExecution.getExecutionId();
+        jobExecutionResults.put(jobExecutionId, result);
+        return jobExecutionId;
     }
 
     @Override
@@ -138,7 +146,16 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public void stop(long executionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+        Future<?> executionResult = jobExecutionResults.get(executionId);
+        if (executionResult == null) {
+            throw LOGGER.noSuchJobExecution(executionId);
+        }
+        //TODO check if need to throw JobExecutionNotRunningException
 
+        //cancel the task if the task execution has not started
+        executionResult.cancel(false);
+
+        //TODO if the task execution has already started
     }
 
     @Override

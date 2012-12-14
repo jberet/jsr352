@@ -25,7 +25,6 @@ package org.mybatch.runtime.runner;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.logging.Logger;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.metadata.ApplicationMetaData;
@@ -34,8 +33,6 @@ import org.mybatch.util.BatchUtil;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class BatchletRunner implements Callable<Void> {
-    private static final Logger logger = Logger.getLogger(BatchletRunner.class.getName());
-
     private Batchlet batchlet;
     private StepExecutionRunner stepExecutionRunner;
 

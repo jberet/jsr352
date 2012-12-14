@@ -28,22 +28,20 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.batch.state.StepExecution;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Step;
-import org.mybatch.util.BatchUtil;
+import org.mybatch.util.ConcurrencyService;
+
+import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class StepExecutionRunner implements Runnable {
-    private static final Logger logger = Logger.getLogger(StepExecutionRunner.class.getName());
-
     private Step step;
     private StepExecution stepExecution;
     private JobExecutionRunner jobExecutionRunner;
+    private Future<?> stepResult;
 
     public static List<Class<? extends Annotation>> methodAnnotations = Arrays.asList(
             javax.batch.annotation.BeginStep.class,
@@ -67,13 +65,13 @@ public class StepExecutionRunner implements Runnable {
         Chunk chunk = step.getChunk();
         Batchlet batchlet = step.getBatchlet();
         if (chunk != null && batchlet != null) {
-            throw new IllegalStateException("A step cannot contain both Chunk type step and batchlet type step.");
+            throw LOGGER.cannotContainBothChunkAndBatchlet(step.getId());
         }
 
         BatchletRunner batchletRunner = new BatchletRunner(batchlet, this);
-        FutureTask<?> futureTask = new FutureTask(batchletRunner);
-        Future<?> future = BatchUtil.getExecutorService().submit(futureTask);
-        logger.log(Level.INFO, "Submitted batchlet task {0} in {1}", new Object[]{batchlet.getRef(), Thread.currentThread()});
+        stepResult = ConcurrencyService.submit(batchletRunner);
+        LOGGER.submittedBatchletTask(batchlet.getRef(), Thread.currentThread());
+
         //TODO handle chunk type step
 
     }
@@ -85,7 +83,7 @@ public class StepExecutionRunner implements Runnable {
             if(m != null) {
                 m.invoke(artifact);
             } else {
-                logger.log(Level.WARNING, "No method for {0} on artifact {1}", new Object[]{ann, artifact});
+                throw LOGGER.noMethodMatchingAnnotation(ann, artifact);
             }
         }
     }
