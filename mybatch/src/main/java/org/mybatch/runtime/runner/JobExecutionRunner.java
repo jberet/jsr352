@@ -26,9 +26,9 @@ import java.io.Serializable;
 
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
-import org.mybatch.state.JobExecutionImpl;
-import org.mybatch.state.JobInstanceImpl;
-import org.mybatch.state.StepExecutionImpl;
+import org.mybatch.runtime.JobExecutionImpl;
+import org.mybatch.runtime.JobInstanceImpl;
+import org.mybatch.runtime.StepExecutionImpl;
 
 public class JobExecutionRunner implements Runnable {
     private Job job;

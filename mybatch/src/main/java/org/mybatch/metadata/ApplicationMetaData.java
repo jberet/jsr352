@@ -122,8 +122,8 @@ public class ApplicationMetaData {
             Set<String> matchingClasses = annotationIndex.get(annotationToLook.getName());
             if (matchingClasses != null) {
                 for (String matchingClass : matchingClasses) {
-                    String artifactName = null;
-                    Class<?> cls = null;
+                    String artifactName;
+                    Class<?> cls;
 
                     try {
                         cls = BatchUtil.getBatchApplicationClassLoader().loadClass(matchingClass);
@@ -164,7 +164,6 @@ public class ApplicationMetaData {
         artifactAnnotations.put(javax.batch.annotation.ItemWriteListener.class, "item-writer-listener");
         artifactAnnotations.put(javax.batch.annotation.ItemWriter.class, "item-writer");
         artifactAnnotations.put(javax.batch.annotation.JobListener.class, "job-listener");
-        artifactAnnotations.put(javax.batch.annotation.PartitionAlgorithm.class, "partition-algorithm");
         artifactAnnotations.put(javax.batch.annotation.PartitionAnalyzer.class, "partition-analyzer");
         artifactAnnotations.put(javax.batch.annotation.PartitionCollector.class, "partition-collector");
         artifactAnnotations.put(javax.batch.annotation.RetryListener.class, "retry-listener");

@@ -33,9 +33,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Future;
-import javax.batch.operations.JobEndCallback;
 import javax.batch.operations.JobOperator;
-import javax.batch.operations.exception.CallbackRegistrationException;
+import javax.batch.operations.exception.JobExecutionIsRunningException;
 import javax.batch.operations.exception.JobExecutionNotRunningException;
 import javax.batch.operations.exception.JobInstanceAlreadyCompleteException;
 import javax.batch.operations.exception.JobRestartException;
@@ -43,7 +42,9 @@ import javax.batch.operations.exception.JobStartException;
 import javax.batch.operations.exception.NoSuchJobException;
 import javax.batch.operations.exception.NoSuchJobExecutionException;
 import javax.batch.operations.exception.NoSuchJobInstanceException;
-import javax.batch.state.JobExecution;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.JobInstance;
+import javax.batch.runtime.StepExecution;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -57,8 +58,8 @@ import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.repository.JobRepository;
 import org.mybatch.repository.impl.MemoryRepository;
 import org.mybatch.runtime.runner.JobExecutionRunner;
-import org.mybatch.state.JobExecutionImpl;
-import org.mybatch.state.JobInstanceImpl;
+import org.mybatch.runtime.JobExecutionImpl;
+import org.mybatch.runtime.JobInstanceImpl;
 import org.mybatch.util.BatchUtil;
 import org.mybatch.util.ConcurrencyService;
 
@@ -82,12 +83,12 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
-    public List<Long> getJobInstances(String jobName, int start, int count) throws NoSuchJobException {
+    public List<Long> getJobInstanceIds(String jobName, int start, int count) throws NoSuchJobException {
         return null;
     }
 
     @Override
-    public Set<Long> getRunningExecutions(String jobName) throws NoSuchJobException {
+    public Set<Long> getRunningInstanceIds(String jobName) throws NoSuchJobException {
         return null;
     }
 
@@ -159,7 +160,12 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
-    public Set<String> getJobNames() {
+    public void abandon(long instanceId) throws NoSuchJobExecutionException, JobExecutionIsRunningException {
+
+    }
+
+    @Override
+    public JobInstance getJobInstance(long instanceId) {
         return null;
     }
 
@@ -174,14 +180,24 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
-    public long registerJobEndCallback(JobEndCallback callback) throws CallbackRegistrationException {
-        return 0;
+    public StepExecution getStepExecution(long jobExecutionId, long stepExecutionId) {
+        return null;
+    }
+
+    @Override
+    public List<StepExecution> getJobSteps(long jobExecutionId) {
+        return null;
+    }
+
+    @Override
+    public Set<String> getJobNames() {
+        return null;
     }
 
     private InputStream getJobXml(String jobXml) throws IOException {
         // META-INF first
         String path = "META-INF/" + jobXml;
-        InputStream is = null;
+        InputStream is;
         is = BatchUtil.getBatchApplicationClassLoader().getResourceAsStream(path);
         if (is != null) {
             return is;

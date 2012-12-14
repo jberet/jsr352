@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
-import javax.batch.state.StepExecution;
+import javax.batch.runtime.StepExecution;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
