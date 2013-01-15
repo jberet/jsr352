@@ -22,10 +22,17 @@
  
 package org.mybatch.runtime.context;
 
+import java.util.ArrayList;
 import javax.batch.runtime.context.FlowContext;
 
 public class FlowContextImpl<T> extends BatchContextImpl<T> implements FlowContext<T> {
     protected FlowContextImpl(String id) {
         super(id);
+        batchContexts = new ArrayList<FlowContext<T>>();
+    }
+
+    public FlowContextImpl(String id, JobContextImpl<T> jobContext1) {
+        this(id);
+        this.jobContext = jobContext1;
     }
 }

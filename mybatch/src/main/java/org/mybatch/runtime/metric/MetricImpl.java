@@ -32,6 +32,10 @@ public class MetricImpl implements Metric, Serializable {
     private MetricName name;
     private long value;
 
+    public MetricImpl(MetricName name) {
+        this.name = name;
+    }
+
     public MetricImpl(MetricName name1, long value1) {
         this.name = name1;
         this.value = value1;
@@ -44,11 +48,15 @@ public class MetricImpl implements Metric, Serializable {
 
     @Override
     public long getValue() {
-        return 0;
+        return value;
     }
 
     public void setValue(long value1) {
         this.value = value1;
+    }
+
+    public void increment(long i) {
+        this.value += i;
     }
 
     @Override

@@ -27,9 +27,20 @@ import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
 import org.mybatch.job.Step;
+import org.mybatch.runtime.context.StepContextImpl;
 
 public class StepExecutionImpl<P> implements StepExecution<P> {
     private Step step;
+
+    private StepContextImpl stepContext;
+
+    public StepContextImpl getStepContext() {
+        return stepContext;
+    }
+
+    public void setStepContext(StepContextImpl stepContext) {
+        this.stepContext = stepContext;
+    }
 
     public StepExecutionImpl(Step step) {
         this.step = step;
@@ -67,7 +78,7 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
 
     @Override
     public Metric[] getMetrics() {
-        return new Metric[0];
+        return stepContext.getMetrics();
     }
 
 }

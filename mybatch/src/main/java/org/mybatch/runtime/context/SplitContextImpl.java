@@ -22,10 +22,18 @@
  
 package org.mybatch.runtime.context;
 
+import java.util.ArrayList;
+import javax.batch.runtime.context.FlowContext;
 import javax.batch.runtime.context.SplitContext;
 
 public class SplitContextImpl<T> extends BatchContextImpl<T> implements SplitContext<T> {
-    protected SplitContextImpl(String id) {
+    public SplitContextImpl(String id) {
         super(id);
+        batchContexts = new ArrayList<FlowContext<T>>();
+    }
+
+    public SplitContextImpl(String id, JobContextImpl<T> jobContext1) {
+        this(id);
+        this.jobContext = jobContext1;
     }
 }

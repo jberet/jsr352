@@ -39,9 +39,15 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
     private Exception exception;
     private StepMetrics stepMetrics = new StepMetrics();
 
-    public StepContextImpl(String id, long stepExecutionId) {
+    public StepContextImpl(String id, long stepExecutionId1) {
         super(id);
-        this.stepExecutionId = stepExecutionId;
+        this.stepExecutionId = stepExecutionId1;
+    }
+
+    public StepContextImpl(String id, long stepExecutionId1, JobContextImpl<T> jobContext1, Properties p) {
+        this(id, stepExecutionId1);
+        this.jobContext = jobContext1;
+        this.properties = p;
     }
 
     @Override
@@ -52,6 +58,14 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
     @Override
     public Properties getProperties() {
         return properties;
+    }
+
+    public void setProperties(Properties p) {
+        this.properties = p;
+    }
+
+    public void addProperty(String key, String value) {
+        properties.setProperty(key, value);
     }
 
     @Override
@@ -78,8 +92,8 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
         return stepMetrics.getMetrics();
     }
 
-    public void updateMetric(MetricName metricName, long value) {
-        stepMetrics.updateMetric(metricName, value);
+    public void setMetric(MetricName metricName, long value) {
+        stepMetrics.set(metricName, value);
     }
 
     @Override

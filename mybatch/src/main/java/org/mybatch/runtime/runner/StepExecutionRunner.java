@@ -33,13 +33,17 @@ import javax.batch.runtime.StepExecution;
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Step;
+import org.mybatch.runtime.StepExecutionImpl;
+import org.mybatch.runtime.context.StepContextImpl;
+import org.mybatch.util.BatchUtil;
 import org.mybatch.util.ConcurrencyService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class StepExecutionRunner implements Runnable {
     private Step step;
-    private StepExecution stepExecution;
+    private StepExecutionImpl stepExecution;
+    private StepContextImpl stepContext;
     private JobExecutionRunner jobExecutionRunner;
     private Future<?> stepResult;
 
@@ -50,10 +54,15 @@ public class StepExecutionRunner implements Runnable {
             //need to consider cancel @Stop
     );
 
-    public StepExecutionRunner(Step step, StepExecution stepExecution, JobExecutionRunner jobExecutionRunner) {
+    public StepExecutionRunner(Step step, StepExecutionImpl stepExecution, JobExecutionRunner jobExecutionRunner) {
         this.step = step;
         this.stepExecution = stepExecution;
         this.jobExecutionRunner = jobExecutionRunner;
+
+        this.stepContext = new StepContextImpl(step.getId(), stepExecution.getJobExecutionId(),
+                jobExecutionRunner.getJobExecution().getJobContext(),
+                BatchUtil.getPropertiesFromStepDefinition(step));
+        stepExecution.setStepContext(stepContext);
     }
 
     public JobExecutionRunner getJobExecutionRunner() {

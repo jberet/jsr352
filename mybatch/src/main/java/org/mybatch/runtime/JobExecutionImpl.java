@@ -27,13 +27,25 @@ import java.util.Date;
 import java.util.Properties;
 import javax.batch.runtime.JobExecution;
 
+import org.mybatch.runtime.context.JobContextImpl;
+
 public class JobExecutionImpl implements JobExecution {
     private long id;
 
     private JobInstanceImpl instance;
 
+    private JobContextImpl jobContext;
+
     public JobExecutionImpl(JobInstanceImpl in) {
         this.instance = in;
+    }
+
+    public JobContextImpl getJobContext() {
+        return jobContext;
+    }
+
+    public void setJobContext(JobContextImpl jobContext1) {
+        this.jobContext = jobContext1;
     }
 
     @Override

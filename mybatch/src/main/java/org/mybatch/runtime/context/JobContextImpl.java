@@ -36,6 +36,11 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
         this.executionId = executionId;
     }
 
+    public JobContextImpl(String id, long instanceId, long executionId, Properties p) {
+        this(id, instanceId, executionId);
+        this.properties = p;
+    }
+
     @Override
     public long getInstanceId() {
         return instanceId;
@@ -53,5 +58,9 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
 
     public void setProperties(Properties p) {
         this.properties = p;
+    }
+
+    public void addProperty(String key, String value) {
+        properties.setProperty(key, value);
     }
 }

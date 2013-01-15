@@ -29,6 +29,8 @@ import org.mybatch.job.Step;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.JobInstanceImpl;
 import org.mybatch.runtime.StepExecutionImpl;
+import org.mybatch.runtime.context.JobContextImpl;
+import org.mybatch.util.BatchUtil;
 
 public class JobExecutionRunner implements Runnable {
     private Job job;
@@ -39,6 +41,11 @@ public class JobExecutionRunner implements Runnable {
         this.job = job;
         this.jobInstance = jobInstance;
         this.jobExecution = jobExecution;
+
+        JobContextImpl jobContext = new JobContextImpl(job.getId(), jobInstance.getInstanceId(),
+                jobExecution.getExecutionId(), BatchUtil.getPropertiesFromJobDefinition(job));
+
+        jobExecution.setJobContext(jobContext);
     }
 
     public JobInstanceImpl getJobInstance() {

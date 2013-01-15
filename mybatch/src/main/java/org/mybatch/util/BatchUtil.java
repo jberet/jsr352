@@ -22,8 +22,12 @@
  
 package org.mybatch.util;
 
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.mybatch.job.Job;
+import org.mybatch.job.Step;
 
 public class BatchUtil {
 
@@ -40,4 +44,23 @@ public class BatchUtil {
     public static ExecutorService getExecutorService() {
         return executorService;
     }
+
+    public static Properties getPropertiesFromJobDefinition(Job job) {
+        return getPropertiesFromDefinition(job.getProperties());
+    }
+
+    public static Properties getPropertiesFromStepDefinition(Step step) {
+        return getPropertiesFromDefinition(step.getProperties());
+    }
+
+    public static Properties getPropertiesFromDefinition(org.mybatch.job.Properties props) {
+        Properties result = new Properties();
+        if (props != null) {
+            for (org.mybatch.job.Property p : props.getProperty()) {
+                result.setProperty(p.getName(), p.getValue());
+            }
+        }
+        return result;
+    }
+
 }

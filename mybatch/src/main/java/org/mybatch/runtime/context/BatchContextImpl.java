@@ -32,7 +32,11 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
     protected T transientUserData;
     protected String batchStatus;
     protected String exitStatus;
-    private List<FlowContext<T>> batchContexts = new ArrayList<FlowContext<T>>();
+
+    //not initialized here.  It is initialized in SplitContextImpl and FlowContextImpl
+    protected List<FlowContext<T>> batchContexts;
+
+    protected JobContextImpl<T> jobContext;
 
     protected BatchContextImpl(String id) {
         this.id = id;
@@ -55,8 +59,7 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
 
     @Override
     public List<FlowContext<T>> getBatchContexts() {
-        //to be overridden by compound job element types
-        return null;
+        return batchContexts;
     }
 
     @Override
@@ -76,6 +79,10 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
     @Override
     public void setExitStatus(String status) {
         this.exitStatus = status;
+    }
+
+    public JobContextImpl<T> getJobContext() {
+        return this.jobContext;
     }
 
 }
