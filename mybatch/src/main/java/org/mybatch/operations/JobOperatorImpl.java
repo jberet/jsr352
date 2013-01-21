@@ -66,6 +66,11 @@ import org.mybatch.util.ConcurrencyService;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class JobOperatorImpl implements JobOperator {
+
+    //TODO remove once JobOperator is updated to include them.
+    public enum BatchStatus {STARTING, STARTED, STOPPING, STOPPED, FAILED, COMPLETED,
+        ABANDONED }
+
     //TODO use factory
     private JobRepository repository = new MemoryRepository();
     private ArtifactFactory artifactFactory = new SimpleArtifactFactory();

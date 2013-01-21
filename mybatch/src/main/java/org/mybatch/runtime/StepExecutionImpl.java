@@ -34,6 +34,8 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
 
     private StepContextImpl stepContext;
 
+    private P persistentData;
+
     public StepContextImpl getStepContext() {
         return stepContext;
     }
@@ -48,12 +50,12 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
 
     @Override
     public long getJobExecutionId() {
-        return 0;
+        return stepContext.getJobContext().getExecutionId();
     }
 
     @Override
     public String getStatus() {
-        return null;
+        return stepContext.getBatchStatus();
     }
 
     @Override
@@ -68,12 +70,12 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
 
     @Override
     public String getExitStatus() {
-        return null;
+        return stepContext.getExitStatus();
     }
 
     @Override
     public P getUserPersistentData() {
-        return null;
+        return persistentData;
     }
 
     @Override

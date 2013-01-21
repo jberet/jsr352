@@ -33,6 +33,7 @@ import javax.batch.runtime.StepExecution;
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Step;
+import org.mybatch.operations.JobOperatorImpl;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchUtil;
@@ -65,6 +66,10 @@ public class StepExecutionRunner implements Runnable {
         stepExecution.setStepContext(stepContext);
     }
 
+    public StepContextImpl getStepContext() {
+        return stepContext;
+    }
+
     public JobExecutionRunner getJobExecutionRunner() {
         return jobExecutionRunner;
     }
@@ -74,7 +79,9 @@ public class StepExecutionRunner implements Runnable {
         Chunk chunk = step.getChunk();
         Batchlet batchlet = step.getBatchlet();
         if (chunk != null && batchlet != null) {
-            throw LOGGER.cannotContainBothChunkAndBatchlet(step.getId());
+            stepContext.setBatchStatus(JobOperatorImpl.BatchStatus.ABANDONED.name());
+            LOGGER.cannotContainBothChunkAndBatchlet(step.getId());
+            return;
         }
 
         BatchletRunner batchletRunner = new BatchletRunner(batchlet, this);

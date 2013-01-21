@@ -28,6 +28,8 @@ import java.util.concurrent.Callable;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.operations.JobOperatorImpl;
+import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchUtil;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
@@ -35,10 +37,12 @@ import static org.mybatch.util.BatchLogger.LOGGER;
 public class BatchletRunner implements Callable<Void> {
     private Batchlet batchlet;
     private StepExecutionRunner stepExecutionRunner;
+    private StepContextImpl stepContext;
 
     public BatchletRunner(Batchlet batchlet, StepExecutionRunner stepExecutionRunner) {
         this.batchlet = batchlet;
         this.stepExecutionRunner = stepExecutionRunner;
+        this.stepContext = stepExecutionRunner.getStepContext();
     }
 
     @Override
@@ -55,8 +59,9 @@ public class BatchletRunner implements Callable<Void> {
             try {
                 Object artifactObj = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, m);
                 StepExecutionRunner.invokeFunctionMethods(artifactObj, StepExecutionRunner.methodAnnotations);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 LOGGER.failToRunBatchlet(e, batchlet);
+                stepContext.setBatchStatus(JobOperatorImpl.BatchStatus.FAILED.name());
             }
             return null;
         } finally {

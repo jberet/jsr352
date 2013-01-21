@@ -68,7 +68,8 @@ public interface BatchLogger extends BasicLogger {
     void failToIdentifyArtifact(@Cause Throwable e);
 
     @Message(id = 9, value = "A step cannot contain both chunk type and batchlet type: %s")
-    IllegalStateException cannotContainBothChunkAndBatchlet(String stepId);
+    @LogMessage(level = Logger.Level.WARN)
+    void cannotContainBothChunkAndBatchlet(String stepId);
 
     @LogMessage(level = Logger.Level.INFO)
     @Message(id = 10, value = "Submitted batchlet task %s in thread %s")

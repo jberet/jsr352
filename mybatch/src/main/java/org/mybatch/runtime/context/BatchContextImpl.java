@@ -31,7 +31,7 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
     protected String id;
     protected T transientUserData;
     protected String batchStatus;
-    protected String exitStatus;
+    protected String exitStatus = batchStatus;
 
     //not initialized here.  It is initialized in SplitContextImpl and FlowContextImpl
     protected List<FlowContext<T>> batchContexts;
@@ -78,7 +78,9 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
 
     @Override
     public void setExitStatus(String status) {
-        this.exitStatus = status;
+        if (status != null) {
+            this.exitStatus = status;
+        }
     }
 
     public JobContextImpl<T> getJobContext() {
