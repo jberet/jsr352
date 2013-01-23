@@ -25,6 +25,7 @@ package org.mybatch.repository.impl;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.mybatch.job.Job;
 import org.mybatch.repository.JobRepository;
@@ -45,5 +46,20 @@ public class MemoryRepository implements JobRepository {
     @Override
     public Collection<Job> getJobs() {
         return jobs.values();
+    }
+
+    @Override
+    public void saveProperty(String jobName, String propName) {
+
+    }
+
+    @Override
+    public String getSavedProperty(String jobName, String propName) {
+        return null;
+    }
+
+    @Override
+    public Properties getSavedProperties(String jobName) {
+        return null;
     }
 }

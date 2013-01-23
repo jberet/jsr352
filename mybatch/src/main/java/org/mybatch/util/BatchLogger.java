@@ -80,4 +80,8 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 12, value = "No job execution with id %s")
     NoSuchJobExecutionException noSuchJobExecution(Long executionId);
+
+    @Message(id = 13, value = "Unrecognized property category: %s, variable name: %s in property value: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void unrecognizedPropertyReference(String category, String variableName, String propVal);
 }
