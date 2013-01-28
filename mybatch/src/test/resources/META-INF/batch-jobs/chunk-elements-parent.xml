@@ -22,11 +22,22 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="properties-listeners-from-parent-child" parent="listeners-from-parent-job" xmlns="http://batch.jsr352/jsl"
+<job id="chunk-elements-parent" xmlns="http://batch.jsr352/jsl"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
-    <step id="step1">
-        <batchlet ref="Batchlet1"></batchlet>
-    </step>
+    <step id="chunk-elements-parent" abstract="true">
+        <chunk>
+            <properties>
+                <property name="key1" value="val1"></property>
+                <property name="key2" value="val2"></property>
+            </properties>
 
+<!--
+            <listeners>
+                <listener ref="L1"></listener>
+                <listener ref="L2"></listener>
+            </listeners>
+            -->
+        </chunk>
+    </step>
 </job>

@@ -47,9 +47,23 @@ public class JobMerger {
 
         merge(parent.getProperties(), child.getProperties());
         merge(parent.getListeners(), child.getListeners());
+
+        //job steps, flows, and splits are not inherited
     }
 
-    public void merge(Listeners parentListeners, Listeners childListeners) {
+    private void merge(Properties parentProps, Properties childProps) {
+        if (parentProps == null) {
+            return;
+        }
+        if (childProps == null) {
+            child.setProperties(parentProps);
+            return;
+        }
+        JobMerger.mergeProperties(parentProps, childProps);
+        //for job-level properties, ignore Properties partition attribute
+    }
+
+    private void merge(Listeners parentListeners, Listeners childListeners) {
         if (parentListeners == null) {
             return;
         }
@@ -57,6 +71,21 @@ public class JobMerger {
             child.setListeners(parentListeners);
             return;
         }
+        JobMerger.mergeListeners(parentListeners, childListeners);
+    }
+
+    public static void mergeProperties(Properties parentProps, Properties childProps) {
+        if(!Boolean.parseBoolean(childProps.getMerge())) {
+            return;
+        }
+
+        List<Property> childPropList = childProps.getProperty();
+        for (Property p : parentProps.getProperty()) {
+            childPropList.add(p);
+        }
+    }
+
+    public static void mergeListeners(Listeners parentListeners, Listeners childListeners) {
         if(!Boolean.parseBoolean(childListeners.getMerge())) {
             return;
         }
@@ -65,26 +94,6 @@ public class JobMerger {
         for (Listener p : parentListeners.getListener()) {
             childListenerList.add(p);
         }
-    }
-
-    public void merge(Properties parentProps, Properties childProps) {
-        if (parentProps == null) {
-            return;
-        }
-        if (childProps == null) {
-            child.setProperties(parentProps);
-            return;
-        }
-        if(!Boolean.parseBoolean(childProps.getMerge())) {
-            return;
-        }
-        
-        List<Property> childPropList = childProps.getProperty();
-        for (Property p : parentProps.getProperty()) {
-            childPropList.add(p);
-        }
-        
-        //for job-level properties, ignore Properties partition attribute
     }
 
 }

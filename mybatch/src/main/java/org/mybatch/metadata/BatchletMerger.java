@@ -22,27 +22,20 @@
  
 package org.mybatch.metadata;
 
-import org.mybatch.job.Listeners;
+import org.mybatch.job.Batchlet;
 import org.mybatch.job.Properties;
-import org.mybatch.job.Step;
 
-public class StepMerger {
-    private Step parent;
-    private Step child;
-
-    public StepMerger(Step parent, Step child) {
-        this.parent = parent;
-        this.child = child;
-    }
+public class BatchletMerger {
+    private Batchlet parent;
+    private Batchlet child;
 
     public void merge() {
-        //merge step attributes
-
         merge(parent.getProperties(), child.getProperties());
-        merge(parent.getListeners(), child.getListeners());
     }
 
     private void merge(Properties parentProps, Properties childProps) {
+        //<batchlet> has no attributes
+
         if (parentProps == null) {
             return;
         }
@@ -52,16 +45,4 @@ public class StepMerger {
         }
         JobMerger.mergeProperties(parentProps, childProps);
     }
-
-    private void merge(Listeners parentListeners, Listeners childListeners) {
-        if (parentListeners == null) {
-            return;
-        }
-        if (childListeners == null) {
-            child.setListeners(parentListeners);
-            return;
-        }
-        JobMerger.mergeListeners(parentListeners, childListeners);
-    }
-
 }
