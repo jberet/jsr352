@@ -62,6 +62,7 @@ import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.JobInstanceImpl;
 import org.mybatch.util.BatchUtil;
 import org.mybatch.util.ConcurrencyService;
+import org.mybatch.util.JaxbUtil;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
@@ -104,30 +105,7 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public Long start(String job, Properties jobParameters) throws JobStartException {
-        InputStream is;
-        Job jobDefined;
-        try {
-            is = getJobXml(job);
-        } catch (IOException e) {
-            throw LOGGER.failToGetJobXml(e, job);
-        }
-
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Job.class);
-            Unmarshaller um = jaxbContext.createUnmarshaller();
-            JAXBElement<Job> root = um.unmarshal(new StreamSource(is), Job.class);
-            jobDefined = root.getValue();
-        } catch (JAXBException e) {
-            throw LOGGER.failToParseBindJobXml(e, job);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
-        }
+        Job jobDefined = JaxbUtil.getJob(job);
 
         repository.add(jobDefined);
         ApplicationMetaData appData;
@@ -197,37 +175,6 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public Set<String> getJobNames() {
         return null;
-    }
-
-    private InputStream getJobXml(String jobXml) throws IOException {
-        // META-INF first
-        String path = "META-INF/" + jobXml;
-        InputStream is;
-        is = BatchUtil.getBatchApplicationClassLoader().getResourceAsStream(path);
-        if (is != null) {
-            return is;
-        }
-
-        // javax.jobpath system property. jobpath format?
-        File jobFile = null;
-        String jobpath = System.getProperty("javax.jobpath");
-        if (jobpath != null && !jobpath.isEmpty()) {
-            String[] jobPathElements = jobpath.split(":");
-            for (String p : jobPathElements) {
-                jobFile = new File(p, jobXml);
-                if (jobFile.exists() && jobFile.isFile()) {
-                    break;
-                }
-            }
-        }
-
-        // default location: current directory
-        if (jobFile == null) {
-            jobFile = new File(System.getProperty("user.dir"), jobXml);
-        }
-
-        is = new BufferedInputStream(new FileInputStream(jobFile));
-        return is;
     }
 
 }

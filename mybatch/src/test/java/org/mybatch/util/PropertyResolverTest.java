@@ -94,7 +94,7 @@ public class PropertyResolverTest {
         for (int i = 0, j = raws.length; i < j; i++) {
             String actual = resolver.resolve(raws[i]);
             Assert.assertEquals(expected[i], actual);
-            System.out.println("Expected: " + expected[i] + ", actual: " + actual);
+//            System.out.println("Expected: " + expected[i] + ", actual: " + actual);
         }
     }
 
