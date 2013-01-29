@@ -28,7 +28,7 @@
 
     <step id="step-merge-true-parent" abstract="true">
         <properties>
-            <property name="key1" value="val1"></property>
+            <property name="parent" value="parent"></property>
         </properties>
 
         <listeners>

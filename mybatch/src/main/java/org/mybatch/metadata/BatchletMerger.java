@@ -29,6 +29,11 @@ public class BatchletMerger {
     private Batchlet parent;
     private Batchlet child;
 
+    public BatchletMerger(Batchlet parent, Batchlet child) {
+        this.parent = parent;
+        this.child = child;
+    }
+
     public void merge() {
         merge(parent.getProperties(), child.getProperties());
     }

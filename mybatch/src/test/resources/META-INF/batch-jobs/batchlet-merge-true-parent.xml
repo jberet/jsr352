@@ -22,20 +22,15 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="job-merge-true-child" restartable="false" parent="job-merge-true-parent" xmlns="http://batch.jsr352/jsl"
+<job id="batchlet-merge-true-parent" xmlns="http://batch.jsr352/jsl"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
 
-    <properties merge="true">
-        <property name="child" value="child"></property>
-    </properties>
-
-    <listeners merge="true">
-        <listener ref="L2"></listener>
-    </listeners>
-
-    <step id="step1">
-        <batchlet ref="Batchlet1"/>
+    <step id="batchlet-merge-true-parent" abstract="true">
+        <batchlet ref="batchlet-merge-true-parent">
+            <properties>
+                <property name="parent" value="parent"></property>
+            </properties>
+        </batchlet>
     </step>
-
 </job>

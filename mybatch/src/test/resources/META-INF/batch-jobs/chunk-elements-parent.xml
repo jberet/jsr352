@@ -28,8 +28,8 @@
     <step id="chunk-elements-parent" abstract="true">
         <chunk>
             <properties>
-                <property name="key1" value="val1"></property>
-                <property name="key2" value="val2"></property>
+                <property name="parent" value="parent"></property>
+                <property name="parent2" value="parent2"></property>
             </properties>
 
 <!--

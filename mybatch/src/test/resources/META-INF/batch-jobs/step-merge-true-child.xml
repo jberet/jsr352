@@ -27,7 +27,7 @@
      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
     <step id="step-merge-true-child" parent="step-merge-true-parent">
         <properties merge="true">
-            <property name="key2" value="val2"></property>
+            <property name="child" value="child"></property>
         </properties>
 
         <listeners merge="true">

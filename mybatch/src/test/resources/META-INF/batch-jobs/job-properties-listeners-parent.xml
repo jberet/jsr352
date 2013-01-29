@@ -27,8 +27,8 @@
      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
 
     <properties>
-        <property name="key1" value="val1"></property>
-        <property name="key2" value="val2"></property>
+        <property name="parent" value="parent"></property>
+        <property name="parent2" value="parent2"></property>
     </properties>
 
     <listeners>

@@ -22,9 +22,13 @@
  
 package org.mybatch.test;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.mybatch.job.Job;
+import org.mybatch.job.Properties;
+import org.mybatch.job.Property;
 import org.mybatch.util.JaxbUtil;
 import org.mybatch.metadata.JobMerger;
 import org.junit.Assert.*;
@@ -45,6 +49,7 @@ public class JobMergerTest {
         Assert.assertEquals("true", child.getRestartable());
         Assert.assertEquals(2, child.getProperties().getProperty().size());
         Assert.assertEquals(2, child.getListeners().getListener().size());
+        JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "parent2"});
     }
 
     @Test
@@ -77,5 +82,33 @@ public class JobMergerTest {
 
         Assert.assertEquals(2, child.getProperties().getProperty().size());
         Assert.assertEquals(2, child.getListeners().getListener().size());
+        JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"});
     }
+
+    /**
+     * verifies that the Properties (generated jaxb type, not java.util.Properties) props contains every key in keys.
+     * As a testing convention, the value is the same as the key.  For instance, the Properties can be:
+     * "foo": "foo", "bar": "bar"
+     * @param props Properties from job xml
+     * @param keys a String array of keys
+     * @throws IllegalStateException if any key is not found
+     */
+    public static void propertiesContain(Properties props, String[] keys) throws IllegalStateException {
+        java.util.Properties javaUtilProps = toJavaUtilProperties(props);
+        for (String k : keys) {
+            if (!javaUtilProps.containsKey(k)) {
+                throw new IllegalStateException(String.format("Expecting key %s in properties %s, but found none.", k, javaUtilProps));
+            }
+        }
+    }
+
+    public static java.util.Properties toJavaUtilProperties(Properties props) {
+        List<Property> propList = props.getProperty();
+        java.util.Properties result = new java.util.Properties();
+        for (Property p : propList) {
+            result.setProperty(p.getName(), p.getValue());  //ignore everything else, just get name and value
+        }
+        return result;
+    }
+
 }
