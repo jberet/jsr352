@@ -33,6 +33,11 @@ public class ChunkMerger {
     private Chunk parent;
     private Chunk child;
 
+    public ChunkMerger(Chunk parent, Chunk child) {
+        this.parent = parent;
+        this.child = child;
+    }
+
     public void merge() {
         //merge chunk attributes
         //TODO:

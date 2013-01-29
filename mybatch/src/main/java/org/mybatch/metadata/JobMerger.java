@@ -75,7 +75,8 @@ public class JobMerger {
     }
 
     public static void mergeProperties(Properties parentProps, Properties childProps) {
-        if(!Boolean.parseBoolean(childProps.getMerge())) {
+        String merge = childProps.getMerge();
+        if(merge != null && !Boolean.parseBoolean(merge)) {
             return;
         }
 
@@ -86,7 +87,8 @@ public class JobMerger {
     }
 
     public static void mergeListeners(Listeners parentListeners, Listeners childListeners) {
-        if(!Boolean.parseBoolean(childListeners.getMerge())) {
+        String merge = childListeners.getMerge();
+        if(merge != null && !Boolean.parseBoolean(merge)) {
             return;
         }
 

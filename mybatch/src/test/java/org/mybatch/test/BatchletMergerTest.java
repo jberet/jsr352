@@ -89,11 +89,10 @@ public class BatchletMergerTest {
 
     protected static Batchlet getBatchlet(Job job, String stepId) {
         List<Serializable> steps = job.getDecisionOrFlowOrSplit();
-        Step step = null;
         for (Serializable s : steps) {
             if (s instanceof Step) {
-                if (stepId.equals(((Step) s).getId())) {
-                    step = (Step) s;
+                Step step = (Step) s;
+                if (stepId.equals(step.getId())) {
                     return step.getBatchlet();
                 }
             }

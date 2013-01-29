@@ -22,12 +22,31 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="job-properties-listeners-child" parent="job-properties-listeners-parent" xmlns="http://batch.jsr352/jsl"
+<job id="chunk-mixed-child" xmlns="http://batch.jsr352/jsl"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
-
-    <step id="step1">
-        <batchlet ref="Batchlet1"></batchlet>
+    <step id="chunk-mixed-child" parent="chunk-mixed-parent">
+        <chunk checkpoint-policy="custom" skip-limit="15" >
+            <properties>
+                <property name="child" value="child"></property>
+            </properties>
+            <checkpoint-algorithm ref="child">
+                <properties merge="true">
+                    <property name="child" value="child"></property>
+                </properties>
+            </checkpoint-algorithm>
+            <skippable-exception-classes>
+                <include class="java.lang.RuntimeException"></include>
+                <exclude class="java.lang.IllegalStateException"></exclude>
+            </skippable-exception-classes>
+            <retryable-exception-classes>
+                <include class="java.lang.RuntimeException"></include>
+                <exclude class="java.lang.IllegalStateException"></exclude>
+            </retryable-exception-classes>
+            <no-rollback-exception-classes>
+                <include class="java.lang.RuntimeException"></include>
+                <exclude class="java.lang.IllegalStateException"></exclude>
+            </no-rollback-exception-classes>
+        </chunk>
     </step>
-
 </job>

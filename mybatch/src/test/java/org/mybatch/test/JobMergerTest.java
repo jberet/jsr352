@@ -40,8 +40,8 @@ public class JobMergerTest {
         Job child = JaxbUtil.getJob("job-properties-listeners-child.xml");
 
         Assert.assertNull(child.getRestartable());
-        Assert.assertNull(child.getProperties());
-        Assert.assertNull(child.getListeners());
+        Assert.assertEquals(true, child.getProperties() == null || child.getProperties().getProperty().size() == 0);
+        Assert.assertEquals(true, child.getListeners() == null || child.getListeners().getListener().size() == 0);
 
         JobMerger merger = new JobMerger(parent, child);
         merger.merge();
