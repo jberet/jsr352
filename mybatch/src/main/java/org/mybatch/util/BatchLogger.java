@@ -84,4 +84,8 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 13, value = "Unrecognized property category: %s, variable name: %s in property value: %s")
     @LogMessage(level = Logger.Level.WARN)
     void unrecognizedPropertyReference(String category, String variableName, String propVal);
+
+    @Message(id = 14, value = "Invalid exception filter classes: %s, failed to load class '%s'")
+    @LogMessage(level = Logger.Level.WARN)
+    void invalidExceptionClassFilter(String classes, String cls);
 }

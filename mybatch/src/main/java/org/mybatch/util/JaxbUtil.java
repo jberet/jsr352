@@ -30,10 +30,12 @@ import java.io.InputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.mybatch.job.Job;
+import org.mybatch.metadata.JaxbObjectFactory;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
@@ -52,6 +54,11 @@ public class JaxbUtil {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Job.class);
             Unmarshaller um = jaxbContext.createUnmarshaller();
+            try {
+                um.setProperty("com.sun.xml.bind.ObjectFactory", new JaxbObjectFactory());
+            } catch (PropertyException e) {
+                um.setProperty("com.sun.xml.internal.bind.ObjectFactory", new JaxbObjectFactory());
+            }
             JAXBElement<Job> root = um.unmarshal(new StreamSource(is), Job.class);
             jobDefined = root.getValue();
         } catch (JAXBException e) {

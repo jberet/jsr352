@@ -22,7 +22,10 @@
  
 package org.mybatch.test;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.channels.AlreadyConnectedException;
 import java.util.List;
 
 import org.junit.Assert;
@@ -31,6 +34,7 @@ import org.mybatch.job.Chunk;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
 import org.mybatch.metadata.ChunkMerger;
+import org.mybatch.metadata.ExceptionClassFilterImpl;
 import org.mybatch.util.JaxbUtil;
 
 public class ChunkMergerTest {
@@ -105,6 +109,80 @@ public class ChunkMergerTest {
         Assert.assertEquals("custom", child.getCheckpointPolicy());
         Assert.assertEquals("15", child.getSkipLimit());
         Assert.assertEquals("5", child.getRetryLimit());
+    }
+
+    @Test
+    public void exceptionClassFilter() throws Exception {
+        Job parentJob = JaxbUtil.getJob("chunk-mixed-parent.xml");
+        Chunk parent = getChunk(parentJob, "chunk-mixed-parent") ;
+
+        Job childJob = JaxbUtil.getJob("chunk-mixed-child.xml");
+        Chunk child = getChunk(childJob, "chunk-mixed-child");
+
+        ChunkMerger merger = new ChunkMerger(parent, child);
+        merger.merge();
+
+        verifyExceptionClassesFilter((ExceptionClassFilterImpl) child.getSkippableExceptionClasses());
+        verifyExceptionClassesFilter((ExceptionClassFilterImpl) child.getRetryableExceptionClasses());
+        verifyExceptionClassesFilter((ExceptionClassFilterImpl) child.getNoRollbackExceptionClasses());
+    }
+
+    @Test
+    public void exceptionClassFilter2() throws Exception {
+        Job job = JaxbUtil.getJob("exception-class-filter.xml");
+        Chunk chunk = getChunk(job, "exception-class-filter") ;
+
+        ExceptionClassFilterImpl filter = (ExceptionClassFilterImpl) chunk.getSkippableExceptionClasses();
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
+
+        filter = (ExceptionClassFilterImpl) chunk.getRetryableExceptionClasses();
+        Assert.assertEquals(true, filter.matches(RuntimeException.class));
+        Assert.assertEquals(true, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(true, filter.matches(AlreadyConnectedException.class));
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
+
+        filter = (ExceptionClassFilterImpl) chunk.getNoRollbackExceptionClasses();
+        Assert.assertEquals(true, filter.matches(Exception.class));
+        Assert.assertEquals(true, filter.matches(RuntimeException.class));
+        Assert.assertEquals(true, filter.matches(IOException.class));
+        Assert.assertEquals(false, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
+
+        chunk = getChunk(job, "exception-class-filter2");
+        filter = (ExceptionClassFilterImpl) chunk.getSkippableExceptionClasses();
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
+        Assert.assertEquals(false, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
+
+        filter = (ExceptionClassFilterImpl) chunk.getRetryableExceptionClasses();
+        Assert.assertEquals(true, filter.matches(RuntimeException.class));
+        Assert.assertEquals(true, filter.matches(Exception.class));
+        Assert.assertEquals(true, filter.matches(IllegalArgumentException.class));
+        Assert.assertEquals(false, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
+        Assert.assertEquals(false, filter.matches(FileNotFoundException.class));
+
+        filter = (ExceptionClassFilterImpl) chunk.getNoRollbackExceptionClasses();
+        Assert.assertEquals(true, filter.matches(Exception.class));
+        Assert.assertEquals(true, filter.matches(RuntimeException.class));
+        Assert.assertEquals(true, filter.matches(FileNotFoundException.class));
+        Assert.assertEquals(true, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(true, filter.matches(AlreadyConnectedException.class));
+    }
+
+    private void verifyExceptionClassesFilter(ExceptionClassFilterImpl filter) {
+        Assert.assertEquals(true, filter.matches(RuntimeException.class));  //included
+        Assert.assertEquals(false, filter.matches(IllegalStateException.class));  //excluded
+        Assert.assertEquals(true, filter.matches(IllegalArgumentException.class));  // superclass included
+        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));  //superclass excluded
+        Assert.assertEquals(false, filter.matches(IOException.class));  //not included
+        Assert.assertEquals(false, filter.matches(Exception.class));  //not included
+        Assert.assertEquals(false, filter.matches(Throwable.class));
+        Assert.assertEquals(false, filter.matches(Error.class));
     }
 
     protected static Chunk getChunk(Job job, String stepId) {

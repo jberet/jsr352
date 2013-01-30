@@ -22,16 +22,13 @@
  
 package org.mybatch.test;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.mybatch.job.Job;
 import org.mybatch.job.Properties;
-import org.mybatch.job.Property;
-import org.mybatch.util.JaxbUtil;
 import org.mybatch.metadata.JobMerger;
-import org.junit.Assert.*;
+import org.mybatch.util.BatchUtil;
+import org.mybatch.util.JaxbUtil;
 
 public class JobMergerTest {
     @Test
@@ -94,21 +91,11 @@ public class JobMergerTest {
      * @throws IllegalStateException if any key is not found
      */
     public static void propertiesContain(Properties props, String[] keys) throws IllegalStateException {
-        java.util.Properties javaUtilProps = toJavaUtilProperties(props);
+        java.util.Properties javaUtilProps = BatchUtil.toJavaUtilProperties(props);
         for (String k : keys) {
             if (!javaUtilProps.containsKey(k)) {
                 throw new IllegalStateException(String.format("Expecting key %s in properties %s, but found none.", k, javaUtilProps));
             }
         }
     }
-
-    public static java.util.Properties toJavaUtilProperties(Properties props) {
-        List<Property> propList = props.getProperty();
-        java.util.Properties result = new java.util.Properties();
-        for (Property p : propList) {
-            result.setProperty(p.getName(), p.getValue());  //ignore everything else, just get name and value
-        }
-        return result;
-    }
-
 }

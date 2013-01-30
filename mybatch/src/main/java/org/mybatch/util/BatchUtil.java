@@ -46,14 +46,14 @@ public class BatchUtil {
     }
 
     public static Properties getPropertiesFromJobDefinition(Job job) {
-        return getPropertiesFromDefinition(job.getProperties());
+        return toJavaUtilProperties(job.getProperties());
     }
 
     public static Properties getPropertiesFromStepDefinition(Step step) {
-        return getPropertiesFromDefinition(step.getProperties());
+        return toJavaUtilProperties(step.getProperties());
     }
 
-    public static Properties getPropertiesFromDefinition(org.mybatch.job.Properties props) {
+    public static Properties toJavaUtilProperties(org.mybatch.job.Properties props) {
         Properties result = new Properties();
         if (props != null) {
             for (org.mybatch.job.Property p : props.getProperty()) {
@@ -62,5 +62,4 @@ public class BatchUtil {
         }
         return result;
     }
-
 }
