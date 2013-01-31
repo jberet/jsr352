@@ -23,19 +23,26 @@
 package org.mybatch.repository.impl;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.mybatch.job.Job;
 import org.mybatch.repository.JobRepository;
+import org.mybatch.util.BatchLogger;
 
 public class MemoryRepository implements JobRepository {
-    private Map<String, Job> jobs = new HashMap<String, Job>();
+    private ConcurrentMap<String, Job> jobs = new ConcurrentHashMap<String, Job>();
+
+    private ConcurrentMap<String, ConcurrentMap<String, String>> savedProperties =
+            new ConcurrentHashMap<String, ConcurrentMap<String, String>>();
 
     @Override
     public void add(Job job) {
-        jobs.put(job.getId(), job);
+        if(jobs.putIfAbsent(job.getId(), job) != null) {
+            BatchLogger.LOGGER.jobAlreadyExists(job.getId());
+        }
     }
 
     @Override
@@ -45,21 +52,37 @@ public class MemoryRepository implements JobRepository {
 
     @Override
     public Collection<Job> getJobs() {
-        return jobs.values();
+        return Collections.unmodifiableCollection(jobs.values());
     }
 
     @Override
-    public void saveProperty(String jobName, String propName) {
-
+    public void saveProperty(String jobName, String propName, String propValue) {
+        ConcurrentMap<String, String> props = savedProperties.get(jobName);
+        if (props == null) {
+            props = new ConcurrentHashMap<String, String>();
+            ConcurrentMap<String, String> old = savedProperties.putIfAbsent(jobName, props);
+            if (old != null) {
+                props = old;
+            }
+        }
+        props.put(propName, propValue);
     }
 
     @Override
     public String getSavedProperty(String jobName, String propName) {
+        ConcurrentMap<String, String> props = savedProperties.get(jobName);
+        if (props != null) {
+            return props.get(propName);
+        }
         return null;
     }
 
     @Override
-    public Properties getSavedProperties(String jobName) {
+    public Map<String, String> getSavedProperties(String jobName) {
+        ConcurrentMap<String, String> result = savedProperties.get(jobName);
+        if (result != null) {
+            return Collections.unmodifiableMap(result);
+        }
         return null;
     }
 }

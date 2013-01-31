@@ -88,4 +88,9 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 14, value = "Invalid exception filter classes: %s, failed to load class '%s'")
     @LogMessage(level = Logger.Level.WARN)
     void invalidExceptionClassFilter(String classes, String cls);
+
+    @Message(id = 15, value = "The job: %s already exists in the job repository and cannot be added again.")
+    @LogMessage(level = Logger.Level.WARN)
+    void jobAlreadyExists(String jobId);
+
 }

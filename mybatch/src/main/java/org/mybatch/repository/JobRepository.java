@@ -24,6 +24,7 @@
 package org.mybatch.repository;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 
 import org.mybatch.job.Job;
@@ -35,10 +36,10 @@ public interface JobRepository {
 
     Collection<Job> getJobs();
 
-    void saveProperty(String jobName, String propName);
+    void saveProperty(String jobName, String propName, String propValue);
 
     String getSavedProperty(String jobName, String propName);
 
-    Properties getSavedProperties(String jobName);
+    Map<String, String> getSavedProperties(String jobName);
 
 }
