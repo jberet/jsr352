@@ -25,35 +25,28 @@ package org.mybatch.metadata;
 import org.jboss.logging.Logger;
 import org.mybatch.job.ExceptionClassFilter;
 import org.mybatch.util.BatchLogger;
+import org.mybatch.util.BatchUtil;
 
 /**
  * An extension of the jaxb-generated class to add exception-class-matching logic.
  */
-public class ExceptionClassFilterImpl extends ExceptionClassFilter {
+final public class ExceptionClassFilterImpl extends ExceptionClassFilter {
     public boolean matches(Class<? extends Throwable> th) {
         if (include == null) {
             if (exclude == null) {
                 return false;
             }
-            return !matchesExclude(th);
+            return !matches(th, exclude.getClazz());
         } else {
             if (exclude == null) {
-                return matchesInclude(th);
+                return matches(th, include.getClazz());
             }
             //both <include> and <exclude> are present
-            if (matchesExclude(th)) {
+            if (!matches(th, include.getClazz())) {
                 return false;
             }
-            return matchesInclude(th);
+            return !matches(th, exclude.getClazz());
         }
-    }
-
-    private boolean matchesInclude(Class<? extends Throwable> th) {
-        return matches(th, include.getClazz());
-    }
-
-    private boolean matchesExclude(Class<? extends Throwable> th) {
-        return matches(th, exclude.getClazz());
     }
 
     private boolean matches(Class<? extends Throwable> th, String filterClasses) {
@@ -63,7 +56,7 @@ public class ExceptionClassFilterImpl extends ExceptionClassFilter {
         }
         for (String s : filterClasses.split(", ")) {
             try {
-                Class<?> clazz = Class.forName(s);
+                Class<?> clazz = Class.forName(s, true, BatchUtil.getBatchApplicationClassLoader());
                 if (clazz.isAssignableFrom(th)) {
                     return true;
                 }
