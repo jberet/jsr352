@@ -25,21 +25,25 @@ package org.mybatch.repository;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Properties;
 
 import org.mybatch.job.Job;
 
 public interface JobRepository {
-    void add(Job job);
+    Job addJob(Job job);
+
+    Job removeJob(String jobId);
 
     Job findJob(String jobId);
 
     Collection<Job> getJobs();
 
-    void saveProperty(String jobName, String propName, String propValue);
+    String saveProperty(Long jobInstanceId, String propName, String propValue);
 
-    String getSavedProperty(String jobName, String propName);
+    String getSavedProperty(Long jobInstanceId, String propName);
 
-    Map<String, String> getSavedProperties(String jobName);
+    Map<String, String> getSavedProperties(Long jobInstanceId);
 
+    String removeSavedProperty(Long jobInstanceId, String propName);
+
+    void removeSavedProperties(Long jobInstanceId);
 }
