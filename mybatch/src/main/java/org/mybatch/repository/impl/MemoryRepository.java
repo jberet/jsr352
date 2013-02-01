@@ -30,19 +30,23 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.mybatch.job.Job;
 import org.mybatch.repository.JobRepository;
-import org.mybatch.util.BatchLogger;
 
 public class MemoryRepository implements JobRepository {
     private ConcurrentMap<String, Job> jobs = new ConcurrentHashMap<String, Job>();
 
-    private ConcurrentMap<String, ConcurrentMap<String, String>> savedProperties =
-            new ConcurrentHashMap<String, ConcurrentMap<String, String>>();
+    //mapping between jobInstanceId and its saved properties
+    private ConcurrentMap<Long, ConcurrentMap<String, String>> savedProperties =
+            new ConcurrentHashMap<Long, ConcurrentMap<String, String>>();
 
     @Override
-    public void add(Job job) {
-        if(jobs.putIfAbsent(job.getId(), job) != null) {
-            BatchLogger.LOGGER.jobAlreadyExists(job.getId());
-        }
+    public Job addJob(Job job) {
+        return jobs.putIfAbsent(job.getId(), job);
+    }
+
+    @Override
+    public Job removeJob(String jobId) {
+        //may need to cascade-remove all the associated jobInstances and their saved properties
+        return jobs.remove(jobId);
     }
 
     @Override
@@ -56,21 +60,21 @@ public class MemoryRepository implements JobRepository {
     }
 
     @Override
-    public void saveProperty(String jobName, String propName, String propValue) {
-        ConcurrentMap<String, String> props = savedProperties.get(jobName);
+    public String saveProperty(Long jobInstanceId, String propName, String propValue) {
+        ConcurrentMap<String, String> props = savedProperties.get(jobInstanceId);
         if (props == null) {
             props = new ConcurrentHashMap<String, String>();
-            ConcurrentMap<String, String> old = savedProperties.putIfAbsent(jobName, props);
+            ConcurrentMap<String, String> old = savedProperties.putIfAbsent(jobInstanceId, props);
             if (old != null) {
                 props = old;
             }
         }
-        props.put(propName, propValue);
+        return props.put(propName, propValue);
     }
 
     @Override
-    public String getSavedProperty(String jobName, String propName) {
-        ConcurrentMap<String, String> props = savedProperties.get(jobName);
+    public String getSavedProperty(Long jobInstanceId, String propName) {
+        ConcurrentMap<String, String> props = savedProperties.get(jobInstanceId);
         if (props != null) {
             return props.get(propName);
         }
@@ -78,11 +82,25 @@ public class MemoryRepository implements JobRepository {
     }
 
     @Override
-    public Map<String, String> getSavedProperties(String jobName) {
-        ConcurrentMap<String, String> result = savedProperties.get(jobName);
+    public Map<String, String> getSavedProperties(Long jobInstanceId) {
+        ConcurrentMap<String, String> result = savedProperties.get(jobInstanceId);
         if (result != null) {
             return Collections.unmodifiableMap(result);
         }
         return null;
+    }
+
+    @Override
+    public String removeSavedProperty(Long jobInstanceId, String propName) {
+        ConcurrentMap<String, String> props = savedProperties.get(jobInstanceId);
+        if (props != null) {
+            return props.remove(propName);
+        }
+        return null;
+    }
+
+    @Override
+    public void removeSavedProperties(Long jobInstanceId) {
+        savedProperties.remove(jobInstanceId);
     }
 }

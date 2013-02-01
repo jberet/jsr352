@@ -22,11 +22,7 @@
 
 package org.mybatch.operations;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +41,6 @@ import javax.batch.operations.exception.NoSuchJobInstanceException;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
 
 import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.creation.SimpleArtifactFactory;
@@ -60,7 +51,6 @@ import org.mybatch.repository.impl.MemoryRepository;
 import org.mybatch.runtime.runner.JobExecutionRunner;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.JobInstanceImpl;
-import org.mybatch.util.BatchUtil;
 import org.mybatch.util.ConcurrencyService;
 import org.mybatch.util.JaxbUtil;
 
@@ -107,7 +97,7 @@ public class JobOperatorImpl implements JobOperator {
     public Long start(String job, Properties jobParameters) throws JobStartException {
         Job jobDefined = JaxbUtil.getJob(job);
 
-        repository.add(jobDefined);
+        repository.addJob(jobDefined);
         ApplicationMetaData appData;
         try {
             appData = new ApplicationMetaData();
