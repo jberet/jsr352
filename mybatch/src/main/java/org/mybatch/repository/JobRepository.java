@@ -29,6 +29,8 @@ import java.util.Map;
 import org.mybatch.job.Job;
 
 public interface JobRepository {
+    long nextUniqueId();
+
     Job addJob(Job job);
 
     Job removeJob(String jobId);

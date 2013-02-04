@@ -82,7 +82,11 @@ public class ChunkMergerTest {
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"child"});
+
         Assert.assertEquals("child", child.getCheckpointAlgorithm().getRef());
+        Assert.assertEquals(1, child.getCheckpointAlgorithm().getProperties().getProperty().size());
+        JobMergerTest.propertiesContain(child.getCheckpointAlgorithm().getProperties(), new String[]{"child"});
+
         Assert.assertEquals("java.lang.RuntimeException", child.getSkippableExceptionClasses().getInclude().getClazz());
         Assert.assertEquals("java.lang.IllegalStateException", child.getSkippableExceptionClasses().getExclude().getClazz());
         Assert.assertEquals("java.lang.RuntimeException", child.getRetryableExceptionClasses().getInclude().getClazz());
@@ -99,7 +103,11 @@ public class ChunkMergerTest {
 
         Assert.assertEquals(2, child.getProperties().getProperty().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"});
+
         Assert.assertEquals("child", child.getCheckpointAlgorithm().getRef());
+        Assert.assertEquals(2, child.getCheckpointAlgorithm().getProperties().getProperty().size());
+        JobMergerTest.propertiesContain(child.getCheckpointAlgorithm().getProperties(), new String[]{"child", "parent"});
+
         Assert.assertEquals("java.lang.RuntimeException", child.getSkippableExceptionClasses().getInclude().getClazz());
         Assert.assertEquals("java.lang.IllegalStateException", child.getSkippableExceptionClasses().getExclude().getClazz());
         Assert.assertEquals("java.lang.RuntimeException", child.getRetryableExceptionClasses().getInclude().getClazz());
@@ -144,9 +152,9 @@ public class ChunkMergerTest {
         Assert.assertEquals(false, filter.matches(IOException.class));
 
         filter = (ExceptionClassFilterImpl) chunk.getNoRollbackExceptionClasses();
-        Assert.assertEquals(true, filter.matches(Exception.class));
-        Assert.assertEquals(true, filter.matches(RuntimeException.class));
-        Assert.assertEquals(true, filter.matches(IOException.class));
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(RuntimeException.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
         Assert.assertEquals(false, filter.matches(IllegalStateException.class));
         Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
 

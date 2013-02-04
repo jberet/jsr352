@@ -27,16 +27,24 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.mybatch.job.Job;
 import org.mybatch.repository.JobRepository;
 
 public class MemoryRepository implements JobRepository {
+    private final AtomicLong atomicLong = new AtomicLong();
+
     private ConcurrentMap<String, Job> jobs = new ConcurrentHashMap<String, Job>();
 
     //mapping between jobInstanceId and its saved properties
     private ConcurrentMap<Long, ConcurrentMap<String, String>> savedProperties =
             new ConcurrentHashMap<Long, ConcurrentMap<String, String>>();
+
+    @Override
+    public long nextUniqueId() {
+        return atomicLong.incrementAndGet();
+    }
 
     @Override
     public Job addJob(Job job) {

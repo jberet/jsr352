@@ -22,7 +22,6 @@
 
 package org.mybatch.metadata;
 
-import org.jboss.logging.Logger;
 import org.mybatch.job.ExceptionClassFilter;
 import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
@@ -32,11 +31,8 @@ import org.mybatch.util.BatchUtil;
  */
 final public class ExceptionClassFilterImpl extends ExceptionClassFilter {
     public boolean matches(Class<? extends Throwable> th) {
-        if (include == null) {
-            if (exclude == null) {
-                return false;
-            }
-            return !matches(th, exclude.getClazz());
+        if (include == null) {  //nothing is included, and exluce is ignored
+            return false;
         } else {
             if (exclude == null) {
                 return matches(th, include.getClazz());

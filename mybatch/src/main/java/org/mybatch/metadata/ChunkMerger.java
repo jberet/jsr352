@@ -73,7 +73,7 @@ public class ChunkMerger {
             child.setCheckpointAlgorithm(parentCheckPointAlgo);
             return;
         }
-        //parent and child each has its own CheckPointAlgorithm, do not merge their properties
+        JobMerger.mergeProperties(parentCheckPointAlgo.getProperties(), childCheckPointAlgo.getProperties());
     }
 
     private void mergeSkippableExceptionClasses(ExceptionClassFilter parentExceptionClassFilter, ExceptionClassFilter childExceptionClassFilter) {
