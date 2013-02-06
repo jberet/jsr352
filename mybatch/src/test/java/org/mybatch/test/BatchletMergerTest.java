@@ -31,15 +31,15 @@ import org.mybatch.job.Batchlet;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
 import org.mybatch.metadata.BatchletMerger;
-import org.mybatch.util.JaxbUtil;
+import org.mybatch.metadata.JobXmlLoader;
 
 public class BatchletMergerTest {
     @Test
     public void propertiesFromParentJob() throws Exception {
-        Job parentJob = JaxbUtil.getJob("batchlet-properties-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("batchlet-properties-parent.xml", Job.class);
         Batchlet parent = getBatchlet(parentJob, "batchlet-properties-parent") ;
 
-        Job childJob = JaxbUtil.getJob("batchlet-properties-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("batchlet-properties-child.xml", Job.class);
         Batchlet child = getBatchlet(childJob, "batchlet-properties-child");
 
         Assert.assertNull(child.getProperties());
@@ -54,10 +54,10 @@ public class BatchletMergerTest {
 
     @Test
     public void mergeFalse() throws Exception {
-        Job parentJob = JaxbUtil.getJob("batchlet-merge-false-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("batchlet-merge-false-parent.xml", Job.class);
         Batchlet parent = getBatchlet(parentJob, "batchlet-merge-false-parent");
 
-        Job childJob = JaxbUtil.getJob("batchlet-merge-false-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("batchlet-merge-false-child.xml", Job.class);
         Batchlet child = getBatchlet(childJob, "batchlet-merge-false-child");
 
         Assert.assertEquals(0, child.getProperties().getProperty().size());
@@ -71,10 +71,10 @@ public class BatchletMergerTest {
 
     @Test
     public void mergeTrue() throws Exception {
-        Job parentJob = JaxbUtil.getJob("batchlet-merge-true-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("batchlet-merge-true-parent.xml", Job.class);
         Batchlet parent = getBatchlet(parentJob, "batchlet-merge-true-parent");
 
-        Job childJob = JaxbUtil.getJob( "batchlet-merge-true-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("batchlet-merge-true-child.xml", Job.class);
         Batchlet child = getBatchlet(childJob, "batchlet-merge-true-child");
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());

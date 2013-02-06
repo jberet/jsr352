@@ -33,7 +33,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mybatch.job.Job;
 import org.mybatch.repository.impl.MemoryRepository;
-import org.mybatch.util.JaxbUtil;
+import org.mybatch.metadata.JobXmlLoader;
 
 public class MemoryRepositoryTest {
     final private static MemoryRepository repo = new MemoryRepository();
@@ -47,7 +47,7 @@ public class MemoryRepositoryTest {
 
     @Test
     public void addRemoveJob() throws Exception {
-        job = JaxbUtil.getJob("batchlet-job-1.xml");
+        job = JobXmlLoader.loadJobXml("batchlet-job-1.xml", Job.class);
         Job jobAdded = repo.addJob(job);
         Assert.assertEquals(null, jobAdded);  //the first time, no pre-existing job by the same jobId.
         Assert.assertEquals(1, repo.getJobs().size());

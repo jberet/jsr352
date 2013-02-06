@@ -52,7 +52,7 @@ import org.mybatch.runtime.runner.JobExecutionRunner;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.JobInstanceImpl;
 import org.mybatch.util.ConcurrencyService;
-import org.mybatch.util.JaxbUtil;
+import org.mybatch.metadata.JobXmlLoader;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
@@ -95,7 +95,7 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public Long start(String job, Properties jobParameters) throws JobStartException {
-        Job jobDefined = JaxbUtil.getJob(job);
+        Job jobDefined = JobXmlLoader.loadJobXml(job, Job.class);
 
         repository.addJob(jobDefined);
         ApplicationMetaData appData;

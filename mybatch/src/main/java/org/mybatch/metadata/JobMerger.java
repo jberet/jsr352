@@ -22,6 +22,8 @@
  
 package org.mybatch.metadata;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.mybatch.job.Job;
@@ -29,17 +31,47 @@ import org.mybatch.job.Listeners;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Properties;
 import org.mybatch.job.Property;
+import org.mybatch.job.Step;
 
 public class JobMerger {
+    private Job parent;
+    private Job child;
+
+    /**
+     * When this.child is also a parent, do not process steps under it.
+     */
+    private boolean skipSteps;
+
+    public JobMerger(Job child) {
+        String parentName = child.getParent();
+        if (parentName != null) {
+            this.parent = JobXmlLoader.loadJobXml(parentName, Job.class);
+        }
+        this.child = child;
+    }
+
+    private JobMerger(String parentName, Job child, boolean skipSteps) {
+        this(JobXmlLoader.loadJobXml(parentName, Job.class), child);
+        this.skipSteps = skipSteps;
+    }
+
     public JobMerger(Job parent, Job child) {
         this.parent = parent;
         this.child = child;
     }
 
-    private Job parent;
-    private Job child;
-
     public void merge() {
+        if (parent == null) {
+            return;
+        }
+
+        //check if parent has its own parent
+        String parentParent = parent.getParent();
+        if (parentParent != null) {
+            JobMerger merger = new JobMerger(parentParent, parent, true);
+            merger.merge();
+        }
+
         //merge job attributes
         if (child.getRestartable() == null && parent.getRestartable() != null) {
             child.setRestartable(parent.getRestartable());
@@ -49,6 +81,20 @@ public class JobMerger {
         merge(parent.getListeners(), child.getListeners());
 
         //job steps, flows, and splits are not inherited
+        //check if each step has its own parent step
+        if(!skipSteps) {
+            List<Step> steps = new ArrayList<Step>();
+            for (Serializable s : child.getDecisionOrFlowOrSplit()) {
+                if (s instanceof Step) {
+                    steps.add((Step) s);
+                    Step step = (Step) s;
+                }
+            }
+            for (Step s : steps) {
+                StepMerger stepMerger = new StepMerger(s, steps);
+                stepMerger.merge();
+            }
+        }
     }
 
     private void merge(Properties parentProps, Properties childProps) {

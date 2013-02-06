@@ -28,19 +28,20 @@ import org.mybatch.job.Job;
 import org.mybatch.job.Properties;
 import org.mybatch.metadata.JobMerger;
 import org.mybatch.util.BatchUtil;
-import org.mybatch.util.JaxbUtil;
+import org.mybatch.metadata.JobXmlLoader;
 
 public class JobMergerTest {
     @Test
     public void propertiesListenersFromParentJob() throws Exception {
-        Job parent = JaxbUtil.getJob("job-properties-listeners-parent.xml");
-        Job child = JaxbUtil.getJob("job-properties-listeners-child.xml");
+        Job parent = JobXmlLoader.loadJobXml("job-properties-listeners-parent.xml", Job.class);
+        Job child = JobXmlLoader.loadJobXml("job-properties-listeners-child.xml", Job.class);
 
         Assert.assertNull(child.getRestartable());
         Assert.assertEquals(true, child.getProperties() == null || child.getProperties().getProperty().size() == 0);
         Assert.assertEquals(true, child.getListeners() == null || child.getListeners().getListener().size() == 0);
 
-        JobMerger merger = new JobMerger(parent, child);
+//        JobMerger merger = new JobMerger(parent, child);
+        JobMerger merger = new JobMerger(child);
         merger.merge();
 
         Assert.assertEquals("true", child.getRestartable());
@@ -51,14 +52,15 @@ public class JobMergerTest {
 
     @Test
     public void mergeFalse() throws Exception {
-        Job parent = JaxbUtil.getJob("job-merge-false-parent.xml");
-        Job child = JaxbUtil.getJob( "job-merge-false-child.xml");
+        Job parent = JobXmlLoader.loadJobXml("job-merge-false-parent.xml", Job.class);
+        Job child = JobXmlLoader.loadJobXml("job-merge-false-child.xml", Job.class);
 
         Assert.assertEquals("false", child.getRestartable());
         Assert.assertEquals(0, child.getProperties().getProperty().size());
         Assert.assertEquals(0, child.getListeners().getListener().size()) ;
 
-        JobMerger merger = new JobMerger(parent, child);
+//        JobMerger merger = new JobMerger(parent, child);
+        JobMerger merger = new JobMerger(child);
         merger.merge();
 
         Assert.assertEquals("false", child.getRestartable());
@@ -68,12 +70,13 @@ public class JobMergerTest {
 
     @Test
     public void mergeTrue() throws Exception {
-        Job parent = JaxbUtil.getJob("job-merge-true-parent.xml");
-        Job child = JaxbUtil.getJob( "job-merge-true-child.xml");
+        Job parent = JobXmlLoader.loadJobXml("job-merge-true-parent.xml", Job.class);
+        Job child = JobXmlLoader.loadJobXml("job-merge-true-child.xml", Job.class);
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());
         Assert.assertEquals(1, child.getListeners().getListener().size()) ;
 
+//        JobMerger merger = new JobMerger(parent, child);
         JobMerger merger = new JobMerger(parent, child);
         merger.merge();
 

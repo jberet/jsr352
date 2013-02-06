@@ -29,23 +29,23 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
-import org.mybatch.metadata.JobMerger;
 import org.mybatch.metadata.StepMerger;
-import org.mybatch.util.JaxbUtil;
+import org.mybatch.metadata.JobXmlLoader;
 
 public class StepMergerTest {
     @Test
     public void propertiesListenersFromParentJob() throws Exception {
-        Job parentJob = JaxbUtil.getJob("step-properties-listeners-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("step-properties-listeners-parent.xml", Job.class);
         Step parent = getStep(parentJob, "step-properties-listeners-parent");
 
-        Job childJob = JaxbUtil.getJob("step-properties-listeners-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("step-properties-listeners-child.xml", Job.class);
         Step child = getStep(childJob, "step-properties-listeners-child");
 
         Assert.assertNull(child.getProperties());
         Assert.assertNull(child.getListeners());
 
         StepMerger merger = new StepMerger(parent, child);
+//        StepMerger merger = new StepMerger(child, (List<Step>) null);
         merger.merge();
 
         Assert.assertEquals(2, child.getProperties().getProperty().size());
@@ -55,16 +55,17 @@ public class StepMergerTest {
 
     @Test
     public void mergeFalse() throws Exception {
-        Job parentJob = JaxbUtil.getJob("step-merge-false-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("step-merge-false-parent.xml", Job.class);
         Step parent = getStep(parentJob, "step-merge-false-parent");
 
-        Job childJob = JaxbUtil.getJob("step-merge-false-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("step-merge-false-child.xml", Job.class);
         Step child = getStep(childJob, "step-merge-false-child");
 
         Assert.assertEquals(0, child.getProperties().getProperty().size());
         Assert.assertEquals(0, child.getListeners().getListener().size()) ;
 
         StepMerger merger = new StepMerger(parent, child);
+//        StepMerger merger = new StepMerger(child, (List<Step>) null);
         merger.merge();
 
         Assert.assertEquals(0, child.getProperties().getProperty().size());
@@ -73,16 +74,17 @@ public class StepMergerTest {
 
     @Test
     public void mergeTrue() throws Exception {
-        Job parentJob = JaxbUtil.getJob("step-merge-true-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("step-merge-true-parent.xml", Job.class);
         Step parent = getStep(parentJob, "step-merge-true-parent");
 
-        Job childJob = JaxbUtil.getJob( "step-merge-true-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("step-merge-true-child.xml", Job.class);
         Step child = getStep(childJob, "step-merge-true-child");
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());
         Assert.assertEquals(1, child.getListeners().getListener().size()) ;
 
         StepMerger merger = new StepMerger(parent, child);
+//        StepMerger merger = new StepMerger(child, (List<Step>) null);
         merger.merge();
 
         Assert.assertEquals(2, child.getProperties().getProperty().size());

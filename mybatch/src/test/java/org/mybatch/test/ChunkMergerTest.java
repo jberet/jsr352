@@ -35,15 +35,15 @@ import org.mybatch.job.Job;
 import org.mybatch.job.Step;
 import org.mybatch.metadata.ChunkMerger;
 import org.mybatch.metadata.ExceptionClassFilterImpl;
-import org.mybatch.util.JaxbUtil;
+import org.mybatch.metadata.JobXmlLoader;
 
 public class ChunkMergerTest {
     @Test
     public void fromParentJob() throws Exception {
-        Job parentJob = JaxbUtil.getJob("chunk-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("chunk-parent.xml", Job.class);
         Chunk parent = getChunk(parentJob, "chunk-parent") ;
 
-        Job childJob = JaxbUtil.getJob("chunk-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("chunk-child.xml", Job.class);
         Chunk child = getChunk(childJob, "chunk-child");
 
         Assert.assertEquals(true, child.getProperties() == null || child.getProperties().getProperty().size() == 0);
@@ -74,10 +74,10 @@ public class ChunkMergerTest {
 
     @Test
     public void mixed() throws Exception {
-        Job parentJob = JaxbUtil.getJob("chunk-mixed-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("chunk-mixed-parent.xml", Job.class);
         Chunk parent = getChunk(parentJob, "chunk-mixed-parent") ;
 
-        Job childJob = JaxbUtil.getJob("chunk-mixed-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
         Chunk child = getChunk(childJob, "chunk-mixed-child");
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());
@@ -121,10 +121,10 @@ public class ChunkMergerTest {
 
     @Test
     public void exceptionClassFilter() throws Exception {
-        Job parentJob = JaxbUtil.getJob("chunk-mixed-parent.xml");
+        Job parentJob = JobXmlLoader.loadJobXml("chunk-mixed-parent.xml", Job.class);
         Chunk parent = getChunk(parentJob, "chunk-mixed-parent") ;
 
-        Job childJob = JaxbUtil.getJob("chunk-mixed-child.xml");
+        Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
         Chunk child = getChunk(childJob, "chunk-mixed-child");
 
         ChunkMerger merger = new ChunkMerger(parent, child);
@@ -137,7 +137,7 @@ public class ChunkMergerTest {
 
     @Test
     public void exceptionClassFilter2() throws Exception {
-        Job job = JaxbUtil.getJob("exception-class-filter.xml");
+        Job job = JobXmlLoader.loadJobXml("exception-class-filter.xml", Job.class);
         Chunk chunk = getChunk(job, "exception-class-filter") ;
 
         ExceptionClassFilterImpl filter = (ExceptionClassFilterImpl) chunk.getSkippableExceptionClasses();

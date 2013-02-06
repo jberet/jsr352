@@ -19,8 +19,10 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.metadata;
+
+import java.util.List;
 
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Properties;
@@ -29,15 +31,54 @@ import org.mybatch.job.Step;
 public class StepMerger {
     private Step parent;
     private Step child;
+    private List<Step> siblings;
 
-    public StepMerger(Step parent, Step child) {
+    public StepMerger(Step child, List<Step> siblings) {
+        this.child = child;
+        String parentName = child.getParent();
+        if (parentName != null) {
+            if (siblings != null) {
+                for (Step s : siblings) {
+                    if (parentName.equals(s.getId())) {
+                        this.parent = s;
+                        this.siblings = siblings;
+                    }
+                }
+            }
+            if (this.parent == null) {
+                this.parent = JobXmlLoader.loadJobXml(parentName, Step.class);
+            }
+        }
+    }
+
+//    public StepMerger(String parentName, Step child) {
+//        //if it's loaded from an external document whose root element is <step>, there is no peer step elements
+//        this(JobXmlLoader.loadJobXml(parentName, Step.class), child, null);
+//    }
+
+    public StepMerger(Step parent, Step child, List<Step> siblings) {
         this.parent = parent;
         this.child = child;
+        this.siblings = siblings;
+    }
+
+    public StepMerger(Step parent, Step child) {
+        this(parent, child, null);
     }
 
     public void merge() {
-        //merge step attributes
+        if (parent == null) {
+            return;
+        }
 
+        //check if parent has its own parent, which may be in the same or different job xml document
+        String parentParent = parent.getParent();
+        if (parentParent != null) {
+            StepMerger merger = new StepMerger(parent, this.siblings);
+            merger.merge();
+        }
+
+        //merge step attributes
         merge(parent.getProperties(), child.getProperties());
         merge(parent.getListeners(), child.getListeners());
     }

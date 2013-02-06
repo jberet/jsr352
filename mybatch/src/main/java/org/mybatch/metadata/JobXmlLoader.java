@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.mybatch.util;
+package org.mybatch.metadata;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -36,15 +36,23 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.mybatch.job.Job;
 import org.mybatch.metadata.JaxbObjectFactory;
+import org.mybatch.util.BatchUtil;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-public class JaxbUtil {
+public class JobXmlLoader {
     public final static String ARCHIVE_JOB_LOCATION = "META-INF/batch-jobs/";
 
-    public static Job getJob(String jobName) {
+    /**
+     * Gets the root element, either of type Job or Step, for a given job or step name.
+     * @param jobName base name of the job xml document
+     * @param rootType Job.class or Step.class
+     * @param <T> Job or Step
+     * @return the job or step root element
+     */
+    public static <T> T loadJobXml(String jobName, Class<T> rootType) {
         InputStream is;
-        Job jobDefined;
+        T jobOrStep;
         try {
             is = getJobXml(jobName);
         } catch (IOException e) {
@@ -59,8 +67,8 @@ public class JaxbUtil {
             } catch (PropertyException e) {
                 um.setProperty("com.sun.xml.internal.bind.ObjectFactory", new JaxbObjectFactory());
             }
-            JAXBElement<Job> root = um.unmarshal(new StreamSource(is), Job.class);
-            jobDefined = root.getValue();
+            JAXBElement<T> root = um.unmarshal(new StreamSource(is), rootType);
+            jobOrStep = root.getValue();
         } catch (JAXBException e) {
             throw LOGGER.failToParseBindJobXml(e, jobName);
         } finally {
@@ -72,10 +80,13 @@ public class JaxbUtil {
                 }
             }
         }
-        return jobDefined;
+        return jobOrStep;
     }
 
     private static InputStream getJobXml(String jobXml) throws IOException {
+        if (!jobXml.endsWith(".xml")) {
+            jobXml += ".xml";
+        }
         // META-INF first
         String path = ARCHIVE_JOB_LOCATION + jobXml;
         InputStream is;
