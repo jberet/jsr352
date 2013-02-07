@@ -19,10 +19,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.test;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -35,17 +36,13 @@ import org.mybatch.metadata.JobXmlLoader;
 public class StepMergerTest {
     @Test
     public void propertiesListenersFromParentJob() throws Exception {
-        Job parentJob = JobXmlLoader.loadJobXml("step-properties-listeners-parent.xml", Job.class);
-        Step parent = getStep(parentJob, "step-properties-listeners-parent");
-
         Job childJob = JobXmlLoader.loadJobXml("step-properties-listeners-child.xml", Job.class);
         Step child = getStep(childJob, "step-properties-listeners-child");
 
         Assert.assertNull(child.getProperties());
         Assert.assertNull(child.getListeners());
 
-        StepMerger merger = new StepMerger(parent, child);
-//        StepMerger merger = new StepMerger(child, (List<Step>) null);
+        StepMerger merger = new StepMerger(child, (List<Step>) null);
         merger.merge();
 
         Assert.assertEquals(2, child.getProperties().getProperty().size());
@@ -55,17 +52,13 @@ public class StepMergerTest {
 
     @Test
     public void mergeFalse() throws Exception {
-        Job parentJob = JobXmlLoader.loadJobXml("step-merge-false-parent.xml", Job.class);
-        Step parent = getStep(parentJob, "step-merge-false-parent");
-
         Job childJob = JobXmlLoader.loadJobXml("step-merge-false-child.xml", Job.class);
         Step child = getStep(childJob, "step-merge-false-child");
 
         Assert.assertEquals(0, child.getProperties().getProperty().size());
-        Assert.assertEquals(0, child.getListeners().getListener().size()) ;
+        Assert.assertEquals(0, child.getListeners().getListener().size());
 
-        StepMerger merger = new StepMerger(parent, child);
-//        StepMerger merger = new StepMerger(child, (List<Step>) null);
+        StepMerger merger = new StepMerger(child, (List<Step>) null);
         merger.merge();
 
         Assert.assertEquals(0, child.getProperties().getProperty().size());
@@ -74,17 +67,13 @@ public class StepMergerTest {
 
     @Test
     public void mergeTrue() throws Exception {
-        Job parentJob = JobXmlLoader.loadJobXml("step-merge-true-parent.xml", Job.class);
-        Step parent = getStep(parentJob, "step-merge-true-parent");
-
         Job childJob = JobXmlLoader.loadJobXml("step-merge-true-child.xml", Job.class);
         Step child = getStep(childJob, "step-merge-true-child");
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());
-        Assert.assertEquals(1, child.getListeners().getListener().size()) ;
+        Assert.assertEquals(1, child.getListeners().getListener().size());
 
-        StepMerger merger = new StepMerger(parent, child);
-//        StepMerger merger = new StepMerger(child, (List<Step>) null);
+        StepMerger merger = new StepMerger(child, (List<Step>) null);
         merger.merge();
 
         Assert.assertEquals(2, child.getProperties().getProperty().size());
@@ -92,13 +81,76 @@ public class StepMergerTest {
         Assert.assertEquals(2, child.getListeners().getListener().size());
     }
 
-    protected static Step getStep(Job job, String stepId) {
+    @Test
+    public void stepSameFileParentChild() throws Exception {
+        Job childJob = JobXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
+
+        String[] child1And2 = new String[]{"step-same-file-child-1", "step-same-file-child-2"};
+        Step child = null;
+        for (String c : child1And2) {
+            child = getStep(childJob, c);
+
+            StepMerger merger = new StepMerger(child, getSteps(childJob));
+            merger.merge();
+
+            Assert.assertEquals(2, child.getProperties().getProperty().size());
+            JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"}, true);
+            Assert.assertEquals(2, child.getListeners().getListener().size());
+            JobMergerTest.listenersContain(child.getListeners(), new String[]{"parent", "child"});
+            Assert.assertEquals("child", child.getBatchlet().getRef());
+        }
+
+        child = getStep(childJob, "step-same-file-child-child");
+        StepMerger merger = new StepMerger(child, getSteps(childJob));
+        merger.merge();
+
+        Assert.assertEquals(3, child.getProperties().getProperty().size());
+        JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child", "child-child"}, true);
+        Assert.assertEquals(3, child.getListeners().getListener().size());
+        JobMergerTest.listenersContain(child.getListeners(), new String[]{"parent", "child", "child-child"});
+        Assert.assertEquals("child-child", child.getBatchlet().getRef());
+    }
+
+    @Test
+    public void emptyParent() throws Exception {
+        Job childJob = JobXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
+        Step child = getStep(childJob, "inheriting-empty-parent");
+        emptyStep(childJob, child);
+    }
+
+    @Test
+    public void emptyChild() throws Exception {
+        Job childJob = JobXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
+        Step child = getStep(childJob, "empty-child");
+        emptyStep(childJob, child);
+    }
+
+    private void emptyStep(Job childJob, Step child) throws Exception {
+        StepMerger merger = new StepMerger(child, getSteps(childJob));
+        merger.merge();
+
+        Assert.assertEquals(1, child.getProperties().getProperty().size());
+        JobMergerTest.propertiesContain(child.getProperties(), new String[]{"child"}, true);
+        Assert.assertEquals(1, child.getListeners().getListener().size());
+        JobMergerTest.listenersContain(child.getListeners(), new String[]{"child"});
+        Assert.assertEquals("child", child.getBatchlet().getRef());
+    }
+
+    protected static List<Step> getSteps(Job job) {
+        List<Step> results = new ArrayList<Step>();
         List<Serializable> steps = job.getDecisionOrFlowOrSplit();
         for (Serializable s : steps) {
             if (s instanceof Step) {
-                if (stepId.equals(((Step) s).getId())) {
-                    return (Step) s;
-                }
+                results.add((Step) s);
+            }
+        }
+        return results;
+    }
+
+    protected static Step getStep(Job job, String stepId) {
+        for (Step s : getSteps(job)) {
+            if (s.getId().equals(stepId)) {
+                return s;
             }
         }
         return null;

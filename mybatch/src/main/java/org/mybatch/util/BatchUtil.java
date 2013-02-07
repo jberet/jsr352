@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.mybatch.job.Job;
+import org.mybatch.job.Listener;
+import org.mybatch.job.Listeners;
+import org.mybatch.job.Property;
 import org.mybatch.job.Step;
 
 public class BatchUtil {
@@ -61,5 +64,29 @@ public class BatchUtil {
             }
         }
         return result;
+    }
+
+    public static boolean propertiesContains(org.mybatch.job.Properties props, String key) {
+        if (props == null) {
+            return false;
+        }
+        for (Property p : props.getProperty()) {
+            if (p.getName().equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean listenersContains(Listeners listeners, String ref) {
+        if (listeners == null) {
+            return false;
+        }
+        for (Listener l : listeners.getListener()) {
+            if (l.getRef().equals(ref)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

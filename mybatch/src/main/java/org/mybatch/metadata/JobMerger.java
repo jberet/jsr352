@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.metadata;
 
 import java.io.Serializable;
@@ -27,11 +27,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mybatch.job.Job;
-import org.mybatch.job.Listeners;
 import org.mybatch.job.Listener;
+import org.mybatch.job.Listeners;
 import org.mybatch.job.Properties;
 import org.mybatch.job.Property;
 import org.mybatch.job.Step;
+import org.mybatch.util.BatchUtil;
 
 public class JobMerger {
     private Job parent;
@@ -40,7 +41,7 @@ public class JobMerger {
     /**
      * When this.child is also a parent, do not process steps under it.
      */
-    private boolean skipSteps;
+    private boolean skipEnclosingSteps;
 
     public JobMerger(Job child) {
         String parentName = child.getParent();
@@ -52,7 +53,7 @@ public class JobMerger {
 
     private JobMerger(String parentName, Job child, boolean skipSteps) {
         this(JobXmlLoader.loadJobXml(parentName, Job.class), child);
-        this.skipSteps = skipSteps;
+        this.skipEnclosingSteps = skipSteps;
     }
 
     public JobMerger(Job parent, Job child) {
@@ -61,33 +62,30 @@ public class JobMerger {
     }
 
     public void merge() {
-        if (parent == null) {
-            return;
+        if (parent != null) {
+            //check if parent has its own parent
+            String parentParent = parent.getParent();
+            if (parentParent != null) {
+                JobMerger merger = new JobMerger(parentParent, parent, true);
+                merger.merge();
+            }
+
+            //merge job attributes
+            if (child.getRestartable() == null && parent.getRestartable() != null) {
+                child.setRestartable(parent.getRestartable());
+            }
+
+            merge(parent.getProperties(), child.getProperties());
+            merge(parent.getListeners(), child.getListeners());
         }
 
-        //check if parent has its own parent
-        String parentParent = parent.getParent();
-        if (parentParent != null) {
-            JobMerger merger = new JobMerger(parentParent, parent, true);
-            merger.merge();
-        }
-
-        //merge job attributes
-        if (child.getRestartable() == null && parent.getRestartable() != null) {
-            child.setRestartable(parent.getRestartable());
-        }
-
-        merge(parent.getProperties(), child.getProperties());
-        merge(parent.getListeners(), child.getListeners());
-
-        //job steps, flows, and splits are not inherited
-        //check if each step has its own parent step
-        if(!skipSteps) {
+        //job steps, flows, and splits are not inherited.
+        //check if each step has its own parent step, whether parent is null or not.
+        if (!skipEnclosingSteps) {
             List<Step> steps = new ArrayList<Step>();
             for (Serializable s : child.getDecisionOrFlowOrSplit()) {
                 if (s instanceof Step) {
                     steps.add((Step) s);
-                    Step step = (Step) s;
                 }
             }
             for (Step s : steps) {
@@ -122,25 +120,29 @@ public class JobMerger {
 
     public static void mergeProperties(Properties parentProps, Properties childProps) {
         String merge = childProps.getMerge();
-        if(merge != null && !Boolean.parseBoolean(merge)) {
+        if (merge != null && !Boolean.parseBoolean(merge)) {
             return;
         }
 
         List<Property> childPropList = childProps.getProperty();
         for (Property p : parentProps.getProperty()) {
-            childPropList.add(p);
+            if (!BatchUtil.propertiesContains(childProps, p.getName())) {
+                childPropList.add(p);
+            }
         }
     }
 
     public static void mergeListeners(Listeners parentListeners, Listeners childListeners) {
         String merge = childListeners.getMerge();
-        if(merge != null && !Boolean.parseBoolean(merge)) {
+        if (merge != null && !Boolean.parseBoolean(merge)) {
             return;
         }
 
         List<Listener> childListenerList = childListeners.getListener();
-        for (Listener p : parentListeners.getListener()) {
-            childListenerList.add(p);
+        for (Listener l : parentListeners.getListener()) {
+            if (!BatchUtil.listenersContains(childListeners, l.getRef())) {
+                childListenerList.add(l);
+            }
         }
     }
 

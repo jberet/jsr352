@@ -19,16 +19,21 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.mybatch.job.Job;
+import org.mybatch.job.Listener;
+import org.mybatch.job.Listeners;
 import org.mybatch.job.Properties;
 import org.mybatch.metadata.JobMerger;
-import org.mybatch.util.BatchUtil;
 import org.mybatch.metadata.JobXmlLoader;
+import org.mybatch.util.BatchUtil;
 
 public class JobMergerTest {
     @Test
@@ -57,7 +62,7 @@ public class JobMergerTest {
 
         Assert.assertEquals("false", child.getRestartable());
         Assert.assertEquals(0, child.getProperties().getProperty().size());
-        Assert.assertEquals(0, child.getListeners().getListener().size()) ;
+        Assert.assertEquals(0, child.getListeners().getListener().size());
 
 //        JobMerger merger = new JobMerger(parent, child);
         JobMerger merger = new JobMerger(child);
@@ -74,7 +79,7 @@ public class JobMergerTest {
         Job child = JobXmlLoader.loadJobXml("job-merge-true-child.xml", Job.class);
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());
-        Assert.assertEquals(1, child.getListeners().getListener().size()) ;
+        Assert.assertEquals(1, child.getListeners().getListener().size());
 
 //        JobMerger merger = new JobMerger(parent, child);
         JobMerger merger = new JobMerger(parent, child);
@@ -89,15 +94,40 @@ public class JobMergerTest {
      * verifies that the Properties (generated jaxb type, not java.util.Properties) props contains every key in keys.
      * As a testing convention, the value is the same as the key.  For instance, the Properties can be:
      * "foo": "foo", "bar": "bar"
+     *
      * @param props Properties from job xml
-     * @param keys a String array of keys
+     * @param keys  a String array of keys
+     * @param checkValues whether to check property value
      * @throws IllegalStateException if any key is not found
      */
-    public static void propertiesContain(Properties props, String[] keys) throws IllegalStateException {
+    public static void propertiesContain(Properties props, String[] keys, boolean... checkValues) throws IllegalStateException {
+        boolean checkVal = checkValues.length == 0 ? false : checkValues[0];
         java.util.Properties javaUtilProps = BatchUtil.toJavaUtilProperties(props);
         for (String k : keys) {
-            if (!javaUtilProps.containsKey(k)) {
+            String v = javaUtilProps.getProperty(k);
+            if (v == null) {
                 throw new IllegalStateException(String.format("Expecting key %s in properties %s, but found none.", k, javaUtilProps));
+            }
+            if (checkVal && !v.equals(k)) {
+                throw new IllegalStateException(String.format("Expecting property %s : %s, but found %s : %s", k, k, k, v));
+            }
+        }
+    }
+
+    public static List<String> getListenerRefs(Listeners listeners) {
+        List<String> results = new ArrayList<String>();
+        List<Listener> listenerList = listeners.getListener();
+        for (Listener l : listenerList) {
+            results.add(l.getRef());
+        }
+        return results;
+    }
+
+    public static void listenersContain(Listeners listeners, String[] keys) throws IllegalStateException {
+        List<String> refs = getListenerRefs(listeners);
+        for (String k : keys) {
+            if (!refs.contains(k)) {
+                throw new IllegalStateException(String.format("Expecting ref %s in listeners %s, but found none.", k, refs));
             }
         }
     }

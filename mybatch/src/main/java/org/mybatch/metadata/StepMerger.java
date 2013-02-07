@@ -51,11 +51,6 @@ public class StepMerger {
         }
     }
 
-//    public StepMerger(String parentName, Step child) {
-//        //if it's loaded from an external document whose root element is <step>, there is no peer step elements
-//        this(JobXmlLoader.loadJobXml(parentName, Step.class), child, null);
-//    }
-
     public StepMerger(Step parent, Step child, List<Step> siblings) {
         this.parent = parent;
         this.child = child;
@@ -67,20 +62,27 @@ public class StepMerger {
     }
 
     public void merge() {
-        if (parent == null) {
-            return;
-        }
+        if (parent != null) {
+            //check if parent has its own parent, which may be in the same or different job xml document
+            String parentParent = parent.getParent();
+            if (parentParent != null) {
+                StepMerger merger = new StepMerger(parent, this.siblings);
+                merger.merge();
+            }
 
-        //check if parent has its own parent, which may be in the same or different job xml document
-        String parentParent = parent.getParent();
-        if (parentParent != null) {
-            StepMerger merger = new StepMerger(parent, this.siblings);
-            merger.merge();
-        }
+            //merge step attributes
+            merge(parent.getProperties(), child.getProperties());
+            merge(parent.getListeners(), child.getListeners());
 
-        //merge step attributes
-        merge(parent.getProperties(), child.getProperties());
-        merge(parent.getListeners(), child.getListeners());
+            //if child has no batchlet or chunk, inherit from parent
+            if (child.getBatchlet() == null && child.getChunk() == null) {
+                if (parent.getChunk() != null) {
+                    child.setChunk(parent.getChunk());
+                } else {
+                    child.setBatchlet(parent.getBatchlet());
+                }
+            }
+        }
     }
 
     private void merge(Properties parentProps, Properties childProps) {
