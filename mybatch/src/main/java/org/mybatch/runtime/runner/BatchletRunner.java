@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.job.Batchlet;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.operations.JobOperatorImpl;
@@ -53,8 +54,13 @@ public class BatchletRunner implements Callable<Void> {
             thread.setContextClassLoader(BatchUtil.getBatchApplicationClassLoader());
             String ref = batchlet.getRef();
             ApplicationMetaData appData = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getApplicationMetaData();
-            Map<String, ApplicationMetaData> m = new HashMap<String, ApplicationMetaData>();
-            m.put(ApplicationMetaData.class.getName(), appData);
+            Map<ArtifactFactory.DataKey, Object> m = new HashMap<ArtifactFactory.DataKey, Object>();
+            m.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, appData);
+            m.put(ArtifactFactory.DataKey.STEP_CONTEXT, stepContext);
+            m.put(ArtifactFactory.DataKey.JOB_CONTEXT, stepContext.getJobContext());
+            if (batchlet.getProperties() != null) {
+                m.put(ArtifactFactory.DataKey.BATCH_PROPERTY, batchlet.getProperties());
+            }
 
             try {
                 Object artifactObj = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, m);

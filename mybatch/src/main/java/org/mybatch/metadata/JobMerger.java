@@ -140,7 +140,7 @@ public class JobMerger {
 
         List<Listener> childListenerList = childListeners.getListener();
         for (Listener l : parentListeners.getListener()) {
-            if (!BatchUtil.listenersContains(childListeners, l.getRef())) {
+            if (!BatchUtil.listenersContains(childListeners, l)) {
                 childListenerList.add(l);
             }
         }

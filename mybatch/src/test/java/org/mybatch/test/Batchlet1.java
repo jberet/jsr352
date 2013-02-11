@@ -22,14 +22,36 @@
  
 package org.mybatch.test;
 
+import javax.batch.annotation.BatchProperty;
 import javax.batch.annotation.Batchlet;
 import javax.batch.annotation.BeginStep;
 import javax.batch.annotation.EndStep;
 import javax.batch.annotation.Process;
 import javax.batch.annotation.Stop;
+import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
+import javax.inject.Inject;
 
 @Batchlet("Batchlet1")
 public class Batchlet1 {
+    @BatchProperty(name="Batchlet1")
+    private String prop1;
+
+    @BatchProperty  //default name
+    private String defaultName;
+
+    @BatchProperty(name = "no-such-property")
+    private String noSuchProperty;
+
+    @BatchProperty(name = "no-such-property")
+    private String defaultValue = "defaultValue";
+
+    @Inject
+    private JobContext jobContext;
+
+    @Inject
+    private StepContext stepContext;
+
     @BeginStep
     public void begin() throws Exception {
         System.out.printf("in @BeginStep, %s%n", Thread.currentThread());
@@ -38,6 +60,14 @@ public class Batchlet1 {
     @Process
     public String process() throws Exception {
         System.out.printf("in @Process, %s%n", Thread.currentThread());
+        System.out.printf("Injected batchlet property: %s => %s%n", "Batchlet1", prop1);
+        System.out.printf("Injected batch property with default name: %s => %s%n", "defaultName", defaultName);
+        System.out.printf("Undeclared batch property: %s => %s%n", "no-such-property", noSuchProperty);
+        System.out.printf("Undeclared batch property: %s => %s%n", "no-such-property", defaultValue);
+        System.out.printf("Injected JobContext: %s%n", jobContext);
+        System.out.printf("Injected StepContext: %s%n", stepContext);
+        System.out.printf("Job properties from injected JobContext: %s%n", jobContext.getProperties());
+        System.out.printf("Step properties from injected StepContext: %s%n", stepContext.getProperties());
         return "Processed";
     }
 

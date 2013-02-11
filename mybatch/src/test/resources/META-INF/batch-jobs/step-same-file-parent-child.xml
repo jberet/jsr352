@@ -46,7 +46,6 @@
         </properties>
         <listeners>
             <listener ref="child"></listener>
-            <listener ref="parent"></listener>  <!-- make sure dups are not added twice -->
         </listeners>
         <batchlet ref="child">
         </batchlet>
@@ -72,7 +71,7 @@
 
         <listeners>
             <listener ref="parent"></listener>
-            <listener ref="child"></listener>  <!-- make sure dups are not added twice -->
+            <listener ref="child"></listener>  <!-- listeners are not required to be unique, dups ok -->
         </listeners>
     </step>
 

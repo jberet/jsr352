@@ -25,6 +25,13 @@ package org.mybatch.creation;
 import java.util.Map;
 
 public interface ArtifactFactory {
+    public static enum DataKey {
+        APPLICATION_META_DATA,
+        JOB_CONTEXT,
+        STEP_CONTEXT,
+        BATCH_PROPERTY;
+    }
+
     /**
      * The initialize method is invoked once during the
      * initialization of the batch runtime.

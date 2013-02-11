@@ -50,7 +50,8 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
 
     @Override
     public long getJobExecutionId() {
-        return stepContext.getJobContext().getExecutionId();
+//        return stepContext.getJobContext().getExecutionId();  //stepContext has not been initialized yet, NPE
+        return 0;
     }
 
     @Override

@@ -22,29 +22,97 @@
 
 package org.mybatch.creation;
 
+import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 
+import javax.batch.annotation.BatchProperty;
+import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
+import javax.inject.Inject;
+
+import org.mybatch.job.Properties;
 import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.util.BatchUtil;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-//import javax.batch.spiArtifactFactory;
-
-public class SimpleArtifactFactory implements ArtifactFactory {
+public final class SimpleArtifactFactory implements ArtifactFactory {
     public void initialize() throws Exception {
 
     }
 
     public Object create(String ref, Map<?, ?> data) throws Exception {
-        ApplicationMetaData appData = (ApplicationMetaData) data.get(ApplicationMetaData.class.getName());
+        ApplicationMetaData appData = (ApplicationMetaData) data.get(DataKey.APPLICATION_META_DATA);
         Class<?> cls = appData.getClassForRef(ref);
         if (cls == null) {
             throw LOGGER.failToCreateArtifact(ref);
         }
-        return cls.newInstance();
+        Object obj = cls.newInstance();
+        doInjection(obj, cls, data);
+        return obj;
     }
 
     public void destroy(Object instance) throws Exception {
 
+    }
+
+    private void doInjection(Object obj, Class<?> cls, Map<?, ?> data) throws Exception {
+        Properties batchProps = (Properties) data.get(DataKey.BATCH_PROPERTY);
+        boolean hasBatchProps = batchProps != null && batchProps.getProperty().size() > 0;
+        while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
+            for (Field f : cls.getDeclaredFields()) {
+                if (!f.isSynthetic()) {
+                    Object fieldVal = null;
+                    if (hasBatchProps) {
+                        BatchProperty batchPropertyAnn = f.getAnnotation(BatchProperty.class);
+                        if (batchPropertyAnn != null) {
+                            String propName = batchPropertyAnn.name();
+                            if (propName.equals("")) {
+                                propName = f.getName();
+                            }
+                            fieldVal = BatchUtil.getBatchProperty(batchProps, propName);
+                            doInjection(obj, f, fieldVal);
+                            continue;
+                        }
+                    }
+
+                    Inject injectAnn = f.getAnnotation(Inject.class);
+                    if (injectAnn != null) {
+                        if (f.getType() == JobContext.class) {
+                            fieldVal = data.get(DataKey.JOB_CONTEXT);
+                        } else if (f.getType() == StepContext.class) {
+                            fieldVal = data.get(DataKey.STEP_CONTEXT);
+                        }
+                        doInjection(obj, f, fieldVal);
+                    }
+                }
+            }
+            cls = cls.getSuperclass();
+        }
+    }
+
+    private void doInjection(final Object obj, final Field field, final Object val) throws Exception {
+        if (val == null) {
+            return;
+        }
+        if (System.getSecurityManager() == null) {
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            field.set(obj, val);
+        } else {
+            AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<Void>() {
+                        public Void run() throws Exception {
+                            if (!field.isAccessible()) {
+                                field.setAccessible(true);
+                            }
+                            field.set(obj, val);
+                            return null;
+                        }
+                    });
+        }
     }
 }

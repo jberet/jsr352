@@ -95,7 +95,7 @@ public class StepMergerTest {
 
             Assert.assertEquals(2, child.getProperties().getProperty().size());
             JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"}, true);
-            Assert.assertEquals(2, child.getListeners().getListener().size());
+            Assert.assertEquals(3, child.getListeners().getListener().size());
             JobMergerTest.listenersContain(child.getListeners(), new String[]{"parent", "child"});
             Assert.assertEquals("child", child.getBatchlet().getRef());
         }
@@ -106,7 +106,7 @@ public class StepMergerTest {
 
         Assert.assertEquals(3, child.getProperties().getProperty().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child", "child-child"}, true);
-        Assert.assertEquals(3, child.getListeners().getListener().size());
+        Assert.assertEquals(4, child.getListeners().getListener().size());
         JobMergerTest.listenersContain(child.getListeners(), new String[]{"parent", "child", "child-child"});
         Assert.assertEquals("child-child", child.getBatchlet().getRef());
     }

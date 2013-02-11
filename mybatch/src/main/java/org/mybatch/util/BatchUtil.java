@@ -66,6 +66,17 @@ public class BatchUtil {
         return result;
     }
 
+    public static String getBatchProperty(org.mybatch.job.Properties batchProps, String key) {
+        if (batchProps != null) {
+            for (Property p : batchProps.getProperty()) {
+                if (p.getName().equals(key)) {
+                    return p.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
     public static boolean propertiesContains(org.mybatch.job.Properties props, String key) {
         if (props == null) {
             return false;
@@ -78,12 +89,12 @@ public class BatchUtil {
         return false;
     }
 
-    public static boolean listenersContains(Listeners listeners, String ref) {
+    public static boolean listenersContains(Listeners listeners, Listener listener) {
         if (listeners == null) {
             return false;
         }
         for (Listener l : listeners.getListener()) {
-            if (l.getRef().equals(ref)) {
+            if (l == listener) {
                 return true;
             }
         }
