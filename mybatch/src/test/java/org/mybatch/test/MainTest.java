@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.mybatch.Main;
 
 public class MainTest {
-    private static final String jobXmlName = "batchlet-job-1.xml";
+    private static final String jobXmlName = "batchlet1.xml";
 
     @Test
     public void testMain() throws Exception {

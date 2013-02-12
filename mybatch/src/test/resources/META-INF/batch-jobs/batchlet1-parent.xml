@@ -2,7 +2,7 @@
 
 <!--
 ~ JBoss, Home of Professional Open Source.
-~ Copyright 2012, Red Hat, Inc., and individual contributors
+~ Copyright 2013, Red Hat, Inc., and individual contributors
 ~ as indicated by the @author tags. See the copyright.txt file in the
 ~ distribution for a full listing of individual contributors.
 ~
@@ -22,22 +22,10 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="batchlet-job-1" xmlns="http://batch.jsr352/jsl"
+<job id="batchlet1-parent" xmlns="http://batch.jsr352/jsl" abstract="true"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
     <properties>
         <property name="job-prop" value="job-prop"></property>
     </properties>
-    <step id="step1">
-        <properties>
-            <property name="step-prop" value="step-prop"></property>
-        </properties>
-        <batchlet ref="Batchlet1">
-            <properties merge="true">
-                <property name="Batchlet1" value="Batchlet1"/>
-                <property name="defaultName" value="defaultName"/>
-            </properties>
-        </batchlet>
-    </step>
-
 </job>

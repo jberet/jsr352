@@ -46,6 +46,7 @@ import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.creation.SimpleArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.metadata.JobMerger;
 import org.mybatch.repository.JobRepository;
 import org.mybatch.repository.impl.MemoryRepository;
 import org.mybatch.runtime.runner.JobExecutionRunner;
@@ -96,6 +97,8 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public Long start(String job, Properties jobParameters) throws JobStartException {
         Job jobDefined = JobXmlLoader.loadJobXml(job, Job.class);
+        JobMerger jobMerger = new JobMerger(jobDefined);  //find any possible parents and merge them in
+        jobMerger.merge();
 
         repository.addJob(jobDefined);
         ApplicationMetaData appData;
