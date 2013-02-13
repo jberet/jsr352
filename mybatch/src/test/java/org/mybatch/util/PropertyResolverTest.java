@@ -22,13 +22,19 @@
 
 package org.mybatch.util;
 
-import java.text.MessageFormat;
+import java.util.List;
 import java.util.Properties;
 
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import static org.mybatch.util.PropertyResolver.*;
+import org.mybatch.job.Property;
+
+import static org.mybatch.util.PropertyResolver.jobParametersToken;
+import static org.mybatch.util.PropertyResolver.jobPropertiesToken;
+import static org.mybatch.util.PropertyResolver.partitionPlanToken;
+import static org.mybatch.util.PropertyResolver.savedToken;
+import static org.mybatch.util.PropertyResolver.systemPropertiesToken;
 
 public class PropertyResolverTest {
     private static final String jobParam1 = "infile.path";
@@ -85,9 +91,21 @@ public class PropertyResolverTest {
         resolver.setJobParameters(jobParams);
         resolver.setSavedProperties(saved);
         resolver.setPartitionPlanProperties(partitionPlan);
-        resolver.addJobProperties(jobProps1);
-        resolver.addJobProperties(jobProps2);
-        resolver.addJobProperties(jobProps3);
+        resolver.pushJobProperties(fromJavaUtilProperties(jobProps1));
+        resolver.pushJobProperties(fromJavaUtilProperties(jobProps2));
+        resolver.pushJobProperties(fromJavaUtilProperties(jobProps3));
+    }
+
+    private org.mybatch.job.Properties fromJavaUtilProperties(Properties props) {
+        org.mybatch.job.Properties result = new org.mybatch.job.Properties();
+        List<Property> propertyList = result.getProperty();
+        for (String s : props.stringPropertyNames()) {
+            Property toAdd = new Property();
+            toAdd.setName(s);
+            toAdd.setValue(props.getProperty(s));
+            propertyList.add(toAdd);
+        }
+        return result;
     }
 
     private void run(String[] raws, String[] expected) {

@@ -110,7 +110,7 @@ public class JobOperatorImpl implements JobOperator {
         }
         JobInstanceImpl instance = new JobInstanceImpl(jobDefined, appData, artifactFactory);
         JobExecutionImpl jobExecution = new JobExecutionImpl(instance);
-        JobContextImpl jobContext = new JobContextImpl(jobDefined, instance.getInstanceId(), jobExecution.getExecutionId());
+        JobContextImpl jobContext = new JobContextImpl(jobDefined, instance.getInstanceId(), jobExecution.getExecutionId(), jobParameters);
         jobExecution.setJobContext(jobContext);
 
         JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(instance, jobExecution, jobContext);

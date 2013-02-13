@@ -22,18 +22,26 @@
 
 package org.mybatch.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Properties;
+
+import org.mybatch.job.Batchlet;
+import org.mybatch.job.Chunk;
+import org.mybatch.job.Job;
+import org.mybatch.job.Listener;
+import org.mybatch.job.Listeners;
+import org.mybatch.job.Property;
+import org.mybatch.job.Step;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public final class PropertyResolver {
-    protected static final String jobParametersToken = "jobParameters";
-    protected static final String jobPropertiesToken = "jobProperties";
+    protected static final String jobParametersToken    = "jobParameters";
+    protected static final String jobPropertiesToken    = "jobProperties";
     protected static final String systemPropertiesToken = "systemProperties";
-    protected static final String partitionPlanToken = "partitionPlan";
-    protected static final String savedToken = "saved";
+    protected static final String partitionPlanToken    = "partitionPlan";
+    protected static final String savedToken            = "saved";
 
     private static final String prefix = "#{";
     private static final String defaultValuePrefix = "?:";
@@ -41,11 +49,11 @@ public final class PropertyResolver {
     private static final int shortestTemplateLen = "#{saved['x']}".length();
     private static final int prefixLen = prefix.length();
 
-    private Properties systemProperties;
+    private Properties systemProperties = System.getProperties();
     private Properties jobParameters;
     private Properties savedProperties;
     private Properties partitionPlanProperties;
-    private List<Properties> jobPropertiesList = new ArrayList<Properties>();
+    private Deque<org.mybatch.job.Properties> jobPropertiesStack = new ArrayDeque<org.mybatch.job.Properties>();
 
     public void setSystemProperties(Properties systemProperties) {
         this.systemProperties = systemProperties;
@@ -63,11 +71,52 @@ public final class PropertyResolver {
         this.partitionPlanProperties = partitionPlanProperties;
     }
 
-    public void addJobProperties(Properties jobProps) {
-        this.jobPropertiesList.add(jobProps);
+    public void pushJobProperties(org.mybatch.job.Properties jobProps) {
+        this.jobPropertiesStack.push(jobProps);
+    }
+
+    /**
+     * Resolves property expressions for job-level elements contained in the job.
+     * The job's direct job properties, job parameters and system properties should already have been set up properly,
+     * e.g., when this instance was instantiated.
+     *
+     * @param job the job element whose properties need to be resolved
+     */
+    public void resolve(Job job) {
+        //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
+        resolve(job.getProperties(), false);
+        resolve(job.getListeners());
+    }
+
+    /**
+     * Resolves property expressions for step-level elements contained in the step.
+     * The step's direct job properties, job parameters and system properties should already have been set up properly,
+     * e.g., when this instance was instantiated.
+     *
+     * @param step the step element whose properties need to be resolved
+     */
+    public void resolve(Step step) {
+        //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
+        resolve(step.getProperties(), false);
+        resolve(step.getListeners());
+        Batchlet batchlet = step.getBatchlet();
+
+        if (batchlet != null) {
+            resolve(batchlet.getProperties(), true);
+            return;
+        }
+
+        Chunk chunk = step.getChunk();
+        if (chunk != null) {
+            //chunk has no direct properties.  Its reader, writer, processor and check-point-algorithm each has its own props
+            //TODO add after schema update
+        }
     }
 
     public String resolve(String rawVale) {
+        if(rawVale.indexOf(prefix) < 0) {
+            return rawVale;
+        }
         StringBuilder sb = new StringBuilder(rawVale);
         resolve(sb, 0, true);
         return sb.toString();
@@ -134,6 +183,37 @@ public final class PropertyResolver {
         resolve(sb, endCurrentPass + 1, true);
     }
 
+    private void resolve(org.mybatch.job.Properties props, boolean pushAndPopProps) {
+        if (props == null) {
+            return;
+        }
+        if (pushAndPopProps) {
+            jobPropertiesStack.push(props);
+        }
+        try {
+            for (Property p : props.getProperty()) {
+                String rawVal = p.getValue();
+                String newVal = resolve(rawVal);
+                if (rawVal != newVal && !rawVal.equals(newVal)) {
+                    p.setValue(newVal);
+                }
+            }
+        } finally {
+            if (pushAndPopProps) {
+                jobPropertiesStack.pop();
+            }
+        }
+    }
+
+    private void resolve(Listeners listeners) {
+        if (listeners == null) {
+            return;
+        }
+        for (Listener l : listeners.getListener()) {
+            resolve(l.getProperties(), true);
+        }
+    }
+
     private int replaceAndGetEndPosition(StringBuilder sb, int startExpression, int endExpression, String replacingVal) {
         sb.replace(startExpression, endExpression + 1, replacingVal);
         return startExpression - 1 + replacingVal.length();
@@ -144,8 +224,8 @@ public final class PropertyResolver {
         if (propCategory.equals(jobParametersToken)) {
             val = jobParameters.getProperty(variableName);
         } else if (propCategory.equals(jobPropertiesToken)) {
-            for (Properties p : jobPropertiesList) {
-                val = p.getProperty(variableName);
+            for (org.mybatch.job.Properties p : jobPropertiesStack) {
+                val = BatchUtil.getBatchProperty(p, variableName);
                 if (val != null) {
                     break;
                 }

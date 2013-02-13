@@ -29,6 +29,9 @@
     <step id="step1-parent" abstract="true">
         <properties>
             <property name="step-prop" value="step-prop"></property>
+            <property name="step-prop-2" value="#{jobProperties['step-prop']}"></property>
+            <property name="step-prop-3" value="#{jobProperties['job-prop']}"></property>
+            <property name="unresolved-property-ref" value="#{jobProperties['xxxxxxxxxxxx']}"></property>
         </properties>
     </step>
 

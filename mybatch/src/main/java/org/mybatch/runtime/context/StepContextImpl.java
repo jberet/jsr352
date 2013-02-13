@@ -33,6 +33,7 @@ import org.mybatch.job.Step;
 import org.mybatch.runtime.metric.MetricName;
 import org.mybatch.runtime.metric.StepMetrics;
 import org.mybatch.util.BatchUtil;
+import org.mybatch.util.PropertyResolver;
 
 public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepContext<T, P> {
     private Step step;
@@ -41,7 +42,7 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
     private Exception exception;
     private StepMetrics stepMetrics = new StepMetrics();
 
-    public StepContextImpl(Step step, long stepExecutionId1) {
+    private StepContextImpl(Step step, long stepExecutionId1) {
         super(step.getId());
         this.step = step;
         this.stepExecutionId = stepExecutionId1;
@@ -50,6 +51,7 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
     public StepContextImpl(Step step, long stepExecutionId1, JobContextImpl<T> jobContext1) {
         this(step, stepExecutionId1);
         this.jobContext = jobContext1;
+        resolveProperties();
     }
 
     @Override
@@ -98,5 +100,22 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         //TODO
+    }
+
+    private void resolveProperties() {
+        PropertyResolver resolver = new PropertyResolver();
+        resolver.setJobParameters(jobContext.getJobParameters());
+
+        org.mybatch.job.Properties props = jobContext.getJob().getProperties();
+        if (props != null) {
+            resolver.pushJobProperties(props);
+        }
+
+        props = step.getProperties();
+        if (props != null) {
+            resolver.pushJobProperties(props);
+        }
+
+        resolver.resolve(step);
     }
 }
