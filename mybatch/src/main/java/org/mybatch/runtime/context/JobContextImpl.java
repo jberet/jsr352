@@ -25,20 +25,19 @@ package org.mybatch.runtime.context;
 import java.util.Properties;
 import javax.batch.runtime.context.JobContext;
 
+import org.mybatch.job.Job;
+import org.mybatch.util.BatchUtil;
+
 public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext<T> {
+    private Job job;
     private long instanceId;
     private long executionId;
-    private Properties properties;
 
-    public JobContextImpl(String id, long instanceId, long executionId) {
-        super(id);
+    public JobContextImpl(Job job, long instanceId, long executionId) {
+        super(job.getId());
+        this.job = job;
         this.instanceId = instanceId;
         this.executionId = executionId;
-    }
-
-    public JobContextImpl(String id, long instanceId, long executionId, Properties p) {
-        this(id, instanceId, executionId);
-        this.properties = p;
     }
 
     @Override
@@ -53,14 +52,10 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
 
     @Override
     public Properties getProperties() {
-        return properties;
+        return BatchUtil.toJavaUtilProperties(job.getProperties());
     }
 
-    public void setProperties(Properties p) {
-        this.properties = p;
-    }
-
-    public void addProperty(String key, String value) {
-        properties.setProperty(key, value);
+    public Job getJob() {
+        return job;
     }
 }

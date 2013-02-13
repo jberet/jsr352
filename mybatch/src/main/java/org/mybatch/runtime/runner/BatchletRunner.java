@@ -70,6 +70,9 @@ public class BatchletRunner implements Callable<Void> {
                 stepContext.setBatchStatus(JobOperatorImpl.BatchStatus.FAILED.name());
             }
             return null;
+        } catch (Throwable th) {
+            LOGGER.failToRunBatchlet(th, batchlet);
+            return null;
         } finally {
             thread.setContextClassLoader(originalCL);
         }

@@ -29,25 +29,27 @@ import java.util.Properties;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.context.StepContext;
 
+import org.mybatch.job.Step;
 import org.mybatch.runtime.metric.MetricName;
 import org.mybatch.runtime.metric.StepMetrics;
+import org.mybatch.util.BatchUtil;
 
 public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepContext<T, P> {
+    private Step step;
     private long stepExecutionId;
-    private Properties properties;
     private P persistentUserData;
     private Exception exception;
     private StepMetrics stepMetrics = new StepMetrics();
 
-    public StepContextImpl(String id, long stepExecutionId1) {
-        super(id);
+    public StepContextImpl(Step step, long stepExecutionId1) {
+        super(step.getId());
+        this.step = step;
         this.stepExecutionId = stepExecutionId1;
     }
 
-    public StepContextImpl(String id, long stepExecutionId1, JobContextImpl<T> jobContext1, Properties p) {
-        this(id, stepExecutionId1);
+    public StepContextImpl(Step step, long stepExecutionId1, JobContextImpl<T> jobContext1) {
+        this(step, stepExecutionId1);
         this.jobContext = jobContext1;
-        this.properties = p;
     }
 
     @Override
@@ -57,15 +59,7 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
 
     @Override
     public Properties getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Properties p) {
-        this.properties = p;
-    }
-
-    public void addProperty(String key, String value) {
-        properties.setProperty(key, value);
+        return BatchUtil.toJavaUtilProperties(step.getProperties());
     }
 
     @Override

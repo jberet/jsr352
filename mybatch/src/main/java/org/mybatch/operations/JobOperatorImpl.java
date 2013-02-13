@@ -47,13 +47,14 @@ import org.mybatch.creation.SimpleArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.metadata.JobMerger;
+import org.mybatch.metadata.JobXmlLoader;
 import org.mybatch.repository.JobRepository;
 import org.mybatch.repository.impl.MemoryRepository;
-import org.mybatch.runtime.runner.JobExecutionRunner;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.JobInstanceImpl;
+import org.mybatch.runtime.context.JobContextImpl;
+import org.mybatch.runtime.runner.JobExecutionRunner;
 import org.mybatch.util.ConcurrencyService;
-import org.mybatch.metadata.JobXmlLoader;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
@@ -109,7 +110,10 @@ public class JobOperatorImpl implements JobOperator {
         }
         JobInstanceImpl instance = new JobInstanceImpl(jobDefined, appData, artifactFactory);
         JobExecutionImpl jobExecution = new JobExecutionImpl(instance);
-        JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobDefined, instance, jobExecution);
+        JobContextImpl jobContext = new JobContextImpl(jobDefined, instance.getInstanceId(), jobExecution.getExecutionId());
+        jobExecution.setJobContext(jobContext);
+
+        JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(instance, jobExecution, jobContext);
         Future<?> result = ConcurrencyService.submit(jobExecutionRunner);
         Long jobExecutionId = jobExecution.getExecutionId();
         jobExecutionResults.put(jobExecutionId, result);

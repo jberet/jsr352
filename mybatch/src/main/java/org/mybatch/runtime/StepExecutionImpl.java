@@ -30,9 +30,13 @@ import org.mybatch.job.Step;
 import org.mybatch.runtime.context.StepContextImpl;
 
 public class StepExecutionImpl<P> implements StepExecution<P> {
+    private long id;
+
     private Step step;
 
     private StepContextImpl stepContext;
+
+    private JobExecutionImpl jobExecution;
 
     private P persistentData;
 
@@ -44,14 +48,19 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
         this.stepContext = stepContext;
     }
 
-    public StepExecutionImpl(Step step) {
+    public StepExecutionImpl(Step step, JobExecutionImpl jobExecution) {
+        //TODO initialize id
         this.step = step;
+        this.jobExecution = jobExecution;
+    }
+
+    public long getId() {
+        return this.id;
     }
 
     @Override
     public long getJobExecutionId() {
-//        return stepContext.getJobContext().getExecutionId();  //stepContext has not been initialized yet, NPE
-        return 0;
+        return jobExecution.getExecutionId();
     }
 
     @Override

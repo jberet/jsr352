@@ -19,33 +19,32 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.runtime.runner;
 
 import java.io.Serializable;
 
+import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
+import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.JobInstanceImpl;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.JobContextImpl;
-import org.mybatch.util.BatchUtil;
+import org.mybatch.runtime.context.StepContextImpl;
 
 public class JobExecutionRunner implements Runnable {
     private Job job;
     private JobInstanceImpl jobInstance;
     private JobExecutionImpl jobExecution;
+    private JobContextImpl jobContext;
 
-    public JobExecutionRunner(Job job, JobInstanceImpl jobInstance, JobExecutionImpl jobExecution) {
-        this.job = job;
+    public JobExecutionRunner(JobInstanceImpl jobInstance, JobExecutionImpl jobExecution, JobContextImpl jobContext) {
+        this.job = jobContext.getJob();
+        this.jobContext = jobContext;
         this.jobInstance = jobInstance;
         this.jobExecution = jobExecution;
-
-        JobContextImpl jobContext = new JobContextImpl(job.getId(), jobInstance.getInstanceId(),
-                jobExecution.getExecutionId(), BatchUtil.getPropertiesFromJobDefinition(job));
-
-        jobExecution.setJobContext(jobContext);
     }
 
     public JobInstanceImpl getJobInstance() {
@@ -58,14 +57,34 @@ public class JobExecutionRunner implements Runnable {
 
     @Override
     public void run() {
-        // is the first element the beginning of the job?
-        // need to collect into an ordered collection first.
-        for(Serializable e : job.getDecisionOrFlowOrSplit()) {
-            if(e instanceof Step) {
+        // the head of the job is the first non-abstract element
+        for (Serializable e : job.getDecisionOrFlowOrSplit()) {
+            if (e instanceof Step) {
                 Step step = (Step) e;
-                StepExecutionImpl stepExecution = new StepExecutionImpl(step);
-                StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(step, stepExecution, this);
+                if (Boolean.parseBoolean(step.getAbstract())) {
+                    continue;
+                }
+                StepExecutionImpl stepExecution = new StepExecutionImpl(step, jobExecution);
+                StepContextImpl stepContext = new StepContextImpl(step, stepExecution.getId(), jobContext);
+                stepExecution.setStepContext(stepContext);
+
+                StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(step, stepExecution, stepContext, this);
                 stepExecutionRunner.run();
+                break;
+            } else if (e instanceof Flow) {
+                Flow flow = (Flow) e;
+                if (Boolean.parseBoolean(flow.getAbstract())) {
+                    continue;
+                }
+                //run the flow
+                break;
+            } else if (e instanceof Split) {
+                Split split = (Split) e;
+                if (Boolean.parseBoolean(split.getAbstract())) {
+                    continue;
+                }
+                //run the split
+                break;
             }
         }
     }

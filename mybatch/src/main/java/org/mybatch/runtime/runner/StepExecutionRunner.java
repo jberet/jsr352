@@ -28,7 +28,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
-import javax.batch.runtime.StepExecution;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
@@ -36,7 +35,6 @@ import org.mybatch.job.Step;
 import org.mybatch.operations.JobOperatorImpl;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.StepContextImpl;
-import org.mybatch.util.BatchUtil;
 import org.mybatch.util.ConcurrencyService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
@@ -55,15 +53,11 @@ public class StepExecutionRunner implements Runnable {
             //need to consider cancel @Stop
     );
 
-    public StepExecutionRunner(Step step, StepExecutionImpl stepExecution, JobExecutionRunner jobExecutionRunner) {
+    public StepExecutionRunner(Step step, StepExecutionImpl stepExecution, StepContextImpl stepContext, JobExecutionRunner jobExecutionRunner) {
         this.step = step;
         this.stepExecution = stepExecution;
+        this.stepContext = stepContext;
         this.jobExecutionRunner = jobExecutionRunner;
-
-        this.stepContext = new StepContextImpl(step.getId(), stepExecution.getJobExecutionId(),
-                jobExecutionRunner.getJobExecution().getJobContext(),
-                BatchUtil.getPropertiesFromStepDefinition(step));
-        stepExecution.setStepContext(stepContext);
     }
 
     public StepContextImpl getStepContext() {
@@ -78,6 +72,12 @@ public class StepExecutionRunner implements Runnable {
     public void run() {
         Chunk chunk = step.getChunk();
         Batchlet batchlet = step.getBatchlet();
+        if (chunk == null && batchlet == null) {
+            stepContext.setBatchStatus(JobOperatorImpl.BatchStatus.ABANDONED.name());
+            LOGGER.stepContainsNoChunkOrBatchlet(step.getId());
+            return;
+        }
+
         if (chunk != null && batchlet != null) {
             stepContext.setBatchStatus(JobOperatorImpl.BatchStatus.ABANDONED.name());
             LOGGER.cannotContainBothChunkAndBatchlet(step.getId());
