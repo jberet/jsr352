@@ -22,10 +22,8 @@
  
 package org.mybatch.runtime.context;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.batch.runtime.context.BatchContext;
-import javax.batch.runtime.context.FlowContext;
 
 public abstract class BatchContextImpl<T> implements BatchContext<T> {
     protected String id;
@@ -33,8 +31,8 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
     protected String batchStatus;
     protected String exitStatus = batchStatus;
 
-    //not initialized here.  It is initialized in SplitContextImpl and FlowContextImpl
-    protected List<FlowContext<T>> batchContexts;
+    //not initialized here
+    protected List<BatchContext<T>> batchContexts;
 
     protected JobContextImpl<T> jobContext;
 
@@ -58,13 +56,8 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
     }
 
     @Override
-    public List<FlowContext<T>> getBatchContexts() {
+    public List<BatchContext<T>> getBatchContexts() {
         return batchContexts;
-    }
-
-    @Override
-    public String getBatchStatus() {
-        return batchStatus;
     }
 
     public void setBatchStatus(String batchStatus) {

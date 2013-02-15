@@ -32,8 +32,8 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mybatch.job.Job;
-import org.mybatch.repository.impl.MemoryRepository;
 import org.mybatch.metadata.JobXmlLoader;
+import org.mybatch.repository.impl.MemoryRepository;
 
 public class MemoryRepositoryTest {
     final private static MemoryRepository repo = new MemoryRepository();

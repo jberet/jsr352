@@ -25,6 +25,7 @@ package javax.batch.runtime.context;
  * @see javax.batch.annotation.context.JobContext
  */
 import java.util.Properties;
+import javax.batch.operations.JobOperator.BatchStatus;
 
 public interface JobContext<T> extends BatchContext<T> {
 	/**
@@ -48,6 +49,13 @@ public interface JobContext<T> extends BatchContext<T> {
 	 * @return job level properties
 	 */
 	public Properties getProperties();
+	
+	/**
+	* The getBatchStatus method simply returns the batch status value
+	* set by the batch runtime into the job context. 
+	* @return batch status string
+	*/
+	public BatchStatus getBatchStatus();
 
 	/**
 	 * The getExitStatus method simply returns the exit status value stored into

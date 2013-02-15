@@ -16,14 +16,26 @@
  */
 package javax.batch.operations.exception;
 
-public class JobRestartException extends BatchOperationsRuntimeException {
+public class JobRestartException extends Exception {
 	/**
 	 * JobRestartException is thrown when an error occurs during the JobOperator
 	 * restart operation.
 	 */
+	public JobRestartException() {
+	}
+
+	public JobRestartException(String message) {
+		super(message);
+	}
+
+	public JobRestartException(Throwable cause) {
+		super(cause);
+	}
+
+	public JobRestartException(String message, Throwable cause) {
+		super(message, cause);
+	}
+	
 	private static final long serialVersionUID = 1L;
 
-	public JobRestartException(final Throwable th, final String localizedMessage) {
-		super(th, localizedMessage);
-	}
 }

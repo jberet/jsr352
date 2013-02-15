@@ -27,6 +27,10 @@
      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
     <step id="exception-class-filter">
         <chunk>
+            <reader ref="R1"></reader>
+            <processor ref="P1"></processor>
+            <writer ref="W1"></writer>
+
             <skippable-exception-classes>
             </skippable-exception-classes>
             <retryable-exception-classes>
@@ -39,6 +43,10 @@
     </step>
     <step id="exception-class-filter2">
         <chunk>
+            <reader ref="R1"></reader>
+            <processor ref="P1"></processor>
+            <writer ref="W1"></writer>
+
             <skippable-exception-classes>
                 <include class=""></include>
                 <exclude class="java.lang.IllegalStateException"></exclude>

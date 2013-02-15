@@ -25,9 +25,6 @@ package org.mybatch.metadata;
 import org.mybatch.job.CheckpointAlgorithm;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.ExceptionClassFilter;
-import org.mybatch.job.Listeners;
-import org.mybatch.job.Properties;
-import org.mybatch.job.Step;
 
 public class ChunkMerger {
     private Chunk parent;
@@ -54,7 +51,7 @@ public class ChunkMerger {
             child.setRetryLimit(parent.getRetryLimit());
         }
 
-        merge(parent.getProperties(), child.getProperties());
+        //no properties directly under chunk
         //TODO wait for xsd update
         //merge reader, writer, processor, listeners
 //        merge(parent.getListeners(), child.getListeners());
@@ -105,18 +102,6 @@ public class ChunkMerger {
         }
         //<include> and <exclude> sub-elements from parent and child are not merged, kept as is
     }
-
-    private void merge(Properties parentProps, Properties childProps) {
-        if (parentProps == null) {
-            return;
-        }
-        if (childProps == null) {
-            child.setProperties(parentProps);
-            return;
-        }
-        JobMerger.mergeProperties(parentProps, childProps);
-    }
-
 
 //    private void merge(Listeners parentListeners, Listeners childListeners) {
 //        if (parentListeners == null) {

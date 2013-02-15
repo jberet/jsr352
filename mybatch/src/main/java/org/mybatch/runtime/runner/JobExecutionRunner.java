@@ -26,6 +26,8 @@ import java.io.Serializable;
 
 import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
+import org.mybatch.job.Listener;
+import org.mybatch.job.Listeners;
 import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.JobExecutionImpl;
@@ -34,7 +36,7 @@ import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.JobContextImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 
-public class JobExecutionRunner implements Runnable {
+public class JobExecutionRunner extends AbstractRunner implements Runnable {
     private Job job;
     private JobInstanceImpl jobInstance;
     private JobExecutionImpl jobExecution;
@@ -57,6 +59,15 @@ public class JobExecutionRunner implements Runnable {
 
     @Override
     public void run() {
+        // run job listeners beforeJob()
+        Listeners listeners = job.getListeners();
+        if (listeners != null) {
+            for (Listener listener : listeners.getListener()) {
+                String ref = listener.getRef();
+
+            }
+        }
+
         // the head of the job is the first non-abstract element
         for (Serializable e : job.getDecisionOrFlowOrSplit()) {
             if (e instanceof Step) {
@@ -73,17 +84,11 @@ public class JobExecutionRunner implements Runnable {
                 break;
             } else if (e instanceof Flow) {
                 Flow flow = (Flow) e;
-                if (Boolean.parseBoolean(flow.getAbstract())) {
-                    continue;
-                }
-                //run the flow
+                //A flow cannot be abstract so run the flow
                 break;
             } else if (e instanceof Split) {
                 Split split = (Split) e;
-                if (Boolean.parseBoolean(split.getAbstract())) {
-                    continue;
-                }
-                //run the split
+                //A split cannot be abstract so run the split
                 break;
             }
         }

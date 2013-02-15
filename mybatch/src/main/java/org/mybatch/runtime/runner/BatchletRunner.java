@@ -35,7 +35,7 @@ import org.mybatch.util.BatchUtil;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-public class BatchletRunner implements Callable<Void> {
+public class BatchletRunner extends AbstractRunner implements Callable<Void> {
     private Batchlet batchlet;
     private StepExecutionRunner stepExecutionRunner;
     private StepContextImpl stepContext;
@@ -51,7 +51,8 @@ public class BatchletRunner implements Callable<Void> {
         Thread thread = Thread.currentThread();
         ClassLoader originalCL = thread.getContextClassLoader();
         try {
-            thread.setContextClassLoader(BatchUtil.getBatchApplicationClassLoader());
+            ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
+            thread.setContextClassLoader(classLoader);
             String ref = batchlet.getRef();
             ApplicationMetaData appData = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getApplicationMetaData();
             Map<ArtifactFactory.DataKey, Object> m = new HashMap<ArtifactFactory.DataKey, Object>();
@@ -63,8 +64,11 @@ public class BatchletRunner implements Callable<Void> {
             }
 
             try {
-                Object artifactObj = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, m);
-                StepExecutionRunner.invokeFunctionMethods(artifactObj, StepExecutionRunner.methodAnnotations);
+                javax.batch.api.Batchlet batchletObj =
+                        (javax.batch.api.Batchlet) stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, classLoader, m);
+                String exitStatus = batchletObj.process();
+                stepContext.setExitStatus(exitStatus);
+
             } catch (Throwable e) {
                 LOGGER.failToRunBatchlet(e, batchlet);
                 stepContext.setBatchStatus(JobOperatorImpl.BatchStatus.FAILED.name());

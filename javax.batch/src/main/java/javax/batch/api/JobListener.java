@@ -21,19 +21,19 @@ package javax.batch.api;
  * 
  */
 public interface JobListener {
-	/**
-	 * The beforeJob method receives control before the job execution begins.
-	 * 
-	 * @throws Exception
-	 *             throw if an error occurs.
-	 */
-	public void beforeJob() throws Exception;
+    /**
+     * The beforeJob method receives control before the job execution begins.
+     * 
+     * @throws Exception
+     *             throw if an error occurs.
+     */
+    public void beforeJob() throws Exception;
 
-	/**
-	 * The afterJob method receives control after the job execution ends.
-	 * 
-	 * @throws Exception
-	 *             throw if an error occurs.
-	 */
-	public void afterJob() throws Exception;
+    /**
+     * The afterJob method receives control after the job execution ends.
+     * 
+     * @throws Exception
+     *             throw if an error occurs.
+     */
+    public void afterJob() throws Exception;
 }

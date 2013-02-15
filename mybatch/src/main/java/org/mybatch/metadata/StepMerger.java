@@ -24,6 +24,8 @@ package org.mybatch.metadata;
 
 import java.util.List;
 
+import javax.batch.operations.exception.JobStartException;
+
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Properties;
 import org.mybatch.job.Step;
@@ -33,7 +35,7 @@ public class StepMerger {
     private Step child;
     private List<Step> siblings;
 
-    public StepMerger(Step child, List<Step> siblings) {
+    public StepMerger(Step child, List<Step> siblings) throws JobStartException {
         this.child = child;
         String parentName = child.getParent();
         if (parentName != null) {
@@ -61,7 +63,7 @@ public class StepMerger {
         this(parent, child, null);
     }
 
-    public void merge() {
+    public void merge() throws JobStartException {
         if (parent != null) {
             //check if parent has its own parent, which may be in the same or different job xml document
             String parentParent = parent.getParent();

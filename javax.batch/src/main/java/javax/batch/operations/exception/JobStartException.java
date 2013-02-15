@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 International Business Machines Corp.
+ * Copyright 2013 International Business Machines Corp.
  * 
  * See the NOTICE file distributed with this work for additional information
  * regarding copyright ownership. Licensed under the Apache License, 
@@ -16,16 +16,28 @@
  */
 package javax.batch.operations.exception;
 
-public class JobStartException extends BatchOperationsRuntimeException {
+public class JobStartException extends Exception {
 
 	/**
 	 * JobStartException is thrown when an error occurs during the JobOperator
 	 * start operation.
 	 */
-	private static final long serialVersionUID = 1L;
-
-	public JobStartException(final Throwable th, final String localizedMessage) {
-		super(th, localizedMessage);
+	public JobStartException() {
 	}
+
+	public JobStartException(String message) {
+		super(message);
+	}
+
+	public JobStartException(Throwable cause) {
+		super(cause);
+	}
+
+	public JobStartException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+
+	private static final long serialVersionUID = 1L;
 
 }

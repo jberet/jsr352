@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.batch.operations.exception.JobStartException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -35,7 +36,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.mybatch.job.Job;
-import org.mybatch.metadata.JaxbObjectFactory;
 import org.mybatch.util.BatchUtil;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
@@ -50,7 +50,7 @@ public class JobXmlLoader {
      * @param <T> Job or Step
      * @return the job or step root element
      */
-    public static <T> T loadJobXml(String jobName, Class<T> rootType) {
+    public static <T> T loadJobXml(String jobName, Class<T> rootType) throws JobStartException {
         InputStream is;
         T jobOrStep;
         try {

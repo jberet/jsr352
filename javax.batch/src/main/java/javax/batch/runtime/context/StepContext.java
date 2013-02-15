@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package javax.batch.runtime.context;
 
 /**
- * 
- * StepContext is the class field type associated with the @StepContext 
- * annotation. A StepContext provides information about the current step 
+ *
+ * StepContext is the class field type associated with the @StepContext
+ * annotation. A StepContext provides information about the current step
  * of a job execution.
  *
  * @see javax.batch.annotation.context.StepContext
@@ -28,10 +29,19 @@ import java.io.Externalizable;
 import java.util.Properties;
 
 import javax.batch.runtime.Metric;
+import javax.batch.operations.JobOperator.BatchStatus;
 
-public interface StepContext<T, P> extends BatchContext<T>, Externalizable {
+public interface StepContext<T, P extends Externalizable> extends BatchContext<T> {
 	/**
-	 * The getStepExecutionId method returns the current step's execution id.
+	 * The getId method returns the current step's id. * This is the value from
+	 * the id attribute of the Job * XML <step> element.
+	 * 
+	 * @return step id
+	 */
+	public String getId();
+
+	/**
+	 * The getStepExecutionId method returns the current step's * execution id.
 	 * 
 	 * @return step execution id
 	 */
@@ -69,6 +79,14 @@ public interface StepContext<T, P> extends BatchContext<T>, Externalizable {
 	public void setPersistentUserData(P data);
 
 	/**
+	* The getBatchStatus method returns the current batch status of the 
+	* current step. This value is set by the batch runtime and changes as 
+	* the batch status changes.
+	* @return batch status string
+	*/
+	public BatchStatus getBatchStatus();
+
+	/**
 	 * The getExitStatus method simply returns the exit status value stored into
 	 * the step context through the setExitStatus method or null.
 	 * 
@@ -99,10 +117,9 @@ public interface StepContext<T, P> extends BatchContext<T>, Externalizable {
 	 * The getMetrics method returns an array of step level metrics. These are
 	 * things like commits, skips, etc.
 	 * 
-	 * @see javax.batch.runtime.javax.batch.runtime.metric.Metric for definition of standard
+	 * @see javax.batch.runtime.metric.Metric for definition of standard
 	 *      metrics.
 	 * @return metrics array
 	 */
 	public Metric[] getMetrics();
-
 }

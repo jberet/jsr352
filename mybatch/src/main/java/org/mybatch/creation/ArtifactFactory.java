@@ -45,10 +45,12 @@ public interface ArtifactFactory {
      * corresponding to a ref value from a Job XML.
      *
      * @param ref value from Job XML
+     * @param classLoader the class loader for loading the artifact class
+     * @param data a map of key-value pair for creating the artifact
      * @return instance corresponding to ref value
      * @throws Exception if instance cannot be created.
      */
-    public Object create(String ref, Map<?, ?> data) throws Exception;
+    public Object create(String ref, ClassLoader classLoader, Map<?, ?> data) throws Exception;
 
     /**
      * The destroy method destroys an instance created

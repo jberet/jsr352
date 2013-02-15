@@ -19,22 +19,20 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.test;
 
 import javax.batch.annotation.BatchProperty;
-import javax.batch.annotation.Batchlet;
-import javax.batch.annotation.BeginStep;
-import javax.batch.annotation.EndStep;
-import javax.batch.annotation.Process;
-import javax.batch.annotation.Stop;
+import javax.batch.api.AbstractBatchlet;
+import javax.batch.api.Batchlet;
 import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
+import javax.inject.Named;
 
-@Batchlet("Batchlet1")
-public class Batchlet1 {
-    @BatchProperty(name="Batchlet1")
+@Named("Batchlet1")
+public class Batchlet1 extends AbstractBatchlet implements Batchlet {
+    @BatchProperty(name = "Batchlet1")
     private String prop1;
 
     @BatchProperty  //default name
@@ -52,12 +50,7 @@ public class Batchlet1 {
     @Inject
     private StepContext stepContext;
 
-    @BeginStep
-    public void begin() throws Exception {
-        System.out.printf("in @BeginStep, %s%n", Thread.currentThread());
-    }
-
-    @Process
+    @Override
     public String process() throws Exception {
         System.out.printf("in @Process, %s%n", Thread.currentThread());
         System.out.printf("Injected batchlet property: %s => %s%n", "Batchlet1", prop1);
@@ -71,14 +64,8 @@ public class Batchlet1 {
         return "Processed";
     }
 
-    @Stop
+    @Override
     public void stop() throws Exception {
         System.out.printf("in @Stop, %s%n", Thread.currentThread());
     }
-
-    @EndStep
-    public void end() throws Exception {
-        System.out.printf("in @EndStep, %s%n", Thread.currentThread());
-    }
-
 }

@@ -18,6 +18,8 @@ package javax.batch.api;
 
 import java.io.Externalizable;
 
+import javax.batch.operations.JobOperator.BatchStatus;
+
 /**
  * PartitionAnalyzer receives control to process data and final results from
  * each partitions. If a PartitionCollector is configured on the step, the
@@ -51,6 +53,6 @@ public interface PartitionAnalyzer {
 	 * @throws Exception
 	 *             is thrown if an error occurs.
 	 */
-	public void analyzeStatus(String batchStatus, String exitStatus)
+	public void analyzeStatus(BatchStatus batchStatus, String exitStatus)
 			throws Exception;
 }

@@ -26,6 +26,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.batch.operations.exception.JobStartException;
+
 import org.mybatch.job.Job;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
@@ -43,7 +45,7 @@ public class JobMerger {
      */
     private boolean skipEnclosingSteps;
 
-    public JobMerger(Job child) {
+    public JobMerger(Job child) throws JobStartException {
         String parentName = child.getParent();
         if (parentName != null) {
             this.parent = JobXmlLoader.loadJobXml(parentName, Job.class);
@@ -51,7 +53,7 @@ public class JobMerger {
         this.child = child;
     }
 
-    private JobMerger(String parentName, Job child, boolean skipSteps) {
+    private JobMerger(String parentName, Job child, boolean skipSteps) throws JobStartException {
         this(JobXmlLoader.loadJobXml(parentName, Job.class), child);
         this.skipEnclosingSteps = skipSteps;
     }
@@ -61,7 +63,7 @@ public class JobMerger {
         this.child = child;
     }
 
-    public void merge() {
+    public void merge() throws JobStartException {
         if (parent != null) {
             //check if parent has its own parent
             String parentParent = parent.getParent();

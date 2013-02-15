@@ -23,6 +23,7 @@
 package org.mybatch.runtime.context;
 
 import java.util.Properties;
+import javax.batch.operations.JobOperator;
 import javax.batch.runtime.context.JobContext;
 
 import org.mybatch.job.Job;
@@ -62,6 +63,11 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
     @Override
     public Properties getProperties() {
         return BatchUtil.toJavaUtilProperties(job.getProperties());
+    }
+
+    @Override
+    public JobOperator.BatchStatus getBatchStatus() {
+        return null;
     }
 
     public Job getJob() {

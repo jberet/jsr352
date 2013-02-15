@@ -26,7 +26,6 @@ import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
-
 import javax.batch.annotation.BatchProperty;
 import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
@@ -43,12 +42,13 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
 
     }
 
-    public Object create(String ref, Map<?, ?> data) throws Exception {
+    public Object create(String ref, ClassLoader classLoader, Map<?, ?> data) throws Exception {
         ApplicationMetaData appData = (ApplicationMetaData) data.get(DataKey.APPLICATION_META_DATA);
-        Class<?> cls = appData.getClassForRef(ref);
-        if (cls == null) {
+        String className = appData.getClassNameForRef(ref);
+        if (className == null) {
             throw LOGGER.failToCreateArtifact(ref);
         }
+        Class<?> cls = classLoader.loadClass(className);
         Object obj = cls.newInstance();
         doInjection(obj, cls, data);
         return obj;
@@ -83,6 +83,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                         if (f.getType() == JobContext.class) {
                             fieldVal = data.get(DataKey.JOB_CONTEXT);
                         } else if (f.getType() == StepContext.class) {
+                            //fieldVal may be null when StepContext was not stored in data map, as in job listeners
                             fieldVal = data.get(DataKey.STEP_CONTEXT);
                         }
                         doInjection(obj, f, fieldVal);

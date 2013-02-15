@@ -21,42 +21,33 @@ package javax.batch.api;
  * 
  */
 public interface ChunkListener {
-	/**
-	 * The beforeChunk method receives control before processing of the next
-	 * chunk begins. This method is invoked in the same transaction as the chunk
-	 * processing.
-	 * 
-	 * @throws Exception
-	 *             throw if an error occurs.
-	 */
-	public void beforeChunk() throws Exception;
+    /**
+     * The beforeChunk method receives control before processing of the next
+     * chunk begins. This method is invoked in the same transaction as the chunk
+     * processing.
+     * 
+     * @throws Exception
+     *             throw if an error occurs.
+     */
+    public void beforeChunk() throws Exception;
 
-	/**
-	 * The afterChunk method receives control after processing of the current
-	 * chunk ends. This method is invoked in the same transaction as the chunk
-	 * processing.
+    /**
+     * The afterChunk method receives control after processing of the current
+     * chunk ends. This method is invoked in the same transaction as the chunk
+     * processing.
+     * 
+     * @throws Exception
+     *             throw if an error occurs.
+     */
+    public void afterChunk() throws Exception;
+    
+    /**
+	 * The onError method receives control
+	 * before the chunk transaction is rolled back. 
+	 * Note afterChunk is not invoked in this case.
 	 * 
 	 * @throws Exception
-	 *             throw if an error occurs.
+	 * 				throw if an error occurs.
 	 */
-	public void afterChunk() throws Exception;
-
-	/**
-	 * The beforeCheckpoint method is invoked before the current chunk
-	 * checkpoint is committed. This method is invoked in the same transaction
-	 * as the chunk processing.
-	 * 
-	 * @throws Exception
-	 *             throw if an error occurs.
-	 */
-	public void beforeCheckpoint() throws Exception;
-
-	/**
-	 * The afterCheckpoint method is invoked after the current chunk checkpoint
-	 * is committed. This method is always invoked in local transaction mode.
-	 * 
-	 * @throws Exception
-	 *             throw if an error occurs.
-	 */
-	public void afterCheckpoint() throws Exception;
+	public void onError() throws Exception;
 }

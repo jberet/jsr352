@@ -18,15 +18,24 @@ package javax.batch.runtime;
 
 import java.util.Date;
 
+import javax.batch.operations.JobOperator.BatchStatus;
+
 
 public interface StepExecution<P> {
 
+    
 	/**
-	 * Get batch status of this step execution.
+	 * Get the step id of the executed step.
 	 * 
-	 * @return batch status.
+	 * @return
 	 */
-	public String getStatus();
+	public String getStepId();
+
+	/**
+	* Get batch status of this step execution.
+	* @return batch status.
+	*/
+	public BatchStatus getBatchStatus();
 
 	/**
 	 * Get time this step started.
@@ -64,4 +73,6 @@ public interface StepExecution<P> {
 	public Metric[] getMetrics();    
 	
 	public long getJobExecutionId();
+
+	public String getName();
 }

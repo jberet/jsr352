@@ -30,8 +30,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
-import org.mybatch.metadata.StepMerger;
 import org.mybatch.metadata.JobXmlLoader;
+import org.mybatch.metadata.StepMerger;
 
 public class StepMergerTest {
     @Test

@@ -62,8 +62,6 @@
 		</xs:sequence>
 		<xs:attribute name="id" use="required" type="xs:string" />
 		<xs:attribute name="next" use="optional" type="xs:string" />
-		<xs:attribute name="abstract" use="optional" type="xs:string" />
-		<xs:attribute name="parent" use="optional" type="xs:string" />
 	</xs:complexType>
 
 	<xs:complexType name="Flow">
@@ -73,13 +71,12 @@
 			<xs:choice minOccurs="0" maxOccurs="unbounded">
 				<xs:element name="decision" type="jsl:Decision" />
 				<xs:element name="step" type="jsl:Step" />
+				<xs:element name="split" type="jsl:Split" />
 			</xs:choice>
 			<xs:group ref="jsl:ControlElements" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 		<xs:attribute name="id" use="required" type="xs:string" />
 		<xs:attribute name="next" use="optional" type="xs:string" />
-		<xs:attribute name="abstract" use="optional" type="xs:string" />
-		<xs:attribute name="parent" use="optional" type="xs:string" />
 	</xs:complexType>
 
 	<xs:group name="ControlElements">
@@ -150,13 +147,13 @@
 
 	<xs:complexType name="Step">
 		<xs:sequence>
-			<xs:element name="partition" type="jsl:Partition" minOccurs="0" maxOccurs="1" />
 			<xs:element name="properties" type="jsl:Properties" minOccurs="0" maxOccurs="1" />
 			<xs:element name="listeners" type="jsl:Listeners" minOccurs="0" maxOccurs="1" />
 			<xs:choice minOccurs="0" maxOccurs="1"> <!--  TODO validate a merged Step has at least one -->
 				<xs:element name="batchlet" type="jsl:Batchlet" />
 				<xs:element name="chunk" type="jsl:Chunk" />
 			</xs:choice>
+			<xs:element name="partition" type="jsl:Partition" minOccurs="0" maxOccurs="1" />
 			<xs:group ref="jsl:ControlElements" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 		<xs:attribute name="id" use="required" type="xs:string" />
@@ -175,28 +172,47 @@
 	</xs:complexType>
 
 	<!--  required attributes were made optional to allow validated snippets to be loaded for inheritance -->
-	<xs:complexType name="Chunk"> <!--  TODO validate a merged Chunk has reader, processor, writer, chunk size -->
+	<xs:complexType name="Chunk"> 
 		<xs:sequence>
-			<xs:element name="properties" type="jsl:Properties" minOccurs="0" maxOccurs="1" />
+			<xs:element name="reader" type="jsl:ItemReader" />
+			<xs:element name="processor" type="jsl:ItemProcessor" minOccurs="0" maxOccurs="1" />
+			<xs:element name="writer" type="jsl:ItemWriter" />
 			<xs:element name="checkpoint-algorithm" type="jsl:CheckpointAlgorithm" minOccurs="0" maxOccurs="1" />
 			<xs:element name="skippable-exception-classes" type="jsl:ExceptionClassFilter" minOccurs="0" maxOccurs="1" />
 			<xs:element name="retryable-exception-classes" type="jsl:ExceptionClassFilter" minOccurs="0" maxOccurs="1" />
 			<xs:element name="no-rollback-exception-classes" type="jsl:ExceptionClassFilter" minOccurs="0" maxOccurs="1" />
 		</xs:sequence>
-		<xs:attribute name="reader" use="optional" type="xs:string" />
-		<xs:attribute name="processor" use="optional" type="xs:string" />
-		<xs:attribute name="writer" use="optional" type="xs:string" />
-		<xs:attribute name="checkpoint-policy" use="optional" type="xs:string" default="item" />
-		<xs:attribute name="commit-interval" use="optional" type="xs:string" default="10" />
-		<xs:attribute name="buffer-size" use="optional" type="xs:string" />
+		<xs:attribute name="checkpoint-policy" use="optional" type="xs:string" default="item"/>
+		<xs:attribute name="item-count" use="optional" type="xs:string"  default="10" />
+		<xs:attribute name="time-limit" use="optional" type="xs:string" default="10"/>
 		<xs:attribute name="skip-limit" use="optional" type="xs:string" />
 		<xs:attribute name="retry-limit" use="optional" type="xs:string" />
+	</xs:complexType>
+
+	<xs:complexType name="ItemReader">
+		<xs:sequence>
+			<xs:element name="properties" type="jsl:Properties" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="ref" use="required" type="jsl:artifactRef" />
+	</xs:complexType>
+	
+	<xs:complexType name="ItemProcessor">
+		<xs:sequence>
+			<xs:element name="properties" type="jsl:Properties" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="ref" use="required" type="jsl:artifactRef" />
+	</xs:complexType>
+		
+	<xs:complexType name="ItemWriter">
+		<xs:sequence>
+			<xs:element name="properties" type="jsl:Properties" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="ref" use="required" type="jsl:artifactRef" />
 	</xs:complexType>
 
 	<xs:complexType name="Property">
 		<xs:attribute name="name" type="xs:string" use="required" />
 		<xs:attribute name="value" type="xs:string" use="required" />
-		<xs:attribute name="target" type="xs:string" use="optional" />
 	</xs:complexType>
 
 	<xs:complexType name="Properties">
@@ -220,11 +236,13 @@
 
 	<xs:complexType name="Partition">
 		<xs:sequence>
-		    <xs:element name="partition-mapper" type="jsl:PartitionMapper" minOccurs="0" maxOccurs="1" />
-		    <xs:element name="partition-plan" type="jsl:PartitionPlan" minOccurs="0" maxOccurs="1" />
+		    <xs:choice minOccurs="0" maxOccurs="1"> <!--  TODO validate a merged Partition has at least one -->
+				<xs:element name="mapper" type="jsl:PartitionMapper" />
+		    	<xs:element name="plan" type="jsl:PartitionPlan" />				
+			</xs:choice>		    
 			<xs:element name="collector" type="jsl:Collector" minOccurs="0" maxOccurs="1"/>
 			<xs:element name="analyzer" type="jsl:Analyzer" minOccurs="0" maxOccurs="1"/>
-			<xs:element name="PartitionReducer" type="jsl:PartitionReducer" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="reducer" type="jsl:PartitionReducer" minOccurs="0" maxOccurs="1"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -232,7 +250,7 @@
 		<xs:sequence>
 			<xs:element name="properties" type="jsl:Properties" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
-		<xs:attribute name="instances" use="optional" type="xs:string" />
+		<xs:attribute name="partitions" use="optional" type="xs:string" />
 		<xs:attribute name="threads" use="optional" type="xs:string" />
 	</xs:complexType>
 	

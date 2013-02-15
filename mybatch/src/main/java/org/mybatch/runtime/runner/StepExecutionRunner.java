@@ -39,19 +39,12 @@ import org.mybatch.util.ConcurrencyService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-public class StepExecutionRunner implements Runnable {
+public class StepExecutionRunner extends AbstractRunner implements Runnable {
     private Step step;
     private StepExecutionImpl stepExecution;
     private StepContextImpl stepContext;
     private JobExecutionRunner jobExecutionRunner;
     private Future<?> stepResult;
-
-    public static List<Class<? extends Annotation>> methodAnnotations = Arrays.asList(
-            javax.batch.annotation.BeginStep.class,
-            javax.batch.annotation.Process.class,
-            javax.batch.annotation.EndStep.class
-            //need to consider cancel @Stop
-    );
 
     public StepExecutionRunner(Step step, StepExecutionImpl stepExecution, StepContextImpl stepContext, JobExecutionRunner jobExecutionRunner) {
         this.step = step;

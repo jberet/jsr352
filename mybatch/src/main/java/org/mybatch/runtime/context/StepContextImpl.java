@@ -22,10 +22,9 @@
  
 package org.mybatch.runtime.context;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.Externalizable;
 import java.util.Properties;
+import javax.batch.operations.JobOperator;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.context.StepContext;
 
@@ -35,7 +34,7 @@ import org.mybatch.runtime.metric.StepMetrics;
 import org.mybatch.util.BatchUtil;
 import org.mybatch.util.PropertyResolver;
 
-public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepContext<T, P> {
+public class StepContextImpl<T, P extends Externalizable> extends BatchContextImpl<T> implements StepContext<T, P> {
     private Step step;
     private long stepExecutionId;
     private P persistentUserData;
@@ -75,6 +74,11 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
     }
 
     @Override
+    public JobOperator.BatchStatus getBatchStatus() {
+        return null;
+    }
+
+    @Override
     public Exception getException() {
         return exception;
     }
@@ -90,16 +94,6 @@ public class StepContextImpl<T, P> extends BatchContextImpl<T> implements StepCo
 
     public void setMetric(MetricName metricName, long value) {
         stepMetrics.set(metricName, value);
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        //TODO
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        //TODO
     }
 
     private void resolveProperties() {

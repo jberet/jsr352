@@ -46,7 +46,6 @@ public class ChunkMergerTest {
         Job childJob = JobXmlLoader.loadJobXml("chunk-child.xml", Job.class);
         Chunk child = getChunk(childJob, "chunk-child");
 
-        Assert.assertEquals(true, child.getProperties() == null || child.getProperties().getProperty().size() == 0);
         Assert.assertNull(child.getCheckpointAlgorithm());
         Assert.assertNull(child.getSkippableExceptionClasses());
         Assert.assertNull(child.getRetryableExceptionClasses());
@@ -60,8 +59,6 @@ public class ChunkMergerTest {
         merger.merge();
 
 //        TODO chunk listeners not in xsd yet
-        Assert.assertEquals(1, child.getProperties().getProperty().size());
-        JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent"});
         Assert.assertEquals("parent", child.getCheckpointAlgorithm().getRef());
         Assert.assertNotNull(child.getSkippableExceptionClasses());
         Assert.assertNotNull(child.getRetryableExceptionClasses());
@@ -80,9 +77,6 @@ public class ChunkMergerTest {
         Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
         Chunk child = getChunk(childJob, "chunk-mixed-child");
 
-        Assert.assertEquals(1, child.getProperties().getProperty().size());
-        JobMergerTest.propertiesContain(child.getProperties(), new String[]{"child"});
-
         Assert.assertEquals("child", child.getCheckpointAlgorithm().getRef());
         Assert.assertEquals(1, child.getCheckpointAlgorithm().getProperties().getProperty().size());
         JobMergerTest.propertiesContain(child.getCheckpointAlgorithm().getProperties(), new String[]{"child"});
@@ -100,9 +94,6 @@ public class ChunkMergerTest {
 
         ChunkMerger merger = new ChunkMerger(parent, child);
         merger.merge();
-
-        Assert.assertEquals(2, child.getProperties().getProperty().size());
-        JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"});
 
         Assert.assertEquals("child", child.getCheckpointAlgorithm().getRef());
         Assert.assertEquals(2, child.getCheckpointAlgorithm().getProperties().getProperty().size());

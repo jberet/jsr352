@@ -25,6 +25,7 @@ package org.mybatch.runtime;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Properties;
+import javax.batch.operations.JobOperator;
 import javax.batch.runtime.JobExecution;
 
 import org.mybatch.runtime.context.JobContextImpl;
@@ -74,7 +75,7 @@ public class JobExecutionImpl implements JobExecution {
     }
 
     @Override
-    public String getStatus() {
+    public JobOperator.BatchStatus getBatchStatus() {
         return null;
     }
 

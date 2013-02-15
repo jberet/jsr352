@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2012, Red Hat, Inc., and individual contributors
+ * Copyright 2012-2013, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -22,19 +22,12 @@
 
 package org.mybatch.metadata;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
 import org.scannotation.AnnotationDB;
 import org.scannotation.ClasspathUrlFinder;
@@ -42,24 +35,17 @@ import org.scannotation.ClasspathUrlFinder;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class ApplicationMetaData {
-    private static final String batchArtifactFileName = "batch-artifacts.xml";
-
     private AnnotationDB annotationDB;
 
+    //current default is {"javax", "java", "sun", "com.sun", "javassist"}
     private static String[] ignoredPkgs = {
-//            "javax.batch.annotation"
     };
 
-    private static Map<Class<? extends Annotation>, String> artifactAnnotations =
-            new HashMap<Class<? extends Annotation>, String>();
-
-    private static Map<String, ArtifactClassAndAnnotation> artifactCatalog = new HashMap<String, ArtifactClassAndAnnotation>();
+    private static Map<String, String> artifactCatalog = new HashMap<String, String>();
 
     public ApplicationMetaData() throws IOException {
         annotationDB = new AnnotationDB();
-        for (String s : ignoredPkgs) {
-            annotationDB.addIgnoredPackages(s);
-        }
+        annotationDB.addIgnoredPackages(ignoredPkgs);
         URL[] urls = ClasspathUrlFinder.findClassPaths();
 //        System.out.println("classpath urls: ");
 //        for (URL u : urls) {
@@ -72,136 +58,32 @@ public class ApplicationMetaData {
         annotationDB.setScanParameterAnnotations(false);
         annotationDB.scanArchives(urls);
 
-        initArtifactAnnotations();
         identifyArtifacts();
-        outputBatchArtifactXml();
     }
 
-    public Class<?> getClassForRef(String ref) {
-        Class<?> cls = null;
-        ArtifactClassAndAnnotation a = artifactCatalog.get(ref);
-        if (a != null) {
-            cls = a.artifactClass;
-        }
-        return cls;
-    }
-
-    private void outputBatchArtifactXml() {
-        PrintWriter pw = null;
-        try {
-            File f = new File(batchArtifactFileName);
-            BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-            pw = new PrintWriter(bw);
-            pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            pw.println("<batch-artifacts>");
-
-            for (Map.Entry<String, ArtifactClassAndAnnotation> entry : artifactCatalog.entrySet()) {
-                String id = entry.getKey();
-                ArtifactClassAndAnnotation val = entry.getValue();
-                Class<?> cls = val.artifactClass;
-                String tag = artifactAnnotations.get(val.annotationType);
-                String line = String.format("    <%s id=\"%s\" class=\"%s\" />", tag, id, cls.getName());
-                pw.println(line);
-            }
-
-            pw.println("</batch-artifacts>");
-            pw.flush();
-        } catch (IOException e) {
-            BatchLogger.LOGGER.failToWriteBatchXml(e);
-        } finally {
-            if (pw != null) {
-                pw.close();
-            }
-        }
+    public String getClassNameForRef(String ref) {
+        return artifactCatalog.get(ref);
     }
 
     private void identifyArtifacts() {
         Map<String, Set<String>> annotationIndex = annotationDB.getAnnotationIndex();
-        for (Map.Entry<Class<? extends Annotation>, String> entry : artifactAnnotations.entrySet()) {
-            Class<? extends Annotation> annotationToLook = entry.getKey();
-            Set<String> matchingClasses = annotationIndex.get(annotationToLook.getName());
-            if (matchingClasses != null) {
-                for (String matchingClass : matchingClasses) {
-                    String artifactName;
-                    Class<?> cls;
-
-                    try {
-                        cls = BatchUtil.getBatchApplicationClassLoader().loadClass(matchingClass);
-                        Annotation ann = cls.getAnnotation(annotationToLook);
-                        Class<? extends Annotation> annType = ann.annotationType();
-                        artifactName = (String) annType.getMethod("value").invoke(ann);
-                    } catch (ClassNotFoundException e) {
-                        LOGGER.failToIdentifyArtifact(e);
-                        continue;
-                    } catch (NoSuchMethodException e) {
-                        LOGGER.failToIdentifyArtifact(e);
-                        continue;
-                    } catch (IllegalAccessException e) {
-                        LOGGER.failToIdentifyArtifact(e);
-                        continue;
-                    } catch (InvocationTargetException e) {
-                        LOGGER.failToIdentifyArtifact(e);
-                        continue;
-                    }
-                    if (artifactName == null || artifactName.isEmpty()) {
-                        artifactName = cls.getSimpleName();
-                    }
-                    artifactCatalog.put(artifactName, new ArtifactClassAndAnnotation(cls, annotationToLook));
+        Set<String> namedClasses = annotationIndex.get("javax.inject.Named");
+        if (namedClasses != null) {
+            for (String matchingClass : namedClasses) {
+                String refName;
+                Class<?> cls;
+                try {
+                    cls = BatchUtil.getBatchApplicationClassLoader().loadClass(matchingClass);
+                    refName = cls.getAnnotation(javax.inject.Named.class).value();
+                } catch (ClassNotFoundException e) {
+                    LOGGER.failToIdentifyArtifact(e);
+                    continue;
                 }
+                if (refName.isEmpty()) {
+                    refName = cls.getSimpleName();
+                }
+                artifactCatalog.put(refName, matchingClass);
             }
-        }
-    }
-
-    private static void initArtifactAnnotations() {
-        artifactAnnotations.put(javax.batch.annotation.Batchlet.class, "batchlet");
-        artifactAnnotations.put(javax.batch.annotation.CheckpointAlgorithm.class, "checkpoint-algorithm");
-        artifactAnnotations.put(javax.batch.annotation.CheckpointListener.class, "checkpoint-listener");
-        artifactAnnotations.put(javax.batch.annotation.Decider.class, "decider");
-        artifactAnnotations.put(javax.batch.annotation.ItemProcessListener.class, "item-processor-listener");
-        artifactAnnotations.put(javax.batch.annotation.ItemProcessor.class, "item-processor");
-        artifactAnnotations.put(javax.batch.annotation.ItemReader.class, "item-reader");
-        artifactAnnotations.put(javax.batch.annotation.ItemReadListener.class, "item-reader-listener");
-        artifactAnnotations.put(javax.batch.annotation.ItemWriteListener.class, "item-writer-listener");
-        artifactAnnotations.put(javax.batch.annotation.ItemWriter.class, "item-writer");
-        artifactAnnotations.put(javax.batch.annotation.JobListener.class, "job-listener");
-        artifactAnnotations.put(javax.batch.annotation.PartitionAnalyzer.class, "partition-analyzer");
-        artifactAnnotations.put(javax.batch.annotation.PartitionCollector.class, "partition-collector");
-        artifactAnnotations.put(javax.batch.annotation.RetryListener.class, "retry-listener");
-        artifactAnnotations.put(javax.batch.annotation.SkipListener.class, "skip-listener");
-        artifactAnnotations.put(javax.batch.annotation.StepListener.class, "step-listener");
-    }
-
-    public Map<String, Set<String>> getAnnotationIndex() {
-        return annotationDB.getAnnotationIndex();
-    }
-
-    private final static class ArtifactClassAndAnnotation {
-        public Class<?> artifactClass;
-        public Class<? extends Annotation> annotationType;
-
-        public ArtifactClassAndAnnotation(Class<?> artifactClass, Class<? extends Annotation> annotationType) {
-            this.artifactClass = artifactClass;
-            this.annotationType = annotationType;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            ArtifactClassAndAnnotation that = (ArtifactClassAndAnnotation) o;
-
-            if (!annotationType.equals(that.annotationType)) return false;
-            if (!artifactClass.equals(that.artifactClass)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = artifactClass.hashCode();
-            result = 31 * result + annotationType.hashCode();
-            return result;
         }
     }
 }

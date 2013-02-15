@@ -21,20 +21,19 @@ package javax.batch.api;
  * 
  */
 public interface StepListener {
-	/**
-	 * The beforeStep method receives control before a step execution begins.
-	 * 
-	 * @throws Exception
-	 *             throw if an error occurs.
-	 */
-	public void beforeStep() throws Exception;
+    /**
+     * The beforeStep method receives control before a step execution begins.
+     * 
+     * @throws Exception
+     *             throw if an error occurs.
+     */
+    public void beforeStep() throws Exception;
 
-	/**
-	 * The afterStep method receives control after a step execution ends.
-	 * 
-	 * @throws Exception
-	 *             throw if an error occurs.
-	 */
-	public void afterStep() throws Exception;
-
+    /**
+     * The afterStep method receives control after a step execution ends.
+     * 
+     * @throws Exception
+     *             throw if an error occurs.
+     */
+    public void afterStep() throws Exception;
 }

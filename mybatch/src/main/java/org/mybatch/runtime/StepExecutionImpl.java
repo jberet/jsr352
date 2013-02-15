@@ -23,6 +23,7 @@
 package org.mybatch.runtime;
 
 import java.sql.Timestamp;
+import javax.batch.operations.JobOperator;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
@@ -64,8 +65,18 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
     }
 
     @Override
-    public String getStatus() {
-        return stepContext.getBatchStatus();
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public String getStepId() {
+        return null;
+    }
+
+    @Override
+    public JobOperator.BatchStatus getBatchStatus() {
+        return null;
     }
 
     @Override

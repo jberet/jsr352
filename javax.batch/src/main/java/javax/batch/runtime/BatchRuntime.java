@@ -16,10 +16,17 @@
  */
 package javax.batch.runtime;
 
+import java.util.ServiceLoader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.batch.operations.JobOperator;
 
 public class BatchRuntime {
 
+    private final static String sourceClass = BatchRuntime.class.getName();
+    private final static Logger logger = Logger.getLogger(sourceClass);
+    
 	/**
 	* The getJobOperator factory method returns
 	* an instance of the JobOperator interface.
@@ -27,9 +34,27 @@ public class BatchRuntime {
 	* same instance.
 	* @return JobOperator instance.
 	*/
+	
 	public static JobOperator getJobOperator() {
 		
-		// TODO:
-		return null;
-	}
+		JobOperator operator = null;
+		ServiceLoader<JobOperator> loader = ServiceLoader.load(JobOperator.class);
+		for (JobOperator provider : loader) {
+			if (provider != null) {
+				if (logger.isLoggable(Level.FINE)) {
+					logger.fine("Loaded BatchContainerServiceProvider with className = " + provider.getClass().getCanonicalName());
+				}
+				// Use first one
+				operator = provider;
+				break;
+			}
+		}
+
+		if (operator == null) {
+			if (logger.isLoggable(Level.WARNING)) {
+				logger.warning("The ServiceLoader was unable to find an implemenation for JobOperator. Check classpath for META-INF/services/javax.batch.operations.JobOperator file.");
+			}
+		}
+		return operator;
+	} 
 }
