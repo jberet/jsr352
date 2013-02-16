@@ -22,6 +22,9 @@
 
 package org.mybatch.metadata;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mybatch.job.ExceptionClassFilter;
 import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
@@ -35,29 +38,41 @@ final public class ExceptionClassFilterImpl extends ExceptionClassFilter {
             return false;
         } else {
             if (exclude == null) {
-                return matches(th, include.getClazz());
+                return matches(th, classesFromIncludeExclude(include));
             }
             //both <include> and <exclude> are present
-            if (!matches(th, include.getClazz())) {
+            if (!matches(th, classesFromIncludeExclude(include))) {
                 return false;
             }
-            return !matches(th, exclude.getClazz());
+            return !matches(th, classesFromIncludeExclude(exclude));
         }
     }
 
-    private boolean matches(Class<? extends Throwable> th, String filterClasses) {
-        filterClasses = filterClasses.trim();
-        if (filterClasses.isEmpty()) {
-            return false;
+    private List<String> classesFromIncludeExclude(List<? extends Object> includeExclude) {
+        List<String> result = new ArrayList<String>();
+        String s;
+        for (Object obj : includeExclude) {
+            if (obj instanceof Include) {
+                s = ((Include) obj).getClazz().trim();
+            } else {
+                s = ((Exclude) obj).getClazz().trim();
+            }
+            if (!s.isEmpty()) {
+                result.add(s);
+            }
         }
-        for (String s : filterClasses.split(", ")) {
+        return result;
+    }
+
+    private boolean matches(Class<? extends Throwable> th, List<String> filterClasses) {
+        for (String s : filterClasses) {
             try {
                 Class<?> clazz = Class.forName(s, true, BatchUtil.getBatchApplicationClassLoader());
                 if (clazz.isAssignableFrom(th)) {
                     return true;
                 }
             } catch (ClassNotFoundException e) {
-                BatchLogger.LOGGER.invalidExceptionClassFilter(filterClasses, s);
+                BatchLogger.LOGGER.invalidExceptionClassFilter(s);
             }
         }
 

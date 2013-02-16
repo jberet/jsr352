@@ -89,9 +89,9 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void unrecognizedPropertyReference(String category, String variableName, String propVal);
 
-    @Message(id = 15, value = "Invalid exception filter classes: %s, failed to load class '%s'")
+    @Message(id = 15, value = "Invalid exception filter class '%s'")
     @LogMessage(level = Logger.Level.WARN)
-    void invalidExceptionClassFilter(String classes, String cls);
+    void invalidExceptionClassFilter(String cls);
 
     @Message(id = 16, value = "The job: %s already exists in the job repository and cannot be added again.")
     @LogMessage(level = Logger.Level.WARN)

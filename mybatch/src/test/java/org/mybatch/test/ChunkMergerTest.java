@@ -81,12 +81,12 @@ public class ChunkMergerTest {
         Assert.assertEquals(1, child.getCheckpointAlgorithm().getProperties().getProperty().size());
         JobMergerTest.propertiesContain(child.getCheckpointAlgorithm().getProperties(), new String[]{"child"});
 
-        Assert.assertEquals("java.lang.RuntimeException", child.getSkippableExceptionClasses().getInclude().getClazz());
-        Assert.assertEquals("java.lang.IllegalStateException", child.getSkippableExceptionClasses().getExclude().getClazz());
-        Assert.assertEquals("java.lang.RuntimeException", child.getRetryableExceptionClasses().getInclude().getClazz());
-        Assert.assertEquals("java.lang.IllegalStateException", child.getRetryableExceptionClasses().getExclude().getClazz());
-        Assert.assertEquals("java.lang.RuntimeException", child.getNoRollbackExceptionClasses().getInclude().getClazz());
-        Assert.assertEquals("java.lang.IllegalStateException", child.getNoRollbackExceptionClasses().getExclude().getClazz());
+        Assert.assertEquals("java.lang.RuntimeException", child.getSkippableExceptionClasses().getInclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.IllegalStateException", child.getSkippableExceptionClasses().getExclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.RuntimeException", child.getRetryableExceptionClasses().getInclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.IllegalStateException", child.getRetryableExceptionClasses().getExclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.RuntimeException", child.getNoRollbackExceptionClasses().getInclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.IllegalStateException", child.getNoRollbackExceptionClasses().getExclude().get(0).getClazz());
 
         Assert.assertEquals("custom", child.getCheckpointPolicy());
         Assert.assertEquals("15", child.getSkipLimit()) ;
@@ -99,12 +99,12 @@ public class ChunkMergerTest {
         Assert.assertEquals(2, child.getCheckpointAlgorithm().getProperties().getProperty().size());
         JobMergerTest.propertiesContain(child.getCheckpointAlgorithm().getProperties(), new String[]{"child", "parent"});
 
-        Assert.assertEquals("java.lang.RuntimeException", child.getSkippableExceptionClasses().getInclude().getClazz());
-        Assert.assertEquals("java.lang.IllegalStateException", child.getSkippableExceptionClasses().getExclude().getClazz());
-        Assert.assertEquals("java.lang.RuntimeException", child.getRetryableExceptionClasses().getInclude().getClazz());
-        Assert.assertEquals("java.lang.IllegalStateException", child.getRetryableExceptionClasses().getExclude().getClazz());
-        Assert.assertEquals("java.lang.RuntimeException", child.getNoRollbackExceptionClasses().getInclude().getClazz());
-        Assert.assertEquals("java.lang.IllegalStateException", child.getNoRollbackExceptionClasses().getExclude().getClazz());
+        Assert.assertEquals("java.lang.RuntimeException", child.getSkippableExceptionClasses().getInclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.IllegalStateException", child.getSkippableExceptionClasses().getExclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.RuntimeException", child.getRetryableExceptionClasses().getInclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.IllegalStateException", child.getRetryableExceptionClasses().getExclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.RuntimeException", child.getNoRollbackExceptionClasses().getInclude().get(0).getClazz());
+        Assert.assertEquals("java.lang.IllegalStateException", child.getNoRollbackExceptionClasses().getExclude().get(0).getClazz());
         Assert.assertEquals("custom", child.getCheckpointPolicy());
         Assert.assertEquals("15", child.getSkipLimit());
         Assert.assertEquals("5", child.getRetryLimit());

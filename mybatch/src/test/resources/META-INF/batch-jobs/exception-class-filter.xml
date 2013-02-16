@@ -52,11 +52,15 @@
                 <exclude class="java.lang.IllegalStateException"></exclude>
             </skippable-exception-classes>
             <retryable-exception-classes>
-                <include class="java.io.FileNotFoundException, java.lang.RuntimeException, java.lang.Exception"></include>
-                <exclude class="java.io.IOException, java.lang.IllegalStateException"></exclude>
+                <include class="java.io.FileNotFoundException"></include>
+                <include class="java.lang.RuntimeException"></include>
+                <include class="java.lang.Exception"></include>
+                <exclude class="java.lang.IllegalStateException"></exclude>
+                <exclude class="java.io.IOException"></exclude>
             </retryable-exception-classes>
             <no-rollback-exception-classes>
-                <include class="java.lang.RuntimeException, java.lang.Exception"></include>
+                <include class="java.lang.RuntimeException"></include>
+                <include class="java.lang.Exception"></include>
                 <exclude class=""></exclude>
             </no-rollback-exception-classes>
         </chunk>

@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.metadata;
 
 import org.mybatch.job.CheckpointAlgorithm;
@@ -37,24 +37,23 @@ public class ChunkMerger {
 
     public void merge() {
         //merge chunk attributes
-        //TODO:
-        //item-count
-        //time-limit
-        //buffer-items
         if (child.getCheckpointPolicy() == null && parent.getCheckpointPolicy() != null) {
             child.setCheckpointPolicy(parent.getCheckpointPolicy());
         }
-        if (child.getSkipLimit()== null && parent.getSkipLimit() != null) {
+        if (child.getSkipLimit() == null && parent.getSkipLimit() != null) {
             child.setSkipLimit(parent.getSkipLimit());
         }
         if (child.getRetryLimit() == null && parent.getRetryLimit() != null) {
             child.setRetryLimit(parent.getRetryLimit());
         }
+        if (child.getItemCount() == null && parent.getItemCount() != null) {
+            child.setItemCount(parent.getItemCount());
+        }
+        if (child.getTimeLimit() == null && parent.getTimeLimit() != null) {
+            child.setTimeLimit(parent.getTimeLimit());
+        }
 
-        //no properties directly under chunk
-        //TODO wait for xsd update
-        //merge reader, writer, processor, listeners
-//        merge(parent.getListeners(), child.getListeners());
+        //no properties or listeners directly under chunk
 
         merge(parent.getCheckpointAlgorithm(), child.getCheckpointAlgorithm());
         mergeSkippableExceptionClasses(parent.getSkippableExceptionClasses(), child.getSkippableExceptionClasses());
