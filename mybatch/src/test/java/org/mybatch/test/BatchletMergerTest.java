@@ -30,13 +30,13 @@ import org.junit.Test;
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
+import org.mybatch.metadata.ArchiveXmlLoader;
 import org.mybatch.metadata.JobMerger;
-import org.mybatch.metadata.JobXmlLoader;
 
 public class BatchletMergerTest {
     @Test
     public void propertiesFromParentJob() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("batchlet-properties-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("batchlet-properties-child.xml", Job.class);
         Batchlet child = getBatchlet(childJob, "batchlet-properties-child");
         Assert.assertNull(child.getProperties());
 
@@ -50,7 +50,7 @@ public class BatchletMergerTest {
 
     @Test
     public void mergeFalse() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("batchlet-merge-false-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("batchlet-merge-false-child.xml", Job.class);
         Batchlet child = getBatchlet(childJob, "batchlet-merge-false-child");
         Assert.assertEquals(0, child.getProperties().getProperty().size());
 
@@ -63,7 +63,7 @@ public class BatchletMergerTest {
 
     @Test
     public void mergeTrue() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("batchlet-merge-true-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("batchlet-merge-true-child.xml", Job.class);
         Batchlet child = getBatchlet(childJob, "batchlet-merge-true-child");
         Assert.assertEquals(1, child.getProperties().getProperty().size());
 
@@ -77,7 +77,7 @@ public class BatchletMergerTest {
 
     @Test
     public void parentHasBatchlet() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("batchlet-merge-true-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("batchlet-merge-true-child.xml", Job.class);
         JobMerger merger = new JobMerger(childJob);
         merger.merge();
         Batchlet child = getBatchlet(childJob, "parent-has-batchlet-child");

@@ -33,14 +33,14 @@ import org.junit.Test;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
+import org.mybatch.metadata.ArchiveXmlLoader;
 import org.mybatch.metadata.ExceptionClassFilterImpl;
 import org.mybatch.metadata.JobMerger;
-import org.mybatch.metadata.JobXmlLoader;
 
 public class ChunkMergerTest {
     @Test
     public void fromParentJob() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("chunk-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("chunk-child.xml", Job.class);
         JobMerger merger = new JobMerger(childJob);
         merger.merge();
         Chunk child = getChunk(childJob, "chunk-child");
@@ -57,7 +57,7 @@ public class ChunkMergerTest {
 
     @Test
     public void mixed() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
         Chunk child = getChunk(childJob, "chunk-mixed-child");
 
         Assert.assertEquals("child", child.getCheckpointAlgorithm().getRef());
@@ -95,7 +95,7 @@ public class ChunkMergerTest {
 
     @Test
     public void readerProcessorWriter() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
         JobMerger merger = new JobMerger(childJob);
         merger.merge();
         Chunk child = getChunk(childJob, "chunk-mixed-child");
@@ -110,7 +110,7 @@ public class ChunkMergerTest {
 
     @Test
     public void parentHasChunk() throws Exception {  //child step is empty and the chunk is declared in parent
-        Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
         JobMerger merger = new JobMerger(childJob);
         merger.merge();
         Chunk child = getChunk(childJob, "parent-has-chunk-child");
@@ -128,7 +128,7 @@ public class ChunkMergerTest {
 
     @Test
     public void exceptionClassFilter() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
         JobMerger merger = new JobMerger(childJob);
         merger.merge();
         Chunk child = getChunk(childJob, "chunk-mixed-child");
@@ -140,7 +140,7 @@ public class ChunkMergerTest {
 
     @Test
     public void exceptionClassFilter2() throws Exception {
-        Job job = JobXmlLoader.loadJobXml("exception-class-filter.xml", Job.class);
+        Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class);
         Chunk chunk = getChunk(job, "exception-class-filter") ;
 
         ExceptionClassFilterImpl filter = (ExceptionClassFilterImpl) chunk.getSkippableExceptionClasses();

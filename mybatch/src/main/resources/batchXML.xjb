@@ -25,10 +25,14 @@
 <bindings xmlns="http://java.sun.com/xml/ns/jaxb"
           xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
           xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd"
-          schemaLocation="jobXML.xsd"
+          schemaLocation="batchXML.xsd"
           version="2.1">
+    <globalBindings>
+        <serializable uid="1" />
+    </globalBindings>
+
     <schemaBindings>
-        <package name="org.mybatch.job" />
+        <package name="org.mybatch.batch" />
     </schemaBindings>
 
 </bindings>

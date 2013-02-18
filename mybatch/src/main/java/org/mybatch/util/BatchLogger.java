@@ -56,44 +56,47 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 5, value = "Failed to parse and bind XML for job %s")
     JobStartException failToParseBindJobXml(@Cause Throwable e, String jobName);
 
-    @Message(id = 6, value = "Failed to process batch application metadata for job %s")
+    @Message(id = 6, value = "Failed to parse and bind batch XML %s")
+    JobStartException failToParseBindBatchXml(@Cause Throwable e, String batchXML);
+
+    @Message(id = 7, value = "Failed to process batch application metadata for job %s")
     JobStartException failToProcessMetaData(@Cause Throwable e, String jobName);
 
     @LogMessage(level = Logger.Level.WARN)
-    @Message(id = 7, value = "Failed to write batch artifact xml file")
+    @Message(id = 8, value = "Failed to write batch artifact xml file")
     void failToWriteBatchXml(@Cause Throwable e);
 
     @LogMessage(level = Logger.Level.WARN)
-    @Message(id = 8, value = "Failed to identify batch artifact")
+    @Message(id = 9, value = "Failed to identify batch artifact")
     void failToIdentifyArtifact(@Cause Throwable e);
 
-    @Message(id = 9, value = "A step cannot contain both chunk type and batchlet type: %s")
+    @Message(id = 10, value = "A step cannot contain both chunk type and batchlet type: %s")
     @LogMessage(level = Logger.Level.WARN)
     void cannotContainBothChunkAndBatchlet(String stepId);
 
-    @Message(id = 10, value = "A concrete step must contain either a chunk or batchlet type: %s")
+    @Message(id = 11, value = "A concrete step must contain either a chunk or batchlet type: %s")
     @LogMessage(level = Logger.Level.WARN)
     void stepContainsNoChunkOrBatchlet(String stepId);
 
     @LogMessage(level = Logger.Level.INFO)
-    @Message(id = 11, value = "Submitted batchlet task %s in thread %s")
+    @Message(id = 12, value = "Submitted batchlet task %s in thread %s")
     void submittedBatchletTask(String b, Thread th);
 
-    @Message(id = 12, value = "No method matches the annotation %s in artifact %s")
+    @Message(id = 13, value = "No method matches the annotation %s in artifact %s")
     IllegalStateException noMethodMatchingAnnotation(Class<? extends Annotation> ann, Object artifact);
 
-    @Message(id = 13, value = "No job execution with id %s")
+    @Message(id = 14, value = "No job execution with id %s")
     NoSuchJobExecutionException noSuchJobExecution(Long executionId);
 
-    @Message(id = 14, value = "Unrecognized property category: %s, variable name: %s in property value: %s")
+    @Message(id = 15, value = "Unrecognized property category: %s, variable name: %s in property value: %s")
     @LogMessage(level = Logger.Level.WARN)
     void unrecognizedPropertyReference(String category, String variableName, String propVal);
 
-    @Message(id = 15, value = "Invalid exception filter class '%s'")
+    @Message(id = 16, value = "Invalid exception filter class '%s'")
     @LogMessage(level = Logger.Level.WARN)
     void invalidExceptionClassFilter(String cls);
 
-    @Message(id = 16, value = "The job: %s already exists in the job repository and cannot be added again.")
+    @Message(id = 17, value = "The job: %s already exists in the job repository and cannot be added again.")
     @LogMessage(level = Logger.Level.WARN)
     void jobAlreadyExists(String jobId);
 

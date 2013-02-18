@@ -27,8 +27,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.batch.operations.exception.JobStartException;
 
-import org.mybatch.util.BatchUtil;
+import org.mybatch.batch.BatchArtifacts;
+import org.mybatch.batch.Ref;
 import org.scannotation.AnnotationDB;
 import org.scannotation.ClasspathUrlFinder;
 
@@ -37,13 +39,18 @@ import static org.mybatch.util.BatchLogger.LOGGER;
 public class ApplicationMetaData {
     private AnnotationDB annotationDB;
 
-    //current default is {"javax", "java", "sun", "com.sun", "javassist"}
+    //current build-in default is {"javax", "java", "sun", "com.sun", "javassist"}
     private static String[] ignoredPkgs = {
     };
 
-    private static Map<String, String> artifactCatalog = new HashMap<String, String>();
+    private Map<String, String> artifactCatalog = new HashMap<String, String>();
 
-    public ApplicationMetaData() throws IOException {
+    private BatchArtifacts batchArtifacts;
+
+    private ClassLoader classLoader;
+
+    public ApplicationMetaData(ClassLoader classLoader) throws IOException, JobStartException {
+        this.classLoader = classLoader;
         annotationDB = new AnnotationDB();
         annotationDB.addIgnoredPackages(ignoredPkgs);
         URL[] urls = ClasspathUrlFinder.findClassPaths();
@@ -59,10 +66,20 @@ public class ApplicationMetaData {
         annotationDB.scanArchives(urls);
 
         identifyArtifacts();
+        batchArtifacts = ArchiveXmlLoader.loadBatchXml(classLoader);
     }
 
     public String getClassNameForRef(String ref) {
-        return artifactCatalog.get(ref);
+        String result = artifactCatalog.get(ref);
+        if (result == null && batchArtifacts != null) {
+            for (Ref r : batchArtifacts.getRef()) {
+                if (r.getId().equals(ref)) {
+                    result = r.getClazz();
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     private void identifyArtifacts() {
@@ -73,7 +90,7 @@ public class ApplicationMetaData {
                 String refName;
                 Class<?> cls;
                 try {
-                    cls = BatchUtil.getBatchApplicationClassLoader().loadClass(matchingClass);
+                    cls = this.classLoader.loadClass(matchingClass);
                     refName = cls.getAnnotation(javax.inject.Named.class).value();
                 } catch (ClassNotFoundException e) {
                     LOGGER.failToIdentifyArtifact(e);

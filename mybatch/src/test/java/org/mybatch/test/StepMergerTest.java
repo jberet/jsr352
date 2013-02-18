@@ -30,13 +30,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
-import org.mybatch.metadata.JobXmlLoader;
+import org.mybatch.metadata.ArchiveXmlLoader;
 import org.mybatch.metadata.StepMerger;
 
 public class StepMergerTest {
     @Test
     public void propertiesListenersFromParentJob() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("step-properties-listeners-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("step-properties-listeners-child.xml", Job.class);
         Step child = getStep(childJob, "step-properties-listeners-child");
 
         Assert.assertNull(child.getProperties());
@@ -52,7 +52,7 @@ public class StepMergerTest {
 
     @Test
     public void mergeFalse() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("step-merge-false-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("step-merge-false-child.xml", Job.class);
         Step child = getStep(childJob, "step-merge-false-child");
 
         Assert.assertEquals(0, child.getProperties().getProperty().size());
@@ -67,7 +67,7 @@ public class StepMergerTest {
 
     @Test
     public void mergeTrue() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("step-merge-true-child.xml", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("step-merge-true-child.xml", Job.class);
         Step child = getStep(childJob, "step-merge-true-child");
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());
@@ -83,7 +83,7 @@ public class StepMergerTest {
 
     @Test
     public void stepSameFileParentChild() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
 
         String[] child1And2 = new String[]{"step-same-file-child-1", "step-same-file-child-2"};
         Step child = null;
@@ -113,14 +113,14 @@ public class StepMergerTest {
 
     @Test
     public void emptyParent() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
         Step child = getStep(childJob, "inheriting-empty-parent");
         emptyStep(childJob, child);
     }
 
     @Test
     public void emptyChild() throws Exception {
-        Job childJob = JobXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
+        Job childJob = ArchiveXmlLoader.loadJobXml("step-same-file-parent-child", Job.class);
         Step child = getStep(childJob, "empty-child");
         emptyStep(childJob, child);
     }

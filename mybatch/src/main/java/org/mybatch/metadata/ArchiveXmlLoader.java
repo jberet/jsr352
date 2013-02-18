@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.metadata;
 
 import java.io.BufferedInputStream;
@@ -35,26 +35,64 @@ import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import org.mybatch.batch.BatchArtifacts;
 import org.mybatch.job.Job;
 import org.mybatch.util.BatchUtil;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-public class JobXmlLoader {
-    public final static String ARCHIVE_JOB_LOCATION = "META-INF/batch-jobs/";
+public class ArchiveXmlLoader {
+    public final static String ARCHIVE_JOB_XML_DIR = "META-INF/batch-jobs/";
+    public final static String ARCHIVE_BATCH_XML = "META-INF/batch.xml";
+
+    /**
+     * Gets the batch artifacts definition object, loaded from the archive batch.xml if available.
+     *
+     * @param classLoader the applicaton classloader used to load batch xml
+     * @return the batch artifacts definition object
+     */
+    public static BatchArtifacts loadBatchXml(ClassLoader classLoader) throws JobStartException {
+        InputStream is;
+        BatchArtifacts batchArtifacts = null;
+        is = classLoader.getResourceAsStream(ARCHIVE_BATCH_XML);
+        if (is == null) {  //the app doesn't contain META-INF/batch.xml
+            return null;
+        }
+
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(BatchArtifacts.class);
+            Unmarshaller um = jaxbContext.createUnmarshaller();
+            JAXBElement<BatchArtifacts> root = um.unmarshal(new StreamSource(is), BatchArtifacts.class);
+            batchArtifacts = root.getValue();
+        } catch (JAXBException e) {
+            throw LOGGER.failToParseBindBatchXml(e, ARCHIVE_BATCH_XML);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    //ignore
+                }
+            }
+        }
+        return batchArtifacts;
+    }
 
     /**
      * Gets the root element, either of type Job or Step, for a given job or step name.
-     * @param jobName base name of the job xml document
-     * @param rootType Job.class or Step.class
-     * @param <T> Job or Step
+     *
+     * @param jobName     base name of the job xml document
+     * @param rootType    Job.class or Step.class
+     * @param <T>         Job or Step
+     * @param cl          the applicaton classloader used to load job xml
      * @return the job or step root element
      */
-    public static <T> T loadJobXml(String jobName, Class<T> rootType) throws JobStartException {
+    public static <T> T loadJobXml(String jobName, Class<T> rootType, ClassLoader... cl) throws JobStartException {
+        ClassLoader classLoader = cl.length > 0 ? cl[0] : BatchUtil.getBatchApplicationClassLoader();
         InputStream is;
         T jobOrStep;
         try {
-            is = getJobXml(jobName);
+            is = getJobXml(jobName, classLoader);
         } catch (IOException e) {
             throw LOGGER.failToGetJobXml(e, jobName);
         }
@@ -83,14 +121,14 @@ public class JobXmlLoader {
         return jobOrStep;
     }
 
-    private static InputStream getJobXml(String jobXml) throws IOException {
+    private static InputStream getJobXml(String jobXml, ClassLoader classLoader) throws IOException {
         if (!jobXml.endsWith(".xml")) {
             jobXml += ".xml";
         }
         // META-INF first
-        String path = ARCHIVE_JOB_LOCATION + jobXml;
+        String path = ARCHIVE_JOB_XML_DIR + jobXml;
         InputStream is;
-        is = BatchUtil.getBatchApplicationClassLoader().getResourceAsStream(path);
+        is = classLoader.getResourceAsStream(path);
         if (is != null) {
             return is;
         }

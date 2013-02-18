@@ -47,14 +47,15 @@ import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.creation.SimpleArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.metadata.ArchiveXmlLoader;
 import org.mybatch.metadata.JobMerger;
-import org.mybatch.metadata.JobXmlLoader;
 import org.mybatch.repository.JobRepository;
 import org.mybatch.repository.impl.MemoryRepository;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.JobInstanceImpl;
 import org.mybatch.runtime.context.JobContextImpl;
 import org.mybatch.runtime.runner.JobExecutionRunner;
+import org.mybatch.util.BatchUtil;
 import org.mybatch.util.ConcurrencyService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
@@ -92,14 +93,15 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public long start(String job, Properties jobParameters) throws JobStartException {
-        Job jobDefined = JobXmlLoader.loadJobXml(job, Job.class);
+        ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
+        Job jobDefined = ArchiveXmlLoader.loadJobXml(job, Job.class, classLoader);
         JobMerger jobMerger = new JobMerger(jobDefined);  //find any possible parents and merge them in
         jobMerger.merge();
 
         repository.addJob(jobDefined);
         ApplicationMetaData appData;
         try {
-            appData = new ApplicationMetaData();
+            appData = new ApplicationMetaData(classLoader);
         } catch (IOException e) {
             throw LOGGER.failToProcessMetaData(e, job);
         }

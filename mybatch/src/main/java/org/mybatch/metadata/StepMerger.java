@@ -50,7 +50,7 @@ public class StepMerger {
                 }
             }
             if (this.parent == null) {
-                this.parent = JobXmlLoader.loadJobXml(parentName, Step.class);
+                this.parent = ArchiveXmlLoader.loadJobXml(parentName, Step.class);
             }
         }
     }

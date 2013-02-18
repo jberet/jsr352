@@ -48,13 +48,13 @@ public class JobMerger {
     public JobMerger(Job child) throws JobStartException {
         String parentName = child.getParent();
         if (parentName != null) {
-            this.parent = JobXmlLoader.loadJobXml(parentName, Job.class);
+            this.parent = ArchiveXmlLoader.loadJobXml(parentName, Job.class);
         }
         this.child = child;
     }
 
     private JobMerger(String parentName, Job child, boolean skipSteps) throws JobStartException {
-        this(JobXmlLoader.loadJobXml(parentName, Job.class), child);
+        this(ArchiveXmlLoader.loadJobXml(parentName, Job.class), child);
         this.skipEnclosingSteps = skipSteps;
     }
 
