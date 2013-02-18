@@ -24,7 +24,7 @@
 
 <job id="job-properties-listeners-parent" restartable="true" abstract="true"  xmlns="http://batch.jsr352/jsl"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
+     xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
 
     <properties>
         <property name="parent" value="parent"></property>

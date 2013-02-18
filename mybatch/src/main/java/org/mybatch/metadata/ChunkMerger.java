@@ -25,6 +25,10 @@ package org.mybatch.metadata;
 import org.mybatch.job.CheckpointAlgorithm;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.ExceptionClassFilter;
+import org.mybatch.job.ItemProcessor;
+import org.mybatch.job.ItemReader;
+import org.mybatch.job.ItemWriter;
+import org.mybatch.job.Properties;
 
 public class ChunkMerger {
     private Chunk parent;
@@ -54,11 +58,73 @@ public class ChunkMerger {
         }
 
         //no properties or listeners directly under chunk
-
+        merge(parent.getReader(), child.getReader());
+        merge(parent.getWriter(), child.getWriter());
+        merge(parent.getProcessor(), child.getProcessor());
         merge(parent.getCheckpointAlgorithm(), child.getCheckpointAlgorithm());
         mergeSkippableExceptionClasses(parent.getSkippableExceptionClasses(), child.getSkippableExceptionClasses());
         mergeRetryableExceptionClasses(parent.getRetryableExceptionClasses(), child.getRetryableExceptionClasses());
         mergeNoRollbackExceptionClasses(parent.getNoRollbackExceptionClasses(), child.getNoRollbackExceptionClasses());
+    }
+
+    private void merge(ItemReader parentReader, ItemReader childReader) {
+        if (parentReader == null) {
+            return;
+        }
+        if (childReader == null) {
+            child.setReader(parentReader);
+            return;
+        }
+        Properties parentProps = parentReader.getProperties();
+        Properties childProps  = childReader.getProperties();
+        if (parentProps == null) {
+            return;
+        }
+        if (childProps == null) {
+            childReader.setProperties(parentProps);
+            return;
+        }
+        JobMerger.mergeProperties(parentProps, childProps);
+    }
+
+    private void merge(ItemWriter parentWriter, ItemWriter childWriter) {
+        if (parentWriter == null) {
+            return;
+        }
+        if (childWriter == null) {
+            child.setWriter(parentWriter);
+            return;
+        }
+        Properties parentProps = parentWriter.getProperties();
+        Properties childProps  = childWriter.getProperties();
+        if (parentProps == null) {
+            return;
+        }
+        if (childProps == null) {
+            childWriter.setProperties(parentProps);
+            return;
+        }
+        JobMerger.mergeProperties(parentProps, childProps);
+    }
+
+    private void merge(ItemProcessor parentProcessor, ItemProcessor childProcessor) {
+        if (parentProcessor == null) {
+            return;
+        }
+        if (childProcessor == null) {
+            child.setProcessor(parentProcessor);
+            return;
+        }
+        Properties parentProps = parentProcessor.getProperties();
+        Properties childProps  = childProcessor.getProperties();
+        if (parentProps == null) {
+            return;
+        }
+        if (childProps == null) {
+            childProcessor.setProperties(parentProps);
+            return;
+        }
+        JobMerger.mergeProperties(parentProps, childProps);
     }
 
     private void merge(CheckpointAlgorithm parentCheckPointAlgo, CheckpointAlgorithm childCheckPointAlgo) {
@@ -78,6 +144,7 @@ public class ChunkMerger {
         }
         if (childExceptionClassFilter == null) {
             child.setSkippableExceptionClasses(parentExceptionClassFilter);
+            return;
         }
         //<include> and <exclude> sub-elements from parent and child are not merged, kept as is
     }
@@ -88,6 +155,7 @@ public class ChunkMerger {
         }
         if (childExceptionClassFilter == null) {
             child.setRetryableExceptionClasses(parentExceptionClassFilter);
+            return;
         }
         //<include> and <exclude> sub-elements from parent and child are not merged, kept as is
     }
@@ -98,19 +166,8 @@ public class ChunkMerger {
         }
         if (childExceptionClassFilter == null) {
             child.setNoRollbackExceptionClasses(parentExceptionClassFilter);
+            return;
         }
         //<include> and <exclude> sub-elements from parent and child are not merged, kept as is
     }
-
-//    private void merge(Listeners parentListeners, Listeners childListeners) {
-//        if (parentListeners == null) {
-//            return;
-//        }
-//        if (childListeners == null) {
-//            child.setListeners(parentListeners);
-//            return;
-//        }
-//        JobMerger.mergeListeners(parentListeners, childListeners);
-//    }
-
 }

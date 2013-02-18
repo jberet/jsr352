@@ -22,15 +22,13 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="batchlet-properties-parent" xmlns="http://batch.jsr352/jsl"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
-    <step id="batchlet-properties-parent" abstract="true">
-        <batchlet ref="batchlet-properties-parent">
-            <properties>
-                <property name="parent" value="parent"></property>
-                <property name="parent2" value="parent2"></property>
-            </properties>
-        </batchlet>
-    </step>
-</job>
+<step id="batchlet-properties-parent" abstract="true" xmlns="http://batch.jsr352/jsl"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
+    <batchlet ref="batchlet-properties-parent">
+        <properties>
+            <property name="parent" value="parent"></property>
+            <property name="parent2" value="parent2"></property>
+        </properties>
+    </batchlet>
+</step>

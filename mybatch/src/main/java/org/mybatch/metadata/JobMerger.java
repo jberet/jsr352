@@ -120,6 +120,11 @@ public class JobMerger {
         JobMerger.mergeListeners(parentListeners, childListeners);
     }
 
+    /**
+     * Merges parent properties and child properties (both must not be null).
+     * @param parentProps properties from parent element
+     * @param childProps  properties from child element
+     */
     public static void mergeProperties(Properties parentProps, Properties childProps) {
         String merge = childProps.getMerge();
         if (merge != null && !Boolean.parseBoolean(merge)) {

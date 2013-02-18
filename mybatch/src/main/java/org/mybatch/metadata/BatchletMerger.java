@@ -39,7 +39,7 @@ public class BatchletMerger {
     }
 
     private void merge(Properties parentProps, Properties childProps) {
-        //<batchlet> has no attributes
+        //<batchlet> has no attributes, no listeners
 
         if (parentProps == null) {
             return;

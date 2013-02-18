@@ -24,12 +24,24 @@
 
 <job id="chunk-mixed-child" xmlns="http://batch.jsr352/jsl"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
+     xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
     <step id="chunk-mixed-child" parent="chunk-mixed-parent">
         <chunk checkpoint-policy="custom" skip-limit="15" >
-            <reader ref="R1"></reader>
-            <processor ref="P1"></processor>
-            <writer ref="W1"></writer>
+            <reader ref="R1">
+                <properties merge="false">
+                    <property name="child" value="child"></property>
+                </properties>
+            </reader>
+            <processor ref="P1">
+                <properties merge="true">
+                    <property name="child" value="child"></property>
+                </properties>
+            </processor>
+            <writer ref="W1">
+                <properties>
+                    <property name="child" value="child"></property>
+                </properties>
+            </writer>
 
             <checkpoint-algorithm ref="child">
                 <properties merge="true">
@@ -50,4 +62,29 @@
             </no-rollback-exception-classes>
         </chunk>
     </step>
+
+    <!-- =========================================== -->
+    <step id="parent-has-chunk-child" parent="parent-has-chunk-parent">
+    </step>
+    <step id="parent-has-chunk-parent" abstract="true">
+        <chunk checkpoint-policy="custom" skip-limit="15">
+            <reader ref="R1">
+                <properties merge="false">
+                    <property name="child" value="child"></property>
+                </properties>
+            </reader>
+            <processor ref="P1">
+                <properties merge="true">
+                    <property name="child" value="child"></property>
+                </properties>
+            </processor>
+            <writer ref="W1">
+                <properties>
+                    <property name="child" value="child"></property>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+
+
 </job>

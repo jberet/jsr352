@@ -24,7 +24,7 @@
 
 <job id="chunk-child" xmlns="http://batch.jsr352/jsl"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd?rev=6ef2f1ade9d0d4ea635a243898bf0f25cd71b346">
+     xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
     <step id="chunk-child" parent="chunk-parent" >
         <chunk>
             <reader ref="R1"></reader>

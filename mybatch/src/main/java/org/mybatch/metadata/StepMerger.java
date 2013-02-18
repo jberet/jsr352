@@ -23,12 +23,14 @@
 package org.mybatch.metadata;
 
 import java.util.List;
-
 import javax.batch.operations.exception.JobStartException;
 
+import org.mybatch.job.Batchlet;
+import org.mybatch.job.Chunk;
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Properties;
 import org.mybatch.job.Step;
+import org.mybatch.util.BatchLogger;
 
 public class StepMerger {
     private Step parent;
@@ -76,13 +78,29 @@ public class StepMerger {
             merge(parent.getProperties(), child.getProperties());
             merge(parent.getListeners(), child.getListeners());
 
-            //if child has no batchlet or chunk, inherit from parent
-            if (child.getBatchlet() == null && child.getChunk() == null) {
-                if (parent.getChunk() != null) {
-                    child.setChunk(parent.getChunk());
-                } else {
-                    child.setBatchlet(parent.getBatchlet());
+            Batchlet parentBatchlet = parent.getBatchlet();
+            Batchlet childBatchlet = child.getBatchlet();
+            Chunk parentChunk = parent.getChunk();
+            Chunk childChunk = child.getChunk();
+
+            if (childChunk != null && childBatchlet == null) {  //child has chunk type
+                if (parentChunk != null) {
+                    ChunkMerger merger = new ChunkMerger(parentChunk, childChunk);
+                    merger.merge();
                 }
+            } else if (childChunk == null && childBatchlet != null) {  //child has batchlet type
+                if (parentBatchlet != null) {
+                    BatchletMerger merger = new BatchletMerger((parentBatchlet), childBatchlet);
+                    merger.merge();
+                }
+            } else if (childChunk == null && childBatchlet == null) {  //if child has no batchlet or chunk, inherit from parent
+                if (parentChunk != null) {
+                    child.setChunk(parentChunk);
+                } else if (parentBatchlet != null) {
+                    child.setBatchlet(parentBatchlet);
+                }
+            } else {  //if child contains both chunk and batchlet
+                BatchLogger.LOGGER.cannotContainBothChunkAndBatchlet(child.getId());
             }
         }
     }
@@ -108,5 +126,4 @@ public class StepMerger {
         }
         JobMerger.mergeListeners(parentListeners, childListeners);
     }
-
 }

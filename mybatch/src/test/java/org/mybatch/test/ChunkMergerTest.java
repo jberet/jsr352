@@ -33,32 +33,18 @@ import org.junit.Test;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
-import org.mybatch.metadata.ChunkMerger;
 import org.mybatch.metadata.ExceptionClassFilterImpl;
+import org.mybatch.metadata.JobMerger;
 import org.mybatch.metadata.JobXmlLoader;
 
 public class ChunkMergerTest {
     @Test
     public void fromParentJob() throws Exception {
-        Job parentJob = JobXmlLoader.loadJobXml("chunk-parent.xml", Job.class);
-        Chunk parent = getChunk(parentJob, "chunk-parent") ;
-
         Job childJob = JobXmlLoader.loadJobXml("chunk-child.xml", Job.class);
+        JobMerger merger = new JobMerger(childJob);
+        merger.merge();
         Chunk child = getChunk(childJob, "chunk-child");
 
-        Assert.assertNull(child.getCheckpointAlgorithm());
-        Assert.assertNull(child.getSkippableExceptionClasses());
-        Assert.assertNull(child.getRetryableExceptionClasses());
-        Assert.assertNull(child.getNoRollbackExceptionClasses());
-
-        Assert.assertEquals("item", child.getCheckpointPolicy());  //default
-        Assert.assertNull(child.getSkipLimit());
-        Assert.assertNull(child.getRetryLimit());
-
-        ChunkMerger merger = new ChunkMerger(parent, child);
-        merger.merge();
-
-//        TODO chunk listeners not in xsd yet
         Assert.assertEquals("parent", child.getCheckpointAlgorithm().getRef());
         Assert.assertNotNull(child.getSkippableExceptionClasses());
         Assert.assertNotNull(child.getRetryableExceptionClasses());
@@ -71,9 +57,6 @@ public class ChunkMergerTest {
 
     @Test
     public void mixed() throws Exception {
-        Job parentJob = JobXmlLoader.loadJobXml("chunk-mixed-parent.xml", Job.class);
-        Chunk parent = getChunk(parentJob, "chunk-mixed-parent") ;
-
         Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
         Chunk child = getChunk(childJob, "chunk-mixed-child");
 
@@ -92,7 +75,7 @@ public class ChunkMergerTest {
         Assert.assertEquals("15", child.getSkipLimit()) ;
         Assert.assertEquals(null, child.getRetryLimit()) ;
 
-        ChunkMerger merger = new ChunkMerger(parent, child);
+        JobMerger merger = new JobMerger(childJob);
         merger.merge();
 
         Assert.assertEquals("child", child.getCheckpointAlgorithm().getRef());
@@ -111,15 +94,44 @@ public class ChunkMergerTest {
     }
 
     @Test
-    public void exceptionClassFilter() throws Exception {
-        Job parentJob = JobXmlLoader.loadJobXml("chunk-mixed-parent.xml", Job.class);
-        Chunk parent = getChunk(parentJob, "chunk-mixed-parent") ;
-
+    public void readerProcessorWriter() throws Exception {
         Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
+        JobMerger merger = new JobMerger(childJob);
+        merger.merge();
         Chunk child = getChunk(childJob, "chunk-mixed-child");
 
-        ChunkMerger merger = new ChunkMerger(parent, child);
+        Assert.assertEquals(1, child.getReader().getProperties().getProperty().size());  //properties merge is false
+        JobMergerTest.propertiesContain(child.getReader().getProperties(), new String[]{"child"}, true);
+        Assert.assertEquals(2, child.getProcessor().getProperties().getProperty().size());
+        JobMergerTest.propertiesContain(child.getProcessor().getProperties(), new String[]{"child", "parent"}, true);
+        Assert.assertEquals(1, child.getWriter().getProperties().getProperty().size());
+        JobMergerTest.propertiesContain(child.getWriter().getProperties(), new String[]{"child"}, true);
+    }
+
+    @Test
+    public void parentHasChunk() throws Exception {  //child step is empty and the chunk is declared in parent
+        Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
+        JobMerger merger = new JobMerger(childJob);
         merger.merge();
+        Chunk child = getChunk(childJob, "parent-has-chunk-child");
+
+        Assert.assertEquals("R1", child.getReader().getRef());
+        Assert.assertEquals("P1", child.getProcessor().getRef());
+        Assert.assertEquals("W1", child.getWriter().getRef());
+        Assert.assertEquals(1, child.getReader().getProperties().getProperty().size());  //properties merge is false
+        JobMergerTest.propertiesContain(child.getReader().getProperties(), new String[]{"child"}, true);
+        Assert.assertEquals(1, child.getProcessor().getProperties().getProperty().size());
+        JobMergerTest.propertiesContain(child.getProcessor().getProperties(), new String[]{"child"}, true);
+        Assert.assertEquals(1, child.getWriter().getProperties().getProperty().size());
+        JobMergerTest.propertiesContain(child.getWriter().getProperties(), new String[]{"child"}, true);
+    }
+
+    @Test
+    public void exceptionClassFilter() throws Exception {
+        Job childJob = JobXmlLoader.loadJobXml("chunk-mixed-child.xml", Job.class);
+        JobMerger merger = new JobMerger(childJob);
+        merger.merge();
+        Chunk child = getChunk(childJob, "chunk-mixed-child");
 
         verifyExceptionClassesFilter((ExceptionClassFilterImpl) child.getSkippableExceptionClasses());
         verifyExceptionClassesFilter((ExceptionClassFilterImpl) child.getRetryableExceptionClasses());
