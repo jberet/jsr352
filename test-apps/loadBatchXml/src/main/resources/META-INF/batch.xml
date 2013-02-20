@@ -31,6 +31,6 @@
 -->
 <batch-artifacts xmlns="http://jcp.org.batch/jsl"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                 xsi:schemaLocation="http://jcp.org.batch/jsl file:///Users/cfang/dev/jsr352/mybatch/src/main/resources/batchXML.xsd">
+                 xsi:schemaLocation="http://jcp.org.batch/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/batchXML.xsd">
     <ref id="Batchlet1" class="org.mybatch.testapps.Batchlet1"/>
 </batch-artifacts>

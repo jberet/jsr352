@@ -28,7 +28,7 @@ public class Batchlet1 extends AbstractBatchlet {
 
     @Override
     public String process() throws Exception {
-        System.out.printf("Processing batchlet mapped with META-INF/batch.xml: %s", this);
+        System.out.printf("Processing batchlet mapped with META-INF/batch.xml: %s%n%n", this);
         return "Processed";
     }
 

@@ -24,7 +24,6 @@ package org.mybatch.runtime;
 
 import javax.batch.runtime.JobInstance;
 
-import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
 
@@ -32,12 +31,10 @@ public class JobInstanceImpl implements JobInstance {
     private long id;
     private Job job;
     private ApplicationMetaData appData;
-    private ArtifactFactory artifactFactory;
 
-    public JobInstanceImpl(Job job, ApplicationMetaData appData, ArtifactFactory artifactFactory) {
+    public JobInstanceImpl(Job job, ApplicationMetaData appData) {
         this.job = job;
         this.appData = appData;
-        this.artifactFactory = artifactFactory;
     }
 
     @Override
@@ -52,10 +49,6 @@ public class JobInstanceImpl implements JobInstance {
 
     public ApplicationMetaData getApplicationMetaData() {
         return this.appData;
-    }
-
-    public ArtifactFactory getArtifactFactory() {
-        return artifactFactory;
     }
 
 }

@@ -105,9 +105,9 @@ public class JobOperatorImpl implements JobOperator {
         } catch (IOException e) {
             throw LOGGER.failToProcessMetaData(e, job);
         }
-        JobInstanceImpl instance = new JobInstanceImpl(jobDefined, appData, artifactFactory);
+        JobInstanceImpl instance = new JobInstanceImpl(jobDefined, appData);
         JobExecutionImpl jobExecution = new JobExecutionImpl(instance);
-        JobContextImpl jobContext = new JobContextImpl(jobDefined, instance.getInstanceId(), jobExecution.getExecutionId(), jobParameters);
+        JobContextImpl jobContext = new JobContextImpl(jobDefined, instance.getInstanceId(), jobExecution.getExecutionId(), jobParameters, appData, artifactFactory);
         jobExecution.setJobContext(jobContext);
 
         JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(instance, jobExecution, jobContext);

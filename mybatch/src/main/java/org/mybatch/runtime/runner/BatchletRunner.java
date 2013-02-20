@@ -31,7 +31,6 @@ import org.mybatch.job.Batchlet;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.operations.JobOperatorImpl;
 import org.mybatch.runtime.context.StepContextImpl;
-import org.mybatch.util.BatchUtil;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
@@ -51,7 +50,7 @@ public class BatchletRunner extends AbstractRunner implements Callable<Void> {
         Thread thread = Thread.currentThread();
         ClassLoader originalCL = thread.getContextClassLoader();
         try {
-            ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
+            ClassLoader classLoader = stepContext.getClassLoader();
             thread.setContextClassLoader(classLoader);
             String ref = batchlet.getRef();
             ApplicationMetaData appData = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getApplicationMetaData();
@@ -65,7 +64,7 @@ public class BatchletRunner extends AbstractRunner implements Callable<Void> {
 
             try {
                 javax.batch.api.Batchlet batchletObj =
-                        (javax.batch.api.Batchlet) stepExecutionRunner.getJobExecutionRunner().getJobInstance().getArtifactFactory().create(ref, classLoader, m);
+                        (javax.batch.api.Batchlet) stepContext.getJobContext().getArtifactFactory().create(ref, classLoader, m);
                 String exitStatus = batchletObj.process();
                 stepContext.setExitStatus(exitStatus);
 

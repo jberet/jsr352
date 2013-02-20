@@ -30,6 +30,7 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
     protected T transientUserData;
     protected String batchStatus;
     protected String exitStatus = batchStatus;
+    protected ClassLoader classLoader;
 
     //not initialized here
     protected List<BatchContext<T>> batchContexts;
@@ -78,6 +79,10 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
 
     public JobContextImpl<T> getJobContext() {
         return this.jobContext;
+    }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
     }
 
 }

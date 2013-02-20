@@ -28,6 +28,21 @@ import org.junit.Test;
 import org.mybatch.Main;
 import org.mybatch.operations.JobOperatorImpl;
 
+/**
+ * Verifies the following:
+ *
+ * Batchlet1 is declared in batch.xml, loaded with portable archive loader;
+ * job listener L1 is declared with @Named, loaded with non-portable job loader;
+ * JobContext injected with @Inject into batchlet and job listener;
+ * artifact properties for the job listener are injected into the target artifact;
+ * job-level properties are not injected into the field of a job listener;
+ * job-level listener property can reference job-level properties with #{jobProperties['']};
+ * can retrieve all job-level properties from JobContext injected into a job listener;
+ * the beforeJob and afterJob methods are invoked in order;
+ * multiple job listeners configured to a job are all invoked;
+ * artifact properties of listener1 is not exposed to listener 2;
+ *
+ */
 public class LoadBatchXmlIT {
     private static final String jobXmlName = "batchlet1.xml";
 

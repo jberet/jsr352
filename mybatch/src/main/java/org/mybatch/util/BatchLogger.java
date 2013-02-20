@@ -100,4 +100,8 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void jobAlreadyExists(String jobId);
 
+    @Message(id = 18, value = "Failed to run artifact: %s, method: %s")
+    @LogMessage(level = Logger.Level.ERROR)
+    void failToRunJob(@Cause Throwable e, Object artifact, String method);
+
 }

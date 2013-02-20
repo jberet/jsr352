@@ -50,6 +50,7 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
     public StepContextImpl(Step step, long stepExecutionId1, JobContextImpl<T> jobContext1) {
         this(step, stepExecutionId1);
         this.jobContext = jobContext1;
+        this.classLoader = jobContext.getClassLoader();
         resolveProperties();
     }
 

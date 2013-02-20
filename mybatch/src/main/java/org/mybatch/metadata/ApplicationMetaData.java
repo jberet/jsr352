@@ -69,6 +69,10 @@ public class ApplicationMetaData {
         batchArtifacts = ArchiveXmlLoader.loadBatchXml(classLoader);
     }
 
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
     public String getClassNameForRef(String ref) {
         String result = artifactCatalog.get(ref);
         if (result == null && batchArtifacts != null) {

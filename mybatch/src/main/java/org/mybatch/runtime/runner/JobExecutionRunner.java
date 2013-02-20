@@ -23,11 +23,10 @@
 package org.mybatch.runtime.runner;
 
 import java.io.Serializable;
+import javax.batch.api.JobListener;
 
 import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
-import org.mybatch.job.Listener;
-import org.mybatch.job.Listeners;
 import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.JobExecutionImpl;
@@ -35,6 +34,7 @@ import org.mybatch.runtime.JobInstanceImpl;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.JobContextImpl;
 import org.mybatch.runtime.context.StepContextImpl;
+import org.mybatch.util.BatchLogger;
 
 public class JobExecutionRunner extends AbstractRunner implements Runnable {
     private Job job;
@@ -60,11 +60,12 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
     @Override
     public void run() {
         // run job listeners beforeJob()
-        Listeners listeners = job.getListeners();
-        if (listeners != null) {
-            for (Listener listener : listeners.getListener()) {
-                String ref = listener.getRef();
-
+        for (JobListener l : jobContext.getJobListeners()) {
+            try {
+                l.beforeJob();
+            } catch (Throwable e) {
+                BatchLogger.LOGGER.failToRunJob(e, l, "beforeJob");
+                return;
             }
         }
 
@@ -90,6 +91,15 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
                 Split split = (Split) e;
                 //A split cannot be abstract so run the split
                 break;
+            }
+        }
+
+        for (JobListener l : jobContext.getJobListeners()) {
+            try {
+                l.afterJob();
+            } catch (Throwable e) {
+                BatchLogger.LOGGER.failToRunJob(e, l, "afterJob");
+                return;
             }
         }
     }

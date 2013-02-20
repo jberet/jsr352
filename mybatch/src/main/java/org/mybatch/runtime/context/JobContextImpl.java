@@ -22,11 +22,21 @@
 
 package org.mybatch.runtime.context;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import javax.batch.api.JobListener;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.context.JobContext;
 
+import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.job.Job;
+import org.mybatch.job.Listener;
+import org.mybatch.job.Listeners;
+import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
 import org.mybatch.util.PropertyResolver;
 
@@ -37,13 +47,35 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
 
     private Properties jobParameters;
 
-    public JobContextImpl(Job job, long instanceId, long executionId, Properties jobParameters) {
+    private ApplicationMetaData applicationMetaData;
+    private ArtifactFactory artifactFactory;
+
+    private JobListener[] jobListeners;
+
+    public JobContextImpl(Job job, long instanceId, long executionId, Properties jobParameters, ApplicationMetaData applicationMetaData, ArtifactFactory artifactFactory) {
         super(job.getId());
         this.job = job;
         this.instanceId = instanceId;
         this.executionId = executionId;
         this.jobParameters = jobParameters;
+        this.applicationMetaData = applicationMetaData;
+        this.classLoader = applicationMetaData.getClassLoader();
+        this.artifactFactory = artifactFactory;
+
         resolveProperties();
+        initJobListeners();
+    }
+
+    public ArtifactFactory getArtifactFactory() {
+        return artifactFactory;
+    }
+
+    public JobListener[] getJobListeners() {
+        return this.jobListeners;
+    }
+
+    public ApplicationMetaData getApplicationMetaData() {
+        return applicationMetaData;
     }
 
     public Properties getJobParameters() {
@@ -72,6 +104,35 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
 
     public Job getJob() {
         return job;
+    }
+
+    public <A> A createJobLevelArtifact(String ref, org.mybatch.job.Properties props) {
+        Map<ArtifactFactory.DataKey, Object> artifactCreationData = new HashMap<ArtifactFactory.DataKey, Object>();
+        artifactCreationData.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, applicationMetaData);
+        artifactCreationData.put(ArtifactFactory.DataKey.JOB_CONTEXT, this);
+        if (props != null) {
+            artifactCreationData.put(ArtifactFactory.DataKey.BATCH_PROPERTY, props);
+        }
+        A a = null;
+        try {
+            a = (A) artifactFactory.create(ref, classLoader, artifactCreationData);
+        } catch (Exception e) {
+            BatchLogger.LOGGER.failToCreateArtifact(ref);
+        }
+        return a;
+    }
+
+    private void initJobListeners() {
+        Listeners listeners = job.getListeners();
+        if (listeners != null) {
+            List<Listener> listenerList = listeners.getListener();
+            int count = listenerList.size();
+            this.jobListeners = new JobListener[count];
+            for (int i = 0; i < count; i++) {
+                Listener listener = listenerList.get(i);
+                this.jobListeners[i] = createJobLevelArtifact(listener.getRef(), listener.getProperties());
+            }
+        }
     }
 
     private void resolveProperties() {
