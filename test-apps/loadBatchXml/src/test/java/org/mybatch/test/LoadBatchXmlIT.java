@@ -22,6 +22,7 @@
  
 package org.mybatch.test;
 
+import java.util.Properties;
 import javax.batch.operations.JobOperator;
 
 import org.junit.Test;
@@ -37,19 +38,25 @@ import org.mybatch.operations.JobOperatorImpl;
  * artifact properties for the job listener are injected into the target artifact;
  * job-level properties are not injected into the field of a job listener;
  * job-level listener property can reference job-level properties with #{jobProperties['']};
+ * job-level listener property can reference system properties with #{systemProperties['']};
+ * job-level listener property can reference job parameters with #{jobParameters['']};
  * can retrieve all job-level properties from JobContext injected into a job listener;
  * the beforeJob and afterJob methods are invoked in order;
  * multiple job listeners configured to a job are all invoked;
  * artifact properties of listener1 is not exposed to listener 2;
- *
+ * the above requirements applied to multiple step listeners;
+ * step listener properties can reference job property from the enclosing step and the enclosing job w/ proper precedence;
  */
 public class LoadBatchXmlIT {
     private static final String jobXmlName = "batchlet1.xml";
 
     @Test
     public void loadBatchXml() throws Exception {
+        Properties props = new Properties();
+        props.setProperty("job-param", "job-param");
+
         JobOperator jobOperator = new JobOperatorImpl();
-        jobOperator.start(jobXmlName, null);
+        jobOperator.start(jobXmlName, props);
         Thread.sleep(10000);
     }
 }

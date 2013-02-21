@@ -40,7 +40,13 @@ public class JobListener1 extends AbstractJobListener implements JobListener {
     private String listenerProp;  //injected
 
     @BatchProperty(name = "reference-job-prop")
-    private Object referencedProp;
+    private Object referenceJobProp;
+
+    @BatchProperty(name="reference-job-param")
+    private String referenceJobParam;
+
+    @BatchProperty(name="reference-system-property")
+    private String referenceSystemProperty;
 
     @Inject
     private JobContext jobContext;
@@ -50,8 +56,11 @@ public class JobListener1 extends AbstractJobListener implements JobListener {
         System.out.printf("In beforeJob of %s%n", this);
         Assert.assertEquals(null, jobProp);
         Assert.assertEquals("listener-prop", listenerProp);
-        Assert.assertEquals("job-prop", referencedProp);
-        Assert.assertEquals(1, jobContext.getProperties().size());
+        Assert.assertEquals("job-prop", referenceJobProp);
+        Assert.assertEquals("job-param", referenceJobParam);
+        Assert.assertEquals(System.getProperty("java.version"), referenceSystemProperty);
+
+        Assert.assertEquals(2, jobContext.getProperties().size());
         Assert.assertEquals("job-prop", jobContext.getProperties().get("job-prop"));
     }
 

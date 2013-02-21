@@ -23,11 +23,15 @@
 package org.mybatch.runtime.context;
 
 import java.io.Externalizable;
+import java.util.List;
 import java.util.Properties;
+import javax.batch.api.StepListener;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.context.StepContext;
 
+import org.mybatch.job.Listener;
+import org.mybatch.job.Listeners;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.metric.MetricName;
 import org.mybatch.runtime.metric.StepMetrics;
@@ -41,6 +45,8 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
     private Exception exception;
     private StepMetrics stepMetrics = new StepMetrics();
 
+    private StepListener[] stepListeners;
+
     private StepContextImpl(Step step, long stepExecutionId1) {
         super(step.getId());
         this.step = step;
@@ -52,6 +58,11 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
         this.jobContext = jobContext1;
         this.classLoader = jobContext.getClassLoader();
         resolveProperties();
+        initStepListeners();
+    }
+
+    public StepListener[] getStepListeners() {
+        return stepListeners;
     }
 
     @Override
@@ -95,6 +106,19 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
 
     public void setMetric(MetricName metricName, long value) {
         stepMetrics.set(metricName, value);
+    }
+
+    private void initStepListeners() {
+        Listeners listeners = step.getListeners();
+        if (listeners != null) {
+            List<Listener> listenerList = listeners.getListener();
+            int count = listenerList.size();
+            this.stepListeners = new StepListener[count];
+            for (int i = 0; i < count; i++) {
+                Listener listener = listenerList.get(i);
+                this.stepListeners[i] = jobContext.createArtifact(listener.getRef(), listener.getProperties(), this);
+            }
+        }
     }
 
     private void resolveProperties() {

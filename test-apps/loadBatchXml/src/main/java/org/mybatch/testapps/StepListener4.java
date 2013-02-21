@@ -23,39 +23,50 @@
 package org.mybatch.testapps;
 
 import javax.batch.annotation.BatchProperty;
-import javax.batch.api.JobListener;
+import javax.batch.api.AbstractStepListener;
+import javax.batch.api.StepListener;
 import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.junit.Assert;
 
-@Named("L2")
-public class JobListener2 implements JobListener {
-    @BatchProperty(name="job-prop")
-    private String jobProp = "L2";  //nothing is injected
+public class StepListener4 extends AbstractStepListener implements StepListener {
+    @BatchProperty(name="step-prop")
+    private String stepProp;  //nothing is injected
 
     @BatchProperty(name = "listener-prop")
-    private String listenerProp;  //nothing is injected
+    private String listenerProp = "default";  //nothing to inject, keep the field default value
 
     @BatchProperty(name = "reference-job-prop")
-    private Object referencedProp;  //nothing is injected
+    private Object referencedProp;  //nothing to inject
+
+    @BatchProperty(name = "reference-step-prop")
+    private Object referencedStepProp;  //nothing to inject
 
     @Inject
     private JobContext jobContext;
 
+    @Inject
+    private StepContext stepContext;
+
     @Override
-    public void beforeJob() throws Exception {
-        System.out.printf("In beforeJob of %s%n", this);
-        Assert.assertEquals("L2", jobProp);
-        Assert.assertEquals(null, listenerProp);
+    public void beforeStep() throws Exception {
+        System.out.printf("In beforeStep of %s%n", this);
+        Assert.assertEquals(null, stepProp);
+        Assert.assertEquals("default", listenerProp);
         Assert.assertEquals(null, referencedProp);
+        Assert.assertEquals(null, referencedStepProp);
+
         Assert.assertEquals(2, jobContext.getProperties().size());
         Assert.assertEquals("job-prop", jobContext.getProperties().get("job-prop"));
+
+        Assert.assertEquals(2, stepContext.getProperties().size());
+        Assert.assertEquals("step-prop", stepContext.getProperties().get("step-prop"));
     }
 
     @Override
-    public void afterJob() throws Exception {
-        System.out.printf("In afterJob of %s%n", this);
+    public void afterStep() throws Exception {
+        System.out.printf("In afterStep of %s%n", this);
     }
 }

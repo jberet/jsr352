@@ -22,15 +22,12 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<!--
-<batch-artifacts xmlns="http://batch.jsr352/jsl"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/batchXML.xsd">
-<ref id="Batchlet1" class="org.mybatch.testapps.Batchlet1"/>
-</batch-artifacts>
--->
 <batch-artifacts xmlns="http://jcp.org.batch/jsl"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xsi:schemaLocation="http://jcp.org.batch/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/batchXML.xsd">
     <ref id="Batchlet1" class="org.mybatch.testapps.Batchlet1"/>
+    <ref id="L1" class="SHOULD NOT REACH HERE"/>
+    <ref id="L2" class="SHOULD NOT REACH HERE"/>
+    <ref id="L3" class="org.mybatch.testapps.StepListener3"/>
+    <ref id="L4" class="org.mybatch.testapps.StepListener4"/>
 </batch-artifacts>

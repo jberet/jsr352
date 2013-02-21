@@ -22,12 +22,7 @@
 
 package org.mybatch.runtime.runner;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Future;
+import javax.batch.api.StepListener;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
@@ -35,7 +30,7 @@ import org.mybatch.job.Step;
 import org.mybatch.operations.JobOperatorImpl;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.StepContextImpl;
-import org.mybatch.util.ConcurrencyService;
+import org.mybatch.util.BatchLogger;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
@@ -44,7 +39,7 @@ public class StepExecutionRunner extends AbstractRunner implements Runnable {
     private StepExecutionImpl stepExecution;
     private StepContextImpl stepContext;
     private JobExecutionRunner jobExecutionRunner;
-    private Future<?> stepResult;
+    private Object stepResult;
 
     public StepExecutionRunner(Step step, StepExecutionImpl stepExecution, StepContextImpl stepContext, JobExecutionRunner jobExecutionRunner) {
         this.step = step;
@@ -77,32 +72,29 @@ public class StepExecutionRunner extends AbstractRunner implements Runnable {
             return;
         }
 
+        for (StepListener l : stepContext.getStepListeners()) {
+            try {
+                l.beforeStep();
+            } catch (Throwable e) {
+                BatchLogger.LOGGER.failToRunJob(e, l, "beforeStep");
+                return;
+            }
+        }
+
+
         BatchletRunner batchletRunner = new BatchletRunner(batchlet, this);
-        stepResult = ConcurrencyService.submit(batchletRunner);
-        LOGGER.submittedBatchletTask(batchlet.getRef(), Thread.currentThread());
+        stepResult = batchletRunner.call();
 
         //TODO handle chunk type step
 
-    }
 
-    public static void invokeFunctionMethods(Object artifact, List<Class<? extends Annotation>> methodAnnotations)
-            throws InvocationTargetException, IllegalAccessException {
-        for(Class<? extends Annotation> ann : methodAnnotations) {
-            Method m = StepExecutionRunner.getAnnotatedMethod(artifact, ann);
-            if(m != null) {
-                m.invoke(artifact);
-            } else {
-                throw LOGGER.noMethodMatchingAnnotation(ann, artifact);
+        for (StepListener l : stepContext.getStepListeners()) {
+            try {
+                l.afterStep();
+            } catch (Throwable e) {
+                BatchLogger.LOGGER.failToRunJob(e, l, "afterStep");
+                return;
             }
         }
-    }
-
-    public static Method getAnnotatedMethod(Object artifact, Class<? extends Annotation> annotationClass) {
-        for(Method m : artifact.getClass().getDeclaredMethods()) {
-            if (m.getAnnotation(annotationClass) != null) {
-                return m;
-            }
-        }
-        return null;
     }
 }

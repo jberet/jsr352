@@ -34,7 +34,7 @@ import org.mybatch.runtime.context.StepContextImpl;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-public class BatchletRunner extends AbstractRunner implements Callable<Void> {
+public class BatchletRunner extends AbstractRunner implements Callable<Object> {
     private Batchlet batchlet;
     private StepExecutionRunner stepExecutionRunner;
     private StepContextImpl stepContext;
@@ -46,7 +46,7 @@ public class BatchletRunner extends AbstractRunner implements Callable<Void> {
     }
 
     @Override
-    public Void call() {
+    public Object call() {
         Thread thread = Thread.currentThread();
         ClassLoader originalCL = thread.getContextClassLoader();
         try {

@@ -22,7 +22,6 @@
 
 package org.mybatch.runtime.context;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,12 +105,23 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
         return job;
     }
 
-    public <A> A createJobLevelArtifact(String ref, org.mybatch.job.Properties props) {
+    /**
+     * Creates a batch artifact by delegating to the proper ArtifactFactory and passing along data needed for artifact
+     * loading and creation.
+     * @param ref ref name of the artifact
+     * @param props batch properties directly for the artifact to create (does not include any properties from upper enclosing levels)
+     * @param stepContext optional StepContext, needed for step-level artifact, but not for job-level ones
+     * @return the created artifact
+     */
+    public <A> A createArtifact(String ref, org.mybatch.job.Properties props, StepContextImpl... stepContext) {
         Map<ArtifactFactory.DataKey, Object> artifactCreationData = new HashMap<ArtifactFactory.DataKey, Object>();
         artifactCreationData.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, applicationMetaData);
         artifactCreationData.put(ArtifactFactory.DataKey.JOB_CONTEXT, this);
         if (props != null) {
             artifactCreationData.put(ArtifactFactory.DataKey.BATCH_PROPERTY, props);
+        }
+        if(stepContext.length > 0) {
+            artifactCreationData.put(ArtifactFactory.DataKey.STEP_CONTEXT, stepContext[0]);
         }
         A a = null;
         try {
@@ -130,7 +140,7 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
             this.jobListeners = new JobListener[count];
             for (int i = 0; i < count; i++) {
                 Listener listener = listenerList.get(i);
-                this.jobListeners[i] = createJobLevelArtifact(listener.getRef(), listener.getProperties());
+                this.jobListeners[i] = createArtifact(listener.getRef(), listener.getProperties());
             }
         }
     }
