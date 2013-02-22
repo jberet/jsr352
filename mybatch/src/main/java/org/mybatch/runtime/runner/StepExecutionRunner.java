@@ -22,17 +22,12 @@
 
 package org.mybatch.runtime.runner;
 
-import java.util.regex.Pattern;
 import javax.batch.api.StepListener;
 import javax.batch.operations.JobOperator;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
-import org.mybatch.job.End;
-import org.mybatch.job.Fail;
-import org.mybatch.job.Next;
 import org.mybatch.job.Step;
-import org.mybatch.job.Stop;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchLogger;
@@ -63,17 +58,17 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
 
     @Override
     public void run() {
-        stepContext.setBatchStatus(JobOperator.BatchStatus.STARTED.name());
+        stepContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
         Chunk chunk = step.getChunk();
         Batchlet batchlet = step.getBatchlet();
         if (chunk == null && batchlet == null) {
-            stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED.name());
+            stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
             LOGGER.stepContainsNoChunkOrBatchlet(step.getId());
             return;
         }
 
         if (chunk != null && batchlet != null) {
-            stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED.name());
+            stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
             LOGGER.cannotContainBothChunkAndBatchlet(step.getId());
             return;
         }
@@ -83,7 +78,7 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
                 l.beforeStep();
             } catch (Throwable e) {
                 BatchLogger.LOGGER.failToRunJob(e, l, "beforeStep");
-                stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
+                stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
                 return;
             }
         }
@@ -100,75 +95,25 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
                 l.afterStep();
             } catch (Throwable e) {
                 BatchLogger.LOGGER.failToRunJob(e, l, "afterStep");
-                stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
+                stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
                 return;
             }
         }
 
-        if (stepContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {
-            stepContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED.name());
+        if (stepContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
+            stepContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+            stepContext.setExitStatus(JobOperator.BatchStatus.COMPLETED.name());
+            stepContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+            stepContext.getJobContext().setExitStatus(JobOperator.BatchStatus.COMPLETED.name());
         }
 
         if (stepContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
-            jobExecutionRunner.runJobElement(getNext());
-        }
-    }
-
-    private String getNext() {
-        String result = null;
-        String nextAttr = step.getNext();
-        if (nextAttr != null) {
-            return nextAttr;
-        }
-        String exitStatus = stepContext.getExitStatus();
-        for (Object e : step.getControlElements()) {  //end, fail. next, stop
-            if (e instanceof Next) {
-                Next next = (Next) e;
-                if (matches(exitStatus, next.getOn())) {
-                    return next.getTo();
-                }
-            } else if (e instanceof End) {
-                End end = (End) e;
-                if (matches(exitStatus, end.getOn())) {
-                    stepContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED.name());
-                    stepContext.setExitStatus(end.getExitStatus());
-                    return null;
-                }
-            } else if (e instanceof Fail) {
-                Fail fail = (Fail) e;
-                if (matches(exitStatus, fail.getOn())) {
-                    stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
-                    stepContext.setExitStatus(fail.getExitStatus());
-                    return null;
-                }
-            } else {  //stop
-                Stop stop = (Stop) e;
-                if (matches(exitStatus, stop.getOn())) {
-                    stepContext.setBatchStatus(JobOperator.BatchStatus.STOPPED.name());
-                    stepContext.setExitStatus(stop.getExitStatus());
-                    //TODO remember restart from stop.getRestart();
-                    return null;
-                }
+            String next = step.getNext();
+            if (next == null) {
+                next = resolveControlElements(step.getControlElements(), stepContext);
             }
+            jobExecutionRunner.runJobElement(next, stepExecution);
         }
-        return result;
     }
 
-    static final boolean matches(String text, String pattern) {
-        if (pattern.equals("*")) {
-            return true;
-        }
-        boolean containsQuestionMark = pattern.contains("?");
-        if (containsQuestionMark) {
-            pattern = pattern.replace('?', '.');
-        }
-        boolean containsAsterisk = pattern.contains("*");
-        if (containsAsterisk) {
-            pattern = pattern.replace("*", ".*");
-        }
-        if (!containsAsterisk && !containsQuestionMark) {
-            return text.equals(pattern);
-        }
-        return Pattern.matches(pattern, text);
-    }
 }

@@ -51,9 +51,9 @@
         <listeners>
             <listener ref="L3">
                 <properties>
-                    <property name="listener-prop"       value="step-listener-prop"></property>
-                    <property name="reference-job-prop"  value="#{jobProperties['job-prop']}"></property>
-                    <property name="reference-step-prop" value="#{jobProperties['step-prop']"></property>
+                    <property name="listener-prop"        value="step-listener-prop"></property>
+                    <property name="reference-job-prop"   value="#{jobProperties['job-prop']}"></property>
+                    <property name="reference-step-prop"  value="#{jobProperties['step-prop']"></property>
                     <property name="reference-job-prop-2" value="#{jobProperties['job-prop-2']}"></property>
                 </properties>
             </listener>
@@ -72,7 +72,20 @@
     <step id="step2">
         <batchlet ref="Batchlet1">
         </batchlet>
-        <next on="*" to="step3"></next>
+        <stop on="xyzz" exit-status="stopped" restart="false"/>  <!-- should not reach here -->
+        <fail on="abcd" exit-status="failed"/>  <!-- should not reach here -->
+        <end on="12345" exit-status="done"/>  <!-- should not reach here -->
+        <next on="aaa" to="step1"/>  <!-- should not reach here -->
+        <next on="*" to="decision1"></next>
     </step>
+
+    <decision id="decision1" ref="Decider1">
+        <properties>
+            <property name="decision-prop" value="decision-prop"></property>
+        </properties>
+        <next on="aaa" to="step1"></next>   <!-- should not reach here -->
+        <next on="next" to="step3"></next>  <!-- "next" is the value returned from Decider1.decide() -->
+        <end on="*" exit-status="done"></end>
+    </decision>
 
 </job>

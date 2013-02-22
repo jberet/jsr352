@@ -63,7 +63,7 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
 
         resolveProperties();
         initJobListeners();
-        setBatchStatus(JobOperator.BatchStatus.STARTING.name());
+        setBatchStatus(JobOperator.BatchStatus.STARTING);
     }
 
     public ArtifactFactory getArtifactFactory() {
@@ -97,12 +97,6 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
         return BatchUtil.toJavaUtilProperties(job.getProperties());
     }
 
-    @Override
-    public JobOperator.BatchStatus getBatchStatus() {
-        //TODO directly return this.batchStatus once the spec api is updated
-        return JobOperator.BatchStatus.valueOf(this.batchStatus);
-    }
-
     public Job getJob() {
         return job;
     }
@@ -129,7 +123,7 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
         try {
             a = (A) artifactFactory.create(ref, classLoader, artifactCreationData);
         } catch (Exception e) {
-            BatchLogger.LOGGER.failToCreateArtifact(ref);
+            BatchLogger.LOGGER.failToCreateArtifact(e, ref);
         }
         return a;
     }

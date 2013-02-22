@@ -23,8 +23,10 @@
 package org.mybatch.runtime.runner;
 
 import java.io.Serializable;
+import javax.batch.api.Decider;
 import javax.batch.api.JobListener;
 import javax.batch.operations.JobOperator;
+import javax.batch.runtime.StepExecution;
 
 import org.mybatch.job.Decision;
 import org.mybatch.job.Flow;
@@ -38,7 +40,7 @@ import org.mybatch.runtime.context.JobContextImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchLogger;
 
-public class JobExecutionRunner extends AbstractRunner implements Runnable {
+public final class JobExecutionRunner extends AbstractRunner implements Runnable {
     private Job job;
     private JobInstanceImpl jobInstance;
     private JobExecutionImpl jobExecution;
@@ -61,34 +63,36 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
 
     @Override
     public void run() {
-        jobContext.setBatchStatus(JobOperator.BatchStatus.STARTED.name());
+        jobContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
         // run job listeners beforeJob()
         for (JobListener l : jobContext.getJobListeners()) {
             try {
                 l.beforeJob();
             } catch (Throwable e) {
                 BatchLogger.LOGGER.failToRunJob(e, l, "beforeJob");
-                jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
+                jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
                 return;
             }
         }
 
-        // the head of the job is the first non-abstract element
+        // the head of the job is the first non-abstract element (step, flow, or split)
         for (Serializable e : job.getDecisionOrFlowOrSplit()) {
             if (e instanceof Step) {
                 Step step = (Step) e;
                 if (Boolean.parseBoolean(step.getAbstract())) {
                     continue;
                 }
-                runJobElement(step);
+                runStep(step);
                 break;
             } else if (e instanceof Flow) {
                 Flow flow = (Flow) e;
-                //A flow cannot be abstract so run the flow
+                //A flow cannot be abstract or have parent, so run the flow
+                runFlow(flow);
                 break;
             } else if (e instanceof Split) {
                 Split split = (Split) e;
-                //A split cannot be abstract so run the split
+                //A split cannot be abstract or have parent, so run the split
+                runSplit(split);
                 break;
             }
         }
@@ -98,16 +102,16 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
                 l.afterJob();
             } catch (Throwable e) {
                 BatchLogger.LOGGER.failToRunJob(e, l, "afterJob");
-                jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
+                jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
                 return;
             }
         }
         if (jobContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {
-            jobContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED.name());
+            jobContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
         }
     }
 
-    protected void runJobElement(String jobElementName) {
+    protected void runJobElement(String jobElementName, StepExecution... precedingStepExecutions) {
         if (jobElementName == null) {
             return;
         }
@@ -115,25 +119,25 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
             if (e instanceof Step) {
                 Step step = (Step) e;
                 if (step.getId().equals(jobElementName)) {
-                    runJobElement(step);
+                    runStep(step);
                     return;
                 }
             } else if (e instanceof Decision) {
                 Decision decision = (Decision) e;
                 if (decision.getId().equals(jobElementName)) {
-                    runJobElement(decision);
+                    runDecision(decision, precedingStepExecutions);
                     return;
                 }
             } else if (e instanceof Flow) {
                 Flow flow = (Flow) e;
                 if (flow.getId().equals(jobElementName)) {
-                    runJobElement(flow);
+                    runFlow(flow);
                     return;
                 }
             } else if (e instanceof Split) {
                 Split split = (Split) e;
                 if (split.getId().equals(jobElementName)) {
-                    runJobElement(split);
+                    runSplit(split);
                     return;
                 }
             }
@@ -142,7 +146,7 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
         BatchLogger.LOGGER.unrecognizableStep(jobElementName, job.getId());
     }
 
-    protected void runJobElement(Step step) {
+    protected void runStep(Step step) {
         StepExecutionImpl stepExecution = new StepExecutionImpl(step, jobExecution);
         StepContextImpl stepContext = new StepContextImpl(step, stepExecution.getId(), jobContext);
         stepExecution.setStepContext(stepContext);
@@ -151,15 +155,29 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
         stepExecutionRunner.run();
     }
 
-    protected void runJobElement(Decision decision) {
+    protected void runDecision(Decision decision, StepExecution... precedingStepExecutions) {
+        Decider decider = (Decider) jobContext.createArtifact(decision.getRef(), decision.getProperties());
+        String newExitStatus;
+        try {
+            newExitStatus = precedingStepExecutions.length == 1 ?
+                    decider.decide(precedingStepExecutions[0]) : decider.decide(precedingStepExecutions);
+            jobContext.setExitStatus(newExitStatus);
+            String next = resolveControlElements(decision.getControlElements(), jobContext);
+            runJobElement(next, precedingStepExecutions);
+        } catch (Exception e) {
+            BatchLogger.LOGGER.failToRunJob(e, decider, "decide");
+            jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            return;
+        }
 
     }
 
-    protected void runJobElement(Flow flow) {
+    protected void runFlow(Flow flow) {
 
     }
 
-    protected void runJobElement(Split split) {
+    protected void runSplit(Split split) {
 
     }
+
 }

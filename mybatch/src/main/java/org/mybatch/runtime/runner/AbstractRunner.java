@@ -19,24 +19,83 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.runtime.runner;
 
-import org.mybatch.job.Properties;
-import org.mybatch.runtime.context.JobContextImpl;
-import org.mybatch.runtime.context.StepContextImpl;
+import java.util.List;
+import java.util.regex.Pattern;
+import javax.batch.operations.JobOperator;
+
+import org.mybatch.job.End;
+import org.mybatch.job.Fail;
+import org.mybatch.job.Next;
+import org.mybatch.job.Stop;
+import org.mybatch.runtime.context.BatchContextImpl;
 
 public abstract class AbstractRunner {
     protected AbstractRunner() {
 
     }
 
-    protected Object createArtifact(String ref,
-                                    JobContextImpl jobContext,
-                                    StepContextImpl stepContext,
-                                    Properties artifactProps
-                                    ) {
-        return null;
+    protected static final boolean matches(String text, String pattern) {
+        if (pattern.equals("*")) {
+            return true;
+        }
+        boolean containsQuestionMark = pattern.contains("?");
+        if (containsQuestionMark) {
+            pattern = pattern.replace('?', '.');
+        }
+        boolean containsAsterisk = pattern.contains("*");
+        if (containsAsterisk) {
+            pattern = pattern.replace("*", ".*");
+        }
+        if (!containsAsterisk && !containsQuestionMark) {
+            return text.equals(pattern);
+        }
+        return Pattern.matches(pattern, text);
     }
+
+    /**
+     * Resolves a list of next, end, stop and fail elements to determine the next job element.
+     * @param controlElements the group of control elements, i.e., next, end, stop and fail
+     * @param batchContext JobContext if the current job element is a decision; otherwise StepContext
+     * @return the ref name of the next execution element
+     */
+    protected String resolveControlElements(List<?> controlElements, BatchContextImpl batchContext) {
+        String result = null;
+        String exitStatus = batchContext.getExitStatus();
+        for (Object e : controlElements) {  //end, fail. next, stop
+            if (e instanceof Next) {
+                Next next = (Next) e;
+                if (matches(exitStatus, next.getOn())) {
+                    return next.getTo();
+                }
+            } else if (e instanceof End) {
+                End end = (End) e;
+                if (matches(exitStatus, end.getOn())) {
+                    batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+                    batchContext.setExitStatus(end.getExitStatus());
+                    return null;
+                }
+            } else if (e instanceof Fail) {
+                Fail fail = (Fail) e;
+                if (matches(exitStatus, fail.getOn())) {
+                    batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    batchContext.setExitStatus(fail.getExitStatus());
+                    return null;
+                }
+            } else {  //stop
+                Stop stop = (Stop) e;
+                if (matches(exitStatus, stop.getOn())) {
+                    batchContext.setBatchStatus(JobOperator.BatchStatus.STOPPED);
+                    batchContext.setExitStatus(stop.getExitStatus());
+                    //TODO remember restart from stop.getRestart();
+                    return null;
+                }
+            }
+        }
+        return result;
+    }
+
 
 }

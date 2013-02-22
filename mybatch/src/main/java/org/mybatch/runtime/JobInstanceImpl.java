@@ -25,16 +25,13 @@ package org.mybatch.runtime;
 import javax.batch.runtime.JobInstance;
 
 import org.mybatch.job.Job;
-import org.mybatch.metadata.ApplicationMetaData;
 
 public class JobInstanceImpl implements JobInstance {
     private long id;
     private Job job;
-    private ApplicationMetaData appData;
 
-    public JobInstanceImpl(Job job, ApplicationMetaData appData) {
+    public JobInstanceImpl(Job job) {
         this.job = job;
-        this.appData = appData;
     }
 
     @Override
@@ -44,11 +41,7 @@ public class JobInstanceImpl implements JobInstance {
 
     @Override
     public long getInstanceId() {
-        return 0;
-    }
-
-    public ApplicationMetaData getApplicationMetaData() {
-        return this.appData;
+        return this.id;
     }
 
 }

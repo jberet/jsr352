@@ -51,7 +51,7 @@ public class BatchletRunner extends AbstractRunner implements Callable<Object> {
             stepContext.setExitStatus(exitStatus);
         } catch (Throwable e) {
             LOGGER.failToRunBatchlet(e, batchlet);
-            stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
+            stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
         }
         return null;
     }

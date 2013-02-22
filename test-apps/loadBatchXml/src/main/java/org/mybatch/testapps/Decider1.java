@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2012, Red Hat, Inc., and individual contributors
+ * Copyright 2013, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -22,26 +22,31 @@
 
 package org.mybatch.testapps;
 
-import javax.batch.api.AbstractBatchlet;
+import javax.batch.annotation.BatchProperty;
+import javax.batch.api.Decider;
+import javax.batch.runtime.StepExecution;
 import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
+import javax.inject.Named;
 
-public class Batchlet1 extends AbstractBatchlet {
+@Named
+public class Decider1 implements Decider {
+    @BatchProperty(name = "decision-prop")
+    private String decisionProp;
+
     @Inject
     private JobContext jobContext;
 
-    @Inject
-    private StepContext stepContext;
-
     @Override
-    public String process() throws Exception {
-        System.out.printf("%nIn %s, running step %s, job batch/exit status: %s/%s, step batch/exit status: %s/%s%n",
-                this, stepContext.getId(),
-                jobContext.getBatchStatus(), jobContext.getExitStatus(),
-                stepContext.getBatchStatus(), stepContext.getExitStatus()
-        );
-        return "Processed";
+    public String decide(StepExecution stepExecution) throws Exception {
+        System.out.printf("Running %s, decisionProp=%s, job batch/exit status: %s/%s, previous step batch/exit status: %s/%s%n",
+                this, decisionProp, jobContext.getBatchStatus(), jobContext.getExitStatus(),
+                stepExecution.getBatchStatus(), stepExecution.getExitStatus());
+        return "next";
     }
 
+    @Override
+    public String decide(StepExecution[] stepExecutions) throws Exception {
+        throw new IllegalStateException("Should not reach here.");
+    }
 }

@@ -46,7 +46,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
         ApplicationMetaData appData = (ApplicationMetaData) data.get(DataKey.APPLICATION_META_DATA);
         String className = appData.getClassNameForRef(ref);
         if (className == null) {
-            throw LOGGER.failToCreateArtifact(ref);
+            throw LOGGER.failToCreateArtifact(null, ref);
         }
         Class<?> cls = classLoader.loadClass(className);
         Object obj = cls.newInstance();

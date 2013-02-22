@@ -66,17 +66,17 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
 
     @Override
     public String getName() {
-        return null;
+        return stepContext.getJobContext().getJob().getId();
     }
 
     @Override
     public String getStepId() {
-        return null;
+        return step.getId();
     }
 
     @Override
     public JobOperator.BatchStatus getBatchStatus() {
-        return null;
+        return stepContext.getBatchStatus();
     }
 
     @Override

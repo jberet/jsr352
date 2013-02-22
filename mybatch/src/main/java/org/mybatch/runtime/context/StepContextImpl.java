@@ -59,7 +59,7 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
         this.classLoader = jobContext.getClassLoader();
         resolveProperties();
         initStepListeners();
-        setBatchStatus(JobOperator.BatchStatus.STARTING.name());
+        setBatchStatus(JobOperator.BatchStatus.STARTING);
     }
 
     public StepListener[] getStepListeners() {
@@ -84,12 +84,6 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
     @Override
     public void setPersistentUserData(P data) {
         this.persistentUserData = data;
-    }
-
-    @Override
-    public JobOperator.BatchStatus getBatchStatus() {
-        //TODO directly return this.batchStatus once the spec api is updated
-        return JobOperator.BatchStatus.valueOf(this.batchStatus);
     }
 
     @Override

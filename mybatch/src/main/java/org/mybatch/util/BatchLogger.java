@@ -39,7 +39,7 @@ public interface BatchLogger extends BasicLogger {
     BatchLogger LOGGER = org.jboss.logging.Logger.getMessageLogger(BatchLogger.class, BatchLogger.class.getPackage().getName());
 
     @Message(id = 1, value = "Failed to create artifact with ref name %s")
-    IllegalStateException failToCreateArtifact(String ref);
+    IllegalStateException failToCreateArtifact(@Cause Throwable e, String ref);
 
     @LogMessage(level = Logger.Level.ERROR)
     @Message(id = 2,

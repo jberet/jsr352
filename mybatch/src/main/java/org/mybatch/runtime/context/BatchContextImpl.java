@@ -23,13 +23,14 @@
 package org.mybatch.runtime.context;
 
 import java.util.List;
+import javax.batch.operations.JobOperator;
 import javax.batch.runtime.context.BatchContext;
 
 public abstract class BatchContextImpl<T> implements BatchContext<T> {
     protected String id;
     protected T transientUserData;
-    protected String batchStatus;
-    protected String exitStatus = batchStatus;
+    protected JobOperator.BatchStatus batchStatus;
+    protected String exitStatus;
     protected ClassLoader classLoader;
 
     //not initialized here
@@ -61,14 +62,18 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
         return batchContexts;
     }
 
-    public void setBatchStatus(String batchStatus) {
+    public void setBatchStatus(JobOperator.BatchStatus batchStatus) {
         this.batchStatus = batchStatus;
+    }
+
+    public JobOperator.BatchStatus getBatchStatus() {
+        return this.batchStatus;
     }
 
     @Override
     public String getExitStatus() {
         if (exitStatus == null) {
-            exitStatus = batchStatus;
+            exitStatus = batchStatus.name();
         }
         return exitStatus;
     }
