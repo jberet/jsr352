@@ -22,14 +22,10 @@
 
 package org.mybatch.runtime.runner;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
+import javax.batch.operations.JobOperator;
 
-import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.job.Batchlet;
-import org.mybatch.metadata.ApplicationMetaData;
-import org.mybatch.operations.JobOperatorImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
@@ -47,37 +43,17 @@ public class BatchletRunner extends AbstractRunner implements Callable<Object> {
 
     @Override
     public Object call() {
-        Thread thread = Thread.currentThread();
-        ClassLoader originalCL = thread.getContextClassLoader();
         try {
-            ClassLoader classLoader = stepContext.getClassLoader();
-            thread.setContextClassLoader(classLoader);
             String ref = batchlet.getRef();
-            ApplicationMetaData appData = stepExecutionRunner.getJobExecutionRunner().getJobInstance().getApplicationMetaData();
-            Map<ArtifactFactory.DataKey, Object> m = new HashMap<ArtifactFactory.DataKey, Object>();
-            m.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, appData);
-            m.put(ArtifactFactory.DataKey.STEP_CONTEXT, stepContext);
-            m.put(ArtifactFactory.DataKey.JOB_CONTEXT, stepContext.getJobContext());
-            if (batchlet.getProperties() != null) {
-                m.put(ArtifactFactory.DataKey.BATCH_PROPERTY, batchlet.getProperties());
-            }
-
-            try {
-                javax.batch.api.Batchlet batchletObj =
-                        (javax.batch.api.Batchlet) stepContext.getJobContext().getArtifactFactory().create(ref, classLoader, m);
-                String exitStatus = batchletObj.process();
-                stepContext.setExitStatus(exitStatus);
-
-            } catch (Throwable e) {
-                LOGGER.failToRunBatchlet(e, batchlet);
-                stepContext.setBatchStatus(JobOperatorImpl.BatchStatus.FAILED.name());
-            }
-            return null;
-        } catch (Throwable th) {
-            LOGGER.failToRunBatchlet(th, batchlet);
-            return null;
-        } finally {
-            thread.setContextClassLoader(originalCL);
+            javax.batch.api.Batchlet batchletObj =
+                    (javax.batch.api.Batchlet) stepContext.getJobContext().createArtifact(ref, batchlet.getProperties(), stepContext);
+            String exitStatus = batchletObj.process();
+            stepContext.setExitStatus(exitStatus);
+        } catch (Throwable e) {
+            LOGGER.failToRunBatchlet(e, batchlet);
+            stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
         }
+        return null;
     }
+
 }

@@ -67,6 +67,9 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
 
     @Override
     public String getExitStatus() {
+        if (exitStatus == null) {
+            exitStatus = batchStatus;
+        }
         return exitStatus;
     }
 

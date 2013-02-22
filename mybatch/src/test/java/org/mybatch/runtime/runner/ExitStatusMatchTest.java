@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2012, Red Hat, Inc., and individual contributors
+ * Copyright 2013, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -19,29 +19,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
+ 
+package org.mybatch.runtime.runner;
 
-package org.mybatch.testapps;
+import junit.framework.Assert;
+import org.junit.Test;
+import static org.mybatch.runtime.runner.StepExecutionRunner.matches;
 
-import javax.batch.api.AbstractBatchlet;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
+public class ExitStatusMatchTest {
+    @Test
+    public void testMatches() throws Exception {
+        Assert.assertTrue(matches("pass", "pass"));
+        Assert.assertTrue(matches("pass", "*"));
+        Assert.assertTrue(matches("pass", "????"));
 
-public class Batchlet1 extends AbstractBatchlet {
-    @Inject
-    private JobContext jobContext;
+        Assert.assertFalse(matches("pass", "p"));
+        Assert.assertFalse(matches("pass", "passed"));
+        Assert.assertFalse(matches("pass", "P???"));
+        Assert.assertFalse(matches("PASS", "p???"));
+        Assert.assertFalse(matches("pass", "p??S"));
 
-    @Inject
-    private StepContext stepContext;
-
-    @Override
-    public String process() throws Exception {
-        System.out.printf("In %s, running step %s, job batch/exit status: %s/%s, step batch/exit status: %s/%s%n%n",
-                this, stepContext.getId(),
-                jobContext.getBatchStatus(), jobContext.getExitStatus(),
-                stepContext.getBatchStatus(), stepContext.getExitStatus()
-        );
-        return "Processed";
+        Assert.assertTrue(matches("pass", "*a*"));
+        Assert.assertTrue(matches("pass", "*s"));
+        Assert.assertTrue(matches("pass", "???*"));
     }
-
 }

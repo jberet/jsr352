@@ -45,7 +45,7 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
     private Exception exception;
     private StepMetrics stepMetrics = new StepMetrics();
 
-    private StepListener[] stepListeners;
+    private StepListener[] stepListeners = new StepListener[0];
 
     private StepContextImpl(Step step, long stepExecutionId1) {
         super(step.getId());
@@ -59,6 +59,7 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
         this.classLoader = jobContext.getClassLoader();
         resolveProperties();
         initStepListeners();
+        setBatchStatus(JobOperator.BatchStatus.STARTING.name());
     }
 
     public StepListener[] getStepListeners() {
@@ -87,7 +88,8 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
 
     @Override
     public JobOperator.BatchStatus getBatchStatus() {
-        return null;
+        //TODO directly return this.batchStatus once the spec api is updated
+        return JobOperator.BatchStatus.valueOf(this.batchStatus);
     }
 
     @Override

@@ -22,7 +22,7 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="batchlet1" xmlns="http://batch.jsr352/jsl"
+<job id="job1" xmlns="http://batch.jsr352/jsl"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://batch.jsr352/jsl http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
 
@@ -42,7 +42,7 @@
         <listener ref="L2"></listener>
     </listeners>
 
-    <step id="batchlet1">
+    <step id="step1" next="step2">
         <properties>
             <property name="step-prop" value="step-prop"></property>
             <!-- same property name as in job, to test property resolution precedence -->
@@ -61,6 +61,18 @@
         </listeners>
         <batchlet ref="Batchlet1">
         </batchlet>
+    </step>
+
+    <step id="step3">
+        <batchlet ref="Batchlet1">
+        </batchlet>
+        <end on="*" exit-status="done"></end>
+    </step>
+
+    <step id="step2">
+        <batchlet ref="Batchlet1">
+        </batchlet>
+        <next on="*" to="step3"></next>
     </step>
 
 </job>

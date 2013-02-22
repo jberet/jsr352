@@ -24,7 +24,9 @@ package org.mybatch.runtime.runner;
 
 import java.io.Serializable;
 import javax.batch.api.JobListener;
+import javax.batch.operations.JobOperator;
 
+import org.mybatch.job.Decision;
 import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
 import org.mybatch.job.Split;
@@ -59,12 +61,14 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
 
     @Override
     public void run() {
+        jobContext.setBatchStatus(JobOperator.BatchStatus.STARTED.name());
         // run job listeners beforeJob()
         for (JobListener l : jobContext.getJobListeners()) {
             try {
                 l.beforeJob();
             } catch (Throwable e) {
                 BatchLogger.LOGGER.failToRunJob(e, l, "beforeJob");
+                jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
                 return;
             }
         }
@@ -76,12 +80,7 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
                 if (Boolean.parseBoolean(step.getAbstract())) {
                     continue;
                 }
-                StepExecutionImpl stepExecution = new StepExecutionImpl(step, jobExecution);
-                StepContextImpl stepContext = new StepContextImpl(step, stepExecution.getId(), jobContext);
-                stepExecution.setStepContext(stepContext);
-
-                StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(step, stepExecution, stepContext, this);
-                stepExecutionRunner.run();
+                runJobElement(step);
                 break;
             } else if (e instanceof Flow) {
                 Flow flow = (Flow) e;
@@ -99,8 +98,68 @@ public class JobExecutionRunner extends AbstractRunner implements Runnable {
                 l.afterJob();
             } catch (Throwable e) {
                 BatchLogger.LOGGER.failToRunJob(e, l, "afterJob");
+                jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED.name());
                 return;
             }
         }
+        if (jobContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {
+            jobContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED.name());
+        }
+    }
+
+    protected void runJobElement(String jobElementName) {
+        if (jobElementName == null) {
+            return;
+        }
+        for (Serializable e : job.getDecisionOrFlowOrSplit()) {
+            if (e instanceof Step) {
+                Step step = (Step) e;
+                if (step.getId().equals(jobElementName)) {
+                    runJobElement(step);
+                    return;
+                }
+            } else if (e instanceof Decision) {
+                Decision decision = (Decision) e;
+                if (decision.getId().equals(jobElementName)) {
+                    runJobElement(decision);
+                    return;
+                }
+            } else if (e instanceof Flow) {
+                Flow flow = (Flow) e;
+                if (flow.getId().equals(jobElementName)) {
+                    runJobElement(flow);
+                    return;
+                }
+            } else if (e instanceof Split) {
+                Split split = (Split) e;
+                if (split.getId().equals(jobElementName)) {
+                    runJobElement(split);
+                    return;
+                }
+            }
+        }
+
+        BatchLogger.LOGGER.unrecognizableStep(jobElementName, job.getId());
+    }
+
+    protected void runJobElement(Step step) {
+        StepExecutionImpl stepExecution = new StepExecutionImpl(step, jobExecution);
+        StepContextImpl stepContext = new StepContextImpl(step, stepExecution.getId(), jobContext);
+        stepExecution.setStepContext(stepContext);
+
+        StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(step, stepExecution, stepContext, this);
+        stepExecutionRunner.run();
+    }
+
+    protected void runJobElement(Decision decision) {
+
+    }
+
+    protected void runJobElement(Flow flow) {
+
+    }
+
+    protected void runJobElement(Split split) {
+
     }
 }

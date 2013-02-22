@@ -63,6 +63,7 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
 
         resolveProperties();
         initJobListeners();
+        setBatchStatus(JobOperator.BatchStatus.STARTING.name());
     }
 
     public ArtifactFactory getArtifactFactory() {
@@ -98,7 +99,8 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
 
     @Override
     public JobOperator.BatchStatus getBatchStatus() {
-        return null;
+        //TODO directly return this.batchStatus once the spec api is updated
+        return JobOperator.BatchStatus.valueOf(this.batchStatus);
     }
 
     public Job getJob() {
