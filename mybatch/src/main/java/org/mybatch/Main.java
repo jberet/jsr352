@@ -24,10 +24,9 @@ package org.mybatch;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.JobOperator;
 import javax.batch.operations.exception.JobStartException;
+import javax.batch.runtime.BatchRuntime;
 
-import org.mybatch.operations.JobOperatorImpl;
 import org.mybatch.util.ConcurrencyService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
@@ -45,7 +44,7 @@ public class Main {
         }
 
         try {
-            getJobOperator().start(jobXml, System.getProperties());
+            BatchRuntime.getJobOperator().start(jobXml, System.getProperties());
         } finally {
             try {
                 Thread.sleep(WAIT_FOR_COMPLETION_MILLIS);
@@ -55,13 +54,6 @@ public class Main {
                 //ignore
             }
         }
-    }
-
-    private static JobOperator getJobOperator() {
-        JobOperator jo = null;
-        //need to use javax.batch.spi.JobOperatorFactory (not available yet)
-        jo = new JobOperatorImpl();
-        return jo;
     }
 
     private static void usage(String[] args) {

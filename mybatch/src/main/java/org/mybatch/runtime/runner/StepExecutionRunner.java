@@ -59,6 +59,7 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
     @Override
     public void run() {
         stepContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
+        stepContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.STARTED);
         Chunk chunk = step.getChunk();
         Batchlet batchlet = step.getBatchlet();
         if (chunk == null && batchlet == null) {
@@ -102,9 +103,7 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
 
         if (stepContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
             stepContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
-            stepContext.setExitStatus(JobOperator.BatchStatus.COMPLETED.name());
-            stepContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);
-            stepContext.getJobContext().setExitStatus(JobOperator.BatchStatus.COMPLETED.name());
+            stepContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);  //set job batch status COMPLETED, may be changed by next step
         }
 
         if (stepContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {

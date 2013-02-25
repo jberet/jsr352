@@ -24,6 +24,7 @@ package org.mybatch.runtime.runner;
 
 import junit.framework.Assert;
 import org.junit.Test;
+
 import static org.mybatch.runtime.runner.StepExecutionRunner.matches;
 
 public class ExitStatusMatchTest {

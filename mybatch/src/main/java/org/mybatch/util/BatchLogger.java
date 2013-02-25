@@ -104,7 +104,7 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.ERROR)
     void failToRunJob(@Cause Throwable e, Object artifact, String method);
 
-    @Message(id = 19, value = "Unrecognizable step: %s in job: %s")
-    IllegalStateException unrecognizableStep(String stepName, String jobName);
+    @Message(id = 19, value = "Unrecognizable job element: %s in job: %s")
+    IllegalStateException unrecognizableJobElement(String jobElementName, String jobName);
 
 }

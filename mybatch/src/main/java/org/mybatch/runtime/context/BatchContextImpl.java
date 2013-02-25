@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.runtime.context;
 
 import java.util.List;
@@ -72,17 +72,18 @@ public abstract class BatchContextImpl<T> implements BatchContext<T> {
 
     @Override
     public String getExitStatus() {
-        if (exitStatus == null) {
-            exitStatus = batchStatus.name();
+        if (this.exitStatus != null) {
+            return this.exitStatus;
         }
-        return exitStatus;
+        if (this.batchStatus != null) {
+            return this.batchStatus.name();
+        }
+        return null;
     }
 
     @Override
     public void setExitStatus(String status) {
-        if (status != null) {
-            this.exitStatus = status;
-        }
+        this.exitStatus = status;
     }
 
     public JobContextImpl<T> getJobContext() {

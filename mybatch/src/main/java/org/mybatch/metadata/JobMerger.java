@@ -25,7 +25,6 @@ package org.mybatch.metadata;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.batch.operations.exception.JobStartException;
 
 import org.mybatch.job.Job;

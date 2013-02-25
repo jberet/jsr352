@@ -24,10 +24,9 @@ package org.mybatch.test;
 
 import java.util.Properties;
 import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchRuntime;
 
 import org.junit.Test;
-import org.mybatch.Main;
-import org.mybatch.operations.JobOperatorImpl;
 
 /**
  * Verifies the following:
@@ -55,7 +54,7 @@ public class LoadBatchXmlIT {
         Properties props = new Properties();
         props.setProperty("job-param", "job-param");
 
-        JobOperator jobOperator = new JobOperatorImpl();
+        JobOperator jobOperator = BatchRuntime.getJobOperator();
         jobOperator.start(jobXmlName, props);
         Thread.sleep(10000);
     }

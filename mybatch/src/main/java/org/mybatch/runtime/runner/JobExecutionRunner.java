@@ -111,6 +111,11 @@ public final class JobExecutionRunner extends AbstractRunner implements Runnable
         }
     }
 
+    /**
+     * Runs the job element including step, decision, flow, and split.
+     * @param jobElementName ref name of the job element
+     * @param precedingStepExecutions 0 or 1 StepExecution, 1 StepExecution is passed in for decision element, and 0 StepExecution for others.
+     */
     protected void runJobElement(String jobElementName, StepExecution... precedingStepExecutions) {
         if (jobElementName == null) {
             return;
@@ -143,7 +148,7 @@ public final class JobExecutionRunner extends AbstractRunner implements Runnable
             }
         }
 
-        BatchLogger.LOGGER.unrecognizableStep(jobElementName, job.getId());
+        BatchLogger.LOGGER.unrecognizableJobElement(jobElementName, job.getId());
     }
 
     protected void runStep(Step step) {
