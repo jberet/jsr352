@@ -22,75 +22,61 @@
  
 package org.mybatch.runtime;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Properties;
-import javax.batch.operations.JobOperator;
 import javax.batch.runtime.JobExecution;
 
-import org.mybatch.runtime.context.JobContextImpl;
-
-public class JobExecutionImpl implements JobExecution {
+public final class JobExecutionImpl extends AbstractExecution implements JobExecution {
     private long id;
 
-    private JobInstanceImpl instance;
+    private JobInstanceImpl jobInstance;
 
-    private JobContextImpl jobContext;
+    private Properties jobParameters;
 
-    public JobExecutionImpl(JobInstanceImpl in) {
-        this.instance = in;
-    }
+    protected long createTime;
+    protected long lastUpdatedTime;
 
-    public JobContextImpl getJobContext() {
-        return jobContext;
-    }
 
-    public void setJobContext(JobContextImpl jobContext1) {
-        this.jobContext = jobContext1;
+    public JobExecutionImpl(JobInstanceImpl in, Properties jobParameters) {
+        this.jobInstance = in;
+        this.jobParameters = jobParameters;
     }
 
     @Override
     public long getExecutionId() {
-        return 0;
+        return id;
     }
 
     @Override
     public long getInstanceId() {
-        return instance.getInstanceId();
+        return jobInstance.getInstanceId();
     }
 
     @Override
-    public Timestamp getCreateTime() {
-        return null;
+    public Date getCreateTime() {
+        return new Date(createTime);
     }
 
     @Override
     public Date getLastUpdatedTime() {
-        return null;
+        return new Date(lastUpdatedTime);
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public void setLastUpdatedTime(long lastUpdatedTime) {
+        this.lastUpdatedTime = lastUpdatedTime;
+    }
+
+    public JobInstanceImpl getJobInstance() {
+        return jobInstance;
     }
 
     @Override
     public Properties getJobParameters() {
-        return null;
+        return jobParameters;
     }
 
-    @Override
-    public JobOperator.BatchStatus getBatchStatus() {
-        return null;
-    }
-
-    @Override
-    public Timestamp getStartTime() {
-        return null;
-    }
-
-    @Override
-    public Timestamp getEndTime() {
-        return null;
-    }
-
-    @Override
-    public String getExitStatus() {
-        return null;
-    }
 }

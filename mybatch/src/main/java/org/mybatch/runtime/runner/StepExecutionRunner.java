@@ -28,7 +28,6 @@ import javax.batch.operations.JobOperator;
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Step;
-import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchLogger;
 
@@ -36,24 +35,13 @@ import static org.mybatch.util.BatchLogger.LOGGER;
 
 public final class StepExecutionRunner extends AbstractRunner implements Runnable {
     private Step step;
-    private StepExecutionImpl stepExecution;
-    private StepContextImpl stepContext;
-    private JobExecutionRunner jobExecutionRunner;
+    private StepContextImpl stepContext;  //duplicate super.batchContext, for accessing StepContext-specific methods
     private Object stepResult;
 
-    public StepExecutionRunner(Step step, StepExecutionImpl stepExecution, StepContextImpl stepContext, JobExecutionRunner jobExecutionRunner) {
-        this.step = step;
-        this.stepExecution = stepExecution;
+    public StepExecutionRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner) {
+        super(stepContext, enclosingRunner);
+        this.step = stepContext.getStep();
         this.stepContext = stepContext;
-        this.jobExecutionRunner = jobExecutionRunner;
-    }
-
-    public StepContextImpl getStepContext() {
-        return stepContext;
-    }
-
-    public JobExecutionRunner getJobExecutionRunner() {
-        return jobExecutionRunner;
     }
 
     @Override
@@ -64,13 +52,13 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
         Batchlet batchlet = step.getBatchlet();
         if (chunk == null && batchlet == null) {
             stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
-            LOGGER.stepContainsNoChunkOrBatchlet(step.getId());
+            LOGGER.stepContainsNoChunkOrBatchlet(id);
             return;
         }
 
         if (chunk != null && batchlet != null) {
             stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
-            LOGGER.cannotContainBothChunkAndBatchlet(step.getId());
+            LOGGER.cannotContainBothChunkAndBatchlet(id);
             return;
         }
 
@@ -85,7 +73,7 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
         }
 
 
-        BatchletRunner batchletRunner = new BatchletRunner(batchlet, this);
+        BatchletRunner batchletRunner = new BatchletRunner(stepContext, enclosingRunner, batchlet);
         stepResult = batchletRunner.call();
 
         //TODO handle chunk type step
@@ -103,15 +91,15 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
 
         if (stepContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
             stepContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
-            stepContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);  //set job batch status COMPLETED, may be changed by next step
+            enclosingRunner.getBatchContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);  //set job batch status COMPLETED, may be changed by next step
         }
 
         if (stepContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
             String next = step.getNext();
             if (next == null) {
-                next = resolveControlElements(step.getControlElements(), stepContext);
+                next = resolveControlElements(step.getControlElements());
             }
-            jobExecutionRunner.runJobElement(next, stepExecution);
+            enclosingRunner.runJobElement(next, stepContext.getStepExecution());
         }
     }
 

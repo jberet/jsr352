@@ -106,11 +106,10 @@ public class JobOperatorImpl implements JobOperator {
             throw LOGGER.failToProcessMetaData(e, job);
         }
         JobInstanceImpl instance = new JobInstanceImpl(jobDefined);
-        JobExecutionImpl jobExecution = new JobExecutionImpl(instance);
-        JobContextImpl jobContext = new JobContextImpl(jobDefined, instance.getInstanceId(), jobExecution.getExecutionId(), jobParameters, appData, artifactFactory);
-        jobExecution.setJobContext(jobContext);
+        JobExecutionImpl jobExecution = new JobExecutionImpl(instance, jobParameters);
+        JobContextImpl jobContext = new JobContextImpl(jobDefined, jobExecution, appData, artifactFactory);
 
-        JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(instance, jobExecution, jobContext);
+        JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
         Future<?> result = ConcurrencyService.submit(jobExecutionRunner);
         long jobExecutionId = jobExecution.getExecutionId();
         jobExecutionResults.put(jobExecutionId, result);
@@ -128,7 +127,6 @@ public class JobOperatorImpl implements JobOperator {
             throws JobExecutionAlreadyCompleteException, NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException {
         return 0;
     }
-
 
     @Override
     public void stop(long executionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {

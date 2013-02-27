@@ -23,42 +23,24 @@
 package org.mybatch.runtime.runner;
 
 import java.io.Serializable;
-import javax.batch.api.Decider;
 import javax.batch.api.JobListener;
 import javax.batch.operations.JobOperator;
-import javax.batch.runtime.StepExecution;
 
-import org.mybatch.job.Decision;
 import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
 import org.mybatch.job.Split;
 import org.mybatch.job.Step;
-import org.mybatch.runtime.JobExecutionImpl;
-import org.mybatch.runtime.JobInstanceImpl;
-import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.runtime.context.JobContextImpl;
-import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchLogger;
 
-public final class JobExecutionRunner extends AbstractRunner implements Runnable {
+public final class JobExecutionRunner extends CompositeExecutionRunner implements Runnable {
     private Job job;
-    private JobInstanceImpl jobInstance;
-    private JobExecutionImpl jobExecution;
-    private JobContextImpl jobContext;
+    private JobContextImpl jobContext;  //duplicate super.batchContext, for accessing StepContext-specific methods
 
-    public JobExecutionRunner(JobInstanceImpl jobInstance, JobExecutionImpl jobExecution, JobContextImpl jobContext) {
+    public JobExecutionRunner(JobContextImpl jobContext) {
+        super(jobContext, null, jobContext.getJob().getDecisionOrFlowOrSplit());
         this.job = jobContext.getJob();
         this.jobContext = jobContext;
-        this.jobInstance = jobInstance;
-        this.jobExecution = jobExecution;
-    }
-
-    public JobInstanceImpl getJobInstance() {
-        return jobInstance;
-    }
-
-    public JobExecutionImpl getJobExecution() {
-        return jobExecution;
     }
 
     @Override
@@ -109,80 +91,6 @@ public final class JobExecutionRunner extends AbstractRunner implements Runnable
         if (jobContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {
             jobContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
         }
-    }
-
-    /**
-     * Runs the job element including step, decision, flow, and split.
-     * @param jobElementName ref name of the job element
-     * @param precedingStepExecutions 0 or 1 StepExecution, 1 StepExecution is passed in for decision element, and 0 StepExecution for others.
-     */
-    protected void runJobElement(String jobElementName, StepExecution... precedingStepExecutions) {
-        if (jobElementName == null) {
-            return;
-        }
-        for (Serializable e : job.getDecisionOrFlowOrSplit()) {
-            if (e instanceof Step) {
-                Step step = (Step) e;
-                if (step.getId().equals(jobElementName)) {
-                    runStep(step);
-                    return;
-                }
-            } else if (e instanceof Decision) {
-                Decision decision = (Decision) e;
-                if (decision.getId().equals(jobElementName)) {
-                    runDecision(decision, precedingStepExecutions);
-                    return;
-                }
-            } else if (e instanceof Flow) {
-                Flow flow = (Flow) e;
-                if (flow.getId().equals(jobElementName)) {
-                    runFlow(flow);
-                    return;
-                }
-            } else if (e instanceof Split) {
-                Split split = (Split) e;
-                if (split.getId().equals(jobElementName)) {
-                    runSplit(split);
-                    return;
-                }
-            }
-        }
-
-        BatchLogger.LOGGER.unrecognizableJobElement(jobElementName, job.getId());
-    }
-
-    protected void runStep(Step step) {
-        StepExecutionImpl stepExecution = new StepExecutionImpl(step, jobExecution);
-        StepContextImpl stepContext = new StepContextImpl(step, stepExecution.getId(), jobContext);
-        stepExecution.setStepContext(stepContext);
-
-        StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(step, stepExecution, stepContext, this);
-        stepExecutionRunner.run();
-    }
-
-    protected void runDecision(Decision decision, StepExecution... precedingStepExecutions) {
-        Decider decider = (Decider) jobContext.createArtifact(decision.getRef(), decision.getProperties());
-        String newExitStatus;
-        try {
-            newExitStatus = precedingStepExecutions.length == 1 ?
-                    decider.decide(precedingStepExecutions[0]) : decider.decide(precedingStepExecutions);
-            jobContext.setExitStatus(newExitStatus);
-            String next = resolveControlElements(decision.getControlElements(), jobContext);
-            runJobElement(next, precedingStepExecutions);
-        } catch (Exception e) {
-            BatchLogger.LOGGER.failToRunJob(e, decider, "decide");
-            jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
-            return;
-        }
-
-    }
-
-    protected void runFlow(Flow flow) {
-
-    }
-
-    protected void runSplit(Split split) {
-
     }
 
 }

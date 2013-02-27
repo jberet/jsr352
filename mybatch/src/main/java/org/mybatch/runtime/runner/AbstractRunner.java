@@ -30,11 +30,28 @@ import org.mybatch.job.End;
 import org.mybatch.job.Fail;
 import org.mybatch.job.Next;
 import org.mybatch.job.Stop;
-import org.mybatch.runtime.context.BatchContextImpl;
+import org.mybatch.runtime.context.AbstractContext;
 
 public abstract class AbstractRunner {
-    protected AbstractRunner() {
+    /**
+     * The id of the job element this runner represents.
+     */
+    protected String id;
+    protected AbstractContext batchContext;
+    protected CompositeExecutionRunner enclosingRunner;
 
+    protected AbstractRunner(AbstractContext batchContext, CompositeExecutionRunner enclosingRunner) {
+        this.id = batchContext.getId();
+        this.batchContext = batchContext;
+        this.enclosingRunner = enclosingRunner;
+    }
+
+    public CompositeExecutionRunner getEnclosingRunner() {
+        return enclosingRunner;
+    }
+
+    public AbstractContext getBatchContext() {
+        return this.batchContext;
     }
 
     protected static final boolean matches(String text, String pattern) {
@@ -57,11 +74,11 @@ public abstract class AbstractRunner {
 
     /**
      * Resolves a list of next, end, stop and fail elements to determine the next job element.
+     *
      * @param controlElements the group of control elements, i.e., next, end, stop and fail
-     * @param batchContext JobContext if the current job element is a decision; otherwise StepContext
      * @return the ref name of the next execution element
      */
-    protected String resolveControlElements(List<?> controlElements, BatchContextImpl batchContext) {
+    protected String resolveControlElements(List<?> controlElements) {
         String result = null;
         String exitStatus = batchContext.getExitStatus();
         for (Object e : controlElements) {  //end, fail. next, stop

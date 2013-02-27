@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.runtime.context;
 
 import java.io.Externalizable;
@@ -33,42 +33,63 @@ import javax.batch.runtime.context.StepContext;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Step;
-import org.mybatch.runtime.metric.MetricName;
-import org.mybatch.runtime.metric.StepMetrics;
+import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.util.BatchUtil;
 import org.mybatch.util.PropertyResolver;
 
-public class StepContextImpl<T, P extends Externalizable> extends BatchContextImpl<T> implements StepContext<T, P> {
+public class StepContextImpl<T, P extends Externalizable> extends AbstractContext<T> implements StepContext<T, P> {
     private Step step;
-    private long stepExecutionId;
-    private P persistentUserData;
+    private StepExecutionImpl<P> stepExecution;
     private Exception exception;
-    private StepMetrics stepMetrics = new StepMetrics();
 
     private StepListener[] stepListeners = new StepListener[0];
 
-    private StepContextImpl(Step step, long stepExecutionId1) {
-        super(step.getId());
+    public StepContextImpl(Step step, AbstractContext<T>[] outerContexts) {
+        super(step.getId(), outerContexts);
         this.step = step;
-        this.stepExecutionId = stepExecutionId1;
-    }
-
-    public StepContextImpl(Step step, long stepExecutionId1, JobContextImpl<T> jobContext1) {
-        this(step, stepExecutionId1);
-        this.jobContext = jobContext1;
-        this.classLoader = jobContext.getClassLoader();
+        this.classLoader = getJobContext().getClassLoader();
         resolveProperties();
         initStepListeners();
-        setBatchStatus(JobOperator.BatchStatus.STARTING);
+
+        this.stepExecution = new StepExecutionImpl<P>(getJobContext().getJobExecution(), id);
+        this.stepExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
+    }
+
+    public Step getStep() {
+        return this.step;
     }
 
     public StepListener[] getStepListeners() {
         return stepListeners;
     }
 
+    public StepExecutionImpl<P> getStepExecution() {
+        return this.stepExecution;
+    }
+
+    @Override
+    public JobOperator.BatchStatus getBatchStatus() {
+        return stepExecution.getBatchStatus();
+    }
+
+    @Override
+    public void setBatchStatus(JobOperator.BatchStatus status) {
+        stepExecution.setBatchStatus(status);
+    }
+
+    @Override
+    public String getExitStatus() {
+        return stepExecution.getExitStatus();
+    }
+
+    @Override
+    public void setExitStatus(String exitStatus) {
+        stepExecution.setExitStatus(exitStatus);
+    }
+
     @Override
     public long getStepExecutionId() {
-        return stepExecutionId;
+        return stepExecution.getId();
     }
 
     @Override
@@ -77,13 +98,18 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
     }
 
     @Override
+    public org.mybatch.job.Properties getProperties2() {
+        return step.getProperties();
+    }
+
+    @Override
     public P getPersistentUserData() {
-        return persistentUserData;
+        return stepExecution.getUserPersistentData();  //TODO UserPersistence or PersistentUser?
     }
 
     @Override
     public void setPersistentUserData(P data) {
-        this.persistentUserData = data;
+        stepExecution.setUserPersistentData(data);
     }
 
     @Override
@@ -97,11 +123,7 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
 
     @Override
     public Metric[] getMetrics() {
-        return stepMetrics.getMetrics();
-    }
-
-    public void setMetric(MetricName metricName, long value) {
-        stepMetrics.set(metricName, value);
+        return stepExecution.getMetrics();
     }
 
     private void initStepListeners() {
@@ -112,18 +134,23 @@ public class StepContextImpl<T, P extends Externalizable> extends BatchContextIm
             this.stepListeners = new StepListener[count];
             for (int i = 0; i < count; i++) {
                 Listener listener = listenerList.get(i);
-                this.stepListeners[i] = jobContext.createArtifact(listener.getRef(), listener.getProperties(), this);
+                //ask the root JobContext to create artifact
+                this.stepListeners[i] = getJobContext().createArtifact(listener.getRef(), listener.getProperties(), this);
             }
         }
     }
 
     private void resolveProperties() {
         PropertyResolver resolver = new PropertyResolver();
-        resolver.setJobParameters(jobContext.getJobParameters());
+        resolver.setJobParameters(getJobContext().getJobParameters());
 
-        org.mybatch.job.Properties props = jobContext.getJob().getProperties();
-        if (props != null) {
-            resolver.pushJobProperties(props);
+        //this step can be directly under job, or under job->split->flow, etc
+        org.mybatch.job.Properties props;
+        for (AbstractContext<T> context : outerContexts) {
+            props = context.getProperties2();
+            if (props != null) {
+                resolver.pushJobProperties(props);
+            }
         }
 
         props = step.getProperties();

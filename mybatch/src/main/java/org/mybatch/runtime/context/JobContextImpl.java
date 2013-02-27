@@ -35,35 +35,31 @@ import org.mybatch.job.Job;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
 import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
 import org.mybatch.util.PropertyResolver;
 
-public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext<T> {
+public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<T> {
     private Job job;
-    private long instanceId;
-    private long executionId;
-
-    private Properties jobParameters;
+    private JobExecutionImpl jobExecution;
 
     private ApplicationMetaData applicationMetaData;
     private ArtifactFactory artifactFactory;
 
     private JobListener[] jobListeners;
 
-    public JobContextImpl(Job job, long instanceId, long executionId, Properties jobParameters, ApplicationMetaData applicationMetaData, ArtifactFactory artifactFactory) {
+    public JobContextImpl(Job job, JobExecutionImpl jobExecution, ApplicationMetaData applicationMetaData, ArtifactFactory artifactFactory) {
         super(job.getId());
         this.job = job;
-        this.instanceId = instanceId;
-        this.executionId = executionId;
-        this.jobParameters = jobParameters;
+        this.jobExecution = jobExecution;
         this.applicationMetaData = applicationMetaData;
         this.classLoader = applicationMetaData.getClassLoader();
         this.artifactFactory = artifactFactory;
 
         resolveProperties();
         initJobListeners();
-        setBatchStatus(JobOperator.BatchStatus.STARTING);
+        jobExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
     }
 
     public ArtifactFactory getArtifactFactory() {
@@ -79,22 +75,56 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
     }
 
     public Properties getJobParameters() {
-        return jobParameters;
+        return jobExecution.getJobParameters();
     }
 
     @Override
     public long getInstanceId() {
-        return instanceId;
+        return jobExecution.getInstanceId();
     }
 
     @Override
     public long getExecutionId() {
-        return executionId;
+        return jobExecution.getExecutionId();
     }
 
     @Override
     public Properties getProperties() {
         return BatchUtil.toJavaUtilProperties(job.getProperties());
+    }
+
+    @Override
+    public org.mybatch.job.Properties getProperties2() {
+        return job.getProperties();
+    }
+
+    @Override
+    public JobOperator.BatchStatus getBatchStatus() {
+        return jobExecution.getBatchStatus();
+    }
+
+    @Override
+    public String getExitStatus() {
+        return jobExecution.getExitStatus();
+    }
+
+    @Override
+    public void setBatchStatus(JobOperator.BatchStatus status) {
+        jobExecution.setBatchStatus(status);
+    }
+
+    @Override
+    public void setExitStatus(String status) {
+        jobExecution.setExitStatus(status);
+    }
+
+    @Override
+    public JobContextImpl<T> getJobContext() {
+        return this;
+    }
+
+    public JobExecutionImpl getJobExecution() {
+        return this.jobExecution;
     }
 
     public Job getJob() {
@@ -106,18 +136,18 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
      * loading and creation.
      * @param ref ref name of the artifact
      * @param props batch properties directly for the artifact to create (does not include any properties from upper enclosing levels)
-     * @param stepContext optional StepContext, needed for step-level artifact, but not for job-level ones
+     * @param stepContextForInjection optional StepContext, needed for step-level artifact, but not for non-step-level ones
      * @return the created artifact
      */
-    public <A> A createArtifact(String ref, org.mybatch.job.Properties props, StepContextImpl... stepContext) {
+    public <A> A createArtifact(String ref, org.mybatch.job.Properties props, StepContextImpl... stepContextForInjection) {
         Map<ArtifactFactory.DataKey, Object> artifactCreationData = new HashMap<ArtifactFactory.DataKey, Object>();
         artifactCreationData.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, applicationMetaData);
         artifactCreationData.put(ArtifactFactory.DataKey.JOB_CONTEXT, this);
         if (props != null) {
             artifactCreationData.put(ArtifactFactory.DataKey.BATCH_PROPERTY, props);
         }
-        if(stepContext.length > 0) {
-            artifactCreationData.put(ArtifactFactory.DataKey.STEP_CONTEXT, stepContext[0]);
+        if(stepContextForInjection.length > 0) {
+            artifactCreationData.put(ArtifactFactory.DataKey.STEP_CONTEXT, stepContextForInjection[0]);
         }
         A a = null;
         try {
@@ -143,11 +173,12 @@ public class JobContextImpl<T> extends BatchContextImpl<T> implements JobContext
 
     private void resolveProperties() {
         PropertyResolver resolver = new PropertyResolver();
-        resolver.setJobParameters(this.jobParameters);
+        resolver.setJobParameters(jobExecution.getJobParameters());
         org.mybatch.job.Properties props = job.getProperties();
         if (props != null) {
             resolver.pushJobProperties(props);
         }
         resolver.resolve(job);
     }
+
 }

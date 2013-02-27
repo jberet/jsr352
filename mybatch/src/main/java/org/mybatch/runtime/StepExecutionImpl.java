@@ -22,37 +22,26 @@
 
 package org.mybatch.runtime;
 
-import java.sql.Timestamp;
-import javax.batch.operations.JobOperator;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
-import org.mybatch.job.Step;
-import org.mybatch.runtime.context.StepContextImpl;
+import org.mybatch.runtime.metric.StepMetrics;
 
-public class StepExecutionImpl<P> implements StepExecution<P> {
+public final class StepExecutionImpl<P> extends AbstractExecution implements StepExecution<P> {
     private long id;
 
-    private Step step;
+    private String stepId;
 
-    private StepContextImpl stepContext;
+    private JobExecutionImpl rootJobExecution;
 
-    private JobExecutionImpl jobExecution;
+    private P userPersistentData;
 
-    private P persistentData;
+    private StepMetrics stepMetrics = new StepMetrics();
 
-    public StepContextImpl getStepContext() {
-        return stepContext;
-    }
-
-    public void setStepContext(StepContextImpl stepContext) {
-        this.stepContext = stepContext;
-    }
-
-    public StepExecutionImpl(Step step, JobExecutionImpl jobExecution) {
+    public StepExecutionImpl(JobExecutionImpl rootJobExecution, String stepId) {
         //TODO initialize id
-        this.step = step;
-        this.jobExecution = jobExecution;
+        this.rootJobExecution = rootJobExecution;
+        this.stepId = stepId;
     }
 
     public long getId() {
@@ -61,47 +50,31 @@ public class StepExecutionImpl<P> implements StepExecution<P> {
 
     @Override
     public long getJobExecutionId() {
-        return jobExecution.getExecutionId();
+        return rootJobExecution.getExecutionId();
     }
 
     @Override
     public String getName() {
-        return stepContext.getJobContext().getJob().getId();
+        return rootJobExecution.getJobInstance().getJobName();
     }
 
     @Override
     public String getStepId() {
-        return step.getId();
-    }
-
-    @Override
-    public JobOperator.BatchStatus getBatchStatus() {
-        return stepContext.getBatchStatus();
-    }
-
-    @Override
-    public Timestamp getStartTime() {
-        return null;
-    }
-
-    @Override
-    public Timestamp getEndTime() {
-        return null;
-    }
-
-    @Override
-    public String getExitStatus() {
-        return stepContext.getExitStatus();
+        return stepId;
     }
 
     @Override
     public P getUserPersistentData() {
-        return persistentData;
+        return userPersistentData;
+    }
+
+    public void setUserPersistentData(P userPersistentData) {
+        this.userPersistentData = userPersistentData;
     }
 
     @Override
     public Metric[] getMetrics() {
-        return stepContext.getMetrics();
+        return stepMetrics.getMetrics();
     }
 
 }
