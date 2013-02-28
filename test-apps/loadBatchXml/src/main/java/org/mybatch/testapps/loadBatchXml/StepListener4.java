@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.mybatch.testapps;
+package org.mybatch.testapps.loadBatchXml;
 
 import javax.batch.annotation.BatchProperty;
 import javax.batch.api.AbstractStepListener;
@@ -31,21 +31,18 @@ import javax.inject.Inject;
 
 import org.junit.Assert;
 
-public class StepListener3 extends AbstractStepListener implements StepListener {
+public class StepListener4 extends AbstractStepListener implements StepListener {
     @BatchProperty(name="step-prop")
     private String stepProp;  //nothing is injected
 
     @BatchProperty(name = "listener-prop")
-    private String listenerProp;  //injected
+    private String listenerProp = "default";  //nothing to inject, keep the field default value
 
     @BatchProperty(name = "reference-job-prop")
-    private Object referencedProp;
+    private Object referencedProp;  //nothing to inject
 
     @BatchProperty(name = "reference-step-prop")
-    private Object referencedStepProp;
-
-    @BatchProperty(name="reference-job-prop-2")
-    private String referenceJobProp2;
+    private Object referencedStepProp;  //nothing to inject
 
     @Inject
     private JobContext jobContext;
@@ -57,17 +54,15 @@ public class StepListener3 extends AbstractStepListener implements StepListener 
     public void beforeStep() throws Exception {
         System.out.printf("In beforeStep of %s%n", this);
         Assert.assertEquals(null, stepProp);
-        Assert.assertEquals("step-listener-prop", listenerProp);
-        Assert.assertEquals("job-prop", referencedProp);
-        Assert.assertEquals("step-prop", referencedStepProp);
-        Assert.assertEquals("step-prop-2", referenceJobProp2);
+        Assert.assertEquals("default", listenerProp);
+        Assert.assertEquals(null, referencedProp);
+        Assert.assertEquals(null, referencedStepProp);
 
         Assert.assertEquals(2, jobContext.getProperties().size());
         Assert.assertEquals("job-prop", jobContext.getProperties().get("job-prop"));
 
         Assert.assertEquals(2, stepContext.getProperties().size());
         Assert.assertEquals("step-prop", stepContext.getProperties().get("step-prop"));
-
     }
 
     @Override

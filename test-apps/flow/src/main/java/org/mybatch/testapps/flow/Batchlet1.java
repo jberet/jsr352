@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2013, Red Hat, Inc., and individual contributors
+ * Copyright 2012, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -20,20 +20,28 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.runtime;
+package org.mybatch.testapps.flow;
 
-import javax.batch.runtime.context.FlowResults;
+import javax.batch.api.AbstractBatchlet;
+import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
+import javax.inject.Inject;
 
-public class FlowExecution extends AbstractExecution implements FlowResults {
-    private String flowId;
+public class Batchlet1 extends AbstractBatchlet {
+    @Inject
+    private JobContext jobContext;
 
-    public FlowExecution(String flowId) {
-        this.flowId = flowId;
-    }
+    @Inject
+    private StepContext stepContext;
 
     @Override
-    public String getFlowId() {
-        return flowId;
+    public String process() throws Exception {
+        System.out.printf("%nIn %s, running step %s, job batch/exit status: %s/%s, step batch/exit status: %s/%s%n",
+                this, stepContext.getId(),
+                jobContext.getBatchStatus(), jobContext.getExitStatus(),
+                stepContext.getBatchStatus(), stepContext.getExitStatus()
+        );
+        return "Processed";
     }
 
 }

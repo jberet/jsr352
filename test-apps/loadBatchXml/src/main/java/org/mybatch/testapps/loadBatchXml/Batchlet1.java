@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.testapps;
+package org.mybatch.testapps.loadBatchXml;
 
 import javax.batch.api.AbstractBatchlet;
 import javax.batch.runtime.context.JobContext;

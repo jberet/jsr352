@@ -35,7 +35,6 @@ import org.mybatch.job.Listeners;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.util.BatchUtil;
-import org.mybatch.util.PropertyResolver;
 
 public class StepContextImpl<T, P extends Externalizable> extends AbstractContext<T> implements StepContext<T, P> {
     private Step step;
@@ -48,8 +47,8 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
         super(step.getId(), outerContexts);
         this.step = step;
         this.classLoader = getJobContext().getClassLoader();
-        resolveProperties();
-        initStepListeners();
+        setUpPropertyResolver().resolve(this.step);
+        createStepListeners();
 
         this.stepExecution = new StepExecutionImpl<P>(getJobContext().getJobExecution(), id);
         this.stepExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
@@ -126,7 +125,7 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
         return stepExecution.getMetrics();
     }
 
-    private void initStepListeners() {
+    private void createStepListeners() {
         Listeners listeners = step.getListeners();
         if (listeners != null) {
             List<Listener> listenerList = listeners.getListener();
@@ -138,26 +137,5 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
                 this.stepListeners[i] = getJobContext().createArtifact(listener.getRef(), listener.getProperties(), this);
             }
         }
-    }
-
-    private void resolveProperties() {
-        PropertyResolver resolver = new PropertyResolver();
-        resolver.setJobParameters(getJobContext().getJobParameters());
-
-        //this step can be directly under job, or under job->split->flow, etc
-        org.mybatch.job.Properties props;
-        for (AbstractContext<T> context : outerContexts) {
-            props = context.getProperties2();
-            if (props != null) {
-                resolver.pushJobProperties(props);
-            }
-        }
-
-        props = step.getProperties();
-        if (props != null) {
-            resolver.pushJobProperties(props);
-        }
-
-        resolver.resolve(step);
     }
 }

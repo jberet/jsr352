@@ -28,6 +28,7 @@ import javax.batch.operations.JobOperator;
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Step;
+import org.mybatch.runtime.context.AbstractContext;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchLogger;
 
@@ -48,50 +49,62 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
     public void run() {
         stepContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
         stepContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.STARTED);
-        Chunk chunk = step.getChunk();
-        Batchlet batchlet = step.getBatchlet();
-        if (chunk == null && batchlet == null) {
-            stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
-            LOGGER.stepContainsNoChunkOrBatchlet(id);
-            return;
-        }
 
-        if (chunk != null && batchlet != null) {
-            stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
-            LOGGER.cannotContainBothChunkAndBatchlet(id);
-            return;
-        }
-
-        for (StepListener l : stepContext.getStepListeners()) {
-            try {
-                l.beforeStep();
-            } catch (Throwable e) {
-                BatchLogger.LOGGER.failToRunJob(e, l, "beforeStep");
-                stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+        try {
+            Chunk chunk = step.getChunk();
+            Batchlet batchlet = step.getBatchlet();
+            if (chunk == null && batchlet == null) {
+                stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
+                LOGGER.stepContainsNoChunkOrBatchlet(id);
                 return;
             }
-        }
 
-
-        BatchletRunner batchletRunner = new BatchletRunner(stepContext, enclosingRunner, batchlet);
-        stepResult = batchletRunner.call();
-
-        //TODO handle chunk type step
-
-
-        for (StepListener l : stepContext.getStepListeners()) {
-            try {
-                l.afterStep();
-            } catch (Throwable e) {
-                BatchLogger.LOGGER.failToRunJob(e, l, "afterStep");
-                stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            if (chunk != null && batchlet != null) {
+                stepContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
+                LOGGER.cannotContainBothChunkAndBatchlet(id);
                 return;
+            }
+
+            for (StepListener l : stepContext.getStepListeners()) {
+                try {
+                    l.beforeStep();
+                } catch (Throwable e) {
+                    BatchLogger.LOGGER.failToRunJob(e, l, "beforeStep");
+                    stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    return;
+                }
+            }
+
+
+            BatchletRunner batchletRunner = new BatchletRunner(stepContext, enclosingRunner, batchlet);
+            stepResult = batchletRunner.call();
+
+            //TODO handle chunk type step
+
+
+            for (StepListener l : stepContext.getStepListeners()) {
+                try {
+                    l.afterStep();
+                } catch (Throwable e) {
+                    BatchLogger.LOGGER.failToRunJob(e, l, "afterStep");
+                    stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    return;
+                }
+            }
+        } catch (Throwable e) {
+            LOGGER.failToRunJob(e, step, "run");
+            if (e instanceof Exception) {
+                stepContext.setException((Exception) e);
+            }
+            stepContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            for (AbstractContext c : stepContext.getOuterContexts()) {
+                c.setBatchStatus(JobOperator.BatchStatus.FAILED);
             }
         }
 
         if (stepContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
             stepContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
-            enclosingRunner.getBatchContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);  //set job batch status COMPLETED, may be changed by next step
+            enclosingRunner.getBatchContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);  //set job batch status COMPLETED, may be changed next
         }
 
         if (stepContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {

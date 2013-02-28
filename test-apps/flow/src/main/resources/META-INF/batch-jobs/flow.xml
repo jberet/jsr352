@@ -42,6 +42,8 @@
         <listener ref="L2"></listener>
     </listeners>
 
+
+    <flow id="flow1" next="step4">
     <step id="step1" next="step2">
         <properties>
             <property name="step-prop" value="step-prop"></property>
@@ -91,5 +93,10 @@
         <next on="next" to="step3"></next>  <!-- "next" is the value returned from Decider1.decide() -->
         <end on="*" exit-status="done"></end>
     </decision>
+    </flow>
+
+    <step id="step4">
+        <batchlet ref="Batchlet1"></batchlet>
+    </step>
 
 </job>

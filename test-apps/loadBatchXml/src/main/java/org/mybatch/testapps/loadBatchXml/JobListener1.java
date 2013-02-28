@@ -20,53 +20,52 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.mybatch.testapps;
+package org.mybatch.testapps.loadBatchXml;
 
 import javax.batch.annotation.BatchProperty;
-import javax.batch.api.AbstractStepListener;
-import javax.batch.api.StepListener;
+import javax.batch.api.AbstractJobListener;
+import javax.batch.api.JobListener;
 import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.junit.Assert;
 
-public class StepListener4 extends AbstractStepListener implements StepListener {
-    @BatchProperty(name="step-prop")
-    private String stepProp;  //nothing is injected
+@Named("L1")
+public class JobListener1 extends AbstractJobListener implements JobListener {
+    @BatchProperty(name="job-prop")
+    private String jobProp;  //nothing is injected
 
     @BatchProperty(name = "listener-prop")
-    private String listenerProp = "default";  //nothing to inject, keep the field default value
+    private String listenerProp;  //injected
 
     @BatchProperty(name = "reference-job-prop")
-    private Object referencedProp;  //nothing to inject
+    private Object referenceJobProp;
 
-    @BatchProperty(name = "reference-step-prop")
-    private Object referencedStepProp;  //nothing to inject
+    @BatchProperty(name="reference-job-param")
+    private String referenceJobParam;
+
+    @BatchProperty(name="reference-system-property")
+    private String referenceSystemProperty;
 
     @Inject
     private JobContext jobContext;
 
-    @Inject
-    private StepContext stepContext;
-
     @Override
-    public void beforeStep() throws Exception {
-        System.out.printf("In beforeStep of %s%n", this);
-        Assert.assertEquals(null, stepProp);
-        Assert.assertEquals("default", listenerProp);
-        Assert.assertEquals(null, referencedProp);
-        Assert.assertEquals(null, referencedStepProp);
+    public void beforeJob() throws Exception {
+        System.out.printf("In beforeJob of %s%n", this);
+        Assert.assertEquals(null, jobProp);
+        Assert.assertEquals("listener-prop", listenerProp);
+        Assert.assertEquals("job-prop", referenceJobProp);
+        Assert.assertEquals("job-param", referenceJobParam);
+        Assert.assertEquals(System.getProperty("java.version"), referenceSystemProperty);
 
         Assert.assertEquals(2, jobContext.getProperties().size());
         Assert.assertEquals("job-prop", jobContext.getProperties().get("job-prop"));
-
-        Assert.assertEquals(2, stepContext.getProperties().size());
-        Assert.assertEquals("step-prop", stepContext.getProperties().get("step-prop"));
     }
 
     @Override
-    public void afterStep() throws Exception {
-        System.out.printf("In afterStep of %s%n", this);
+    public void afterJob() throws Exception {
+        System.out.printf("In afterJob of %s%n", this);
     }
 }

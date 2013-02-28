@@ -32,6 +32,7 @@ import org.mybatch.job.Flow;
 import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.context.AbstractContext;
+import org.mybatch.runtime.context.FlowContextImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchLogger;
 
@@ -40,11 +41,34 @@ import org.mybatch.util.BatchLogger;
  * job, flow and split.
  */
 public abstract class CompositeExecutionRunner extends AbstractRunner {
-    protected List<?> jobElements;
-
-    protected CompositeExecutionRunner(AbstractContext batchContext, CompositeExecutionRunner enclosingRunner, List<?> jobElements) {
+    protected CompositeExecutionRunner(AbstractContext batchContext, CompositeExecutionRunner enclosingRunner) {
         super(batchContext, enclosingRunner);
-        this.jobElements = jobElements;
+    }
+
+    protected abstract List<?> getJobElements();
+
+    protected void runFromHead() {
+        // the head of the composite job element is the first non-abstract element (step, flow, or split)
+        for (Object e : getJobElements()) {
+            if (e instanceof Step) {
+                Step step = (Step) e;
+                if (Boolean.parseBoolean(step.getAbstract())) {
+                    continue;
+                }
+                runStep(step);
+                break;
+            } else if (e instanceof Flow) {
+                Flow flow = (Flow) e;
+                //A flow cannot be abstract or have parent, so run the flow
+                runFlow(flow);
+                break;
+            } else if (e instanceof Split) {
+                Split split = (Split) e;
+                //A split cannot be abstract or have parent, so run the split
+                runSplit(split);
+                break;
+            }
+        }
     }
 
     /**
@@ -57,7 +81,7 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
         if (jobElementName == null) {
             return;
         }
-        for (Object e : jobElements) {
+        for (Object e : getJobElements()) {
             if (e instanceof Step) {
                 Step step = (Step) e;
                 if (step.getId().equals(jobElementName)) {
@@ -112,7 +136,10 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
     }
 
     protected void runFlow(Flow flow) {
-
+        FlowContextImpl flowContext = new FlowContextImpl(flow,
+                AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
+        FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this);
+        flowExecutionRunner.run();
     }
 
     protected void runSplit(Split split) {

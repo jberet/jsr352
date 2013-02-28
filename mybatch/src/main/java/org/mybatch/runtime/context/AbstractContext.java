@@ -27,6 +27,7 @@ import javax.batch.operations.JobOperator;
 import javax.batch.runtime.context.BatchContext;
 
 import org.mybatch.job.Properties;
+import org.mybatch.util.PropertyResolver;
 
 public abstract class AbstractContext<T> implements BatchContext<T> {
     protected String id;
@@ -42,6 +43,15 @@ public abstract class AbstractContext<T> implements BatchContext<T> {
      * if this is a StepContext type directly under a job, outerContexts contains 1 element (the root JobContext)
      */
     protected AbstractContext<T>[] outerContexts;
+
+    public abstract void setBatchStatus(JobOperator.BatchStatus status);
+
+    /**
+     * Gets the org.mybatch.job.Properties configured for the element corresponding to this BatchContext.
+     *
+     * @return org.mybatch.job.Properties
+     */
+    public abstract Properties getProperties2();
 
     protected AbstractContext(String id) {
         this.id = id;
@@ -101,13 +111,27 @@ public abstract class AbstractContext<T> implements BatchContext<T> {
         return result;
     }
 
-    public abstract void setBatchStatus(JobOperator.BatchStatus status);
+    protected PropertyResolver setUpPropertyResolver() {
+        PropertyResolver resolver = new PropertyResolver();
+        resolver.setJobParameters(getJobContext().getJobParameters());
 
-    /**
-     * Gets the org.mybatch.job.Properties configured for the element corresponding to this BatchContext.
-     * @return org.mybatch.job.Properties
-     */
-    public abstract Properties getProperties2();
+        //this job element (job, step, flow, etc) can be directly under job, or under job->split->flow, etc
+        org.mybatch.job.Properties props;
+        if (outerContexts != null) {
+            for (AbstractContext<T> context : outerContexts) {
+                props = context.getProperties2();
+                if (props != null) {
+                    resolver.pushJobProperties(props);
+                }
+            }
+        }
+
+        props = getProperties2();
+        if (props != null) {
+            resolver.pushJobProperties(props);
+        }
+        return resolver;
+    }
 
 }
 

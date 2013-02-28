@@ -38,7 +38,6 @@ import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
-import org.mybatch.util.PropertyResolver;
 
 public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<T> {
     private Job job;
@@ -47,7 +46,7 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
     private ApplicationMetaData applicationMetaData;
     private ArtifactFactory artifactFactory;
 
-    private JobListener[] jobListeners;
+    private JobListener[] jobListeners = new JobListener[0];
 
     public JobContextImpl(Job job, JobExecutionImpl jobExecution, ApplicationMetaData applicationMetaData, ArtifactFactory artifactFactory) {
         super(job.getId());
@@ -57,8 +56,8 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
         this.classLoader = applicationMetaData.getClassLoader();
         this.artifactFactory = artifactFactory;
 
-        resolveProperties();
-        initJobListeners();
+        setUpPropertyResolver().resolve(job);
+        createJobListeners();
         jobExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
     }
 
@@ -158,7 +157,7 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
         return a;
     }
 
-    private void initJobListeners() {
+    private void createJobListeners() {
         Listeners listeners = job.getListeners();
         if (listeners != null) {
             List<Listener> listenerList = listeners.getListener();
@@ -170,15 +169,4 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
             }
         }
     }
-
-    private void resolveProperties() {
-        PropertyResolver resolver = new PropertyResolver();
-        resolver.setJobParameters(jobExecution.getJobParameters());
-        org.mybatch.job.Properties props = job.getProperties();
-        if (props != null) {
-            resolver.pushJobProperties(props);
-        }
-        resolver.resolve(job);
-    }
-
 }

@@ -24,7 +24,6 @@ package org.mybatch.runtime.runner;
 
 import java.util.concurrent.Callable;
 import javax.batch.operations.JobOperator;
-import javax.batch.runtime.context.StepContext;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.runtime.context.StepContextImpl;

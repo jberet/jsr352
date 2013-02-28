@@ -24,10 +24,13 @@ package org.mybatch.util;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.Properties;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
+import org.mybatch.job.Decision;
+import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
@@ -37,11 +40,11 @@ import org.mybatch.job.Step;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public final class PropertyResolver {
-    protected static final String jobParametersToken    = "jobParameters";
-    protected static final String jobPropertiesToken    = "jobProperties";
+    protected static final String jobParametersToken = "jobParameters";
+    protected static final String jobPropertiesToken = "jobProperties";
     protected static final String systemPropertiesToken = "systemProperties";
-    protected static final String partitionPlanToken    = "partitionPlan";
-    protected static final String savedToken            = "saved";
+    protected static final String partitionPlanToken = "partitionPlan";
+    protected static final String savedToken = "saved";
 
     private static final String prefix = "#{";
     private static final String defaultValuePrefix = "?:";
@@ -86,6 +89,7 @@ public final class PropertyResolver {
         //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
         resolve(job.getProperties(), false);
         resolve(job.getListeners());
+        resolveDecision(job.getDecisionOrFlowOrSplit());
     }
 
     /**
@@ -113,8 +117,15 @@ public final class PropertyResolver {
         }
     }
 
+    public void resolve(Flow flow) {
+        //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
+        //flow has no listeners
+        resolve(flow.getProperties(), false);
+        resolveDecision(flow.getDecisionOrStepOrSplit());
+    }
+
     public String resolve(String rawVale) {
-        if(rawVale.indexOf(prefix) < 0) {
+        if (rawVale.indexOf(prefix) < 0) {
             return rawVale;
         }
         StringBuilder sb = new StringBuilder(rawVale);
@@ -214,6 +225,14 @@ public final class PropertyResolver {
         }
     }
 
+    private void resolveDecision(List<?> jobElements) {
+        for (Object e : jobElements) {
+            if (e instanceof Decision) {
+                resolve(((Decision) e).getProperties(), true);
+            }
+        }
+    }
+
     private int replaceAndGetEndPosition(StringBuilder sb, int startExpression, int endExpression, String replacingVal) {
         sb.replace(startExpression, endExpression + 1, replacingVal);
         return startExpression - 1 + replacingVal.length();
@@ -221,7 +240,7 @@ public final class PropertyResolver {
 
     private String getPropertyValue(String variableName, String propCategory, StringBuilder sb) {
         String val = null;
-        if (propCategory.equals(jobParametersToken)) {
+        if (propCategory.equals(jobParametersToken) && jobParameters != null) {
             val = jobParameters.getProperty(variableName);
         } else if (propCategory.equals(jobPropertiesToken)) {
             for (org.mybatch.job.Properties p : jobPropertiesStack) {

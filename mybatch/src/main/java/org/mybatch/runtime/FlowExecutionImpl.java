@@ -20,33 +20,20 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.testapps;
+package org.mybatch.runtime;
 
-import javax.batch.annotation.BatchProperty;
-import javax.batch.api.Decider;
-import javax.batch.runtime.StepExecution;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import javax.batch.runtime.context.FlowResults;
 
-@Named
-public class Decider1 implements Decider {
-    @BatchProperty(name = "decision-prop")
-    private String decisionProp;
+public class FlowExecutionImpl extends AbstractExecution implements FlowResults {
+    private String flowId;
 
-    @Inject
-    private JobContext jobContext;
-
-    @Override
-    public String decide(StepExecution stepExecution) throws Exception {
-        System.out.printf("Running %s, decisionProp=%s, job batch/exit status: %s/%s, previous step batch/exit status: %s/%s%n",
-                this, decisionProp, jobContext.getBatchStatus(), jobContext.getExitStatus(),
-                stepExecution.getBatchStatus(), stepExecution.getExitStatus());
-        return "next";
+    public FlowExecutionImpl(String flowId) {
+        this.flowId = flowId;
     }
 
     @Override
-    public String decide(StepExecution[] stepExecutions) throws Exception {
-        throw new IllegalStateException("Should not reach here.");
+    public String getFlowId() {
+        return flowId;
     }
+
 }
