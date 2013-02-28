@@ -40,21 +40,19 @@ import org.mybatch.job.Step;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public final class PropertyResolver {
-    protected static final String jobParametersToken = "jobParameters";
-    protected static final String jobPropertiesToken = "jobProperties";
+    protected static final String jobParametersToken    = "jobParameters";
+    protected static final String jobPropertiesToken    = "jobProperties";
     protected static final String systemPropertiesToken = "systemProperties";
-    protected static final String partitionPlanToken = "partitionPlan";
-    protected static final String savedToken = "saved";
+    protected static final String partitionPlanToken    = "partitionPlan";
 
     private static final String prefix = "#{";
     private static final String defaultValuePrefix = "?:";
 
-    private static final int shortestTemplateLen = "#{saved['x']}".length();
+    private static final int shortestTemplateLen = "#{jobProperties['x']}".length();
     private static final int prefixLen = prefix.length();
 
     private Properties systemProperties = System.getProperties();
     private Properties jobParameters;
-    private Properties savedProperties;
     private Properties partitionPlanProperties;
     private Deque<org.mybatch.job.Properties> jobPropertiesStack = new ArrayDeque<org.mybatch.job.Properties>();
 
@@ -64,10 +62,6 @@ public final class PropertyResolver {
 
     public void setJobParameters(Properties jobParameters) {
         this.jobParameters = jobParameters;
-    }
-
-    public void setSavedProperties(Properties savedProperties) {
-        this.savedProperties = savedProperties;
     }
 
     public void setPartitionPlanProperties(Properties partitionPlanProperties) {
@@ -133,7 +127,7 @@ public final class PropertyResolver {
         return sb.toString();
     }
 
-    public void resolve(StringBuilder sb, int start, boolean defaultAllowed) {
+    private void resolve(StringBuilder sb, int start, boolean defaultAllowed) {
         //distance-to-end doesn't have space for any template, so no variable referenced
         if (sb.length() - start < shortestTemplateLen) {
             return;
@@ -177,7 +171,7 @@ public final class PropertyResolver {
             if (val != null) {
                 if (!hasDefault) {  //resolved, no default: replace the expression with value
                     endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, val);
-                } else {  //resolved, has default: replace the expression and the default expression with value
+                } else {  //resolved, has default: replace    the expression and the default expression    with value
                     endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endDefaultExpressionMarker, val);
                 }
             } else {
@@ -251,8 +245,6 @@ public final class PropertyResolver {
             }
         } else if (propCategory.equals(systemPropertiesToken)) {
             val = systemProperties.getProperty(variableName);
-        } else if (propCategory.equals(savedToken)) {
-            val = savedProperties.getProperty(variableName);
         } else if (propCategory.equals(partitionPlanToken)) {
             val = partitionPlanProperties.getProperty(variableName);
         } else {
