@@ -109,7 +109,7 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
             }
         }
 
-        BatchLogger.LOGGER.unrecognizableJobElement(jobElementName, id);
+        throw BatchLogger.LOGGER.unrecognizableJobElement(jobElementName, id);
     }
 
     protected void runStep(Step step) {

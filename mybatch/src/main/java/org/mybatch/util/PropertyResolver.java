@@ -24,6 +24,7 @@ package org.mybatch.util;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -119,15 +120,15 @@ public final class PropertyResolver {
     }
 
     public String resolve(String rawVale) {
-        if (rawVale.indexOf(prefix) < 0) {
+        if (rawVale.length() < shortestTemplateLen || !rawVale.contains(prefix)) {
             return rawVale;
         }
         StringBuilder sb = new StringBuilder(rawVale);
-        resolve(sb, 0, true);
+        resolve(sb, 0, true, null);
         return sb.toString();
     }
 
-    private void resolve(StringBuilder sb, int start, boolean defaultAllowed) {
+    private void resolve(StringBuilder sb, int start, boolean defaultAllowed, LinkedList<String> referringExpressions) {
         //distance-to-end doesn't have space for any template, so no variable referenced
         if (sb.length() - start < shortestTemplateLen) {
             return;
@@ -141,16 +142,30 @@ public final class PropertyResolver {
         String propCategory = sb.substring(startPropCategory, openBracket);
         int startVariableName = openBracket + 2;  //jump to the next char after ', the start of variable name
         int endBracket = sb.indexOf("]", startVariableName + 1);
+        int endExpression = endBracket + 1;
+
+        if (endExpression >= sb.length()) {
+            //this can happen when missing an ending } (e.g.,   #{jobProperties['step-prop']   )
+            LOGGER.possibleSyntaxErrorInProperty(sb.toString());
+            endExpression = sb.length() - 1;
+        }
+        String expression = sb.substring(startExpression, endExpression + 1);
+
+        if (referringExpressions != null && referringExpressions.contains(expression)) {
+            throw LOGGER.cycleInPropertyReference(referringExpressions);  //exception thrown
+        }
+
         String variableName = sb.substring(startVariableName, endBracket - 1);  // ['abc']
         String val = getPropertyValue(variableName, propCategory, sb);
+        if (val != null) {
+            val = reresolve(expression, val, defaultAllowed, referringExpressions);
+        }
 
-        int endExpression = endBracket + 1;
         int endCurrentPass = endExpression;
         if (!defaultAllowed) {  //a default expression should not have default again
             if (val != null) {
                 endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, val);
             } else {  //not resolved, keep unchanged
-                //do nothing for now
             }
         } else {
             int startDefaultMarker = endExpression + 1;
@@ -179,13 +194,26 @@ public final class PropertyResolver {
                     //do nothing for now
                 } else {  //not resolved, has default: resolve and apply the default
                     StringBuilder sb4DefaultExpression = new StringBuilder(sb.substring(endDefaultMarker + 1, endDefaultExpressionMarker));
-                    resolve(sb4DefaultExpression, 0, false);
+                    resolve(sb4DefaultExpression, 0, false, null);
                     endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endDefaultExpressionMarker, sb4DefaultExpression.toString());
                 }
             }
         }
 
-        resolve(sb, endCurrentPass + 1, true);
+        resolve(sb, endCurrentPass + 1, true, null);
+    }
+
+    private String reresolve(String expression, String currentlyResolvedToVal, boolean defaultAllowed, LinkedList<String> referringExpressions) {
+        if (currentlyResolvedToVal.length() < shortestTemplateLen || !currentlyResolvedToVal.contains(prefix)) {
+            return currentlyResolvedToVal;
+        }
+        if (referringExpressions == null) {
+            referringExpressions = new LinkedList<String>();
+        }
+        referringExpressions.add(expression);
+        StringBuilder sb = new StringBuilder(currentlyResolvedToVal);
+        resolve(sb, 0, defaultAllowed, referringExpressions);
+        return sb.toString();
     }
 
     private void resolve(org.mybatch.job.Properties props, boolean pushAndPopProps) {

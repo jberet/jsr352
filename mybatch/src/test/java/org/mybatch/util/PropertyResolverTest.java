@@ -106,6 +106,51 @@ public class PropertyResolverTest {
         }
     }
 
+    @Test public void cycle() {
+        Properties props = new Properties();
+        props.setProperty("one", "#{jobProperties['one']}");  //self reference
+
+        props.setProperty("two", "#{jobProperties['three']}");  //mutual reference
+        props.setProperty("three", "#{jobProperties['two']}");
+
+        props.setProperty("four", "#{jobProperties['five']}");  //cycle
+        props.setProperty("five", "#{jobProperties['six']}");
+        props.setProperty("six", "#{jobProperties['four']}");
+
+        props.setProperty("seven", "#{jobProperties['eight']}");  //valid one
+        props.setProperty("eight", "#{jobProperties['nine']}");
+        props.setProperty("nine", "#{jobProperties['ten']}");
+        props.setProperty("ten", "TEN");  //cycle
+
+        resolver.pushJobProperties(fromJavaUtilProperties(props));
+        String result = null;
+        try {
+            result = resolver.resolve("#{jobProperties['one']}");
+            throw new AssertionError(String.format("Expecting exception, but got %s for a self-referencing property", result));
+        } catch (Exception e) {
+            System.out.printf("Got the expected %s%n", e);
+        }
+        try {
+            result = resolver.resolve("#{jobProperties['two']}");
+            throw new AssertionError(String.format("Expecting exception, but got %s for a mutual-referencing property", result));
+        } catch (Exception e) {
+            System.out.printf("Got the expected %s%n", e);
+        }
+        try {
+            result = resolver.resolve("#{jobProperties['four']}");
+            throw new AssertionError(String.format("Expecting exception, but got %s for a cyclic-referencing property", result));
+        } catch (Exception e) {
+            System.out.printf("Got the expected %s%n", e);
+        }
+
+        try {
+            result = resolver.resolve("#{jobProperties['seven']}");
+            System.out.printf("Got the expected %s%n", result);
+        } catch (Exception e) {
+            throw new AssertionError(String.format("Expecting %s, but got %s property", result, e));
+        }
+    }
+
     @Test public void literal() {
         String[] raw = {"", "1", " 2 ", "#3", "4name@company.com", "5 people", "$6",
         "~!@#$%^&*()_+\":?></.raw,?:\\][[]qwert" };

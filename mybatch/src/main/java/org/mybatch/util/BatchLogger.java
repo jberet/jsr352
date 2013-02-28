@@ -107,4 +107,11 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 19, value = "Unrecognizable job element: %s in job: %s")
     IllegalStateException unrecognizableJobElement(String jobElementName, String jobName);
 
+    @Message(id = 20, value = "Cycle detected in property reference: %s")
+    IllegalStateException cycleInPropertyReference(List<String> referringExpressions);
+
+    @Message(id = 21, value = "Possible syntax errors in property: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void possibleSyntaxErrorInProperty(String prop);
+
 }

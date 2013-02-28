@@ -78,8 +78,8 @@
             <properties>
                 <property name="decision-prop" value="decision-prop"></property>
                 <property name="reference-job-prop" value="#{jobProperties['job-prop']}"></property>
-                <property name="reference-step-prop" value="#{jobProperties['step-prop']"></property>
-                <property name="reference-system-prop" value="#{systemProperties['java.version']"></property>
+                <property name="reference-step-prop" value="#{jobProperties['step-prop']}"></property>
+                <property name="reference-system-prop" value="#{systemProperties['java.version']}"></property>
                 <property name="reference-job-param" value="#{jobParameters['job-param']}"></property>
             </properties>
             <next on="aaa" to="step1"></next>
@@ -95,7 +95,7 @@
             <properties>
                 <property name="batchlet-prop" value="batchlet-prop"></property>
                 <property name="reference-job-prop" value="#{jobProperties['job-prop']}"></property>
-                <property name="reference-system-prop" value="#{systemProperties['java.version']"></property>
+                <property name="reference-system-prop" value="#{systemProperties['java.version']}"></property>
                 <property name="reference-job-param" value="#{jobParameters['job-param']}"></property>
             </properties>
         </batchlet>
