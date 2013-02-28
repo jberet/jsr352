@@ -22,26 +22,25 @@
 
 package org.mybatch.testapps.flow;
 
-import javax.batch.api.AbstractBatchlet;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
+import javax.inject.Named;
 
-public class Batchlet1 extends AbstractBatchlet {
-    @Inject
-    private JobContext jobContext;
+import org.junit.Assert;
+import org.mybatch.testapps.common.Batchlet0;
 
-    @Inject
-    private StepContext stepContext;
-
+@Named
+public class Batchlet1 extends Batchlet0 {
     @Override
     public String process() throws Exception {
-        System.out.printf("%nIn %s, running step %s, job batch/exit status: %s/%s, step batch/exit status: %s/%s%n",
-                this, stepContext.getId(),
-                jobContext.getBatchStatus(), jobContext.getExitStatus(),
-                stepContext.getBatchStatus(), stepContext.getExitStatus()
-        );
-        return "Processed";
-    }
+        String result = super.process();
 
+        String stepToVerify = "step4";
+        if (getStepContext().getId().equals(stepToVerify)) {
+            System.out.printf("%nVerify %s-specific property injections...%n", stepToVerify);
+            Assert.assertEquals("job-prop", referencingJobProp);
+            Assert.assertEquals(System.getProperty("java.version"), referencingSystemProp);
+            Assert.assertEquals("job-param", referencingJobParam);
+        }
+
+        return result;
+    }
 }

@@ -20,28 +20,49 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.testapps.loadBatchXml;
+package org.mybatch.testapps.common;
 
+import javax.batch.annotation.BatchProperty;
 import javax.batch.api.AbstractBatchlet;
 import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
-public class Batchlet1 extends AbstractBatchlet {
+public class Batchlet0 extends AbstractBatchlet {
     @Inject
     private JobContext jobContext;
 
     @Inject
     private StepContext stepContext;
 
+    @BatchProperty(name="batchlet-prop")
+    protected String batchletProp;
+
+    @BatchProperty(name="reference-job-prop")
+    protected String referencingJobProp;
+
+    @BatchProperty(name = "reference-system-prop")
+    protected String referencingSystemProp;
+
+    @BatchProperty(name = "reference-job-param")
+    protected String referencingJobParam;
+
     @Override
     public String process() throws Exception {
-        System.out.printf("%nIn %s, running step %s, job batch/exit status: %s/%s, step batch/exit status: %s/%s%n",
+        System.out.printf("%nIn %s, running step %s, job batch/exit status: %s/%s, step batch/exit status: %s/%s%n, job properties: %s, step properties: %s%n%n",
                 this, stepContext.getId(),
                 jobContext.getBatchStatus(), jobContext.getExitStatus(),
-                stepContext.getBatchStatus(), stepContext.getExitStatus()
+                stepContext.getBatchStatus(), stepContext.getExitStatus(),
+                jobContext.getProperties(), stepContext.getProperties()
         );
         return "Processed";
     }
 
+    public JobContext getJobContext() {
+        return jobContext;
+    }
+
+    public StepContext getStepContext() {
+        return stepContext;
+    }
 }

@@ -33,9 +33,9 @@
     <listeners>
         <listener ref="L1">
             <properties>
-                <property name="listener-prop"             value="listener-prop"></property>
-                <property name="reference-job-prop"        value="#{jobProperties['job-prop']}"></property>
-                <property name="reference-job-param"       value="#{jobParameters['job-param']}"></property>
+                <property name="listener-prop" value="listener-prop"></property>
+                <property name="reference-job-prop" value="#{jobProperties['job-prop']}"></property>
+                <property name="reference-job-param" value="#{jobParameters['job-param']}"></property>
                 <property name="reference-system-property" value="#{systemProperties['java.version']}"></property>
             </properties>
         </listener>
@@ -44,59 +44,61 @@
 
 
     <flow id="flow1" next="step4">
-    <step id="step1" next="step2">
-        <properties>
-            <property name="step-prop" value="step-prop"></property>
-            <!-- same property name as in job, to test property resolution precedence -->
-            <property name="job-prop-2" value="step-prop-2"></property>
-        </properties>
-        <listeners>
-            <listener ref="L3">
-                <properties>
-                    <property name="listener-prop"        value="step-listener-prop"></property>
-                    <property name="reference-job-prop"   value="#{jobProperties['job-prop']}"></property>
-                    <property name="reference-step-prop"  value="#{jobProperties['step-prop']"></property>
-                    <property name="reference-job-prop-2" value="#{jobProperties['job-prop-2']}"></property>
-                </properties>
-            </listener>
-            <listener ref="L4"></listener>
-        </listeners>
-        <batchlet ref="Batchlet1">
-        </batchlet>
-    </step>
+        <step id="step1" next="step2">
+            <properties>
+                <property name="step-prop" value="step-prop"></property>
+                <!-- same property name as in job, to test property resolution precedence -->
+                <property name="job-prop-2" value="step-prop-2"></property>
+            </properties>
+            <batchlet ref="Batchlet1">
+            </batchlet>
+        </step>
 
-    <step id="step3">
-        <batchlet ref="Batchlet1">
-        </batchlet>
-        <end on="*" exit-status="done"></end>
-    </step>
+        <step id="step3">
+            <batchlet ref="Batchlet1">
+            </batchlet>
+            <end on="*" exit-status="done"></end>
+        </step>
 
-    <step id="step2">
-        <batchlet ref="Batchlet1">
-        </batchlet>
-        <stop on="xyzz" exit-status="stopped" restart="false"/>  <!-- should not reach here -->
-        <fail on="abcd" exit-status="failed"/>  <!-- should not reach here -->
-        <end on="12345" exit-status="done"/>  <!-- should not reach here -->
-        <next on="aaa" to="step1"/>  <!-- should not reach here -->
-        <next on="*" to="decision1"></next>
-    </step>
+        <step id="step2">
+            <batchlet ref="Batchlet1">
+            </batchlet>
+            <stop on="xyzz" exit-status="stopped" restart="false"/>
+            <!-- should not reach here -->
+            <fail on="abcd" exit-status="failed"/>
+            <!-- should not reach here -->
+            <end on="12345" exit-status="done"/>
+            <!-- should not reach here -->
+            <next on="aaa" to="step1"/>
+            <!-- should not reach here -->
+            <next on="*" to="decision1"></next>
+        </step>
 
-    <decision id="decision1" ref="Decider1">
-        <properties>
-            <property name="decision-prop"          value="decision-prop"></property>
-            <property name="reference-job-prop"     value="#{jobProperties['job-prop']}"></property>
-            <property name="reference-step-prop"    value="#{jobProperties['step-prop']"></property>
-            <property name="reference-system-prop"  value="#{systemProperties['java.version']"></property>
-            <property name="reference-job-param"    value="#{jobParameters['job-param']}"></property>
-        </properties>
-        <next on="aaa" to="step1"></next>   <!-- should not reach here -->
-        <next on="next" to="step3"></next>  <!-- "next" is the value returned from Decider1.decide() -->
-        <end on="*" exit-status="done"></end>
-    </decision>
+        <decision id="decision1" ref="Decider1">
+            <properties>
+                <property name="decision-prop" value="decision-prop"></property>
+                <property name="reference-job-prop" value="#{jobProperties['job-prop']}"></property>
+                <property name="reference-step-prop" value="#{jobProperties['step-prop']"></property>
+                <property name="reference-system-prop" value="#{systemProperties['java.version']"></property>
+                <property name="reference-job-param" value="#{jobParameters['job-param']}"></property>
+            </properties>
+            <next on="aaa" to="step1"></next>
+            <!-- should not reach here -->
+            <next on="next" to="step3"></next>
+            <!-- "next" is the value returned from Decider1.decide() -->
+            <end on="*" exit-status="done"></end>
+        </decision>
     </flow>
 
     <step id="step4">
-        <batchlet ref="Batchlet1"></batchlet>
+        <batchlet ref="Batchlet1">
+            <properties>
+                <property name="batchlet-prop" value="batchlet-prop"></property>
+                <property name="reference-job-prop" value="#{jobProperties['job-prop']}"></property>
+                <property name="reference-system-prop" value="#{systemProperties['java.version']"></property>
+                <property name="reference-job-param" value="#{jobParameters['job-param']}"></property>
+            </properties>
+        </batchlet>
     </step>
 
 </job>

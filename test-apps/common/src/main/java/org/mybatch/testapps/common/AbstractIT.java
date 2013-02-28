@@ -20,19 +20,19 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.testapps.flow;
+package org.mybatch.testapps.common;
 
-import org.junit.Test;
-import org.mybatch.testapps.common.AbstractIT;
+import java.util.Properties;
+import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchRuntime;
 
-/**
- * Verifies the following:
- * injections into super class are processed (Batchlet1 extends Batchlet0), including @Inject and @BatchProperty
- * flow property resolution, runtime execution, and transition inside flow and outwards;
- */
-public class FlowIT extends AbstractIT {
-    @Test
-    public void loadBatchXml() throws Exception {
-        startJob("flow.xml");
+abstract public class AbstractIT {
+    protected void startJob(String jobXmlName) throws Exception {
+        Properties props = new Properties();
+        props.setProperty("job-param", "job-param");
+
+        JobOperator jobOperator = BatchRuntime.getJobOperator();
+        jobOperator.start(jobXmlName, props);
+        Thread.sleep(10000);
     }
 }

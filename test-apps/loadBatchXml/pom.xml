@@ -35,5 +35,12 @@
 
     <artifactId>loadBatchXml</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.mybatch.test-apps</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>

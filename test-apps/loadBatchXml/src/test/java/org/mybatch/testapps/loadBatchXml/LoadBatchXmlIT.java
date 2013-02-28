@@ -19,19 +19,16 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.testapps.loadBatchXml;
 
-import java.util.Properties;
-import javax.batch.operations.JobOperator;
-import javax.batch.runtime.BatchRuntime;
-
 import org.junit.Test;
+import org.mybatch.testapps.common.AbstractIT;
 
 /**
  * Verifies the following:
- *
- * Batchlet1 is declared in batch.xml, loaded with portable archive loader;
+ * <p/>
+ * Batchlet0 is declared in batch.xml, loaded with portable archive loader;
  * job listener L1 is declared with @Named, loaded with non-portable job loader;
  * JobContext injected with @Inject into batchlet and job listener;
  * artifact properties for the job listener are injected into the target artifact;
@@ -46,16 +43,9 @@ import org.junit.Test;
  * the above requirements applied to multiple step listeners;
  * step listener properties can reference job property from the enclosing step and the enclosing job w/ proper precedence;
  */
-public class LoadBatchXmlIT {
-    private static final String jobXmlName = "batchlet1.xml";
-
+public class LoadBatchXmlIT extends AbstractIT {
     @Test
     public void loadBatchXml() throws Exception {
-        Properties props = new Properties();
-        props.setProperty("job-param", "job-param");
-
-        JobOperator jobOperator = BatchRuntime.getJobOperator();
-        jobOperator.start(jobXmlName, props);
-        Thread.sleep(10000);
+        startJob("batchlet1.xml");
     }
 }

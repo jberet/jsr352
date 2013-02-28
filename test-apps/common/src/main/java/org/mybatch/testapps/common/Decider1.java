@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.testapps.flow;
+package org.mybatch.testapps.common;
 
 import javax.batch.annotation.BatchProperty;
 import javax.batch.api.Decider;
