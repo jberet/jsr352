@@ -23,6 +23,7 @@
 package org.mybatch.runtime.context;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -34,6 +35,7 @@ import org.mybatch.creation.ArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
+import org.mybatch.job.Step;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.util.BatchLogger;
@@ -48,6 +50,8 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
 
     private JobListener[] jobListeners = new JobListener[0];
 
+    private LinkedList<Step> executedSteps = new LinkedList<Step>();
+
     public JobContextImpl(Job job, JobExecutionImpl jobExecution, ApplicationMetaData applicationMetaData, ArtifactFactory artifactFactory) {
         super(job.getId());
         this.job = job;
@@ -59,6 +63,10 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
         setUpPropertyResolver().resolve(job);
         createJobListeners();
         jobExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
+    }
+
+    public LinkedList<Step> getExecutedSteps() {
+        return executedSteps;
     }
 
     public ArtifactFactory getArtifactFactory() {

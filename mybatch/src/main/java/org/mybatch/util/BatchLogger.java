@@ -24,6 +24,7 @@ package org.mybatch.util;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import javax.batch.operations.exception.BatchOperationsRuntimeException;
 import javax.batch.operations.exception.JobStartException;
 import javax.batch.operations.exception.NoSuchJobExecutionException;
 
@@ -113,5 +114,9 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 21, value = "Possible syntax errors in property: %s")
     @LogMessage(level = Logger.Level.WARN)
     void possibleSyntaxErrorInProperty(String prop);
+
+    @Message(id = 22, value = "Step loopback not allowed.  The step %s has already run in sequence: %s")
+    BatchOperationsRuntimeException loopbackStep(String stepId, List<?> executedSteps);
+
 
 }

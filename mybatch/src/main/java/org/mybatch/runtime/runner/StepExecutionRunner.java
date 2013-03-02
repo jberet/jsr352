@@ -22,6 +22,9 @@
 
 package org.mybatch.runtime.runner;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import javax.batch.api.StepListener;
 import javax.batch.operations.JobOperator;
 
@@ -47,6 +50,15 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
 
     @Override
     public void run() {
+        LinkedList<Step> executedSteps = stepContext.getJobContext().getExecutedSteps();
+        if (executedSteps.contains(step)) {
+            List<String> stepIds = new ArrayList<String>();
+            for (Step s : executedSteps) {
+                stepIds.add(s.getId());
+            }
+            throw LOGGER.loopbackStep(step.getId(), stepIds);
+        }
+
         stepContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
         stepContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.STARTED);
 
@@ -81,6 +93,9 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
 
             //TODO handle chunk type step
 
+
+            //record the fact this step has been executed
+            executedSteps.add(step);
 
             for (StepListener l : stepContext.getStepListeners()) {
                 try {

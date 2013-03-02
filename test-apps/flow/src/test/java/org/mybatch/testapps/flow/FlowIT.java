@@ -32,7 +32,7 @@ import org.mybatch.testapps.common.AbstractIT;
  */
 public class FlowIT extends AbstractIT {
     @Test
-    public void loadBatchXml() throws Exception {
+    public void flow() throws Exception {
         startJob("flow.xml");
     }
 }

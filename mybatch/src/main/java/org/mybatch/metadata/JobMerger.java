@@ -81,7 +81,7 @@ public class JobMerger {
         }
 
         //job steps, flows, and splits are not inherited.
-        //check if each step has its own parent step, whether parent is null or not.
+        //check if each step has its own parent step
         if (!skipEnclosingSteps) {
             List<Step> steps = new ArrayList<Step>();
             for (Serializable s : child.getDecisionOrFlowOrSplit()) {

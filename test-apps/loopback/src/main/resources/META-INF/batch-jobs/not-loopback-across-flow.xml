@@ -22,12 +22,21 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/batchXML.xsd">
-    <ref id="BatchletNoNamed" class="org.mybatch.testapps.common.BatchletNoNamed"/>
-    <ref id="L1" class="SHOULD NOT REACH HERE"/>
-    <ref id="L2" class="SHOULD NOT REACH HERE"/>
-    <ref id="L3" class="org.mybatch.testapps.loadBatchXml.StepListener3"/>
-    <ref id="L4" class="org.mybatch.testapps.loadBatchXml.StepListener4"/>
-</batch-artifacts>
+<job id="job1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
+
+    <flow id="flow1" next="step1">
+        <step id="step1" next="step2">
+            <batchlet ref="Batchlet0"/>
+        </step>
+
+        <step id="step2">
+            <batchlet ref="Batchlet0"/>
+        </step>
+    </flow>
+
+    <step id="step1">
+        <batchlet ref="Batchlet0"/>
+    </step>
+</job>

@@ -28,7 +28,7 @@ import org.mybatch.testapps.common.AbstractIT;
 /**
  * Verifies the following:
  * <p/>
- * Batchlet0 is declared in batch.xml, loaded with portable archive loader;
+ * BatchletNoNamed is declared in batch.xml, loaded with portable archive loader;
  * job listener L1 is declared with @Named, loaded with non-portable job loader;
  * JobContext injected with @Inject into batchlet and job listener;
  * artifact properties for the job listener are injected into the target artifact;
