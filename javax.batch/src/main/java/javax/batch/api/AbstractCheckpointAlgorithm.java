@@ -33,7 +33,7 @@ public abstract class AbstractCheckpointAlgorithm implements CheckpointAlgorithm
      *             (or subclass) if an error occurs.
      */
     @Override
-    public int checkpointTimeout(int timeout) throws Exception {
+    public int checkpointTimeout() throws Exception {
         return 0;
     }
 

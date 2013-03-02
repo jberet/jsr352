@@ -17,12 +17,12 @@
 package javax.batch.operations;
 
 import java.util.List;
-import java.util.Set;
 import java.util.Properties;
-import javax.batch.operations.exception.JobExecutionIsRunningException;
-import javax.batch.operations.exception.JobExecutionNotRunningException;
+import java.util.Set;
 import javax.batch.operations.exception.JobExecutionAlreadyCompleteException;
+import javax.batch.operations.exception.JobExecutionIsRunningException;
 import javax.batch.operations.exception.JobExecutionNotMostRecentException;
+import javax.batch.operations.exception.JobExecutionNotRunningException;
 import javax.batch.operations.exception.JobRestartException;
 import javax.batch.operations.exception.JobStartException;
 import javax.batch.operations.exception.NoSuchJobException;
@@ -84,7 +84,7 @@ public interface JobOperator {
 	 * @return a list of JobInstances. 
 	 * @throws NoSuchJobException
 	 */
-	List<JobInstance> getRunningInstances(String jobName) throws NoSuchJobException;
+	List<JobExecution> getRunningExecutions(String jobName) throws NoSuchJobException;
 
 	/**
 	 * Returns all JobExecutions belonging to a particular job instance.

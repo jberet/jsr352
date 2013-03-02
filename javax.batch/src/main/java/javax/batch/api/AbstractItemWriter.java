@@ -19,26 +19,55 @@ package javax.batch.api;
 import java.io.Externalizable;
 import java.util.List;
 
-public class AbstractItemWriter<T> implements ItemWriter<T> {
+/**
+ * The AbstractItemWriter provides default implementations 
+ * of not commonly implemented methods.
+ *
+ * @param <T> specifies the item type written by the 
+ * ItemWriter.
+ */
+public abstract class AbstractItemWriter<T> implements ItemWriter<T> {
 
-    @Override
-    public Externalizable checkpointInfo() throws Exception {
-        return null;
-    }
-
-    @Override
-    public void close() throws Exception {
-        
-    }
-
-    @Override
-    public void open(Externalizable checkpoint) throws Exception {
-        
-    }
-
-    @Override
-    public void writeItems(List<T> items) throws Exception {
-        
-    }
+	/**
+	 * Override this method if the ItemWriter requires
+	 * any open time processing.   
+	 * The default implementation does nothing. 
+	 * 
+	 * @param last checkpoint for this ItemReader
+	 * @throws Exception (or subclass) if an error occurs.
+	 */
+	@Override
+	public void open(Externalizable checkpoint) throws Exception { }
+	/**
+	 * Override this method if the ItemWriter requires
+	 * any close time processing.   
+	 * The default implementation does nothing. 
+	 * 
+	 * @throws Exception (or subclass) if an error occurs.
+	 */
+	@Override
+	public void close() throws Exception { }
+	/**
+	 * Implement write logic for the ItemWriter in this 
+	 * method.
+	 * 
+	 * @param items specifies the list of items to write.
+	 * @throws Exception (or subclass) if an error occurs.
+	 */
+	@Override
+	public abstract void writeItems(List<T> items) throws Exception;
+	/**
+	 * Override this method if the ItemWriter supports 
+	 * checkpoints. 
+	 * The default implementation returns null. 
+	 *   
+	 * @return checkpoint data 
+	 * @throws Exception (or subclass) if an error occurs.
+	 */
+	@Override
+	public Externalizable checkpointInfo() throws Exception { 
+		return null; 
+	}	
 	
 }
+

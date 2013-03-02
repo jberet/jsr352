@@ -77,7 +77,7 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
-    public List<JobInstance> getRunningInstances(String jobName) throws NoSuchJobException {
+    public List<JobExecution> getRunningExecutions(String jobName) throws NoSuchJobException {
         return null;
     }
 

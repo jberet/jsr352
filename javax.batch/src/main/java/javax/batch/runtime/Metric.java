@@ -15,21 +15,27 @@
  * limitations under the License.
 */
 package javax.batch.runtime;
-
+/**
+  * 
+  * The Metric interface defines job metrics recorded by
+  * the batch runtime.
+  *
+  */
 public interface Metric {
-	
+	public enum MetricName {READCOUNT, WRITECOUNT, COMMITCOUNT, 
+	       ROLLBACKCOUNT, READSKIPCOUNT, PROCESSSKIPCOUNT, FILTERCOUNT, 
+	       WRITESKIPCOUNT}
 	/**
-	* The getName method returns the metric name. The following names
-	* are defined: "readCount", "writeCount", "commitCount",
-	* "rollbackCount", "readSkipCount", "processSkipCount", "filterCount",
-	* "writeSkipCount"
-	* @return metric name.
-	*/
-	public String getName();
+	 * The getName method returns the metric name. The following names
+       * are defined: "readCount", "writeCount", "commitCount", 
+       * "rollbackCount", "readSkipCount", "processSkipCount", "filterCount", 
+       * "writeSkipCount"       
+	 * @return metric name.
+	 */
+	public MetricName getName(); 
 	/**
-	* The getValue method returns the metric value.
-	* @return metric value.
-	*/
+	 * The getValue method returns the metric value.
+	 * @return metric value.
+	 */
 	public long getValue();
-
 }

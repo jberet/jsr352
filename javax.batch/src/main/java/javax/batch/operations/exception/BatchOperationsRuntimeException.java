@@ -28,6 +28,17 @@ public class BatchOperationsRuntimeException extends RuntimeException {
 		setMessage(localizedMessage);
 		setCause(th);
 	}
+	
+	public BatchOperationsRuntimeException(Throwable th) {
+		setCause(th);
+	}
+	
+	public BatchOperationsRuntimeException(String localizedMessage) {
+		setMessage(localizedMessage);
+	}
+	
+	public BatchOperationsRuntimeException() {
+	}
 
 	@Override
 	public java.lang.String getMessage() {

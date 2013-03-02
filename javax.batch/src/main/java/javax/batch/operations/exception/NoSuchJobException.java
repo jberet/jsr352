@@ -26,4 +26,16 @@ public class NoSuchJobException extends BatchOperationsRuntimeException {
 	public NoSuchJobException(final Throwable th, final String localizedMessage) {
 		super(th, localizedMessage);
 	}
+	
+	public NoSuchJobException(final String localizedMessage) {
+		super(localizedMessage);
+	}
+	
+	public NoSuchJobException(final Throwable th) {
+		super(th);
+	}
+	
+	public NoSuchJobException() {
+		super();
+	}
 }

@@ -35,7 +35,7 @@ import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
-import org.mybatch.batch.BatchArtifacts;
+import org.mybatch.job.BatchArtifacts;
 import org.mybatch.job.Job;
 import org.mybatch.util.BatchUtil;
 

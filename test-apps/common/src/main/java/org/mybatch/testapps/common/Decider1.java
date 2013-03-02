@@ -53,7 +53,8 @@ public class Decider1 implements Decider {
     private JobContext jobContext;
 
     @Override
-    public String decide(StepExecution stepExecution) throws Exception {
+    public String decide(StepExecution[] stepExecutions) throws Exception {
+        StepExecution stepExecution = stepExecutions[0];
         Assert.assertEquals("decision-prop", decisionProp);
         Assert.assertEquals("job-prop", referencingJobProp);
         Assert.assertThat(referencingStepProp, not(equalTo("step-prop")));
@@ -64,10 +65,5 @@ public class Decider1 implements Decider {
                 this, decisionProp, jobContext.getBatchStatus(), jobContext.getExitStatus(),
                 stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         return "next";
-    }
-
-    @Override
-    public String decide(StepExecution[] stepExecutions) throws Exception {
-        throw new IllegalStateException("Should not reach here.");
     }
 }

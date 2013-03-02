@@ -22,12 +22,13 @@
 
 package org.mybatch.runtime;
 
+import java.io.Serializable;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
 import org.mybatch.runtime.metric.StepMetrics;
 
-public final class StepExecutionImpl<P> extends AbstractExecution implements StepExecution<P> {
+public final class StepExecutionImpl<P extends Serializable> extends AbstractExecution implements StepExecution<P> {
     private long id;
 
     private String stepId;

@@ -16,17 +16,17 @@
   limitations under the License.
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-	targetNamespace="http://jcp.org.batch/jsl" xmlns:jbatch="http://jcp.org.batch/jsl">
+	targetNamespace="http://xmlns.jcp.org/xml/ns/javaee" xmlns:jbatch="http://xmlns.jcp.org/xml/ns/javaee">
 
 	<xs:element name="batch-artifacts" type="jbatch:BatchArtifacts" />
 
 	<xs:complexType name="BatchArtifacts">
 		<xs:sequence>
-			<xs:element name="ref" type="jbatch:Ref" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="ref" type="jbatch:BatchArtifactRef" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 
-	<xs:complexType name="Ref">
+	<xs:complexType name="BatchArtifactRef">
 		<xs:attribute name="id" use="required" type="xs:string" />
 		<xs:attribute name="class" use="required" type="xs:string" />
 	</xs:complexType>

@@ -29,5 +29,17 @@ public class JobInstanceAlreadyCompleteException extends
 			final String localizedMessage) {
 		super(th, localizedMessage);
 	}
+	
+	public JobInstanceAlreadyCompleteException(final String localizedMessage) {
+		super(localizedMessage);
+	}
+	
+	public JobInstanceAlreadyCompleteException(final Throwable th) {
+		super(th);
+	}
+	
+	public JobInstanceAlreadyCompleteException() {
+		super();
+	}
 
 }

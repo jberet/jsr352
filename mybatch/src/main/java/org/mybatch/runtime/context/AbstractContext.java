@@ -22,7 +22,6 @@
 
 package org.mybatch.runtime.context;
 
-import java.util.List;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.context.BatchContext;
 
@@ -34,9 +33,6 @@ public abstract class AbstractContext<T> implements BatchContext<T> {
     protected T transientUserData;
     protected ClassLoader classLoader;
 
-    //not initialized here
-    protected List<BatchContext<T>> batchContexts;
-
     /**
      * Chain of batch contexts, the first one is the root JobContext.
      * If this is a JobContext type, outerContexts is null (no outer context);
@@ -45,6 +41,12 @@ public abstract class AbstractContext<T> implements BatchContext<T> {
     protected AbstractContext<T>[] outerContexts;
 
     public abstract void setBatchStatus(JobOperator.BatchStatus status);
+
+    public abstract JobOperator.BatchStatus getBatchStatus();
+
+    public abstract void setExitStatus(String status);
+
+    public abstract String getExitStatus();
 
     /**
      * Gets the org.mybatch.job.Properties configured for the element corresponding to this BatchContext.
@@ -75,11 +77,6 @@ public abstract class AbstractContext<T> implements BatchContext<T> {
     @Override
     public void setTransientUserData(T data) {
         this.transientUserData = data;
-    }
-
-    @Override
-    public List<BatchContext<T>> getBatchContexts() {
-        return batchContexts;
     }
 
     public JobContextImpl<T> getJobContext() {

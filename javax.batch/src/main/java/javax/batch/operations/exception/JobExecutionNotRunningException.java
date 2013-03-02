@@ -29,5 +29,17 @@ public class JobExecutionNotRunningException extends
 			final String localizedMessage) {
 		super(th, localizedMessage);
 	}
+	
+	public JobExecutionNotRunningException(final String localizedMessage) {
+		super(localizedMessage);
+	}
+	
+	public JobExecutionNotRunningException(final Throwable th) {
+		super(th);
+	}
+	
+	public JobExecutionNotRunningException() {
+		super();
+	}
 
 }

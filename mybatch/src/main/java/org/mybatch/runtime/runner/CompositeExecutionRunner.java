@@ -123,8 +123,7 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
         Decider decider = (Decider) batchContext.getJobContext().createArtifact(decision.getRef(), decision.getProperties());
         String newExitStatus;
         try {
-            newExitStatus = precedingStepExecutions.length == 1 ?
-                    decider.decide(precedingStepExecutions[0]) : decider.decide(precedingStepExecutions);
+            newExitStatus = decider.decide(precedingStepExecutions);
             batchContext.setExitStatus(newExitStatus);
             String next = resolveControlElements(decision.getControlElements());
             runJobElement(next, precedingStepExecutions);

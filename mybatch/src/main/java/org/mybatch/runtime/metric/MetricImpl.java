@@ -42,8 +42,8 @@ public class MetricImpl implements Metric, Serializable {
     }
 
     @Override
-    public String getName() {
-        return name.toString();
+    public MetricName getName() {
+        return name;
     }
 
     @Override

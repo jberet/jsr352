@@ -17,19 +17,27 @@
 package javax.batch.api;
 
 import java.io.Externalizable;
-
-import javax.batch.operations.JobOperator.BatchStatus;
-
-public class AbstractPartitionAnalyzer implements PartitionAnalyzer {
-
-    @Override
-    public void analyzeCollectorData(Externalizable data) throws Exception {
-        
-    }
-
-    @Override
-    public void analyzeStatus(BatchStatus batchStatus, String exitStatus) throws Exception {
-        
-    }
-
+/**
+ * The AbstractPartitionAnalyzer provides default 
+ * implementations of less commonly implemented methods.
+ */
+public abstract class AbstractPartitionAnalyzer implements PartitionAnalyzer {
+	/**
+	 * Override this method to analyze PartitionCollector payloads.
+	 * 
+	 * @param data specifies the payload sent by the
+	 * PartitionCollector. 
+	 * @throws Exception is thrown if an error occurs. 
+	 */
+	@Override
+	public void analyzeCollectorData(Externalizable data) throws Exception {}
+	/**
+	 * Override this method to analyze partition end status.
+	 * @param batchStatus specifies the batch status of a partition.
+	 * @param exitStatus specifies the exit status of a partition. 
+	 * @throws Exception is thrown if an error occurs.  
+	 */
+	@Override
+	public void analyzeStatus(String batchStatus, String exitStatus)
+			throws Exception {}
 }

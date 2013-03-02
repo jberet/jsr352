@@ -33,12 +33,11 @@ import static org.mybatch.util.BatchLogger.LOGGER;
 
 public final class FlowExecutionRunner extends CompositeExecutionRunner implements Runnable {
     private Flow flow;
-    private FlowContextImpl flowContext;  //duplicate super.batchContext, for accessing FlowContextImpl-specific methods
 
     public FlowExecutionRunner(FlowContextImpl flowContext, CompositeExecutionRunner enclosingRunner) {
         super(flowContext, enclosingRunner);
         this.flow = flowContext.getFlow();
-        this.flowContext = flowContext;
+        this.batchContext = flowContext;
     }
 
     @Override
@@ -48,25 +47,25 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner implemen
 
     @Override
     public void run() {
-        flowContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
-        flowContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.STARTED);
+        batchContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
+        batchContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.STARTED);
 
         try {
             runFromHead();
         } catch (Throwable e) {
             LOGGER.failToRunJob(e, flow, "run");
-            flowContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
-            for (AbstractContext c : flowContext.getOuterContexts()) {
+            batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            for (AbstractContext c : batchContext.getOuterContexts()) {
                 c.setBatchStatus(JobOperator.BatchStatus.FAILED);
             }
         }
 
-        if (flowContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
-            flowContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
+            batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
             enclosingRunner.getBatchContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);  //set job batch status COMPLETED, may be changed next
         }
 
-        if (flowContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
+        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
             String next = flow.getNext();
             if (next == null) {
                 next = resolveControlElements(flow.getControlElements());

@@ -18,7 +18,6 @@ package javax.batch.runtime;
 
 import java.util.Date;
 import java.util.Properties;
-
 import javax.batch.operations.JobOperator.BatchStatus;
 
 public interface JobExecution {

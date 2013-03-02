@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.batch.operations.exception.JobStartException;
 
-import org.mybatch.batch.BatchArtifacts;
-import org.mybatch.batch.Ref;
+import org.mybatch.job.BatchArtifactRef;
+import org.mybatch.job.BatchArtifacts;
 import org.scannotation.AnnotationDB;
 import org.scannotation.ClasspathUrlFinder;
 
@@ -76,7 +76,7 @@ public class ApplicationMetaData {
     public String getClassNameForRef(String ref) {
         String result = artifactCatalog.get(ref);
         if (result == null && batchArtifacts != null) {
-            for (Ref r : batchArtifacts.getRef()) {
+            for (BatchArtifactRef r : batchArtifacts.getRef()) {
                 if (r.getId().equals(ref)) {
                     result = r.getClazz();
                     break;

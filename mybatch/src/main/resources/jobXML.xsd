@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-	targetNamespace="http://batch.jsr352/jsl" xmlns:jsl="http://batch.jsr352/jsl" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	targetNamespace="http://xmlns.jcp.org/xml/ns/javaee" xmlns:jsl="http://xmlns.jcp.org/xml/ns/javaee" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
 	jaxb:version="2.0">
 
 	<xs:simpleType name="artifactRef">
@@ -184,7 +184,7 @@
 		</xs:sequence>
 		<xs:attribute name="checkpoint-policy" use="optional" type="xs:string" default="item"/>
 		<xs:attribute name="item-count" use="optional" type="xs:string"  default="10" />
-		<xs:attribute name="time-limit" use="optional" type="xs:string" default="10"/>
+		<xs:attribute name="time-limit" use="optional" type="xs:string" default="0"/>
 		<xs:attribute name="skip-limit" use="optional" type="xs:string" />
 		<xs:attribute name="retry-limit" use="optional" type="xs:string" />
 	</xs:complexType>

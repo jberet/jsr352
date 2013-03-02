@@ -31,10 +31,10 @@ import javax.batch.runtime.Metric;
  */
 final public class StepMetrics {
 
-    private final Map<MetricName, MetricImpl> metricsMapping = new HashMap<MetricName, MetricImpl>();
+    private final Map<Metric.MetricName, MetricImpl> metricsMapping = new HashMap<Metric.MetricName, MetricImpl>();
 
     public StepMetrics() {
-        for (MetricName m : MetricName.values()) {
+        for (Metric.MetricName m : Metric.MetricName.values()) {
             metricsMapping.put(m, new MetricImpl(m));
         }
     }
@@ -43,12 +43,12 @@ final public class StepMetrics {
         return metricsMapping.values().toArray(new Metric[metricsMapping.size()]);
     }
 
-    public void set(MetricName name, long value) {
+    public void set(Metric.MetricName name, long value) {
         MetricImpl targetMetric = metricsMapping.get(name);
         targetMetric.setValue(value);
     }
 
-    public void increment(MetricName name, long value) {
+    public void increment(Metric.MetricName name, long value) {
         MetricImpl targetMetric = metricsMapping.get(name);
         targetMetric.increment(value);
     }

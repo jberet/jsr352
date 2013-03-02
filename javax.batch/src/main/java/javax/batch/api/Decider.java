@@ -19,41 +19,29 @@ package javax.batch.api;
 import javax.batch.runtime.StepExecution;
 
 /**
- * Decider determines batch exit status and to influence sequencing between
- * steps, splits, and flows in a Job XML. The decider returns a String value
- * which becomes the exit status value on which the decision chooses the next
- * transition.
- * 
- * @param <T>
- *            specifies the type of the transient data in the batch context.
+ * Decider determines batch exit status and to influence 
+ * sequencing between steps, splits, and flows in a Job XML. 
+ * The decider returns a String value which becomes the exit 
+ * status value on which the decision chooses the next transition. 
+ *
+ * @param <T> specifies the type of the transient data in the 
+ * batch context.
  */
-public interface Decider<T> {
-	
+public interface Decider <T> {
+
 	/**
-	* The decide method receives control during job processing to 
-	* set exit status between a step, split, or flow. The return 
-	* value updates the current job execution's exit status. The
-	* decide method signature with a single StepExecution input receives
-	* control following a step or a flow. In the case of a flow, the
-	* StepContext is from the last step to execute in the flow.
-	* 
-	* @param execution specifies the StepExecution of the preceding step.
-	* @return updated job exit status
-	* @throws Exception is thrown if an error occurs. 
-	*/
-	public String decide(StepExecution stepExecution) throws Exception;
-	
-	/**
-	* The decide method receives control during job processing to 
-	* set exit status between a step, split, or flow. The return 
-	* value updates the current job execution's exit status. The
-	* decide method signature with an array of StepExecution input receives
-	* control following a split. The array contains a StepExecution from
-	* the last step to execute in each flow of the split.
-	* 
-	* @param stepExecutions specifies the StepExecution of the preceding step.
-	* @return updated job exit status
-	* @throws Exception is thrown if an error occurs. 
-	*/
-	public String decide(StepExecution[] stepExecutions) throws Exception;
+	 * The decide method receives control during job processing to 
+	 * set exit status between a step, split, or flow. The return 
+	 * value updates the current job execution's exit status. This
+     * decide method signature with an array of StepExecution input 
+     * receives control following a split. The array contains a 
+     * StepExecution from the last step to execute in each flow of 
+     * the split.
+	 * @param executions specifies the StepExecutions of the preceding 
+     * steps.	 
+     * @return updated job exit status
+	 * @throws Exception is thrown if an error occurs. 
+	 */
+	public String decide(StepExecution<?>[] executions) throws Exception;
+
 }

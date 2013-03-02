@@ -47,7 +47,7 @@ public interface CheckpointAlgorithm {
 	 * @throws Exception
 	 *             thrown for any errors.
 	 */
-	public int checkpointTimeout(int timeout) throws Exception;
+	public int checkpointTimeout() throws Exception;
 
 	/**
 	 * The beginCheckpoint method is invoked before the next checkpoint interval

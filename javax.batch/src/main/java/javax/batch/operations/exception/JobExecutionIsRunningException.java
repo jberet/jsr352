@@ -30,4 +30,16 @@ public class JobExecutionIsRunningException extends
 			final String localizedMessage) {
 		super(th, localizedMessage);
 	}
+	
+	public JobExecutionIsRunningException(final String localizedMessage) {
+		super(localizedMessage);
+	}
+	
+	public JobExecutionIsRunningException(final Throwable th) {
+		super(th);
+	}
+	
+	public JobExecutionIsRunningException() {
+		super();
+	}
 }

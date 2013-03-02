@@ -29,5 +29,17 @@ public class NoSuchJobExecutionException extends
 			final String localizedMessage) {
 		super(th, localizedMessage);
 	}
+	
+	public NoSuchJobExecutionException(final String localizedMessage) {
+		super(localizedMessage);
+	}
+	
+	public NoSuchJobExecutionException(final Throwable th) {
+		super(th);
+	}
+	
+	public NoSuchJobExecutionException() {
+		super();
+	}
 
 }
