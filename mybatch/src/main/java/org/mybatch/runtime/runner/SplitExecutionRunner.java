@@ -24,59 +24,53 @@ package org.mybatch.runtime.runner;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 
 import org.mybatch.job.Flow;
+import org.mybatch.job.Split;
 import org.mybatch.runtime.context.AbstractContext;
-import org.mybatch.runtime.context.FlowContextImpl;
+import org.mybatch.runtime.context.SplitContextImpl;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-public final class FlowExecutionRunner extends CompositeExecutionRunner implements Runnable {
-    private Flow flow;
+public final class SplitExecutionRunner extends CompositeExecutionRunner implements Runnable {
+    private static final long SPLIT_FLOW_TIMEOUT_SECONDS = 300;
+    private Split split;
     private CountDownLatch latch;
 
-    public FlowExecutionRunner(FlowContextImpl flowContext, CompositeExecutionRunner enclosingRunner, CountDownLatch latch) {
-        super(flowContext, enclosingRunner);
-        this.flow = flowContext.getFlow();
-        this.batchContext = flowContext;
-        this.latch = latch;
+    public SplitExecutionRunner(SplitContextImpl splitContext, CompositeExecutionRunner enclosingRunner) {
+        super(splitContext, enclosingRunner);
+        this.split = splitContext.getSplit();
+        this.batchContext = splitContext;
     }
 
     @Override
     protected List<?> getJobElements() {
-        return flow.getDecisionOrStepOrSplit();
+        return split.getFlow();
     }
 
     @Override
     public void run() {
-        batchContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
-        batchContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.STARTED);
-
+        List<Flow> flows = split.getFlow();
+        latch = new CountDownLatch(flows.size());
         try {
-            runFromHead();
+            for (Flow f : flows) {
+                runFlow(f, latch);
+            }
+            latch.await(SPLIT_FLOW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (Throwable e) {
-            LOGGER.failToRunJob(e, flow, "run");
-            batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            LOGGER.failToRunJob(e, split, "run");
             for (AbstractContext c : batchContext.getOuterContexts()) {
                 c.setBatchStatus(JobOperator.BatchStatus.FAILED);
             }
-        } finally {
-            latch.countDown();
         }
 
-        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
-            batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
-            enclosingRunner.getBatchContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);  //set job batch status COMPLETED, may be changed next
+        String next = split.getNext();
+        if (next == null) {
+            next = resolveControlElements(split.getControlElements());
         }
-
-        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
-            String next = flow.getNext();
-            if (next == null) {
-                next = resolveControlElements(flow.getControlElements());
-            }
-            enclosingRunner.runJobElement(next);
-        }
+        enclosingRunner.runJobElement(next);
     }
 
 }

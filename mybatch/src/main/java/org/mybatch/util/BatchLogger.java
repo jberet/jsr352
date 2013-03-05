@@ -34,6 +34,7 @@ import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
+import org.mybatch.runtime.context.AbstractContext;
 
 @MessageLogger(projectCode = "mybatch")
 public interface BatchLogger extends BasicLogger {
@@ -116,7 +117,9 @@ public interface BatchLogger extends BasicLogger {
     void possibleSyntaxErrorInProperty(String prop);
 
     @Message(id = 22, value = "Step loopback not allowed.  The step %s has already run in sequence: %s")
-    BatchOperationsRuntimeException loopbackStep(String stepId, List<?> executedSteps);
+    BatchOperationsRuntimeException loopbackStep(String stepId, String executedSteps);
 
+    @Message(id = 23, value = "The requested batch operation %s is not supported in %s")
+    BatchOperationsRuntimeException batchOperationNotSupported(String op, AbstractContext context);
 
 }

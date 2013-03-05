@@ -24,7 +24,7 @@ package org.mybatch.runtime;
 
 import javax.batch.runtime.context.FlowResults;
 
-public class FlowExecutionImpl extends AbstractExecution implements FlowResults {
+public final class FlowExecutionImpl extends AbstractExecution implements FlowResults {
     private String flowId;
 
     public FlowExecutionImpl(String flowId) {

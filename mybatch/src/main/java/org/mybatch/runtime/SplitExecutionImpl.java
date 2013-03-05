@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2012, Red Hat, Inc., and individual contributors
+ * Copyright 2013, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -22,26 +22,15 @@
 
 package org.mybatch.runtime;
 
-import javax.batch.runtime.JobInstance;
+public final class SplitExecutionImpl extends AbstractExecution {
+    private String splitId;
 
-import org.mybatch.job.Job;
-
-public final class JobInstanceImpl implements JobInstance {
-    private long id;
-    private Job job;
-
-    public JobInstanceImpl(Job job) {
-        this.job = job;
+    public SplitExecutionImpl(String splitId) {
+        this.splitId = splitId;
     }
 
-    @Override
-    public String getJobName() {
-        return job.getId();
-    }
-
-    @Override
-    public long getInstanceId() {
-        return this.id;
+    public String getSplitId() {
+        return splitId;
     }
 
 }

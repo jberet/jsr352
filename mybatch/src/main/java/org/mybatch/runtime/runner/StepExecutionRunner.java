@@ -23,6 +23,7 @@
 package org.mybatch.runtime.runner;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.batch.api.StepListener;
@@ -52,11 +53,15 @@ public final class StepExecutionRunner extends AbstractRunner implements Runnabl
     public void run() {
         LinkedList<Step> executedSteps = stepContext.getJobContext().getExecutedSteps();
         if (executedSteps.contains(step)) {
-            List<String> stepIds = new ArrayList<String>();
-            for (Step s : executedSteps) {
-                stepIds.add(s.getId());
+            StringBuilder stepIds = new StringBuilder();
+            int i = 0, j = executedSteps.size() - 1;
+            for (Iterator<Step> it = executedSteps.iterator(); it.hasNext(); i++) {
+                stepIds.append(it.next().getId());
+                if (i < j) {
+                    stepIds.append(" -> ");
+                }
             }
-            throw LOGGER.loopbackStep(step.getId(), stepIds);
+            throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
         }
 
         stepContext.setBatchStatus(JobOperator.BatchStatus.STARTED);

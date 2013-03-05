@@ -23,6 +23,7 @@
 package org.mybatch.runtime.runner;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import javax.batch.api.Decider;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.StepExecution;
@@ -33,8 +34,10 @@ import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.context.AbstractContext;
 import org.mybatch.runtime.context.FlowContextImpl;
+import org.mybatch.runtime.context.SplitContextImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchLogger;
+import org.mybatch.util.ConcurrencyService;
 
 /**
  * A runner for job elements that can contain other job elements.  Examples of such composite job elements are
@@ -47,6 +50,10 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
 
     protected abstract List<?> getJobElements();
 
+    /**
+     * Runs the first job element, which then transitions to the next element.  Not used for running split, whose
+     * component elements are not sequential.
+     */
     protected void runFromHead() {
         // the head of the composite job element is the first non-abstract element (step, flow, or split)
         for (Object e : getJobElements()) {
@@ -60,7 +67,7 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
             } else if (e instanceof Flow) {
                 Flow flow = (Flow) e;
                 //A flow cannot be abstract or have parent, so run the flow
-                runFlow(flow);
+                runFlow(flow, null);
                 break;
             } else if (e instanceof Split) {
                 Split split = (Split) e;
@@ -97,7 +104,7 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
             } else if (e instanceof Flow) {
                 Flow flow = (Flow) e;
                 if (flow.getId().equals(jobElementName)) {
-                    runFlow(flow);
+                    runFlow(flow, null);
                     return;
                 }
             } else if (e instanceof Split) {
@@ -134,14 +141,22 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
         }
     }
 
-    protected void runFlow(Flow flow) {
+    protected void runFlow(Flow flow, CountDownLatch latch) {
         FlowContextImpl flowContext = new FlowContextImpl(flow,
                 AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
-        FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this);
-        flowExecutionRunner.run();
+        FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this, latch);
+
+        if (latch != null) {
+            ConcurrencyService.getExecutorService().submit(flowExecutionRunner);
+        } else {
+            flowExecutionRunner.run();
+        }
     }
 
     protected void runSplit(Split split) {
-
+        SplitContextImpl splitContext = new SplitContextImpl(split,
+                AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
+        SplitExecutionRunner splitExecutionRunner = new SplitExecutionRunner(splitContext, this);
+        splitExecutionRunner.run();
     }
 }

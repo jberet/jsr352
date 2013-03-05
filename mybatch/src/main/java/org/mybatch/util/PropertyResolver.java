@@ -36,6 +36,7 @@ import org.mybatch.job.Job;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Property;
+import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
@@ -110,6 +111,12 @@ public final class PropertyResolver {
             //chunk has no direct properties.  Its reader, writer, processor and check-point-algorithm each has its own props
             //TODO add after schema update
         }
+    }
+
+    public void resolve(Split split) {
+        //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
+        //split has no listeners, no decision
+        resolve(split.getProperties(), false);
     }
 
     public void resolve(Flow flow) {
