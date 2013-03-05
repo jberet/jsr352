@@ -168,6 +168,11 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
+    public void purge(String apptag) {
+
+    }
+
+    @Override
     public Set<String> getJobNames() {
         return null;
     }

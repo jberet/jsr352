@@ -62,7 +62,9 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner implemen
                 c.setBatchStatus(JobOperator.BatchStatus.FAILED);
             }
         } finally {
-            latch.countDown();
+            if (latch != null) {
+                latch.countDown();
+            }
         }
 
         if (batchContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned

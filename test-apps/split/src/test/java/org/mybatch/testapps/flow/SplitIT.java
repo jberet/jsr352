@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2012, Red Hat, Inc., and individual contributors
+ * Copyright 2013, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -20,27 +20,14 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.testapps.flow;
+package org.mybatch.testapps.split;
 
-import javax.batch.annotation.BatchProperty;
-import javax.inject.Named;
+import org.junit.Test;
+import org.mybatch.testapps.common.AbstractIT;
 
-import org.mybatch.testapps.common.Batchlet0;
-
-@Named
-public class Batchlet1 extends Batchlet0 {
-    @BatchProperty(name = "reference-flow-prop")
-    private String referencingFlowProp;
-
-    @Override
-    public String process() throws Exception {
-        String result = super.process();
-
-        String stepToVerify = "step1";
-        if (getStepContext().getId().equals(stepToVerify)) {
-            System.out.printf("referencingFlowbProp: %s%n", referencingFlowProp);
-        }
-
-        return result;
+public class SplitIT extends AbstractIT {
+    @Test
+    public void split() throws Exception {
+        startJob("split.xml");
     }
 }

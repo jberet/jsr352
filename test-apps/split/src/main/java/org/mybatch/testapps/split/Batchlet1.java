@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.testapps.flow;
+package org.mybatch.testapps.split;
 
 import javax.batch.annotation.BatchProperty;
 import javax.inject.Named;
@@ -29,16 +29,19 @@ import org.mybatch.testapps.common.Batchlet0;
 
 @Named
 public class Batchlet1 extends Batchlet0 {
-    @BatchProperty(name = "reference-flow-prop")
+    @BatchProperty(name="reference-split-prop")
+    private String referencingSplitProp;
+
+    @BatchProperty(name="reference-flow-prop")
     private String referencingFlowProp;
 
     @Override
     public String process() throws Exception {
         String result = super.process();
 
-        String stepToVerify = "step1";
-        if (getStepContext().getId().equals(stepToVerify)) {
-            System.out.printf("referencingFlowbProp: %s%n", referencingFlowProp);
+        String stepToVerify = "step11";
+        if (stepToVerify.equals(getStepContext().getId())) {
+            System.out.printf("referencingSplitProp: %s, referencingFlowProp: %s%n", referencingSplitProp, referencingFlowProp);
         }
 
         return result;

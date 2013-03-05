@@ -17,17 +17,18 @@
 package javax.batch.operations;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
-import javax.batch.operations.exception.JobExecutionAlreadyCompleteException;
+import java.util.Properties;
 import javax.batch.operations.exception.JobExecutionIsRunningException;
-import javax.batch.operations.exception.JobExecutionNotMostRecentException;
 import javax.batch.operations.exception.JobExecutionNotRunningException;
+import javax.batch.operations.exception.JobExecutionAlreadyCompleteException;
+import javax.batch.operations.exception.JobExecutionNotMostRecentException;
 import javax.batch.operations.exception.JobRestartException;
 import javax.batch.operations.exception.JobStartException;
 import javax.batch.operations.exception.NoSuchJobException;
 import javax.batch.operations.exception.NoSuchJobExecutionException;
 import javax.batch.operations.exception.NoSuchJobInstanceException;
+import javax.batch.operations.exception.SecurityException;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
@@ -56,7 +57,7 @@ public interface JobOperator {
 	 * @return count of instances of the named job.
 	 * @throws NoSuchJobException
 	 */
-	int getJobInstanceCount(String jobName) throws NoSuchJobException;
+	int getJobInstanceCount(String jobName) throws NoSuchJobException, SecurityException;
 
 	/**
 	 * Returns all JobInstances belonging to a job with a particular name.
@@ -73,7 +74,7 @@ public interface JobOperator {
 	 * @throws NoSuchJobException
 	 */
 	List<JobInstance> getJobInstances(String jobName, int start, int count)
-			throws NoSuchJobException;
+			throws NoSuchJobException, SecurityException;
 
 	/**
 	 * Returns JobInstances for all running jobs across all instances of a job
@@ -94,7 +95,7 @@ public interface JobOperator {
 	 * @return List of JobExecutions. 
 	 * @throws NoSuchJobInstanceException
 	 */
-	List<JobExecution> getExecutions(JobInstance instance) throws NoSuchJobInstanceException;
+	List<JobExecution> getExecutions(JobInstance instance) throws NoSuchJobInstanceException, SecurityException;
 
 	/**
 	 * Returns job parameters for a specified job instance. These are the key/value
@@ -106,7 +107,7 @@ public interface JobOperator {
 	 * @throws NoSuchJobInstanceException
 	 */
 	Properties getParameters(JobInstance instance)
-			throws NoSuchJobInstanceException;
+			throws NoSuchJobInstanceException, SecurityException;
 
 	/**
 	 * Creates a new job instance and starts the first execution of that
@@ -147,7 +148,7 @@ public interface JobOperator {
 			throws JobExecutionAlreadyCompleteException,
 			NoSuchJobExecutionException, 
 			JobExecutionNotMostRecentException, 
-			JobRestartException;
+			JobRestartException, SecurityException;
 	
 	/**
 	 * Restarts a failed or stopped job instance.
@@ -165,7 +166,7 @@ public interface JobOperator {
 			throws JobExecutionAlreadyCompleteException,
 			NoSuchJobExecutionException, 
 			JobExecutionNotMostRecentException, 
-			JobRestartException;
+			JobRestartException, SecurityException;
 
 	/**
 	 * Request a running job execution stops. This
@@ -181,9 +182,10 @@ public interface JobOperator {
 	 *            The job execution must be running.
 	 * @throws NoSuchJobExecutionException
 	 * @throws JobExecutionNotRunningException
+	 * @throws SecurityException 
 	 */
 	void stop(long executionId) throws NoSuchJobExecutionException,
-			JobExecutionNotRunningException;
+			JobExecutionNotRunningException, SecurityException;
 
 	/**
 	 * Set batch status to ABANDONED.  The instance must have 
@@ -195,7 +197,7 @@ public interface JobOperator {
 	 * @throws JobExecutionIsRunningException
 	 */
 	void abandon(JobExecution jobExecution) throws NoSuchJobInstanceException, 
-			JobExecutionIsRunningException;
+			JobExecutionIsRunningException, SecurityException;
 	
 	
 	/**
@@ -206,7 +208,7 @@ public interface JobOperator {
 	 * @return job instance
 	 * @throws NoSuchJobExecutionException
 	 */
-	JobInstance getJobInstance(long executionId) throws NoSuchJobExecutionException;
+	JobInstance getJobInstance(long executionId) throws NoSuchJobExecutionException, SecurityException;
 
 	/**
 	 * Return all job executions belonging to the specified job instance.
@@ -216,7 +218,7 @@ public interface JobOperator {
 	 * @return list of job executions
 	 * @throws NoSuchJobInstanceException 
 	 */
-	List<JobExecution> getJobExecutions(JobInstance instance) throws NoSuchJobInstanceException;
+	List<JobExecution> getJobExecutions(JobInstance instance) throws NoSuchJobInstanceException, SecurityException;
 
 	/**
 	 * Return job execution for specified execution id
@@ -226,7 +228,7 @@ public interface JobOperator {
 	 * @return job execution
 	 * @throws NoSuchJobExecutionException
 	 */
-	JobExecution getJobExecution(long executionId) throws NoSuchJobExecutionException;
+	JobExecution getJobExecution(long executionId) throws NoSuchJobExecutionException, SecurityException;
 
 	/**
 	* Return StepExecutions for specified execution id.
@@ -236,5 +238,7 @@ public interface JobOperator {
 	* @return a list of step executions (no particular ordering implied)
 	* @throws NoSuchJobExecutionException
 	*/
-	List<StepExecution> getStepExecutions(long jobExecutionId) throws NoSuchJobExecutionException;
+	List<StepExecution> getStepExecutions(long jobExecutionId) throws NoSuchJobExecutionException, SecurityException;
+
+	void purge(String apptag);
 }

@@ -30,7 +30,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.junit.Assert;
-import static org.hamcrest.CoreMatchers.*;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 
 @Named
 public class Decider1 implements Decider {

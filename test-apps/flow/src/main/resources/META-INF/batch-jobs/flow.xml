@@ -44,6 +44,9 @@
 
 
     <flow id="flow1" next="step4">
+        <properties>
+            <property name="flow-prop" value="flow-prop"/>
+        </properties>
         <step id="step1" next="step2">
             <properties>
                 <property name="step-prop" value="step-prop"></property>
@@ -51,6 +54,9 @@
                 <property name="job-prop-2" value="step-prop-2"></property>
             </properties>
             <batchlet ref="Batchlet1">
+                <properties>
+                    <property name="reference-flow-prop" value="flow-prop"/>
+                </properties>
             </batchlet>
         </step>
 
