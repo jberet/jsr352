@@ -19,15 +19,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
+ 
 package org.mybatch.testapps.split;
 
-import org.junit.Test;
-import org.mybatch.testapps.common.AbstractIT;
+import java.util.Arrays;
+import javax.batch.api.Decider;
+import javax.batch.runtime.StepExecution;
+import javax.inject.Named;
 
-public class SplitIT extends AbstractIT {
-    @Test
-    public void split() throws Exception {
-        startJob("split.xml");
+import org.junit.Assert;
+
+/**
+ * This decider follows a split, so there should be multiple StepExecution.
+ */
+@Named("Decider2")
+public class Decider2 implements Decider {
+    @Override
+    public String decide(StepExecution[] executions) throws Exception {
+        Assert.assertEquals(2, executions.length);
+        System.out.printf("In decider2 StepExecution[]: %s%n", Arrays.toString(executions));
+        for (StepExecution e : executions) {
+            System.out.printf("batch status: %s, exit status: %s%n", e.getBatchStatus(), e.getExitStatus());
+        }
+        return "next";
     }
 }

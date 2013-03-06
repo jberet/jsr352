@@ -35,11 +35,12 @@ import static org.mybatch.util.BatchLogger.LOGGER;
 public final class FlowExecutionRunner extends CompositeExecutionRunner implements Runnable {
     private Flow flow;
     private CountDownLatch latch;
+    private FlowContextImpl flowContext;
 
     public FlowExecutionRunner(FlowContextImpl flowContext, CompositeExecutionRunner enclosingRunner, CountDownLatch latch) {
         super(flowContext, enclosingRunner);
         this.flow = flowContext.getFlow();
-        this.batchContext = flowContext;
+        this.flowContext = flowContext;
         this.latch = latch;
     }
 
@@ -77,7 +78,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner implemen
             if (next == null) {
                 next = resolveControlElements(flow.getControlElements());
             }
-            enclosingRunner.runJobElement(next);
+            enclosingRunner.runJobElement(next, flowContext.getFlowExecution().getLastStepExecution());
         }
     }
 

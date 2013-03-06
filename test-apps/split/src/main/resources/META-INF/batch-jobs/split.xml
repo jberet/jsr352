@@ -31,7 +31,7 @@
         <property name="job-prop-2" value="job-prop-2"></property>
     </properties>
 
-    <split id="split1" next="step3">
+    <split id="split1" next="decision1">
         <properties>
             <property name="split-prop" value="split-prop"/>
         </properties>
@@ -67,6 +67,11 @@
         </flow>
     </split>
 
+    <decision id="decision1" ref="Decider2">
+        <!-- Decider2 sets exit status to "next", thus directing the job to step3 -->
+        <next on="next" to="step3" />
+    </decision>
+    
     <step id="step3">
         <batchlet ref="Batchlet1"/>
     </step>

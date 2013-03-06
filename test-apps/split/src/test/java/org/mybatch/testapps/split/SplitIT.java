@@ -20,35 +20,17 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.runtime;
+package org.mybatch.testapps.split;
 
-import javax.batch.runtime.StepExecution;
-import javax.batch.runtime.context.FlowResults;
+import org.junit.Test;
+import org.mybatch.testapps.common.AbstractIT;
 
-public final class FlowExecutionImpl extends AbstractExecution implements FlowResults {
-    private String flowId;
-
-    /**
-     * The last StepExecution of the current flow.  Needed if the next element after the current flow is a decison, or
-     * if this flow is part of a split, and the next element after the split is a decision.
-     */
-    private StepExecution lastStepExecution;
-
-    public FlowExecutionImpl(String flowId) {
-        this.flowId = flowId;
+/**
+ * Verifies split properties referencing, job element transition, and decision following split.
+ */
+public class SplitIT extends AbstractIT {
+    @Test
+    public void split() throws Exception {
+        startJob("split.xml");
     }
-
-    @Override
-    public String getFlowId() {
-        return flowId;
-    }
-
-    public StepExecution getLastStepExecution() {
-        return lastStepExecution;
-    }
-
-    public void setLastStepExecution(StepExecution lastStepExecution) {
-        this.lastStepExecution = lastStepExecution;
-    }
-
 }

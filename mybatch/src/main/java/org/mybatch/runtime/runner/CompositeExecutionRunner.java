@@ -123,6 +123,11 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
         StepContextImpl stepContext = new StepContextImpl(step,
                 AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
         StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(stepContext, this);
+
+        if (batchContext instanceof FlowContextImpl) {
+            ((FlowContextImpl) batchContext).getFlowExecution().setLastStepExecution(stepContext.getStepExecution());
+        }
+
         stepExecutionRunner.run();
     }
 
@@ -145,6 +150,11 @@ public abstract class CompositeExecutionRunner extends AbstractRunner {
         FlowContextImpl flowContext = new FlowContextImpl(flow,
                 AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
         FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this, latch);
+
+        if (batchContext instanceof SplitContextImpl) {
+            SplitContextImpl splitContext = (SplitContextImpl) batchContext;
+            splitContext.getFlowExecutions().add(flowContext.getFlowExecution());
+        }
 
         if (latch != null) {
             ConcurrencyService.getExecutorService().submit(flowExecutionRunner);
