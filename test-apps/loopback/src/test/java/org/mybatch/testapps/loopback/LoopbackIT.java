@@ -87,4 +87,12 @@ public class LoopbackIT extends AbstractIT {
     public void loopbackSplitSelf() throws Exception {
         startJob("loopback-split-self.xml");
     }
+
+    /**
+     * step0 => split1 (flow1 (step1) | flow2 (step2)) => step0 is a loopback.
+     */
+    @Test
+    public void loopbackStepSplit() throws Exception {
+        startJob("loopback-step-split.xml");
+    }
 }

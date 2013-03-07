@@ -19,12 +19,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.repository.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,10 +35,6 @@ public class MemoryRepository implements JobRepository {
     private final AtomicLong atomicLong = new AtomicLong();
 
     private ConcurrentMap<String, Job> jobs = new ConcurrentHashMap<String, Job>();
-
-    //mapping between jobInstanceId and its saved properties
-    private ConcurrentMap<Long, ConcurrentMap<String, String>> savedProperties =
-            new ConcurrentHashMap<Long, ConcurrentMap<String, String>>();
 
     @Override
     public long nextUniqueId() {
@@ -53,7 +48,7 @@ public class MemoryRepository implements JobRepository {
 
     @Override
     public Job removeJob(String jobId) {
-        //may need to cascade-remove all the associated jobInstances and their saved properties
+        //may need to cascade-remove all the associated jobInstances
         return jobs.remove(jobId);
     }
 
@@ -67,48 +62,4 @@ public class MemoryRepository implements JobRepository {
         return Collections.unmodifiableCollection(jobs.values());
     }
 
-    @Override
-    public String saveProperty(Long jobInstanceId, String propName, String propValue) {
-        ConcurrentMap<String, String> props = savedProperties.get(jobInstanceId);
-        if (props == null) {
-            props = new ConcurrentHashMap<String, String>();
-            ConcurrentMap<String, String> old = savedProperties.putIfAbsent(jobInstanceId, props);
-            if (old != null) {
-                props = old;
-            }
-        }
-        return props.put(propName, propValue);
-    }
-
-    @Override
-    public String getSavedProperty(Long jobInstanceId, String propName) {
-        ConcurrentMap<String, String> props = savedProperties.get(jobInstanceId);
-        if (props != null) {
-            return props.get(propName);
-        }
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getSavedProperties(Long jobInstanceId) {
-        ConcurrentMap<String, String> result = savedProperties.get(jobInstanceId);
-        if (result != null) {
-            return Collections.unmodifiableMap(result);
-        }
-        return null;
-    }
-
-    @Override
-    public String removeSavedProperty(Long jobInstanceId, String propName) {
-        ConcurrentMap<String, String> props = savedProperties.get(jobInstanceId);
-        if (props != null) {
-            return props.remove(propName);
-        }
-        return null;
-    }
-
-    @Override
-    public void removeSavedProperties(Long jobInstanceId) {
-        savedProperties.remove(jobInstanceId);
-    }
 }

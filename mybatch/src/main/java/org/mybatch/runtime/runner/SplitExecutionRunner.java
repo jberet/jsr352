@@ -86,19 +86,21 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner impleme
             }
         }
 
-        String next = split.getNext();
-        if (next == null) {
-            next = resolveControlElements(split.getControlElements());
-        }
-
-        if (next != null) {
-            //the last StepExecution of each flow is needed if the next element after this split is a decision
-            List<FlowExecutionImpl> fes = splitContext.getFlowExecutions();
-            StepExecution[] stepExecutions = new StepExecution[fes.size()];
-            for (int i = 0; i < fes.size(); i++) {
-                stepExecutions[i] = fes.get(i).getLastStepExecution();
+        if (splitContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
+            String next = split.getNext();
+            if (next == null) {
+                next = resolveControlElements(split.getControlElements());
             }
-            enclosingRunner.runJobElement(next, stepExecutions);
+
+            if (next != null) {
+                //the last StepExecution of each flow is needed if the next element after this split is a decision
+                List<FlowExecutionImpl> fes = splitContext.getFlowExecutions();
+                StepExecution[] stepExecutions = new StepExecution[fes.size()];
+                for (int i = 0; i < fes.size(); i++) {
+                    stepExecutions[i] = fes.get(i).getLastStepExecution();
+                }
+                enclosingRunner.runJobElement(next, stepExecutions);
+            }
         }
     }
 

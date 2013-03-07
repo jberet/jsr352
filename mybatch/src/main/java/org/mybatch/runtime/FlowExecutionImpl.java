@@ -23,9 +23,8 @@
 package org.mybatch.runtime;
 
 import javax.batch.runtime.StepExecution;
-import javax.batch.runtime.context.FlowResults;
 
-public final class FlowExecutionImpl extends AbstractExecution implements FlowResults {
+public final class FlowExecutionImpl extends AbstractExecution {
     private String flowId;
 
     /**
@@ -38,7 +37,6 @@ public final class FlowExecutionImpl extends AbstractExecution implements FlowRe
         this.flowId = flowId;
     }
 
-    @Override
     public String getFlowId() {
         return flowId;
     }

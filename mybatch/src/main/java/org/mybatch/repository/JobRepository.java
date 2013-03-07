@@ -24,7 +24,6 @@
 package org.mybatch.repository;
 
 import java.util.Collection;
-import java.util.Map;
 
 import org.mybatch.job.Job;
 
@@ -39,13 +38,4 @@ public interface JobRepository {
 
     Collection<Job> getJobs();
 
-    String saveProperty(Long jobInstanceId, String propName, String propValue);
-
-    String getSavedProperty(Long jobInstanceId, String propName);
-
-    Map<String, String> getSavedProperties(Long jobInstanceId);
-
-    String removeSavedProperty(Long jobInstanceId, String propName);
-
-    void removeSavedProperties(Long jobInstanceId);
 }
