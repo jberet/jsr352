@@ -32,16 +32,16 @@ import javax.inject.Named;
 
 @Named("Batchlet1")
 public class Batchlet1 extends AbstractBatchlet implements Batchlet {
-    @BatchProperty(name = "Batchlet1")
+    @Inject @BatchProperty(name = "Batchlet1")
     private String prop1;
 
-    @BatchProperty  //default name
+    @Inject @BatchProperty  //default name
     private String defaultName;
 
-    @BatchProperty(name = "no-such-property")
+    @Inject @BatchProperty(name = "no-such-property")
     private String noSuchProperty;
 
-    @BatchProperty(name = "no-such-property")
+    @Inject @BatchProperty(name = "no-such-property")
     private String defaultValue = "defaultValue";
 
     @Inject

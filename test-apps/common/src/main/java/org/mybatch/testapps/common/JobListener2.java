@@ -32,13 +32,13 @@ import org.junit.Assert;
 
 @Named("L2")
 public class JobListener2 implements JobListener {
-    @BatchProperty(name="job-prop")
+    @Inject @BatchProperty(name="job-prop")
     private String jobProp = "L2";  //nothing is injected
 
-    @BatchProperty(name = "listener-prop")
+    @Inject @BatchProperty(name = "listener-prop")
     private String listenerProp;  //nothing is injected
 
-    @BatchProperty(name = "reference-job-prop")
+    @Inject @BatchProperty(name = "reference-job-prop")
     private Object referencedProp;  //nothing is injected
 
     @Inject

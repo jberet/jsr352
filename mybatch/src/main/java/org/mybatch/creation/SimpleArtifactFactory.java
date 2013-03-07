@@ -65,19 +65,6 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
             for (Field f : cls.getDeclaredFields()) {
                 if (!f.isSynthetic()) {
                     Object fieldVal = null;
-                    if (hasBatchProps) {
-                        BatchProperty batchPropertyAnn = f.getAnnotation(BatchProperty.class);
-                        if (batchPropertyAnn != null) {
-                            String propName = batchPropertyAnn.name();
-                            if (propName.equals("")) {
-                                propName = f.getName();
-                            }
-                            fieldVal = BatchUtil.getBatchProperty(batchProps, propName);
-                            doInjection(obj, f, fieldVal);
-                            continue;
-                        }
-                    }
-
                     Inject injectAnn = f.getAnnotation(Inject.class);
                     if (injectAnn != null) {
                         if (f.getType() == JobContext.class) {
@@ -85,8 +72,19 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                         } else if (f.getType() == StepContext.class) {
                             //fieldVal may be null when StepContext was not stored in data map, as in job listeners
                             fieldVal = data.get(DataKey.STEP_CONTEXT);
+                        } else if (hasBatchProps) {
+                            BatchProperty batchPropertyAnn = f.getAnnotation(BatchProperty.class);
+                            if (batchPropertyAnn != null) {
+                                String propName = batchPropertyAnn.name();
+                                if (propName.equals("")) {
+                                    propName = f.getName();
+                                }
+                                fieldVal = BatchUtil.getBatchProperty(batchProps, propName);
+                            }
                         }
-                        doInjection(obj, f, fieldVal);
+                        if (fieldVal != null) {
+                            doInjection(obj, f, fieldVal);
+                        }
                     }
                 }
             }

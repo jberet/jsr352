@@ -23,12 +23,14 @@
 package org.mybatch.testapps.flow;
 
 import javax.batch.annotation.BatchProperty;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.mybatch.testapps.common.Batchlet0;
 
 @Named
 public class Batchlet1 extends Batchlet0 {
+    @Inject
     @BatchProperty(name = "reference-flow-prop")
     private String referencingFlowProp;
 

@@ -23,16 +23,17 @@
 package org.mybatch.testapps.split;
 
 import javax.batch.annotation.BatchProperty;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.mybatch.testapps.common.Batchlet0;
 
 @Named
 public class Batchlet1 extends Batchlet0 {
-    @BatchProperty(name="reference-split-prop")
+    @Inject @BatchProperty(name="reference-split-prop")
     private String referencingSplitProp;
 
-    @BatchProperty(name="reference-flow-prop")
+    @Inject @BatchProperty(name="reference-flow-prop")
     private String referencingFlowProp;
 
     @Override

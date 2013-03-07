@@ -35,16 +35,16 @@ public class BatchletNoNamed extends AbstractBatchlet {
     @Inject
     private StepContext stepContext;
 
-    @BatchProperty(name="batchlet-prop")
+    @Inject @BatchProperty(name="batchlet-prop")
     protected String batchletProp;
 
-    @BatchProperty(name="reference-job-prop")
+    @Inject @BatchProperty(name="reference-job-prop")
     protected String referencingJobProp;
 
-    @BatchProperty(name = "reference-system-prop")
+    @Inject @BatchProperty(name = "reference-system-prop")
     protected String referencingSystemProp;
 
-    @BatchProperty(name = "reference-job-param")
+    @Inject @BatchProperty(name = "reference-job-param")
     protected String referencingJobParam;
 
     @Override

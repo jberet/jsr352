@@ -32,16 +32,16 @@ import javax.inject.Inject;
 import org.junit.Assert;
 
 public class StepListener4 extends AbstractStepListener implements StepListener {
-    @BatchProperty(name="step-prop")
+    @Inject @BatchProperty(name="step-prop")
     private String stepProp;  //nothing is injected
 
-    @BatchProperty(name = "listener-prop")
+    @Inject @BatchProperty(name = "listener-prop")
     private String listenerProp = "default";  //nothing to inject, keep the field default value
 
-    @BatchProperty(name = "reference-job-prop")
+    @Inject @BatchProperty(name = "reference-job-prop")
     private Object referencedProp;  //nothing to inject
 
-    @BatchProperty(name = "reference-step-prop")
+    @Inject @BatchProperty(name = "reference-step-prop")
     private Object referencedStepProp;  //nothing to inject
 
     @Inject

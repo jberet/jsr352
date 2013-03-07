@@ -36,19 +36,19 @@ import static org.hamcrest.CoreMatchers.not;
 
 @Named
 public class Decider1 implements Decider {
-    @BatchProperty(name = "decision-prop")
+    @Inject @BatchProperty(name = "decision-prop")
     private String decisionProp;
 
-    @BatchProperty(name="reference-job-prop")
+    @Inject @BatchProperty(name="reference-job-prop")
     private String referencingJobProp;
 
-    @BatchProperty(name="reference-step-prop")
+    @Inject @BatchProperty(name="reference-step-prop")
     private String referencingStepProp;  //not injected
 
-    @BatchProperty(name = "reference-system-prop")
+    @Inject @BatchProperty(name = "reference-system-prop")
     private String referencingSystemProp;
 
-    @BatchProperty(name = "reference-job-param")
+    @Inject @BatchProperty(name = "reference-job-param")
     private String referencingJobParam;
 
     @Inject

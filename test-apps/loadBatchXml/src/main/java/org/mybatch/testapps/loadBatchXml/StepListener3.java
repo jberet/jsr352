@@ -32,19 +32,19 @@ import javax.inject.Inject;
 import org.junit.Assert;
 
 public class StepListener3 extends AbstractStepListener implements StepListener {
-    @BatchProperty(name="step-prop")
+    @Inject @BatchProperty(name="step-prop")
     private String stepProp;  //nothing is injected
 
-    @BatchProperty(name = "listener-prop")
+    @Inject @BatchProperty(name = "listener-prop")
     private String listenerProp;  //injected
 
-    @BatchProperty(name = "reference-job-prop")
+    @Inject @BatchProperty(name = "reference-job-prop")
     private Object referencedProp;
 
-    @BatchProperty(name = "reference-step-prop")
+    @Inject @BatchProperty(name = "reference-step-prop")
     private Object referencedStepProp;
 
-    @BatchProperty(name="reference-job-prop-2")
+    @Inject @BatchProperty(name="reference-job-prop-2")
     private String referenceJobProp2;
 
     @Inject
