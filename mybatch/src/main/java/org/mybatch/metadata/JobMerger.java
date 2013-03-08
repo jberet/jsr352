@@ -22,27 +22,37 @@
 
 package org.mybatch.metadata;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import javax.batch.operations.exception.JobStartException;
 
+import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Properties;
 import org.mybatch.job.Property;
+import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 import org.mybatch.util.BatchUtil;
 
-public class JobMerger {
+public final class JobMerger {
     private Job parent;
     private Job child;
+    Set<Step> mergedSteps = new HashSet<Step>();
 
     /**
      * When this.child is also a parent, do not process steps under it.
      */
     private boolean skipEnclosingSteps;
+
+    /**
+     * no-arg constructor, used by tests.
+     */
+    public JobMerger() {
+    }
 
     public JobMerger(Job child) throws JobStartException {
         String parentName = child.getParent();
@@ -83,16 +93,67 @@ public class JobMerger {
         //job steps, flows, and splits are not inherited.
         //check if each step has its own parent step
         if (!skipEnclosingSteps) {
-            List<Step> steps = new ArrayList<Step>();
-            for (Serializable s : child.getDecisionOrFlowOrSplit()) {
+            LinkedList<Step> steps = new LinkedList<Step>();
+            List<?> elements = child.getDecisionOrFlowOrSplit();
+            for (Object s : elements) {
                 if (s instanceof Step) {
                     steps.add((Step) s);
                 }
             }
             for (Step s : steps) {
-                StepMerger stepMerger = new StepMerger(s, steps);
-                stepMerger.merge();
+                if (!mergedSteps.contains(s)) {
+                    StepMerger stepMerger = new StepMerger(s, steps, this);
+                    stepMerger.merge();
+                    mergedSteps.add(s);
+                }
             }
+            for (Object e : elements) {
+                if (e instanceof Flow) {
+                    merge((Flow) e, steps);
+                } else if (e instanceof Split) {
+                    merge((Split) e, steps);
+                }
+            }
+        }
+    }
+
+    /**
+     * Merges flow steps.  A flow does not have a parent, but its steps may have parent.
+     *
+     * @param flow  the flow whose steps need to be merged
+     * @param steps the steps at the same level with the flow, which may contain parent steps for flow step
+     */
+    private void merge(Flow flow, LinkedList<Step> steps) throws JobStartException {
+        List<?> elements = flow.getDecisionOrStepOrSplit();
+        for (Object e : elements) {
+            if (e instanceof Step) {
+                steps.add((Step) e);
+            }
+        }
+        for (Step s : steps) {
+            if (!mergedSteps.contains(s)) {
+                StepMerger stepMerger = new StepMerger(s, steps, this);
+                stepMerger.merge();
+                mergedSteps.add(s);
+            }
+        }
+        for (Object e : elements) {
+            if (e instanceof Split) {
+                merge((Split) e, steps);
+            }
+        }
+    }
+
+    /**
+     * Merges split steps.  A split does not have a parent, but its steps may have parent.
+     *
+     * @param split the split whose steps need to be merged
+     * @param steps the steps at the same level with the split, which may contain parent steps for split step
+     */
+    private void merge(Split split, LinkedList<Step> steps) throws JobStartException {
+        List<Flow> flows = split.getFlow();
+        for (Flow f : flows) {
+            merge(f, steps);
         }
     }
 
@@ -121,6 +182,7 @@ public class JobMerger {
 
     /**
      * Merges parent properties and child properties (both must not be null).
+     *
      * @param parentProps properties from parent element
      * @param childProps  properties from child element
      */

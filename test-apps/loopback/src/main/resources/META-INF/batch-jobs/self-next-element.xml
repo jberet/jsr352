@@ -26,8 +26,7 @@
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
 
-    <step id="step1">
-        <batchlet ref="Batchlet0"/>
+    <step id="step1" parent="step-parent">
         <next on="*" to="step1"/>
     </step>
 

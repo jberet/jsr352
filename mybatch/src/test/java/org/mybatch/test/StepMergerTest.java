@@ -23,7 +23,7 @@
 package org.mybatch.test;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -31,9 +31,12 @@ import org.junit.Test;
 import org.mybatch.job.Job;
 import org.mybatch.job.Step;
 import org.mybatch.metadata.ArchiveXmlLoader;
+import org.mybatch.metadata.JobMerger;
 import org.mybatch.metadata.StepMerger;
 
 public class StepMergerTest {
+    private final JobMerger jobMerger = new JobMerger();
+
     @Test
     public void propertiesListenersFromParentJob() throws Exception {
         Job childJob = ArchiveXmlLoader.loadJobXml("step-properties-listeners-child.xml", Job.class);
@@ -42,7 +45,7 @@ public class StepMergerTest {
         Assert.assertNull(child.getProperties());
         Assert.assertNull(child.getListeners());
 
-        StepMerger merger = new StepMerger(child, (List<Step>) null);
+        StepMerger merger = new StepMerger(child, (LinkedList<Step>) null, jobMerger);
         merger.merge();
 
         Assert.assertEquals(2, child.getProperties().getProperty().size());
@@ -58,7 +61,7 @@ public class StepMergerTest {
         Assert.assertEquals(0, child.getProperties().getProperty().size());
         Assert.assertEquals(0, child.getListeners().getListener().size());
 
-        StepMerger merger = new StepMerger(child, (List<Step>) null);
+        StepMerger merger = new StepMerger(child, (LinkedList<Step>) null, jobMerger);
         merger.merge();
 
         Assert.assertEquals(0, child.getProperties().getProperty().size());
@@ -73,7 +76,7 @@ public class StepMergerTest {
         Assert.assertEquals(1, child.getProperties().getProperty().size());
         Assert.assertEquals(1, child.getListeners().getListener().size());
 
-        StepMerger merger = new StepMerger(child, (List<Step>) null);
+        StepMerger merger = new StepMerger(child, (LinkedList<Step>) null, jobMerger);
         merger.merge();
 
         Assert.assertEquals(2, child.getProperties().getProperty().size());
@@ -90,7 +93,7 @@ public class StepMergerTest {
         for (String c : child1And2) {
             child = getStep(childJob, c);
 
-            StepMerger merger = new StepMerger(child, getSteps(childJob));
+            StepMerger merger = new StepMerger(child, getSteps(childJob), jobMerger);
             merger.merge();
 
             Assert.assertEquals(2, child.getProperties().getProperty().size());
@@ -101,7 +104,7 @@ public class StepMergerTest {
         }
 
         child = getStep(childJob, "step-same-file-child-child");
-        StepMerger merger = new StepMerger(child, getSteps(childJob));
+        StepMerger merger = new StepMerger(child, getSteps(childJob), jobMerger);
         merger.merge();
 
         Assert.assertEquals(3, child.getProperties().getProperty().size());
@@ -126,7 +129,7 @@ public class StepMergerTest {
     }
 
     private void emptyStep(Job childJob, Step child) throws Exception {
-        StepMerger merger = new StepMerger(child, getSteps(childJob));
+        StepMerger merger = new StepMerger(child, getSteps(childJob), jobMerger);
         merger.merge();
 
         Assert.assertEquals(1, child.getProperties().getProperty().size());
@@ -136,8 +139,8 @@ public class StepMergerTest {
         Assert.assertEquals("child", child.getBatchlet().getRef());
     }
 
-    protected static List<Step> getSteps(Job job) {
-        List<Step> results = new ArrayList<Step>();
+    protected static LinkedList<Step> getSteps(Job job) {
+        LinkedList<Step> results = new LinkedList<Step>();
         List<Serializable> steps = job.getDecisionOrFlowOrSplit();
         for (Serializable s : steps) {
             if (s instanceof Step) {

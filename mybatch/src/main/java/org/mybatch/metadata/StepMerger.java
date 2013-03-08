@@ -22,7 +22,8 @@
 
 package org.mybatch.metadata;
 
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedList;
 import javax.batch.operations.exception.JobStartException;
 
 import org.mybatch.job.Batchlet;
@@ -32,20 +33,24 @@ import org.mybatch.job.Properties;
 import org.mybatch.job.Step;
 import org.mybatch.util.BatchLogger;
 
-public class StepMerger {
+public final class StepMerger {
     private Step parent;
     private Step child;
-    private List<Step> siblings;
+    private LinkedList<Step> siblings;
+    private JobMerger jobMerger;
 
-    public StepMerger(Step child, List<Step> siblings) throws JobStartException {
+    public StepMerger(Step child, LinkedList<Step> siblings, JobMerger jobMerger) throws JobStartException {
         this.child = child;
+        this.jobMerger = jobMerger;
         String parentName = child.getParent();
         if (parentName != null) {
             if (siblings != null) {
-                for (Step s : siblings) {
+                this.siblings = siblings;
+                for (Iterator<Step> it = siblings.descendingIterator(); it.hasNext();) {
+                    Step s = it.next();
                     if (parentName.equals(s.getId())) {
                         this.parent = s;
-                        this.siblings = siblings;
+                        break;
                     }
                 }
             }
@@ -55,23 +60,16 @@ public class StepMerger {
         }
     }
 
-    public StepMerger(Step parent, Step child, List<Step> siblings) {
-        this.parent = parent;
-        this.child = child;
-        this.siblings = siblings;
-    }
-
-    public StepMerger(Step parent, Step child) {
-        this(parent, child, null);
-    }
-
     public void merge() throws JobStartException {
         if (parent != null) {
             //check if parent has its own parent, which may be in the same or different job xml document
             String parentParent = parent.getParent();
-            if (parentParent != null) {
-                StepMerger merger = new StepMerger(parent, this.siblings);
+
+            //if the step represented by parent has already been handled, do nothing
+            if (parentParent != null && !jobMerger.mergedSteps.contains(parent)) {
+                StepMerger merger = new StepMerger(parent, this.siblings, this.jobMerger);
                 merger.merge();
+                jobMerger.mergedSteps.add(parent);
             }
 
             //merge step attributes

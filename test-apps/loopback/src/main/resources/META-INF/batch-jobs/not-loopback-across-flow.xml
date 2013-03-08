@@ -27,16 +27,10 @@
      xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
 
     <flow id="flow1" next="step1">
-        <step id="step1" next="step2">
-            <batchlet ref="Batchlet0"/>
-        </step>
+        <step id="step1" next="step2" parent="step-parent"/>
 
-        <step id="step2">
-            <batchlet ref="Batchlet0"/>
-        </step>
+        <step id="step2" parent="step-parent"/>
     </flow>
 
-    <step id="step1">
-        <batchlet ref="Batchlet0"/>
-    </step>
+    <step id="step1" parent="step-parent"/>
 </job>
