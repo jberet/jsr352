@@ -31,6 +31,10 @@
         <property name="job-prop-2" value="job-prop-2"></property>
     </properties>
 
+    <step id="step-parent" abstract="true">
+        <batchlet ref="Batchlet1"/>
+    </step>
+
     <split id="split1" next="decision1">
         <properties>
             <property name="split-prop" value="split-prop"/>
@@ -51,19 +55,15 @@
                 </batchlet>
             </step>
 
-            <step id="step12">
-                <batchlet ref="Batchlet1"/>
-            </step>
+            <step id="step12" parent="step-parent"/>
         </flow>
 
         <flow id="flow2">
-            <step id="step21">
-                <batchlet ref="Batchlet1"/>
+            <step id="step21" parent="step-parent">
                 <next on="*" to="step22"/>
             </step>
-            <step id="step22">
-                <batchlet ref="Batchlet1"/>
-            </step>
+
+            <step id="step22" parent="step-parent"/>
         </flow>
     </split>
 
@@ -72,8 +72,5 @@
         <next on="next" to="step3" />
     </decision>
     
-    <step id="step3">
-        <batchlet ref="Batchlet1"/>
-    </step>
-
+    <step id="step3" parent="step-parent"/>
 </job>

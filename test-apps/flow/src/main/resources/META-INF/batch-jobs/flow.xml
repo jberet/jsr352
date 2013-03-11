@@ -47,6 +47,11 @@
         <properties>
             <property name="flow-prop" value="flow-prop"/>
         </properties>
+
+        <step id="step-parent" abstract="true">
+            <batchlet ref="Batchlet1"/>
+        </step>
+
         <step id="step1" next="step2">
             <properties>
                 <property name="step-prop" value="step-prop"></property>
@@ -60,15 +65,11 @@
             </batchlet>
         </step>
 
-        <step id="step3">
-            <batchlet ref="Batchlet1">
-            </batchlet>
+        <step id="step3" parent="step-parent">
             <end on="*" exit-status="done"></end>
         </step>
 
-        <step id="step2">
-            <batchlet ref="Batchlet1">
-            </batchlet>
+        <step id="step2" parent="step-parent">
             <stop on="xyzz" exit-status="stopped" restart="false"/>
             <!-- should not reach here -->
             <fail on="abcd" exit-status="failed"/>

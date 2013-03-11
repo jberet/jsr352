@@ -25,10 +25,7 @@ package org.mybatch.metadata;
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Properties;
 
-public class BatchletMerger {
-    private Batchlet parent;
-    private Batchlet child;
-
+public final class BatchletMerger extends AbstractMerger<Batchlet> {
     public BatchletMerger(Batchlet parent, Batchlet child) {
         this.parent = parent;
         this.child = child;
@@ -48,6 +45,6 @@ public class BatchletMerger {
             child.setProperties(parentProps);
             return;
         }
-        JobMerger.mergeProperties(parentProps, childProps);
+        AbstractMerger.mergeProperties(parentProps, childProps);
     }
 }

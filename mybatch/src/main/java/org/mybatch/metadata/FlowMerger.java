@@ -19,21 +19,22 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
+ 
+package org.mybatch.metadata;
 
-package org.mybatch.testapps.flow;
+import java.util.LinkedList;
 
-import org.junit.Test;
-import org.mybatch.testapps.common.AbstractIT;
+import org.mybatch.job.Flow;
+import org.mybatch.job.Step;
 
-/**
- * Verifies the following:
- * injections into super class are processed (Batchlet1 extends Batchlet0), including @Inject and @BatchProperty
- * flow property resolution, runtime execution, and transition inside flow and outwards;
- * steps  in a flow can have step-parent;
- */
-public class FlowIT extends AbstractIT {
-    @Test
-    public void flow() throws Exception {
-        startJob("flow.xml");
+public final class FlowMerger extends AbstractMerger<Flow> {
+    private LinkedList<Step> siblingSteps;
+    private JobMerger jobMerger;
+
+    public FlowMerger(Flow child, LinkedList<Step> siblingSteps, JobMerger jobMerger) {
+        this.child = child;
+        this.jobMerger = jobMerger;
+//        wait for schema update TODO
+//        String parentName = child.getParent();
     }
 }

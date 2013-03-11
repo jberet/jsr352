@@ -30,10 +30,7 @@ import org.mybatch.job.ItemReader;
 import org.mybatch.job.ItemWriter;
 import org.mybatch.job.Properties;
 
-public class ChunkMerger {
-    private Chunk parent;
-    private Chunk child;
-
+public final class ChunkMerger extends AbstractMerger<Chunk> {
     public ChunkMerger(Chunk parent, Chunk child) {
         this.parent = parent;
         this.child = child;
@@ -84,7 +81,7 @@ public class ChunkMerger {
             childReader.setProperties(parentProps);
             return;
         }
-        JobMerger.mergeProperties(parentProps, childProps);
+        AbstractMerger.mergeProperties(parentProps, childProps);
     }
 
     private void merge(ItemWriter parentWriter, ItemWriter childWriter) {
@@ -104,7 +101,7 @@ public class ChunkMerger {
             childWriter.setProperties(parentProps);
             return;
         }
-        JobMerger.mergeProperties(parentProps, childProps);
+        AbstractMerger.mergeProperties(parentProps, childProps);
     }
 
     private void merge(ItemProcessor parentProcessor, ItemProcessor childProcessor) {
@@ -124,7 +121,7 @@ public class ChunkMerger {
             childProcessor.setProperties(parentProps);
             return;
         }
-        JobMerger.mergeProperties(parentProps, childProps);
+        AbstractMerger.mergeProperties(parentProps, childProps);
     }
 
     private void merge(CheckpointAlgorithm parentCheckPointAlgo, CheckpointAlgorithm childCheckPointAlgo) {
@@ -135,7 +132,7 @@ public class ChunkMerger {
             child.setCheckpointAlgorithm(parentCheckPointAlgo);
             return;
         }
-        JobMerger.mergeProperties(parentCheckPointAlgo.getProperties(), childCheckPointAlgo.getProperties());
+        AbstractMerger.mergeProperties(parentCheckPointAlgo.getProperties(), childCheckPointAlgo.getProperties());
     }
 
     private void mergeSkippableExceptionClasses(ExceptionClassFilter parentExceptionClassFilter, ExceptionClassFilter childExceptionClassFilter) {

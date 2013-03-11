@@ -33,20 +33,19 @@ import org.mybatch.job.Properties;
 import org.mybatch.job.Step;
 import org.mybatch.util.BatchLogger;
 
-public final class StepMerger {
-    private Step parent;
-    private Step child;
-    private LinkedList<Step> siblings;
+public final class StepMerger extends AbstractMerger<Step> {
+    private LinkedList<Step> siblingSteps;
+
     private JobMerger jobMerger;
 
-    public StepMerger(Step child, LinkedList<Step> siblings, JobMerger jobMerger) throws JobStartException {
+    public StepMerger(Step child, LinkedList<Step> siblingSteps, JobMerger jobMerger) throws JobStartException {
         this.child = child;
         this.jobMerger = jobMerger;
         String parentName = child.getParent();
         if (parentName != null) {
-            if (siblings != null) {
-                this.siblings = siblings;
-                for (Iterator<Step> it = siblings.descendingIterator(); it.hasNext();) {
+            if (siblingSteps != null) {
+                this.siblingSteps = siblingSteps;
+                for (Iterator<Step> it = siblingSteps.descendingIterator(); it.hasNext(); ) {
                     Step s = it.next();
                     if (parentName.equals(s.getId())) {
                         this.parent = s;
@@ -62,12 +61,15 @@ public final class StepMerger {
 
     public void merge() throws JobStartException {
         if (parent != null) {
+            checkInheritingElements(this.parent, this.parent.getId());
+
             //check if parent has its own parent, which may be in the same or different job xml document
             String parentParent = parent.getParent();
 
             //if the step represented by parent has already been handled, do nothing
             if (parentParent != null && !jobMerger.mergedSteps.contains(parent)) {
-                StepMerger merger = new StepMerger(parent, this.siblings, this.jobMerger);
+                StepMerger merger = new StepMerger(parent, this.siblingSteps, this.jobMerger);
+                recordInheritingElements(merger);
                 merger.merge();
                 jobMerger.mergedSteps.add(parent);
             }
@@ -111,7 +113,7 @@ public final class StepMerger {
             child.setProperties(parentProps);
             return;
         }
-        JobMerger.mergeProperties(parentProps, childProps);
+        AbstractMerger.mergeProperties(parentProps, childProps);
     }
 
     private void merge(Listeners parentListeners, Listeners childListeners) {
@@ -122,6 +124,6 @@ public final class StepMerger {
             child.setListeners(parentListeners);
             return;
         }
-        JobMerger.mergeListeners(parentListeners, childListeners);
+        AbstractMerger.mergeListeners(parentListeners, childListeners);
     }
 }

@@ -30,17 +30,12 @@ import javax.batch.operations.exception.JobStartException;
 
 import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
-import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Properties;
-import org.mybatch.job.Property;
 import org.mybatch.job.Split;
 import org.mybatch.job.Step;
-import org.mybatch.util.BatchUtil;
 
-public final class JobMerger {
-    private Job parent;
-    private Job child;
+public final class JobMerger extends AbstractMerger<Job> {
     Set<Step> mergedSteps = new HashSet<Step>();
 
     /**
@@ -74,10 +69,13 @@ public final class JobMerger {
 
     public void merge() throws JobStartException {
         if (parent != null) {
+            checkInheritingElements(parent, parent.getId());
+
             //check if parent has its own parent
             String parentParent = parent.getParent();
             if (parentParent != null) {
                 JobMerger merger = new JobMerger(parentParent, parent, true);
+                recordInheritingElements(merger);
                 merger.merge();
             }
 
@@ -165,7 +163,7 @@ public final class JobMerger {
             child.setProperties(parentProps);
             return;
         }
-        JobMerger.mergeProperties(parentProps, childProps);
+        AbstractMerger.mergeProperties(parentProps, childProps);
         //for job-level properties, ignore Properties partition attribute
     }
 
@@ -177,41 +175,7 @@ public final class JobMerger {
             child.setListeners(parentListeners);
             return;
         }
-        JobMerger.mergeListeners(parentListeners, childListeners);
-    }
-
-    /**
-     * Merges parent properties and child properties (both must not be null).
-     *
-     * @param parentProps properties from parent element
-     * @param childProps  properties from child element
-     */
-    public static void mergeProperties(Properties parentProps, Properties childProps) {
-        String merge = childProps.getMerge();
-        if (merge != null && !Boolean.parseBoolean(merge)) {
-            return;
-        }
-
-        List<Property> childPropList = childProps.getProperty();
-        for (Property p : parentProps.getProperty()) {
-            if (!BatchUtil.propertiesContains(childProps, p.getName())) {
-                childPropList.add(p);
-            }
-        }
-    }
-
-    public static void mergeListeners(Listeners parentListeners, Listeners childListeners) {
-        String merge = childListeners.getMerge();
-        if (merge != null && !Boolean.parseBoolean(merge)) {
-            return;
-        }
-
-        List<Listener> childListenerList = childListeners.getListener();
-        for (Listener l : parentListeners.getListener()) {
-            if (!BatchUtil.listenersContains(childListeners, l)) {
-                childListenerList.add(l);
-            }
-        }
+        AbstractMerger.mergeListeners(parentListeners, childListeners);
     }
 
 }

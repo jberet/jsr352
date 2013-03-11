@@ -27,6 +27,8 @@ import org.mybatch.testapps.common.AbstractIT;
 
 /**
  * Verifies split properties referencing, job element transition, and decision following split.
+ *
+ * step within a flow within a split can have step-parent, which is a top-level job element;
  */
 public class SplitIT extends AbstractIT {
     @Test

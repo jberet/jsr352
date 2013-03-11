@@ -19,13 +19,15 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.util;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
@@ -99,5 +101,26 @@ public class BatchUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Produces a StringBuilder containing contactinated id of elements.
+     * @param elements step, job, or flow elements, and all elements are of the same type.  Either all elements are job,
+     *                 or all elements are step, or all elements are flow
+     * @return a StringBuilder whose string value is in the form: a -> b -> c ->
+     */
+    public static StringBuilder toElementSequence(List<?> elements) {
+        StringBuilder sb = new StringBuilder();
+        for (Object e : elements) {
+            if (e instanceof Step) {
+                sb.append(((Step) e).getId());
+            } else if (e instanceof Job) {
+                sb.append(((Job) e).getId());
+            } else if (e instanceof Flow) {
+                sb.append(((Flow) e).getId());
+            }
+            sb.append(" -> ");
+        }
+        return sb;
     }
 }

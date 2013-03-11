@@ -24,6 +24,7 @@ package org.mybatch.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.batch.operations.exception.JobStartException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,6 +37,40 @@ import org.mybatch.metadata.JobMerger;
 import org.mybatch.util.BatchUtil;
 
 public class JobMergerTest {
+    @Test
+    public void stepInheritanceCycle() throws Exception {
+        Job child = ArchiveXmlLoader.loadJobXml("step-inheritance-cycle.xml", Job.class);
+        jobStartException(child, "Expecting exceptioin from cyclic inheritance, but got no exception.");
+    }
+
+    @Test
+    public void stepInheritanceSelf() throws Exception {
+        Job child = ArchiveXmlLoader.loadJobXml("step-inheritance-self.xml", Job.class);
+        jobStartException(child, "Expecting exceptioin from self inheritance, but got no exception.");
+    }
+
+    @Test
+    public void jobInheritanceSelf() throws Exception {
+        Job child = ArchiveXmlLoader.loadJobXml("job-inheritance-self.xml", Job.class);
+        jobStartException(child, "Expecting exception from cyclic inheritance, but got no exceptioin");
+    }
+
+    /**
+     * Shared by tests expecting JobStartException.
+     *
+     * @param child          the job to resolve its inheritance
+     * @param failureMessage the message to include when failing the test
+     */
+    private void jobStartException(Job child, String failureMessage) {
+        try {
+            JobMerger merger = new JobMerger(child);
+            merger.merge();
+            Assert.fail(failureMessage);
+        } catch (JobStartException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+    }
+
     @Test
     public void propertiesListenersFromParentJob() throws Exception {
         Job parent = ArchiveXmlLoader.loadJobXml("job-properties-listeners-parent.xml", Job.class);
@@ -95,8 +130,8 @@ public class JobMergerTest {
      * As a testing convention, the value is the same as the key.  For instance, the Properties can be:
      * "foo": "foo", "bar": "bar"
      *
-     * @param props Properties from job xml
-     * @param keys  a String array of keys
+     * @param props       Properties from job xml
+     * @param keys        a String array of keys
      * @param checkValues whether to check property value
      * @throws IllegalStateException if any key is not found
      */

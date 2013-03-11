@@ -116,10 +116,14 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void possibleSyntaxErrorInProperty(String prop);
 
-    @Message(id = 22, value = "Step loopback not allowed.  The step %s has already run in sequence: %s")
+    @Message(id = 22, value = "The step %s would form a loopback in sequence: %s")
     BatchOperationsRuntimeException loopbackStep(String stepId, String executedSteps);
 
     @Message(id = 23, value = "The requested batch operation %s is not supported in %s")
     BatchOperationsRuntimeException batchOperationNotSupported(String op, AbstractContext context);
+
+    @Message(id = 24, value = "Cycles detected in job element inheritance: %s")
+    JobStartException cycleInheritance(String inheritingElements);
+
 
 }

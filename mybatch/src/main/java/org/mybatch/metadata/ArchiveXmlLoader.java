@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.batch.operations.exception.JobStartException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -44,6 +46,8 @@ import static org.mybatch.util.BatchLogger.LOGGER;
 public class ArchiveXmlLoader {
     public final static String ARCHIVE_JOB_XML_DIR = "META-INF/batch-jobs/";
     public final static String ARCHIVE_BATCH_XML = "META-INF/batch.xml";
+
+    private static ConcurrentMap<String, Object> loadedJobsByName = new ConcurrentHashMap<String, Object>();
 
     /**
      * Gets the batch artifacts definition object, loaded from the archive batch.xml if available.
@@ -81,44 +85,50 @@ public class ArchiveXmlLoader {
     /**
      * Gets the root element, either of type Job or Step, for a given job or step name.
      *
-     * @param jobName     base name of the job xml document
-     * @param rootType    Job.class or Step.class
-     * @param <T>         Job or Step
-     * @param cl          the applicaton classloader used to load job xml
+     * @param jobName  base name of the job xml document
+     * @param rootType Job.class or Step.class
+     * @param <T>      Job or Step
+     * @param cl       the applicaton classloader used to load job xml
      * @return the job or step root element
      */
     public static <T> T loadJobXml(String jobName, Class<T> rootType, ClassLoader... cl) throws JobStartException {
-        ClassLoader classLoader = cl.length > 0 ? cl[0] : BatchUtil.getBatchApplicationClassLoader();
-        InputStream is;
-        T jobOrStep;
-        try {
-            is = getJobXml(jobName, classLoader);
-        } catch (IOException e) {
-            throw LOGGER.failToGetJobXml(e, jobName);
-        }
-
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Job.class);
-            Unmarshaller um = jaxbContext.createUnmarshaller();
+        Object jobOrStep = loadedJobsByName.get(jobName);
+        if (jobOrStep == null) {
+            ClassLoader classLoader = cl.length > 0 ? cl[0] : BatchUtil.getBatchApplicationClassLoader();
+            InputStream is;
             try {
-                um.setProperty("com.sun.xml.bind.ObjectFactory", new JaxbObjectFactory());
-            } catch (PropertyException e) {
-                um.setProperty("com.sun.xml.internal.bind.ObjectFactory", new JaxbObjectFactory());
+                is = getJobXml(jobName, classLoader);
+            } catch (IOException e) {
+                throw LOGGER.failToGetJobXml(e, jobName);
             }
-            JAXBElement<T> root = um.unmarshal(new StreamSource(is), rootType);
-            jobOrStep = root.getValue();
-        } catch (JAXBException e) {
-            throw LOGGER.failToParseBindJobXml(e, jobName);
-        } finally {
-            if (is != null) {
+
+            try {
+                JAXBContext jaxbContext = JAXBContext.newInstance(Job.class);
+                Unmarshaller um = jaxbContext.createUnmarshaller();
                 try {
-                    is.close();
-                } catch (IOException e) {
-                    //ignore
+                    um.setProperty("com.sun.xml.bind.ObjectFactory", new JaxbObjectFactory());
+                } catch (PropertyException e) {
+                    um.setProperty("com.sun.xml.internal.bind.ObjectFactory", new JaxbObjectFactory());
+                }
+                JAXBElement<T> root = um.unmarshal(new StreamSource(is), rootType);
+                jobOrStep = root.getValue();
+            } catch (JAXBException e) {
+                throw LOGGER.failToParseBindJobXml(e, jobName);
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        //ignore
+                    }
                 }
             }
+            Object anyExisting = loadedJobsByName.putIfAbsent(jobName, jobOrStep);
+            if (anyExisting != null) {
+                jobOrStep = anyExisting;
+            }
         }
-        return jobOrStep;
+        return (T) jobOrStep;
     }
 
     private static InputStream getJobXml(String jobXml, ClassLoader classLoader) throws IOException {
