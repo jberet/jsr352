@@ -30,14 +30,12 @@ import org.mybatch.job.Job;
 import org.mybatch.runtime.context.JobContextImpl;
 import org.mybatch.util.BatchLogger;
 
-public final class JobExecutionRunner extends CompositeExecutionRunner implements Runnable {
+public final class JobExecutionRunner extends CompositeExecutionRunner<JobContextImpl> implements Runnable {
     private Job job;
-    private JobContextImpl jobContext;  //duplicate super.batchContext, for accessing StepContext-specific methods
 
     public JobExecutionRunner(JobContextImpl jobContext) {
         super(jobContext, null);
         this.job = jobContext.getJob();
-        this.jobContext = jobContext;
     }
 
     @Override
@@ -47,38 +45,38 @@ public final class JobExecutionRunner extends CompositeExecutionRunner implement
 
     @Override
     public void run() {
-        jobContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
+        batchContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
         try {
             // run job listeners beforeJob()
-            for (JobListener l : jobContext.getJobListeners()) {
+            for (JobListener l : batchContext.getJobListeners()) {
                 try {
                     l.beforeJob();
                 } catch (Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, l, "beforeJob");
-                    jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
                     return;
                 }
             }
 
             runFromHead();
 
-            for (JobListener l : jobContext.getJobListeners()) {
+            for (JobListener l : batchContext.getJobListeners()) {
                 try {
                     l.afterJob();
                 } catch (Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, l, "afterJob");
-                    jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
                     return;
                 }
             }
 
         } catch (Throwable e) {
             BatchLogger.LOGGER.failToRunJob(e, job, "run");
-            jobContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
         }
 
-        if (jobContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {
-            jobContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {
+            batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
         }
     }
 

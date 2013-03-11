@@ -32,15 +32,13 @@ import org.mybatch.runtime.context.FlowContextImpl;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-public final class FlowExecutionRunner extends CompositeExecutionRunner implements Runnable {
+public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowContextImpl> implements Runnable {
     private Flow flow;
     private CountDownLatch latch;
-    private FlowContextImpl flowContext;
 
     public FlowExecutionRunner(FlowContextImpl flowContext, CompositeExecutionRunner enclosingRunner, CountDownLatch latch) {
         super(flowContext, enclosingRunner);
         this.flow = flowContext.getFlow();
-        this.flowContext = flowContext;
         this.latch = latch;
     }
 
@@ -78,7 +76,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner implemen
             if (next == null) {
                 next = resolveControlElements(flow.getControlElements());
             }
-            enclosingRunner.runJobElement(next, flowContext.getFlowExecution().getLastStepExecution());
+            enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
         }
     }
 

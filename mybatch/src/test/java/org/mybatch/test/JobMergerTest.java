@@ -55,6 +55,12 @@ public class JobMergerTest {
         jobStartException(child, "Expecting exception from cyclic inheritance, but got no exceptioin");
     }
 
+    @Test
+    public void jobInheritanceCycle() throws Exception {
+        Job child = ArchiveXmlLoader.loadJobXml("job-inheritance-cycle-child.xml", Job.class);
+        jobStartException(child, "Expecting exception from cyclic inheritance, but got no exceptioin");
+    }
+
     /**
      * Shared by tests expecting JobStartException.
      *

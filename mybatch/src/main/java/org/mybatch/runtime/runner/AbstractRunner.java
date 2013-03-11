@@ -32,15 +32,15 @@ import org.mybatch.job.Next;
 import org.mybatch.job.Stop;
 import org.mybatch.runtime.context.AbstractContext;
 
-public abstract class AbstractRunner {
+public abstract class AbstractRunner<C extends AbstractContext> {
     /**
      * The id of the job element this runner represents.
      */
     protected String id;
-    protected AbstractContext batchContext;
+    protected C batchContext;
     protected CompositeExecutionRunner enclosingRunner;
 
-    protected AbstractRunner(AbstractContext batchContext, CompositeExecutionRunner enclosingRunner) {
+    protected AbstractRunner(C batchContext, CompositeExecutionRunner enclosingRunner) {
         this.id = batchContext.getId();
         this.batchContext = batchContext;
         this.enclosingRunner = enclosingRunner;
@@ -50,7 +50,7 @@ public abstract class AbstractRunner {
         return enclosingRunner;
     }
 
-    public AbstractContext getBatchContext() {
+    public C getBatchContext() {
         return this.batchContext;
     }
 

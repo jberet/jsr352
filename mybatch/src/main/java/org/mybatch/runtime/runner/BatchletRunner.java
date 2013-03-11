@@ -30,7 +30,7 @@ import org.mybatch.runtime.context.StepContextImpl;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
-public class BatchletRunner extends AbstractRunner implements Callable<Object> {
+public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Callable<Object> {
     private Batchlet batchlet;
 
     public BatchletRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, Batchlet batchlet) {
@@ -43,7 +43,7 @@ public class BatchletRunner extends AbstractRunner implements Callable<Object> {
     public Object call() {
         try {
             javax.batch.api.Batchlet batchletObj =
-                    (javax.batch.api.Batchlet) batchContext.getJobContext().createArtifact(id, batchlet.getProperties(), (StepContextImpl) batchContext);
+                    (javax.batch.api.Batchlet) batchContext.getJobContext().createArtifact(id, batchlet.getProperties(), batchContext);
             String exitStatus = batchletObj.process();
             batchContext.setExitStatus(exitStatus);
         } catch (Throwable e) {

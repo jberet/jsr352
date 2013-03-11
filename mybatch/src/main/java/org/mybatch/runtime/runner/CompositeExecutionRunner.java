@@ -43,8 +43,8 @@ import org.mybatch.util.ConcurrencyService;
  * A runner for job elements that can contain other job elements.  Examples of such composite job elements are
  * job, flow and split.
  */
-public abstract class CompositeExecutionRunner extends AbstractRunner {
-    protected CompositeExecutionRunner(AbstractContext batchContext, CompositeExecutionRunner enclosingRunner) {
+public abstract class CompositeExecutionRunner<C extends AbstractContext> extends AbstractRunner<C> {
+    protected CompositeExecutionRunner(C batchContext, CompositeExecutionRunner enclosingRunner) {
         super(batchContext, enclosingRunner);
     }
 
