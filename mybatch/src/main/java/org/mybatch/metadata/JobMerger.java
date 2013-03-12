@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.batch.operations.exception.JobStartException;
+import javax.batch.operations.JobStartException;
 
 import org.mybatch.job.Flow;
 import org.mybatch.job.Job;

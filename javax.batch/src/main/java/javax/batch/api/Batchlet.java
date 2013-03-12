@@ -21,17 +21,14 @@ package javax.batch.api;
  * A batchlet is type of batch step that can be used for any type of background
  * processing that does not explicitly call for a chunk oriented approach.
  * <p>
- * A well-behaved batchlet responds to stop requests by either implementing the
- * stop method or by exiting when it catches an InterruptedException.
+ * A well-behaved batchlet responds to stop requests by implementing the
+ * stop method.
  * 
  */
 public interface Batchlet {
 	/**
 	 * The process method does the work of the batchlet. If this method throws
 	 * an exception, the batchlet step ends with a batch status of FAILED.
-	 * <p>
-	 * This method will be interrupted with an java.lang.Interrupted exception
-	 * if the batchlet is stopped by the JobOperator.stop method.
 	 * 
 	 * @return exit status string
 	 * @throws Exception

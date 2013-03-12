@@ -24,9 +24,9 @@ package org.mybatch.util;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import javax.batch.operations.exception.BatchOperationsRuntimeException;
-import javax.batch.operations.exception.JobStartException;
-import javax.batch.operations.exception.NoSuchJobExecutionException;
+import javax.batch.operations.BatchOperationsRuntimeException;
+import javax.batch.operations.JobStartException;
+import javax.batch.operations.NoSuchJobExecutionException;
 
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;

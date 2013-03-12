@@ -48,8 +48,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     @Override
-    public long getInstanceId() {
-        return jobInstance.getInstanceId();
+    public String getJobName() {
+        return jobInstance.getJobName();
     }
 
     @Override

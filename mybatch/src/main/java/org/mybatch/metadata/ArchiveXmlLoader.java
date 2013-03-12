@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.batch.operations.exception.JobStartException;
+import javax.batch.operations.JobStartException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;

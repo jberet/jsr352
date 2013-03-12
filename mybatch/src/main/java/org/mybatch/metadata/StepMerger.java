@@ -24,7 +24,7 @@ package org.mybatch.metadata;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import javax.batch.operations.exception.JobStartException;
+import javax.batch.operations.JobStartException;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;

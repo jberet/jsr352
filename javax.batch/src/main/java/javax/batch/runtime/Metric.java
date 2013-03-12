@@ -22,9 +22,9 @@ package javax.batch.runtime;
   *
   */
 public interface Metric {
-	public enum MetricName {READCOUNT, WRITECOUNT, COMMITCOUNT, 
-	       ROLLBACKCOUNT, READSKIPCOUNT, PROCESSSKIPCOUNT, FILTERCOUNT, 
-	       WRITESKIPCOUNT}
+	public enum MetricType {READ_COUNT, WRITE_COUNT, COMMIT_COUNT, 
+        ROLLBACK_COUNT, READ_SKIP_COUNT, PROCESS_SKIP_COUNT, FILTER_COUNT, 
+        WRITE_SKIPCOUNT}
 	/**
 	 * The getName method returns the metric name. The following names
        * are defined: "readCount", "writeCount", "commitCount", 
@@ -32,7 +32,7 @@ public interface Metric {
        * "writeSkipCount"       
 	 * @return metric name.
 	 */
-	public MetricName getName(); 
+	public MetricType getType(); 
 	/**
 	 * The getValue method returns the metric value.
 	 * @return metric value.

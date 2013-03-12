@@ -18,22 +18,28 @@ package javax.batch.runtime;
 
 import java.util.Date;
 import java.util.Properties;
+
 import javax.batch.operations.JobOperator.BatchStatus;
 
 public interface JobExecution {
+	
+	/**
+	 * Get unique id for this JobExecution.
+	 * @return execution id
+	 */
+	public long getExecutionId();
+	/**
+	 * Get job name.
+	 * @return value of 'id' attribute from <job>
+	 */
+	public String getJobName(); 
+
 
 	/**
 	* Get batch status of this execution.
 	* @return batch status value.
 	*/
 	public BatchStatus getBatchStatus();
-
-//	/**
-//	 * Get batch status of this execution.
-//	 * 
-//	 * @return batch status value.
-//	 */
-//	public String getStatus();
 
 	/**
 	 * Get time execution entered STARTED status.
@@ -76,9 +82,5 @@ public interface JobExecution {
 	 * @return job parameters
 	 */
 	public Properties getJobParameters();
-
-	public long getExecutionId();
-
-	public long getInstanceId();
 
 }

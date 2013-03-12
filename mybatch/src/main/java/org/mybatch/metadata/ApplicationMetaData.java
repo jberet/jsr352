@@ -27,7 +27,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import javax.batch.operations.exception.JobStartException;
+import javax.batch.operations.JobStartException;
 
 import org.mybatch.job.BatchArtifactRef;
 import org.mybatch.job.BatchArtifacts;

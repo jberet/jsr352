@@ -24,7 +24,7 @@ package org.mybatch.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.batch.operations.exception.JobStartException;
+import javax.batch.operations.JobStartException;
 
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;

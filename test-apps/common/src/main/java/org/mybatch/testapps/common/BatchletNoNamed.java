@@ -50,7 +50,7 @@ public class BatchletNoNamed extends AbstractBatchlet {
     @Override
     public String process() throws Exception {
         System.out.printf("%nIn %s, running step %s, job batch/exit status: %s/%s, step batch/exit status: %s/%s%n, job properties: %s, step properties: %s%n%n",
-                this, stepContext.getId(),
+                this, stepContext.getStepName(),
                 jobContext.getBatchStatus(), jobContext.getExitStatus(),
                 stepContext.getBatchStatus(), stepContext.getExitStatus(),
                 jobContext.getProperties(), stepContext.getProperties()

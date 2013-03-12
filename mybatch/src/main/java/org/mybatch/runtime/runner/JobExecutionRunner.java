@@ -23,7 +23,7 @@
 package org.mybatch.runtime.runner;
 
 import java.util.List;
-import javax.batch.api.JobListener;
+import javax.batch.api.listener.JobListener;
 import javax.batch.operations.JobOperator;
 
 import org.mybatch.job.Job;

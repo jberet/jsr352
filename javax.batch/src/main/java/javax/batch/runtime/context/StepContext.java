@@ -24,13 +24,32 @@ package javax.batch.runtime.context;
   *
   * @see javax.batch.annotation.context.StepContext
   */
-
 import java.io.Serializable;
 import java.util.Properties;
-import javax.batch.operations.JobOperator.BatchStatus;
 import javax.batch.runtime.Metric;
+import javax.batch.operations.JobOperator.BatchStatus;
 
-public interface StepContext <T,P extends Serializable> extends BatchContext <T> {
+public interface StepContext <T,P extends Serializable> {
+	
+	/**
+	 * Get step name
+	 * @return value of 'id' attribute from <step>
+	 * 
+	 */	
+	public String getStepName();
+	
+	/**
+	 * The getTransientUserData method returns a transient data object 
+	 * belonging to the current Job XML execution element. 
+	 * @return user-specified type
+	 */
+	public T getTransientUserData();
+	/**
+	 * The setTransientUserData method stores a transient data object into 
+	 * the current batch context. 
+	 * @param data is the user-specified type
+	 */
+	public void setTransientUserData(T data);
 
 	/**
 	 * The getStepExecutionId method returns the current step's 
@@ -48,7 +67,7 @@ public interface StepContext <T,P extends Serializable> extends BatchContext <T>
 	/**
 	 * The getPersistentUserData method returns a persistent data object 
 	 * belonging to the current step. The user data type must implement 
-	 * java.util.Externalizable. This data is saved as part of a step's 
+	 * java.util.Serializable. This data is saved as part of a step's 
 	 * checkpoint. For a step that does not do checkpoints, it is saved 
 	 * after the step ends. It is available upon restart. 
 	 * @return user-specified type
@@ -57,7 +76,7 @@ public interface StepContext <T,P extends Serializable> extends BatchContext <T>
 	/**
 	 * The setPersistentUserData method stores a persistent data object 
 	 * into the current step. The user data type must implement 
-	 * java.util.Externalizable. This data is saved as part of a step's 
+	 * java.util.Serializable. This data is saved as part of a step's 
 	 * checkpoint. For a step that does not do checkpoints, it is saved 
 	 * after the step ends. It is available upon restart. 
 	 * @param data is the user-specified type

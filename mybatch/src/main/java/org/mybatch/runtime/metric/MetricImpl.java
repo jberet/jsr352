@@ -29,21 +29,21 @@ public class MetricImpl implements Metric, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private MetricName name;
+    private MetricType type;
     private long value;
 
-    public MetricImpl(MetricName name) {
-        this.name = name;
+    public MetricImpl(MetricType type) {
+        this.type = type;
     }
 
-    public MetricImpl(MetricName name1, long value1) {
-        this.name = name1;
+    public MetricImpl(MetricType type, long value1) {
+        this.type = type;
         this.value = value1;
     }
 
     @Override
-    public MetricName getName() {
-        return name;
+    public MetricType getType() {
+        return type;
     }
 
     @Override
@@ -66,20 +66,20 @@ public class MetricImpl implements Metric, Serializable {
 
         MetricImpl metric = (MetricImpl) o;
 
-        return name.equals(metric.name);
+        return type.equals(metric.type);
 
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return type.hashCode();
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("MetricImpl");
-        sb.append("{name='").append(name).append('\'');
+        sb.append("{name='").append(type).append('\'');
         sb.append(", value=").append(value);
         sb.append('}');
         return sb.toString();

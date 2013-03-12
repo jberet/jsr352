@@ -19,26 +19,43 @@ package javax.batch.api;
 import javax.batch.runtime.StepExecution;
 
 /**
- * Decider determines batch exit status and to influence 
- * sequencing between steps, splits, and flows in a Job XML. 
- * The decider returns a String value which becomes the exit 
- * status value on which the decision chooses the next transition. 
- *
- * @param <T> specifies the type of the transient data in the 
- * batch context.
+ * A Decider receives control as part of a decision element 
+ * in a job. It is used to direct execution flow during job
+ * processing. It returns an exit status that updates the 
+ * current job execution's exit status. This exit status 
+ * value also directs the execution transition based on 
+ * next, end, stop, fail child elements configured on the 
+ * same decision element as the decider.
  */
-public interface Decider <T> {
-
+public interface Decider {
 	/**
-	 * The decide method receives control during job processing to 
-	 * set exit status between a step, split, or flow. The return 
-	 * value updates the current job execution's exit status. This
-     * decide method signature with an array of StepExecution input 
-     * receives control following a split. The array contains a 
-     * StepExecution from the last step to execute in each flow of 
-     * the split.
-	 * @param executions specifies the StepExecutions of the preceding 
-     * steps.	 
+	 * The decide method sets a new exit status for a job. 
+	 * It receives an array of StepExecution objects as input.
+	 * These StepExecution objects represent the execution 
+	 * element that transitions to this decider as follows:
+     * <p>
+     * <ul> 
+     * <li>Step</li>
+     * <p>
+     * When the transition is from a step, the decide method
+     * receives the StepExecution corresponding 
+     * to the step as input.
+     * <li>Split</li>
+     * <p>
+     * When the transition is from a split, the decide method
+     * receives a StepExecution from each flow defined to the split
+     * as input.   
+     * <li>Flow</li>
+     * <p>
+     * When the transition is from a flow, the decide method
+     * receives a StepExecution corresponding 
+     * to the last element that completed in the flow. 
+     * This will be a single StepExecution if the last element 
+     * was a step and multiple StepExecutions if the last element 
+     * was a split.
+	 * </ul>
+	 * @param executions specifies the StepExecution(s) of the preceding 
+     * element.	 
      * @return updated job exit status
 	 * @throws Exception is thrown if an error occurs. 
 	 */

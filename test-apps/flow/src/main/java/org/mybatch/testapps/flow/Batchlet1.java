@@ -39,7 +39,7 @@ public class Batchlet1 extends Batchlet0 {
         String result = super.process();
 
         String stepToVerify = "step1";
-        if (getStepContext().getId().equals(stepToVerify)) {
+        if (getStepContext().getStepName().equals(stepToVerify)) {
             System.out.printf("referencingFlowbProp: %s%n", referencingFlowProp);
         }
 

@@ -23,8 +23,9 @@
 package org.mybatch.testapps.loadBatchXml;
 
 import javax.batch.annotation.BatchProperty;
-import javax.batch.api.AbstractStepListener;
-import javax.batch.api.StepListener;
+import javax.batch.api.listener.AbstractStepListener;
+import javax.batch.api.listener.StepListener;
+import javax.batch.api.listener.StepListener;
 import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;

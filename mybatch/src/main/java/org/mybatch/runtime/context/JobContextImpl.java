@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import javax.batch.api.JobListener;
+import javax.batch.api.listener.JobListener;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.context.JobContext;
 
@@ -86,8 +86,13 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
     }
 
     @Override
+    public String getJobName() {
+        return job.getId();
+    }
+
+    @Override
     public long getInstanceId() {
-        return jobExecution.getInstanceId();
+        return jobExecution.getJobInstance().getInstanceId();
     }
 
     @Override

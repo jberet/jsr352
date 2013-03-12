@@ -30,15 +30,16 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Future;
 import javax.batch.operations.JobOperator;
-import javax.batch.operations.exception.JobExecutionAlreadyCompleteException;
-import javax.batch.operations.exception.JobExecutionIsRunningException;
-import javax.batch.operations.exception.JobExecutionNotMostRecentException;
-import javax.batch.operations.exception.JobExecutionNotRunningException;
-import javax.batch.operations.exception.JobRestartException;
-import javax.batch.operations.exception.JobStartException;
-import javax.batch.operations.exception.NoSuchJobException;
-import javax.batch.operations.exception.NoSuchJobExecutionException;
-import javax.batch.operations.exception.NoSuchJobInstanceException;
+import javax.batch.operations.JobExecutionAlreadyCompleteException;
+import javax.batch.operations.JobExecutionIsRunningException;
+import javax.batch.operations.JobExecutionNotMostRecentException;
+import javax.batch.operations.JobExecutionNotRunningException;
+import javax.batch.operations.JobRestartException;
+import javax.batch.operations.JobSecurityException;
+import javax.batch.operations.JobStartException;
+import javax.batch.operations.NoSuchJobException;
+import javax.batch.operations.NoSuchJobExecutionException;
+import javax.batch.operations.NoSuchJobInstanceException;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
@@ -67,34 +68,9 @@ public class JobOperatorImpl implements JobOperator {
     private Map<Long, Future<?>> jobExecutionResults = new HashMap<Long, Future<?>>();
 
     @Override
-    public int getJobInstanceCount(String jobName) throws NoSuchJobException {
-        return 0;
-    }
-
-    @Override
-    public List<JobInstance> getJobInstances(String jobName, int start, int count) throws NoSuchJobException {
-        return null;
-    }
-
-    @Override
-    public List<JobExecution> getRunningExecutions(String jobName) throws NoSuchJobException {
-        return null;
-    }
-
-    @Override
-    public List<JobExecution> getExecutions(JobInstance instance) throws NoSuchJobInstanceException {
-        return null;
-    }
-
-    @Override
-    public Properties getParameters(JobInstance instance) throws NoSuchJobInstanceException {
-        return null;
-    }
-
-    @Override
-    public long start(String job, Properties jobParameters) throws JobStartException {
+    public long start(String jobXMLName, Properties jobParameters) throws JobStartException, JobSecurityException {
         ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
-        Job jobDefined = ArchiveXmlLoader.loadJobXml(job, Job.class, classLoader);
+        Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, Job.class, classLoader);
         JobMerger jobMerger = new JobMerger(jobDefined);  //find any possible parents and merge them in
         jobMerger.merge();
 
@@ -103,7 +79,7 @@ public class JobOperatorImpl implements JobOperator {
         try {
             appData = new ApplicationMetaData(classLoader);
         } catch (IOException e) {
-            throw LOGGER.failToProcessMetaData(e, job);
+            throw LOGGER.failToProcessMetaData(e, jobXMLName);
         }
         JobInstanceImpl instance = new JobInstanceImpl(jobDefined);
         JobExecutionImpl jobExecution = new JobExecutionImpl(instance, jobParameters);
@@ -117,19 +93,8 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
-    public long restart(long executionId)
-            throws JobExecutionAlreadyCompleteException, NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException {
-        return 0;
-    }
-
-    @Override
-    public long restart(long executionId, Properties overrideJobParameters)
-            throws JobExecutionAlreadyCompleteException, NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException {
-        return 0;
-    }
-
-    @Override
-    public void stop(long executionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+    public void stop(long executionId) throws NoSuchJobExecutionException,
+            JobExecutionNotRunningException, JobSecurityException {
         Future<?> executionResult = jobExecutionResults.get(executionId);
         if (executionResult == null) {
             throw LOGGER.noSuchJobExecution(executionId);
@@ -143,38 +108,57 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
-    public void abandon(JobExecution jobExecution) throws NoSuchJobInstanceException, JobExecutionIsRunningException {
-
-    }
-
-    @Override
-    public JobInstance getJobInstance(long instanceId) {
+    public Set<String> getJobNames() throws JobSecurityException {
         return null;
     }
 
     @Override
-    public List<JobExecution> getJobExecutions(JobInstance instance) throws NoSuchJobInstanceException {
+    public int getJobInstanceCount(String jobName) throws NoSuchJobException, JobSecurityException {
+        return 0;
+    }
+
+    @Override
+    public List<JobInstance> getJobInstances(String jobName, int start, int count) throws NoSuchJobException, JobSecurityException {
         return null;
     }
 
     @Override
-    public JobExecution getJobExecution(long executionId) {
+    public List<Long> getRunningExecutions(String jobName) throws NoSuchJobException, JobSecurityException {
         return null;
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(long jobExecutionId) throws NoSuchJobExecutionException {
+    public Properties getParameters(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
         return null;
     }
 
     @Override
-    public void purge(String apptag) {
+    public long restart(long executionId, Properties restartParameters) throws JobExecutionAlreadyCompleteException, NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
+        return 0;
+    }
+
+    @Override
+    public void abandon(long executionId) throws NoSuchJobExecutionException, JobExecutionIsRunningException, JobSecurityException {
 
     }
 
     @Override
-    public Set<String> getJobNames() {
+    public JobInstance getJobInstance(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
         return null;
     }
 
+    @Override
+    public List<JobExecution> getJobExecutions(JobInstance instance) throws NoSuchJobInstanceException, JobSecurityException {
+        return null;
+    }
+
+    @Override
+    public JobExecution getJobExecution(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
+        return null;
+    }
+
+    @Override
+    public List<StepExecution<?>> getStepExecutions(long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
+        return null;
+    }
 }

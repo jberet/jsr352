@@ -23,7 +23,7 @@
 package org.mybatch.runtime.runner;
 
 import java.util.LinkedList;
-import javax.batch.api.StepListener;
+import javax.batch.api.listener.StepListener;
 import javax.batch.operations.JobOperator;
 
 import org.mybatch.job.Batchlet;

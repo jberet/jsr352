@@ -25,7 +25,7 @@ package org.mybatch.runtime.context;
 import java.io.Externalizable;
 import java.util.List;
 import java.util.Properties;
-import javax.batch.api.StepListener;
+import javax.batch.api.listener.StepListener;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.context.StepContext;
@@ -67,6 +67,11 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
     }
 
     @Override
+    public String getStepName() {
+        return step.getId();
+    }
+
+    @Override
     public JobOperator.BatchStatus getBatchStatus() {
         return stepExecution.getBatchStatus();
     }
@@ -88,7 +93,7 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
 
     @Override
     public long getStepExecutionId() {
-        return stepExecution.getId();
+        return stepExecution.getExecutionId();
     }
 
     @Override

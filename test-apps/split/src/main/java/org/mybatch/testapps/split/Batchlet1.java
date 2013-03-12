@@ -41,7 +41,7 @@ public class Batchlet1 extends Batchlet0 {
         String result = super.process();
 
         String stepToVerify = "step11";
-        if (stepToVerify.equals(getStepContext().getId())) {
+        if (stepToVerify.equals(getStepContext().getStepName())) {
             System.out.printf("referencingSplitProp: %s, referencingFlowProp: %s%n", referencingSplitProp, referencingFlowProp);
         }
 

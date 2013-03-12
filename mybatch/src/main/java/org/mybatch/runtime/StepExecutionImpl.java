@@ -45,23 +45,19 @@ public final class StepExecutionImpl<P extends Serializable> extends AbstractExe
         this.stepId = stepId;
     }
 
-    public long getId() {
+    @Override
+    public long getExecutionId() {
         return this.id;
     }
 
     @Override
-    public long getJobExecutionId() {
-        return rootJobExecution.getExecutionId();
-    }
-
-    @Override
-    public String getName() {
-        return rootJobExecution.getJobInstance().getJobName();
-    }
-
-    @Override
-    public String getStepId() {
+    public String getStepName() {
         return stepId;
+    }
+
+    @Override
+    public String[] getStepContainment() {
+        return new String[0];
     }
 
     @Override

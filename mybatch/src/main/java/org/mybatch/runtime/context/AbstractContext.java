@@ -23,12 +23,11 @@
 package org.mybatch.runtime.context;
 
 import javax.batch.operations.JobOperator;
-import javax.batch.runtime.context.BatchContext;
 
 import org.mybatch.job.Properties;
 import org.mybatch.util.PropertyResolver;
 
-public abstract class AbstractContext<T> implements BatchContext<T> {
+public abstract class AbstractContext<T> {
     protected String id;
     protected T transientUserData;
     protected ClassLoader classLoader;
@@ -64,17 +63,14 @@ public abstract class AbstractContext<T> implements BatchContext<T> {
         this.outerContexts = outerContexts;
     }
 
-    @Override
     public String getId() {
         return id;
     }
 
-    @Override
     public T getTransientUserData() {
         return transientUserData;
     }
 
-    @Override
     public void setTransientUserData(T data) {
         this.transientUserData = data;
     }

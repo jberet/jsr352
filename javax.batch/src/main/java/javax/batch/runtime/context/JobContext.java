@@ -23,11 +23,30 @@ package javax.batch.runtime.context;
   *
   * @see javax.batch.annotation.context.JobContext
   */
-
 import java.util.Properties;
 import javax.batch.operations.JobOperator.BatchStatus;
 
-public interface JobContext <T> extends BatchContext <T> {
+public interface JobContext <T> {
+	
+	/**
+	 * Get job name
+	 * @return value of 'id' attribute from <job>
+	 */
+	public String getJobName();
+	
+	/**
+	 * The getTransientUserData method returns a transient data object 
+	 * belonging to the current Job XML execution element. 
+	 * @return user-specified type
+	 */
+	public T getTransientUserData();
+	
+	/**
+	 * The setTransientUserData method stores a transient data object into 
+	 * the current batch context. 
+	 * @param data is the user-specified type
+	 */
+	public void setTransientUserData(T data);
 
 	/**
 	 * The getInstanceId method returns the current job's instance 

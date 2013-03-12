@@ -24,7 +24,8 @@ package org.mybatch;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.exception.JobStartException;
+import javax.batch.operations.JobSecurityException;
+import javax.batch.operations.JobStartException;
 import javax.batch.runtime.BatchRuntime;
 
 import org.mybatch.util.ConcurrencyService;
@@ -34,7 +35,7 @@ import static org.mybatch.util.BatchLogger.LOGGER;
 public class Main {
     private static final long WAIT_FOR_COMPLETION_MILLIS = 5000;
 
-    public static void main(String[] args) throws JobStartException {
+    public static void main(String[] args) throws JobStartException, JobSecurityException {
         if (args.length == 0) {
             usage(args);
         }
