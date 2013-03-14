@@ -1,0 +1,3 @@
+#To run JSR 352 sigtest:
+
+java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/batch-tck/lib/javax.inject.jar:$HOME/dev/jsr352/javax.batch/target/javax.batch-1.0-SNAPSHOT.jar
