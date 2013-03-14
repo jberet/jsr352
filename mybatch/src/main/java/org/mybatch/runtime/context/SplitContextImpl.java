@@ -42,8 +42,6 @@ public class SplitContextImpl<T> extends AbstractContext<T> {
         this.split = split;
         this.classLoader = getJobContext().getClassLoader();
         this.splitExecution = new SplitExecutionImpl(split.getId());
-        setUpPropertyResolver().resolve(this.split);
-        //Split has no listeners
         splitExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
     }
 
@@ -77,7 +75,7 @@ public class SplitContextImpl<T> extends AbstractContext<T> {
 
     @Override
     public org.mybatch.job.Properties getProperties2() {
-        return split.getProperties();
+        return null;  //split has no <properties>
     }
 
 }

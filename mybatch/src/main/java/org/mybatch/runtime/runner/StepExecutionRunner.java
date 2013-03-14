@@ -120,7 +120,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (batchContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
             String next = step.getNext();
             if (next == null) {
-                next = resolveControlElements(step.getControlElements());
+                next = resolveControlElements(step.getTransitionElements());
             }
             enclosingRunner.runJobElement(next, batchContext.getStepExecution());
         }

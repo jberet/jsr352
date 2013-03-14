@@ -73,7 +73,7 @@ public class FlowContextImpl<T> extends AbstractContext<T> {
 
     @Override
     public org.mybatch.job.Properties getProperties2() {
-        return flow.getProperties();
+        return null;  //flow has no <properties>
     }
 
 }

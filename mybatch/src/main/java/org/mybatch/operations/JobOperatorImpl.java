@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Future;
-import javax.batch.operations.JobOperator;
 import javax.batch.operations.JobExecutionAlreadyCompleteException;
 import javax.batch.operations.JobExecutionIsRunningException;
 import javax.batch.operations.JobExecutionNotMostRecentException;
 import javax.batch.operations.JobExecutionNotRunningException;
+import javax.batch.operations.JobOperator;
 import javax.batch.operations.JobRestartException;
 import javax.batch.operations.JobSecurityException;
 import javax.batch.operations.JobStartException;
@@ -49,7 +49,6 @@ import org.mybatch.creation.SimpleArtifactFactory;
 import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.metadata.ArchiveXmlLoader;
-import org.mybatch.metadata.JobMerger;
 import org.mybatch.repository.JobRepository;
 import org.mybatch.repository.impl.MemoryRepository;
 import org.mybatch.runtime.JobExecutionImpl;
@@ -71,8 +70,6 @@ public class JobOperatorImpl implements JobOperator {
     public long start(String jobXMLName, Properties jobParameters) throws JobStartException, JobSecurityException {
         ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
         Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, Job.class, classLoader);
-        JobMerger jobMerger = new JobMerger(jobDefined);  //find any possible parents and merge them in
-        jobMerger.merge();
 
         repository.addJob(jobDefined);
         ApplicationMetaData appData;

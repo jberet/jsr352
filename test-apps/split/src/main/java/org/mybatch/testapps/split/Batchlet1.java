@@ -26,15 +26,13 @@ import javax.batch.annotation.BatchProperty;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.junit.Assert;
 import org.mybatch.testapps.common.Batchlet0;
 
 @Named
 public class Batchlet1 extends Batchlet0 {
-    @Inject @BatchProperty(name="reference-split-prop")
-    private String referencingSplitProp;
-
-    @Inject @BatchProperty(name="reference-flow-prop")
-    private String referencingFlowProp;
+    @Inject @BatchProperty(name="reference-step-prop")
+    private String referencingStepProp;
 
     @Override
     public String process() throws Exception {
@@ -42,7 +40,7 @@ public class Batchlet1 extends Batchlet0 {
 
         String stepToVerify = "step11";
         if (stepToVerify.equals(getStepContext().getStepName())) {
-            System.out.printf("referencingSplitProp: %s, referencingFlowProp: %s%n", referencingSplitProp, referencingFlowProp);
+            Assert.assertEquals("step-prop", referencingStepProp);
         }
 
         return result;

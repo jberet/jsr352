@@ -86,7 +86,7 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
         if (batchContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
             String next = split.getNext();
             if (next == null) {
-                next = resolveControlElements(split.getControlElements());
+                next = resolveControlElements(split.getTransitionElements());
             }
 
             if (next != null) {

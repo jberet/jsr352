@@ -36,7 +36,6 @@ import org.mybatch.job.Job;
 import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Property;
-import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
@@ -113,17 +112,10 @@ public final class PropertyResolver {
         }
     }
 
-    public void resolve(Split split) {
-        //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
-        //split has no listeners, no decision
-        resolve(split.getProperties(), false);
-    }
-
     public void resolve(Flow flow) {
         //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
-        //flow has no listeners
-        resolve(flow.getProperties(), false);
-        resolveDecision(flow.getDecisionOrStepOrSplit());
+        //flow has no listeners, no properties
+        resolveDecision(flow.getDecisionOrFlowOrSplit());
     }
 
     public String resolve(String rawVale) {

@@ -31,46 +31,42 @@
         <property name="job-prop-2" value="job-prop-2"></property>
     </properties>
 
-    <step id="step-parent" abstract="true">
-        <batchlet ref="Batchlet1"/>
-    </step>
-
     <split id="split1" next="decision1">
-        <properties>
-            <property name="split-prop" value="split-prop"/>
-        </properties>
         <flow id="flow1">
-            <properties>
-                <property name="flow-prop" value="flow-prop"/>
-            </properties>
             <step id="step11" next="step12">
                 <properties>
                     <property name="step-prop" value="step-prop"></property>
                 </properties>
                 <batchlet ref="Batchlet1">
                     <properties>
-                        <property name="reference-flow-prop" value="#{jobProperties['flow-prop']}"/>
-                        <property name="reference-split-prop" value="#{jobProperties['split-prop']}"/>
+                        <property name="reference-step-prop" value="#{jobProperties['step-prop']}"/>
                     </properties>
                 </batchlet>
             </step>
 
-            <step id="step12" parent="step-parent"/>
+            <step id="step12">
+                <batchlet ref="Batchlet1"/>
+            </step>
         </flow>
 
         <flow id="flow2">
-            <step id="step21" parent="step-parent">
+            <step id="step21">
+                <batchlet ref="Batchlet1"/>
                 <next on="*" to="step22"/>
             </step>
 
-            <step id="step22" parent="step-parent"/>
+            <step id="step22">
+                <batchlet ref="Batchlet1"/>
+            </step>
         </flow>
     </split>
 
     <decision id="decision1" ref="Decider2">
         <!-- Decider2 sets exit status to "next", thus directing the job to step3 -->
-        <next on="next" to="step3" />
+        <next on="next" to="step3"/>
     </decision>
-    
-    <step id="step3" parent="step-parent"/>
+
+    <step id="step3">
+        <batchlet ref="Batchlet1"/>
+    </step>
 </job>

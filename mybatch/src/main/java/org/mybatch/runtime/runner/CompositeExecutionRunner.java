@@ -137,7 +137,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         try {
             newExitStatus = decider.decide(precedingStepExecutions);
             batchContext.setExitStatus(newExitStatus);
-            String next = resolveControlElements(decision.getControlElements());
+            String next = resolveControlElements(decision.getTransitionElements());
             runJobElement(next, precedingStepExecutions);
         } catch (Exception e) {
             BatchLogger.LOGGER.failToRunJob(e, decider, "decide");

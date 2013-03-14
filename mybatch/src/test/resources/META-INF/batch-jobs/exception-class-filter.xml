@@ -25,7 +25,7 @@
 <job id="exception-class-filter" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML.xsd">
-    <step id="exception-class-filter">
+    <step id="exception-class-filter-step">
         <chunk>
             <reader ref="R1"></reader>
             <processor ref="P1"></processor>
@@ -41,7 +41,7 @@
             </no-rollback-exception-classes>
         </chunk>
     </step>
-    <step id="exception-class-filter2">
+    <step id="exception-class-filter-step2">
         <chunk>
             <reader ref="R1"></reader>
             <processor ref="P1"></processor>

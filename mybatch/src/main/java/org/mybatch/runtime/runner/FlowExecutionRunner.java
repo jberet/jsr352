@@ -44,7 +44,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
 
     @Override
     protected List<?> getJobElements() {
-        return flow.getDecisionOrStepOrSplit();
+        return flow.getDecisionOrFlowOrSplit();
     }
 
     @Override
@@ -74,7 +74,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
         if (batchContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
             String next = flow.getNext();
             if (next == null) {
-                next = resolveControlElements(flow.getControlElements());
+                next = resolveControlElements(flow.getTransitionElements());
             }
             enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
         }
