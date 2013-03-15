@@ -22,11 +22,25 @@
  
 package org.mybatch.test;
 
+import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchRuntime;
+
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mybatch.Main;
 
 public class MainTest {
     private static final String jobXmlName = "batchlet1.xml";
+
+    @Test @Ignore
+    public void loadJobOperator() throws Exception {
+        JobOperator operator = BatchRuntime.getJobOperator();
+        for (int i = 0; i < 10; i++) {
+            JobOperator op = BatchRuntime.getJobOperator();
+            Assert.assertSame(operator, op);
+        }
+    }
 
     @Test
     public void testMain() throws Exception {
