@@ -59,9 +59,9 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         for (Object e : getJobElements()) {
             if (e instanceof Step) {
                 Step step = (Step) e;
-                if (Boolean.parseBoolean(step.getAbstract())) {
-                    continue;
-                }
+//                if (Boolean.parseBoolean(step.getAbstract())) {
+//                    continue;
+//                }
                 runStep(step);
                 break;
             } else if (e instanceof Flow) {
@@ -74,6 +74,9 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
                 //A split cannot be abstract or have parent, so run the split
                 runSplit(split);
                 break;
+            } else if (e instanceof Decision) {
+                Decision decision = (Decision) e;
+                runDecision(decision);
             }
         }
     }

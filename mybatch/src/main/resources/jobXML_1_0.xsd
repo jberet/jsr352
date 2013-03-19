@@ -70,8 +70,6 @@
 			</xs:choice>
 		</xs:sequence>
 		<xs:attribute name="id" use="required" type="xs:ID" />
-		<xs:attribute name="parent" use="optional" type="xs:string" />
-		<xs:attribute name="abstract" use="optional" type="xs:string" />
 		<xs:attribute name="restartable" use="optional" type="xs:string" />
 	</xs:complexType>
 
@@ -208,7 +206,7 @@
 					</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:choice minOccurs="0" maxOccurs="1"> <!-- TODO validate a merged Step has at least one -->
+			<xs:choice minOccurs="0" maxOccurs="1"> 
 				<xs:element name="batchlet" type="jsl:Batchlet" />
 				<xs:element name="chunk" type="jsl:Chunk" />
 			</xs:choice>
@@ -221,8 +219,6 @@
 		<xs:attribute name="allow-start-if-complete" use="optional"
 			type="xs:string" />
 		<xs:attribute name="next" use="optional" type="xs:string" />
-		<xs:attribute name="abstract" use="optional" type="xs:string" />
-		<xs:attribute name="parent" use="optional" type="xs:string" />
 	</xs:complexType>
 
 	<xs:complexType name="Batchlet">
@@ -233,8 +229,6 @@
 		<xs:attribute name="ref" use="required" type="jsl:artifactRef" />
 	</xs:complexType>
 
-	<!-- required attributes were made optional to allow validated snippets 
-		to be loaded for inheritance -->
 	<xs:complexType name="Chunk">
 		<xs:sequence>
 			<xs:element name="reader" type="jsl:ItemReader" />
@@ -268,10 +262,8 @@
 					checkpoint-algorithm element is also
 					specified. It is an optional
 					attribute. The default policy is
-					"item". However, to make it easier
-					for implementations to support JSL inheritance
-					we abstain from
-					defining a schema-specified default for this attribute.
+					"item". However, we chose not to define
+					a schema-specified default for this attribute.
 				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
@@ -374,28 +366,20 @@
 
 	<xs:complexType name="Properties">
 		<xs:sequence>
-			<!-- We could have a useful "empty" list case when a child wants to "unset" 
-				parent properties by doing merge="false" with an empty list. -->
-			<xs:element name="property" type="jsl:Property" maxOccurs="unbounded"
-				minOccurs="0" />
+			<xs:element name="property" type="jsl:Property" maxOccurs="unbounded" minOccurs="0" />
 		</xs:sequence>
-		<xs:attribute name="merge" use="optional" type="xs:string" />
 		<xs:attribute name="partition" use="optional" type="xs:string" />
 	</xs:complexType>
 
 	<xs:complexType name="Listeners">
 		<xs:sequence>
-			<!-- We could have a useful "empty" list case when a child wants to "unset" 
-				parent listeners by doing merge="false" with an empty list. -->
-			<xs:element name="listener" type="jsl:Listener" maxOccurs="unbounded"
-				minOccurs="0" />
+			<xs:element name="listener" type="jsl:Listener" maxOccurs="unbounded" minOccurs="0" />
 		</xs:sequence>
-		<xs:attribute name="merge" use="optional" type="xs:string" />
 	</xs:complexType>
 
 	<xs:complexType name="Partition">
 		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="1"> <!-- TODO validate a merged Partition has at least one -->
+			<xs:choice minOccurs="0" maxOccurs="1"> 
 				<xs:element name="mapper" type="jsl:PartitionMapper" />
 				<xs:element name="plan" type="jsl:PartitionPlan" />
 			</xs:choice>

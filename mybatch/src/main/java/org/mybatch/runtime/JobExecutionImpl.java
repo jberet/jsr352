@@ -24,6 +24,9 @@ package org.mybatch.runtime;
 
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import javax.batch.operations.JobOperator;
 import javax.batch.runtime.JobExecution;
 
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution {
@@ -36,10 +39,25 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     protected long createTime;
     protected long lastUpdatedTime;
 
+    private CountDownLatch latch = new CountDownLatch(1);
 
     public JobExecutionImpl(JobInstanceImpl in, Properties jobParameters) {
         this.jobInstance = in;
         this.jobParameters = jobParameters;
+    }
+
+    public void awaitTerminatioin(long timeout, TimeUnit timeUnit) throws InterruptedException {
+        latch.await(timeout, timeUnit);
+    }
+
+    @Override
+    public void setBatchStatus(JobOperator.BatchStatus batchStatus) {
+        super.setBatchStatus(batchStatus);
+        if (batchStatus != JobOperator.BatchStatus.STARTING &&
+                batchStatus != JobOperator.BatchStatus.STARTED &&
+                batchStatus != JobOperator.BatchStatus.STOPPING) {
+            latch.countDown();
+        }
     }
 
     @Override

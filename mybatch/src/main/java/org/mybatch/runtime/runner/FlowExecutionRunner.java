@@ -68,7 +68,6 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
 
         if (batchContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
             batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
-            enclosingRunner.getBatchContext().setBatchStatus(JobOperator.BatchStatus.COMPLETED);  //set job batch status COMPLETED, may be changed next
         }
 
         if (batchContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
