@@ -78,14 +78,19 @@ public class JobOperatorImpl implements JobOperator {
         } catch (IOException e) {
             throw LOGGER.failToProcessMetaData(e, jobXMLName);
         }
-        JobInstanceImpl instance = new JobInstanceImpl(jobDefined);
-        JobExecutionImpl jobExecution = new JobExecutionImpl(instance, jobParameters);
-        JobContextImpl jobContext = new JobContextImpl(jobDefined, jobExecution, appData, artifactFactory);
+        JobInstanceImpl instance = new JobInstanceImpl(repository.nextUniqueId(), jobDefined);
+        JobExecutionImpl jobExecution = new JobExecutionImpl(repository.nextUniqueId(), instance, jobParameters);
+        JobContextImpl jobContext = new JobContextImpl(jobDefined, jobExecution, appData, artifactFactory, repository);
 
         JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
         Future<?> result = ConcurrencyService.submit(jobExecutionRunner);
         long jobExecutionId = jobExecution.getExecutionId();
         jobExecutionResults.put(jobExecutionId, result);
+
+        repository.addJob(jobDefined);
+        repository.addJobInstance(instance);
+        repository.addJobExecution(jobExecution);
+
         return jobExecutionId;
     }
 
@@ -126,7 +131,7 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public Properties getParameters(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
-        return null;
+        return getJobExecution(executionId).getJobParameters();
     }
 
     @Override
@@ -141,21 +146,23 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public JobInstance getJobInstance(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
-        return null;
+        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution (executionId);
+        return jobExecution.getJobInstance();
     }
 
     @Override
     public List<JobExecution> getJobExecutions(JobInstance instance) throws NoSuchJobInstanceException, JobSecurityException {
-        return null;
+        return ((JobInstanceImpl) instance).getJobExecutions();
     }
 
     @Override
     public JobExecution getJobExecution(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
-        return null;
+        return repository.getJobExecution(executionId);
     }
 
     @Override
     public List<StepExecution<?>> getStepExecutions(long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
-        return null;
+        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution (jobExecutionId);
+        return jobExecution.getStepExecutions();
     }
 }

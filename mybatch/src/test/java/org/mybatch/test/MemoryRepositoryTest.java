@@ -48,16 +48,16 @@ public class MemoryRepositoryTest {
     @Test
     public void addRemoveJob() throws Exception {
         job = ArchiveXmlLoader.loadJobXml("batchlet1.xml", Job.class);
-        Job jobAdded = repo.addJob(job);
-        Assert.assertEquals(null, jobAdded);  //the first time, no pre-existing job by the same jobId.
+        boolean isAdded = repo.addJob(job);
+        Assert.assertEquals(true, isAdded);  //the first time, no pre-existing job by the same jobId.
         Assert.assertEquals(1, repo.getJobs().size());
 
-        Job jobRemoved = repo.removeJob(job.getId());
-        Assert.assertEquals(job, jobRemoved);
+        boolean isRemoved = repo.removeJob(job.getId());
+        Assert.assertEquals(true, isRemoved);
         Assert.assertEquals(0, repo.getJobs().size());
 
-        jobRemoved = repo.removeJob(job.getId());
-        Assert.assertEquals(null, jobRemoved);
+        isRemoved = repo.removeJob(job.getId());
+        Assert.assertEquals(false, isRemoved);
         Assert.assertEquals(0, repo.getJobs().size());
     }
 

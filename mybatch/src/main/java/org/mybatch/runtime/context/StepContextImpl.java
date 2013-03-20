@@ -50,7 +50,8 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
         setUpPropertyResolver().resolve(this.step);
         createStepListeners();
 
-        this.stepExecution = new StepExecutionImpl<P>(getJobContext().getJobExecution(), id);
+        this.stepExecution = new StepExecutionImpl<P>(getJobContext().getJobRepository().nextUniqueId(),
+                getJobContext().getJobExecution(), id);
         this.stepExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
     }
 

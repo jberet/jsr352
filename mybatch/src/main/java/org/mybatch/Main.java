@@ -24,17 +24,17 @@ package org.mybatch;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import javax.batch.operations.JobOperator;
 import javax.batch.operations.JobSecurityException;
 import javax.batch.operations.JobStartException;
 import javax.batch.runtime.BatchRuntime;
 
+import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.util.ConcurrencyService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class Main {
-    private static final long WAIT_FOR_COMPLETION_MILLIS = 5000;
-
     public static void main(String[] args) throws JobStartException, JobSecurityException {
         if (args.length == 0) {
             usage(args);
@@ -44,13 +44,19 @@ public class Main {
             usage(args);
         }
 
+        JobOperator jobOperator = BatchRuntime.getJobOperator();
+        long jobExecutionId;
+        long timeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
         try {
-            BatchRuntime.getJobOperator().start(jobXml, System.getProperties());
+            jobExecutionId = jobOperator.start(jobXml, System.getProperties());
+            JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+            jobExecution.awaitTerminatioin(timeout, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            //ignore
         } finally {
             try {
-                Thread.sleep(WAIT_FOR_COMPLETION_MILLIS);
                 ConcurrencyService.shutdown();
-                ConcurrencyService.getExecutorService().awaitTermination(WAIT_FOR_COMPLETION_MILLIS, TimeUnit.MINUTES);
+                ConcurrencyService.getExecutorService().awaitTermination(timeout, TimeUnit.MINUTES);
             } catch (InterruptedException e) {
                 //ignore
             }

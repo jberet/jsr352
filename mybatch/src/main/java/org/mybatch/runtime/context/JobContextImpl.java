@@ -37,6 +37,7 @@ import org.mybatch.job.Listener;
 import org.mybatch.job.Listeners;
 import org.mybatch.job.Step;
 import org.mybatch.metadata.ApplicationMetaData;
+import org.mybatch.repository.JobRepository;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
@@ -47,18 +48,21 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
 
     private ApplicationMetaData applicationMetaData;
     private ArtifactFactory artifactFactory;
+    private JobRepository jobRepository;
 
     private JobListener[] jobListeners = new JobListener[0];
 
     private LinkedList<Step> executedSteps = new LinkedList<Step>();
 
-    public JobContextImpl(Job job, JobExecutionImpl jobExecution, ApplicationMetaData applicationMetaData, ArtifactFactory artifactFactory) {
+    public JobContextImpl(Job job, JobExecutionImpl jobExecution, ApplicationMetaData applicationMetaData,
+                          ArtifactFactory artifactFactory, JobRepository jobRepository) {
         super(job.getId());
         this.job = job;
         this.jobExecution = jobExecution;
         this.applicationMetaData = applicationMetaData;
         this.classLoader = applicationMetaData.getClassLoader();
         this.artifactFactory = artifactFactory;
+        this.jobRepository = jobRepository;
 
         setUpPropertyResolver().resolve(job);
         createJobListeners();
@@ -181,5 +185,9 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
                 this.jobListeners[i] = createArtifact(listener.getRef(), listener.getProperties());
             }
         }
+    }
+
+    JobRepository getJobRepository() {
+        return jobRepository;
     }
 }

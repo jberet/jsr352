@@ -22,6 +22,10 @@
 
 package org.mybatch.runtime;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
 import org.mybatch.job.Job;
@@ -29,8 +33,10 @@ import org.mybatch.job.Job;
 public final class JobInstanceImpl implements JobInstance {
     private long id;
     private Job job;
+    private List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
 
-    public JobInstanceImpl(Job job) {
+    public JobInstanceImpl(long id, Job job) {
+        this.id = id;
         this.job = job;
     }
 
@@ -44,4 +50,11 @@ public final class JobInstanceImpl implements JobInstance {
         return this.id;
     }
 
+    public List<JobExecution> getJobExecutions() {
+        return Collections.unmodifiableList(this.jobExecutions);
+    }
+
+    void addJobExecution(JobExecution jobExecution) {
+        this.jobExecutions.add(jobExecution);
+    }
 }

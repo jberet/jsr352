@@ -24,18 +24,36 @@
 package org.mybatch.repository;
 
 import java.util.Collection;
+import java.util.List;
+
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.JobInstance;
 
 import org.mybatch.job.Job;
 
 public interface JobRepository {
     long nextUniqueId();
 
-    Job addJob(Job job);
+    boolean addJob(Job job);
 
-    Job removeJob(String jobId);
+    boolean removeJob(String jobId);
 
-    Job findJob(String jobId);
+    Job getJob(String jobId);
 
     Collection<Job> getJobs();
+    
+
+    boolean addJobExecution(JobExecution jobExecution);
+
+    JobExecution getJobExecution(long jobExecutionId);
+
+    List<JobExecution> getJobExecutions();
+
+
+    boolean addJobInstance(JobInstance jobInstance);
+
+    JobInstance getJobInstance(long jobInstanceId);
+
+    List<JobInstance> getJobInstances();
 
 }

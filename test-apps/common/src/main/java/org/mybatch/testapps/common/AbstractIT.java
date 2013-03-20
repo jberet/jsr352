@@ -23,8 +23,11 @@
 package org.mybatch.testapps.common;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
+
+import org.mybatch.runtime.JobExecutionImpl;
 
 abstract public class AbstractIT {
     protected void startJob(String jobXmlName) throws Exception {
@@ -32,7 +35,10 @@ abstract public class AbstractIT {
         props.setProperty("job-param", "job-param");
 
         JobOperator jobOperator = BatchRuntime.getJobOperator();
-        jobOperator.start(jobXmlName, props);
-        Thread.sleep(10000);
+        long jobExecutionId = jobOperator.start(jobXmlName, props);
+        JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+
+        long timeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
+        jobExecution.awaitTerminatioin(timeout, TimeUnit.SECONDS);
     }
 }

@@ -53,7 +53,7 @@ public interface JobOperator {
 	 */
 	public Set<String> getJobNames() throws JobSecurityException;
 
-	/**
+	/**  
 	 * Returns number of instances of a job with a particular name.
 	 * 
 	 * @param jobName

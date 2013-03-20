@@ -39,10 +39,11 @@ public final class StepExecutionImpl<P extends Serializable> extends AbstractExe
 
     private StepMetrics stepMetrics = new StepMetrics();
 
-    public StepExecutionImpl(JobExecutionImpl rootJobExecution, String stepId) {
-        //TODO initialize id
+    public StepExecutionImpl(long id, JobExecutionImpl rootJobExecution, String stepId) {
+        this.id = id;
         this.rootJobExecution = rootJobExecution;
         this.stepId = stepId;
+        this.rootJobExecution.addStepExecution(this);
     }
 
     @Override

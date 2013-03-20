@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2012, Red Hat, Inc., and individual contributors
+ * Copyright 2012-2013, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -22,11 +22,13 @@
 
 package org.mybatch.repository.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.JobInstance;
 
 import org.mybatch.job.Job;
 import org.mybatch.repository.JobRepository;
@@ -34,7 +36,11 @@ import org.mybatch.repository.JobRepository;
 public class MemoryRepository implements JobRepository {
     private final AtomicLong atomicLong = new AtomicLong();
 
-    private ConcurrentMap<String, Job> jobs = new ConcurrentHashMap<String, Job>();
+    private List<Job> jobs = Collections.synchronizedList(new ArrayList<Job>());
+
+    private List<JobInstance> jobInstances = Collections.synchronizedList(new ArrayList<JobInstance>());
+
+    private List<JobExecution> jobExecutions = Collections.synchronizedList(new ArrayList<JobExecution>());
 
     @Override
     public long nextUniqueId() {
@@ -42,24 +48,76 @@ public class MemoryRepository implements JobRepository {
     }
 
     @Override
-    public Job addJob(Job job) {
-        return jobs.putIfAbsent(job.getId(), job);
+    public boolean addJob(Job job) {
+        return jobs.add(job);
     }
 
     @Override
-    public Job removeJob(String jobId) {
-        //may need to cascade-remove all the associated jobInstances
-        return jobs.remove(jobId);
+    public boolean removeJob(String jobId) {
+        Job toRemove = getJob(jobId);
+        return toRemove == null ? false : jobs.remove(toRemove);
     }
 
     @Override
-    public Job findJob(String jobId) {
-        return jobs.get(jobId);
+    public Job getJob(String jobId) {
+        synchronized (jobs) {
+            for (Job j : jobs) {
+                if (j.getId().equals(jobId)) {
+                    return j;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
     public Collection<Job> getJobs() {
-        return Collections.unmodifiableCollection(jobs.values());
+        return Collections.unmodifiableCollection(jobs);
     }
+
+    @Override
+    public boolean addJobExecution(JobExecution jobExecution) {
+        return jobExecutions.add(jobExecution);
+    }
+
+    @Override
+    public JobExecution getJobExecution(long jobExecutionId) {
+        synchronized (jobExecutions) {
+            for (JobExecution e : jobExecutions) {
+                if (e.getExecutionId() == jobExecutionId) {
+                    return e;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<JobExecution> getJobExecutions() {
+        return Collections.unmodifiableList(this.jobExecutions);
+    }
+
+    @Override
+    public boolean addJobInstance(JobInstance jobInstance) {
+        return jobInstances.add(jobInstance);
+    }
+
+    @Override
+    public JobInstance getJobInstance(long jobInstanceId) {
+        synchronized (jobInstances) {
+            for (JobInstance e : jobInstances) {
+                if (e.getInstanceId() == jobInstanceId) {
+                    return e;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<JobInstance> getJobInstances() {
+        return Collections.unmodifiableList(jobInstances);
+    }
+
 
 }

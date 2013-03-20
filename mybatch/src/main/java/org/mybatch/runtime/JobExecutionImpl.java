@@ -22,17 +22,26 @@
  
 package org.mybatch.runtime;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.StepExecution;
 
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution {
+    public static final String JOB_EXECUTION_TIMEOUT_SECONDS_KEY = "org.mybatch.job.execution.timeout.seconds";
+    public static final long   JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT = 300L;
+
     private long id;
 
     private JobInstanceImpl jobInstance;
+
+    private List<StepExecution<?>> stepExecutions = new ArrayList<StepExecution<?>>();
 
     private Properties jobParameters;
 
@@ -41,9 +50,11 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private CountDownLatch latch = new CountDownLatch(1);
 
-    public JobExecutionImpl(JobInstanceImpl in, Properties jobParameters) {
-        this.jobInstance = in;
+    public JobExecutionImpl(long id, JobInstanceImpl jobInstance, Properties jobParameters) {
+        this.id = id;
+        this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
+        this.jobInstance.addJobExecution(this);
     }
 
     public void awaitTerminatioin(long timeout, TimeUnit timeUnit) throws InterruptedException {
@@ -97,4 +108,11 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         return jobParameters;
     }
 
+    public List<StepExecution<?>> getStepExecutions() {
+        return Collections.unmodifiableList(this.stepExecutions);
+    }
+
+    void addStepExecution(StepExecution<?> stepExecution) {
+        this.stepExecutions.add(stepExecution);
+    }
 }
