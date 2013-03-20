@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tck-porting</artifactId>
+    <artifactId>tck-porting-impl</artifactId>
 
     <dependencies>
         <dependency>
@@ -20,7 +20,12 @@
         <dependency>
             <groupId>com.ibm.jbatch</groupId>
             <artifactId>com.ibm.jbatch-tck-spi</artifactId>
-            <version>1.0-b14</version>
+            <version>1.0-b17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatch</groupId>
+            <artifactId>mybatch</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

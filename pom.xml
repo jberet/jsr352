@@ -60,7 +60,7 @@
         <module>javax.batch</module>
         <module>mybatch</module>
         <module>test-apps</module>
-        <module>tck-porting</module>
+        <module>tck-porting-impl</module>
     </modules>
 
     <build>

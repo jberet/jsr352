@@ -22,17 +22,14 @@
  
 package org.mybatch.tck.impl;
 
-import com.ibm.jbatch.tck.spi.JobEndCallback;
-import com.ibm.jbatch.tck.spi.JobEndCallbackManager;
+import javax.batch.operations.JobOperator;
 
-public class JobEndCallbackManagerImpl implements JobEndCallbackManager {
+import com.ibm.jbatch.tck.spi.JobExecutionWaiter;
+import com.ibm.jbatch.tck.spi.JobExecutionWaiterFactory;
+
+public final class JobExecutionWaiterFactoryImpl implements JobExecutionWaiterFactory {
     @Override
-    public void registerJobEndCallback(JobEndCallback jobEndCallback) {
-
-    }
-
-    @Override
-    public void deregisterJobEndCallback(JobEndCallback jobEndCallback) {
-
+    public JobExecutionWaiter createWaiter(long executionId, JobOperator jobOp, long sleepTime) {
+        return new JobExecutionWaiterImpl(executionId, jobOp, sleepTime);
     }
 }
