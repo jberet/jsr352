@@ -25,7 +25,6 @@ package org.mybatch.repository;
 
 import java.util.Collection;
 import java.util.List;
-
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 

@@ -22,7 +22,7 @@
  
 package org.mybatch.testapps.loadBatchXml;
 
-import javax.batch.annotation.BatchProperty;
+import javax.batch.api.BatchProperty;
 import javax.batch.api.listener.AbstractStepListener;
 import javax.batch.api.listener.StepListener;
 import javax.batch.runtime.context.JobContext;

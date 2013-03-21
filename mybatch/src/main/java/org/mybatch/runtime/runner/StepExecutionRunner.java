@@ -24,7 +24,7 @@ package org.mybatch.runtime.runner;
 
 import java.util.LinkedList;
 import javax.batch.api.listener.StepListener;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.job.Chunk;
@@ -54,20 +54,20 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
         }
 
-        batchContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
-        batchContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.STARTED);
+        batchContext.setBatchStatus(BatchStatus.STARTED);
+        batchContext.getJobContext().setBatchStatus(BatchStatus.STARTED);
 
         try {
             Chunk chunk = step.getChunk();
             Batchlet batchlet = step.getBatchlet();
             if (chunk == null && batchlet == null) {
-                batchContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
+                batchContext.setBatchStatus(BatchStatus.ABANDONED);
                 LOGGER.stepContainsNoChunkOrBatchlet(id);
                 return;
             }
 
             if (chunk != null && batchlet != null) {
-                batchContext.setBatchStatus(JobOperator.BatchStatus.ABANDONED);
+                batchContext.setBatchStatus(BatchStatus.ABANDONED);
                 LOGGER.cannotContainBothChunkAndBatchlet(id);
                 return;
             }
@@ -77,7 +77,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     l.beforeStep();
                 } catch (Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, l, "beforeStep");
-                    batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
                     return;
                 }
             }
@@ -97,7 +97,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     l.afterStep();
                 } catch (Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, l, "afterStep");
-                    batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
                     return;
                 }
             }
@@ -106,17 +106,17 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (e instanceof Exception) {
                 batchContext.setException((Exception) e);
             }
-            batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            batchContext.setBatchStatus(BatchStatus.FAILED);
             for (AbstractContext c : batchContext.getOuterContexts()) {
-                c.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                c.setBatchStatus(BatchStatus.FAILED);
             }
         }
 
-        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
-            batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
+            batchContext.setBatchStatus(BatchStatus.COMPLETED);
         }
 
-        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
+        if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             String next = step.getNext();
             if (next == null) {
                 next = resolveControlElements(step.getTransitionElements());

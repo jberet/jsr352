@@ -23,7 +23,7 @@
 package org.mybatch.runtime.runner;
 
 import java.util.concurrent.Callable;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Batchlet;
 import org.mybatch.runtime.context.StepContextImpl;
@@ -48,7 +48,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             batchContext.setExitStatus(exitStatus);
         } catch (Throwable e) {
             LOGGER.failToRunBatchlet(e, batchlet);
-            batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            batchContext.setBatchStatus(BatchStatus.FAILED);
         }
         return null;
     }

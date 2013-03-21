@@ -25,6 +25,7 @@ package org.mybatch.tck.impl;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.operations.JobSecurityException;
+import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.JobExecution;
 
 import com.ibm.jbatch.tck.spi.JobExecutionTimeoutException;
@@ -34,25 +35,30 @@ import org.mybatch.runtime.JobExecutionImpl;
 public final class JobExecutionWaiterImpl implements JobExecutionWaiter {
     private JobExecutionImpl jobExecution;
     private long sleepTime;
+    private JobOperator jobOperator;
 
     JobExecutionWaiterImpl(long executionId, JobOperator jobOp, long sleepTime) {
         try {
+            this.jobOperator = jobOp;
             this.jobExecution = (JobExecutionImpl) jobOp.getJobExecution(executionId);
             this.sleepTime = sleepTime;
         } catch (JobSecurityException e) {
+            throw new IllegalStateException("Failed to create JobExecutionWaiterImpl.", e);
+        } catch (NoSuchJobExecutionException e) {
             throw new IllegalStateException("Failed to create JobExecutionWaiterImpl.", e);
         }
     }
 
     @Override
     public JobExecution awaitTermination() throws JobExecutionTimeoutException {
-        System.out.printf("awaitTerminatioin for jobExecution %s, will timeout in %s milliseconds%n",
-                jobExecution.getExecutionId(), sleepTime);
         try {
             jobExecution.awaitTerminatioin(sleepTime, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             //unexpected interrup, ignore.
         }
+        System.out.printf("awaitTerminatioin for jobName %s, jobExecution %s, timeout %s milliseconds, BatchStatus: %s%n",
+                jobExecution.getJobName(), jobExecution.getExecutionId(), sleepTime, jobExecution.getBatchStatus());
+
         return jobExecution;
     }
 }

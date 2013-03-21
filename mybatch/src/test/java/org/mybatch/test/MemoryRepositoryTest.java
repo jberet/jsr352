@@ -22,6 +22,7 @@
 
 package org.mybatch.test;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -36,7 +37,7 @@ import org.mybatch.metadata.ArchiveXmlLoader;
 import org.mybatch.repository.impl.MemoryRepository;
 
 public class MemoryRepositoryTest {
-    final private static MemoryRepository repo = new MemoryRepository();
+    final private static MemoryRepository repo = MemoryRepository.INSTANCE;
     private Job job;
     private static ExecutorService es = Executors.newCachedThreadPool();
 
@@ -48,17 +49,21 @@ public class MemoryRepositoryTest {
     @Test
     public void addRemoveJob() throws Exception {
         job = ArchiveXmlLoader.loadJobXml("batchlet1.xml", Job.class);
+        repo.removeJob(job.getId());
+        Collection<Job> jobs = repo.getJobs();
+        int existingJobsCount = jobs.size();
+
         boolean isAdded = repo.addJob(job);
         Assert.assertEquals(true, isAdded);  //the first time, no pre-existing job by the same jobId.
-        Assert.assertEquals(1, repo.getJobs().size());
+        Assert.assertEquals(existingJobsCount + 1, repo.getJobs().size());
 
         boolean isRemoved = repo.removeJob(job.getId());
         Assert.assertEquals(true, isRemoved);
-        Assert.assertEquals(0, repo.getJobs().size());
+        Assert.assertEquals(existingJobsCount, repo.getJobs().size());
 
         isRemoved = repo.removeJob(job.getId());
         Assert.assertEquals(false, isRemoved);
-        Assert.assertEquals(0, repo.getJobs().size());
+        Assert.assertEquals(existingJobsCount, repo.getJobs().size());
     }
 
     @Test

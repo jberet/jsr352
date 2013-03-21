@@ -18,7 +18,7 @@ package javax.batch.api.partition;
 
 import java.io.Serializable;
 
-import javax.batch.operations.JobOperator.BatchStatus;
+import javax.batch.runtime.BatchStatus;
 /**
  * The AbstractPartitionAnalyzer provides default 
  * implementations of less commonly implemented methods.

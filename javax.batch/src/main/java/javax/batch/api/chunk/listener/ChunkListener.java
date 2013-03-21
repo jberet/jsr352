@@ -46,8 +46,11 @@ public interface ChunkListener {
 	 * before the chunk transaction is rolled back. 
 	 * Note afterChunk is not invoked in this case.
 	 * 
+	 * @param ex specifies the exception that
+	 * caused the roll back. 
+	 * 
 	 * @throws Exception
 	 * 				throw if an error occurs.
 	 */
-	public void onError() throws Exception;
+	public void onError(Exception e) throws Exception;
 }

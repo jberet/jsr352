@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 International Business Machines Corp.
+ * Copyright 2013 International Business Machines Corp.
  * 
  * See the NOTICE file distributed with this work for additional information
  * regarding copyright ownership. Licensed under the Apache License, 
@@ -16,27 +16,30 @@
  */
 package javax.batch.operations;
 
-public class NoSuchJobInstanceException extends BatchOperationsRuntimeException {
+public class NoSuchJobInstanceException extends Exception {
+
 	/**
-	 * NoSuchJobException is thrown when a JobOperator operation specifies a job
-	 * instance that does not exist.
+	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public NoSuchJobInstanceException(final Throwable th,
-			final String localizedMessage) {
-		super(th, localizedMessage);
-	}
-	
-	public NoSuchJobInstanceException(final String localizedMessage) {
-		super(localizedMessage);
-	}
-	
-	public NoSuchJobInstanceException(final Throwable th) {
-		super(th);
-	}
-	
 	public NoSuchJobInstanceException() {
-		super();
+		// TODO Auto-generated constructor stub
 	}
+
+	public NoSuchJobInstanceException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
+
+	public NoSuchJobInstanceException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
+	}
+
+	public NoSuchJobInstanceException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
+	}
+
 }

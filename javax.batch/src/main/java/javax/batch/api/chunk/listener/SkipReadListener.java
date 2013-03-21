@@ -13,22 +13,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
 package javax.batch.api.chunk.listener;
 
 /**
-* SkipReadListener intercepts skippable
-* itemReader exception handling. 
-*/
+ * SkipReadListener intercepts skippable itemReader exception handling.
+ */
 public interface SkipReadListener {
-/**
-* The onSkipReadItem method receives control 
-* when a skippable exception is thrown from an 
-* ItemReader readItem method. This method receives the 
-* exception as an input. 
-* 
-* @param ex specifies the exception thrown by the ItemReader.
-* @throws Exception is thrown if an error occurs.
-*/
-public void onSkipReadItem(Exception ex) throws Exception; 
+    /**
+     * The onSkipReadItem method receives control when a skippable exception is
+     * thrown from an ItemReader readItem method. This method receives the
+     * exception as an input.
+     * 
+     * @param ex
+     *            specifies the exception thrown by the ItemReader.
+     * @throws Exception
+     *             is thrown if an error occurs.
+     */
+    public void onSkipReadItem(Exception ex) throws Exception;
 }

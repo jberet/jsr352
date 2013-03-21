@@ -28,14 +28,14 @@ import javax.batch.runtime.StepExecution;
 
 import org.mybatch.runtime.metric.StepMetrics;
 
-public final class StepExecutionImpl<P extends Serializable> extends AbstractExecution implements StepExecution<P> {
+public final class StepExecutionImpl extends AbstractExecution implements StepExecution {
     private long id;
 
     private String stepId;
 
     private JobExecutionImpl rootJobExecution;
 
-    private P userPersistentData;
+    private Serializable userPersistentData;
 
     private StepMetrics stepMetrics = new StepMetrics();
 
@@ -47,7 +47,7 @@ public final class StepExecutionImpl<P extends Serializable> extends AbstractExe
     }
 
     @Override
-    public long getExecutionId() {
+    public long getStepExecutionId() {
         return this.id;
     }
 
@@ -57,16 +57,11 @@ public final class StepExecutionImpl<P extends Serializable> extends AbstractExe
     }
 
     @Override
-    public String[] getStepContainment() {
-        return new String[0];
-    }
-
-    @Override
-    public P getUserPersistentData() {
+    public Serializable getUserPersistentData() {
         return userPersistentData;
     }
 
-    public void setUserPersistentData(P userPersistentData) {
+    public void setUserPersistentData(Serializable userPersistentData) {
         this.userPersistentData = userPersistentData;
     }
 

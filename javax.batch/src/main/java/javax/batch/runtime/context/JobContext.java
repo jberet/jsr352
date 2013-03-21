@@ -15,78 +15,90 @@
  * limitations under the License.
  */
 package javax.batch.runtime.context;
+
 /**
-  * 
-  * JobContext is the class field type associated with the @JobContext 
-  * annotation. A JobContext provides information about the current  
-  * job execution.
-  *
-  * @see javax.batch.annotation.context.JobContext
-  */
+ * 
+ * A JobContext provides information about the current  
+ * job execution.
+ *
+ */
 import java.util.Properties;
-import javax.batch.operations.JobOperator.BatchStatus;
 
-public interface JobContext <T> {
-	
-	/**
-	 * Get job name
-	 * @return value of 'id' attribute from <job>
-	 */
-	public String getJobName();
-	
-	/**
-	 * The getTransientUserData method returns a transient data object 
-	 * belonging to the current Job XML execution element. 
-	 * @return user-specified type
-	 */
-	public T getTransientUserData();
-	
-	/**
-	 * The setTransientUserData method stores a transient data object into 
-	 * the current batch context. 
-	 * @param data is the user-specified type
-	 */
-	public void setTransientUserData(T data);
+import javax.batch.runtime.BatchStatus;
 
-	/**
-	 * The getInstanceId method returns the current job's instance 
-       * id.  
-	 * @return job instance id 
-	 */
-	public long getInstanceId();
-	/**
-	 * The getExecutionId method returns the current job's current    
-       * execution id.  
-	 * @return job execution id 
-	 */
+public interface JobContext {
 
-	public long getExecutionId();
+    /**
+     * Get job name
+     * 
+     * @return value of 'id' attribute from <job>
+     */
+    public String getJobName();
 
-	/**
-	 * The getProperties method returns the job level properties
-	 * specified in a job definition.
-	 * @return job level properties 
-	 */
-	public Properties getProperties();
+    /**
+     * The getTransientUserData method returns a transient data object belonging
+     * to the current Job XML execution element.
+     * 
+     * @return user-specified type
+     */
+    public Object getTransientUserData();
 
-	/**
-	 * The getBatchStatus method simply returns the batch status value	 	 * set by the batch runtime into the job context. 
-	 * @return batch status string
-	 */
-	public BatchStatus getBatchStatus();
-	/**
-	 * The getExitStatus method simply returns the exit status value stored 
-	 * into the job context through the setExitStatus method or null. 
-	 * @return exit status string
-	 */	
-	public String getExitStatus();
-	/**
-	 * The setExitStatus method assigns the user-specified exit status for 
-	 * the current job. When the job ends, the exit status of the job is 
-	 * the value specified through setExitStatus. If setExitStatus was not 
-	 * called or was called with a null value, then the exit status 
-	 * defaults to the batch status of the job. 
-	 * @Param status string 
-	 */
-	public void setExitStatus(String status);
+    /**
+     * The setTransientUserData method stores a transient data object into the
+     * current batch context.
+     * 
+     * @param data
+     *            is the user-specified type
+     */
+    public void setTransientUserData(Object data);
+
+    /**
+     * The getInstanceId method returns the current job's instance id.
+     * 
+     * @return job instance id
+     */
+    public long getInstanceId();
+
+    /**
+     * The getExecutionId method returns the current job's current execution id.
+     * 
+     * @return job execution id
+     */
+
+    public long getExecutionId();
+
+    /**
+     * The getProperties method returns the job level properties specified in a
+     * job definition.
+     * 
+     * @return job level properties
+     */
+    public Properties getProperties();
+
+    /**
+     * The getBatchStatus method simply returns the batch status value * set by
+     * the batch runtime into the job context.
+     * 
+     * @return batch status string
+     */
+    public BatchStatus getBatchStatus();
+
+    /**
+     * The getExitStatus method simply returns the exit status value stored into
+     * the job context through the setExitStatus method or null.
+     * 
+     * @return exit status string
+     */
+    public String getExitStatus();
+
+    /**
+     * The setExitStatus method assigns the user-specified exit status for the
+     * current job. When the job ends, the exit status of the job is the value
+     * specified through setExitStatus. If setExitStatus was not called or was
+     * called with a null value, then the exit status defaults to the batch
+     * status of the job.
+     * 
+     * @Param status string
+     */
+    public void setExitStatus(String status);
 }

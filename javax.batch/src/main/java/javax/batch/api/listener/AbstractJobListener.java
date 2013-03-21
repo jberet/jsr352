@@ -21,6 +21,7 @@ package javax.batch.api.listener;
  * implemented methods.
  */
 public abstract class AbstractJobListener implements JobListener {
+
     /**
      * Override this method if the JobListener will do something before the job
      * begins. The default implementation does nothing.

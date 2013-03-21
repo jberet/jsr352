@@ -14,43 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package javax.batch.api.chunk.listener;
 
 /**
  * ItemReadListener intercepts item reader processing.
  * 
- * @param <T>
- *            specifies the type processed by an item reader.
  */
-public interface ItemReadListener<T> {
-	/**
-	 * The beforeRead method that receives control before an item reader is
-	 * called to read the next item.
-	 * 
-	 * @throws Exception
-	 *             is thrown if an error occurs.
-	 */
-	public void beforeRead() throws Exception;
+public interface ItemReadListener {
 
-	/**
-	 * The afterRead method that receives control after an item reader reads an
-	 * item. The method receives the item read as an input.
-	 * 
-	 * @param item
-	 *            specifies the item read by the item reader.
-	 * @throws Exception
-	 *             is thrown if an error occurs.
-	 */
-	public void afterRead(T item) throws Exception;
+    /**
+     * The beforeRead method receives control before an item reader is called to
+     * read the next item.
+     * 
+     * @throws Exception
+     *             is thrown if an error occurs.
+     */
+    public void beforeRead() throws Exception;
 
-	/**
-	 * The onReadError method that receives control after an item reader throws
-	 * an exception. This method receives the exception as an input.
-	 * 
-	 * @param ex
-	 *            specifies the exception that occurred in the item reader.
-	 * @throws Exception
-	 *             is thrown if an error occurs.
-	 */
-	public void onReadError(Exception ex) throws Exception;
+    /**
+     * The afterRead method receives control after an item reader reads an item.
+     * The method receives the item read as an input.
+     * 
+     * @param item
+     *            specifies the item read by the item reader.
+     * @throws Exception
+     *             is thrown if an error occurs.
+     */
+    public void afterRead(Object item) throws Exception;
+
+    /**
+     * The onReadError method receives control after an item reader throws an
+     * exception in the readItem method. This method receives the exception as
+     * an input.
+     * 
+     * @param ex
+     *            specifies the exception that occurred in the item reader.
+     * @throws Exception
+     *             is thrown if an error occurs.
+     */
+    public void onReadError(Exception ex) throws Exception;
 }

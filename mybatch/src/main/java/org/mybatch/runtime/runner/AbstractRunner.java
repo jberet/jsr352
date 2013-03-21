@@ -24,7 +24,7 @@ package org.mybatch.runtime.runner;
 
 import java.util.List;
 import java.util.regex.Pattern;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.End;
 import org.mybatch.job.Fail;
@@ -90,21 +90,21 @@ public abstract class AbstractRunner<C extends AbstractContext> {
             } else if (e instanceof End) {
                 End end = (End) e;
                 if (matches(exitStatus, end.getOn())) {
-                    batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+                    batchContext.setBatchStatus(BatchStatus.COMPLETED);
                     batchContext.setExitStatus(end.getExitStatus());
                     return null;
                 }
             } else if (e instanceof Fail) {
                 Fail fail = (Fail) e;
                 if (matches(exitStatus, fail.getOn())) {
-                    batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
                     batchContext.setExitStatus(fail.getExitStatus());
                     return null;
                 }
             } else {  //stop
                 Stop stop = (Stop) e;
                 if (matches(exitStatus, stop.getOn())) {
-                    batchContext.setBatchStatus(JobOperator.BatchStatus.STOPPED);
+                    batchContext.setBatchStatus(BatchStatus.STOPPED);
                     batchContext.setExitStatus(stop.getExitStatus());
                     //TODO remember restart from stop.getRestart();
                     return null;

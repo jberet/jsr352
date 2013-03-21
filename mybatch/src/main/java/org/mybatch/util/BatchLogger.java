@@ -24,7 +24,6 @@ package org.mybatch.util;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import javax.batch.operations.BatchOperationsRuntimeException;
 import javax.batch.operations.JobStartException;
 import javax.batch.operations.NoSuchJobExecutionException;
 
@@ -117,10 +116,10 @@ public interface BatchLogger extends BasicLogger {
     void possibleSyntaxErrorInProperty(String prop);
 
     @Message(id = 22, value = "The step %s would form a loopback in sequence: %s")
-    BatchOperationsRuntimeException loopbackStep(String stepId, String executedSteps);
+    IllegalStateException loopbackStep(String stepId, String executedSteps);
 
     @Message(id = 23, value = "The requested batch operation %s is not supported in %s")
-    BatchOperationsRuntimeException batchOperationNotSupported(String op, AbstractContext context);
+    IllegalStateException batchOperationNotSupported(String op, AbstractContext context);
 
     @Message(id = 24, value = "Cycles detected in job element inheritance: %s")
     JobStartException cycleInheritance(String inheritingElements);

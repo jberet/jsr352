@@ -18,7 +18,7 @@ package javax.batch.api.partition;
 
 import java.io.Serializable;
 
-import javax.batch.operations.JobOperator.BatchStatus;
+import javax.batch.runtime.BatchStatus;
 
 /**
  * PartitionAnalyzer receives control to process data and final results from

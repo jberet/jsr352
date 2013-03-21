@@ -26,11 +26,9 @@ public interface Metric {
         ROLLBACK_COUNT, READ_SKIP_COUNT, PROCESS_SKIP_COUNT, FILTER_COUNT, 
         WRITE_SKIPCOUNT}
 	/**
-	 * The getName method returns the metric name. The following names
-       * are defined: "readCount", "writeCount", "commitCount", 
-       * "rollbackCount", "readSkipCount", "processSkipCount", "filterCount", 
-       * "writeSkipCount"       
-	 * @return metric name.
+	 * The getType method returns the metric type. 
+	 * 
+	 * @return metric type.
 	 */
 	public MetricType getType(); 
 	/**

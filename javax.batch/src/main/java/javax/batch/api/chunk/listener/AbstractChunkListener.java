@@ -46,11 +46,14 @@ public abstract class AbstractChunkListener implements ChunkListener {
     /**
 	 * Override this method if the ChunkListener will do something before the
 	 * chunk transaction is rolled back. Note afterChunk is not invoked in this case.
+	 * 
+	 * @param ex specifies the exception that
+	 * caused the roll back.
      * 
      * @throws Exception
      *             (or subclass) if an error occurs.
      */
     @Override
-    public void onError() throws Exception {
+    public void onError(Exception e) throws Exception {
     }
 }

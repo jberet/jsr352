@@ -33,7 +33,9 @@ import javax.batch.runtime.JobInstance;
 import org.mybatch.job.Job;
 import org.mybatch.repository.JobRepository;
 
-public class MemoryRepository implements JobRepository {
+public enum MemoryRepository implements JobRepository {
+    INSTANCE;
+
     private final AtomicLong atomicLong = new AtomicLong();
 
     private List<Job> jobs = Collections.synchronizedList(new ArrayList<Job>());
@@ -49,13 +51,21 @@ public class MemoryRepository implements JobRepository {
 
     @Override
     public boolean addJob(Job job) {
-        return jobs.add(job);
+        boolean result = false;
+        synchronized (jobs) {
+            if (!jobs.contains(job)) {
+                result = jobs.add(job);
+            }
+        }
+        return result;
     }
 
     @Override
     public boolean removeJob(String jobId) {
-        Job toRemove = getJob(jobId);
-        return toRemove == null ? false : jobs.remove(toRemove);
+        synchronized (jobs) {
+            Job toRemove = getJob(jobId);
+            return toRemove == null ? false : jobs.remove(toRemove);
+        }
     }
 
     @Override

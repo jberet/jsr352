@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.StepExecution;
 
@@ -41,7 +41,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private JobInstanceImpl jobInstance;
 
-    private List<StepExecution<?>> stepExecutions = new ArrayList<StepExecution<?>>();
+    private List<StepExecution> stepExecutions = new ArrayList<StepExecution>();
 
     private Properties jobParameters;
 
@@ -62,11 +62,11 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     @Override
-    public void setBatchStatus(JobOperator.BatchStatus batchStatus) {
+    public void setBatchStatus(BatchStatus batchStatus) {
         super.setBatchStatus(batchStatus);
-        if (batchStatus != JobOperator.BatchStatus.STARTING &&
-                batchStatus != JobOperator.BatchStatus.STARTED &&
-                batchStatus != JobOperator.BatchStatus.STOPPING) {
+        if (batchStatus != BatchStatus.STARTING &&
+                batchStatus != BatchStatus.STARTED &&
+                batchStatus != BatchStatus.STOPPING) {
             latch.countDown();
         }
     }
@@ -108,11 +108,11 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         return jobParameters;
     }
 
-    public List<StepExecution<?>> getStepExecutions() {
+    public List<StepExecution> getStepExecutions() {
         return Collections.unmodifiableList(this.stepExecutions);
     }
 
-    void addStepExecution(StepExecution<?> stepExecution) {
+    void addStepExecution(StepExecution stepExecution) {
         this.stepExecutions.add(stepExecution);
     }
 }

@@ -24,7 +24,7 @@ package org.mybatch.runtime.runner;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Flow;
 import org.mybatch.runtime.context.AbstractContext;
@@ -49,16 +49,16 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
 
     @Override
     public void run() {
-        batchContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
-        batchContext.getJobContext().setBatchStatus(JobOperator.BatchStatus.STARTED);
+        batchContext.setBatchStatus(BatchStatus.STARTED);
+        batchContext.getJobContext().setBatchStatus(BatchStatus.STARTED);
 
         try {
             runFromHead();
         } catch (Throwable e) {
             LOGGER.failToRunJob(e, flow, "run");
-            batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            batchContext.setBatchStatus(BatchStatus.FAILED);
             for (AbstractContext c : batchContext.getOuterContexts()) {
-                c.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                c.setBatchStatus(BatchStatus.FAILED);
             }
         } finally {
             if (latch != null) {
@@ -66,11 +66,11 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
             }
         }
 
-        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
-            batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
+            batchContext.setBatchStatus(BatchStatus.COMPLETED);
         }
 
-        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.COMPLETED) {
+        if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             String next = flow.getNext();
             if (next == null) {
                 next = resolveControlElements(flow.getTransitionElements());

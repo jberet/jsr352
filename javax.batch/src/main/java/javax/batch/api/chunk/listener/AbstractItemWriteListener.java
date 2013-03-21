@@ -22,12 +22,8 @@ import java.util.List;
 /**
  * The AbstractItemWriteListener provides default implementations of less
  * commonly implemented methods.
- * 
- * @param <T>
- *            specifies the item type written by the ItemWriter paired with this
- *            ItemWriteListener.
  */
-public abstract class AbstractItemWriteListener<T> implements ItemWriteListener<T> {
+public abstract class AbstractItemWriteListener implements ItemWriteListener {
     /**
      * Override this method if the ItemWriteListener will do something before
      * the items are written. The default implementation does nothing.
@@ -38,7 +34,7 @@ public abstract class AbstractItemWriteListener<T> implements ItemWriteListener<
      *             (or subclass) if an error occurs.
      */
     @Override
-    public void beforeWrite(List<T> items) throws Exception {
+    public void beforeWrite(List<Object> items) throws Exception {
     }
 
     /**
@@ -51,7 +47,7 @@ public abstract class AbstractItemWriteListener<T> implements ItemWriteListener<
      *             (or subclass) if an error occurs.
      */
     @Override
-    public void afterWrite(List<T> items) throws Exception {
+    public void afterWrite(List<Object> items) throws Exception {
     }
 
     /**
@@ -67,6 +63,6 @@ public abstract class AbstractItemWriteListener<T> implements ItemWriteListener<
      *             (or subclass) if an error occurs.
      */
     @Override
-    public void onWriteError(List<T> items, Exception ex) throws Exception {
+    public void onWriteError(List<Object> items, Exception ex) throws Exception {
     }
 }

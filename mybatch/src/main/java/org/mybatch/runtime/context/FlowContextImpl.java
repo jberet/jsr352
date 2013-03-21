@@ -22,17 +22,17 @@
 
 package org.mybatch.runtime.context;
 
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Flow;
 import org.mybatch.runtime.FlowExecutionImpl;
 
-public class FlowContextImpl<T> extends AbstractContext<T> {
+public class FlowContextImpl extends AbstractContext {
     private Flow flow;
 
     private FlowExecutionImpl flowExecution;
 
-    public FlowContextImpl(Flow flow, AbstractContext<T>[] outerContexts) {
+    public FlowContextImpl(Flow flow, AbstractContext[] outerContexts) {
         super(flow.getId(), outerContexts);
         this.flow = flow;
         this.classLoader = getJobContext().getClassLoader();
@@ -41,7 +41,7 @@ public class FlowContextImpl<T> extends AbstractContext<T> {
         setUpPropertyResolver().resolve(this.flow);
         //flow has no listeners
 
-        this.flowExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
+        this.flowExecution.setBatchStatus(BatchStatus.STARTING);
     }
 
     public Flow getFlow() {
@@ -52,12 +52,12 @@ public class FlowContextImpl<T> extends AbstractContext<T> {
         return flowExecution;
     }
 
-    public JobOperator.BatchStatus getBatchStatus() {
+    public BatchStatus getBatchStatus() {
         return flowExecution.getBatchStatus();
     }
 
     @Override
-    public void setBatchStatus(JobOperator.BatchStatus status) {
+    public void setBatchStatus(BatchStatus status) {
         flowExecution.setBatchStatus(status);
     }
 

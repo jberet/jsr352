@@ -14,21 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package javax.batch.api.chunk.listener;
 
 /**
  * The AbstractItemProcessListener provides default implementations of less
  * commonly implemented methods.
  * 
- * @param <T>
- *            specifies the item type read by the ItemProcessor paired with this
- *            ItemProcessListener.
- * 
- * @param <R>
- *            specifies the item type returned by the ItemProcessor paired with
- *            this ItemProcessListener.
  */
-public abstract class AbstractItemProcessListener<T, R> implements ItemProcessListener<T, R> {
+public abstract class AbstractItemProcessListener implements ItemProcessListener {
     /**
      * Override this method if the ItemProcessListener will do something before
      * the item is processed. The default implementation does nothing.
@@ -39,7 +33,7 @@ public abstract class AbstractItemProcessListener<T, R> implements ItemProcessLi
      *             (or subclass) if an error occurs.
      */
     @Override
-    public void beforeProcess(T item) throws Exception {
+    public void beforeProcess(Object item) throws Exception {
     }
 
     /**
@@ -54,7 +48,7 @@ public abstract class AbstractItemProcessListener<T, R> implements ItemProcessLi
      *             (or subclass) if an error occurs.
      */
     @Override
-    public void afterProcess(T item, R result) throws Exception {
+    public void afterProcess(Object item, Object result) throws Exception {
     }
 
     /**
@@ -70,6 +64,6 @@ public abstract class AbstractItemProcessListener<T, R> implements ItemProcessLi
      *             (or subclass) if an error occurs.
      */
     @Override
-    public void onProcessError(T item, Exception ex) throws Exception {
+    public void onProcessError(Object item, Exception ex) throws Exception {
     }
 }

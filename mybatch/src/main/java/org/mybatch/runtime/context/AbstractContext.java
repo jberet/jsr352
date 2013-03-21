@@ -22,14 +22,14 @@
 
 package org.mybatch.runtime.context;
 
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Properties;
 import org.mybatch.util.PropertyResolver;
 
-public abstract class AbstractContext<T> {
+public abstract class AbstractContext {
     protected String id;
-    protected T transientUserData;
+    protected Object transientUserData;
     protected ClassLoader classLoader;
 
     /**
@@ -37,11 +37,11 @@ public abstract class AbstractContext<T> {
      * If this is a JobContext type, outerContexts is null (no outer context);
      * if this is a StepContext type directly under a job, outerContexts contains 1 element (the root JobContext)
      */
-    protected AbstractContext<T>[] outerContexts;
+    protected AbstractContext[] outerContexts;
 
-    public abstract void setBatchStatus(JobOperator.BatchStatus status);
+    public abstract void setBatchStatus(BatchStatus status);
 
-    public abstract JobOperator.BatchStatus getBatchStatus();
+    public abstract BatchStatus getBatchStatus();
 
     public abstract void setExitStatus(String status);
 
@@ -58,7 +58,7 @@ public abstract class AbstractContext<T> {
         this.id = id;
     }
 
-    protected AbstractContext(String id, AbstractContext<T>[] outerContexts) {
+    protected AbstractContext(String id, AbstractContext[] outerContexts) {
         this.id = id;
         this.outerContexts = outerContexts;
     }
@@ -67,23 +67,23 @@ public abstract class AbstractContext<T> {
         return id;
     }
 
-    public T getTransientUserData() {
+    public Object getTransientUserData() {
         return transientUserData;
     }
 
-    public void setTransientUserData(T data) {
+    public void setTransientUserData(Object data) {
         this.transientUserData = data;
     }
 
-    public JobContextImpl<T> getJobContext() {
-        return (JobContextImpl<T>) outerContexts[0];
+    public JobContextImpl getJobContext() {
+        return (JobContextImpl) outerContexts[0];
     }
 
     public ClassLoader getClassLoader() {
         return classLoader;
     }
 
-    public AbstractContext<T>[] getOuterContexts() {
+    public AbstractContext[] getOuterContexts() {
         return outerContexts;
     }
 
@@ -94,11 +94,11 @@ public abstract class AbstractContext<T> {
      * @param add          the additional BatchContext; should not be nul
      * @return a newly expanded array of BatchContext
      */
-    public static <D> AbstractContext<D>[] addToContextArray(AbstractContext<D>[] contextArray, AbstractContext<D> add) {
+    public static AbstractContext[] addToContextArray(AbstractContext[] contextArray, AbstractContext add) {
         if (contextArray == null) {
             return new AbstractContext[]{add};
         }
-        AbstractContext<D>[] result = new AbstractContext[contextArray.length + 1];
+        AbstractContext[] result = new AbstractContext[contextArray.length + 1];
         System.arraycopy(contextArray, 0, result, 0, contextArray.length);
         result[contextArray.length] = add;
         return result;
@@ -111,7 +111,7 @@ public abstract class AbstractContext<T> {
         //this job element (job, step, flow, etc) can be directly under job, or under job->split->flow, etc
         org.mybatch.job.Properties props;
         if (outerContexts != null) {
-            for (AbstractContext<T> context : outerContexts) {
+            for (AbstractContext context : outerContexts) {
                 props = context.getProperties2();
                 if (props != null) {
                     resolver.pushJobProperties(props);

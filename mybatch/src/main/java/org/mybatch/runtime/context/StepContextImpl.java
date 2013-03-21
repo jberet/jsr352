@@ -22,11 +22,11 @@
 
 package org.mybatch.runtime.context;
 
-import java.io.Externalizable;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
 import javax.batch.api.listener.StepListener;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.context.StepContext;
 
@@ -36,23 +36,23 @@ import org.mybatch.job.Step;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.util.BatchUtil;
 
-public class StepContextImpl<T, P extends Externalizable> extends AbstractContext<T> implements StepContext<T, P> {
+public class StepContextImpl extends AbstractContext implements StepContext {
     private Step step;
-    private StepExecutionImpl<P> stepExecution;
+    private StepExecutionImpl stepExecution;
     private Exception exception;
 
     private StepListener[] stepListeners = new StepListener[0];
 
-    public StepContextImpl(Step step, AbstractContext<T>[] outerContexts) {
+    public StepContextImpl(Step step, AbstractContext[] outerContexts) {
         super(step.getId(), outerContexts);
         this.step = step;
         this.classLoader = getJobContext().getClassLoader();
         setUpPropertyResolver().resolve(this.step);
         createStepListeners();
 
-        this.stepExecution = new StepExecutionImpl<P>(getJobContext().getJobRepository().nextUniqueId(),
+        this.stepExecution = new StepExecutionImpl(getJobContext().getJobRepository().nextUniqueId(),
                 getJobContext().getJobExecution(), id);
-        this.stepExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
+        this.stepExecution.setBatchStatus(BatchStatus.STARTING);
     }
 
     public Step getStep() {
@@ -63,7 +63,7 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
         return stepListeners;
     }
 
-    public StepExecutionImpl<P> getStepExecution() {
+    public StepExecutionImpl getStepExecution() {
         return this.stepExecution;
     }
 
@@ -73,12 +73,12 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
     }
 
     @Override
-    public JobOperator.BatchStatus getBatchStatus() {
+    public BatchStatus getBatchStatus() {
         return stepExecution.getBatchStatus();
     }
 
     @Override
-    public void setBatchStatus(JobOperator.BatchStatus status) {
+    public void setBatchStatus(BatchStatus status) {
         stepExecution.setBatchStatus(status);
     }
 
@@ -94,7 +94,7 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
 
     @Override
     public long getStepExecutionId() {
-        return stepExecution.getExecutionId();
+        return stepExecution.getStepExecutionId();
     }
 
     @Override
@@ -108,12 +108,12 @@ public class StepContextImpl<T, P extends Externalizable> extends AbstractContex
     }
 
     @Override
-    public P getPersistentUserData() {
+    public Serializable getPersistentUserData() {
         return stepExecution.getUserPersistentData();  //TODO UserPersistence or PersistentUser?
     }
 
     @Override
-    public void setPersistentUserData(P data) {
+    public void setPersistentUserData(Serializable data) {
         stepExecution.setUserPersistentData(data);
     }
 

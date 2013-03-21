@@ -22,7 +22,7 @@
 
 package org.mybatch.testapps.split;
 
-import javax.batch.annotation.BatchProperty;
+import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 import javax.inject.Named;
 

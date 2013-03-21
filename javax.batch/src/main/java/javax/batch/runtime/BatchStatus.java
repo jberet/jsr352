@@ -14,32 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package javax.batch.operations;
+package javax.batch.runtime;
 
-public class NoSuchJobExecutionException extends Exception {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	public NoSuchJobExecutionException() {
-		// TODO Auto-generated constructor stub
-	}
-
-	public NoSuchJobExecutionException(String message) {
-		super(message);
-		// TODO Auto-generated constructor stub
-	}
-
-	public NoSuchJobExecutionException(Throwable cause) {
-		super(cause);
-		// TODO Auto-generated constructor stub
-	}
-
-	public NoSuchJobExecutionException(String message, Throwable cause) {
-		super(message, cause);
-		// TODO Auto-generated constructor stub
-	}
-
-}
+/**
+* BatchStatus enum defines the batch status values
+* possible for a job.
+*/
+public enum BatchStatus {STARTING, STARTED, STOPPING, 
+STOPPED, FAILED, COMPLETED, ABANDONED }

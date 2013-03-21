@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package javax.batch.api.chunk.listener;
 
 import java.util.List;
@@ -21,10 +22,8 @@ import java.util.List;
 /**
  * ItemWriteListener intercepts item writer processing.
  * 
- * @param <T>
- *            specifies the type processed by an item reader.
  */
-public interface ItemWriteListener<T> {
+public interface ItemWriteListener {
 
     /**
      * The beforeWrite method receives control before an item writer is called
@@ -36,7 +35,7 @@ public interface ItemWriteListener<T> {
      * @throws Exception
      *             is thrown if an error occurs.
      */
-    public void beforeWrite(List<T> items) throws Exception;
+    public void beforeWrite(List<Object> items) throws Exception;
 
     /**
      * The afterWrite method receives control after an item writer writes its
@@ -48,7 +47,7 @@ public interface ItemWriteListener<T> {
      * @throws Exception
      *             is thrown if an error occurs.
      */
-    public void afterWrite(List<T> items) throws Exception;
+    public void afterWrite(List<Object> items) throws Exception;
 
     /**
      * The onWriteError method receives control after an item writer writeItems
@@ -62,5 +61,5 @@ public interface ItemWriteListener<T> {
      * @throws Exception
      *             is thrown if an error occurs.
      */
-    public void onWriteError(List<T> items, Exception ex) throws Exception;
+    public void onWriteError(List<Object> items, Exception ex) throws Exception;
 }

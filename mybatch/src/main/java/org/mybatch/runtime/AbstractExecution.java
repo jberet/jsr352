@@ -23,14 +23,14 @@
 package org.mybatch.runtime;
 
 import java.util.Date;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 public abstract class AbstractExecution {
     protected long startTime;
     protected long endTime;
 
     protected String exitStatus;
-    protected JobOperator.BatchStatus batchStatus;
+    protected BatchStatus batchStatus;
 
     public Date getStartTime() {
         return new Date(startTime);
@@ -58,7 +58,7 @@ public abstract class AbstractExecution {
         return null;
     }
 
-    public JobOperator.BatchStatus getBatchStatus() {
+    public BatchStatus getBatchStatus() {
         return batchStatus;
     }
 
@@ -66,7 +66,7 @@ public abstract class AbstractExecution {
         this.exitStatus = exitStatus;
     }
 
-    public void setBatchStatus(JobOperator.BatchStatus batchStatus) {
+    public void setBatchStatus(BatchStatus batchStatus) {
         this.batchStatus = batchStatus;
     }
 

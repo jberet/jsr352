@@ -50,7 +50,7 @@ import org.mybatch.job.Job;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.metadata.ArchiveXmlLoader;
 import org.mybatch.repository.JobRepository;
-import org.mybatch.repository.impl.MemoryRepository;
+import org.mybatch.repository.JobRepositoryFactory;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.JobInstanceImpl;
 import org.mybatch.runtime.context.JobContextImpl;
@@ -61,13 +61,12 @@ import org.mybatch.util.ConcurrencyService;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class JobOperatorImpl implements JobOperator {
-    //TODO use factory
-    private JobRepository repository = new MemoryRepository();
     private ArtifactFactory artifactFactory = new SimpleArtifactFactory();
     private Map<Long, Future<?>> jobExecutionResults = new HashMap<Long, Future<?>>();
 
     @Override
     public long start(String jobXMLName, Properties jobParameters) throws JobStartException, JobSecurityException {
+        JobRepository repository = JobRepositoryFactory.getJobRepository();
         ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
         Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, Job.class, classLoader);
 
@@ -157,11 +156,11 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public JobExecution getJobExecution(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
-        return repository.getJobExecution(executionId);
+        return JobRepositoryFactory.getJobRepository().getJobExecution(executionId);
     }
 
     @Override
-    public List<StepExecution<?>> getStepExecutions(long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
+    public List<StepExecution> getStepExecutions(long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
         JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution (jobExecutionId);
         return jobExecution.getStepExecutions();
     }

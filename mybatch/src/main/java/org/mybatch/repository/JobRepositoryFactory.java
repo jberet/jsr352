@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2012, Red Hat, Inc., and individual contributors
+ * Copyright 2013, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -20,30 +20,16 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.mybatch.testapps.flow;
+package org.mybatch.repository;
 
-import javax.batch.api.BatchProperty;
-import javax.inject.Inject;
-import javax.inject.Named;
+import org.mybatch.repository.impl.MemoryRepository;
 
-import org.junit.Assert;
-import org.mybatch.testapps.common.Batchlet0;
+public final class JobRepositoryFactory {
+    private JobRepositoryFactory() {
 
-@Named
-public class Batchlet1 extends Batchlet0 {
-    @Inject
-    @BatchProperty(name = "reference-step-prop")
-    private String referencingStepProp;
+    }
 
-    @Override
-    public String process() throws Exception {
-        String result = super.process();
-
-        String stepToVerify = "step1";
-        if (getStepContext().getStepName().equals(stepToVerify)) {
-            Assert.assertEquals("step-prop", referencingStepProp);
-        }
-
-        return result;
+    public static JobRepository getJobRepository() {
+        return MemoryRepository.INSTANCE;
     }
 }

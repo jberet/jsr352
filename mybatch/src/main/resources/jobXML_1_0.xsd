@@ -93,9 +93,7 @@
 
 	<xs:complexType name="Split">
 		<xs:sequence>
-			<xs:element name="flow" type="jsl:Flow" minOccurs="0"
-				maxOccurs="unbounded" />
-			<xs:group ref="jsl:TransitionElements" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="flow" type="jsl:Flow" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 		<xs:attribute name="id" use="required" type="xs:ID" />
 		<xs:attribute name="next" use="optional" type="xs:string" />

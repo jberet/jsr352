@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.batch.api.listener.JobListener;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.context.JobContext;
 
 import org.mybatch.creation.ArtifactFactory;
@@ -42,7 +42,7 @@ import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
 
-public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<T> {
+public class JobContextImpl extends AbstractContext implements JobContext {
     private Job job;
     private JobExecutionImpl jobExecution;
 
@@ -66,7 +66,7 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
 
         setUpPropertyResolver().resolve(job);
         createJobListeners();
-        jobExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
+        jobExecution.setBatchStatus(BatchStatus.STARTING);
     }
 
     public LinkedList<Step> getExecutedSteps() {
@@ -115,7 +115,7 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
     }
 
     @Override
-    public JobOperator.BatchStatus getBatchStatus() {
+    public BatchStatus getBatchStatus() {
         return jobExecution.getBatchStatus();
     }
 
@@ -125,7 +125,7 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
     }
 
     @Override
-    public void setBatchStatus(JobOperator.BatchStatus status) {
+    public void setBatchStatus(BatchStatus status) {
         jobExecution.setBatchStatus(status);
     }
 
@@ -135,7 +135,7 @@ public class JobContextImpl<T> extends AbstractContext<T> implements JobContext<
     }
 
     @Override
-    public JobContextImpl<T> getJobContext() {
+    public JobContextImpl getJobContext() {
         return this;
     }
 

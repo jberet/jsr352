@@ -14,42 +14,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package javax.batch.api.chunk.listener;
+
 /**
- * The AbstractItemReadListener provides default 
- * implementations of less commonly implemented methods.
- * 
- * @param <T> specifies the item type read by the 
- * ItemReader paired with this ItemReadListener. 
+ * The AbstractItemReadListener provides default implementations of less
+ * commonly implemented methods.
  */
-public abstract class AbstractItemReadListener<T> implements
-		ItemReadListener<T> {
-	/**
-	 * Override this method if the ItemReadListener
-	 * will do something before the item is read.  
-	 * The default implementation does nothing. 
-	 * 
-	 * @throws Exception (or subclass) if an error occurs.
-	 */	
-	@Override
-	public void beforeRead() throws Exception {}
-	/**
-	 * Override this method if the ItemReadListener
-	 * will do something after the item is read.  
-	 * The default implementation does nothing. 
-	 * 
-	 * @throws Exception (or subclass) if an error occurs.
-	 */	
-	@Override
-	public void afterRead(T item) throws Exception {}
-	/**
-	 * Override this method if the ItemReadListener
-	 * will do something when the ItemReader readItem
-	 * method throws an exception.  
-	 * The default implementation does nothing. 
-	 * 
-	 * @throws Exception (or subclass) if an error occurs.
-	 */	
-	@Override
-	public void onReadError(Exception ex) throws Exception {}
+public abstract class AbstractItemReadListener implements ItemReadListener {
+    /**
+     * Override this method if the ItemReadListener will do something before the
+     * item is read. The default implementation does nothing.
+     * 
+     * @throws Exception
+     *             (or subclass) if an error occurs.
+     */
+    @Override
+    public void beforeRead() throws Exception {
+    }
+
+    /**
+     * Override this method if the ItemReadListener will do something after the
+     * item is read. The default implementation does nothing.
+     * 
+     * @throws Exception
+     *             (or subclass) if an error occurs.
+     */
+    @Override
+    public void afterRead(Object item) throws Exception {
+    }
+
+    /**
+     * Override this method if the ItemReadListener will do something when the
+     * ItemReader readItem method throws an exception. The default
+     * implementation does nothing.
+     * 
+     * @throws Exception
+     *             (or subclass) if an error occurs.
+     */
+    @Override
+    public void onReadError(Exception ex) throws Exception {
+    }
 }

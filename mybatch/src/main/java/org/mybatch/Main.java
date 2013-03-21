@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.operations.JobSecurityException;
 import javax.batch.operations.JobStartException;
+import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchRuntime;
 
 import org.mybatch.runtime.JobExecutionImpl;
@@ -35,7 +36,7 @@ import org.mybatch.util.ConcurrencyService;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class Main {
-    public static void main(String[] args) throws JobStartException, JobSecurityException {
+    public static void main(String[] args) throws JobStartException, JobSecurityException, NoSuchJobExecutionException {
         if (args.length == 0) {
             usage(args);
         }

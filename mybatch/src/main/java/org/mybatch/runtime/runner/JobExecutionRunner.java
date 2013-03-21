@@ -24,7 +24,7 @@ package org.mybatch.runtime.runner;
 
 import java.util.List;
 import javax.batch.api.listener.JobListener;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Job;
 import org.mybatch.runtime.context.JobContextImpl;
@@ -45,7 +45,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
 
     @Override
     public void run() {
-        batchContext.setBatchStatus(JobOperator.BatchStatus.STARTED);
+        batchContext.setBatchStatus(BatchStatus.STARTED);
         try {
             // run job listeners beforeJob()
             for (JobListener l : batchContext.getJobListeners()) {
@@ -53,7 +53,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
                     l.beforeJob();
                 } catch (Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, l, "beforeJob");
-                    batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
                     return;
                 }
             }
@@ -65,18 +65,18 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
                     l.afterJob();
                 } catch (Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, l, "afterJob");
-                    batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
                     return;
                 }
             }
 
         } catch (Throwable e) {
             BatchLogger.LOGGER.failToRunJob(e, job, "run");
-            batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            batchContext.setBatchStatus(BatchStatus.FAILED);
         }
 
-        if (batchContext.getBatchStatus() == JobOperator.BatchStatus.STARTED) {
-            batchContext.setBatchStatus(JobOperator.BatchStatus.COMPLETED);
+        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
+            batchContext.setBatchStatus(BatchStatus.COMPLETED);
         }
     }
 

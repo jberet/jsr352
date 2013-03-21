@@ -24,25 +24,25 @@ package org.mybatch.runtime.context;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Split;
 import org.mybatch.runtime.FlowExecutionImpl;
 import org.mybatch.runtime.SplitExecutionImpl;
 
-public class SplitContextImpl<T> extends AbstractContext<T> {
+public class SplitContextImpl extends AbstractContext {
     private Split split;
 
     private SplitExecutionImpl splitExecution;
 
     private List<FlowExecutionImpl> flowExecutions = new ArrayList<FlowExecutionImpl>();
 
-    public SplitContextImpl(Split split, AbstractContext<T>[] outerContexts) {
+    public SplitContextImpl(Split split, AbstractContext[] outerContexts) {
         super(split.getId(), outerContexts);
         this.split = split;
         this.classLoader = getJobContext().getClassLoader();
         this.splitExecution = new SplitExecutionImpl(split.getId());
-        splitExecution.setBatchStatus(JobOperator.BatchStatus.STARTING);
+        splitExecution.setBatchStatus(BatchStatus.STARTING);
     }
 
     public Split getSplit() {
@@ -54,12 +54,12 @@ public class SplitContextImpl<T> extends AbstractContext<T> {
     }
 
     @Override
-    public JobOperator.BatchStatus getBatchStatus() {
+    public BatchStatus getBatchStatus() {
         return splitExecution.getBatchStatus();
     }
 
     @Override
-    public void setBatchStatus(JobOperator.BatchStatus status) {
+    public void setBatchStatus(BatchStatus status) {
         splitExecution.setBatchStatus(status);
     }
 

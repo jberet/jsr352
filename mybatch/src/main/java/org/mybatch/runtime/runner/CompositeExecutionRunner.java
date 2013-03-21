@@ -25,7 +25,7 @@ package org.mybatch.runtime.runner;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import javax.batch.api.Decider;
-import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 
 import org.mybatch.job.Decision;
@@ -144,7 +144,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             runJobElement(next, precedingStepExecutions);
         } catch (Exception e) {
             BatchLogger.LOGGER.failToRunJob(e, decider, "decide");
-            batchContext.setBatchStatus(JobOperator.BatchStatus.FAILED);
+            batchContext.setBatchStatus(BatchStatus.FAILED);
             return;
         }
     }

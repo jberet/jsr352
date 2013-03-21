@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 International Business Machines Corp.
+ * Copyright 2013 International Business Machines Corp.
  * 
  * See the NOTICE file distributed with this work for additional information
  * regarding copyright ownership. Licensed under the Apache License, 
@@ -14,32 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package javax.batch.operations;
 
-public class JobExecutionIsRunningException extends
-		BatchOperationsRuntimeException {
+public class JobExecutionIsRunningException extends Exception {
+
 	/**
-	 * JobExecutionNotRunningException is thrown when a JobOperator operation
-	 * that applies to a running job execution specifies a job execution that is
-	 * not running.
+	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public JobExecutionIsRunningException(final Throwable th,
-			final String localizedMessage) {
-		super(th, localizedMessage);
-	}
-	
-	public JobExecutionIsRunningException(final String localizedMessage) {
-		super(localizedMessage);
-	}
-	
-	public JobExecutionIsRunningException(final Throwable th) {
-		super(th);
-	}
-	
 	public JobExecutionIsRunningException() {
-		super();
+		// TODO Auto-generated constructor stub
 	}
+
+	public JobExecutionIsRunningException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
+
+	public JobExecutionIsRunningException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
+	}
+
+	public JobExecutionIsRunningException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
+	}
+
 }

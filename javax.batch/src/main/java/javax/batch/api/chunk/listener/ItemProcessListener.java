@@ -14,53 +14,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package javax.batch.api.chunk.listener;
 
 /**
  * ItemProcessListener intercepts item processing.
  * 
- * @param <T>
- *            specifies the type processed by an item processor.
- * @param <R>
- *            specifies the type returned by an item processor.
  */
-public interface ItemProcessListener<T, R> {
-	/**
-	 * The beforeProcess method that receives control before an item processor
-	 * is called to process the next item. The method receives the item to be
-	 * processed as an input.
-	 * 
-	 * @param item
-	 *            specifies the item about to be processed.
-	 * @throws Exception
-	 *             if an error occurs.
-	 */
-	public void beforeProcess(T item) throws Exception;
+public interface ItemProcessListener {
 
-	/**
-	 * The afterProcess method that receives control after an item processor
-	 * processes an item. The method receives the item processed and the result
-	 * item as an input.
-	 * 
-	 * @param item
-	 *            specifies the item about to be processed.
-	 * @param result
-	 *            specifies the item to pass to the item writer.
-	 * @throws Exception
-	 *             if an error occurs.
-	 */
-	public void afterProcess(T item, R result) throws Exception;
+    /**
+     * The beforeProcess method receives control before an item processor is
+     * called to process the next item. The method receives the item to be
+     * processed as an input.
+     * 
+     * @param item
+     *            specifies the item about to be processed.
+     * @throws Exception
+     *             if an error occurs.
+     */
+    public void beforeProcess(Object item) throws Exception;
 
-	/**
-	 * The onProcessError a method that receives control after an item processor
-	 * throws an exception. This method receives the exception and the input
-	 * item.
-	 * 
-	 * @param item
-	 *            specifies the item about to be processed.
-	 * @param ex
-	 *            specifies the exception thrown by the item processor.
-	 * @throws Exception
-	 */
-	public void onProcessError(T item, Exception ex) throws Exception;
+    /**
+     * The afterProcess method receives control after an item processor
+     * processes an item. The method receives the item processed and the result
+     * item as an input.
+     * 
+     * @param item
+     *            specifies the item about to be processed.
+     * @param result
+     *            specifies the item to pass to the item writer.
+     * @throws Exception
+     *             if an error occurs.
+     */
+    public void afterProcess(Object item, Object result) throws Exception;
+
+    /**
+     * The afterProcess method receives control after an item processor
+     * processes an item. The method receives the item processed and the result
+     * item as an input.
+     * 
+     * @param item
+     *            specifies the item about to be processed.
+     * @param ex
+     *            specifies the exception thrown by the item processor.
+     * @throws Exception
+     */
+    public void onProcessError(Object item, Exception ex) throws Exception;
+
 }

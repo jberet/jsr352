@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package javax.batch.api.chunk;
 
 /**
@@ -21,19 +22,21 @@ package javax.batch.api.chunk;
  * produce an output item.
  * 
  */
-public interface ItemProcessor<T, R> {
-	/**
-	 * The processItem method is part of a chunk step. It accepts an input item
-	 * from an item reader and returns an item that gets passed onto the item
-	 * writer. If processItem returns null, no value is passed onto the chunk's
-	 * item writer. This effectively enables processItem to filter out unwanted
-	 * input items.
-	 * 
-	 * @param item
-	 *            specifies the input item to process.
-	 * @return output item to write.
-	 * @throws Exception
-	 *             thrown for any errors.
-	 */
-	public R processItem(T item) throws Exception;
+public interface ItemProcessor {
+
+    /**
+     * The processItem method is part of a chunk step. It accepts an input item
+     * from an item reader and returns an item that gets passed onto the item
+     * writer. Returning null indicates that the item should not be continued to
+     * be processed. This effectively enables processItem to filter out unwanted
+     * input items.
+     * 
+     * @param item
+     *            specifies the input item to process.
+     * @return output item to write.
+     * @throws Exception
+     *             thrown for any errors.
+     */
+    public Object processItem(Object item) throws Exception;
+
 }

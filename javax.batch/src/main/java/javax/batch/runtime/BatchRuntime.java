@@ -16,12 +16,19 @@
  */
 package javax.batch.runtime;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.batch.operations.JobOperator;
 
+/**
+ * BatchRuntime represents the JSR 352 Batch Runtime.
+ * It provides factory access to the JobOperator interface.
+ *
+ */
 public class BatchRuntime {
 
     private final static String sourceClass = BatchRuntime.class.getName();
@@ -30,25 +37,33 @@ public class BatchRuntime {
 	/**
 	* The getJobOperator factory method returns
 	* an instance of the JobOperator interface.
-	* Repeated calls to this method returns the
-	* same instance.
+	*
 	* @return JobOperator instance.
 	*/
 	
 	public static JobOperator getJobOperator() {
 		
-		JobOperator operator = null;
-		ServiceLoader<JobOperator> loader = ServiceLoader.load(JobOperator.class);
-		for (JobOperator provider : loader) {
-			if (provider != null) {
-				if (logger.isLoggable(Level.FINE)) {
-					logger.fine("Loaded BatchContainerServiceProvider with className = " + provider.getClass().getCanonicalName());
-				}
-				// Use first one
-				operator = provider;
-				break;
-			}
-		}
+		
+		JobOperator operator = AccessController.doPrivileged(new PrivilegedAction<JobOperator> () {
+            public JobOperator run() {
+                
+            	ServiceLoader<JobOperator> loader = ServiceLoader.load(JobOperator.class);
+            	JobOperator returnVal = null;
+            	for (JobOperator provider : loader) {
+        			if (provider != null) {
+        				if (logger.isLoggable(Level.FINE)) {
+        					logger.fine("Loaded BatchContainerServiceProvider with className = " + provider.getClass().getCanonicalName());
+        				}
+        				// Use first one
+        				returnVal = provider;
+        				break;
+        			}
+        		}
+            	
+                return returnVal;
+            }
+        });
+		
 
 		if (operator == null) {
 			if (logger.isLoggable(Level.WARNING)) {
