@@ -82,9 +82,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                                 fieldVal = BatchUtil.getBatchProperty(batchProps, propName);
                             }
                         }
-                        if (fieldVal != null) {
-                            doInjection(obj, f, fieldVal);
-                        }
+                        doInjection(obj, f, fieldVal);
                     }
                 }
             }
@@ -93,9 +91,6 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
     }
 
     private void doInjection(final Object obj, final Field field, final Object val) throws Exception {
-        if (val == null) {
-            return;
-        }
         if (System.getSecurityManager() == null) {
             if (!field.isAccessible()) {
                 field.setAccessible(true);

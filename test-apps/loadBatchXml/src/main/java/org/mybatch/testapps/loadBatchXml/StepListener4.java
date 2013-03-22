@@ -36,7 +36,7 @@ public class StepListener4 extends AbstractStepListener implements StepListener 
     private String stepProp;  //nothing is injected
 
     @Inject @BatchProperty(name = "listener-prop")
-    private String listenerProp = "default";  //nothing to inject, keep the field default value
+    private String listenerProp = "default";  //unmatched property is set to null
 
     @Inject @BatchProperty(name = "reference-job-prop")
     private Object referencedProp;  //nothing to inject
@@ -54,7 +54,7 @@ public class StepListener4 extends AbstractStepListener implements StepListener 
     public void beforeStep() throws Exception {
         System.out.printf("In beforeStep of %s%n", this);
         Assert.assertEquals(null, stepProp);
-        Assert.assertEquals("default", listenerProp);
+        Assert.assertEquals(null, listenerProp);
         Assert.assertEquals(null, referencedProp);
         Assert.assertEquals(null, referencedStepProp);
 

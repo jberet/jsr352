@@ -23,7 +23,10 @@
 package org.mybatch.operations;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -40,6 +43,7 @@ import javax.batch.operations.JobStartException;
 import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.operations.NoSuchJobInstanceException;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
@@ -70,7 +74,6 @@ public class JobOperatorImpl implements JobOperator {
         ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
         Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, Job.class, classLoader);
 
-        repository.addJob(jobDefined);
         ApplicationMetaData appData;
         try {
             appData = new ApplicationMetaData(classLoader);
@@ -110,22 +113,51 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public Set<String> getJobNames() throws JobSecurityException {
-        return null;
+        JobRepository repository = JobRepositoryFactory.getJobRepository();
+        Set<String> result = new HashSet<String>();
+        for (Job e : repository.getJobs()) {
+            result.add(e.getId());
+        }
+        return result;
     }
 
     @Override
     public int getJobInstanceCount(String jobName) throws NoSuchJobException, JobSecurityException {
-        return 0;
+        JobRepository repository = JobRepositoryFactory.getJobRepository();
+        int count = 0;
+        for (JobInstance e : repository.getJobInstances()) {
+            if (e.getJobName().equals(jobName)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Override
     public List<JobInstance> getJobInstances(String jobName, int start, int count) throws NoSuchJobException, JobSecurityException {
-        return null;
+        LinkedList<JobInstance> result = new LinkedList<JobInstance>();
+        JobRepository repository = JobRepositoryFactory.getJobRepository();
+        for (JobInstance e : repository.getJobInstances()) {
+            if (e.getJobName().equals(jobName)) {
+                if (result.size() < count) {
+                    result.addFirst(e);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
     public List<Long> getRunningExecutions(String jobName) throws NoSuchJobException, JobSecurityException {
-        return null;
+        JobRepository repository = JobRepositoryFactory.getJobRepository();
+        List<Long> result = new ArrayList<Long>();
+        for (JobExecution e : repository.getJobExecutions()) {
+            BatchStatus s = e.getBatchStatus();
+            if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
+                result.add(e.getExecutionId());
+            } 
+        }
+        return result;
     }
 
     @Override

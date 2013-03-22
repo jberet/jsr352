@@ -99,6 +99,10 @@ public abstract class AbstractRunner<C extends AbstractContext> {
                 if (matches(exitStatus, fail.getOn())) {
                     batchContext.setBatchStatus(BatchStatus.FAILED);
                     batchContext.setExitStatus(fail.getExitStatus());
+                    for (AbstractContext c : batchContext.getOuterContexts()) {
+                        c.setBatchStatus(BatchStatus.FAILED);
+                        c.setExitStatus(fail.getExitStatus());
+                    }
                     return null;
                 }
             } else {  //stop
@@ -107,6 +111,10 @@ public abstract class AbstractRunner<C extends AbstractContext> {
                     batchContext.setBatchStatus(BatchStatus.STOPPED);
                     batchContext.setExitStatus(stop.getExitStatus());
                     //TODO remember restart from stop.getRestart();
+                    for (AbstractContext c : batchContext.getOuterContexts()) {
+                        c.setBatchStatus(BatchStatus.STOPPED);
+                        c.setExitStatus(stop.getExitStatus());
+                    }
                     return null;
                 }
             }

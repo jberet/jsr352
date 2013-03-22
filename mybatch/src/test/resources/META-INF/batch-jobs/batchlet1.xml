@@ -22,9 +22,7 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="batchlet1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML_1_0.xsd">
+<job id="batchlet1" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
     <properties>
         <property name="job-prop-3" value="#{jobProperties['job-prop-2']}"></property>
         <property name="job-prop-2" value="#{jobProperties['job-prop']}"></property>
@@ -38,7 +36,7 @@
             <property name="unresolved-property-ref" value="#{jobProperties['xxxxxxxxxxxx']}"></property>
         </properties>
         <batchlet ref="Batchlet1">
-            <properties merge="true">
+            <properties>
                 <property name="Batchlet1" value="Batchlet1"/>
                 <property name="defaultName" value="defaultName"/>
             </properties>

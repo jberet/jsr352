@@ -22,9 +22,7 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="self-next-attribute" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML_1_0.xsd">
+<job id="self-next-attribute" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
     <step id="step1" next="step1">
         <batchlet ref="Batchlet0"/>
     </step>

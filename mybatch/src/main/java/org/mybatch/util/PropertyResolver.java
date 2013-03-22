@@ -41,10 +41,10 @@ import org.mybatch.job.Step;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public final class PropertyResolver {
-    protected static final String jobParametersToken    = "jobParameters";
-    protected static final String jobPropertiesToken    = "jobProperties";
+    protected static final String jobParametersToken = "jobParameters";
+    protected static final String jobPropertiesToken = "jobProperties";
     protected static final String systemPropertiesToken = "systemProperties";
-    protected static final String partitionPlanToken    = "partitionPlan";
+    protected static final String partitionPlanToken = "partitionPlan";
 
     private static final String prefix = "#{";
     private static final String defaultValuePrefix = "?:";
@@ -81,6 +81,20 @@ public final class PropertyResolver {
      * @param job the job element whose properties need to be resolved
      */
     public void resolve(Job job) {
+        String oldVal, newVal;
+        oldVal = job.getRestartable();
+        if (oldVal != null) {
+            newVal = resolve(oldVal);
+            if (!oldVal.equals(newVal)) {
+                job.setRestartable(newVal);
+            }
+        }
+        oldVal = job.getId();
+        newVal = resolve(oldVal);
+        if (!oldVal.equals(newVal)) {
+            job.setId(newVal);
+        }
+
         //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
         resolve(job.getProperties(), false);
         resolve(job.getListeners());
@@ -95,6 +109,32 @@ public final class PropertyResolver {
      * @param step the step element whose properties need to be resolved
      */
     public void resolve(Step step) {
+        String oldVal = step.getId();
+        String newVal = resolve(oldVal);
+        if (!oldVal.equals(newVal)) {
+            step.setId(newVal);
+        }
+        oldVal = step.getNext();
+        if (oldVal != null) {
+            newVal = resolve(oldVal);
+            if (!oldVal.equals(newVal)) {
+                step.setNext(newVal);
+            }
+        }
+        oldVal = step.getAllowStartIfComplete();
+        if (oldVal != null) {
+            newVal = resolve(oldVal);
+            if (!oldVal.equals(newVal)) {
+                step.setAllowStartIfComplete(newVal);
+            }
+        }
+        oldVal = step.getStartLimit();
+        if (oldVal != null) {
+            newVal = resolve(oldVal);
+            if (!oldVal.equals(newVal)) {
+                step.setStartLimit(newVal);
+            }
+        }
         //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
         resolve(step.getProperties(), false);
         resolve(step.getListeners());

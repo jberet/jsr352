@@ -55,7 +55,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         }
 
         batchContext.setBatchStatus(BatchStatus.STARTED);
-        batchContext.getJobContext().setBatchStatus(BatchStatus.STARTED);
 
         try {
             Chunk chunk = step.getChunk();
@@ -112,8 +111,15 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
         }
 
-        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
-            batchContext.setBatchStatus(BatchStatus.COMPLETED);
+        BatchStatus stepStatus = batchContext.getBatchStatus();
+        switch (stepStatus) {
+            case STARTED:
+                batchContext.setBatchStatus(BatchStatus.COMPLETED);
+                break;
+            case FAILED:
+                for (AbstractContext e : batchContext.getOuterContexts()) {
+                    e.setBatchStatus(BatchStatus.FAILED);
+                }
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {

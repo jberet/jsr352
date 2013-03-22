@@ -22,14 +22,12 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="loopback-split-self" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.net/projects/jbatch/sources/jsr-352-git-repository/content/JSR352.JobXML.Model/src/main/resources/jobXML_1_0.xsd">
+<job id="loopback-split-self" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
     <step id="step0" next="split1">
         <batchlet ref="Batchlet0"/>
     </step>
 
-    <split id="split1">
+    <split id="split1" next="step0">
         <flow id="flow1">
             <step id="step1">
                 <batchlet ref="Batchlet0"/>
@@ -40,6 +38,5 @@
                 <batchlet ref="Batchlet0"/>
             </step>
         </flow>
-        <next on="*" to="step0"/>
     </split>
 </job>
