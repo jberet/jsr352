@@ -16,7 +16,7 @@
  */
 package javax.batch.operations;
 
-public class NoSuchJobInstanceException extends Exception {
+public class NoSuchJobInstanceException extends BatchRuntimeException {
 
 	/**
 	 * 

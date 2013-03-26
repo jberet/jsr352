@@ -75,13 +75,13 @@ public abstract class AbstractRunner<C extends AbstractContext> {
     /**
      * Resolves a list of next, end, stop and fail elements to determine the next job element.
      *
-     * @param controlElements the group of control elements, i.e., next, end, stop and fail
+     * @param transitionElements the group of control elements, i.e., next, end, stop and fail
      * @return the ref name of the next execution element
      */
-    protected String resolveControlElements(List<?> controlElements) {
+    protected String resolveTransitionElements(List<?> transitionElements) {
         String result = null;
         String exitStatus = batchContext.getExitStatus();
-        for (Object e : controlElements) {  //end, fail. next, stop
+        for (Object e : transitionElements) {  //end, fail. next, stop
             if (e instanceof Next) {
                 Next next = (Next) e;
                 if (matches(exitStatus, next.getOn())) {
@@ -92,6 +92,10 @@ public abstract class AbstractRunner<C extends AbstractContext> {
                 if (matches(exitStatus, end.getOn())) {
                     batchContext.setBatchStatus(BatchStatus.COMPLETED);
                     batchContext.setExitStatus(end.getExitStatus());
+                    for (AbstractContext c : batchContext.getOuterContexts()) {
+                        c.setBatchStatus(BatchStatus.COMPLETED);
+                        c.setExitStatus(end.getExitStatus());
+                    }
                     return null;
                 }
             } else if (e instanceof Fail) {

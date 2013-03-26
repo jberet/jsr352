@@ -16,7 +16,7 @@
  */
 package javax.batch.operations;
 
-public class JobRestartException extends Exception {
+public class JobRestartException extends BatchRuntimeException {
 	/**
 	 * JobRestartException is thrown when an error occurs during the JobOperator
 	 * restart operation.

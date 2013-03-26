@@ -16,7 +16,7 @@
  */
 package javax.batch.operations;
 
-public class JobExecutionNotMostRecentException extends Exception {
+public class JobExecutionNotMostRecentException extends BatchRuntimeException {
 
 	/**
 	 * 

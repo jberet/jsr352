@@ -36,14 +36,13 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     public BatchletRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, Batchlet batchlet) {
         super(stepContext, enclosingRunner);
         this.batchlet = batchlet;
-        this.id = batchlet.getRef();
     }
 
     @Override
     public Object call() {
         try {
             javax.batch.api.Batchlet batchletObj =
-                    (javax.batch.api.Batchlet) batchContext.getJobContext().createArtifact(id, batchlet.getProperties(), batchContext);
+                    (javax.batch.api.Batchlet) batchContext.getJobContext().createArtifact(batchlet.getRef(), batchlet.getProperties(), batchContext);
             String exitStatus = batchletObj.process();
             batchContext.setExitStatus(exitStatus);
         } catch (Throwable e) {

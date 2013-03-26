@@ -16,7 +16,7 @@
  */
 package javax.batch.operations;
 
-public class JobExecutionIsRunningException extends Exception {
+public class JobExecutionIsRunningException extends BatchRuntimeException {
 
 	/**
 	 * 

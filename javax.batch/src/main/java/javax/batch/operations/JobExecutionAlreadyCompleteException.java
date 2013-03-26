@@ -16,7 +16,7 @@
  */
 package javax.batch.operations;
 
-public class JobExecutionAlreadyCompleteException extends Exception {
+public class JobExecutionAlreadyCompleteException extends BatchRuntimeException {
 
 	/**
 	 * 

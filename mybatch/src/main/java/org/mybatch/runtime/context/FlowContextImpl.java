@@ -37,10 +37,6 @@ public class FlowContextImpl extends AbstractContext {
         this.flow = flow;
         this.classLoader = getJobContext().getClassLoader();
         this.flowExecution = new FlowExecutionImpl(id);
-
-        setUpPropertyResolver().resolve(this.flow);
-        //flow has no listeners
-
         this.flowExecution.setBatchStatus(BatchStatus.STARTING);
     }
 

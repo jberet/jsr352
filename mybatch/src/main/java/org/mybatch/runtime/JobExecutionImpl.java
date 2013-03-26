@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.mybatch.runtime;
 
 import java.util.ArrayList;
@@ -29,17 +29,23 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.batch.operations.JobStartException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.StepExecution;
 
+import org.mybatch.job.Job;
+import org.mybatch.util.BatchUtil;
+
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution {
     public static final String JOB_EXECUTION_TIMEOUT_SECONDS_KEY = "org.mybatch.job.execution.timeout.seconds";
-    public static final long   JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT = 300L;
+    public static final long JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT = 300L;
 
     private long id;
 
     private JobInstanceImpl jobInstance;
+
+    private Job substitutedJob;
 
     private List<StepExecution> stepExecutions = new ArrayList<StepExecution>();
 
@@ -50,15 +56,24 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private CountDownLatch latch = new CountDownLatch(1);
 
-    public JobExecutionImpl(long id, JobInstanceImpl jobInstance, Properties jobParameters) {
+    public JobExecutionImpl(long id, JobInstanceImpl jobInstance, Properties jobParameters) throws JobStartException {
         this.id = id;
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
         this.jobInstance.addJobExecution(this);
+        this.substitutedJob = BatchUtil.cloneJob(jobInstance.unsubstitutedJob);
     }
 
     public void awaitTerminatioin(long timeout, TimeUnit timeUnit) throws InterruptedException {
         latch.await(timeout, timeUnit);
+    }
+
+    public Job getSubstitutedJob() {
+        return substitutedJob;
+    }
+
+    public void setSubstitutedJob(Job j) {
+        this.substitutedJob = j;
     }
 
     @Override

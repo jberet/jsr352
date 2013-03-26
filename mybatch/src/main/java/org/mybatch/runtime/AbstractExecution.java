@@ -52,7 +52,11 @@ public abstract class AbstractExecution {
         if (this.exitStatus != null) {
             return this.exitStatus;
         }
-        if (this.batchStatus != null) {
+        if (this.batchStatus != null &&
+                (this.batchStatus == BatchStatus.COMPLETED ||
+                this.batchStatus == BatchStatus.FAILED ||
+                this.batchStatus == BatchStatus.ABANDONED ||
+                this.batchStatus == BatchStatus.STOPPED)) {
             return this.batchStatus.name();
         }
         return null;

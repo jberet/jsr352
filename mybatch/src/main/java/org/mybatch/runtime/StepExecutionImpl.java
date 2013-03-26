@@ -57,7 +57,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
     }
 
     @Override
-    public Serializable getUserPersistentData() {
+    public Serializable getPersistentUserData() {
         return userPersistentData;
     }
 

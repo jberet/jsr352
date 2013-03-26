@@ -22,10 +22,16 @@
 
 package org.mybatch.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.batch.operations.JobStartException;
 
 import org.mybatch.job.Flow;
 import org.mybatch.job.Job;
@@ -123,4 +129,40 @@ public class BatchUtil {
         }
         return sb;
     }
+
+    public static Job cloneJob(Job originalJob) throws JobStartException {
+        Job clone = null;
+        ObjectOutputStream oos = null;
+        ObjectInputStream ois = null;
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(originalJob);
+            oos.flush();
+            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+            ois = new ObjectInputStream(bis);
+            clone = (Job) ois.readObject();
+        } catch (IOException e) {
+            throw new JobStartException(e);
+        } catch (ClassNotFoundException e) {
+            throw new JobStartException(e);
+        } finally {
+            if (oos != null) {
+                try {
+                    oos.close();
+                } catch (IOException e) {
+                    //ignore
+                }
+            }
+            if (ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    //ignore
+                }
+            }
+        }
+        return clone;
+    }
+
 }

@@ -16,7 +16,7 @@
  */
 package javax.batch.operations;
 
-public class JobStartException extends Exception {
+public class JobStartException extends BatchRuntimeException {
 
 	/**
 	 * JobStartException is thrown when an error occurs during the JobOperator

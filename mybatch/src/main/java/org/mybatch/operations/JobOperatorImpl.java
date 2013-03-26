@@ -65,12 +65,12 @@ import org.mybatch.util.ConcurrencyService;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class JobOperatorImpl implements JobOperator {
+    JobRepository repository = JobRepositoryFactory.getJobRepository();
     private ArtifactFactory artifactFactory = new SimpleArtifactFactory();
     private Map<Long, Future<?>> jobExecutionResults = new HashMap<Long, Future<?>>();
 
     @Override
     public long start(String jobXMLName, Properties jobParameters) throws JobStartException, JobSecurityException {
-        JobRepository repository = JobRepositoryFactory.getJobRepository();
         ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
         Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, Job.class, classLoader);
 
@@ -80,40 +80,33 @@ public class JobOperatorImpl implements JobOperator {
         } catch (IOException e) {
             throw LOGGER.failToProcessMetaData(e, jobXMLName);
         }
-        JobInstanceImpl instance = new JobInstanceImpl(repository.nextUniqueId(), jobDefined);
-        JobExecutionImpl jobExecution = new JobExecutionImpl(repository.nextUniqueId(), instance, jobParameters);
-        JobContextImpl jobContext = new JobContextImpl(jobDefined, jobExecution, appData, artifactFactory, repository);
-
-        JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
-        Future<?> result = ConcurrencyService.submit(jobExecutionRunner);
-        long jobExecutionId = jobExecution.getExecutionId();
-        jobExecutionResults.put(jobExecutionId, result);
-
+        JobInstanceImpl instance = new JobInstanceImpl(repository.nextUniqueId(), jobDefined, appData);
         repository.addJob(jobDefined);
         repository.addJobInstance(instance);
-        repository.addJobExecution(jobExecution);
 
-        return jobExecutionId;
+        return startJobExecution(instance, jobParameters);
     }
 
     @Override
     public void stop(long executionId) throws NoSuchJobExecutionException,
             JobExecutionNotRunningException, JobSecurityException {
-        Future<?> executionResult = jobExecutionResults.get(executionId);
-        if (executionResult == null) {
+        JobExecutionImpl jobExecution = (JobExecutionImpl) repository.getJobExecution(executionId);
+        if (jobExecution == null) {
             throw LOGGER.noSuchJobExecution(executionId);
         }
-        //TODO check if need to throw JobExecutionNotRunningException
-
-        //cancel the task if the task execution has not started
-        executionResult.cancel(false);
-
-        //TODO if the task execution has already started
+        BatchStatus s = jobExecution.getBatchStatus();
+        if (s == BatchStatus.STOPPED || s == BatchStatus.FAILED || s == BatchStatus.ABANDONED ||
+                s == BatchStatus.COMPLETED) {
+            throw LOGGER.jobExecutionNotRunningException(executionId, s);
+        } else if (s == BatchStatus.STOPPING) {
+            //in process of stopping, do nothing
+        } else {
+            jobExecution.setBatchStatus(BatchStatus.STOPPING);
+        }
     }
 
     @Override
     public Set<String> getJobNames() throws JobSecurityException {
-        JobRepository repository = JobRepositoryFactory.getJobRepository();
         Set<String> result = new HashSet<String>();
         for (Job e : repository.getJobs()) {
             result.add(e.getId());
@@ -123,7 +116,6 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public int getJobInstanceCount(String jobName) throws NoSuchJobException, JobSecurityException {
-        JobRepository repository = JobRepositoryFactory.getJobRepository();
         int count = 0;
         for (JobInstance e : repository.getJobInstances()) {
             if (e.getJobName().equals(jobName)) {
@@ -136,11 +128,12 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<JobInstance> getJobInstances(String jobName, int start, int count) throws NoSuchJobException, JobSecurityException {
         LinkedList<JobInstance> result = new LinkedList<JobInstance>();
-        JobRepository repository = JobRepositoryFactory.getJobRepository();
         for (JobInstance e : repository.getJobInstances()) {
             if (e.getJobName().equals(jobName)) {
                 if (result.size() < count) {
                     result.addFirst(e);
+                } else {
+                    break;
                 }
             }
         }
@@ -149,13 +142,12 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public List<Long> getRunningExecutions(String jobName) throws NoSuchJobException, JobSecurityException {
-        JobRepository repository = JobRepositoryFactory.getJobRepository();
         List<Long> result = new ArrayList<Long>();
         for (JobExecution e : repository.getJobExecutions()) {
             BatchStatus s = e.getBatchStatus();
             if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
                 result.add(e.getExecutionId());
-            } 
+            }
         }
         return result;
     }
@@ -166,23 +158,67 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
-    public long restart(long executionId, Properties restartParameters) throws JobExecutionAlreadyCompleteException, NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
-        return 0;
+    public long restart(long executionId, Properties restartParameters) throws JobExecutionAlreadyCompleteException,
+            NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
+        long newExecutionId = 0;
+        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(executionId);
+        if (jobExecution == null) {
+            throw LOGGER.noSuchJobExecution(executionId);
+        }
+        BatchStatus previousStatus = jobExecution.getBatchStatus();
+        if (previousStatus == BatchStatus.COMPLETED) {
+            throw LOGGER.jobExecutionAlreadyCompleteException(executionId);
+        }
+        if (previousStatus == BatchStatus.ABANDONED ||
+                previousStatus == BatchStatus.STARTED ||
+                previousStatus == BatchStatus.STARTING ||
+                previousStatus == BatchStatus.STOPPING) {
+            throw LOGGER.jobRestartException(executionId, previousStatus);
+        }
+        if (previousStatus == BatchStatus.FAILED ||
+                previousStatus == BatchStatus.STOPPED) {
+            JobInstanceImpl jobInstance = (JobInstanceImpl) getJobInstance(executionId);
+            List<JobExecution> executions = jobInstance.getJobExecutions();
+            JobExecution mostRecentExecution = executions.get(executions.size() - 1);
+            if (executionId != mostRecentExecution.getExecutionId()) {
+                throw LOGGER.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
+            }
+            try {
+                newExecutionId = startJobExecution(jobInstance, restartParameters);
+            } catch (Exception e) {
+                throw new JobRestartException(e);
+            }
+        }
+        return newExecutionId;
     }
 
     @Override
-    public void abandon(long executionId) throws NoSuchJobExecutionException, JobExecutionIsRunningException, JobSecurityException {
-
+    public void abandon(long executionId) throws
+            NoSuchJobExecutionException, JobExecutionIsRunningException, JobSecurityException {
+        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(executionId);
+        if (jobExecution == null) {
+            throw LOGGER.noSuchJobExecution(executionId);
+        }
+        BatchStatus batchStatus = jobExecution.getBatchStatus();
+        if (batchStatus == BatchStatus.COMPLETED ||
+                batchStatus == BatchStatus.FAILED ||
+                batchStatus == BatchStatus.STOPPED ||
+                batchStatus == BatchStatus.ABANDONED) {
+            jobExecution.setBatchStatus(BatchStatus.ABANDONED);
+        } else {
+            throw LOGGER.jobExecutionIsRunningException(executionId);
+        }
     }
 
     @Override
     public JobInstance getJobInstance(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
-        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution (executionId);
+        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(executionId);
         return jobExecution.getJobInstance();
     }
 
     @Override
-    public List<JobExecution> getJobExecutions(JobInstance instance) throws NoSuchJobInstanceException, JobSecurityException {
+    public List<JobExecution> getJobExecutions(JobInstance instance) throws
+            NoSuchJobInstanceException, JobSecurityException {
         return ((JobInstanceImpl) instance).getJobExecutions();
     }
 
@@ -192,8 +228,21 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
-        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution (jobExecutionId);
+    public List<StepExecution> getStepExecutions(long jobExecutionId) throws
+            NoSuchJobExecutionException, JobSecurityException {
+        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(jobExecutionId);
         return jobExecution.getStepExecutions();
+    }
+
+    private long startJobExecution(JobInstanceImpl jobInstance, Properties jobParameters) throws JobStartException, JobSecurityException {
+        JobExecutionImpl jobExecution = new JobExecutionImpl(repository.nextUniqueId(), jobInstance, jobParameters);
+        JobContextImpl jobContext = new JobContextImpl(jobExecution, artifactFactory, repository);
+
+        JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
+        Future<?> result = ConcurrencyService.submit(jobExecutionRunner);
+        long jobExecutionId = jobExecution.getExecutionId();
+
+        repository.addJobExecution(jobExecution);
+        return jobExecutionId;
     }
 }

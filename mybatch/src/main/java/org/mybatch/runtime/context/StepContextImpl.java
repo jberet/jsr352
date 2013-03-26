@@ -23,15 +23,11 @@
 package org.mybatch.runtime.context;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Properties;
-import javax.batch.api.listener.StepListener;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.context.StepContext;
 
-import org.mybatch.job.Listener;
-import org.mybatch.job.Listeners;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.util.BatchUtil;
@@ -41,15 +37,10 @@ public class StepContextImpl extends AbstractContext implements StepContext {
     private StepExecutionImpl stepExecution;
     private Exception exception;
 
-    private StepListener[] stepListeners = new StepListener[0];
-
     public StepContextImpl(Step step, AbstractContext[] outerContexts) {
         super(step.getId(), outerContexts);
         this.step = step;
         this.classLoader = getJobContext().getClassLoader();
-        setUpPropertyResolver().resolve(this.step);
-        createStepListeners();
-
         this.stepExecution = new StepExecutionImpl(getJobContext().getJobRepository().nextUniqueId(),
                 getJobContext().getJobExecution(), id);
         this.stepExecution.setBatchStatus(BatchStatus.STARTING);
@@ -57,10 +48,6 @@ public class StepContextImpl extends AbstractContext implements StepContext {
 
     public Step getStep() {
         return this.step;
-    }
-
-    public StepListener[] getStepListeners() {
-        return stepListeners;
     }
 
     public StepExecutionImpl getStepExecution() {
@@ -109,7 +96,7 @@ public class StepContextImpl extends AbstractContext implements StepContext {
 
     @Override
     public Serializable getPersistentUserData() {
-        return stepExecution.getUserPersistentData();  //TODO UserPersistence or PersistentUser?
+        return stepExecution.getPersistentUserData();
     }
 
     @Override
@@ -131,17 +118,4 @@ public class StepContextImpl extends AbstractContext implements StepContext {
         return stepExecution.getMetrics();
     }
 
-    private void createStepListeners() {
-        Listeners listeners = step.getListeners();
-        if (listeners != null) {
-            List<Listener> listenerList = listeners.getListener();
-            int count = listenerList.size();
-            this.stepListeners = new StepListener[count];
-            for (int i = 0; i < count; i++) {
-                Listener listener = listenerList.get(i);
-                //ask the root JobContext to create artifact
-                this.stepListeners[i] = getJobContext().createArtifact(listener.getRef(), listener.getProperties(), this);
-            }
-        }
-    }
 }

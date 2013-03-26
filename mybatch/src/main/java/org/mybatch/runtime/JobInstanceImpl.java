@@ -29,25 +29,37 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
 import org.mybatch.job.Job;
+import org.mybatch.metadata.ApplicationMetaData;
 
 public final class JobInstanceImpl implements JobInstance {
     private long id;
-    private Job job;
+    protected Job unsubstitutedJob;
     private List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
 
-    public JobInstanceImpl(long id, Job job) {
+    private ApplicationMetaData applicationMetaData;
+
+    public JobInstanceImpl(long id, Job unsubstitutedJob, ApplicationMetaData appData) {
         this.id = id;
-        this.job = job;
+        this.unsubstitutedJob = unsubstitutedJob;
+        this.applicationMetaData = appData;
     }
 
     @Override
     public String getJobName() {
-        return job.getId();
+        return unsubstitutedJob.getId();
     }
 
     @Override
     public long getInstanceId() {
         return this.id;
+    }
+
+    public Job getUnsubstitutedJob() {
+        return unsubstitutedJob;
+    }
+
+    public ApplicationMetaData getApplicationMetaData() {
+        return applicationMetaData;
     }
 
     public List<JobExecution> getJobExecutions() {

@@ -25,7 +25,6 @@ package org.mybatch.runtime.context;
 import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Properties;
-import org.mybatch.util.PropertyResolver;
 
 public abstract class AbstractContext {
     protected String id;
@@ -103,28 +102,5 @@ public abstract class AbstractContext {
         result[contextArray.length] = add;
         return result;
     }
-
-    protected PropertyResolver setUpPropertyResolver() {
-        PropertyResolver resolver = new PropertyResolver();
-        resolver.setJobParameters(getJobContext().getJobParameters());
-
-        //this job element (job, step, flow, etc) can be directly under job, or under job->split->flow, etc
-        org.mybatch.job.Properties props;
-        if (outerContexts != null) {
-            for (AbstractContext context : outerContexts) {
-                props = context.getProperties2();
-                if (props != null) {
-                    resolver.pushJobProperties(props);
-                }
-            }
-        }
-
-        props = getProperties2();
-        if (props != null) {
-            resolver.pushJobProperties(props);
-        }
-        return resolver;
-    }
-
 }
 

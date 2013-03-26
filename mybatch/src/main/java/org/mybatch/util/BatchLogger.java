@@ -24,8 +24,14 @@ package org.mybatch.util;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import javax.batch.operations.JobExecutionAlreadyCompleteException;
+import javax.batch.operations.JobExecutionIsRunningException;
+import javax.batch.operations.JobExecutionNotMostRecentException;
+import javax.batch.operations.JobExecutionNotRunningException;
+import javax.batch.operations.JobRestartException;
 import javax.batch.operations.JobStartException;
 import javax.batch.operations.NoSuchJobExecutionException;
+import javax.batch.runtime.BatchStatus;
 
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
@@ -87,7 +93,7 @@ public interface BatchLogger extends BasicLogger {
     IllegalStateException noMethodMatchingAnnotation(Class<? extends Annotation> ann, Object artifact);
 
     @Message(id = 14, value = "No job execution with id %s")
-    NoSuchJobExecutionException noSuchJobExecution(Long executionId);
+    NoSuchJobExecutionException noSuchJobExecution(long executionId);
 
     @Message(id = 15, value = "Unrecognized property category: %s, variable name: %s in property value: %s")
     @LogMessage(level = Logger.Level.WARN)
@@ -101,9 +107,9 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void jobAlreadyExists(String jobId);
 
-    @Message(id = 18, value = "Failed to run artifact: %s, method: %s")
+    @Message(id = 18, value = "Failed to run artifact %s, %s")
     @LogMessage(level = Logger.Level.ERROR)
-    void failToRunJob(@Cause Throwable e, Object artifact, String method);
+    void failToRunJob(@Cause Throwable e, String name, Object artifact);
 
     @Message(id = 19, value = "Unrecognizable job element: %s in job: %s")
     IllegalStateException unrecognizableJobElement(String jobElementName, String jobName);
@@ -123,6 +129,21 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 24, value = "Cycles detected in job element inheritance: %s")
     JobStartException cycleInheritance(String inheritingElements);
+
+    @Message(id = 25, value = "Job execution %s is running and cannot be abandoned.")
+    JobExecutionIsRunningException jobExecutionIsRunningException(long jobExecutionId);
+
+    @Message(id = 26, value = "Job execution %s has already completed and cannot be restarted.")
+    JobExecutionAlreadyCompleteException jobExecutionAlreadyCompleteException(long jobExecutionId);
+
+    @Message(id = 27, value = "Failed to restart job execution %s, which had batch status %s.")
+    JobRestartException jobRestartException(long jobExecutionId, BatchStatus previousStatus);
+
+    @Message(id = 28, value = "Job execution %s is not the most recent execution of job instance %s.")
+    JobExecutionNotMostRecentException jobExecutionNotMostRecentException(long jobExecutionId, long jobInstanceId);
+
+    @Message(id = 29, value = "Job execution %s has batch status %s, and is not running.")
+    JobExecutionNotRunningException jobExecutionNotRunningException(long jobExecutionId, BatchStatus batchStatus);
 
 
 }

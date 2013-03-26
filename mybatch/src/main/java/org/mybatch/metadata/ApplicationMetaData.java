@@ -75,15 +75,17 @@ public class ApplicationMetaData {
 
     public String getClassNameForRef(String ref) {
         String result = artifactCatalog.get(ref);
-        if (result == null && batchArtifacts != null) {
+        if (result != null) {
+            return result;
+        }
+        if (batchArtifacts != null) {
             for (BatchArtifactRef r : batchArtifacts.getRef()) {
                 if (r.getId().equals(ref)) {
-                    result = r.getClazz();
-                    break;
+                    return r.getClazz();
                 }
             }
         }
-        return result;
+        return ref;
     }
 
     private void identifyArtifacts() {

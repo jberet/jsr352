@@ -41,9 +41,9 @@ import org.mybatch.repository.JobRepository;
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
+import org.mybatch.util.PropertyResolver;
 
 public class JobContextImpl extends AbstractContext implements JobContext {
-    private Job job;
     private JobExecutionImpl jobExecution;
 
     private ApplicationMetaData applicationMetaData;
@@ -54,17 +54,17 @@ public class JobContextImpl extends AbstractContext implements JobContext {
 
     private LinkedList<Step> executedSteps = new LinkedList<Step>();
 
-    public JobContextImpl(Job job, JobExecutionImpl jobExecution, ApplicationMetaData applicationMetaData,
-                          ArtifactFactory artifactFactory, JobRepository jobRepository) {
-        super(job.getId());
-        this.job = job;
+    public JobContextImpl(JobExecutionImpl jobExecution, ArtifactFactory artifactFactory, JobRepository jobRepository) {
+        super(jobExecution.getSubstitutedJob().getId());
         this.jobExecution = jobExecution;
-        this.applicationMetaData = applicationMetaData;
+        this.applicationMetaData = jobExecution.getJobInstance().getApplicationMetaData();
         this.classLoader = applicationMetaData.getClassLoader();
         this.artifactFactory = artifactFactory;
         this.jobRepository = jobRepository;
 
-        setUpPropertyResolver().resolve(job);
+        PropertyResolver resolver = new PropertyResolver();
+        resolver.setJobParameters(jobExecution.getJobParameters());
+        resolver.resolve(jobExecution.getSubstitutedJob());
         createJobListeners();
         jobExecution.setBatchStatus(BatchStatus.STARTING);
     }
@@ -90,8 +90,13 @@ public class JobContextImpl extends AbstractContext implements JobContext {
     }
 
     @Override
+    public AbstractContext[] getOuterContexts() {
+        return new AbstractContext[0];
+    }
+
+    @Override
     public String getJobName() {
-        return job.getId();
+        return jobExecution.getJobInstance().getJobName();
     }
 
     @Override
@@ -106,12 +111,12 @@ public class JobContextImpl extends AbstractContext implements JobContext {
 
     @Override
     public Properties getProperties() {
-        return BatchUtil.toJavaUtilProperties(job.getProperties());
+        return BatchUtil.toJavaUtilProperties(jobExecution.getSubstitutedJob().getProperties());
     }
 
     @Override
     public org.mybatch.job.Properties getProperties2() {
-        return job.getProperties();
+        return jobExecution.getSubstitutedJob().getProperties();
     }
 
     @Override
@@ -144,14 +149,15 @@ public class JobContextImpl extends AbstractContext implements JobContext {
     }
 
     public Job getJob() {
-        return job;
+        return jobExecution.getSubstitutedJob();
     }
 
     /**
      * Creates a batch artifact by delegating to the proper ArtifactFactory and passing along data needed for artifact
      * loading and creation.
-     * @param ref ref name of the artifact
-     * @param props batch properties directly for the artifact to create (does not include any properties from upper enclosing levels)
+     *
+     * @param ref                     ref name of the artifact
+     * @param props                   batch properties directly for the artifact to create (does not include any properties from upper enclosing levels)
      * @param stepContextForInjection optional StepContext, needed for step-level artifact, but not for non-step-level ones
      * @return the created artifact
      */
@@ -162,7 +168,7 @@ public class JobContextImpl extends AbstractContext implements JobContext {
         if (props != null) {
             artifactCreationData.put(ArtifactFactory.DataKey.BATCH_PROPERTY, props);
         }
-        if(stepContextForInjection.length > 0) {
+        if (stepContextForInjection.length > 0) {
             artifactCreationData.put(ArtifactFactory.DataKey.STEP_CONTEXT, stepContextForInjection[0]);
         }
         A a = null;
@@ -175,7 +181,7 @@ public class JobContextImpl extends AbstractContext implements JobContext {
     }
 
     private void createJobListeners() {
-        Listeners listeners = job.getListeners();
+        Listeners listeners = jobExecution.getSubstitutedJob().getListeners();
         if (listeners != null) {
             List<Listener> listenerList = listeners.getListener();
             int count = listenerList.size();

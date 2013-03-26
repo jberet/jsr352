@@ -52,7 +52,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
                 try {
                     l.beforeJob();
                 } catch (Throwable e) {
-                    BatchLogger.LOGGER.failToRunJob(e, l, "beforeJob");
+                    BatchLogger.LOGGER.failToRunJob(e, "", l);
                     batchContext.setBatchStatus(BatchStatus.FAILED);
                     return;
                 }
@@ -64,19 +64,23 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
                 try {
                     l.afterJob();
                 } catch (Throwable e) {
-                    BatchLogger.LOGGER.failToRunJob(e, l, "afterJob");
+                    BatchLogger.LOGGER.failToRunJob(e, "", l);
                     batchContext.setBatchStatus(BatchStatus.FAILED);
                     return;
                 }
             }
 
         } catch (Throwable e) {
-            BatchLogger.LOGGER.failToRunJob(e, job, "run");
+            BatchLogger.LOGGER.failToRunJob(e, job.getId(), job);
             batchContext.setBatchStatus(BatchStatus.FAILED);
+        } finally {
+            batchContext.getJobExecution().setSubstitutedJob(null);
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
             batchContext.setBatchStatus(BatchStatus.COMPLETED);
+        } else if (batchContext.getBatchStatus() == BatchStatus.STOPPING) {
+            batchContext.setBatchStatus(BatchStatus.STOPPED);
         }
     }
 

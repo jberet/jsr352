@@ -67,7 +67,7 @@ public interface StepExecution {
      * 
      * @return persistent data
      */
-    public Serializable getUserPersistentData();
+    public Serializable getPersistentUserData();
 
     /**
      * Get step metrics

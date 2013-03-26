@@ -55,7 +55,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
         try {
             runFromHead();
         } catch (Throwable e) {
-            LOGGER.failToRunJob(e, flow, "run");
+            LOGGER.failToRunJob(e, flow.getId(), flow);
             batchContext.setBatchStatus(BatchStatus.FAILED);
             for (AbstractContext c : batchContext.getOuterContexts()) {
                 c.setBatchStatus(BatchStatus.FAILED);
@@ -73,7 +73,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             String next = flow.getNext();
             if (next == null) {
-                next = resolveControlElements(flow.getTransitionElements());
+                next = resolveTransitionElements(flow.getTransitionElements());
             }
             enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
         }

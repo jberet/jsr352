@@ -16,7 +16,7 @@
  */
 package javax.batch.operations;
 
-public class JobSecurityException extends Exception {
+public class JobSecurityException extends BatchRuntimeException {
 
 	/**
 	 * SecurityException is thrown when an user is not authorized to run a JobOperator method, such as
