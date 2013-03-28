@@ -27,6 +27,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import javax.batch.operations.BatchRuntimeException;
 
 import org.mybatch.job.Analyzer;
 import org.mybatch.job.Batchlet;
@@ -106,15 +107,13 @@ public final class PropertyResolver {
         }
 
         org.mybatch.job.Properties props = job.getProperties();
-        if (props != null) {
-            jobPropertiesStack.push(props);
-        }
         //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
-        resolve(job.getProperties(), false);
+        resolve(props, false);
+
         resolve(job.getListeners());
         resolveJobElements(job.getDecisionOrFlowOrSplit());
 
-        if (props != null && jobPropertiesStack.peek() == props) {
+        if (props != null) {  // the properties instance to pop is different from job.getProperties (a clone).
             jobPropertiesStack.pop();
         }
     }
@@ -167,10 +166,7 @@ public final class PropertyResolver {
             }
         }
         org.mybatch.job.Properties props = step.getProperties();
-        if (props != null) {
-            jobPropertiesStack.push(props);
-        }
-        resolve(step.getProperties(), false);
+        resolve(props, false);
         resolve(step.getListeners());
         Batchlet batchlet = step.getBatchlet();
 
@@ -186,7 +182,7 @@ public final class PropertyResolver {
         resolve(step.getPartition());
         resolveTransitionElements(step.getTransitionElements());
 
-        if(props != null && jobPropertiesStack.peek() == props) {
+        if(props != null) {
             jobPropertiesStack.pop();
         }
     }
@@ -379,30 +375,34 @@ public final class PropertyResolver {
         resolveJobElements(flow.getDecisionOrFlowOrSplit());
     }
 
-    private void resolve(org.mybatch.job.Properties props, boolean pushAndPopProps) {
+    private void resolve(org.mybatch.job.Properties props, boolean popProps) {
         if (props == null) {
             return;
         }
-        if (pushAndPopProps) {
-            jobPropertiesStack.push(props);
-        }
 
-        String oldVal = props.getPartition();
-        String newVal;
-        if (oldVal != null) {
-            newVal = resolve(oldVal);
-            if (!oldVal.equals(newVal)) {
-                props.setPartition(newVal);
-            }
-        }
+        //push individula property to resolver one by one, so only those properties that are already defined can be
+        //visible to the resolver.
+        org.mybatch.job.Properties propsToPush = new org.mybatch.job.Properties();
+        jobPropertiesStack.push(propsToPush);
 
         try {
+            String oldVal = props.getPartition();
+            String newVal;
+            if (oldVal != null) {
+                newVal = resolve(oldVal);
+                if (!oldVal.equals(newVal)) {
+                    props.setPartition(newVal);
+                }
+            }
+
             for (Property p : props.getProperty()) {
                 oldVal = p.getName();
                 newVal = resolve(oldVal);
                 if (!oldVal.equals(newVal)) {
                     p.setName(newVal);
                 }
+
+                propsToPush.getProperty().add(p);
 
                 oldVal = p.getValue();
                 newVal = resolve(oldVal);
@@ -411,7 +411,7 @@ public final class PropertyResolver {
                 }
             }
         } finally {
-            if (pushAndPopProps) {
+            if (popProps) {
                 jobPropertiesStack.pop();
             }
         }
@@ -517,11 +517,17 @@ public final class PropertyResolver {
             return rawVale;
         }
         StringBuilder sb = new StringBuilder(rawVale);
-        resolve(sb, 0, true, null);
+        try {
+            resolve(sb, 0, true, null);
+        } catch (BatchRuntimeException e) {
+            LOGGER.unresolvableExpression(e.getMessage());
+            return null;
+        }
         return sb.toString();
     }
 
-    private void resolve(StringBuilder sb, int start, boolean defaultAllowed, LinkedList<String> referringExpressions) {
+    private void resolve(StringBuilder sb, int start, boolean defaultAllowed, LinkedList<String> referringExpressions)
+                                        throws BatchRuntimeException {
         //distance-to-end doesn't have space for any template, so no variable referenced
         if (sb.length() - start < shortestTemplateLen) {
             return;
@@ -545,7 +551,7 @@ public final class PropertyResolver {
         String expression = sb.substring(startExpression, endExpression + 1);
 
         if (referringExpressions != null && referringExpressions.contains(expression)) {
-            throw LOGGER.cycleInPropertyReference(referringExpressions);  //exception thrown
+            throw LOGGER.cycleInPropertyReference(referringExpressions);
         }
 
         String variableName = sb.substring(startVariableName, endBracket - 1);  // ['abc']
@@ -558,7 +564,8 @@ public final class PropertyResolver {
         if (!defaultAllowed) {  //a default expression should not have default again
             if (val != null) {
                 endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, val);
-            } else {  //not resolved, keep unchanged
+            } else {  //not resolved:
+                throw LOGGER.unresolvableExpressionException(sb.toString());
             }
         } else {
             int startDefaultMarker = endExpression + 1;
@@ -583,8 +590,8 @@ public final class PropertyResolver {
                     endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endDefaultExpressionMarker, val);
                 }
             } else {
-                if (!hasDefault) {  //not resolved, no default: leave unchanged
-                    //do nothing for now
+                if (!hasDefault) {  //not resolved, no default:
+                    throw LOGGER.unresolvableExpressionException(sb.toString());
                 } else {  //not resolved, has default: resolve and apply the default
                     StringBuilder sb4DefaultExpression = new StringBuilder(sb.substring(endDefaultMarker + 1, endDefaultExpressionMarker));
                     resolve(sb4DefaultExpression, 0, false, null);
@@ -596,7 +603,8 @@ public final class PropertyResolver {
         resolve(sb, endCurrentPass + 1, true, null);
     }
 
-    private String reresolve(String expression, String currentlyResolvedToVal, boolean defaultAllowed, LinkedList<String> referringExpressions) {
+    private String reresolve(String expression, String currentlyResolvedToVal, boolean defaultAllowed, LinkedList<String> referringExpressions)
+                                throws BatchRuntimeException {
         if (currentlyResolvedToVal.length() < shortestTemplateLen || !currentlyResolvedToVal.contains(prefix)) {
             return currentlyResolvedToVal;
         }
@@ -605,7 +613,13 @@ public final class PropertyResolver {
         }
         referringExpressions.add(expression);
         StringBuilder sb = new StringBuilder(currentlyResolvedToVal);
-        resolve(sb, 0, defaultAllowed, referringExpressions);
+
+        try {
+            resolve(sb, 0, defaultAllowed, referringExpressions);
+        } catch (BatchRuntimeException e) {
+            LOGGER.unresolvableExpression(e.getMessage());
+            return null;
+        }
         return sb.toString();
     }
 
@@ -638,4 +652,5 @@ public final class PropertyResolver {
         }
         return val;
     }
+
 }

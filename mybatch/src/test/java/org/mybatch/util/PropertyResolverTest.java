@@ -66,6 +66,9 @@ public class PropertyResolverTest {
     private Properties jobProps3 = new Properties();
     private Properties sysProps = System.getProperties();
 
+    String javaVersion = sysProps.getProperty("java.version");
+    String osName = sysProps.getProperty("os.name");
+
     @Before
     public void setUp() throws Exception {
         jobParams.setProperty(jobParam1, jobParam1Val);
@@ -122,33 +125,15 @@ public class PropertyResolverTest {
         props.setProperty("nine", "#{jobProperties['ten']}");
         props.setProperty("ten", "TEN");  //cycle
 
-        resolver.pushJobProperties(fromJavaUtilProperties(props));
-        String result = null;
-        try {
-            result = resolver.resolve("#{jobProperties['one']}");
-            throw new AssertionError(String.format("Expecting exception, but got %s for a self-referencing property", result));
-        } catch (Exception e) {
-            System.out.printf("Got the expected %s%n", e);
-        }
-        try {
-            result = resolver.resolve("#{jobProperties['two']}");
-            throw new AssertionError(String.format("Expecting exception, but got %s for a mutual-referencing property", result));
-        } catch (Exception e) {
-            System.out.printf("Got the expected %s%n", e);
-        }
-        try {
-            result = resolver.resolve("#{jobProperties['four']}");
-            throw new AssertionError(String.format("Expecting exception, but got %s for a cyclic-referencing property", result));
-        } catch (Exception e) {
-            System.out.printf("Got the expected %s%n", e);
-        }
+        props.setProperty("java.version", "#{systemProperties['java.version']}");  //valid one, not cycle
 
-        try {
-            result = resolver.resolve("#{jobProperties['seven']}");
-            System.out.printf("Got the expected %s%n", result);
-        } catch (Exception e) {
-            throw new AssertionError(String.format("Expecting %s, but got %s property", result, e));
-        }
+        resolver.pushJobProperties(fromJavaUtilProperties(props));
+        Assert.assertNull(resolver.resolve("#{jobProperties['one']}"));
+        Assert.assertNull(resolver.resolve("#{jobProperties['two']}"));
+        Assert.assertNull(resolver.resolve("#{jobProperties['four']}"));
+        Assert.assertEquals("TEN", resolver.resolve("#{jobProperties['seven']}"));
+
+        org.junit.Assert.assertEquals(javaVersion, resolver.resolve("#{jobProperties['java.version']}"));
     }
 
     @Test public void literal() {
@@ -288,8 +273,6 @@ public class PropertyResolverTest {
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};#{%s['%s']}", jobParametersToken, "", systemPropertiesToken, "java.version"),
         };
 
-        String javaVersion = sysProps.getProperty("java.version");
-        String osName = sysProps.getProperty("os.name");
         String[] expected = {
                 javaVersion + osName,
                 osName + javaVersion

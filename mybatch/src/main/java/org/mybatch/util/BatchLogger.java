@@ -24,6 +24,7 @@ package org.mybatch.util;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import javax.batch.operations.BatchRuntimeException;
 import javax.batch.operations.JobExecutionAlreadyCompleteException;
 import javax.batch.operations.JobExecutionIsRunningException;
 import javax.batch.operations.JobExecutionNotMostRecentException;
@@ -115,7 +116,7 @@ public interface BatchLogger extends BasicLogger {
     IllegalStateException unrecognizableJobElement(String jobElementName, String jobName);
 
     @Message(id = 20, value = "Cycle detected in property reference: %s")
-    IllegalStateException cycleInPropertyReference(List<String> referringExpressions);
+    BatchRuntimeException cycleInPropertyReference(List<String> referringExpressions);
 
     @Message(id = 21, value = "Possible syntax errors in property: %s")
     @LogMessage(level = Logger.Level.WARN)
@@ -145,5 +146,14 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 29, value = "Job execution %s has batch status %s, and is not running.")
     JobExecutionNotRunningException jobExecutionNotRunningException(long jobExecutionId, BatchStatus batchStatus);
 
+    @Message(id = 30, value = "A decision cannot be the first element: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void decisionCannotBeFirst(String decisionId);
 
+    @Message(id = 31, value = "Could not resolve expression because: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void unresolvableExpression(String message);
+
+    @Message(id = 32, value = "Could not resolve the expression: %s")
+    BatchRuntimeException unresolvableExpressionException(String expression);
 }

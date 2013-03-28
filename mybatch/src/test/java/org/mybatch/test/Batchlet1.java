@@ -25,6 +25,7 @@ package org.mybatch.test;
 import javax.batch.api.AbstractBatchlet;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.Batchlet;
+import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
@@ -44,6 +45,9 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     @Inject @BatchProperty(name = "no-such-property")
     private String defaultValue = "defaultValue";
 
+    @Inject @BatchProperty(name = "foo")
+    private String foo;
+
     @Inject
     private JobContext jobContext;
 
@@ -52,15 +56,22 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
 
     @Override
     public String process() throws Exception {
-        System.out.printf("in @Process, %s%n", Thread.currentThread());
         System.out.printf("Injected batchlet property: %s => %s%n", "Batchlet1", prop1);
         System.out.printf("Injected batch property with default name: %s => %s%n", "defaultName", defaultName);
         System.out.printf("Undeclared batch property: %s => %s%n", "no-such-property", noSuchProperty);
         System.out.printf("Undeclared batch property: %s => %s%n", "no-such-property", defaultValue);
+
         System.out.printf("Injected JobContext: %s%n", jobContext);
         System.out.printf("Injected StepContext: %s%n", stepContext);
         System.out.printf("Job properties from injected JobContext: %s%n", jobContext.getProperties());
         System.out.printf("Step properties from injected StepContext: %s%n", stepContext.getProperties());
+
+        String fooExpected = "foo";
+        if (fooExpected.equals(foo)) {
+            System.out.printf("Injected batchlet property foo: %s%n", foo);
+        } else {
+            throw new BatchRuntimeException(String.format("Expecting batchlet property foo to be %s, but got %s", fooExpected, foo));
+        }
         return "Processed";
     }
 

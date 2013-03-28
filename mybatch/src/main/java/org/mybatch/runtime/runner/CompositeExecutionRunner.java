@@ -76,7 +76,11 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
                 break;
             } else if (e instanceof Decision) {
                 Decision decision = (Decision) e;
-                runDecision(decision);
+                batchContext.setBatchStatus(BatchStatus.FAILED);
+                BatchLogger.LOGGER.decisionCannotBeFirst(decision.getId());
+                return;
+
+//                runDecision(decision);
             }
         }
     }

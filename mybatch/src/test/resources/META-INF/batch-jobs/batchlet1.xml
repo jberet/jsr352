@@ -27,6 +27,7 @@
         <property name="job-prop-3" value="#{jobProperties['job-prop-2']}"></property>
         <property name="job-prop-2" value="#{jobProperties['job-prop']}"></property>
         <property name="job-prop" value="job-prop"></property>
+        <property name="foo" value="foo"/>
     </properties>
     <step id="step1">
         <properties>
@@ -39,6 +40,10 @@
             <properties>
                 <property name="Batchlet1" value="Batchlet1"/>
                 <property name="defaultName" value="defaultName"/>
+
+                <!-- valid property reference: foo resolves to bar, and bar resolves to the foo declared above in job-level -->
+                <property name="bar" value="#{jobProperties['foo']}"></property>
+                <property name="foo" value="#{jobProperties['bar']}"></property>
             </properties>
         </batchlet>
     </step>

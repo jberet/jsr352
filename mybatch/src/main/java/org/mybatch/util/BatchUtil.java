@@ -68,7 +68,10 @@ public class BatchUtil {
         Properties result = new Properties();
         if (props != null) {
             for (org.mybatch.job.Property p : props.getProperty()) {
-                result.setProperty(p.getName(), p.getValue());
+                String v = p.getValue();
+                if (v != null) {  //unresolvable properties have value null
+                    result.setProperty(p.getName(), v);
+                }
             }
         }
         return result;

@@ -24,11 +24,13 @@ package org.mybatch;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import javax.batch.operations.BatchRuntimeException;
 import javax.batch.operations.JobOperator;
 import javax.batch.operations.JobSecurityException;
 import javax.batch.operations.JobStartException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchRuntime;
+import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.util.ConcurrencyService;
@@ -36,7 +38,7 @@ import org.mybatch.util.ConcurrencyService;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public class Main {
-    public static void main(String[] args) throws JobStartException, JobSecurityException, NoSuchJobExecutionException {
+    public static void main(String[] args) throws BatchRuntimeException {
         if (args.length == 0) {
             usage(args);
         }
@@ -52,6 +54,10 @@ public class Main {
             jobExecutionId = jobOperator.start(jobXml, System.getProperties());
             JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
             jobExecution.awaitTerminatioin(timeout, TimeUnit.SECONDS);
+
+            if (!jobExecution.getBatchStatus().equals(BatchStatus.COMPLETED)) {
+                throw new BatchRuntimeException(String.format("The job did not complete: %s%n", jobXml));
+            }
         } catch (InterruptedException e) {
             //ignore
         } finally {
