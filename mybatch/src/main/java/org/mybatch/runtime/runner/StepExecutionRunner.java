@@ -36,6 +36,7 @@ import javax.batch.api.chunk.listener.SkipProcessListener;
 import javax.batch.api.chunk.listener.SkipReadListener;
 import javax.batch.api.chunk.listener.SkipWriteListener;
 import javax.batch.api.listener.StepListener;
+import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Batchlet;
@@ -78,16 +79,30 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     @Override
     public void run() {
-        LinkedList<Step> executedSteps = batchContext.getJobContext().getExecutedSteps();
-        if (executedSteps.contains(step)) {
-            StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
-            stepIds.append(step.getId());
-            throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
-        }
-
-        batchContext.setBatchStatus(BatchStatus.STARTED);
-
         try {
+            LinkedList<Step> executedSteps = batchContext.getJobContext().getExecutedSteps();
+            if (executedSteps.contains(step)) {
+                StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
+                stepIds.append(step.getId());
+                throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
+            }
+
+
+            int startLimit = 0;
+            if (step.getStartLimit() != null) {
+                startLimit = Integer.parseInt(step.getStartLimit());
+            }
+            if (startLimit > 0) {
+                int startCount = batchContext.getStepExecution().getStartCount();
+                if (startCount >= startLimit) {
+                    throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
+                }
+            }
+
+            batchContext.getStepExecution().incrementStartCount();
+            batchContext.setBatchStatus(BatchStatus.STARTED);
+            batchContext.getJobContext().getJobExecution().addStepExecution(batchContext.getStepExecution());
+
             Chunk chunk = step.getChunk();
             Batchlet batchlet = step.getBatchlet();
             if (chunk == null && batchlet == null) {
@@ -103,21 +118,15 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
 
             for (StepListener l : stepListeners) {
-                try {
-                    l.beforeStep();
-                } catch (Throwable e) {
-                    BatchLogger.LOGGER.failToRunJob(e, "", l);
-                    batchContext.setBatchStatus(BatchStatus.FAILED);
-                    return;
-                }
+                l.beforeStep();
             }
 
             if (batchlet != null) {
                 BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, batchlet);
                 stepResult = batchletRunner.call();
             } else {
-
-            //TODO handle chunk type step
+                ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
+                chunkRunner.run();
             }
 
             //record the fact this step has been executed
@@ -136,11 +145,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             LOGGER.failToRunJob(e, step.getId(), step);
             if (e instanceof Exception) {
                 batchContext.setException((Exception) e);
+            } else {
+                batchContext.setException(new BatchRuntimeException(e));
             }
             batchContext.setBatchStatus(BatchStatus.FAILED);
-            for (AbstractContext c : batchContext.getOuterContexts()) {
-                c.setBatchStatus(BatchStatus.FAILED);
-            }
         }
 
         BatchStatus stepStatus = batchContext.getBatchStatus();
@@ -152,6 +160,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 for (AbstractContext e : batchContext.getOuterContexts()) {
                     e.setBatchStatus(BatchStatus.FAILED);
                 }
+                break;
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {

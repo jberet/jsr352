@@ -84,7 +84,7 @@ public class JobOperatorImpl implements JobOperator {
         repository.addJob(jobDefined);
         repository.addJobInstance(instance);
 
-        return startJobExecution(instance, jobParameters);
+        return startJobExecution(instance, jobParameters, null);
     }
 
     @Override
@@ -161,11 +161,11 @@ public class JobOperatorImpl implements JobOperator {
     public long restart(long executionId, Properties restartParameters) throws JobExecutionAlreadyCompleteException,
             NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
         long newExecutionId = 0;
-        JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(executionId);
-        if (jobExecution == null) {
+        JobExecutionImpl originalToRestart = (JobExecutionImpl) getJobExecution(executionId);
+        if (originalToRestart == null) {
             throw LOGGER.noSuchJobExecution(executionId);
         }
-        BatchStatus previousStatus = jobExecution.getBatchStatus();
+        BatchStatus previousStatus = originalToRestart.getBatchStatus();
         if (previousStatus == BatchStatus.COMPLETED) {
             throw LOGGER.jobExecutionAlreadyCompleteException(executionId);
         }
@@ -184,7 +184,7 @@ public class JobOperatorImpl implements JobOperator {
                 throw LOGGER.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
             }
             try {
-                newExecutionId = startJobExecution(jobInstance, restartParameters);
+                newExecutionId = startJobExecution(jobInstance, restartParameters, originalToRestart);
             } catch (Exception e) {
                 throw new JobRestartException(e);
             }
@@ -234,8 +234,8 @@ public class JobOperatorImpl implements JobOperator {
         return jobExecution.getStepExecutions();
     }
 
-    private long startJobExecution(JobInstanceImpl jobInstance, Properties jobParameters) throws JobStartException, JobSecurityException {
-        JobExecutionImpl jobExecution = new JobExecutionImpl(repository.nextUniqueId(), jobInstance, jobParameters);
+    private long startJobExecution(JobInstanceImpl jobInstance, Properties jobParameters, JobExecutionImpl originalToRestart) throws JobStartException, JobSecurityException {
+        JobExecutionImpl jobExecution = new JobExecutionImpl(repository.nextUniqueId(), jobInstance, jobParameters, originalToRestart);
         JobContextImpl jobContext = new JobContextImpl(jobExecution, artifactFactory, repository);
 
         JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);

@@ -81,6 +81,8 @@ public abstract class AbstractRunner<C extends AbstractContext> {
     protected String resolveTransitionElements(List<?> transitionElements) {
         String result = null;
         String exitStatus = batchContext.getExitStatus();
+        String newExitStatus = null;  //optional, may be null
+
         for (Object e : transitionElements) {  //end, fail. next, stop
             if (e instanceof Next) {
                 Next next = (Next) e;
@@ -91,10 +93,13 @@ public abstract class AbstractRunner<C extends AbstractContext> {
                 End end = (End) e;
                 if (matches(exitStatus, end.getOn())) {
                     batchContext.setBatchStatus(BatchStatus.COMPLETED);
-                    batchContext.setExitStatus(end.getExitStatus());
+                    newExitStatus = end.getExitStatus();
+                    if (newExitStatus != null) {
+                        batchContext.setExitStatus(newExitStatus);
+                    }
                     for (AbstractContext c : batchContext.getOuterContexts()) {
                         c.setBatchStatus(BatchStatus.COMPLETED);
-                        c.setExitStatus(end.getExitStatus());
+                        c.setExitStatus(newExitStatus == null ? exitStatus : newExitStatus);
                     }
                     return null;
                 }
@@ -102,10 +107,13 @@ public abstract class AbstractRunner<C extends AbstractContext> {
                 Fail fail = (Fail) e;
                 if (matches(exitStatus, fail.getOn())) {
                     batchContext.setBatchStatus(BatchStatus.FAILED);
-                    batchContext.setExitStatus(fail.getExitStatus());
+                    newExitStatus = fail.getExitStatus();
+                    if (newExitStatus != null) {
+                        batchContext.setExitStatus(newExitStatus);
+                    }
                     for (AbstractContext c : batchContext.getOuterContexts()) {
                         c.setBatchStatus(BatchStatus.FAILED);
-                        c.setExitStatus(fail.getExitStatus());
+                        c.setExitStatus(newExitStatus == null ? exitStatus : newExitStatus);
                     }
                     return null;
                 }
@@ -113,11 +121,17 @@ public abstract class AbstractRunner<C extends AbstractContext> {
                 Stop stop = (Stop) e;
                 if (matches(exitStatus, stop.getOn())) {
                     batchContext.setBatchStatus(BatchStatus.STOPPED);
-                    batchContext.setExitStatus(stop.getExitStatus());
-                    //TODO remember restart from stop.getRestart();
+                    newExitStatus = stop.getExitStatus();
+                    if (newExitStatus != null) {
+                        batchContext.setExitStatus(newExitStatus);
+                    }
                     for (AbstractContext c : batchContext.getOuterContexts()) {
                         c.setBatchStatus(BatchStatus.STOPPED);
-                        c.setExitStatus(stop.getExitStatus());
+                        c.setExitStatus(newExitStatus == null ? exitStatus : newExitStatus);
+                    }
+                    String restartPoint = stop.getRestart();  //job-level step, flow or split to restart
+                    if (restartPoint != null) {
+                        batchContext.getJobContext().getJobExecution().setRestartPoint(restartPoint);
                     }
                     return null;
                 }

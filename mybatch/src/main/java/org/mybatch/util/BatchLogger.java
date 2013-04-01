@@ -156,4 +156,7 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 32, value = "Could not resolve the expression: %s")
     BatchRuntimeException unresolvableExpressionException(String expression);
+
+    @Message(id = 33, value = "The step %s has started %s times and reached its start limit %s")
+    BatchRuntimeException stepReachedStartLimit(String stepName, int startLimit, int startCount);
 }

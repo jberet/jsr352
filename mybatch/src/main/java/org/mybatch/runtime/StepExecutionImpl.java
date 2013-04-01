@@ -35,15 +35,37 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     private JobExecutionImpl rootJobExecution;
 
-    private Serializable userPersistentData;
+    private Serializable persistentUserData;
+
+    private Exception exception;
 
     private StepMetrics stepMetrics = new StepMetrics();
+
+    int startCount;
 
     public StepExecutionImpl(long id, JobExecutionImpl rootJobExecution, String stepId) {
         this.id = id;
         this.rootJobExecution = rootJobExecution;
         this.stepId = stepId;
-        this.rootJobExecution.addStepExecution(this);
+        if (rootJobExecution.originalToRestart != null) {  //currently in a restarted execution
+            for (StepExecution s : rootJobExecution.originalToRestart.getStepExecutions()) {
+                if (s.getStepName().equals(stepId)) {  // found the corresponding step in the original job execution
+                    if(s.getPersistentUserData() != null) {
+                        persistentUserData = s.getPersistentUserData();
+                    }
+                    this.startCount = ((StepExecutionImpl) s).startCount;
+                    break;
+                }
+            }
+        }
+    }
+
+    public int getStartCount() {
+        return startCount;
+    }
+
+    public void incrementStartCount() {
+        this.startCount++;
     }
 
     @Override
@@ -58,11 +80,11 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     @Override
     public Serializable getPersistentUserData() {
-        return userPersistentData;
+        return persistentUserData;
     }
 
-    public void setUserPersistentData(Serializable userPersistentData) {
-        this.userPersistentData = userPersistentData;
+    public void setPersistentUserData(Serializable persistentUserData) {
+        this.persistentUserData = persistentUserData;
     }
 
     @Override
@@ -70,4 +92,11 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return stepMetrics.getMetrics();
     }
 
+    public Exception getException() {
+        return exception;
+    }
+
+    public void setException(Exception exception) {
+        this.exception = exception;
+    }
 }

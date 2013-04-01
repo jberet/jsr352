@@ -54,33 +54,63 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
      * Runs the first job element, which then transitions to the next element.  Not used for running split, whose
      * component elements are not sequential.
      */
-    protected void runFromHead() {
-        // the head of the composite job element is the first non-abstract element (step, flow, or split)
-        for (Object e : getJobElements()) {
-            if (e instanceof Step) {
-                Step step = (Step) e;
+    protected void runFromHeadOrRestartPoint(String restartPoint) {
+        if (restartPoint != null) {
+            for (Object e : getJobElements()) {
+                if (e instanceof Step) {
+                    Step step = (Step) e;
+                    if (step.getId().equals(restartPoint)) {
+                        runStep(step);
+                        break;
+                    }
+                } else if (e instanceof Flow) {
+                    Flow flow = (Flow) e;
+                    if (flow.getId().equals(restartPoint)) {
+                        runFlow(flow, null);
+                        break;
+                    }
+                } else if (e instanceof Split) {
+                    Split split = (Split) e;
+                    if (split.getId().equals(restartPoint)) {
+                        runSplit(split);
+                        break;
+                    }
+                } else if (e instanceof Decision) {
+                    Decision decision = (Decision) e;
+                    if (decision.getId().equals(restartPoint)) {
+                        runDecision(decision);
+                    }
+                    break;
+                }
+            }
+        } else {
+            // the head of the composite job element is the first non-abstract element (step, flow, or split)
+            for (Object e : getJobElements()) {
+                if (e instanceof Step) {
+                    Step step = (Step) e;
 //                if (Boolean.parseBoolean(step.getAbstract())) {
 //                    continue;
 //                }
-                runStep(step);
-                break;
-            } else if (e instanceof Flow) {
-                Flow flow = (Flow) e;
-                //A flow cannot be abstract or have parent, so run the flow
-                runFlow(flow, null);
-                break;
-            } else if (e instanceof Split) {
-                Split split = (Split) e;
-                //A split cannot be abstract or have parent, so run the split
-                runSplit(split);
-                break;
-            } else if (e instanceof Decision) {
-                Decision decision = (Decision) e;
-                batchContext.setBatchStatus(BatchStatus.FAILED);
-                BatchLogger.LOGGER.decisionCannotBeFirst(decision.getId());
-                return;
+                    runStep(step);
+                    break;
+                } else if (e instanceof Flow) {
+                    Flow flow = (Flow) e;
+                    //A flow cannot be abstract or have parent, so run the flow
+                    runFlow(flow, null);
+                    break;
+                } else if (e instanceof Split) {
+                    Split split = (Split) e;
+                    //A split cannot be abstract or have parent, so run the split
+                    runSplit(split);
+                    break;
+                } else if (e instanceof Decision) {
+                    Decision decision = (Decision) e;
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
+                    BatchLogger.LOGGER.decisionCannotBeFirst(decision.getId());
+                    return;
 
 //                runDecision(decision);
+                }
             }
         }
     }

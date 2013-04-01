@@ -35,7 +35,6 @@ import org.mybatch.util.BatchUtil;
 public class StepContextImpl extends AbstractContext implements StepContext {
     private Step step;
     private StepExecutionImpl stepExecution;
-    private Exception exception;
 
     public StepContextImpl(Step step, AbstractContext[] outerContexts) {
         super(step.getId(), outerContexts);
@@ -101,16 +100,16 @@ public class StepContextImpl extends AbstractContext implements StepContext {
 
     @Override
     public void setPersistentUserData(Serializable data) {
-        stepExecution.setUserPersistentData(data);
+        stepExecution.setPersistentUserData(data);
     }
 
     @Override
     public Exception getException() {
-        return exception;
+        return stepExecution.getException();
     }
 
     public void setException(Exception e) {
-        this.exception = e;
+        stepExecution.setException(e);
     }
 
     @Override
