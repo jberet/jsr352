@@ -33,8 +33,6 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     private String stepId;
 
-    private JobExecutionImpl rootJobExecution;
-
     private Serializable persistentUserData;
 
     private Exception exception;
@@ -43,21 +41,9 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     int startCount;
 
-    public StepExecutionImpl(long id, JobExecutionImpl rootJobExecution, String stepId) {
+    public StepExecutionImpl(long id, String stepId) {
         this.id = id;
-        this.rootJobExecution = rootJobExecution;
         this.stepId = stepId;
-        if (rootJobExecution.originalToRestart != null) {  //currently in a restarted execution
-            for (StepExecution s : rootJobExecution.originalToRestart.getStepExecutions()) {
-                if (s.getStepName().equals(stepId)) {  // found the corresponding step in the original job execution
-                    if(s.getPersistentUserData() != null) {
-                        persistentUserData = s.getPersistentUserData();
-                    }
-                    this.startCount = ((StepExecutionImpl) s).startCount;
-                    break;
-                }
-            }
-        }
     }
 
     public int getStartCount() {
@@ -66,6 +52,10 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     public void incrementStartCount() {
         this.startCount++;
+    }
+
+    public void setStartCount(int startCount) {
+        this.startCount = startCount;
     }
 
     @Override

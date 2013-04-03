@@ -73,7 +73,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             String next = flow.getNext();
             if (next == null) {
-                next = resolveTransitionElements(flow.getTransitionElements());
+                next = resolveTransitionElements(flow.getTransitionElements(), flow.getNext());
             }
             enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
         }

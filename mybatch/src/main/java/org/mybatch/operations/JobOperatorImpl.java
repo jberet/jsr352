@@ -235,8 +235,8 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     private long startJobExecution(JobInstanceImpl jobInstance, Properties jobParameters, JobExecutionImpl originalToRestart) throws JobStartException, JobSecurityException {
-        JobExecutionImpl jobExecution = new JobExecutionImpl(repository.nextUniqueId(), jobInstance, jobParameters, originalToRestart);
-        JobContextImpl jobContext = new JobContextImpl(jobExecution, artifactFactory, repository);
+        JobExecutionImpl jobExecution = new JobExecutionImpl(repository.nextUniqueId(), jobInstance, jobParameters);
+        JobContextImpl jobContext = new JobContextImpl(jobExecution, originalToRestart, artifactFactory, repository);
 
         JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
         Future<?> result = ConcurrencyService.submit(jobExecutionRunner);

@@ -26,23 +26,60 @@ import java.io.Serializable;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
+import javax.batch.runtime.StepExecution;
 import javax.batch.runtime.context.StepContext;
 
 import org.mybatch.job.Step;
+import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.util.BatchUtil;
 
 public class StepContextImpl extends AbstractContext implements StepContext {
     private Step step;
     private StepExecutionImpl stepExecution;
+    Boolean allowStartIfComplete;
 
     public StepContextImpl(Step step, AbstractContext[] outerContexts) {
         super(step.getId(), outerContexts);
         this.step = step;
         this.classLoader = getJobContext().getClassLoader();
-        this.stepExecution = new StepExecutionImpl(getJobContext().getJobRepository().nextUniqueId(),
-                getJobContext().getJobExecution(), id);
-        this.stepExecution.setBatchStatus(BatchStatus.STARTING);
+        this.stepExecution = new StepExecutionImpl(getJobContext().getJobRepository().nextUniqueId(), id);
+
+        JobExecutionImpl originalToRestart = getJobContext().originalToRestart;
+        if (originalToRestart != null) {  //currently in a restarted execution
+            StepExecutionImpl originalStepExecution = findOriginalStepExecution(originalToRestart);
+            if (originalStepExecution != null) {
+                if (originalStepExecution.getBatchStatus() == BatchStatus.COMPLETED) {
+                    allowStartIfComplete = Boolean.valueOf(step.getAllowStartIfComplete());
+                    if (allowStartIfComplete == Boolean.FALSE) {
+                        setBatchStatus(BatchStatus.COMPLETED);
+                        setExitStatus(originalStepExecution.getExitStatus());
+                    }
+                }
+                if (originalStepExecution.getPersistentUserData() != null) {
+                    this.stepExecution.setPersistentUserData(originalStepExecution.getPersistentUserData());
+                }
+                this.stepExecution.setStartCount((originalStepExecution).getStartCount());
+            }
+        }
+
+        if (getBatchStatus() != BatchStatus.COMPLETED) {
+            this.stepExecution.setBatchStatus(BatchStatus.STARTING);
+        }
+    }
+
+    private StepExecutionImpl findOriginalStepExecution(JobExecutionImpl originalToRestart) {
+        for (StepExecution s : originalToRestart.getStepExecutions()) {
+            if (id.equals(s.getStepName())) {
+                return (StepExecutionImpl) s;
+            }
+        }
+        for (StepExecutionImpl s : originalToRestart.getInactiveStepExecutions()) {
+            if (id.equals(s.getStepName())) {
+                return s;
+            }
+        }
+        return null;
     }
 
     public Step getStep() {
@@ -51,6 +88,10 @@ public class StepContextImpl extends AbstractContext implements StepContext {
 
     public StepExecutionImpl getStepExecution() {
         return this.stepExecution;
+    }
+
+    public Boolean getAllowStartIfComplete() {
+        return allowStartIfComplete;
     }
 
     @Override

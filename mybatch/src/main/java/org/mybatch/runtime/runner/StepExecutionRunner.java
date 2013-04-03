@@ -79,95 +79,95 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     @Override
     public void run() {
-        try {
-            LinkedList<Step> executedSteps = batchContext.getJobContext().getExecutedSteps();
-            if (executedSteps.contains(step)) {
-                StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
-                stepIds.append(step.getId());
-                throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
-            }
-
-
-            int startLimit = 0;
-            if (step.getStartLimit() != null) {
-                startLimit = Integer.parseInt(step.getStartLimit());
-            }
-            if (startLimit > 0) {
-                int startCount = batchContext.getStepExecution().getStartCount();
-                if (startCount >= startLimit) {
-                    throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
+        Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
+        if (allowStartIfComplete != Boolean.FALSE) {
+            try {
+                LinkedList<Step> executedSteps = batchContext.getJobContext().getExecutedSteps();
+                if (executedSteps.contains(step)) {
+                    StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
+                    stepIds.append(step.getId());
+                    throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
                 }
-            }
 
-            batchContext.getStepExecution().incrementStartCount();
-            batchContext.setBatchStatus(BatchStatus.STARTED);
-            batchContext.getJobContext().getJobExecution().addStepExecution(batchContext.getStepExecution());
 
-            Chunk chunk = step.getChunk();
-            Batchlet batchlet = step.getBatchlet();
-            if (chunk == null && batchlet == null) {
-                batchContext.setBatchStatus(BatchStatus.ABANDONED);
-                LOGGER.stepContainsNoChunkOrBatchlet(id);
-                return;
-            }
+                int startLimit = 0;
+                if (step.getStartLimit() != null) {
+                    startLimit = Integer.parseInt(step.getStartLimit());
+                }
+                if (startLimit > 0) {
+                    int startCount = batchContext.getStepExecution().getStartCount();
+                    if (startCount >= startLimit) {
+                        throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
+                    }
+                }
 
-            if (chunk != null && batchlet != null) {
-                batchContext.setBatchStatus(BatchStatus.ABANDONED);
-                LOGGER.cannotContainBothChunkAndBatchlet(id);
-                return;
-            }
+                batchContext.getStepExecution().incrementStartCount();
+                batchContext.setBatchStatus(BatchStatus.STARTED);
+                batchContext.getJobContext().getJobExecution().addStepExecution(batchContext.getStepExecution());
 
-            for (StepListener l : stepListeners) {
-                l.beforeStep();
-            }
-
-            if (batchlet != null) {
-                BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, batchlet);
-                stepResult = batchletRunner.call();
-            } else {
-                ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
-                chunkRunner.run();
-            }
-
-            //record the fact this step has been executed
-            executedSteps.add(step);
-
-            for (StepListener l : stepListeners) {
-                try {
-                    l.afterStep();
-                } catch (Throwable e) {
-                    BatchLogger.LOGGER.failToRunJob(e, "", l);
-                    batchContext.setBatchStatus(BatchStatus.FAILED);
+                Chunk chunk = step.getChunk();
+                Batchlet batchlet = step.getBatchlet();
+                if (chunk == null && batchlet == null) {
+                    batchContext.setBatchStatus(BatchStatus.ABANDONED);
+                    LOGGER.stepContainsNoChunkOrBatchlet(id);
                     return;
                 }
-            }
-        } catch (Throwable e) {
-            LOGGER.failToRunJob(e, step.getId(), step);
-            if (e instanceof Exception) {
-                batchContext.setException((Exception) e);
-            } else {
-                batchContext.setException(new BatchRuntimeException(e));
-            }
-            batchContext.setBatchStatus(BatchStatus.FAILED);
-        }
 
-        BatchStatus stepStatus = batchContext.getBatchStatus();
-        switch (stepStatus) {
-            case STARTED:
-                batchContext.setBatchStatus(BatchStatus.COMPLETED);
-                break;
-            case FAILED:
-                for (AbstractContext e : batchContext.getOuterContexts()) {
-                    e.setBatchStatus(BatchStatus.FAILED);
+                if (chunk != null && batchlet != null) {
+                    batchContext.setBatchStatus(BatchStatus.ABANDONED);
+                    LOGGER.cannotContainBothChunkAndBatchlet(id);
+                    return;
                 }
-                break;
+
+                for (StepListener l : stepListeners) {
+                    l.beforeStep();
+                }
+
+                if (batchlet != null) {
+                    BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, batchlet);
+                    stepResult = batchletRunner.call();
+                } else {
+                    ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
+                    chunkRunner.run();
+                }
+
+                //record the fact this step has been executed
+                executedSteps.add(step);
+
+                for (StepListener l : stepListeners) {
+                    try {
+                        l.afterStep();
+                    } catch (Throwable e) {
+                        BatchLogger.LOGGER.failToRunJob(e, "", l);
+                        batchContext.setBatchStatus(BatchStatus.FAILED);
+                        return;
+                    }
+                }
+            } catch (Throwable e) {
+                LOGGER.failToRunJob(e, step.getId(), step);
+                if (e instanceof Exception) {
+                    batchContext.setException((Exception) e);
+                } else {
+                    batchContext.setException(new BatchRuntimeException(e));
+                }
+                batchContext.setBatchStatus(BatchStatus.FAILED);
+            }
+
+            BatchStatus stepStatus = batchContext.getBatchStatus();
+            switch (stepStatus) {
+                case STARTED:
+                    batchContext.setBatchStatus(BatchStatus.COMPLETED);
+                    break;
+                case FAILED:
+                    for (AbstractContext e : batchContext.getOuterContexts()) {
+                        e.setBatchStatus(BatchStatus.FAILED);
+                    }
+                    break;
+            }
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            String next = step.getNext();
-            if (next == null) {
-                next = resolveTransitionElements(step.getTransitionElements());
-            }
+            String next = resolveTransitionElements(step.getTransitionElements(), step.getNext());
             enclosingRunner.runJobElement(next, batchContext.getStepExecution());
         }
     }

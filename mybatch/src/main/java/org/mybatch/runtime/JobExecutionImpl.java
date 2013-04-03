@@ -49,30 +49,26 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private List<StepExecution> stepExecutions = new ArrayList<StepExecution>();
 
-    JobExecutionImpl originalToRestart;
-
-    /**
-     * Which job-level step, flow, decision or split to restart this job execution, if it were to be restarted.
-     */
-    String restartPoint;
+    private List<StepExecutionImpl> inactiveStepExecutions = new ArrayList<StepExecutionImpl>();
 
     private Properties jobParameters;
 
     protected long createTime;
     protected long lastUpdatedTime;
 
+    /**
+     * Which job-level step, flow, decision or split to restart this job execution, if it were to be restarted.
+     */
+    String restartPoint;
+
     private CountDownLatch latch = new CountDownLatch(1);
 
-    public JobExecutionImpl(long id, JobInstanceImpl jobInstance, Properties jobParameters, JobExecutionImpl originalToRestart) throws JobStartException {
+    public JobExecutionImpl(long id, JobInstanceImpl jobInstance, Properties jobParameters) throws JobStartException {
         this.id = id;
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
         this.jobInstance.addJobExecution(this);
         this.substitutedJob = BatchUtil.cloneJob(jobInstance.unsubstitutedJob);
-        if (originalToRestart != null) {
-            this.originalToRestart = originalToRestart;
-            this.restartPoint = originalToRestart.restartPoint;
-        }
     }
 
     public void awaitTerminatioin(long timeout, TimeUnit timeUnit) throws InterruptedException {
@@ -140,6 +136,10 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     public void addStepExecution(StepExecution stepExecution) {
         this.stepExecutions.add(stepExecution);
+    }
+
+    public List<StepExecutionImpl> getInactiveStepExecutions() {
+        return inactiveStepExecutions;
     }
 
     public void setRestartPoint(String restartPoint) {

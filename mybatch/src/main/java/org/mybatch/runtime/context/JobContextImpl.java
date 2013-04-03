@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
+import javax.batch.runtime.StepExecution;
 import javax.batch.runtime.context.JobContext;
 
 import org.mybatch.creation.ArtifactFactory;
@@ -39,6 +40,7 @@ import org.mybatch.job.Step;
 import org.mybatch.metadata.ApplicationMetaData;
 import org.mybatch.repository.JobRepository;
 import org.mybatch.runtime.JobExecutionImpl;
+import org.mybatch.runtime.StepExecutionImpl;
 import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
 import org.mybatch.util.PropertyResolver;
@@ -54,13 +56,20 @@ public class JobContextImpl extends AbstractContext implements JobContext {
 
     private LinkedList<Step> executedSteps = new LinkedList<Step>();
 
-    public JobContextImpl(JobExecutionImpl jobExecution, ArtifactFactory artifactFactory, JobRepository jobRepository) {
+    JobExecutionImpl originalToRestart;
+
+    public JobContextImpl(JobExecutionImpl jobExecution, JobExecutionImpl originalToRestart, ArtifactFactory artifactFactory, JobRepository jobRepository) {
         super(jobExecution.getSubstitutedJob().getId());
         this.jobExecution = jobExecution;
         this.applicationMetaData = jobExecution.getJobInstance().getApplicationMetaData();
         this.classLoader = applicationMetaData.getClassLoader();
         this.artifactFactory = artifactFactory;
         this.jobRepository = jobRepository;
+
+        if (originalToRestart != null) {
+            this.originalToRestart = originalToRestart;
+            this.jobExecution.setRestartPoint(originalToRestart.getRestartPoint());
+        }
 
         PropertyResolver resolver = new PropertyResolver();
         resolver.setJobParameters(jobExecution.getJobParameters());
@@ -195,5 +204,40 @@ public class JobContextImpl extends AbstractContext implements JobContext {
 
     JobRepository getJobRepository() {
         return jobRepository;
+    }
+
+    public void saveInactiveStepExecutions() {
+        if (originalToRestart != null) {
+            List<StepExecutionImpl> currentInactives = jobExecution.getInactiveStepExecutions();
+
+            List<StepExecution> originalStepExecutions = originalToRestart.getStepExecutions();
+            List<StepExecution> currentStepExecutions = jobExecution.getStepExecutions();
+
+            for (StepExecution originalStep : originalStepExecutions) {
+                boolean matched = false;
+                for (StepExecution currentStep : currentStepExecutions) {
+                    if (originalStep.getStepName().equals(currentStep.getStepName())) {
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched) {
+                    currentInactives.add((StepExecutionImpl) originalStep);
+                }
+            }
+
+            for (StepExecutionImpl originalStep : originalToRestart.getInactiveStepExecutions()) {
+                boolean matched = false;
+                for (StepExecutionImpl currentStep : currentInactives) {
+                    if (originalStep.getStepName().equals(currentStep.getStepName())) {
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched) {
+                    currentInactives.add(originalStep);
+                }
+            }
+        }
     }
 }

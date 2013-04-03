@@ -56,6 +56,9 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
      */
     protected void runFromHeadOrRestartPoint(String restartPoint) {
         if (restartPoint != null) {
+            //clear the restart point passed over from original job execution.  This execution may have its own
+            //restart point or null (start from head) for use by the next restart.
+            batchContext.getJobContext().getJobExecution().setRestartPoint(null);
             for (Object e : getJobElements()) {
                 if (e instanceof Step) {
                     Step step = (Step) e;
@@ -174,7 +177,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         try {
             newExitStatus = decider.decide(precedingStepExecutions);
             batchContext.setExitStatus(newExitStatus);
-            String next = resolveTransitionElements(decision.getTransitionElements());
+            String next = resolveTransitionElements(decision.getTransitionElements(), null);
             runJobElement(next, precedingStepExecutions);
         } catch (Exception e) {
             BatchLogger.LOGGER.failToRunJob(e, "", decider);
