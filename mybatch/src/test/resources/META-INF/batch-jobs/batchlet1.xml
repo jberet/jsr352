@@ -22,7 +22,7 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="batchlet1" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+<job id="batchlet1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <properties>
         <property name="job-prop-3" value="#{jobProperties['job-prop-2']}"></property>
         <property name="job-prop-2" value="#{jobProperties['job-prop']}"></property>

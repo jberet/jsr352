@@ -22,7 +22,7 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="exception-class-filter" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+<job id="exception-class-filter" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="exception-class-filter-step">
         <chunk>
             <reader ref="R1"></reader>

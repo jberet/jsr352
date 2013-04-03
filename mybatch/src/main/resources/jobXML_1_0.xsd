@@ -69,6 +69,7 @@
 				<xs:element name="step" type="jsl:Step" />
 			</xs:choice>
 		</xs:sequence>
+        <xs:attribute name="version" use="required" type="xs:string" fixed="1.0" />
 		<xs:attribute name="id" use="required" type="xs:ID" />
 		<xs:attribute name="restartable" use="optional" type="xs:string" />
 	</xs:complexType>
