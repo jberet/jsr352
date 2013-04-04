@@ -69,9 +69,13 @@ public abstract class AbstractRunner<C extends AbstractContext> {
      *
      * @param transitionElements the group of control elements, i.e., next, end, stop and fail
      * @param nextAttr the next attribute value
+     * @param partOfDecision if these transition elements are part of a decision element.  If so the current
+     *                       batchContext's status will be updated to the terminating status.  Otherwise, these
+     *                       transition elements are part of a step or flow, and the terminating status has no
+     *                       bearing on the current batchContext.
      * @return the ref name of the next execution element
      */
-    protected String resolveTransitionElements(List<?> transitionElements, String nextAttr) {
+    protected String resolveTransitionElements(List<?> transitionElements, String nextAttr, boolean partOfDecision) {
         String exitStatus = batchContext.getExitStatus();
         for (Object e : transitionElements) {  //end, fail. next, stop
             if (e instanceof Next) {
@@ -82,19 +86,22 @@ public abstract class AbstractRunner<C extends AbstractContext> {
             } else if (e instanceof End) {
                 End end = (End) e;
                 if (matches(exitStatus, end.getOn())) {
-                    setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.COMPLETED, end.getExitStatus());
+                    setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.COMPLETED,
+                            exitStatus, end.getExitStatus(), partOfDecision);
                     return null;
                 }
             } else if (e instanceof Fail) {
                 Fail fail = (Fail) e;
                 if (matches(exitStatus, fail.getOn())) {
-                    setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.FAILED, fail.getExitStatus());
+                    setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.FAILED,
+                            exitStatus, fail.getExitStatus(), partOfDecision);
                     return null;
                 }
             } else {  //stop
                 Stop stop = (Stop) e;
                 if (matches(exitStatus, stop.getOn())) {
-                    setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.STOPPED, stop.getExitStatus());
+                    setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.STOPPED,
+                            exitStatus, stop.getExitStatus(), partOfDecision);
                     String restartPoint = stop.getRestart();  //job-level step, flow or split to restart
                     if (restartPoint != null) {
                         batchContext.getJobContext().getJobExecution().setRestartPoint(restartPoint);
@@ -106,18 +113,32 @@ public abstract class AbstractRunner<C extends AbstractContext> {
         return nextAttr;
     }
 
-    private void setOuterContextStatus(AbstractContext[] outerContexts, BatchStatus batchStatus, String exitStatus) {
-        if (outerContexts.length == 0) {
-            batchContext.getJobContext().setBatchStatus(batchStatus);
-            if (exitStatus != null) {
-                batchContext.getJobContext().setExitStatus(exitStatus);
-            }
+    private void setOuterContextStatus(AbstractContext[] outerContexts, BatchStatus batchStatus,
+                                       String currentExitStatus, String newExitStatus, boolean partOfDecision) {
+        String exitStatusToUse;
+        //for decision, the currentExitStatus is from the decider class
+        if (partOfDecision) {
+            exitStatusToUse = newExitStatus != null ? newExitStatus : currentExitStatus;
         } else {
-            for (AbstractContext c : outerContexts) {
-                c.setBatchStatus(batchStatus);
-                if (exitStatus != null) {
-                    c.setExitStatus(exitStatus);
-                }
+            exitStatusToUse = newExitStatus;
+        }
+
+        //if these elements are part of a step, or flow, the new batch status and exit status do not affect
+        //the already-completed step or flow.  If part of a decision, then yes.
+        if (partOfDecision) {
+            batchContext.setBatchStatus(batchStatus);
+            batchContext.setExitStatus(exitStatusToUse);
+        }
+
+        for (AbstractContext c : outerContexts) {
+            c.setBatchStatus(batchStatus);
+
+            //inside this method are all terminating transition elements, and
+            // the exitStatus returned from a decider should be applied to the entire job
+            if (partOfDecision) {
+                c.setExitStatus(exitStatusToUse);
+            } else if (exitStatusToUse != null) {
+                c.setExitStatus(exitStatusToUse);
             }
         }
     }

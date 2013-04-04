@@ -151,7 +151,7 @@ public interface BatchLogger extends BasicLogger {
     void decisionCannotBeFirst(String decisionId);
 
     @Message(id = 31, value = "Could not resolve expression because: %s")
-    @LogMessage(level = Logger.Level.WARN)
+    @LogMessage(level = Logger.Level.DEBUG)
     void unresolvableExpression(String message);
 
     @Message(id = 32, value = "Could not resolve the expression: %s")
