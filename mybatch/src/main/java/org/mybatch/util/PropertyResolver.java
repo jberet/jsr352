@@ -31,6 +31,7 @@ import javax.batch.operations.BatchRuntimeException;
 
 import org.mybatch.job.Analyzer;
 import org.mybatch.job.Batchlet;
+import org.mybatch.job.CheckpointAlgorithm;
 import org.mybatch.job.Chunk;
 import org.mybatch.job.Collector;
 import org.mybatch.job.Decision;
@@ -320,6 +321,18 @@ public final class PropertyResolver {
                 processor.setRef(newVal);
             }
             resolve(processor.getProperties(), true);
+        }
+
+        CheckpointAlgorithm checkpointAlgorithm = chunk.getCheckpointAlgorithm();
+        if (checkpointAlgorithm != null) {
+            oldVal = checkpointAlgorithm.getRef();
+            if (oldVal != null) {  //TODO remove the if, ref attr should be required
+                newVal = resolve(oldVal);
+                if (!oldVal.equals(newVal)) {
+                    checkpointAlgorithm.setRef(newVal);
+                }
+            }
+            resolve(checkpointAlgorithm.getProperties(), true);
         }
     }
 

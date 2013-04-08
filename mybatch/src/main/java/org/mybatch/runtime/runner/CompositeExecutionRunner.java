@@ -180,7 +180,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             String next = resolveTransitionElements(decision.getTransitionElements(), null, true);
             runJobElement(next, precedingStepExecutions);
         } catch (Exception e) {
-            BatchLogger.LOGGER.failToRunJob(e, decision.getRef(), decider);
+            BatchLogger.LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), decision.getRef(), decider);
             batchContext.setBatchStatus(BatchStatus.FAILED);
             return;
         }

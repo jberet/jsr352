@@ -52,7 +52,7 @@ import org.mybatch.util.BatchUtil;
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements Runnable {
-    private Step step;
+    Step step;
     private Object stepResult;
 
     List<StepListener> stepListeners = new ArrayList<StepListener>();
@@ -138,13 +138,13 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     try {
                         l.afterStep();
                     } catch (Throwable e) {
-                        BatchLogger.LOGGER.failToRunJob(e, "", l);
+                        BatchLogger.LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), step.getId(), l);
                         batchContext.setBatchStatus(BatchStatus.FAILED);
                         return;
                     }
                 }
             } catch (Throwable e) {
-                LOGGER.failToRunJob(e, step.getId(), step);
+                LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), step.getId(), step);
                 if (e instanceof Exception) {
                     batchContext.setException((Exception) e);
                 } else {

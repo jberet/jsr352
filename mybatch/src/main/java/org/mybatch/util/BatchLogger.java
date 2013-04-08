@@ -108,9 +108,9 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void jobAlreadyExists(String jobId);
 
-    @Message(id = 18, value = "Failed to run artifact %s, %s")
+    @Message(id = 18, value = "Failed to run job %s, %s, %s")
     @LogMessage(level = Logger.Level.ERROR)
-    void failToRunJob(@Cause Throwable e, String name, Object artifact);
+    void failToRunJob(@Cause Throwable e, String jobName, String stepName, Object artifact);
 
     @Message(id = 19, value = "Unrecognizable job element: %s in job: %s")
     IllegalStateException unrecognizableJobElement(String jobElementName, String jobName);
@@ -159,4 +159,15 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 33, value = "The step %s has started %s times and reached its start limit %s")
     BatchRuntimeException stepReachedStartLimit(String stepName, int startLimit, int startCount);
+
+    @Message(id = 34, value = "Invalid chunk checkpoint-policy %s.  It must be either item or custom.")
+    BatchRuntimeException invalidCheckpointPolicy(String checkpointPolicy);
+
+    @Message(id = 35, value = "Invalid chunk item-count %s.  It must be greater than 0.")
+    BatchRuntimeException invalidItemCount(int itemCount);
+
+    @Message(id = 36, value = "checkpoint-algorithm element is missing in step %s.  It is required for custom checkpoint-policy.")
+    BatchRuntimeException checkpointAlgorithmMissing(String stepName);
+
+
 }

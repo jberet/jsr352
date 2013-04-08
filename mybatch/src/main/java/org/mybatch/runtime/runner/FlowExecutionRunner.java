@@ -55,7 +55,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
         try {
             runFromHeadOrRestartPoint(null);
         } catch (Throwable e) {
-            LOGGER.failToRunJob(e, flow.getId(), flow);
+            LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), flow.getId(), flow);
             batchContext.setBatchStatus(BatchStatus.FAILED);
             for (AbstractContext c : batchContext.getOuterContexts()) {
                 c.setBatchStatus(BatchStatus.FAILED);
