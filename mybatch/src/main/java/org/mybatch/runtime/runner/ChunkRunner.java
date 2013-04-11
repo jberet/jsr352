@@ -316,6 +316,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
                 batchContext.getStepExecution().setReaderCheckpointInfo(itemReader.checkpointInfo());
                 batchContext.getStepExecution().setWriterCheckpointInfo(itemWriter.checkpointInfo());
+                batchContext.savePersistentData();
             } catch (Exception e) {
                 for (ItemWriteListener l : stepRunner.itemWriteListeners) {
                     l.onWriteError(outputList, e);
@@ -336,6 +337,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             checkpointAlgorithm.endCheckpoint();
         }
         processingInfo.startingNewChunk = true;
+        processingInfo.count = 0;
     }
 
     private boolean maySkip(Exception e) {

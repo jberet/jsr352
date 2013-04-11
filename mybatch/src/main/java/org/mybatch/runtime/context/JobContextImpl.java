@@ -46,11 +46,11 @@ import org.mybatch.util.BatchUtil;
 import org.mybatch.util.PropertyResolver;
 
 public class JobContextImpl extends AbstractContext implements JobContext {
-    private JobExecutionImpl jobExecution;
+    JobExecutionImpl jobExecution;
 
     private ApplicationMetaData applicationMetaData;
     private ArtifactFactory artifactFactory;
-    private JobRepository jobRepository;
+    JobRepository jobRepository;
 
     private JobListener[] jobListeners = new JobListener[0];
 
@@ -200,10 +200,6 @@ public class JobContextImpl extends AbstractContext implements JobContext {
                 this.jobListeners[i] = createArtifact(listener.getRef(), listener.getProperties());
             }
         }
-    }
-
-    JobRepository getJobRepository() {
-        return jobRepository;
     }
 
     public void saveInactiveStepExecutions() {

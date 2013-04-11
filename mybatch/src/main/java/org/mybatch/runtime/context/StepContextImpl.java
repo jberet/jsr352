@@ -43,7 +43,7 @@ public class StepContextImpl extends AbstractContext implements StepContext {
         super(step.getId(), outerContexts);
         this.step = step;
         this.classLoader = getJobContext().getClassLoader();
-        this.stepExecution = new StepExecutionImpl(getJobContext().getJobRepository().nextUniqueId(), id);
+        this.stepExecution = new StepExecutionImpl(getJobContext().jobRepository.nextUniqueId(), id);
 
         JobExecutionImpl originalToRestart = getJobContext().originalToRestart;
         if (originalToRestart != null) {  //currently in a restarted execution
@@ -160,4 +160,7 @@ public class StepContextImpl extends AbstractContext implements StepContext {
         return stepExecution.getMetrics();
     }
 
+    public void savePersistentData() {
+        getJobContext().jobRepository.savePersistentData(getJobContext().jobExecution, stepExecution);
+    }
 }

@@ -22,6 +22,7 @@
 
 package org.mybatch.repository.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +33,8 @@ import javax.batch.runtime.JobInstance;
 
 import org.mybatch.job.Job;
 import org.mybatch.repository.JobRepository;
+import org.mybatch.runtime.StepExecutionImpl;
+import org.mybatch.util.BatchUtil;
 
 public enum MemoryRepository implements JobRepository {
     INSTANCE;
@@ -129,5 +132,24 @@ public enum MemoryRepository implements JobRepository {
         return Collections.unmodifiableList(jobInstances);
     }
 
+    @Override
+    public void savePersistentData(JobExecution jobExecution, StepExecutionImpl stepExecution) {
+        Serializable ser = stepExecution.getPersistentUserData();
+        Serializable copy;
+        if (ser != null) {
+            copy = BatchUtil.clone(ser);
+            stepExecution.setPersistentUserData(copy);
+        }
+        ser = stepExecution.getReaderCheckpointInfo();
+        if (ser != null) {
+            copy = BatchUtil.clone(ser);
+            stepExecution.setReaderCheckpointInfo(copy);
+        }
+        ser = stepExecution.getWriterCheckpointInfo();
+        if (ser != null) {
+            copy = BatchUtil.clone(ser);
+            stepExecution.setWriterCheckpointInfo(copy);
+        }
+    }
 
 }

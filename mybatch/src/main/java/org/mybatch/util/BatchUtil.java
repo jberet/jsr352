@@ -133,18 +133,18 @@ public class BatchUtil {
         return sb;
     }
 
-    public static Job cloneJob(Job originalJob) throws JobStartException {
-        Job clone = null;
+    public static <T> T clone(T original) throws JobStartException {
+        T clone = null;
         ObjectOutputStream oos = null;
         ObjectInputStream ois = null;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             oos = new ObjectOutputStream(bos);
-            oos.writeObject(originalJob);
+            oos.writeObject(original);
             oos.flush();
             ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
             ois = new ObjectInputStream(bis);
-            clone = (Job) ois.readObject();
+            clone = (T) ois.readObject();
         } catch (IOException e) {
             throw new JobStartException(e);
         } catch (ClassNotFoundException e) {
