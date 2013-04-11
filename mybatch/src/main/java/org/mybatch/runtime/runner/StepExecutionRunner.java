@@ -180,25 +180,35 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 Object o = batchContext.getJobContext().createArtifact(listener.getRef(), listener.getProperties(), batchContext);
                 if (o instanceof StepListener) {
                     stepListeners.add((StepListener) o);
-                } else if (o instanceof ChunkListener) {
+                }
+                if (o instanceof ChunkListener) {
                     chunkListeners.add((ChunkListener) o);
-                } else if (o instanceof SkipWriteListener) {
+                }
+                if (o instanceof SkipWriteListener) {
                     skipWriteListeners.add((SkipWriteListener) o);
-                } else if (o instanceof SkipProcessListener) {
+                }
+                if (o instanceof SkipProcessListener) {
                     skipProcessListeners.add((SkipProcessListener) o);
-                } else if (o instanceof SkipReadListener) {
+                }
+                if (o instanceof SkipReadListener) {
                     skipReadListeners.add((SkipReadListener) o);
-                } else if (o instanceof RetryReadListener) {
+                }
+                if (o instanceof RetryReadListener) {
                     retryReadListeners.add((RetryReadListener) o);
-                } else if (o instanceof RetryWriteListener) {
+                }
+                if (o instanceof RetryWriteListener) {
                     retryWriteListeners.add((RetryWriteListener) o);
-                } else if (o instanceof RetryProcessListener) {
+                }
+                if (o instanceof RetryProcessListener) {
                     retryProcessListeners.add((RetryProcessListener) o);
-                } else if (o instanceof ItemReadListener) {
+                }
+                if (o instanceof ItemReadListener) {
                     itemReadListeners.add((ItemReadListener) o);
-                } else if (o instanceof ItemWriteListener) {
+                }
+                if (o instanceof ItemWriteListener) {
                     itemWriteListeners.add((ItemWriteListener) o);
-                } else if (o instanceof ItemProcessListener) {
+                }
+                if (o instanceof ItemProcessListener) {
                     itemProcessListeners.add((ItemProcessListener) o);
                 }
             }

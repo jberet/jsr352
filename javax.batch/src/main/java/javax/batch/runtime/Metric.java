@@ -24,7 +24,7 @@ package javax.batch.runtime;
 public interface Metric {
 	public enum MetricType {READ_COUNT, WRITE_COUNT, COMMIT_COUNT, 
         ROLLBACK_COUNT, READ_SKIP_COUNT, PROCESS_SKIP_COUNT, FILTER_COUNT, 
-        WRITE_SKIPCOUNT}
+        WRITE_SKIP_COUNT}
 	/**
 	 * The getType method returns the metric type. 
 	 * 

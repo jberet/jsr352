@@ -44,6 +44,7 @@
                 <!-- valid property reference: foo resolves to bar, and bar resolves to the foo declared above in job-level -->
                 <property name="bar" value="#{jobProperties['foo']}"></property>
                 <property name="foo" value="#{jobProperties['bar']}"></property>
+                <property name="job-param" value="#{jobParameters['job-param']}?:jobParamDefault;"></property>
             </properties>
         </batchlet>
     </step>

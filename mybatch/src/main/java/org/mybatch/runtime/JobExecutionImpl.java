@@ -69,6 +69,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         this.jobParameters = jobParameters;
         this.jobInstance.addJobExecution(this);
         this.substitutedJob = BatchUtil.cloneJob(jobInstance.unsubstitutedJob);
+        this.startTime = this.createTime = System.currentTimeMillis();
     }
 
     public void awaitTerminatioin(long timeout, TimeUnit timeUnit) throws InterruptedException {
@@ -86,10 +87,12 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     @Override
     public void setBatchStatus(BatchStatus batchStatus) {
         super.setBatchStatus(batchStatus);
-        if (batchStatus != BatchStatus.STARTING &&
-                batchStatus != BatchStatus.STARTED &&
-                batchStatus != BatchStatus.STOPPING) {
+        if (batchStatus == BatchStatus.COMPLETED ||
+                batchStatus == BatchStatus.FAILED ||
+                batchStatus == BatchStatus.STOPPED) {
             latch.countDown();
+            lastUpdatedTime = System.currentTimeMillis();
+            endTime = lastUpdatedTime;
         }
     }
 
@@ -113,14 +116,6 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         return new Date(lastUpdatedTime);
     }
 
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
-    }
-
-    public void setLastUpdatedTime(long lastUpdatedTime) {
-        this.lastUpdatedTime = lastUpdatedTime;
-    }
-
     public JobInstanceImpl getJobInstance() {
         return jobInstance;
     }
@@ -136,6 +131,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     public void addStepExecution(StepExecution stepExecution) {
         this.stepExecutions.add(stepExecution);
+        lastUpdatedTime = System.currentTimeMillis();
     }
 
     public List<StepExecutionImpl> getInactiveStepExecutions() {

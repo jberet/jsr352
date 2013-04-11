@@ -22,6 +22,7 @@
 
 package org.mybatch.runtime.runner;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -39,10 +40,12 @@ import javax.batch.api.chunk.listener.SkipReadListener;
 import javax.batch.api.chunk.listener.SkipWriteListener;
 import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.BatchStatus;
+import javax.batch.runtime.Metric;
 
 import org.mybatch.job.Chunk;
 import org.mybatch.metadata.ExceptionClassFilterImpl;
 import org.mybatch.runtime.context.StepContextImpl;
+import org.mybatch.runtime.metric.StepMetrics;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
@@ -51,6 +54,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private Chunk chunk;
     private StepExecutionRunner stepRunner;
+    private StepMetrics stepMetrics;
     private ItemReader itemReader;
     private ItemWriter itemWriter;
     private ItemProcessor itemProcessor;
@@ -70,6 +74,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     public ChunkRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, StepExecutionRunner stepRunner, Chunk chunk) {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
+        this.stepMetrics = stepRunner.batchContext.getStepExecution().getStepMetrics();
         this.chunk = chunk;
 
         org.mybatch.job.ItemReader readerElement = chunk.getReader();
@@ -129,8 +134,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     @Override
     public void run() {
         try {
-            itemReader.open(null);
-            itemWriter.open(null);
+            itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
+            itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
 
             readProcessWriteItems();
 
@@ -146,13 +151,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private void readProcessWriteItems() throws Exception {
         List<Object> outputList = new ArrayList<Object>();
-        ProcessingInfo processingInfo = ProcessingInfo.get();
+        ProcessingInfo processingInfo = new ProcessingInfo();
         int checkpointTimeout = 0;
         Object item = null;
-        boolean allItemsProcessed = false;
-        while (!allItemsProcessed) {
+        while (!processingInfo.depleted) {
             try {
                 if (processingInfo.startingNewChunk) {
+                    processingInfo = new ProcessingInfo();
                     for (ChunkListener l : stepRunner.chunkListeners) {
                         l.beforeChunk();
                     }
@@ -164,19 +169,21 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     processItem(item, processingInfo, outputList);
                 }
 
-                if (isReadyToCheckpoint(processingInfo) || item == null) {
-                    doCheckpoint(processingInfo, outputList);
-                    for (ChunkListener l : stepRunner.chunkListeners) {
-                        l.afterChunk();
+                if (!processingInfo.skipTheRest) {
+                    if (isReadyToCheckpoint(processingInfo)) {
+                        doCheckpoint(processingInfo, outputList);
+                        for (ChunkListener l : stepRunner.chunkListeners) {
+                            l.afterChunk();
+                        }
                     }
                 }
             } catch (Exception e) {
+                batchContext.setException(e);
                 for (ChunkListener l : stepRunner.chunkListeners) {
                     l.onError(e);
                 }
                 throw e;
             }
-            allItemsProcessed = item == null;
         }
     }
 
@@ -187,6 +194,11 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 l.beforeRead();
             }
             result = itemReader.readItem();
+            if (result != null) {  //only count successful read
+                stepMetrics.increment(Metric.MetricType.READ_COUNT, 1);
+            } else {
+                processingInfo.depleted = true;
+            }
             for (ItemReadListener l : stepRunner.itemReadListeners) {
                 l.afterRead(result);
             }
@@ -198,8 +210,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 for (SkipReadListener l : stepRunner.skipReadListeners) {
                     l.onSkipReadItem(e);
                 }
+                stepMetrics.increment(Metric.MetricType.READ_SKIP_COUNT, 1);
                 skipCount++;
-                readItem(processingInfo);
+                processingInfo.skipTheRest = true;
+                return null;
             } else {
                 throw e;
             }
@@ -209,7 +223,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private void processItem(final Object item, final ProcessingInfo processingInfo, final List<Object> outputList) throws Exception {
         Object output;
-        boolean skippedProcessing = false;
         if (itemProcessor != null) {
             try {
                 for (ItemProcessListener l : stepRunner.itemProcessListeners) {
@@ -219,6 +232,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 for (ItemProcessListener l : stepRunner.itemProcessListeners) {
                     l.afterProcess(item, output);
                 }
+                if (output == null) {
+                    stepMetrics.increment(Metric.MetricType.FILTER_COUNT, 1);
+                }
             } catch (Exception e) {
                 for (ItemProcessListener l : stepRunner.itemProcessListeners) {
                     l.onProcessError(item, e);
@@ -227,9 +243,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     for (SkipProcessListener l : stepRunner.skipProcessListeners) {
                         l.onSkipProcessItem(item, e);
                     }
+                    stepMetrics.increment(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
                     skipCount++;
                     output = null;
-                    skippedProcessing = true;
+                    processingInfo.skipTheRest = true;
                 } else {
                     throw e;
                 }
@@ -241,9 +258,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         if (output != null) {
             outputList.add(output);
         }
-        if (!skippedProcessing) {
-            processingInfo.count++;
-        }
+        processingInfo.count++;
     }
 
     private int checkpointTimeout() throws Exception {
@@ -272,6 +287,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private boolean isReadyToCheckpoint(final ProcessingInfo processingInfo) throws Exception {
+        if (processingInfo.depleted) {
+            return true;
+        }
         if (checkpointPolicy.equals("item")) {
             if (processingInfo.count >= itemCount) {
                 return true;
@@ -285,15 +303,19 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private void doCheckpoint(final ProcessingInfo processingInfo, final List<Object> outputList) throws Exception {
-        if (outputList.size() > 0) {
+        int outputSize = outputList.size();
+        if (outputSize > 0) {
             try {
                 for (ItemWriteListener l : stepRunner.itemWriteListeners) {
                     l.beforeWrite(outputList);
                 }
                 itemWriter.writeItems(outputList);
+                stepMetrics.increment(Metric.MetricType.WRITE_COUNT, outputSize);
                 for (ItemWriteListener l : stepRunner.itemWriteListeners) {
                     l.afterWrite(outputList);
                 }
+                batchContext.getStepExecution().setReaderCheckpointInfo(itemReader.checkpointInfo());
+                batchContext.getStepExecution().setWriterCheckpointInfo(itemWriter.checkpointInfo());
             } catch (Exception e) {
                 for (ItemWriteListener l : stepRunner.itemWriteListeners) {
                     l.onWriteError(outputList, e);
@@ -302,7 +324,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     for (SkipWriteListener l : stepRunner.skipWriteListeners) {
                         l.onSkipWriteItem(outputList, e);
                     }
-                    skipCount++;
+                    stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
+                    skipCount += outputSize;
                 } else {
                     throw e;
                 }
@@ -312,7 +335,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         if (!checkpointPolicy.equals("item")) {
             checkpointAlgorithm.endCheckpoint();
         }
-        processingInfo.reset();
+        processingInfo.startingNewChunk = true;
     }
 
     private boolean maySkip(Exception e) {
@@ -328,23 +351,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private static final class ProcessingInfo {
-        private static ProcessingInfo instance = new ProcessingInfo();
-
         int count;
         boolean timerExpired;
         boolean startingNewChunk = true;
-
-        private ProcessingInfo() {
-        }
-
-        static ProcessingInfo get() {
-            return instance;
-        }
-
-        void reset() {
-            count = 0;
-            timerExpired = false;
-            startingNewChunk = true;
-        }
+        boolean skipTheRest;
+        boolean depleted;
     }
 }

@@ -59,6 +59,8 @@ public class StepContextImpl extends AbstractContext implements StepContext {
                 if (originalStepExecution.getPersistentUserData() != null) {
                     this.stepExecution.setPersistentUserData(originalStepExecution.getPersistentUserData());
                 }
+                this.stepExecution.setReaderCheckpointInfo(originalStepExecution.getReaderCheckpointInfo());
+                this.stepExecution.setWriterCheckpointInfo(originalStepExecution.getWriterCheckpointInfo());
                 this.stepExecution.setStartCount((originalStepExecution).getStartCount());
             }
         }

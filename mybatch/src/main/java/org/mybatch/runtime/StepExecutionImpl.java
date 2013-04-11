@@ -23,6 +23,7 @@
 package org.mybatch.runtime;
 
 import java.io.Serializable;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
@@ -31,9 +32,13 @@ import org.mybatch.runtime.metric.StepMetrics;
 public final class StepExecutionImpl extends AbstractExecution implements StepExecution {
     private long id;
 
-    private String stepId;
+    private String stepName;
 
     private Serializable persistentUserData;
+
+    private Serializable readerCheckpointInfo;
+
+    private Serializable writerCheckpointInfo;
 
     private Exception exception;
 
@@ -41,9 +46,10 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     int startCount;
 
-    public StepExecutionImpl(long id, String stepId) {
+    public StepExecutionImpl(long id, String stepName) {
         this.id = id;
-        this.stepId = stepId;
+        this.stepName = stepName;
+        startTime = System.currentTimeMillis();
     }
 
     public int getStartCount() {
@@ -65,7 +71,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     @Override
     public String getStepName() {
-        return stepId;
+        return stepName;
     }
 
     @Override
@@ -82,11 +88,41 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return stepMetrics.getMetrics();
     }
 
+    public StepMetrics getStepMetrics() {
+        return this.stepMetrics;
+    }
+
     public Exception getException() {
         return exception;
     }
 
     public void setException(Exception exception) {
         this.exception = exception;
+    }
+
+    @Override
+    public void setBatchStatus(BatchStatus batchStatus) {
+        super.setBatchStatus(batchStatus);
+        if (batchStatus == BatchStatus.COMPLETED ||
+                batchStatus == BatchStatus.FAILED ||
+                batchStatus == BatchStatus.STOPPED) {
+            endTime = System.currentTimeMillis();
+        }
+    }
+
+    public Serializable getReaderCheckpointInfo() {
+        return readerCheckpointInfo;
+    }
+
+    public void setReaderCheckpointInfo(Serializable readerCheckpointInfo) {
+        this.readerCheckpointInfo = readerCheckpointInfo;
+    }
+
+    public Serializable getWriterCheckpointInfo() {
+        return writerCheckpointInfo;
+    }
+
+    public void setWriterCheckpointInfo(Serializable writerCheckpointInfo) {
+        this.writerCheckpointInfo = writerCheckpointInfo;
     }
 }

@@ -122,20 +122,30 @@ public class JobOperatorImpl implements JobOperator {
                 count++;
             }
         }
+        if (count == 0) {
+            throw LOGGER.noSuchJobException(jobName);
+        }
         return count;
     }
 
     @Override
     public List<JobInstance> getJobInstances(String jobName, int start, int count) throws NoSuchJobException, JobSecurityException {
         LinkedList<JobInstance> result = new LinkedList<JobInstance>();
+        int pos = 0;
         for (JobInstance e : repository.getJobInstances()) {
             if (e.getJobName().equals(jobName)) {
-                if (result.size() < count) {
-                    result.addFirst(e);
-                } else {
-                    break;
+                if (pos >= start) {
+                    if (result.size() < count) {
+                        result.addFirst(e);
+                    } else {
+                        break;
+                    }
                 }
+                pos++;
             }
+        }
+        if (pos == 0) {
+            throw LOGGER.noSuchJobException(jobName);
         }
         return result;
     }
@@ -143,11 +153,18 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<Long> getRunningExecutions(String jobName) throws NoSuchJobException, JobSecurityException {
         List<Long> result = new ArrayList<Long>();
+        boolean jobExists = false;
         for (JobExecution e : repository.getJobExecutions()) {
             BatchStatus s = e.getBatchStatus();
-            if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
-                result.add(e.getExecutionId());
+            if (e.getJobName().equals(jobName)) {
+                jobExists = true;
+                if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
+                    result.add(e.getExecutionId());
+                }
             }
+        }
+        if (!jobExists) {
+            throw LOGGER.noSuchJobException(jobName);
         }
         return result;
     }

@@ -48,6 +48,9 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     @Inject @BatchProperty(name = "foo")
     private String foo;
 
+    @Inject @BatchProperty(name = "job-param")
+    String jobParam;
+
     @Inject
     private JobContext jobContext;
 
@@ -60,6 +63,7 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
         System.out.printf("Injected batch property with default name: %s => %s%n", "defaultName", defaultName);
         System.out.printf("Undeclared batch property: %s => %s%n", "no-such-property", noSuchProperty);
         System.out.printf("Undeclared batch property: %s => %s%n", "no-such-property", defaultValue);
+        System.out.printf("Injected job param %s => %s%n", "job-param", jobParam);
 
         System.out.printf("Injected JobContext: %s%n", jobContext);
         System.out.printf("Injected StepContext: %s%n", stepContext);

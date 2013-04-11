@@ -48,7 +48,7 @@ public class Main {
         long jobExecutionId;
         long timeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
         try {
-            jobExecutionId = jobOperator.start(jobXml, System.getProperties());
+            jobExecutionId = jobOperator.start(jobXml, null);
             JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
             jobExecution.awaitTerminatioin(timeout, TimeUnit.SECONDS);
 

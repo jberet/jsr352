@@ -40,14 +40,6 @@ public abstract class AbstractExecution {
         return new Date(endTime);
     }
 
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
-    public void setEndTime(long endTime) {
-        this.endTime = endTime;
-    }
-
     public String getExitStatus() {
         if (this.exitStatus != null) {
             return this.exitStatus;

@@ -31,6 +31,7 @@ import javax.batch.operations.JobExecutionNotMostRecentException;
 import javax.batch.operations.JobExecutionNotRunningException;
 import javax.batch.operations.JobRestartException;
 import javax.batch.operations.JobStartException;
+import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
 
@@ -169,5 +170,6 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 36, value = "checkpoint-algorithm element is missing in step %s.  It is required for custom checkpoint-policy.")
     BatchRuntimeException checkpointAlgorithmMissing(String stepName);
 
-
+    @Message(id = 37, value = "The specified job with the name %s does not exist.")
+    NoSuchJobException noSuchJobException(String jobName);
 }
