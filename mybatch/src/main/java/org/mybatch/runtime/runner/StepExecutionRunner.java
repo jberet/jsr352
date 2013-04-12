@@ -164,6 +164,8 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                         e.setBatchStatus(BatchStatus.FAILED);
                     }
                     break;
+                case STOPPING:
+                    batchContext.setBatchStatus(BatchStatus.STOPPED);
             }
         }
 

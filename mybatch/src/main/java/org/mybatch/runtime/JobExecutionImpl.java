@@ -61,7 +61,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
      */
     String restartPoint;
 
-    private CountDownLatch latch = new CountDownLatch(1);
+    private CountDownLatch jobTerminationlatch = new CountDownLatch(1);
+    private CountDownLatch jobStopLatch = new CountDownLatch(1);
 
     public JobExecutionImpl(long id, JobInstanceImpl jobInstance, Properties jobParameters) throws JobStartException {
         this.id = id;
@@ -72,8 +73,18 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         this.startTime = this.createTime = System.currentTimeMillis();
     }
 
+    //It's possible the (fast) job is already terminated and the latch nulled when this method is called
     public void awaitTerminatioin(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        latch.await(timeout, timeUnit);
+        if (jobTerminationlatch != null) {
+            jobTerminationlatch.await(timeout, timeUnit);
+        }
+    }
+
+    //It's possible the (fast) job is already terminated and the latch nulled when this method is called
+    public void awaitStop(long timeout, TimeUnit timeUnit) throws InterruptedException {
+        if (jobStopLatch != null) {
+            jobStopLatch.await(timeout, timeUnit);
+        }
     }
 
     public Job getSubstitutedJob() {
@@ -90,9 +101,12 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         if (batchStatus == BatchStatus.COMPLETED ||
                 batchStatus == BatchStatus.FAILED ||
                 batchStatus == BatchStatus.STOPPED) {
-            latch.countDown();
+            jobTerminationlatch.countDown();
+            jobStopLatch.countDown();
             lastUpdatedTime = System.currentTimeMillis();
             endTime = lastUpdatedTime;
+            jobStopLatch = null;
+            jobTerminationlatch = null;
         }
     }
 
@@ -144,5 +158,9 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     public String getRestartPoint() {
         return restartPoint;
+    }
+
+    public void stop() {
+        jobStopLatch.countDown();
     }
 }

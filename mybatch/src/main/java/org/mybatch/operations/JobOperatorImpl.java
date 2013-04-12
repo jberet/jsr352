@@ -102,6 +102,7 @@ public class JobOperatorImpl implements JobOperator {
             //in process of stopping, do nothing
         } else {
             jobExecution.setBatchStatus(BatchStatus.STOPPING);
+            jobExecution.stop();
         }
     }
 

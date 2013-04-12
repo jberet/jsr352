@@ -27,8 +27,6 @@ import java.util.Collection;
 import java.util.List;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
-import javax.batch.runtime.StepExecution;
-import javax.batch.runtime.context.StepContext;
 
 import org.mybatch.job.Job;
 import org.mybatch.runtime.StepExecutionImpl;

@@ -23,10 +23,13 @@
 package org.mybatch.runtime.runner;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Batchlet;
+import org.mybatch.runtime.JobExecutionImpl;
 import org.mybatch.runtime.context.StepContextImpl;
+import org.mybatch.util.ConcurrencyService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
@@ -41,8 +44,24 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     @Override
     public Object call() {
         try {
-            javax.batch.api.Batchlet batchletObj =
+            final javax.batch.api.Batchlet batchletObj =
                     (javax.batch.api.Batchlet) batchContext.getJobContext().createArtifact(batchlet.getRef(), batchlet.getProperties(), batchContext);
+
+            ConcurrencyService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        batchContext.getJobContext().getJobExecution().awaitStop(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+                        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
+                            batchContext.setBatchStatus(BatchStatus.STOPPING);
+                            batchletObj.stop();
+                        }
+                    } catch (Exception e) {
+                        LOGGER.failToStopJob(e, batchContext.getJobContext().getJobName(), batchContext.getStepName(), batchletObj);
+                    }
+                }
+            });
+
             String exitStatus = batchletObj.process();
             batchContext.setExitStatus(exitStatus);
         } catch (Throwable e) {

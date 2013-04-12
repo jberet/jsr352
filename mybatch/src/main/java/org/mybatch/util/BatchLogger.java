@@ -172,4 +172,8 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 37, value = "The specified job with the name %s does not exist.")
     NoSuchJobException noSuchJobException(String jobName);
+
+    @Message(id = 38, value = "Failed to stop the job %s, %s, %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToStopJob(@Cause Throwable cause, String jobName, String stepName, Object additionalInfo);
 }

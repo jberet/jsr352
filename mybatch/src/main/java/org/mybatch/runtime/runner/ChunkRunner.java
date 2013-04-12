@@ -22,7 +22,6 @@
 
 package org.mybatch.runtime.runner;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -178,7 +177,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     }
                 }
             } catch (Exception e) {
-                batchContext.setException(e);
                 for (ChunkListener l : stepRunner.chunkListeners) {
                     l.onError(e);
                 }
@@ -206,7 +204,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             for (ItemReadListener l : stepRunner.itemReadListeners) {
                 l.onReadError(e);
             }
-            if (maySkip(e)) {
+            if (needSkip(e)) {
                 for (SkipReadListener l : stepRunner.skipReadListeners) {
                     l.onSkipReadItem(e);
                 }
@@ -239,7 +237,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 for (ItemProcessListener l : stepRunner.itemProcessListeners) {
                     l.onProcessError(item, e);
                 }
-                if (maySkip(e)) {
+                if (needSkip(e)) {
                     for (SkipProcessListener l : stepRunner.skipProcessListeners) {
                         l.onSkipProcessItem(item, e);
                     }
@@ -321,7 +319,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 for (ItemWriteListener l : stepRunner.itemWriteListeners) {
                     l.onWriteError(outputList, e);
                 }
-                if (maySkip(e)) {
+                if (needSkip(e)) {
                     for (SkipWriteListener l : stepRunner.skipWriteListeners) {
                         l.onSkipWriteItem(outputList, e);
                     }
@@ -340,16 +338,23 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         processingInfo.count = 0;
     }
 
-    private boolean maySkip(Exception e) {
+    private boolean needSkip(Exception e) {
         return skippableExceptionClasses != null &&
-                ((skipLimit > 0 && skipCount < skipLimit) || skipLimit <= 0) &&
+                ((skipLimit >= 0 && skipCount < skipLimit) || skipLimit < 0) &&
                 skippableExceptionClasses.matches(e.getClass());
     }
 
-    private boolean mayRetry(Exception e) {
+    private boolean needRetry(Exception e) {
         return retryableExceptionClasses != null &&
-                ((retryLimit > 0 && retryCount < retryLimit) || retryLimit <= 0) &&
+                ((retryLimit >= 0 && retryCount < retryLimit) || retryLimit < 0) &&
                 retryableExceptionClasses.matches(e.getClass());
+    }
+
+    //already called needRetry(Exception) and returned true, then call this method to check if need to rollback
+    //before retry the current chunk
+    private boolean needRollbackBeforeRetry(Exception e) {
+        return noRollbackExceptionClasses == null ||
+                noRollbackExceptionClasses.matches(e.getClass());
     }
 
     private static final class ProcessingInfo {
