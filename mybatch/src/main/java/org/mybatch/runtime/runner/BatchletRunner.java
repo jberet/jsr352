@@ -45,7 +45,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     public Object call() {
         try {
             final javax.batch.api.Batchlet batchletObj =
-                    (javax.batch.api.Batchlet) batchContext.getJobContext().createArtifact(batchlet.getRef(), batchlet.getProperties(), batchContext);
+                    batchContext.getJobContext().createArtifact(batchlet.getRef(), batchlet.getProperties(), batchContext);
 
             ConcurrencyService.submit(new Runnable() {
                 @Override

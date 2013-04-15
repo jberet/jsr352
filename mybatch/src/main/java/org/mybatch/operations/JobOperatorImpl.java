@@ -133,11 +133,13 @@ public class JobOperatorImpl implements JobOperator {
     public List<JobInstance> getJobInstances(String jobName, int start, int count) throws NoSuchJobException, JobSecurityException {
         LinkedList<JobInstance> result = new LinkedList<JobInstance>();
         int pos = 0;
-        for (JobInstance e : repository.getJobInstances()) {
+        List<JobInstance> instances = repository.getJobInstances();
+        for (int i = instances.size() - 1; i >= 0; i--) {
+            JobInstance e = instances.get(i);
             if (e.getJobName().equals(jobName)) {
                 if (pos >= start) {
                     if (result.size() < count) {
-                        result.addFirst(e);
+                        result.add(e);
                     } else {
                         break;
                     }

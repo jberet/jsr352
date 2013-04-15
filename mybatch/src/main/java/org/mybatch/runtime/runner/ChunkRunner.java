@@ -40,17 +40,17 @@ import javax.batch.api.chunk.listener.SkipWriteListener;
 import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
+import javax.transaction.UserTransaction;
 
 import org.mybatch.job.Chunk;
 import org.mybatch.metadata.ExceptionClassFilterImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.runtime.metric.StepMetrics;
+import org.mybatch.util.TransactionService;
 
 import static org.mybatch.util.BatchLogger.LOGGER;
 
 public final class ChunkRunner extends AbstractRunner<StepContextImpl> implements Runnable {
-    private static final int defaultCheckpointTimeout = 600;
-
     private Chunk chunk;
     private StepExecutionRunner stepRunner;
     private StepMetrics stepMetrics;
@@ -69,6 +69,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private ExceptionClassFilterImpl noRollbackExceptionClasses;
     private int skipCount;
     private int retryCount;
+
+    private UserTransaction ut;
 
     public ChunkRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, StepExecutionRunner stepRunner, Chunk chunk) {
         super(stepContext, enclosingRunner);
@@ -128,18 +130,33 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         skippableExceptionClasses = (ExceptionClassFilterImpl) chunk.getSkippableExceptionClasses();
         retryableExceptionClasses = (ExceptionClassFilterImpl) chunk.getRetryableExceptionClasses();
         noRollbackExceptionClasses = (ExceptionClassFilterImpl) chunk.getNoRollbackExceptionClasses();
+        ut = TransactionService.getTransaction();
     }
 
     @Override
     public void run() {
         try {
-            itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
-            itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
+            ut.begin();
+            try {
+                itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
+                itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
+            } catch (Exception e) {
+                ut.rollback();
+                throw e;
+            }
+            ut.commit();
 
             readProcessWriteItems();
 
-            itemReader.close();
-            itemWriter.close();
+            ut.begin();
+            try {
+                itemReader.close();
+                itemWriter.close();
+            } catch (Exception e) {
+                ut.rollback();
+                throw e;
+            }
+            ut.commit();
         } catch (Throwable e) {
             Exception exception = e instanceof Exception ? (Exception) e : new BatchRuntimeException(e);
             batchContext.setException(exception);
@@ -151,16 +168,16 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private void readProcessWriteItems() throws Exception {
         List<Object> outputList = new ArrayList<Object>();
         ProcessingInfo processingInfo = new ProcessingInfo();
-        int checkpointTimeout = 0;
         Object item = null;
         while (!processingInfo.depleted) {
             try {
                 if (processingInfo.startingNewChunk) {
                     processingInfo = new ProcessingInfo();
+                    ut.setTransactionTimeout(checkpointTimeout());
+                    ut.begin();
                     for (ChunkListener l : stepRunner.chunkListeners) {
                         l.beforeChunk();
                     }
-                    checkpointTimeout = checkpointTimeout();
                     beginCheckpoint(processingInfo);
                 }
                 item = readItem(processingInfo);
@@ -168,13 +185,24 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     processItem(item, processingInfo, outputList);
                 }
 
-                if (!processingInfo.skipTheRest) {
+                if (!processingInfo.skipThisItem) {
                     if (isReadyToCheckpoint(processingInfo)) {
-                        doCheckpoint(processingInfo, outputList);
-                        for (ChunkListener l : stepRunner.chunkListeners) {
-                            l.afterChunk();
+                        ut.begin();
+                        try {
+                            doCheckpoint(processingInfo, outputList);
+                            for (ChunkListener l : stepRunner.chunkListeners) {
+                                l.afterChunk();
+                            }
+                        } catch (Exception e) {
+                            ut.rollback();
+                            stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
+                            throw e;
                         }
+                        ut.commit();
+                        stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
                     }
+                } else {
+                    processingInfo.skipThisItem = false;  //reset for the next iteration
                 }
             } catch (Exception e) {
                 for (ChunkListener l : stepRunner.chunkListeners) {
@@ -210,7 +238,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
                 stepMetrics.increment(Metric.MetricType.READ_SKIP_COUNT, 1);
                 skipCount++;
-                processingInfo.skipTheRest = true;
+                processingInfo.skipThisItem = true;
                 return null;
             } else {
                 throw e;
@@ -244,7 +272,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     stepMetrics.increment(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
                     skipCount++;
                     output = null;
-                    processingInfo.skipTheRest = true;
+                    processingInfo.skipThisItem = true;
                 } else {
                     throw e;
                 }
@@ -261,7 +289,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private int checkpointTimeout() throws Exception {
         if (checkpointPolicy.equals("item")) {
-            return defaultCheckpointTimeout;
+            return 0;  //0 indicates jta system default
         } else {
             return checkpointAlgorithm.checkpointTimeout();
         }
@@ -361,7 +389,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         int count;
         boolean timerExpired;
         boolean startingNewChunk = true;
-        boolean skipTheRest;
+        boolean skipThisItem;
         boolean depleted;
     }
 }

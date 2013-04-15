@@ -70,6 +70,10 @@
             <artifactId>scannotation</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>jta</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>

@@ -166,6 +166,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     break;
                 case STOPPING:
                     batchContext.setBatchStatus(BatchStatus.STOPPED);
+                    break;
             }
         }
 
@@ -181,6 +182,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             for (Listener listener : listeners.getListener()) {
                 //ask the root JobContext to create artifact
                 Object o = batchContext.getJobContext().createArtifact(listener.getRef(), listener.getProperties(), batchContext);
+
+                //a class can implement multiple listener interfaces, so need to check it against all listener types
+                //even after previous matches
                 if (o instanceof StepListener) {
                     stepListeners.add((StepListener) o);
                 }
