@@ -34,6 +34,7 @@ import org.mybatch.job.Split;
 import org.mybatch.job.Step;
 import org.mybatch.runtime.context.AbstractContext;
 import org.mybatch.runtime.context.FlowContextImpl;
+import org.mybatch.runtime.context.JobContextImpl;
 import org.mybatch.runtime.context.SplitContextImpl;
 import org.mybatch.runtime.context.StepContextImpl;
 import org.mybatch.util.BatchLogger;
@@ -187,14 +188,18 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
     }
 
     protected void runFlow(Flow flow, CountDownLatch latch) {
-        FlowContextImpl flowContext = new FlowContextImpl(flow,
-                AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
-        FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this, latch);
-
+        FlowContextImpl flowContext;
+        AbstractContext[] outerContextsToUse = AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext);
         if (batchContext instanceof SplitContextImpl) {
             SplitContextImpl splitContext = (SplitContextImpl) batchContext;
+            outerContextsToUse[0] = splitContext.getJobContext().clone();
+            flowContext = new FlowContextImpl(flow, outerContextsToUse);
             splitContext.getFlowExecutions().add(flowContext.getFlowExecution());
+        } else {
+            flowContext = new FlowContextImpl(flow, outerContextsToUse);
         }
+
+        FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this, latch);
 
         if (latch != null) {
             ConcurrencyService.getExecutorService().submit(flowExecutionRunner);

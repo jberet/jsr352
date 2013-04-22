@@ -45,7 +45,7 @@ import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
 import org.mybatch.util.PropertyResolver;
 
-public class JobContextImpl extends AbstractContext implements JobContext {
+public class JobContextImpl extends AbstractContext implements JobContext, Cloneable {
     JobExecutionImpl jobExecution;
 
     private ApplicationMetaData applicationMetaData;
@@ -76,6 +76,19 @@ public class JobContextImpl extends AbstractContext implements JobContext {
         resolver.resolve(jobExecution.getSubstitutedJob());
         createJobListeners();
         jobExecution.setBatchStatus(BatchStatus.STARTING);
+    }
+
+    @Override
+    public JobContextImpl clone() {
+        JobContextImpl result = null;
+        try {
+            result = (JobContextImpl) super.clone();
+        } catch (CloneNotSupportedException e) {
+            BatchLogger.LOGGER.failToClone(e, this, getJobName(), "");
+        }
+        result.jobExecution = jobExecution.clone();
+        result.executedSteps = new LinkedList<Step>(executedSteps);
+        return result;
     }
 
     public LinkedList<Step> getExecutedSteps() {

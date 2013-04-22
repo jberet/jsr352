@@ -26,7 +26,7 @@ import javax.batch.runtime.BatchStatus;
 
 import org.mybatch.job.Properties;
 
-public abstract class AbstractContext {
+public abstract class AbstractContext implements Cloneable {
     protected String id;
     protected Object transientUserData;
     protected ClassLoader classLoader;
@@ -37,6 +37,20 @@ public abstract class AbstractContext {
      * if this is a StepContext type directly under a job, outerContexts contains 1 element (the root JobContext)
      */
     protected AbstractContext[] outerContexts;
+
+    protected AbstractContext(String id) {
+        this.id = id;
+    }
+
+    protected AbstractContext(String id, AbstractContext[] outerContexts) {
+        this.id = id;
+        this.outerContexts = outerContexts;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     public abstract void setBatchStatus(BatchStatus status);
 
@@ -52,15 +66,6 @@ public abstract class AbstractContext {
      * @return org.mybatch.job.Properties
      */
     public abstract Properties getProperties2();
-
-    protected AbstractContext(String id) {
-        this.id = id;
-    }
-
-    protected AbstractContext(String id, AbstractContext[] outerContexts) {
-        this.id = id;
-        this.outerContexts = outerContexts;
-    }
 
     public String getId() {
         return id;

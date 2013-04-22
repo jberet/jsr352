@@ -176,4 +176,8 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 38, value = "Failed to stop the job %s, %s, %s")
     @LogMessage(level = Logger.Level.WARN)
     void failToStopJob(@Cause Throwable cause, String jobName, String stepName, Object additionalInfo);
+
+    @Message(id = 39, value = "Failed to clone %s when running job [%s] and step [%s]")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToClone(@Cause Throwable cause, Object original, String jobName, String stepName);
 }

@@ -25,12 +25,17 @@ package org.mybatch.runtime;
 import java.util.Date;
 import javax.batch.runtime.BatchStatus;
 
-public abstract class AbstractExecution {
+public abstract class AbstractExecution implements Cloneable {
     protected long startTime;
     protected long endTime;
 
     protected String exitStatus;
     protected BatchStatus batchStatus;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     public Date getStartTime() {
         return new Date(startTime);

@@ -35,9 +35,10 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.StepExecution;
 
 import org.mybatch.job.Job;
+import org.mybatch.util.BatchLogger;
 import org.mybatch.util.BatchUtil;
 
-public final class JobExecutionImpl extends AbstractExecution implements JobExecution {
+public final class JobExecutionImpl extends AbstractExecution implements JobExecution, Cloneable {
     public static final String JOB_EXECUTION_TIMEOUT_SECONDS_KEY = "org.mybatch.job.execution.timeout.seconds";
     public static final long JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT = 300L;
 
@@ -71,6 +72,17 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         this.jobInstance.addJobExecution(this);
         this.substitutedJob = BatchUtil.clone(jobInstance.unsubstitutedJob);
         this.startTime = this.createTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public JobExecutionImpl clone() {
+        JobExecutionImpl result = null;
+        try {
+            result = (JobExecutionImpl) super.clone();
+        } catch (CloneNotSupportedException e) {
+            BatchLogger.LOGGER.failToClone(e, this, getJobName(), "");
+        }
+        return result;
     }
 
     //It's possible the (fast) job is already terminated and the latch nulled when this method is called
@@ -140,11 +152,15 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     public List<StepExecution> getStepExecutions() {
-        return Collections.unmodifiableList(this.stepExecutions);
+        synchronized (stepExecutions) {
+            return Collections.unmodifiableList(stepExecutions);
+        }
     }
 
     public void addStepExecution(StepExecution stepExecution) {
-        this.stepExecutions.add(stepExecution);
+        synchronized (stepExecutions) {
+            this.stepExecutions.add(stepExecution);
+        }
         lastUpdatedTime = System.currentTimeMillis();
     }
 
