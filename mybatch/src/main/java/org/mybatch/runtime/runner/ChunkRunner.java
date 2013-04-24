@@ -22,6 +22,7 @@
 
 package org.mybatch.runtime.runner;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -34,6 +35,9 @@ import javax.batch.api.chunk.listener.ChunkListener;
 import javax.batch.api.chunk.listener.ItemProcessListener;
 import javax.batch.api.chunk.listener.ItemReadListener;
 import javax.batch.api.chunk.listener.ItemWriteListener;
+import javax.batch.api.chunk.listener.RetryProcessListener;
+import javax.batch.api.chunk.listener.RetryReadListener;
+import javax.batch.api.chunk.listener.RetryWriteListener;
 import javax.batch.api.chunk.listener.SkipProcessListener;
 import javax.batch.api.chunk.listener.SkipReadListener;
 import javax.batch.api.chunk.listener.SkipWriteListener;
@@ -69,6 +73,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private ExceptionClassFilterImpl noRollbackExceptionClasses;
     private int skipCount;
     private int retryCount;
+
+    private Object itemRead;
+    private List<Object> outputList = new ArrayList<Object>();
 
     private UserTransaction ut;
 
@@ -136,6 +143,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     @Override
     public void run() {
         try {
+            ut.setTransactionTimeout(checkpointTimeout());
             ut.begin();
             try {
                 itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
@@ -165,44 +173,72 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         }
     }
 
+    /**
+     * The main read-process-write loop
+     * @throws Exception
+     */
     private void readProcessWriteItems() throws Exception {
-        List<Object> outputList = new ArrayList<Object>();
         ProcessingInfo processingInfo = new ProcessingInfo();
-        Object item = null;
-        while (!processingInfo.depleted) {
+        //if input has not been depleted, or even if depleted, but still need to retry the last item
+        while (processingInfo.chunkState != ChunkState.DEPLETED ||
+                processingInfo.itemState == ItemState.TO_RETRY_READ ||
+                processingInfo.itemState == ItemState.TO_RETRY_PROCESS ||
+                processingInfo.itemState == ItemState.TO_RETRY_WRITE) {
             try {
-                if (processingInfo.startingNewChunk) {
-                    processingInfo = new ProcessingInfo();
-                    ut.setTransactionTimeout(checkpointTimeout());
+                //reset state for the next iteration
+                switch (processingInfo.itemState) {
+                    case TO_SKIP:
+                        processingInfo.itemState = ItemState.RUNNING;
+                        break;
+                    case TO_RETRY_READ:
+                        processingInfo.itemState = ItemState.RETRYING_READ;
+                        break;
+                    case TO_RETRY_PROCESS:
+                        processingInfo.itemState = ItemState.RETRYING_PROCESS;
+                        break;
+                    case TO_RETRY_WRITE:
+                        processingInfo.itemState = ItemState.RETRYING_WRITE;
+                        break;
+                }
+
+                if (processingInfo.chunkState == ChunkState.TO_START_NEW ||
+                        processingInfo.chunkState == ChunkState.TO_RETRY ||
+                        processingInfo.chunkState == ChunkState.TO_END_RETRY) {
+                    if (processingInfo.chunkState == ChunkState.TO_START_NEW || processingInfo.chunkState == ChunkState.TO_END_RETRY) {
+                        processingInfo.reset();
+                    }
                     ut.begin();
                     for (ChunkListener l : stepRunner.chunkListeners) {
                         l.beforeChunk();
                     }
                     beginCheckpoint(processingInfo);
                 }
-                item = readItem(processingInfo);
-                if (item != null) {
-                    processItem(item, processingInfo, outputList);
+
+                if (processingInfo.itemState != ItemState.RETRYING_PROCESS && processingInfo.itemState != ItemState.RETRYING_WRITE) {
+                    readItem(processingInfo);
                 }
 
-                if (!processingInfo.skipThisItem) {
-                    if (isReadyToCheckpoint(processingInfo)) {
-                        ut.begin();
-                        try {
-                            doCheckpoint(processingInfo, outputList);
-                            for (ChunkListener l : stepRunner.chunkListeners) {
-                                l.afterChunk();
-                            }
-                        } catch (Exception e) {
-                            ut.rollback();
-                            stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
-                            throw e;
+                if (itemRead != null && processingInfo.itemState!= ItemState.RETRYING_WRITE) {
+                    processItem(processingInfo);
+                }
+
+                if (processingInfo.toStopItem()) {
+                    continue;
+                }
+
+                if (isReadyToCheckpoint(processingInfo)) {
+                    try {
+                        doCheckpoint(processingInfo);
+                        for (ChunkListener l : stepRunner.chunkListeners) {
+                            l.afterChunk();
                         }
-                        ut.commit();
-                        stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
+                    } catch (Exception e) {
+                        ut.rollback();
+                        stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
+                        throw e;
                     }
-                } else {
-                    processingInfo.skipThisItem = false;  //reset for the next iteration
+                    ut.commit();
+                    stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
                 }
             } catch (Exception e) {
                 for (ChunkListener l : stepRunner.chunkListeners) {
@@ -213,78 +249,120 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         }
     }
 
-    private Object readItem(final ProcessingInfo processingInfo) throws Exception {
-        Object result = null;
+    private void readItem(final ProcessingInfo processingInfo) throws Exception {
         try {
             for (ItemReadListener l : stepRunner.itemReadListeners) {
                 l.beforeRead();
             }
-            result = itemReader.readItem();
-            if (result != null) {  //only count successful read
+            itemRead = itemReader.readItem();
+            if (itemRead != null) {  //only count successful read
                 stepMetrics.increment(Metric.MetricType.READ_COUNT, 1);
+                processingInfo.count++;
             } else {
-                processingInfo.depleted = true;
+                processingInfo.chunkState = ChunkState.DEPLETED;
             }
             for (ItemReadListener l : stepRunner.itemReadListeners) {
-                l.afterRead(result);
+                l.afterRead(itemRead);
             }
         } catch (Exception e) {
             for (ItemReadListener l : stepRunner.itemReadListeners) {
                 l.onReadError(e);
             }
-            if (needSkip(e)) {
+            toSkipOrRetry(e, processingInfo);
+            if (processingInfo.itemState == ItemState.TO_SKIP) {
                 for (SkipReadListener l : stepRunner.skipReadListeners) {
                     l.onSkipReadItem(e);
                 }
                 stepMetrics.increment(Metric.MetricType.READ_SKIP_COUNT, 1);
                 skipCount++;
-                processingInfo.skipThisItem = true;
-                return null;
+                itemRead = null;
+            } else if (processingInfo.itemState == ItemState.TO_RETRY) {
+                for (RetryReadListener l : stepRunner.retryReadListeners) {
+                    l.onRetryReadException(e);
+                }
+                retryCount++;
+                if (needRollbackBeforeRetry(e)) {
+                    rollbackCheckpoint(processingInfo);
+                } else {
+                    processingInfo.itemState = ItemState.TO_RETRY_READ;
+                }
+                itemRead = null;
             } else {
                 throw e;
             }
+            checkIfEndRetry(processingInfo, itemReader.checkpointInfo());
+            if (processingInfo.itemState == ItemState.RETRYING_READ) {
+                processingInfo.itemState = ItemState.RUNNING;
+            }
         }
-        return result;
     }
 
-    private void processItem(final Object item, final ProcessingInfo processingInfo, final List<Object> outputList) throws Exception {
+    private void processItem(final ProcessingInfo processingInfo) throws Exception {
         Object output;
         if (itemProcessor != null) {
             try {
                 for (ItemProcessListener l : stepRunner.itemProcessListeners) {
-                    l.beforeProcess(item);
+                    l.beforeProcess(itemRead);
                 }
-                output = itemProcessor.processItem(item);
+                output = itemProcessor.processItem(itemRead);
                 for (ItemProcessListener l : stepRunner.itemProcessListeners) {
-                    l.afterProcess(item, output);
+                    l.afterProcess(itemRead, output);
                 }
                 if (output == null) {
                     stepMetrics.increment(Metric.MetricType.FILTER_COUNT, 1);
                 }
             } catch (Exception e) {
                 for (ItemProcessListener l : stepRunner.itemProcessListeners) {
-                    l.onProcessError(item, e);
+                    l.onProcessError(itemRead, e);
                 }
-                if (needSkip(e)) {
+                toSkipOrRetry(e, processingInfo);
+                if (processingInfo.itemState == ItemState.TO_SKIP) {
                     for (SkipProcessListener l : stepRunner.skipProcessListeners) {
-                        l.onSkipProcessItem(item, e);
+                        l.onSkipProcessItem(itemRead, e);
                     }
                     stepMetrics.increment(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
                     skipCount++;
                     output = null;
-                    processingInfo.skipThisItem = true;
+                } else if (processingInfo.itemState == ItemState.TO_RETRY) {
+                    for (RetryProcessListener l : stepRunner.retryProcessListeners) {
+                        l.onRetryProcessException(itemRead, e);
+                    }
+                    retryCount++;
+                    if (needRollbackBeforeRetry(e)) {
+                        rollbackCheckpoint(processingInfo);
+                    } else {
+                        processingInfo.itemState = ItemState.TO_RETRY_PROCESS;
+                    }
+                    output = null;
                 } else {
                     throw e;
                 }
             }
         } else {
-            output = item;
+            output = itemRead;
         }
         //a normal processing can also return null to exclude the processing result from writer.
         if (output != null) {
             outputList.add(output);
         }
-        processingInfo.count++;
+        if (processingInfo.itemState != ItemState.TO_RETRY_PROCESS) {
+            itemRead = null;
+        }
+        checkIfEndRetry(processingInfo, itemReader.checkpointInfo());
+        if (processingInfo.itemState == ItemState.RETRYING_PROCESS) {
+            processingInfo.itemState=ItemState.RUNNING;
+        }
+    }
+
+    private void checkIfEndRetry(ProcessingInfo processingInfo, Serializable currentPosition) {
+        if (processingInfo.chunkState == ChunkState.RETRYING &&
+                processingInfo.itemState != ItemState.TO_RETRY_READ &&
+                processingInfo.itemState != ItemState.TO_RETRY_PROCESS &&
+                processingInfo.itemState != ItemState.TO_RETRY_WRITE &&
+                processingInfo.failurePoint.equals(currentPosition)) {
+            //if failurePoint is null, should fail with NPE
+            processingInfo.chunkState = ChunkState.TO_END_RETRY;
+        }
     }
 
     private int checkpointTimeout() throws Exception {
@@ -309,11 +387,14 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         } else {
             checkpointAlgorithm.beginCheckpoint();
         }
-        processingInfo.startingNewChunk = false;
+        processingInfo.chunkState = (processingInfo.chunkState == ChunkState.TO_RETRY) ?
+                ChunkState.RETRYING : ChunkState.RUNNING;
     }
 
     private boolean isReadyToCheckpoint(final ProcessingInfo processingInfo) throws Exception {
-        if (processingInfo.depleted) {
+        if (processingInfo.chunkState == ChunkState.DEPLETED ||
+                processingInfo.chunkState == ChunkState.RETRYING ||
+                processingInfo.chunkState == ChunkState.TO_END_RETRY) {
             return true;
         }
         if (checkpointPolicy.equals("item")) {
@@ -328,7 +409,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         return checkpointAlgorithm.isReadyToCheckpoint();
     }
 
-    private void doCheckpoint(final ProcessingInfo processingInfo, final List<Object> outputList) throws Exception {
+    private void doCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         int outputSize = outputList.size();
         if (outputSize > 0) {
             try {
@@ -343,27 +424,57 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 batchContext.getStepExecution().setReaderCheckpointInfo(itemReader.checkpointInfo());
                 batchContext.getStepExecution().setWriterCheckpointInfo(itemWriter.checkpointInfo());
                 batchContext.savePersistentData();
+
+                outputList.clear();
+                if (!checkpointPolicy.equals("item")) {
+                    checkpointAlgorithm.endCheckpoint();
+                }
+                if (processingInfo.chunkState != ChunkState.DEPLETED) {
+                    processingInfo.chunkState = ChunkState.TO_START_NEW;
+                }
             } catch (Exception e) {
                 for (ItemWriteListener l : stepRunner.itemWriteListeners) {
                     l.onWriteError(outputList, e);
                 }
-                if (needSkip(e)) {
+                toSkipOrRetry(e, processingInfo);
+                if (processingInfo.itemState == ItemState.TO_SKIP) {
                     for (SkipWriteListener l : stepRunner.skipWriteListeners) {
                         l.onSkipWriteItem(outputList, e);
                     }
                     stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
                     skipCount += outputSize;
+                } else if (processingInfo.itemState == ItemState.TO_RETRY) {
+                    for (RetryWriteListener l : stepRunner.retryWriteListeners) {
+                        l.onRetryWriteException(outputList, e);
+                    }
+                    retryCount++;
+                    if (needRollbackBeforeRetry(e)) {
+                        rollbackCheckpoint(processingInfo);
+                    } else {
+                        processingInfo.itemState = ItemState.TO_RETRY_WRITE;
+                    }
                 } else {
                     throw e;
                 }
             }
-            outputList.clear();
         }
-        if (!checkpointPolicy.equals("item")) {
-            checkpointAlgorithm.endCheckpoint();
+        checkIfEndRetry(processingInfo, itemReader.checkpointInfo());
+        if (processingInfo.itemState == ItemState.RETRYING_WRITE) {
+            processingInfo.itemState = ItemState.RUNNING;
         }
-        processingInfo.startingNewChunk = true;
-        processingInfo.count = 0;
+    }
+
+    private void rollbackCheckpoint(final ProcessingInfo processingInfo) throws Exception {
+        outputList.clear();
+        processingInfo.failurePoint = itemReader.checkpointInfo();
+        ut.rollback();
+        stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
+        itemReader.close();
+        itemWriter.close();
+        itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
+        itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
+        processingInfo.chunkState = ChunkState.TO_RETRY;
+        processingInfo.itemState = ItemState.RUNNING;
     }
 
     private boolean needSkip(Exception e) {
@@ -378,18 +489,89 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 retryableExceptionClasses.matches(e.getClass());
     }
 
-    //already called needRetry(Exception) and returned true, then call this method to check if need to rollback
-    //before retry the current chunk
+    private void toSkipOrRetry(Exception e, ProcessingInfo processingInfo) {
+        if (processingInfo.chunkState == ChunkState.RETRYING ||
+                processingInfo.chunkState == ChunkState.TO_END_RETRY ||
+                processingInfo.itemState == ItemState.RETRYING_READ ||
+                processingInfo.itemState == ItemState.RETRYING_PROCESS ||
+                processingInfo.itemState == ItemState.RETRYING_WRITE) {
+            //during retry, skip has precedence over retry
+            if (needSkip(e)) {
+                processingInfo.itemState = ItemState.TO_SKIP;
+                return;
+            } else if (needRetry(e)) {
+                processingInfo.itemState = ItemState.TO_RETRY;
+                return;
+            }
+        } else {
+            //during normal processing, retry has precedence over skip
+            if (needRetry(e)) {
+                processingInfo.itemState = ItemState.TO_RETRY;
+                return;
+            } else if (needSkip(e)) {
+                processingInfo.itemState = ItemState.TO_SKIP;
+                return;
+            }
+        }
+    }
+
+    //already know need to retry, call this method to check if need to rollback before retry the current chunk
     private boolean needRollbackBeforeRetry(Exception e) {
+        //if no-rollback-exceptions not configured, by default need to rollback the current chunk
+        //else if the current exception does not match the configured no-rollback-exceptions, need to rollback
         return noRollbackExceptionClasses == null ||
-                noRollbackExceptionClasses.matches(e.getClass());
+                !noRollbackExceptionClasses.matches(e.getClass());
     }
 
     private static final class ProcessingInfo {
         int count;
         boolean timerExpired;
-        boolean startingNewChunk = true;
-        boolean skipThisItem;
-        boolean depleted;
+        ItemState itemState = ItemState.RUNNING;
+        ChunkState chunkState = ChunkState.TO_START_NEW;
+
+        /**
+         * Where the failure occurred that caused the current retry.  The retry should stop after the item at failurePoint
+         * has been retried.
+         */
+        Serializable failurePoint;
+
+        private void reset() {
+            count = 0;
+            timerExpired = false;
+            itemState = ItemState.RUNNING;
+            chunkState = ChunkState.RUNNING;
+            failurePoint = null;
+        }
+
+        private boolean toStopItem() {
+            return itemState == ItemState.TO_SKIP || itemState == ItemState.TO_RETRY ||
+                    itemState == ItemState.TO_RETRY_READ || itemState == ItemState.TO_RETRY_PROCESS ||
+                    itemState == ItemState.TO_RETRY_WRITE;
+        }
     }
+
+    private enum ItemState {
+        RUNNING,       //normal item processing
+        TO_SKIP,        //need to skip the remainder of the current iteration
+        TO_RETRY,       //a super-type value for TO_RETRY_*, used to indicate whether to skip or retry current item
+
+        TO_RETRY_READ,  //need to retry the current item read operation, upon starting next iteration => RETRYING_READ
+        RETRYING_READ,  //the current item is being re-read, when successful or result in a skip => normal RUNNING
+
+        TO_RETRY_PROCESS, //need to retry the current item process operation, upon starting next iteration => RETRYING_PROCESS
+        RETRYING_PROCESS, //the current item is being re-processed, when successful or result in a skip => normal RUNNING
+
+        TO_RETRY_WRITE, //need to retry the current item write operation, upon starting next items => RETRYING_WRITE
+        RETRYING_WRITE  //the current item is being re-written, when successful or result in a skip => normal RUNNING
+    }
+
+    private enum ChunkState {
+        RUNNING,      //normal running of chunk
+        TO_RETRY,     //need to retry the current chunk
+        RETRYING,     //chunk being retried
+        TO_END_RETRY, //need to end retrying the current chunk
+        TO_START_NEW, //the current chunk is done and need to start a new chunk next
+        DEPLETED      //no more input items, the processing can still go to next iteration so this last item can be retried
+    }
+
 }
