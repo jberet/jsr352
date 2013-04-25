@@ -23,9 +23,9 @@
 -->
 
 <batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee">
-    <ref id="BatchletNoNamed" class="org.mybatch.testapps.common.BatchletNoNamed"/>
+    <ref id="BatchletNoNamed" class="org.jberet.testapps.common.BatchletNoNamed"/>
     <ref id="L1" class="SHOULD NOT REACH HERE"/>
     <ref id="L2" class="SHOULD NOT REACH HERE"/>
-    <ref id="L3" class="org.mybatch.testapps.loadBatchXml.StepListener3"/>
-    <ref id="L4" class="org.mybatch.testapps.loadBatchXml.StepListener4"/>
+    <ref id="L3" class="org.jberet.testapps.loadBatchXml.StepListener3"/>
+    <ref id="L4" class="org.jberet.testapps.loadBatchXml.StepListener4"/>
 </batch-artifacts>

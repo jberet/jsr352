@@ -3,8 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>mybatch-parent</artifactId>
-        <groupId>org.mybatch</groupId>
+        <artifactId>jberet-parent</artifactId>
+        <groupId>org.jberet</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.mybatch</groupId>
+            <groupId>org.jberet</groupId>
             <artifactId>javax.batch</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -23,8 +23,8 @@
             <version>1.0-b17</version>
         </dependency>
         <dependency>
-            <groupId>org.mybatch</groupId>
-            <artifactId>mybatch</artifactId>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

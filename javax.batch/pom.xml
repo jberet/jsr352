@@ -28,8 +28,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.mybatch</groupId>
-        <artifactId>mybatch-parent</artifactId>
+        <groupId>org.jberet</groupId>
+        <artifactId>jberet-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 

@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.mybatch.test-apps</groupId>
+        <groupId>org.jberet.test-apps</groupId>
         <artifactId>test-apps</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
@@ -37,7 +37,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.mybatch.test-apps</groupId>
+            <groupId>org.jberet.test-apps</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
