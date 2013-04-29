@@ -74,6 +74,8 @@ public final class PropertyResolver {
     private Properties partitionPlanProperties;
     private Deque<org.jberet.job.Properties> jobPropertiesStack = new ArrayDeque<org.jberet.job.Properties>();
 
+    private boolean resolvePartitionPlanProperties;
+
     public void setSystemProperties(Properties systemProperties) {
         this.systemProperties = systemProperties;
     }
@@ -88,6 +90,10 @@ public final class PropertyResolver {
 
     public void pushJobProperties(org.jberet.job.Properties jobProps) {
         this.jobPropertiesStack.push(jobProps);
+    }
+
+    public void setResolvePartitionPlanProperties(boolean resolvePartitionPlanProperties) {
+        this.resolvePartitionPlanProperties = resolvePartitionPlanProperties;
     }
 
     /**
@@ -144,6 +150,7 @@ public final class PropertyResolver {
      * @param step the step element whose properties need to be resolved
      */
     public void resolve(Step step) {
+        resolve(step.getPartition());
         String oldVal, newVal;
         oldVal = step.getNext();
         if (oldVal != null) {
@@ -180,10 +187,9 @@ public final class PropertyResolver {
             resolve(batchlet.getProperties(), true);
         }
         resolve(step.getChunk());
-        resolve(step.getPartition());
         resolveTransitionElements(step.getTransitionElements());
 
-        if(props != null) {
+        if (props != null) {
             jobPropertiesStack.pop();
         }
     }
@@ -237,8 +243,11 @@ public final class PropertyResolver {
                     plan.setThreads(newVal);
                 }
             }
-            for (org.jberet.job.Properties p : plan.getProperties()) {
-                resolve(p, true);
+            //plan properties should be resolved at job load time (1st pass)
+            if (!resolvePartitionPlanProperties) {
+                for (org.jberet.job.Properties p : plan.getProperties()) {
+                    resolve(p, true);
+                }
             }
         }
         PartitionMapper mapper = partition.getMapper();
@@ -248,7 +257,10 @@ public final class PropertyResolver {
             if (!oldVal.equals(newVal)) {
                 mapper.setRef(newVal);
             }
-            resolve(mapper.getProperties(), true);
+            //mapper properties should be resolved at job load time (1st pass)
+            if (!resolvePartitionPlanProperties) {
+                resolve(mapper.getProperties(), true);
+            }
         }
     }
 
@@ -561,10 +573,16 @@ public final class PropertyResolver {
             LOGGER.possibleSyntaxErrorInProperty(sb.toString());
             endExpression = sb.length() - 1;
         }
-        String expression = sb.substring(startExpression, endExpression + 1);
 
+        int endCurrentPass = endExpression;
+        String expression = sb.substring(startExpression, endExpression + 1);
         if (referringExpressions != null && referringExpressions.contains(expression)) {
             throw LOGGER.cycleInPropertyReference(referringExpressions);
+        }
+
+        if (!resolvePartitionPlanProperties && propCategory.equals(partitionPlanToken)) {
+            resolve(sb, endCurrentPass + 1, true, null);
+            return;
         }
 
         String variableName = sb.substring(startVariableName, endBracket - 1);  // ['abc']
@@ -573,7 +591,6 @@ public final class PropertyResolver {
             val = reresolve(expression, val, defaultAllowed, referringExpressions);
         }
 
-        int endCurrentPass = endExpression;
         if (!defaultAllowed) {  //a default expression should not have default again
             if (val != null) {
                 endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, val);

@@ -32,9 +32,10 @@ import javax.batch.runtime.context.StepContext;
 import org.jberet.job.Step;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
 
-public class StepContextImpl extends AbstractContext implements StepContext {
+public class StepContextImpl extends AbstractContext implements StepContext, Cloneable {
     private Step step;
     private StepExecutionImpl stepExecution;
     Boolean allowStartIfComplete;
@@ -82,6 +83,24 @@ public class StepContextImpl extends AbstractContext implements StepContext {
             }
         }
         return null;
+    }
+
+    @Override
+    public StepContextImpl clone() {
+        StepContextImpl c = null;
+        try {
+            c = (StepContextImpl) super.clone();
+            c.stepExecution = stepExecution.clone();
+            c.outerContexts = new AbstractContext[outerContexts.length];
+            c.outerContexts[0] = getJobContext().clone();
+            for(int i = 1; i < c.outerContexts.length; i++) {
+                c.outerContexts[i] = outerContexts[i];
+            }
+            c.step = BatchUtil.clone(step);
+        } catch (CloneNotSupportedException e) {
+            BatchLogger.LOGGER.failToClone(e, this, getJobContext().getJobName(), getStepName());
+        }
+        return c;
     }
 
     public Step getStep() {

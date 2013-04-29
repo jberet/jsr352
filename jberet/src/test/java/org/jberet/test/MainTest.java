@@ -22,8 +22,8 @@
 
 package org.jberet.test;
 
-import org.junit.Test;
 import org.jberet.Main;
+import org.junit.Test;
 
 public class MainTest {
     private static final String jobXmlName = "batchlet1.xml";

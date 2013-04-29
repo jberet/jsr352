@@ -29,12 +29,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
 import org.jberet.job.Job;
 import org.jberet.metadata.ArchiveXmlLoader;
 import org.jberet.repository.impl.MemoryRepository;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class MemoryRepositoryTest {
     final private static MemoryRepository repo = MemoryRepository.INSTANCE;

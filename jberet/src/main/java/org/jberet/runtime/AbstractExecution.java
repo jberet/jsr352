@@ -22,10 +22,12 @@
  
 package org.jberet.runtime;
 
+import java.io.Serializable;
 import java.util.Date;
 import javax.batch.runtime.BatchStatus;
 
-public abstract class AbstractExecution implements Cloneable {
+public abstract class AbstractExecution implements Cloneable, Serializable {
+    private static final long serialVersionUID = 1L;
     protected long startTime;
     protected long endTime;
 

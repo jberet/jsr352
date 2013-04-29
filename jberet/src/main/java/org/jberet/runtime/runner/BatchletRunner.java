@@ -22,30 +22,41 @@
 
 package org.jberet.runtime.runner;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import javax.batch.api.partition.PartitionCollector;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet.job.Batchlet;
+import org.jberet.job.Collector;
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.util.ConcurrencyService;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
-public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Callable<Object> {
+public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Runnable {
     private Batchlet batchlet;
+    private StepExecutionRunner stepRunner;
+    private PartitionCollector collector;
 
-    public BatchletRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, Batchlet batchlet) {
+    public BatchletRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, StepExecutionRunner stepRunner, Batchlet batchlet) {
         super(stepContext, enclosingRunner);
+        this.stepRunner = stepRunner;
         this.batchlet = batchlet;
     }
 
     @Override
-    public Object call() {
+    public void run() {
         try {
-            final javax.batch.api.Batchlet batchletObj =
-                    batchContext.getJobContext().createArtifact(batchlet.getRef(), batchlet.getProperties(), batchContext);
+            if (stepRunner.dataQueue != null) {
+                Collector collectorConfig = batchContext.getStep().getPartition().getCollector();
+                if (collectorConfig != null) {
+                    collector = batchContext.getJobContext().createArtifact(collectorConfig.getRef(), collectorConfig.getProperties(), batchContext);
+                }
+            }
+            JobContextImpl jobContext = batchContext.getJobContext();
+            final javax.batch.api.Batchlet batchletObj = jobContext.createArtifact(batchlet.getRef(), batchlet.getProperties(), batchContext);
 
             ConcurrencyService.submit(new Runnable() {
                 @Override
@@ -64,11 +75,28 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
 
             String exitStatus = batchletObj.process();
             batchContext.setExitStatus(exitStatus);
+            if (collector != null) {
+                stepRunner.dataQueue.put(collector.collectPartitionData());
+            }
         } catch (Throwable e) {
+            if (collector != null) {
+                try {
+                    stepRunner.dataQueue.put(collector.collectPartitionData());
+                } catch (Exception e1) {
+                    //ignore
+                }
+            }
             LOGGER.failToRunBatchlet(e, batchlet);
             batchContext.setBatchStatus(BatchStatus.FAILED);
+        } finally {
+            try {
+                if (stepRunner.dataQueue != null) {
+                    stepRunner.dataQueue.put(batchContext.getStepExecution());
+                }
+            } catch (InterruptedException e) {
+                //ignore
+            }
         }
-        return null;
     }
 
 }

@@ -28,13 +28,13 @@ import java.io.Serializable;
 import java.nio.channels.AlreadyConnectedException;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.jberet.job.Chunk;
 import org.jberet.job.Job;
 import org.jberet.job.Step;
 import org.jberet.metadata.ArchiveXmlLoader;
 import org.jberet.metadata.ExceptionClassFilterImpl;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ExceptionClassFilterTest {
     @Test

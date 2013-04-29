@@ -22,8 +22,9 @@
 
 package org.jberet.runtime.context;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -54,7 +55,8 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
 
     private JobListener[] jobListeners = new JobListener[0];
 
-    private LinkedList<Step> executedSteps = new LinkedList<Step>();
+    //to track the executed steps to detect loopback, may be accessed sub-threads (e.g., flows in split executions)
+    private List<Step> executedSteps = Collections.synchronizedList(new ArrayList<Step>());
 
     JobExecutionImpl originalToRestart;
 
@@ -87,11 +89,10 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
             BatchLogger.LOGGER.failToClone(e, this, getJobName(), "");
         }
         result.jobExecution = jobExecution.clone();
-        result.executedSteps = new LinkedList<Step>(executedSteps);
         return result;
     }
 
-    public LinkedList<Step> getExecutedSteps() {
+    public List<Step> getExecutedSteps() {
         return executedSteps;
     }
 

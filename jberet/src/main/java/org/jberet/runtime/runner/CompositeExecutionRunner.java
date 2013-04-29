@@ -34,7 +34,6 @@ import org.jberet.job.Split;
 import org.jberet.job.Step;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
-import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.SplitContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.util.BatchLogger;

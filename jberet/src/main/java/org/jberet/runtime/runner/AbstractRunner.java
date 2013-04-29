@@ -32,7 +32,7 @@ import org.jberet.job.Next;
 import org.jberet.job.Stop;
 import org.jberet.runtime.context.AbstractContext;
 
-public abstract class AbstractRunner<C extends AbstractContext> {
+public abstract class AbstractRunner<C extends AbstractContext> implements Runnable {
     /**
      * The id of the job element this runner represents.
      */

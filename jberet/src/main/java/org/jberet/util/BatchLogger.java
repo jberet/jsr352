@@ -35,13 +35,13 @@ import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet.runtime.context.AbstractContext;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
-import org.jberet.runtime.context.AbstractContext;
 
 @MessageLogger(projectCode = "jberet")
 public interface BatchLogger extends BasicLogger {

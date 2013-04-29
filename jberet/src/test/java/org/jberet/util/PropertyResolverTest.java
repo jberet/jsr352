@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Properties;
 
 import junit.framework.Assert;
+import org.jberet.job.Property;
 import org.junit.Before;
 import org.junit.Test;
-import org.jberet.job.Property;
 
 import static org.jberet.util.PropertyResolver.jobParametersToken;
 import static org.jberet.util.PropertyResolver.jobPropertiesToken;
@@ -83,7 +83,7 @@ public class PropertyResolverTest {
 
         resolver.setSystemProperties(sysProps);
         resolver.setJobParameters(jobParams);
-        resolver.setPartitionPlanProperties(partitionPlan);
+//        resolver.setPartitionPlanProperties(partitionPlan);
         resolver.pushJobProperties(fromJavaUtilProperties(jobProps1));
         resolver.pushJobProperties(fromJavaUtilProperties(jobProps2));
         resolver.pushJobProperties(fromJavaUtilProperties(jobProps3));
@@ -183,15 +183,20 @@ public class PropertyResolverTest {
 
         String[] expected = {
             jobParam1Val,
-                partitionPlan1Val,
+                null,
                 jobProp1Val,
                 jobProp2Val,
                 jobProp3Val,
                 sysProp1Val,
                 sysProp2Val
         };
+        expected[1] = raw[1];
         run(raw,  expected);
+
+        expected[1] = raw2[1];
         run(raw2, expected);
+
+        expected[1] = String.format("#{%s['%s']}?:%s;", partitionPlanToken, partitionPlan1, osName);
         run(raw3, expected);
     }
 
@@ -211,7 +216,7 @@ public class PropertyResolverTest {
         };
         String[] expected = {
                 preLiteral + jobParam1Val + postLiteral,
-                preLiteral + partitionPlan1Val + postLiteral,
+                raw[1],
                 preLiteral + jobProp1Val + postLiteral,
                 preLiteral + jobProp2Val + postLiteral,
                 preLiteral + jobProp3Val + postLiteral,
@@ -238,7 +243,7 @@ public class PropertyResolverTest {
         };
 
         String[] expected = {
-                "1.txt", "3x", "4.txt", " 5 ", "#6", "$7", ":"
+                "1.txt", raw[1], "4.txt", " 5 ", "#6", "$7", ":"
         };
 
         run(raw, expected);
@@ -261,7 +266,8 @@ public class PropertyResolverTest {
         };
         String s = sysProps.getProperty("os.name");
         String[] expected = {
-                s + "!", s, s, s, s, s, s
+                s + "!", "#{partitionPlan['']}?:" + osName + ";",
+                s, s, s, s, s
         };
 
         run(raw, expected);

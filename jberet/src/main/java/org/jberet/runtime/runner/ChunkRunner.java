@@ -50,7 +50,6 @@ import org.jberet.job.Chunk;
 import org.jberet.metadata.ExceptionClassFilterImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
-import org.jberet.util.TransactionService;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -137,7 +136,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         skippableExceptionClasses = (ExceptionClassFilterImpl) chunk.getSkippableExceptionClasses();
         retryableExceptionClasses = (ExceptionClassFilterImpl) chunk.getRetryableExceptionClasses();
         noRollbackExceptionClasses = (ExceptionClassFilterImpl) chunk.getNoRollbackExceptionClasses();
-        ut = TransactionService.getTransaction();
+        this.ut = stepRunner.ut;
     }
 
     @Override

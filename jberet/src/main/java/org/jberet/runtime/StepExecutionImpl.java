@@ -28,8 +28,11 @@ import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.metric.StepMetrics;
+import org.jberet.util.BatchLogger;
 
-public final class StepExecutionImpl extends AbstractExecution implements StepExecution {
+public final class StepExecutionImpl extends AbstractExecution implements StepExecution, Serializable, Cloneable {
+    private static final long serialVersionUID = 1L;
+
     private long id;
 
     private String stepName;
@@ -50,6 +53,17 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         this.id = id;
         this.stepName = stepName;
         startTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public StepExecutionImpl clone() throws CloneNotSupportedException {
+        StepExecutionImpl result = null;
+        try {
+            result = (StepExecutionImpl) super.clone();
+        } catch (CloneNotSupportedException e) {
+            BatchLogger.LOGGER.failToClone(e, this, "", stepName);
+        }
+        return result;
     }
 
     public int getStartCount() {
