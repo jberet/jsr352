@@ -99,10 +99,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     BlockingQueue<Serializable> dataQueue;
 
     UserTransaction ut = TransactionService.getTransaction();
+    private StepExecutionImpl stepExecution;
 
     public StepExecutionRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
+        this.stepExecution = stepContext.getStepExecution();
         createStepListeners();
         initPartitionConfig();
     }
@@ -125,15 +127,15 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     startLimit = Integer.parseInt(step.getStartLimit());
                 }
                 if (startLimit > 0) {
-                    int startCount = batchContext.getStepExecution().getStartCount();
+                    int startCount = stepExecution.getStartCount();
                     if (startCount >= startLimit) {
                         throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
                     }
                 }
 
-                batchContext.getStepExecution().incrementStartCount();
+                stepExecution.incrementStartCount();
                 batchContext.setBatchStatus(BatchStatus.STARTED);
-                batchContext.getJobContext().getJobExecution().addStepExecution(batchContext.getStepExecution());
+                batchContext.getJobContext().getJobExecution().addStepExecution(stepExecution);
 
                 Chunk chunk = step.getChunk();
                 Batchlet batchlet = step.getBatchlet();
@@ -200,7 +202,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             String next = resolveTransitionElements(step.getTransitionElements(), step.getNext(), false);
-            enclosingRunner.runJobElement(next, batchContext.getStepExecution());
+            enclosingRunner.runJobElement(next, stepExecution);
         }
     }
 
@@ -222,15 +224,36 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         }
     }
 
+    private void applyPreviousPartitionPlan() {
+        StepExecutionImpl s = stepExecution;
+        numOfPartitions = s.getNumOfPartitions();
+        List<java.util.Properties> pps = s.getPartitionProperties();
+        if (pps != null) {
+            partitionProperties = pps.toArray(new java.util.Properties[pps.size()]);
+        }
+    }
+
     private void beginPartition(AbstractRunner runner) throws Exception {
         if (reducer != null) {
             reducer.beginPartitionedStep();
         }
+        boolean isRestart = batchContext.getJobContext().isRestart();
+        boolean isOverride = false;
         if (mapper != null) {
             javax.batch.api.partition.PartitionPlan partitionPlan = mapper.mapPartitions();
-            numOfPartitions = partitionPlan.getPartitions();
-            numOfThreads = partitionPlan.getThreads();
-            partitionProperties = partitionPlan.getPartitionProperties();
+            isOverride = partitionPlan.getPartitionsOverride();
+            if (isOverride || !isRestart) {
+                numOfPartitions = partitionPlan.getPartitions();
+                numOfThreads = partitionPlan.getThreads();
+                partitionProperties = partitionPlan.getPartitionProperties();
+            } else {
+                applyPreviousPartitionPlan();
+                numOfThreads = partitionPlan.getThreads();
+                partitionProperties = partitionPlan.getPartitionProperties();
+            }
+        } else if (isRestart) {
+            applyPreviousPartitionPlan();
+            numOfThreads = plan.getThreads() == null ? numOfPartitions : Integer.parseInt(plan.getThreads());
         } else {
             numOfPartitions = plan.getPartitions() == null ? 1 : Integer.parseInt(plan.getPartitions());
             numOfThreads = plan.getThreads() == null ? numOfPartitions : Integer.parseInt(plan.getThreads());
@@ -250,10 +273,17 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             PropertyResolver resolver = new PropertyResolver();
             if (i < partitionProperties.length) {
                 resolver.setPartitionPlanProperties(partitionProperties[i]);
+
+                //associate this chunk represeted by this StepExecutionImpl with this partition properties.  If this
+                //partition fails or is stopped, the restart process can select this partition properties.
+                stepContext1.getStepExecution().addPartitionProperties(partitionProperties[i]);
             }
             resolver.setResolvePartitionPlanProperties(true);
             resolver.resolve(step1);
 
+            if (isRestart && isOverride && reducer != null) {
+                reducer.rollbackPartitionedStep();
+            }
             if (runner instanceof BatchletRunner) {
                 runner1 = new BatchletRunner(stepContext1, enclosingRunner, this, step1.getBatchlet());
             } else {
@@ -272,11 +302,20 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     StepExecutionImpl s = (StepExecutionImpl) data;
                     fromAllPartitions.add(s);
                     BatchStatus bs = s.getBatchStatus();
-                    if (bs == BatchStatus.FAILED) {
-                        consolidatedBatchStatus= BatchStatus.FAILED;
-                    } else if (bs == BatchStatus.STOPPED && consolidatedBatchStatus != BatchStatus.FAILED) {
-                        consolidatedBatchStatus = BatchStatus.STOPPED;
+
+                    if (bs == BatchStatus.FAILED || bs == BatchStatus.STOPPED) {
+                        List<java.util.Properties> pps = s.getPartitionProperties();
+                        java.util.Properties pp = null;
+                        if (pps != null && pps.size() > 0) {
+                            pp = pps.get(0);
+                        }
+                        stepExecution.addPartitionProperties(pp);
+                        stepExecution.setNumOfPartitions(stepExecution.getNumOfPartitions() + 1);
+                        if(consolidatedBatchStatus != BatchStatus.FAILED) {
+                            consolidatedBatchStatus = bs;
+                        }
                     }
+
                     if (analyzer != null) {
                         analyzer.analyzeStatus(bs, s.getExitStatus());
                     }

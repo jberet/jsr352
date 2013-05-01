@@ -41,13 +41,15 @@ import javax.batch.api.chunk.listener.RetryWriteListener;
 import javax.batch.api.chunk.listener.SkipProcessListener;
 import javax.batch.api.chunk.listener.SkipReadListener;
 import javax.batch.api.chunk.listener.SkipWriteListener;
-import javax.batch.operations.BatchRuntimeException;
+import javax.batch.api.partition.PartitionCollector;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.transaction.UserTransaction;
 
 import org.jberet.job.Chunk;
+import org.jberet.job.Collector;
 import org.jberet.metadata.ExceptionClassFilterImpl;
+import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
 
@@ -60,6 +62,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private ItemReader itemReader;
     private ItemWriter itemWriter;
     private ItemProcessor itemProcessor;
+    private PartitionCollector collector;
+
     private String checkpointPolicy = "item";
     private CheckpointAlgorithm checkpointAlgorithm;
     private int itemCount = 10;
@@ -141,6 +145,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     @Override
     public void run() {
+        final JobContextImpl jobContext = batchContext.getJobContext();
+        if (stepRunner.dataQueue != null) {
+            Collector collectorConfig = batchContext.getStep().getPartition().getCollector();
+            if (collectorConfig != null) {
+                collector = jobContext.createArtifact(collectorConfig.getRef(), collectorConfig.getProperties(), batchContext);
+            }
+        }
         try {
             ut.setTransactionTimeout(checkpointTimeout());
             ut.begin();
@@ -163,12 +174,30 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 ut.rollback();
                 throw e;
             }
+            //collect data at the end of the partition
+            if (collector != null) {
+                stepRunner.dataQueue.put(collector.collectPartitionData());
+            }
             ut.commit();
-        } catch (Throwable e) {
-            Exception exception = e instanceof Exception ? (Exception) e : new BatchRuntimeException(e);
-            batchContext.setException(exception);
-            LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), batchContext.getStepName(), chunk);
+        } catch (Exception e) {
+            if (collector != null) {
+                try {
+                    stepRunner.dataQueue.put(collector.collectPartitionData());
+                } catch (Exception e1) {
+                    //ignore
+                }
+            }
+            batchContext.setException(e);
+            LOGGER.failToRunJob(e, jobContext.getJobName(), batchContext.getStepName(), chunk);
             batchContext.setBatchStatus(BatchStatus.FAILED);
+        } finally {
+            try {
+                if (stepRunner.dataQueue != null) {
+                    stepRunner.dataQueue.put(batchContext.getStepExecution());
+                }
+            } catch (InterruptedException e) {
+                //ignore
+            }
         }
     }
 
@@ -431,6 +460,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 if (processingInfo.chunkState != ChunkState.DEPLETED) {
                     processingInfo.chunkState = ChunkState.TO_START_NEW;
                 }
+                if (collector != null) {
+                    stepRunner.dataQueue.put(collector.collectPartitionData());
+                }
             } catch (Exception e) {
                 for (ItemWriteListener l : stepRunner.itemWriteListeners) {
                     l.onWriteError(outputList, e);
@@ -474,6 +506,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
         processingInfo.chunkState = ChunkState.TO_RETRY;
         processingInfo.itemState = ItemState.RUNNING;
+        if (collector != null) {
+            stepRunner.dataQueue.put(collector.collectPartitionData());
+        }
     }
 
     private boolean needSkip(Exception e) {

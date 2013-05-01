@@ -92,6 +92,10 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         return result;
     }
 
+    public boolean isRestart() {
+        return originalToRestart != null;
+    }
+
     public List<Step> getExecutedSteps() {
         return executedSteps;
     }

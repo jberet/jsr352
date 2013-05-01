@@ -80,6 +80,9 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                                     propName = f.getName();
                                 }
                                 fieldVal = BatchUtil.getBatchProperty(batchProps, propName);
+                                if ("".equals(fieldVal)) {
+                                    fieldVal = null;
+                                }
                             }
                         }
                         doInjection(obj, f, fieldVal);

@@ -23,6 +23,9 @@
 package org.jberet.runtime;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
@@ -48,6 +51,20 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
     private StepMetrics stepMetrics = new StepMetrics();
 
     int startCount;
+
+    /**
+     * To remember the numOfPartitions for restart purpose.  This field should not be cloned.  This field is set on the
+     * main StepExecution only.
+     */
+    private int numOfPartitions;
+
+    /**
+     * To remember the partition properties for the failed or stopped partitions.  This field should not be cloned.
+     * On the main StepExecution, a list of partition properties from failed or stopped partitions are added at the end
+     * of a partitioned step execution; on a partition StepExecutionImpl clone, a resolved single partition properties
+     * is added before starting the partition.
+     */
+    private List<Properties> partitionProperties;
 
     public StepExecutionImpl(long id, String stepName) {
         this.id = id;
@@ -138,5 +155,24 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     public void setWriterCheckpointInfo(Serializable writerCheckpointInfo) {
         this.writerCheckpointInfo = writerCheckpointInfo;
+    }
+
+    public int getNumOfPartitions() {
+        return numOfPartitions;
+    }
+
+    public void setNumOfPartitions(int numOfPartitions) {
+        this.numOfPartitions = numOfPartitions;
+    }
+
+    public List<Properties> getPartitionProperties() {
+        return partitionProperties;
+    }
+
+    public void addPartitionProperties(Properties p) {
+        if (partitionProperties == null) {
+            partitionProperties = new ArrayList<Properties>();
+        }
+        partitionProperties.add(p);
     }
 }

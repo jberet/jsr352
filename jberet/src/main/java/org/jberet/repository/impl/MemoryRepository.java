@@ -150,6 +150,7 @@ public enum MemoryRepository implements JobRepository {
             copy = BatchUtil.clone(ser);
             stepExecution.setWriterCheckpointInfo(copy);
         }
+        //save stepExecution partition properties
     }
 
 }

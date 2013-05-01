@@ -430,9 +430,13 @@ public final class PropertyResolver {
                 propsToPush.getProperty().add(p);
 
                 oldVal = p.getValue();
-                newVal = resolve(oldVal);
-                if (!oldVal.equals(newVal)) {
-                    p.setValue(newVal);
+                if (oldVal != null) {
+                    newVal = resolve(oldVal);
+                    if (!oldVal.equals(newVal)) {
+                        p.setValue(newVal);
+                    }
+                } else {
+                    p.setValue("");
                 }
             }
         } finally {

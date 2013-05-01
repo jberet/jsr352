@@ -55,6 +55,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
                     if (allowStartIfComplete == Boolean.FALSE) {
                         setBatchStatus(BatchStatus.COMPLETED);
                         setExitStatus(originalStepExecution.getExitStatus());
+                        return;
                     }
                 }
                 if (originalStepExecution.getPersistentUserData() != null) {
@@ -63,12 +64,16 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
                 this.stepExecution.setReaderCheckpointInfo(originalStepExecution.getReaderCheckpointInfo());
                 this.stepExecution.setWriterCheckpointInfo(originalStepExecution.getWriterCheckpointInfo());
                 this.stepExecution.setStartCount((originalStepExecution).getStartCount());
+                this.stepExecution.setNumOfPartitions(originalStepExecution.getNumOfPartitions());
+                if (originalStepExecution.getPartitionProperties() != null) {
+                    for (java.util.Properties p : originalStepExecution.getPartitionProperties()) {
+                        this.stepExecution.addPartitionProperties(p);
+                    }
+                }
             }
         }
 
-        if (getBatchStatus() != BatchStatus.COMPLETED) {
-            this.stepExecution.setBatchStatus(BatchStatus.STARTING);
-        }
+        this.stepExecution.setBatchStatus(BatchStatus.STARTING);
     }
 
     private StepExecutionImpl findOriginalStepExecution(JobExecutionImpl originalToRestart) {
