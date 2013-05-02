@@ -79,6 +79,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
                 stepRunner.dataQueue.put(collector.collectPartitionData());
             }
         } catch (Exception e) {
+            //TODO remove this block.  collector is not called for unhandled exceptions.
             try {
                 if (collector != null) {
                     stepRunner.dataQueue.put(collector.collectPartitionData());

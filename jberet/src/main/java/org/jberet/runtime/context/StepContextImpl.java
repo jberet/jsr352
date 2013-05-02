@@ -65,9 +65,24 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
                 this.stepExecution.setWriterCheckpointInfo(originalStepExecution.getWriterCheckpointInfo());
                 this.stepExecution.setStartCount((originalStepExecution).getStartCount());
                 this.stepExecution.setNumOfPartitions(originalStepExecution.getNumOfPartitions());
-                if (originalStepExecution.getPartitionProperties() != null) {
-                    for (java.util.Properties p : originalStepExecution.getPartitionProperties()) {
-                        this.stepExecution.addPartitionProperties(p);
+                if (originalStepExecution.getPartitionPropertiesIndex() != null) {
+                    for (Integer i : originalStepExecution.getPartitionPropertiesIndex()) {
+                        this.stepExecution.addPartitionPropertiesIndex(i);
+                    }
+                }
+                if (originalStepExecution.getPartitionPersistentUserData() != null) {
+                    for (Serializable d : originalStepExecution.getPartitionPersistentUserData()) {
+                        this.stepExecution.addPartitionPersistentUserData(d);
+                    }
+                }
+                if (originalStepExecution.getPartitionReaderCheckpointInfo() != null) {
+                    for (Serializable d : originalStepExecution.getPartitionReaderCheckpointInfo()) {
+                        this.stepExecution.addPartitionReaderCheckpointInfo(d);
+                    }
+                }
+                if (originalStepExecution.getPartitionWriterCheckpointInfo() != null) {
+                    for (Serializable d : originalStepExecution.getPartitionWriterCheckpointInfo()) {
+                        this.stepExecution.addPartitionWriterCheckpointInfo(d);
                     }
                 }
             }

@@ -25,7 +25,6 @@ package org.jberet.runtime;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
@@ -59,12 +58,32 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
     private int numOfPartitions;
 
     /**
-     * To remember the partition properties for the failed or stopped partitions.  This field should not be cloned.
-     * On the main StepExecution, a list of partition properties from failed or stopped partitions are added at the end
-     * of a partitioned step execution; on a partition StepExecutionImpl clone, a resolved single partition properties
-     * is added before starting the partition.
+     * To remember the index of the partition plan properties for failed or stopped partition on the step main thread.
+     * This field should not be cloned.  On a cloned StepExecutionImpl, it contains a single index of the partition's
+     * plan properties index.
      */
-    private List<Properties> partitionProperties;
+    private List<Integer> partitionPropertiesIndex;
+
+    /**
+     * To remember the persistent user data from each failed or stopped partition on the step main thread.  The element
+     * order must be same as partitionPropertiesIndex.  This field should not be cloned.  On a cloned StepExecutionImpl,
+     * it should not be used.
+     */
+    private List<Serializable> partitionPersistentUserData;
+
+    /**
+     * To remember the reader checkpoint info from each failed or stopped partition on the step main thread.  The 
+     * element order must be same as other partition-related list in this class.  This field should not be clone.  On a
+     * cloned StepExecutionImpl, it should not be used.
+     */
+    private List<Serializable> partitionReaderCheckpointInfo;
+
+    /**
+     * To remember the writer checkpoint info from each failed or stopped partition on the step main thread.  The 
+     * element order must be same as other partition-related list in this class.  This field should not be clone.  On a
+     * cloned StepExecutionImpl, it should not be used.
+     */
+    private List<Serializable> partitionWriterCheckpointInfo;
 
     public StepExecutionImpl(long id, String stepName) {
         this.id = id;
@@ -80,6 +99,8 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         } catch (CloneNotSupportedException e) {
             BatchLogger.LOGGER.failToClone(e, this, "", stepName);
         }
+        result.numOfPartitions = 0;
+        result.partitionPropertiesIndex = null;
         return result;
     }
 
@@ -165,14 +186,47 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         this.numOfPartitions = numOfPartitions;
     }
 
-    public List<Properties> getPartitionProperties() {
-        return partitionProperties;
+    public List<Integer> getPartitionPropertiesIndex() {
+        return partitionPropertiesIndex;
     }
 
-    public void addPartitionProperties(Properties p) {
-        if (partitionProperties == null) {
-            partitionProperties = new ArrayList<Properties>();
+    public void addPartitionPropertiesIndex(Integer i) {
+        if (partitionPropertiesIndex == null) {
+            partitionPropertiesIndex = new ArrayList<Integer>();
         }
-        partitionProperties.add(p);
+        partitionPropertiesIndex.add(i);
+    }
+
+    public List<Serializable> getPartitionPersistentUserData() {
+        return partitionPersistentUserData;
+    }
+
+    public void addPartitionPersistentUserData(Serializable d) {
+        if (partitionPersistentUserData == null) {
+            partitionPersistentUserData = new ArrayList<Serializable>();
+        }
+        partitionPersistentUserData.add(d);
+    }
+
+    public List<Serializable> getPartitionReaderCheckpointInfo() {
+        return partitionReaderCheckpointInfo;
+    }
+
+    public void addPartitionReaderCheckpointInfo(Serializable s) {
+        if (partitionReaderCheckpointInfo == null) {
+            partitionReaderCheckpointInfo = new ArrayList<Serializable>();
+        }
+        partitionReaderCheckpointInfo.add(s);
+    }
+
+    public List<Serializable> getPartitionWriterCheckpointInfo() {
+        return partitionWriterCheckpointInfo;
+    }
+
+    public void addPartitionWriterCheckpointInfo(Serializable s) {
+        if (partitionWriterCheckpointInfo == null) {
+            partitionWriterCheckpointInfo = new ArrayList<Serializable>();
+        }
+        partitionWriterCheckpointInfo.add(s);
     }
 }

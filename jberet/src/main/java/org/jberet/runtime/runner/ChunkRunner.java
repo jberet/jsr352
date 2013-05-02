@@ -180,13 +180,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
             ut.commit();
         } catch (Exception e) {
-            if (collector != null) {
-                try {
-                    stepRunner.dataQueue.put(collector.collectPartitionData());
-                } catch (Exception e1) {
-                    //ignore
-                }
-            }
             batchContext.setException(e);
             LOGGER.failToRunJob(e, jobContext.getJobName(), batchContext.getStepName(), chunk);
             batchContext.setBatchStatus(BatchStatus.FAILED);
