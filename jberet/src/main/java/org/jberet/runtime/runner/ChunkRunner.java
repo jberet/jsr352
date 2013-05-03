@@ -48,6 +48,8 @@ import javax.transaction.UserTransaction;
 
 import org.jberet.job.Chunk;
 import org.jberet.job.Collector;
+import org.jberet.job.Listener;
+import org.jberet.job.Listeners;
 import org.jberet.metadata.ExceptionClassFilterImpl;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
@@ -56,6 +58,21 @@ import org.jberet.runtime.metric.StepMetrics;
 import static org.jberet.util.BatchLogger.LOGGER;
 
 public final class ChunkRunner extends AbstractRunner<StepContextImpl> implements Runnable {
+    private List<ChunkListener> chunkListeners = new ArrayList<ChunkListener>();
+
+    private List<SkipWriteListener> skipWriteListeners = new ArrayList<SkipWriteListener>();
+    private List<SkipProcessListener> skipProcessListeners = new ArrayList<SkipProcessListener>();
+    private List<SkipReadListener> skipReadListeners = new ArrayList<SkipReadListener>();
+
+    private List<RetryReadListener> retryReadListeners = new ArrayList<RetryReadListener>();
+    private List<RetryWriteListener> retryWriteListeners = new ArrayList<RetryWriteListener>();
+    private List<RetryProcessListener> retryProcessListeners = new ArrayList<RetryProcessListener>();
+
+    private List<ItemReadListener> itemReadListeners = new ArrayList<ItemReadListener>();
+    private List<ItemWriteListener> itemWriteListeners = new ArrayList<ItemWriteListener>();
+    private List<ItemProcessListener> itemProcessListeners = new ArrayList<ItemProcessListener>();
+
+    private JobContextImpl jobContext;
     private Chunk chunk;
     private StepExecutionRunner stepRunner;
     private StepMetrics stepMetrics;
@@ -87,19 +104,24 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         this.stepRunner = stepRunner;
         this.stepMetrics = stepRunner.batchContext.getStepExecution().getStepMetrics();
         this.chunk = chunk;
+        this.jobContext = batchContext.getJobContext();
 
         org.jberet.job.ItemReader readerElement = chunk.getReader();
-        itemReader = batchContext.getJobContext().createArtifact(
-                readerElement.getRef(), readerElement.getProperties(), batchContext);
+        itemReader = jobContext.createArtifact(readerElement.getRef(), null, readerElement.getProperties(), batchContext);
 
         org.jberet.job.ItemWriter writerElement = chunk.getWriter();
-        itemWriter = batchContext.getJobContext().createArtifact(
-                writerElement.getRef(), writerElement.getProperties(), batchContext);
+        itemWriter = jobContext.createArtifact(writerElement.getRef(), null, writerElement.getProperties(), batchContext);
 
         org.jberet.job.ItemProcessor processorElement = chunk.getProcessor();
         if (processorElement != null) {
-            itemProcessor = batchContext.getJobContext().createArtifact(
-                    processorElement.getRef(), processorElement.getProperties(), batchContext);
+            itemProcessor = jobContext.createArtifact(processorElement.getRef(), null, processorElement.getProperties(), batchContext);
+        }
+
+        if (stepRunner.collectorDataQueue != null) {
+            Collector collectorConfig = batchContext.getStep().getPartition().getCollector();
+            if (collectorConfig != null) {
+                collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
+            }
         }
 
         String attrVal = chunk.getCheckpointPolicy();
@@ -119,8 +141,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             checkpointPolicy = "custom";
             org.jberet.job.CheckpointAlgorithm alg = chunk.getCheckpointAlgorithm();
             if (alg != null) {
-                checkpointAlgorithm = batchContext.getJobContext().createArtifact(
-                        alg.getRef(), alg.getProperties(), batchContext);
+                checkpointAlgorithm = jobContext.createArtifact(alg.getRef(), null, alg.getProperties(), batchContext);
             } else {
                 throw LOGGER.checkpointAlgorithmMissing(stepRunner.step.getId());
             }
@@ -141,17 +162,11 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         retryableExceptionClasses = (ExceptionClassFilterImpl) chunk.getRetryableExceptionClasses();
         noRollbackExceptionClasses = (ExceptionClassFilterImpl) chunk.getNoRollbackExceptionClasses();
         this.ut = stepRunner.ut;
+        createChunkRelatedListeners();
     }
 
     @Override
     public void run() {
-        final JobContextImpl jobContext = batchContext.getJobContext();
-        if (stepRunner.dataQueue != null) {
-            Collector collectorConfig = batchContext.getStep().getPartition().getCollector();
-            if (collectorConfig != null) {
-                collector = jobContext.createArtifact(collectorConfig.getRef(), collectorConfig.getProperties(), batchContext);
-            }
-        }
         try {
             ut.setTransactionTimeout(checkpointTimeout());
             ut.begin();
@@ -176,7 +191,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
             //collect data at the end of the partition
             if (collector != null) {
-                stepRunner.dataQueue.put(collector.collectPartitionData());
+                stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
             ut.commit();
         } catch (Exception e) {
@@ -185,8 +200,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
             try {
-                if (stepRunner.dataQueue != null) {
-                    stepRunner.dataQueue.put(batchContext.getStepExecution());
+                if (stepRunner.collectorDataQueue != null) {
+                    stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
                 }
             } catch (InterruptedException e) {
                 //ignore
@@ -229,7 +244,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         processingInfo.reset();
                     }
                     ut.begin();
-                    for (ChunkListener l : stepRunner.chunkListeners) {
+                    for (ChunkListener l : chunkListeners) {
                         l.beforeChunk();
                     }
                     beginCheckpoint(processingInfo);
@@ -250,7 +265,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 if (isReadyToCheckpoint(processingInfo)) {
                     try {
                         doCheckpoint(processingInfo);
-                        for (ChunkListener l : stepRunner.chunkListeners) {
+                        for (ChunkListener l : chunkListeners) {
                             l.afterChunk();
                         }
                     } catch (Exception e) {
@@ -262,7 +277,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
                 }
             } catch (Exception e) {
-                for (ChunkListener l : stepRunner.chunkListeners) {
+                for (ChunkListener l : chunkListeners) {
                     l.onError(e);
                 }
                 throw e;
@@ -272,7 +287,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private void readItem(final ProcessingInfo processingInfo) throws Exception {
         try {
-            for (ItemReadListener l : stepRunner.itemReadListeners) {
+            for (ItemReadListener l : itemReadListeners) {
                 l.beforeRead();
             }
             itemRead = itemReader.readItem();
@@ -282,23 +297,23 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             } else {
                 processingInfo.chunkState = ChunkState.DEPLETED;
             }
-            for (ItemReadListener l : stepRunner.itemReadListeners) {
+            for (ItemReadListener l : itemReadListeners) {
                 l.afterRead(itemRead);
             }
         } catch (Exception e) {
-            for (ItemReadListener l : stepRunner.itemReadListeners) {
+            for (ItemReadListener l : itemReadListeners) {
                 l.onReadError(e);
             }
             toSkipOrRetry(e, processingInfo);
             if (processingInfo.itemState == ItemState.TO_SKIP) {
-                for (SkipReadListener l : stepRunner.skipReadListeners) {
+                for (SkipReadListener l : skipReadListeners) {
                     l.onSkipReadItem(e);
                 }
                 stepMetrics.increment(Metric.MetricType.READ_SKIP_COUNT, 1);
                 skipCount++;
                 itemRead = null;
             } else if (processingInfo.itemState == ItemState.TO_RETRY) {
-                for (RetryReadListener l : stepRunner.retryReadListeners) {
+                for (RetryReadListener l : retryReadListeners) {
                     l.onRetryReadException(e);
                 }
                 retryCount++;
@@ -322,30 +337,30 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         Object output;
         if (itemProcessor != null) {
             try {
-                for (ItemProcessListener l : stepRunner.itemProcessListeners) {
+                for (ItemProcessListener l : itemProcessListeners) {
                     l.beforeProcess(itemRead);
                 }
                 output = itemProcessor.processItem(itemRead);
-                for (ItemProcessListener l : stepRunner.itemProcessListeners) {
+                for (ItemProcessListener l : itemProcessListeners) {
                     l.afterProcess(itemRead, output);
                 }
                 if (output == null) {
                     stepMetrics.increment(Metric.MetricType.FILTER_COUNT, 1);
                 }
             } catch (Exception e) {
-                for (ItemProcessListener l : stepRunner.itemProcessListeners) {
+                for (ItemProcessListener l : itemProcessListeners) {
                     l.onProcessError(itemRead, e);
                 }
                 toSkipOrRetry(e, processingInfo);
                 if (processingInfo.itemState == ItemState.TO_SKIP) {
-                    for (SkipProcessListener l : stepRunner.skipProcessListeners) {
+                    for (SkipProcessListener l : skipProcessListeners) {
                         l.onSkipProcessItem(itemRead, e);
                     }
                     stepMetrics.increment(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
                     skipCount++;
                     output = null;
                 } else if (processingInfo.itemState == ItemState.TO_RETRY) {
-                    for (RetryProcessListener l : stepRunner.retryProcessListeners) {
+                    for (RetryProcessListener l : retryProcessListeners) {
                         l.onRetryProcessException(itemRead, e);
                     }
                     retryCount++;
@@ -434,12 +449,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         int outputSize = outputList.size();
         if (outputSize > 0) {
             try {
-                for (ItemWriteListener l : stepRunner.itemWriteListeners) {
+                for (ItemWriteListener l : itemWriteListeners) {
                     l.beforeWrite(outputList);
                 }
                 itemWriter.writeItems(outputList);
                 stepMetrics.increment(Metric.MetricType.WRITE_COUNT, outputSize);
-                for (ItemWriteListener l : stepRunner.itemWriteListeners) {
+                for (ItemWriteListener l : itemWriteListeners) {
                     l.afterWrite(outputList);
                 }
                 batchContext.getStepExecution().setReaderCheckpointInfo(itemReader.checkpointInfo());
@@ -454,21 +469,21 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     processingInfo.chunkState = ChunkState.TO_START_NEW;
                 }
                 if (collector != null) {
-                    stepRunner.dataQueue.put(collector.collectPartitionData());
+                    stepRunner.collectorDataQueue.put(collector.collectPartitionData());
                 }
             } catch (Exception e) {
-                for (ItemWriteListener l : stepRunner.itemWriteListeners) {
+                for (ItemWriteListener l : itemWriteListeners) {
                     l.onWriteError(outputList, e);
                 }
                 toSkipOrRetry(e, processingInfo);
                 if (processingInfo.itemState == ItemState.TO_SKIP) {
-                    for (SkipWriteListener l : stepRunner.skipWriteListeners) {
+                    for (SkipWriteListener l : skipWriteListeners) {
                         l.onSkipWriteItem(outputList, e);
                     }
                     stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
                     skipCount += outputSize;
                 } else if (processingInfo.itemState == ItemState.TO_RETRY) {
-                    for (RetryWriteListener l : stepRunner.retryWriteListeners) {
+                    for (RetryWriteListener l : retryWriteListeners) {
                         l.onRetryWriteException(outputList, e);
                     }
                     retryCount++;
@@ -500,7 +515,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         processingInfo.chunkState = ChunkState.TO_RETRY;
         processingInfo.itemState = ItemState.RUNNING;
         if (collector != null) {
-            stepRunner.dataQueue.put(collector.collectPartitionData());
+            stepRunner.collectorDataQueue.put(collector.collectPartitionData());
         }
     }
 
@@ -548,6 +563,52 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         //else if the current exception does not match the configured no-rollback-exceptions, need to rollback
         return noRollbackExceptionClasses == null ||
                 !noRollbackExceptionClasses.matches(e.getClass());
+    }
+
+    private void createChunkRelatedListeners() {
+        Listeners listeners = batchContext.getStep().getListeners();
+        if (listeners != null) {
+            String ref;
+            Object o;
+            for (Listener l : listeners.getListener()) {
+                ref = l.getRef();
+                Class<?> cls = null;
+                if (stepRunner.chunkRelatedListeners != null) {
+                    cls = stepRunner.chunkRelatedListeners.get(ref);
+                }
+                o = jobContext.createArtifact(ref, cls, l.getProperties(), batchContext);
+                if (o instanceof ChunkListener) {
+                    chunkListeners.add((ChunkListener) o);
+                }
+                if (o instanceof ItemReadListener) {
+                    itemReadListeners.add((ItemReadListener) o);
+                }
+                if (o instanceof ItemWriteListener) {
+                    itemWriteListeners.add((ItemWriteListener) o);
+                }
+                if (o instanceof ItemProcessListener) {
+                    itemProcessListeners.add((ItemProcessListener) o);
+                }
+                if (o instanceof SkipReadListener) {
+                    skipReadListeners.add((SkipReadListener) o);
+                }
+                if (o instanceof SkipWriteListener) {
+                    skipWriteListeners.add((SkipWriteListener) o);
+                }
+                if (o instanceof SkipProcessListener) {
+                    skipProcessListeners.add((SkipProcessListener) o);
+                }
+                if (o instanceof RetryReadListener) {
+                    retryReadListeners.add((RetryReadListener) o);
+                }
+                if (o instanceof RetryWriteListener) {
+                    retryWriteListeners.add((RetryWriteListener) o);
+                }
+                if (o instanceof RetryProcessListener) {
+                    retryProcessListeners.add((RetryProcessListener) o);
+                }
+            }
+        }
     }
 
     private static final class ProcessingInfo {

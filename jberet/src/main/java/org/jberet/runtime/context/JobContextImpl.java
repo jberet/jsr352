@@ -184,11 +184,28 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
      * loading and creation.
      *
      * @param ref                     ref name of the artifact
+     * @param cls                     the class type of the target artifact. Either ref or cls may be specified.
      * @param props                   batch properties directly for the artifact to create (does not include any properties from upper enclosing levels)
      * @param stepContextForInjection optional StepContext, needed for step-level artifact, but not for non-step-level ones
      * @return the created artifact
      */
-    public <A> A createArtifact(String ref, org.jberet.job.Properties props, StepContextImpl... stepContextForInjection) {
+    public <A> A createArtifact(String ref, Class<?> cls, org.jberet.job.Properties props, StepContextImpl... stepContextForInjection) {
+        Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(props, stepContextForInjection);
+        A a = null;
+        try {
+            a = (A) artifactFactory.create(ref, cls, classLoader, artifactCreationData);
+        } catch (Exception e) {
+            BatchLogger.LOGGER.failToCreateArtifact(e, ref);
+        }
+        return a;
+    }
+
+    public Class<?> getArtifactClass(String ref) {
+        Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(null);
+        return artifactFactory.getArtifactClass(ref, classLoader, artifactCreationData);
+    }
+
+    private Map<ArtifactFactory.DataKey, Object> prepareCreationData(org.jberet.job.Properties props, StepContextImpl... stepContextForInjection) {
         Map<ArtifactFactory.DataKey, Object> artifactCreationData = new HashMap<ArtifactFactory.DataKey, Object>();
         artifactCreationData.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, applicationMetaData);
         artifactCreationData.put(ArtifactFactory.DataKey.JOB_CONTEXT, this);
@@ -198,13 +215,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         if (stepContextForInjection.length > 0) {
             artifactCreationData.put(ArtifactFactory.DataKey.STEP_CONTEXT, stepContextForInjection[0]);
         }
-        A a = null;
-        try {
-            a = (A) artifactFactory.create(ref, classLoader, artifactCreationData);
-        } catch (Exception e) {
-            BatchLogger.LOGGER.failToCreateArtifact(e, ref);
-        }
-        return a;
+        return artifactCreationData;
     }
 
     private void createJobListeners() {
@@ -215,7 +226,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
             this.jobListeners = new JobListener[count];
             for (int i = 0; i < count; i++) {
                 Listener listener = listenerList.get(i);
-                this.jobListeners[i] = createArtifact(listener.getRef(), listener.getProperties());
+                this.jobListeners[i] = createArtifact(listener.getRef(), null, listener.getProperties());
             }
         }
     }

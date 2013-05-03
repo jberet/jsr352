@@ -50,13 +50,13 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     public void run() {
         try {
             final JobContextImpl jobContext = batchContext.getJobContext();
-            if (stepRunner.dataQueue != null) {
+            if (stepRunner.collectorDataQueue != null) {
                 Collector collectorConfig = batchContext.getStep().getPartition().getCollector();
                 if (collectorConfig != null) {
-                    collector = jobContext.createArtifact(collectorConfig.getRef(), collectorConfig.getProperties(), batchContext);
+                    collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
                 }
             }
-            final javax.batch.api.Batchlet batchletObj = jobContext.createArtifact(batchlet.getRef(), batchlet.getProperties(), batchContext);
+            final javax.batch.api.Batchlet batchletObj = jobContext.createArtifact(batchlet.getRef(), null, batchlet.getProperties(), batchContext);
 
             ConcurrencyService.submit(new Runnable() {
                 @Override
@@ -76,13 +76,13 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             String exitStatus = batchletObj.process();
             batchContext.setExitStatus(exitStatus);
             if (collector != null) {
-                stepRunner.dataQueue.put(collector.collectPartitionData());
+                stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
         } catch (Exception e) {
             //TODO remove this block.  collector is not called for unhandled exceptions.
             try {
                 if (collector != null) {
-                    stepRunner.dataQueue.put(collector.collectPartitionData());
+                    stepRunner.collectorDataQueue.put(collector.collectPartitionData());
                 }
             } catch (Exception e1) {
                 //ignore
@@ -92,8 +92,8 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
             try {
-                if (stepRunner.dataQueue != null) {
-                    stepRunner.dataQueue.put(batchContext.getStepExecution());
+                if (stepRunner.collectorDataQueue != null) {
+                    stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
                 }
             } catch (InterruptedException e) {
                 //ignore

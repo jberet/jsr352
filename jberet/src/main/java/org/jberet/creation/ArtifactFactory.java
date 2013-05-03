@@ -45,12 +45,13 @@ public interface ArtifactFactory {
      * corresponding to a ref value from a Job XML.
      *
      * @param ref value from Job XML
+     * @param cls the class type of the target artifact.  Either ref or cls may be specified.
      * @param classLoader the class loader for loading the artifact class
      * @param data a map of key-value pair for creating the artifact
      * @return instance corresponding to ref value
      * @throws Exception if instance cannot be created.
      */
-    public Object create(String ref, ClassLoader classLoader, Map<?, ?> data) throws Exception;
+    public Object create(String ref, Class<?> cls, ClassLoader classLoader, Map<?, ?> data) throws Exception;
 
     /**
      * The destroy method destroys an instance created
@@ -61,4 +62,12 @@ public interface ArtifactFactory {
      */
     public void destroy(Object instance) throws Exception;
 
+    /**
+     * Gets the class type of the artifact represented by ref.
+     * @param ref the ref name of the artifact
+     * @param classLoader the class loader for loading the artifact class
+     * @param data a map of key-value pair for creating the artifact
+     * @return the Class type of the artifact represented by ref
+     */
+    public Class<?> getArtifactClass(String ref, ClassLoader classLoader, Map<?, ?> data);
 }

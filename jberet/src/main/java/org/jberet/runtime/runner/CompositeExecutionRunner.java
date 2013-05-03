@@ -172,7 +172,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
     }
 
     protected void runDecision(Decision decision, StepExecution... precedingStepExecutions) {
-        Decider decider = batchContext.getJobContext().createArtifact(decision.getRef(), decision.getProperties());
+        Decider decider = batchContext.getJobContext().createArtifact(decision.getRef(), null, decision.getProperties());
         String newExitStatus;
         try {
             newExitStatus = decider.decide(precedingStepExecutions);

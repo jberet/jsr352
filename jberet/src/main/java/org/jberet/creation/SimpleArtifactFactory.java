@@ -39,21 +39,32 @@ import static org.jberet.util.BatchLogger.LOGGER;
 
 public final class SimpleArtifactFactory implements ArtifactFactory {
     public void initialize() throws Exception {
-
     }
 
-    public Object create(String ref, ClassLoader classLoader, Map<?, ?> data) throws Exception {
+    @Override
+    public Class<?> getArtifactClass(String ref, ClassLoader classLoader, Map<?, ?> data) {
         ApplicationMetaData appData = (ApplicationMetaData) data.get(DataKey.APPLICATION_META_DATA);
         String className = appData.getClassNameForRef(ref);
-        if (className == null) {
-            throw LOGGER.failToCreateArtifact(null, ref);
+        Class<?> cls;
+        try {
+            cls = classLoader.loadClass(className);
+        } catch (ClassNotFoundException e) {
+            throw LOGGER.failToCreateArtifact(e, ref);
         }
-        Class<?> cls = classLoader.loadClass(className);
+        return cls;
+    }
+
+    @Override
+    public Object create(String ref, Class<?> cls, ClassLoader classLoader, Map<?, ?> data) throws Exception {
+        if (cls == null) {
+            cls = getArtifactClass(ref, classLoader, data);
+        }
         Object obj = cls.newInstance();
         doInjection(obj, cls, data);
         return obj;
     }
 
+    @Override
     public void destroy(Object instance) throws Exception {
 
     }
