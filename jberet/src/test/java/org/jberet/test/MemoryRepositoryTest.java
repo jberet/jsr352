@@ -22,10 +22,10 @@
 
 package org.jberet.test;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -67,47 +67,22 @@ public class MemoryRepositoryTest {
     }
 
     @Test
-    public void concurrentAccess() throws Exception {
-        Long jobInstanceId = 1L;
+    public void nextUniqueId() throws Exception {
         int count = 20;
-        CountDownLatch latch = new CountDownLatch(count);
-        Map<String, String> expectedProps = new HashMap<String, String>();
-        Task[] tasks = new Task[count];
+        final List<Long> results = Collections.synchronizedList(new ArrayList<Long>());
         for (int i = 0; i < count; i++) {
-            expectedProps.put(String.valueOf(i), String.valueOf(i));
-            tasks[i] = new Task(jobInstanceId, String.valueOf(i), latch);
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    results.add(repo.nextUniqueId());
+                }
+            };
+            es.submit(runnable);
         }
-        for (Task t : tasks) {
-            es.submit(t);
-        }
-        latch.await();
-
-//TODO
-    }
-
-    private static class Task implements Runnable {
-        private final String p;
-        private final Long jobInstanceId;
-        private CountDownLatch latch;
-
-        private Task(Long jobInstanceId, String p, CountDownLatch latch) {
-            this.p = p;
-            this.jobInstanceId = jobInstanceId;
-            this.latch = latch;
-        }
-
-        @Override
-        public void run() {
-//            the following sleep can be used to see the effect of latch.await.  When latch.await
-//            and the following block are commented out, the test will fail, because not all of the
-//            properties have been saved.
-//            try {
-//                Thread.sleep(1);
-//            } catch (InterruptedException e) {
-//                //ignore
-//            }
-            //TODO add some other operations
-            latch.countDown();
+        synchronized (results) {
+            for (Long l : results) {
+                Assert.assertEquals(1, Collections.frequency(results, l));
+            }
         }
     }
 }

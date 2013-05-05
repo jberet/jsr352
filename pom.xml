@@ -62,6 +62,7 @@
         <module>jberet</module>
         <module>test-apps</module>
         <module>tck-porting-impl</module>
+        <module>distribution</module>
     </modules>
 
     <build>

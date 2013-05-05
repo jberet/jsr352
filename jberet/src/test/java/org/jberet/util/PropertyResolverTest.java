@@ -83,10 +83,11 @@ public class PropertyResolverTest {
 
         resolver.setSystemProperties(sysProps);
         resolver.setJobParameters(jobParams);
-//        resolver.setPartitionPlanProperties(partitionPlan);
+        resolver.setPartitionPlanProperties(partitionPlan);
         resolver.pushJobProperties(fromJavaUtilProperties(jobProps1));
         resolver.pushJobProperties(fromJavaUtilProperties(jobProps2));
         resolver.pushJobProperties(fromJavaUtilProperties(jobProps3));
+        resolver.setResolvePartitionPlanProperties(false);
     }
 
     private org.jberet.job.Properties fromJavaUtilProperties(Properties props) {
@@ -292,6 +293,29 @@ public class PropertyResolverTest {
                         jobParametersToken, jobParam1, systemPropertiesToken, "file.separator", jobParametersToken, jobParam2)};
         String[] expected = {
                 jobParam1Val + sysProps.getProperty("file.separator") + jobParam2Val
+        };
+        run(raw, expected);
+    }
+
+    @Test public void partitionPlan() {
+        String preLiteral = "#";
+        String postLiteral = ";";
+        resolver.setResolvePartitionPlanProperties(true);
+        String[] raw = {
+                String.format("#{%s['%s']}?:#{systemProperties['os.name']};", partitionPlanToken, ""),
+                String.format("#{%s['%s']}?:3;x", partitionPlanToken, "."),
+                String.format("%s#{%s['%s']}%s", preLiteral, partitionPlanToken, partitionPlan1, postLiteral),
+                String.format("#{%s['%s']}", partitionPlanToken, partitionPlan1),
+                String.format("#{%s['%s']}?:in.txt;", partitionPlanToken, partitionPlan1),
+                String.format("#{%s['%s']}?:#{systemProperties['os.name']};", partitionPlanToken, partitionPlan1)
+        };
+        String[] expected = {
+                osName,
+                "3x",
+                preLiteral + partitionPlan1Val + postLiteral,
+                partitionPlan1Val,
+                partitionPlan1Val,
+                partitionPlan1Val
         };
         run(raw, expected);
     }
