@@ -103,23 +103,10 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         return substitutedJob;
     }
 
-    public void setSubstitutedJob(Job j) {
-        this.substitutedJob = j;
-    }
-
     @Override
     public void setBatchStatus(BatchStatus batchStatus) {
         super.setBatchStatus(batchStatus);
-        if (batchStatus == BatchStatus.COMPLETED ||
-                batchStatus == BatchStatus.FAILED ||
-                batchStatus == BatchStatus.STOPPED) {
-            jobTerminationlatch.countDown();
-            jobStopLatch.countDown();
-            lastUpdatedTime = System.currentTimeMillis();
-            endTime = lastUpdatedTime;
-            jobStopLatch = null;
-            jobTerminationlatch = null;
-        }
+        lastUpdatedTime = System.currentTimeMillis();
     }
 
     @Override
@@ -176,7 +163,20 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         return restartPoint;
     }
 
+    public boolean isStopRequested() {
+        return jobStopLatch.getCount() == 0;
+    }
+
     public void stop() {
         jobStopLatch.countDown();
+    }
+
+    public void cleanUp() {
+        jobTerminationlatch.countDown();
+        jobStopLatch.countDown();
+        jobStopLatch = null;
+        jobTerminationlatch = null;
+        substitutedJob = null;
+        endTime = System.currentTimeMillis();
     }
 }

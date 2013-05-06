@@ -216,10 +216,14 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private void readProcessWriteItems() throws Exception {
         ProcessingInfo processingInfo = new ProcessingInfo();
         //if input has not been depleted, or even if depleted, but still need to retry the last item
-        while (processingInfo.chunkState != ChunkState.DEPLETED ||
+        //if stopped, exit the loop
+        while ((processingInfo.chunkState != ChunkState.JOB_STOPPED) &&
+
+               (processingInfo.chunkState != ChunkState.DEPLETED ||
                 processingInfo.itemState == ItemState.TO_RETRY_READ ||
                 processingInfo.itemState == ItemState.TO_RETRY_PROCESS ||
-                processingInfo.itemState == ItemState.TO_RETRY_WRITE) {
+                processingInfo.itemState == ItemState.TO_RETRY_WRITE)
+               ) {
             try {
                 //reset state for the next iteration
                 switch (processingInfo.itemState) {
@@ -428,6 +432,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private boolean isReadyToCheckpoint(final ProcessingInfo processingInfo) throws Exception {
+        if (jobContext.getJobExecution().isStopRequested()) {
+            processingInfo.chunkState=ChunkState.JOB_STOPPING;
+            return true;
+        }
         if (processingInfo.chunkState == ChunkState.DEPLETED ||
                 processingInfo.chunkState == ChunkState.RETRYING ||
                 processingInfo.chunkState == ChunkState.TO_END_RETRY) {
@@ -465,7 +473,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 if (!checkpointPolicy.equals("item")) {
                     checkpointAlgorithm.endCheckpoint();
                 }
-                if (processingInfo.chunkState != ChunkState.DEPLETED) {
+                if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
+                    processingInfo.chunkState = ChunkState.JOB_STOPPED;
+                } else if (processingInfo.chunkState != ChunkState.DEPLETED) {
                     processingInfo.chunkState = ChunkState.TO_START_NEW;
                 }
                 if (collector != null) {
@@ -477,11 +487,16 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
                 toSkipOrRetry(e, processingInfo);
                 if (processingInfo.itemState == ItemState.TO_SKIP) {
-                    for (SkipWriteListener l : skipWriteListeners) {
-                        l.onSkipWriteItem(outputList, e);
+                    //if requested to stop the job, do not skip to the next item
+                    if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
+                        processingInfo.chunkState = ChunkState.JOB_STOPPED;
+                    } else if (processingInfo.chunkState != ChunkState.JOB_STOPPED) {
+                        for (SkipWriteListener l : skipWriteListeners) {
+                            l.onSkipWriteItem(outputList, e);
+                        }
+                        stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
+                        skipCount += outputSize;
                     }
-                    stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
-                    skipCount += outputSize;
                 } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                     for (RetryWriteListener l : retryWriteListeners) {
                         l.onRetryWriteException(outputList, e);
@@ -650,7 +665,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         RETRYING_PROCESS, //the current item is being re-processed, when successful or result in a skip => normal RUNNING
 
         TO_RETRY_WRITE, //need to retry the current item write operation, upon starting next items => RETRYING_WRITE
-        RETRYING_WRITE  //the current item is being re-written, when successful or result in a skip => normal RUNNING
+        RETRYING_WRITE,  //the current item is being re-written, when successful or result in a skip => normal RUNNING
     }
 
     private enum ChunkState {
@@ -659,7 +674,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         RETRYING,     //chunk being retried
         TO_END_RETRY, //need to end retrying the current chunk
         TO_START_NEW, //the current chunk is done and need to start a new chunk next
-        DEPLETED      //no more input items, the processing can still go to next iteration so this last item can be retried
-    }
+        DEPLETED,      //no more input items, the processing can still go to next iteration so this last item can be retried
+
+        JOB_STOPPING,  //the job has been requested to stop
+        JOB_STOPPED
+        }
 
 }
