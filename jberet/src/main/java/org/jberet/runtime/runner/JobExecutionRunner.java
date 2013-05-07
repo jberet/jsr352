@@ -45,7 +45,10 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
 
     @Override
     public void run() {
-        batchContext.setBatchStatus(BatchStatus.STARTED);
+        // the job may be stopped right after starting
+        if (batchContext.getBatchStatus() != BatchStatus.STOPPING) {
+            batchContext.setBatchStatus(BatchStatus.STARTED);
+        }
         try {
             // run job listeners beforeJob()
             for (JobListener l : batchContext.getJobListeners()) {

@@ -98,6 +98,9 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             } catch (InterruptedException e) {
                 //ignore
             }
+            if (stepRunner.completedPartitionThreads != null) {
+                stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
+            }
         }
     }
 

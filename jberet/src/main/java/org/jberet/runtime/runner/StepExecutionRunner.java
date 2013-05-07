@@ -87,6 +87,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     boolean isPartitioned;
     BlockingQueue<Serializable> collectorDataQueue;
+    BlockingQueue<Boolean> completedPartitionThreads;
 
     UserTransaction ut = TransactionService.getTransaction();
     private StepExecutionImpl stepExecution;
@@ -239,6 +240,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (isRestart && !isOverride) {
             numOfPartitions = batchContext.getStepExecution().getNumOfPartitions();
         }
+        if (numOfPartitions > numOfThreads) {
+            completedPartitionThreads = new ArrayBlockingQueue<Boolean>(numOfPartitions);
+        }
         collectorDataQueue = new ArrayBlockingQueue<Serializable>(numOfPartitions * 3);
         List<Integer> indexes = stepExecution.getPartitionPropertiesIndex();
 
@@ -289,6 +293,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 runner1 = new BatchletRunner(stepContext1, enclosingRunner, this, step1.getBatchlet());
             } else {
                 runner1 = new ChunkRunner(stepContext1, enclosingRunner, this, step1.getChunk());
+            }
+            if (i >= numOfThreads) {
+                completedPartitionThreads.take();
             }
             ConcurrencyService.submit(runner1);
         }

@@ -206,6 +206,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             } catch (InterruptedException e) {
                 //ignore
             }
+            if (stepRunner.completedPartitionThreads != null) {
+                stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
+            }
         }
     }
 
@@ -475,6 +478,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
                 if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
                     processingInfo.chunkState = ChunkState.JOB_STOPPED;
+                    batchContext.setBatchStatus(BatchStatus.STOPPED);
                 } else if (processingInfo.chunkState != ChunkState.DEPLETED) {
                     processingInfo.chunkState = ChunkState.TO_START_NEW;
                 }
@@ -490,6 +494,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     //if requested to stop the job, do not skip to the next item
                     if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
                         processingInfo.chunkState = ChunkState.JOB_STOPPED;
+                        batchContext.setBatchStatus(BatchStatus.STOPPED);
                     } else if (processingInfo.chunkState != ChunkState.JOB_STOPPED) {
                         for (SkipWriteListener l : skipWriteListeners) {
                             l.onSkipWriteItem(outputList, e);
@@ -665,7 +670,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         RETRYING_PROCESS, //the current item is being re-processed, when successful or result in a skip => normal RUNNING
 
         TO_RETRY_WRITE, //need to retry the current item write operation, upon starting next items => RETRYING_WRITE
-        RETRYING_WRITE,  //the current item is being re-written, when successful or result in a skip => normal RUNNING
+        RETRYING_WRITE  //the current item is being re-written, when successful or result in a skip => normal RUNNING
     }
 
     private enum ChunkState {
