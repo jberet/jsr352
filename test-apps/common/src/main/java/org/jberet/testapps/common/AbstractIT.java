@@ -30,15 +30,33 @@ import javax.batch.runtime.BatchRuntime;
 import org.jberet.runtime.JobExecutionImpl;
 
 abstract public class AbstractIT {
-    protected void startJob(String jobXmlName) throws Exception {
-        Properties props = new Properties();
-        props.setProperty("job-param", "job-param");
+    protected long jobTimeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
 
-        JobOperator jobOperator = BatchRuntime.getJobOperator();
-        long jobExecutionId = jobOperator.start(jobXmlName, props);
-        JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+    protected Properties params = new Properties();
+    protected JobOperator jobOperator = BatchRuntime.getJobOperator();
+    protected long jobExecutionId;
+    protected JobExecutionImpl jobExecution;
+    protected long restartJobExecutionId;
+    protected JobExecutionImpl restartJobExecution;
 
-        long timeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
-        jobExecution.awaitTerminatioin(timeout, TimeUnit.SECONDS);
+    protected void startJob(String jobXml) {
+        jobExecutionId = jobOperator.start(jobXml, params);
+        jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+    }
+
+    protected void awaitTermination(JobExecutionImpl exe) throws InterruptedException {
+        exe.awaitTerminatioin(jobTimeout, TimeUnit.SECONDS);
+    }
+
+    protected void startJobAndWait(String jobXml) throws Exception {
+        startJob(jobXml);
+        awaitTermination(jobExecution);
+    }
+
+    protected void restartAndWait(long... oldJobExecutionIds) throws InterruptedException {
+        long restartId = oldJobExecutionIds.length == 0 ? jobExecutionId : oldJobExecutionIds[0];
+        restartJobExecutionId = jobOperator.restart(restartId, params);
+        restartJobExecution = (JobExecutionImpl) jobOperator.getJobExecution(restartJobExecutionId);
+        awaitTermination(restartJobExecution);
     }
 }
