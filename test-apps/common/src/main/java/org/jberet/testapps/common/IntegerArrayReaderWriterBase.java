@@ -20,12 +20,10 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.jberet.testapps.chunkstop;
+package org.jberet.testapps.common;
 
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
-import javax.batch.runtime.Metric;
-import javax.batch.runtime.StepExecution;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
@@ -36,7 +34,7 @@ public abstract class IntegerArrayReaderWriterBase {
     @Inject
     @BatchProperty(name = "data.count")
     protected String dataCountProp;
-    int dataCount;
+    protected int dataCount;
 
     @Inject
     @BatchProperty(name = "reader.fail.at")
@@ -75,17 +73,6 @@ public abstract class IntegerArrayReaderWriterBase {
         if (writerSleepTime == null) {
             writerSleepTime = "0";
         }
-    }
-
-    protected long getMetric(Metric.MetricType type) {
-        long result = 0;
-        for (Metric m : stepContext.getMetrics()) {
-            if (m.getType() == type) {
-                result = m.getValue();
-                break;
-            }
-        }
-        return result;
     }
 
     public void open(Serializable checkpoint) throws Exception {

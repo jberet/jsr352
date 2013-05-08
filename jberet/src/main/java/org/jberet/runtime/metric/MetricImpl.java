@@ -24,6 +24,8 @@ package org.jberet.runtime.metric;
 
 import java.io.Serializable;
 import javax.batch.runtime.Metric;
+import javax.batch.runtime.StepExecution;
+import javax.batch.runtime.context.StepContext;
 
 public class MetricImpl implements Metric, Serializable {
 
@@ -65,9 +67,7 @@ public class MetricImpl implements Metric, Serializable {
         if (!(o instanceof MetricImpl)) return false;
 
         MetricImpl metric = (MetricImpl) o;
-
-        return type.equals(metric.type);
-
+        return type == metric.type;
     }
 
     @Override
@@ -83,5 +83,23 @@ public class MetricImpl implements Metric, Serializable {
         sb.append(", value=").append(value);
         sb.append('}');
         return sb.toString();
+    }
+
+    public static long getMetric(StepExecution stepExecution, Metric.MetricType type) {
+        for (Metric m : stepExecution.getMetrics()) {
+            if (m.getType() == type) {
+                return m.getValue();
+            }
+        }
+        return 0;
+    }
+
+    public static long getMetric(StepContext stepContext, Metric.MetricType type) {
+        for (Metric m : stepContext.getMetrics()) {
+            if (m.getType() == type) {
+                return m.getValue();
+            }
+        }
+        return 0;
     }
 }

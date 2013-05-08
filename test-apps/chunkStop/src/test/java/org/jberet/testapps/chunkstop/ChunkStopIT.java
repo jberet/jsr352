@@ -23,29 +23,20 @@
 package org.jberet.testapps.chunkstop;
 
 import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import javax.batch.operations.JobOperator;
-import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
 import junit.framework.Assert;
-import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.metric.MetricImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class ChunkStopIT extends AbstractIT {
-    public static final long COMPLETION_TIMEOUT = 60;
     protected int dataCount = 30;
     protected static final String jobXml = "chunkStop.xml";
-    protected Properties params = new Properties();
-    protected JobOperator jobOperator = BatchRuntime.getJobOperator();
-    protected long jobExecutionId;
-    protected JobExecutionImpl jobExecution;
 
     @Before
     public void before() {
@@ -57,105 +48,67 @@ public class ChunkStopIT extends AbstractIT {
         params.clear();
     }
 
-    private void startJob() {
-        jobExecutionId = jobOperator.start(jobXml, params);
-        jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-    }
-
-    private long getMetric(StepExecution stepExecution, Metric.MetricType type) {
-        long result = 0;
-        for (Metric m : stepExecution.getMetrics()) {
-            if (m.getType() == type) {
-                result = m.getValue();
-                break;
-            }
-        }
-        return result;
-    }
-
-    private void checkMetrics(StepExecution stepExecution, Metric.MetricType type, long expected) {
-        Metric[] metrics = stepExecution.getMetrics();
-        if (metrics == null || metrics.length == 0) {
-            throw new IllegalStateException("Empty " + metrics);
-        }
-        for (Metric m : metrics) {
-            if (m.getType() == type) {
-                Assert.assertEquals(expected, m.getValue());
-                return;
-            }
-        }
-        throw new IllegalStateException("Didn't find the Metric type " + type + " in metrics: " + String.valueOf(metrics));
-    }
-
     @Test
     public void chunkStopRestart() throws Exception {
         params.setProperty("writer.sleep.time", "500");
-        startJob();
+        startJob(jobXml);
         jobOperator.stop(jobExecutionId);
-        jobExecution.awaitTerminatioin(COMPLETION_TIMEOUT, TimeUnit.SECONDS);
+        awaitTermination(jobExecution);
         Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
 
         List<StepExecution> stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
         StepExecution stepExecution = stepExecutions.get(0);
         Assert.assertEquals(1, stepExecutions.size());
         //since we called stop right after start, and the writer sleeps before writing data, there should only be 1 write and commit
-        checkMetrics(stepExecution, Metric.MetricType.WRITE_COUNT, 1);
-        checkMetrics(stepExecution, Metric.MetricType.COMMIT_COUNT, 1);
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
 
-        long restartedId = jobOperator.restart(jobExecutionId, params);
-        JobExecutionImpl jobExecution1 = (JobExecutionImpl) jobOperator.getJobExecution(restartedId);
-        jobExecution1.awaitTerminatioin(COMPLETION_TIMEOUT, TimeUnit.SECONDS);
+        restartAndWait();
 
-        stepExecution = jobOperator.getStepExecutions(restartedId).get(0);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution1.getBatchStatus());
-        Assert.assertTrue(getMetric(stepExecution, Metric.MetricType.READ_COUNT) < dataCount);
+        stepExecution = jobOperator.getStepExecutions(restartJobExecutionId).get(0);
+        Assert.assertEquals(BatchStatus.COMPLETED, restartJobExecution.getBatchStatus());
+        Assert.assertTrue(MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT) < dataCount);
     }
 
     @Test
     public void chunkFailRestart() throws Exception {
         params.setProperty("reader.fail.at", "13");
-        startJob();
-        jobExecution.awaitTerminatioin(COMPLETION_TIMEOUT, TimeUnit.SECONDS);
+        startJobAndWait(jobXml);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         StepExecution stepExecution = jobOperator.getStepExecutions(jobExecutionId).get(0);
-        checkMetrics(stepExecution, Metric.MetricType.READ_COUNT, 13);  //reader.fail.at is 0-based, reader.fail.at 13 means 13 successful read
-        checkMetrics(stepExecution, Metric.MetricType.WRITE_COUNT, 10);
-        checkMetrics(stepExecution, Metric.MetricType.COMMIT_COUNT, 1);
+        Assert.assertEquals(13, MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT));  //reader.fail.at is 0-based, reader.fail.at 13 means 13 successful read
+        Assert.assertEquals(10, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
 
         params.setProperty("reader.fail.at", "3");
-        long restartedId = jobOperator.restart(jobExecutionId, params);
-        JobExecutionImpl jobExecution1 = (JobExecutionImpl) jobOperator.getJobExecution(restartedId);
-        jobExecution1.awaitTerminatioin(COMPLETION_TIMEOUT, TimeUnit.SECONDS);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution1.getBatchStatus());
+        restartAndWait();
+        Assert.assertEquals(BatchStatus.COMPLETED, restartJobExecution.getBatchStatus());
 
-        stepExecution = jobOperator.getStepExecutions(restartedId).get(0);
-        checkMetrics(stepExecution, Metric.MetricType.READ_COUNT, 20);
-        checkMetrics(stepExecution, Metric.MetricType.WRITE_COUNT, 20);
-        checkMetrics(stepExecution, Metric.MetricType.COMMIT_COUNT, 3);
+        stepExecution = jobOperator.getStepExecutions(restartJobExecutionId).get(0);
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT));
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(3, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
     }
 
     @Test
     public void chunkWriterFailRestart() throws Exception {
         params.setProperty("writer.fail.at", "13");
-        startJob();
-        jobExecution.awaitTerminatioin(COMPLETION_TIMEOUT, TimeUnit.SECONDS);
+        startJobAndWait(jobXml);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         StepExecution stepExecution = jobOperator.getStepExecutions(jobExecutionId).get(0);
-        checkMetrics(stepExecution, Metric.MetricType.READ_COUNT, 20);
-        checkMetrics(stepExecution, Metric.MetricType.WRITE_COUNT, 10);
-        checkMetrics(stepExecution, Metric.MetricType.COMMIT_COUNT, 1);
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT));
+        Assert.assertEquals(10, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
 
         params.setProperty("writer.fail.at", "-1");
-        long restartedId = jobOperator.restart(jobExecutionId, params);
-        JobExecutionImpl jobExecution1 = (JobExecutionImpl) jobOperator.getJobExecution(restartedId);
-        jobExecution1.awaitTerminatioin(COMPLETION_TIMEOUT, TimeUnit.SECONDS);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution1.getBatchStatus());
+        restartAndWait();
+        Assert.assertEquals(BatchStatus.COMPLETED, restartJobExecution.getBatchStatus());
 
-        stepExecution = jobOperator.getStepExecutions(restartedId).get(0);
-        checkMetrics(stepExecution, Metric.MetricType.READ_COUNT, 20);
-        checkMetrics(stepExecution, Metric.MetricType.WRITE_COUNT, 20);
-        checkMetrics(stepExecution, Metric.MetricType.COMMIT_COUNT, 3);
+        stepExecution = jobOperator.getStepExecutions(restartJobExecutionId).get(0);
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT));
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(3, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
     }
 }

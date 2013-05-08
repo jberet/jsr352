@@ -20,13 +20,15 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.jberet.testapps.chunkstop;
+package org.jberet.testapps.common;
 
 import javax.batch.api.chunk.ItemReader;
 import javax.inject.Named;
 
-@Named("chunkStopReader")
-public final class ChunkStopReader extends IntegerArrayReaderWriterBase implements ItemReader {
+import org.jberet.testapps.common.IntegerArrayReaderWriterBase;
+
+@Named("integerArrayReader")
+public final class IntegerArrayReader extends IntegerArrayReaderWriterBase implements ItemReader {
     @Override
     public Object readItem() throws Exception {
         if (cursor >= dataCount) {

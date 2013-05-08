@@ -22,22 +22,35 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="chunkStop" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="chunkPartition" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="step1">
-        <chunk>
+        <chunk item-count="3">
             <reader ref="integerArrayReader">
                 <properties>
-                    <property name="data.count" value="#{jobParameters['data.count']}" />
-                    <property name="reader.fail.at" value="#{jobParameters['reader.fail.at']}" />
+                    <property name="data.count" value="30" />
+                    <property name="reader.fail.at" value="-1" />
                 </properties>
             </reader>
             <writer ref="integerArrayWriter">
                 <properties>
-                    <property name="data.count" value="#{jobParameters['data.count']}" />
-                    <property name="writer.fail.at" value="#{jobParameters['writer.fail.at']}" />
+                    <property name="data.count" value="30" />
+                    <property name="writer.fail.at" value="-1" />
                     <property name="writer.sleep.time" value="#{jobParameters['writer.sleep.time']}" />
                 </properties>
             </writer>
         </chunk>
+        <partition>
+            <plan partitions="3" threads="2">
+                <properties partition="0">
+                    <property name="partition.start" value="0" />
+                </properties>
+                <properties>
+                    <property name="partition.start" value="10" />
+                </properties>
+                <properties>
+                    <property name="partition.start" value="20" />
+                </properties>
+            </plan>
+        </partition>
     </step>
 </job>

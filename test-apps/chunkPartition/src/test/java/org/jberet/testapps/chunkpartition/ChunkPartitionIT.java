@@ -20,30 +20,22 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jberet.testapps.chunkstop;
+package org.jberet.testapps.chunkpartition;
 
-import java.util.List;
-import javax.batch.api.chunk.ItemWriter;
-import javax.batch.runtime.Metric;
-import javax.inject.Named;
+import javax.batch.runtime.BatchStatus;
 
-@Named("chunkStopWriter")
-public final class ChunkStopWriter extends IntegerArrayReaderWriterBase implements ItemWriter {
-    @Override
-    public void writeItems(List<Object> items) throws Exception {
-        if (items == null) {
-            return;
-        }
+import junit.framework.Assert;
+import org.jberet.testapps.common.AbstractIT;
+import org.junit.Test;
 
-        int writerFailAtInt = Integer.parseInt(writerFailAt);
-        if (getMetric(Metric.MetricType.WRITE_COUNT) + items.size() >= writerFailAtInt && writerFailAtInt >= 0) {
-            throw new ArithmeticException("Failing at writer.fail.at point " + writerFailAt);
-        }
-        Thread.sleep(Long.parseLong(writerSleepTime));
-        for (Object o : items) {
-            data[cursor] = (Integer) o;
-            cursor++;
-        }
-        System.out.printf("Wrote items: %s%n", String.valueOf(items));
+public class ChunkPartitionIT extends AbstractIT {
+    protected int dataCount = 30;
+    protected static final String jobXml = "chunkPartition.xml";
+
+    @Test
+    public void partition() throws Exception {
+        startJobAndWait(jobXml);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+
     }
 }

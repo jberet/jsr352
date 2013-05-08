@@ -44,8 +44,12 @@ import org.jberet.testapps.common.AbstractIT;
  * step listener properties can reference job property from the enclosing step and the enclosing job w/ proper precedence;
  */
 public class LoadBatchXmlIT extends AbstractIT {
+    public LoadBatchXmlIT() {
+        params.setProperty("job-param", "job-param");
+    }
+
     @Test
     public void loadBatchXml() throws Exception {
-        startJob("batchlet1.xml");
+        startJobAndWait("batchlet1.xml");
     }
 }

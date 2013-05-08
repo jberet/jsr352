@@ -22,7 +22,6 @@
 
 package org.jberet.testapps.loopback;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.jberet.testapps.common.AbstractIT;
 
@@ -30,12 +29,16 @@ import org.jberet.testapps.common.AbstractIT;
  * Verifies step loopbacks are detected and failed.
  */
 public class LoopbackIT extends AbstractIT {
+    public LoopbackIT() {
+        params.setProperty("job-param", "job-param");
+    }
+
     /**
      * step1's next attribute is itself.
      */
     @Test
     public void selfNextAttribute() throws Exception {
-        startJob("self-next-attribute.xml");
+        startJobAndWait("self-next-attribute.xml");
     }
 
     /**
@@ -43,7 +46,7 @@ public class LoopbackIT extends AbstractIT {
      */
     @Test
     public void selfNextElement() throws Exception {
-        startJob("self-next-element.xml");
+        startJobAndWait("self-next-element.xml");
     }
 
     /**
@@ -51,7 +54,7 @@ public class LoopbackIT extends AbstractIT {
      */
     @Test
     public void loopbackAttributeElement() throws Exception {
-        startJob("loopback-attribute-element.xml");
+        startJobAndWait("loopback-attribute-element.xml");
     }
 
     /**
@@ -59,7 +62,7 @@ public class LoopbackIT extends AbstractIT {
      */
     @Test
     public void loopbackInFlow() throws Exception {
-        startJob("loopback-in-flow.xml");
+        startJobAndWait("loopback-in-flow.xml");
     }
 
     /**
@@ -68,7 +71,7 @@ public class LoopbackIT extends AbstractIT {
      */
     @Test
     public void notLoopbackAcrossFlow() throws Exception {
-        startJob("not-loopback-across-flow.xml");
+        startJobAndWait("not-loopback-across-flow.xml");
     }
 
     /**
@@ -78,7 +81,7 @@ public class LoopbackIT extends AbstractIT {
      */
     @Test
     public void loopbackFlowToFlow() throws Exception {
-        startJob("loopback-flow-to-flow.xml");
+        startJobAndWait("loopback-flow-to-flow.xml");
     }
 
     /**
@@ -86,7 +89,7 @@ public class LoopbackIT extends AbstractIT {
      */
     @Test
     public void loopbackSplitSelf() throws Exception {
-        startJob("loopback-split-self.xml");
+        startJobAndWait("loopback-split-self.xml");
     }
 
     /**
@@ -94,6 +97,6 @@ public class LoopbackIT extends AbstractIT {
      */
     @Test
     public void loopbackStepSplit() throws Exception {
-        startJob("loopback-step-split.xml");
+        startJobAndWait("loopback-step-split.xml");
     }
 }

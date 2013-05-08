@@ -31,8 +31,12 @@ import org.jberet.testapps.common.AbstractIT;
  * flow property resolution, runtime execution, and transition inside flow and outwards;
  */
 public class FlowIT extends AbstractIT {
+    public FlowIT() {
+        params.setProperty("job-param", "job-param");
+    }
+
     @Test
     public void flow() throws Exception {
-        startJob("flow.xml");
+        startJobAndWait("flow.xml");
     }
 }

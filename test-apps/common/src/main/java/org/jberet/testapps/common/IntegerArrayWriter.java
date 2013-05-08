@@ -20,23 +20,32 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jberet.testapps.split;
+package org.jberet.testapps.common;
 
-import org.junit.Test;
-import org.jberet.testapps.common.AbstractIT;
+import java.util.List;
+import javax.batch.api.chunk.ItemWriter;
+import javax.batch.runtime.Metric;
+import javax.inject.Named;
 
-/**
- * Verifies split properties referencing, job element transition, and decision following split.
- *
- * step within a flow within a split can have step-parent, which is a top-level job element;
- */
-public class SplitIT extends AbstractIT {
-    public SplitIT() {
-        params.setProperty("job-param", "job-param");
-    }
+import org.jberet.runtime.metric.MetricImpl;
 
-    @Test
-    public void split() throws Exception {
-        startJobAndWait("split.xml");
+@Named("integerArrayWriter")
+public final class IntegerArrayWriter extends IntegerArrayReaderWriterBase implements ItemWriter {
+    @Override
+    public void writeItems(List<Object> items) throws Exception {
+        if (items == null) {
+            return;
+        }
+
+        int writerFailAtInt = Integer.parseInt(writerFailAt);
+        if (MetricImpl.getMetric(stepContext, Metric.MetricType.WRITE_COUNT) + items.size() >= writerFailAtInt && writerFailAtInt >= 0) {
+            throw new ArithmeticException("Failing at writer.fail.at point " + writerFailAt);
+        }
+        Thread.sleep(Long.parseLong(writerSleepTime));
+        for (Object o : items) {
+            data[cursor] = (Integer) o;
+            cursor++;
+        }
+        System.out.printf("Wrote items: %s%n", String.valueOf(items));
     }
 }
