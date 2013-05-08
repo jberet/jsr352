@@ -32,8 +32,11 @@ public final class ChunkStopReader extends IntegerArrayReaderWriterBase implemen
         if (cursor >= dataCount) {
             return null;
         }
+        if (cursor == Integer.parseInt(readerFailAt)) {
+            throw new ArithmeticException("Failing at reader.fail.at point " + readerFailAt);
+        }
         Integer result = data[cursor];
-        System.out.printf("Reading item %s at cursor %s%n", result, cursor);
+//        System.out.printf("Reading item %s at cursor %s%n", result, cursor);
         cursor++;
         return result;
     }

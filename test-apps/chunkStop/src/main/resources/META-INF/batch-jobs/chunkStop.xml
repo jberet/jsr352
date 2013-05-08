@@ -28,11 +28,14 @@
             <reader ref="chunkStopReader">
                 <properties>
                     <property name="data.count" value="#{jobParameters['data.count']}" />
+                    <property name="reader.fail.at" value="#{jobParameters['reader.fail.at']}" />
                 </properties>
             </reader>
             <writer ref="chunkStopWriter">
                 <properties>
                     <property name="data.count" value="#{jobParameters['data.count']}" />
+                    <property name="writer.fail.at" value="#{jobParameters['writer.fail.at']}" />
+                    <property name="writer.sleep.time" value="#{jobParameters['writer.sleep.time']}" />
                 </properties>
             </writer>
         </chunk>

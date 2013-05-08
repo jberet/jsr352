@@ -24,19 +24,26 @@ package org.jberet.testapps.chunkstop;
 
 import java.util.List;
 import javax.batch.api.chunk.ItemWriter;
+import javax.batch.runtime.Metric;
 import javax.inject.Named;
 
 @Named("chunkStopWriter")
 public final class ChunkStopWriter extends IntegerArrayReaderWriterBase implements ItemWriter {
     @Override
     public void writeItems(List<Object> items) throws Exception {
-        Thread.sleep(500);
-        if (items != null) {
-            for (Object o : items) {
-                data[cursor] = (Integer) o;
-                cursor++;
-            }
-            System.out.printf("Wrote items: %s%n", String.valueOf(items));
+        if (items == null) {
+            return;
         }
+
+        int writerFailAtInt = Integer.parseInt(writerFailAt);
+        if (getMetric(Metric.MetricType.WRITE_COUNT) + items.size() >= writerFailAtInt && writerFailAtInt >= 0) {
+            throw new ArithmeticException("Failing at writer.fail.at point " + writerFailAt);
+        }
+        Thread.sleep(Long.parseLong(writerSleepTime));
+        for (Object o : items) {
+            data[cursor] = (Integer) o;
+            cursor++;
+        }
+        System.out.printf("Wrote items: %s%n", String.valueOf(items));
     }
 }

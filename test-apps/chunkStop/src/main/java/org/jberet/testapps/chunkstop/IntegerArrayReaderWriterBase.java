@@ -24,16 +24,34 @@ package org.jberet.testapps.chunkstop;
 
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
+import javax.batch.runtime.Metric;
+import javax.batch.runtime.StepExecution;
+import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
 public abstract class IntegerArrayReaderWriterBase {
     @Inject
+    protected StepContext stepContext;
+
+    @Inject
     @BatchProperty(name = "data.count")
-    String dataCountProp;
+    protected String dataCountProp;
     int dataCount;
 
-    Integer[] data;
-    int cursor;
+    @Inject
+    @BatchProperty(name = "reader.fail.at")
+    protected String readerFailAt = "-1";
+
+    @Inject
+    @BatchProperty(name = "writer.fail.at")
+    protected String writerFailAt = "-1";
+
+    @Inject
+    @BatchProperty(name = "writer.sleep.time")
+    protected String writerSleepTime;
+
+    protected Integer[] data;
+    protected int cursor;
 
     protected IntegerArrayReaderWriterBase() {
         System.out.printf("Instantiating %s%n", this);
@@ -48,6 +66,26 @@ public abstract class IntegerArrayReaderWriterBase {
         }
         dataCount = Integer.parseInt(dataCountProp);
         data = new Integer[dataCount];
+        if (readerFailAt == null) {
+            readerFailAt = "-1";
+        }
+        if (writerFailAt == null) {
+            writerFailAt = "-1";
+        }
+        if (writerSleepTime == null) {
+            writerSleepTime = "0";
+        }
+    }
+
+    protected long getMetric(Metric.MetricType type) {
+        long result = 0;
+        for (Metric m : stepContext.getMetrics()) {
+            if (m.getType() == type) {
+                result = m.getValue();
+                break;
+            }
+        }
+        return result;
     }
 
     public void open(Serializable checkpoint) throws Exception {
