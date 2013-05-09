@@ -146,11 +146,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     l.beforeStep();
                 }
 
-                if (batchlet != null) {
-                    runBatchlet(batchlet);
-                } else {
-                    runChunk(chunk);
-                }
+                runBatchletOrChunk(batchlet, chunk);
 
                 //record the fact this step has been executed
                 executedSteps.add(step);
@@ -197,25 +193,19 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         }
     }
 
-    private void runBatchlet(Batchlet batchlet) throws Exception {
-        BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, this, batchlet);
-        if (!isPartitioned) {
-            batchletRunner.run();
-        } else {
-            beginPartition(batchletRunner);
-        }
-    }
-
-    private void runChunk(Chunk chunk) throws Exception {
-        ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
-        if (!isPartitioned) {
+    private void runBatchletOrChunk(Batchlet batchlet, Chunk chunk) throws Exception {
+        if (isPartitioned) {
+            beginPartition();
+        } else if (chunk != null) {
+            ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
             chunkRunner.run();
         } else {
-            beginPartition(chunkRunner);
+            BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, this, batchlet);
+            batchletRunner.run();
         }
     }
 
-    private void beginPartition(AbstractRunner runner) throws Exception {
+    private void beginPartition() throws Exception {
         if (reducer != null) {
             reducer.beginPartitionedStep();
         }
@@ -289,10 +279,11 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (isRestart && isOverride && reducer != null) {
                 reducer.rollbackPartitionedStep();
             }
-            if (runner instanceof BatchletRunner) {
+            Chunk ch = step1.getChunk();
+            if (ch == null) {
                 runner1 = new BatchletRunner(stepContext1, enclosingRunner, this, step1.getBatchlet());
             } else {
-                runner1 = new ChunkRunner(stepContext1, enclosingRunner, this, step1.getChunk());
+                runner1 = new ChunkRunner(stepContext1, enclosingRunner, this, ch);
             }
             if (i >= numOfThreads) {
                 completedPartitionThreads.take();

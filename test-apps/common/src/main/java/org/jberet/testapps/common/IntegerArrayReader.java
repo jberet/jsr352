@@ -25,20 +25,17 @@ package org.jberet.testapps.common;
 import javax.batch.api.chunk.ItemReader;
 import javax.inject.Named;
 
-import org.jberet.testapps.common.IntegerArrayReaderWriterBase;
-
 @Named("integerArrayReader")
 public final class IntegerArrayReader extends IntegerArrayReaderWriterBase implements ItemReader {
     @Override
     public Object readItem() throws Exception {
-        if (cursor >= dataCount) {
+        if (cursor > partitionEnd || cursor < partitionStart) {
             return null;
         }
         if (cursor == Integer.parseInt(readerFailAt)) {
             throw new ArithmeticException("Failing at reader.fail.at point " + readerFailAt);
         }
         Integer result = data[cursor];
-//        System.out.printf("Reading item %s at cursor %s%n", result, cursor);
         cursor++;
         return result;
     }
@@ -47,7 +44,10 @@ public final class IntegerArrayReader extends IntegerArrayReaderWriterBase imple
     protected void initData() {
         super.initData();
         for (int i = 0; i < dataCount; i++) {
-            data[i] = i * 10;
+            data[i] = i;
         }
+        //position the cursor according to partition start
+        cursor = partitionStart;
+        System.out.printf("Partition start = %s, end = %s in %s%n", partitionStart, partitionEnd, this);
     }
 }

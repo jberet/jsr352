@@ -22,10 +22,12 @@
 
 package org.jberet.testapps.common;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
+import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 
@@ -36,27 +38,30 @@ abstract public class AbstractIT {
     protected JobOperator jobOperator = BatchRuntime.getJobOperator();
     protected long jobExecutionId;
     protected JobExecutionImpl jobExecution;
-    protected long restartJobExecutionId;
-    protected JobExecutionImpl restartJobExecution;
+    protected List<StepExecution> stepExecutions;
+    protected StepExecution stepExecution0;
 
     protected void startJob(String jobXml) {
         jobExecutionId = jobOperator.start(jobXml, params);
         jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
     }
 
-    protected void awaitTermination(JobExecutionImpl exe) throws InterruptedException {
+    protected void awaitTermination(JobExecutionImpl... exes) throws InterruptedException {
+        JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
         exe.awaitTerminatioin(jobTimeout, TimeUnit.SECONDS);
+        stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
+        stepExecution0 = stepExecutions.get(0);
     }
 
     protected void startJobAndWait(String jobXml) throws Exception {
         startJob(jobXml);
-        awaitTermination(jobExecution);
+        awaitTermination();
     }
 
     protected void restartAndWait(long... oldJobExecutionIds) throws InterruptedException {
         long restartId = oldJobExecutionIds.length == 0 ? jobExecutionId : oldJobExecutionIds[0];
-        restartJobExecutionId = jobOperator.restart(restartId, params);
-        restartJobExecution = (JobExecutionImpl) jobOperator.getJobExecution(restartJobExecutionId);
-        awaitTermination(restartJobExecution);
+        jobExecutionId = jobOperator.restart(restartId, params);
+        jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        awaitTermination();
     }
 }

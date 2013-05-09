@@ -31,21 +31,25 @@ public abstract class IntegerArrayReaderWriterBase {
     @Inject
     protected StepContext stepContext;
 
-    @Inject
-    @BatchProperty(name = "data.count")
+    @Inject @BatchProperty(name = "data.count")
     protected String dataCountProp;
     protected int dataCount;
 
-    @Inject
-    @BatchProperty(name = "reader.fail.at")
+    @Inject @BatchProperty(name = "partition.start")
+    protected String partitionStartProp;
+    protected int    partitionStart;
+
+    @Inject @BatchProperty(name = "partition.end")
+    protected String partitionEndProp;
+    protected int    partitionEnd;
+
+    @Inject @BatchProperty(name = "reader.fail.at")
     protected String readerFailAt = "-1";
 
-    @Inject
-    @BatchProperty(name = "writer.fail.at")
+    @Inject @BatchProperty(name = "writer.fail.at")
     protected String writerFailAt = "-1";
 
-    @Inject
-    @BatchProperty(name = "writer.sleep.time")
+    @Inject @BatchProperty(name = "writer.sleep.time")
     protected String writerSleepTime;
 
     protected Integer[] data;
@@ -73,13 +77,15 @@ public abstract class IntegerArrayReaderWriterBase {
         if (writerSleepTime == null) {
             writerSleepTime = "0";
         }
+        partitionStart = partitionStartProp == null ? 0 : Integer.parseInt(partitionStartProp);
+        partitionEnd = partitionEndProp == null ? dataCount - 1 : Integer.parseInt(partitionEndProp);
     }
 
     public void open(Serializable checkpoint) throws Exception {
         if (data == null) {
             initData();
         }
-        cursor = checkpoint == null ? 0 : (Integer) checkpoint;
+        cursor = checkpoint == null ? partitionStart : (Integer) checkpoint;
     }
 
     public Serializable checkpointInfo() throws Exception {

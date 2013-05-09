@@ -48,4 +48,11 @@ public final class IntegerArrayWriter extends IntegerArrayReaderWriterBase imple
         }
         System.out.printf("Wrote items: %s%n", String.valueOf(items));
     }
+
+    @Override
+    protected void initData() {
+        super.initData();
+        cursor = partitionStart;
+        System.out.printf("Partition start = %s, end = %s in %s%n", partitionStart, partitionEnd, this);
+    }
 }

@@ -29,6 +29,8 @@
                 <properties>
                     <property name="data.count" value="30" />
                     <property name="reader.fail.at" value="-1" />
+                    <property name="partition.start" value="#{partitionPlan['partition.start']}" />
+                    <property name="partition.end"   value="#{partitionPlan['partition.end']}" />
                 </properties>
             </reader>
             <writer ref="integerArrayWriter">
@@ -36,6 +38,8 @@
                     <property name="data.count" value="30" />
                     <property name="writer.fail.at" value="-1" />
                     <property name="writer.sleep.time" value="#{jobParameters['writer.sleep.time']}" />
+                    <property name="partition.start" value="#{partitionPlan['partition.start']}" />
+                    <property name="partition.end"   value="#{partitionPlan['partition.end']}" />
                 </properties>
             </writer>
         </chunk>
@@ -43,12 +47,15 @@
             <plan partitions="3" threads="2">
                 <properties partition="0">
                     <property name="partition.start" value="0" />
+                    <property name="partition.end" value="9" />
                 </properties>
-                <properties>
+                <properties partition="1">
                     <property name="partition.start" value="10" />
+                    <property name="partition.end" value="19" />
                 </properties>
-                <properties>
+                <properties partition="2">
                     <property name="partition.start" value="20" />
+                    <property name="partition.end" value="29" />
                 </properties>
             </plan>
         </partition>

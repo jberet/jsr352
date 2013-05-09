@@ -22,10 +22,8 @@
 
 package org.jberet.testapps.chunkstop;
 
-import java.util.List;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
-import javax.batch.runtime.StepExecution;
 
 import junit.framework.Assert;
 import org.jberet.runtime.metric.MetricImpl;
@@ -53,21 +51,18 @@ public class ChunkStopIT extends AbstractIT {
         params.setProperty("writer.sleep.time", "500");
         startJob(jobXml);
         jobOperator.stop(jobExecutionId);
-        awaitTermination(jobExecution);
+        awaitTermination();
         Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
 
-        List<StepExecution> stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
-        StepExecution stepExecution = stepExecutions.get(0);
         Assert.assertEquals(1, stepExecutions.size());
         //since we called stop right after start, and the writer sleeps before writing data, there should only be 1 write and commit
-        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
 
         restartAndWait();
 
-        stepExecution = jobOperator.getStepExecutions(restartJobExecutionId).get(0);
-        Assert.assertEquals(BatchStatus.COMPLETED, restartJobExecution.getBatchStatus());
-        Assert.assertTrue(MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT) < dataCount);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertTrue(MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT) < dataCount);
     }
 
     @Test
@@ -76,19 +71,17 @@ public class ChunkStopIT extends AbstractIT {
         startJobAndWait(jobXml);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
-        StepExecution stepExecution = jobOperator.getStepExecutions(jobExecutionId).get(0);
-        Assert.assertEquals(13, MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT));  //reader.fail.at is 0-based, reader.fail.at 13 means 13 successful read
-        Assert.assertEquals(10, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
+        Assert.assertEquals(13, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));  //reader.fail.at is 0-based, reader.fail.at 13 means 13 successful read
+        Assert.assertEquals(10, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
 
         params.setProperty("reader.fail.at", "3");
         restartAndWait();
-        Assert.assertEquals(BatchStatus.COMPLETED, restartJobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
 
-        stepExecution = jobOperator.getStepExecutions(restartJobExecutionId).get(0);
-        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(3, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(3, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
     }
 
     @Test
@@ -97,18 +90,16 @@ public class ChunkStopIT extends AbstractIT {
         startJobAndWait(jobXml);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
-        StepExecution stepExecution = jobOperator.getStepExecutions(jobExecutionId).get(0);
-        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(10, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
+        Assert.assertEquals(10, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
 
         params.setProperty("writer.fail.at", "-1");
         restartAndWait();
-        Assert.assertEquals(BatchStatus.COMPLETED, restartJobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
 
-        stepExecution = jobOperator.getStepExecutions(restartJobExecutionId).get(0);
-        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution, Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(3, MetricImpl.getMetric(stepExecution, Metric.MetricType.COMMIT_COUNT));
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
+        Assert.assertEquals(20, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(3, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
     }
 }
