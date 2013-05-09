@@ -33,9 +33,20 @@ public class ChunkPartitionIT extends AbstractIT {
     protected static final String jobXml = "chunkPartition.xml";
 
     @Test
-    public void partition() throws Exception {
+    public void partitionThreads() throws Exception {
+        for (int i = 10; i >= 8; i--) {
+            params.setProperty("thread.count", String.valueOf(i));
+            params.setProperty("writer.sleep.time", "100");
+            startJobAndWait(jobXml);
+            Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+            String exitStatus = stepExecution0.getExitStatus();
+            System.out.printf("Step exit status: %s%n", exitStatus);
+            Assert.assertEquals(true, exitStatus.startsWith("PASS"));
+        }
+
+        params.setProperty("thread.count", "1");
+        params.setProperty("skip.thread.check", "true");
         startJobAndWait(jobXml);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-
     }
 }

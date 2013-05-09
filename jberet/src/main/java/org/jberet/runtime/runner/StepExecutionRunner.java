@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.batch.api.chunk.listener.ChunkListener;
 import javax.batch.api.chunk.listener.ItemProcessListener;
 import javax.batch.api.chunk.listener.ItemReadListener;
@@ -233,7 +234,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (numOfPartitions > numOfThreads) {
             completedPartitionThreads = new ArrayBlockingQueue<Boolean>(numOfPartitions);
         }
-        collectorDataQueue = new ArrayBlockingQueue<Serializable>(numOfPartitions * 3);
+        collectorDataQueue = new LinkedBlockingQueue<Serializable>();
         List<Integer> indexes = stepExecution.getPartitionPropertiesIndex();
 
         for (int i = 0; i < numOfPartitions; i++) {
