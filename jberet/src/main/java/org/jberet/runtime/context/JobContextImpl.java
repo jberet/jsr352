@@ -195,7 +195,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         try {
             a = (A) artifactFactory.create(ref, cls, classLoader, artifactCreationData);
         } catch (Exception e) {
-            BatchLogger.LOGGER.failToCreateArtifact(e, ref);
+            throw BatchLogger.LOGGER.failToCreateArtifact(e, ref);
         }
         return a;
     }

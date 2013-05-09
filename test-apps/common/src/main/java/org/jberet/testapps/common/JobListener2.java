@@ -33,7 +33,7 @@ import org.junit.Assert;
 @Named("L2")
 public class JobListener2 implements JobListener {
     @Inject @BatchProperty(name="job-prop")
-    private String jobProp = "L2";  //unmatched property is set to null
+    private String jobProp = "L2";  //unmatched property
 
     @Inject @BatchProperty(name = "listener-prop")
     private String listenerProp;  //nothing is injected
@@ -47,7 +47,7 @@ public class JobListener2 implements JobListener {
     @Override
     public void beforeJob() throws Exception {
         System.out.printf("In beforeJob of %s%n", this);
-        Assert.assertEquals(null, jobProp);
+        Assert.assertEquals("L2", jobProp);
         Assert.assertEquals(null, listenerProp);
         Assert.assertEquals(null, referencedProp);
         Assert.assertEquals(2, jobContext.getProperties().size());

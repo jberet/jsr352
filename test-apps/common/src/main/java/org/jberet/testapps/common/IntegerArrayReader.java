@@ -32,7 +32,7 @@ public final class IntegerArrayReader extends IntegerArrayReaderWriterBase imple
         if (cursor > partitionEnd || cursor < partitionStart) {
             return null;
         }
-        if (cursor == Integer.parseInt(readerFailAt)) {
+        if (cursor == readerFailAt) {
             throw new ArithmeticException("Failing at reader.fail.at point " + readerFailAt);
         }
         Integer result = data[cursor];

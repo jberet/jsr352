@@ -32,25 +32,22 @@ public abstract class IntegerArrayReaderWriterBase {
     protected StepContext stepContext;
 
     @Inject @BatchProperty(name = "data.count")
-    protected String dataCountProp;
-    protected int dataCount;
+    protected Integer dataCount;
 
     @Inject @BatchProperty(name = "partition.start")
-    protected String partitionStartProp;
-    protected int    partitionStart;
+    protected int partitionStart;
 
     @Inject @BatchProperty(name = "partition.end")
-    protected String partitionEndProp;
-    protected int    partitionEnd;
+    protected Integer partitionEnd;
 
     @Inject @BatchProperty(name = "reader.fail.at")
-    protected String readerFailAt = "-1";
+    protected Integer readerFailAt;
 
     @Inject @BatchProperty(name = "writer.fail.at")
-    protected String writerFailAt = "-1";
+    protected Integer writerFailAt;
 
     @Inject @BatchProperty(name = "writer.sleep.time")
-    protected String writerSleepTime;
+    protected long writerSleepTime;
 
     protected Integer[] data;
     protected int cursor;
@@ -63,22 +60,19 @@ public abstract class IntegerArrayReaderWriterBase {
      * Creates the data array without filling the data.
      */
     protected void initData() {
-        if (dataCountProp == null) {
+        if (dataCount == null) {
             throw new IllegalStateException("data.count property is not injected.");
         }
-        dataCount = Integer.parseInt(dataCountProp);
         data = new Integer[dataCount];
         if (readerFailAt == null) {
-            readerFailAt = "-1";
+            readerFailAt = -1;
         }
         if (writerFailAt == null) {
-            writerFailAt = "-1";
+            writerFailAt = -1;
         }
-        if (writerSleepTime == null) {
-            writerSleepTime = "0";
+        if (partitionEnd == null) {
+            partitionEnd = dataCount - 1;
         }
-        partitionStart = partitionStartProp == null ? 0 : Integer.parseInt(partitionStartProp);
-        partitionEnd = partitionEndProp == null ? dataCount - 1 : Integer.parseInt(partitionEndProp);
     }
 
     public void open(Serializable checkpoint) throws Exception {

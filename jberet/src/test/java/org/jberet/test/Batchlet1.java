@@ -51,6 +51,9 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     @Inject @BatchProperty(name = "job-param")
     String jobParam;
 
+    @Inject @BatchProperty(name="int.prop")
+    private int intProp;
+
     @Inject
     private JobContext jobContext;
 
@@ -75,6 +78,11 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
             System.out.printf("Injected batchlet property foo: %s%n", foo);
         } else {
             throw new BatchRuntimeException(String.format("Expecting batchlet property foo to be %s, but got %s", fooExpected, foo));
+        }
+        if (intProp == 1) {
+            System.out.printf("Injected int.prop: %s%n", intProp);
+        } else {
+            throw new BatchRuntimeException(String.format("Expecting int.prop %s, but got %s", 1, intProp));
         }
         return "Processed";
     }

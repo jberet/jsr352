@@ -37,11 +37,13 @@ public final class IntegerArrayWriter extends IntegerArrayReaderWriterBase imple
             return;
         }
 
-        int writerFailAtInt = Integer.parseInt(writerFailAt);
-        if (MetricImpl.getMetric(stepContext, Metric.MetricType.WRITE_COUNT) + items.size() >= writerFailAtInt && writerFailAtInt >= 0) {
+        if (MetricImpl.getMetric(stepContext, Metric.MetricType.WRITE_COUNT) + items.size() >= writerFailAt
+                && writerFailAt >= 0) {
             throw new ArithmeticException("Failing at writer.fail.at point " + writerFailAt);
         }
-        Thread.sleep(Long.parseLong(writerSleepTime));
+        if (writerSleepTime > 0) {
+            Thread.sleep(writerSleepTime);
+        }
         for (Object o : items) {
             data[cursor] = (Integer) o;
             cursor++;

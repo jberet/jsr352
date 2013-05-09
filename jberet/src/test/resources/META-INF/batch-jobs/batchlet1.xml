@@ -38,6 +38,7 @@
         </properties>
         <batchlet ref="Batchlet1">
             <properties>
+                <property name="int.prop" value="1" />
                 <property name="Batchlet1" value="Batchlet1"/>
                 <property name="defaultName" value="defaultName"/>
 

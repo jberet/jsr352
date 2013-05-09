@@ -76,11 +76,11 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
             for (Field f : cls.getDeclaredFields()) {
                 if (!f.isSynthetic()) {
                     Object fieldVal = null;
-                    Inject injectAnn = f.getAnnotation(Inject.class);
-                    if (injectAnn != null) {
-                        if (f.getType() == JobContext.class) {
+                    if (f.getAnnotation(Inject.class) != null) {
+                        Class<?> fType = f.getType();
+                        if (fType == JobContext.class) {
                             fieldVal = data.get(DataKey.JOB_CONTEXT);
-                        } else if (f.getType() == StepContext.class) {
+                        } else if (fType == StepContext.class) {
                             //fieldVal may be null when StepContext was not stored in data map, as in job listeners
                             fieldVal = data.get(DataKey.STEP_CONTEXT);
                         } else if (hasBatchProps) {
@@ -94,14 +94,48 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                                 if ("".equals(fieldVal)) {
                                     fieldVal = null;
                                 }
+                                if (fType != String.class && fieldVal != null) {
+                                    fieldVal = convertFieldValue((String) fieldVal, fType);
+                                }
                             }
                         }
-                        doInjection(obj, f, fieldVal);
+                        if (fieldVal != null) {
+                            doInjection(obj, f, fieldVal);
+                        }
                     }
                 }
             }
             cls = cls.getSuperclass();
         }
+    }
+
+    private Object convertFieldValue(String v, Class<?> t) {
+        v = v.trim();
+        if (t == int.class || t == Integer.class) {
+            return Integer.valueOf(v);
+        }
+        if (t == long.class || t == Long.class) {
+            return Long.valueOf(v);
+        }
+        if (t == double.class || t == Double.class) {
+            return Double.valueOf(v);
+        }
+        if (t == boolean.class || t == Boolean.class) {
+            return Boolean.valueOf(v);
+        }
+        if (t == float.class || t == Float.class) {
+            return Float.valueOf(v);
+        }
+        if (t == char.class || t == Character.class) {
+            return v.charAt(0);
+        }
+        if (t == byte.class || t == Byte.class) {
+            return Byte.valueOf(v);
+        }
+        if (t == short.class || t == Short.class) {
+            return Short.valueOf(v);
+        }
+        return v;
     }
 
     private void doInjection(final Object obj, final Field field, final Object val) throws Exception {
@@ -111,16 +145,28 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
             }
             field.set(obj, val);
         } else {
-            AccessController.doPrivileged(
-                    new PrivilegedExceptionAction<Void>() {
-                        public Void run() throws Exception {
-                            if (!field.isAccessible()) {
-                                field.setAccessible(true);
-                            }
-                            field.set(obj, val);
-                            return null;
-                        }
-                    });
+            AccessController.doPrivileged(new SetFieldPrivilegedExceptionAction(field, obj, val));
+        }
+    }
+
+    private static class SetFieldPrivilegedExceptionAction implements PrivilegedExceptionAction<Void> {
+        private final Field field;
+        private final Object obj;
+        private final Object val;
+
+        public SetFieldPrivilegedExceptionAction(Field field, Object obj, Object val) {
+            this.field = field;
+            this.obj = obj;
+            this.val = val;
+        }
+
+        @Override
+        public Void run() throws Exception {
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            field.set(obj, val);
+            return null;
         }
     }
 }
