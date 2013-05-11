@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+~ JBoss, Home of Professional Open Source.
+~ Copyright 2013, Red Hat, Inc., and individual contributors
+~ as indicated by the @author tags. See the copyright.txt file in the
+~ distribution for a full listing of individual contributors.
+~
+~ This is free software; you can redistribute it and/or modify it
+~ under the terms of the GNU Lesser General Public License as
+~ published by the Free Software Foundation; either version 2.1 of
+~ the License, or (at your option) any later version.
+~
+~ This software is distributed in the hope that it will be useful,
+~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+~ Lesser General Public License for more details.
+~
+~ You should have received a copy of the GNU Lesser General Public
+~ License along with this software; if not, write to the Free
+~ Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<job id="propertyInjection" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="step1">
+        <batchlet ref="Batchlet1">
+            <properties>
+                <property name="class" value="org.jberet.testapps.propertyinjection.Batchlet1"/>
+                <property name="color" value="RED"/>
+                <property name="file" value="/tmp"/>
+                <property name="int" value="9"/>
+                <property name="big.integer" value="999"/>
+                <property name="big.decimal" value="999.99"/>
+                <property name="inet.address" value="localhost"/>
+                <property name="inet4.address" value="127.0.0.1"/>
+                <property name="inet6.address" value="0:0:0:0:0:0:0:1"/>
+                <property name="url" value="http://jboss.org"/>
+                <property name="uri" value="http://jboss.org"/>
+
+                <property name="list" value=" 1.0, 2.0, 3.0"/>
+
+                <property name="date.time.short"  value="05/09/13 12:00 AM" />
+                <property name="date.time.short2" value="05/09/2013 7:03 AM" />
+                <property name="date.time.medium" value="Jun 09, 2013 7:03:47 AM" />
+                <property name="date.time.long"   value="June 09, 2013 7:03:47 AM PDT" />
+                <property name="date.time.full"   value="Saturday, April 12, 1952 7:03:47 AM PDT" />
+
+                <property name="date.short"  value="05/09/13" />
+                <property name="date.short2" value="05/09/2013" />
+                <property name="date.medium" value="Jun 09, 2013" />
+                <property name="date.long"   value="June 09, 2013" />
+                <property name="date.full"   value="Saturday, April 12, 1952" />
+
+                <property name="map" value="b=bb, a = aa"/>
+                <property name="set" value="2.0, 1.0, 2.0, 1.0, 1.0"/>
+                <property name="logger" value="org.jberet"/>
+                <property name="pattern" value="a*b"/>
+                <property name="object.name" value="d:type=Foo,name=Bar"/>
+                <property name="string" value="    a b c    "/>
+
+            </properties>
+        </batchlet>
+    </step>
+</job>

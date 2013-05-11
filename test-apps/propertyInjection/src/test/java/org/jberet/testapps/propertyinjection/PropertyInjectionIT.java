@@ -20,31 +20,14 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jberet.test;
+package org.jberet.testapps.propertyinjection;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jberet.Main;
+import org.jberet.testapps.common.AbstractIT;
 import org.junit.Test;
 
-public class MainTest {
-    private static final String jobXmlName = "batchlet1.xml";
-
+public class PropertyInjectionIT extends AbstractIT {
     @Test
-    public void testMain() throws Exception {
-        String args[] = {jobXmlName};
-        Main.main(args);
-
-    }
-
-    @Test
-    public void foo() throws Exception {
-        List<Integer> list;
-        List l = new ArrayList();
-        l.add(1);
-        l.add(2);
-        list = l;
-        System.out.printf("Integer list: %s%n", list);
+    public void loadBatchXml() throws Exception {
+        startJobAndWait("propertyInjection.xml");
     }
 }

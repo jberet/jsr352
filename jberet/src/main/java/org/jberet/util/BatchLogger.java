@@ -23,6 +23,7 @@
 package org.jberet.util;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.List;
 import javax.batch.operations.BatchRuntimeException;
 import javax.batch.operations.JobExecutionAlreadyCompleteException;
@@ -180,4 +181,10 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 39, value = "Failed to clone %s when running job [%s] and step [%s]")
     @LogMessage(level = Logger.Level.WARN)
     void failToClone(@Cause Throwable cause, Object original, String jobName, String stepName);
+
+    @Message(id = 40, value = "Failed to inject value %s into field %s, because the field type %s is not supported for property injection.")
+    BatchRuntimeException unsupportedFieldType(String v, Field f, Class<?> t);
+
+    @Message(id = 41, value = "Failed to inject value %s into field %s")
+    BatchRuntimeException failToInjectProperty(@Cause Throwable th, String v, Field f);
 }

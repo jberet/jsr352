@@ -46,6 +46,7 @@ public class ChunkPartitionIT extends AbstractIT {
 
         params.setProperty("thread.count", "1");
         params.setProperty("skip.thread.check", "true");
+        params.setProperty("writer.sleep.time", "0");
         startJobAndWait(jobXml);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }

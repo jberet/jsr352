@@ -60,7 +60,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
             cls = getArtifactClass(ref, classLoader, data);
         }
         Object obj = cls.newInstance();
-        doInjection(obj, cls, data);
+        doInjection(obj, cls, classLoader, data);
         return obj;
     }
 
@@ -69,7 +69,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
 
     }
 
-    private void doInjection(Object obj, Class<?> cls, Map<?, ?> data) throws Exception {
+    private void doInjection(Object obj, Class<?> cls, ClassLoader classLoader, Map<?, ?> data) throws Exception {
         Properties batchProps = (Properties) data.get(DataKey.BATCH_PROPERTY);
         boolean hasBatchProps = batchProps != null && batchProps.getProperty().size() > 0;
         while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
@@ -94,8 +94,8 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                                 if ("".equals(fieldVal)) {
                                     fieldVal = null;
                                 }
-                                if (fType != String.class && fieldVal != null) {
-                                    fieldVal = convertFieldValue((String) fieldVal, fType);
+                                if (!fType.isAssignableFrom(String.class) && fieldVal != null) {
+                                    fieldVal = ValueConverter.convertFieldValue((String) fieldVal, fType, f, classLoader);
                                 }
                             }
                         }
@@ -107,35 +107,6 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
             }
             cls = cls.getSuperclass();
         }
-    }
-
-    private Object convertFieldValue(String v, Class<?> t) {
-        v = v.trim();
-        if (t == int.class || t == Integer.class) {
-            return Integer.valueOf(v);
-        }
-        if (t == long.class || t == Long.class) {
-            return Long.valueOf(v);
-        }
-        if (t == double.class || t == Double.class) {
-            return Double.valueOf(v);
-        }
-        if (t == boolean.class || t == Boolean.class) {
-            return Boolean.valueOf(v);
-        }
-        if (t == float.class || t == Float.class) {
-            return Float.valueOf(v);
-        }
-        if (t == char.class || t == Character.class) {
-            return v.charAt(0);
-        }
-        if (t == byte.class || t == Byte.class) {
-            return Byte.valueOf(v);
-        }
-        if (t == short.class || t == Short.class) {
-            return Short.valueOf(v);
-        }
-        return v;
     }
 
     private void doInjection(final Object obj, final Field field, final Object val) throws Exception {

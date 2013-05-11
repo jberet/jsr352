@@ -26,41 +26,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <modules>
-        <module>common</module>
-        <module>loadBatchXml</module>
-        <module>flow</module>
-        <module>loopback</module>
-        <module>split</module>
-        <module>chunkStop</module>
-        <module>chunkPartition</module>
-        <module>propertyInjection</module>
-    </modules>
+
     <parent>
-        <groupId>org.jberet</groupId>
-        <artifactId>jberet-parent</artifactId>
+        <groupId>org.jberet.test-apps</groupId>
+        <artifactId>test-apps</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.jberet.test-apps</groupId>
-    <artifactId>test-apps</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>propertyInjection</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.jberet</groupId>
-            <artifactId>javax.batch</artifactId>
+            <groupId>org.jberet.test-apps</groupId>
+            <artifactId>common</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jberet</groupId>
-            <artifactId>jberet</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

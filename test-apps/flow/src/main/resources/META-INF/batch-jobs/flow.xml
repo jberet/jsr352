@@ -22,7 +22,7 @@
 ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<job id="job1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="flow" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <properties>
         <property name="job-prop" value="job-prop"></property>
         <property name="job-prop-2" value="job-prop-2"></property>
