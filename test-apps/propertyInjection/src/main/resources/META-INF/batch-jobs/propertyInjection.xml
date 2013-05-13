@@ -38,8 +38,11 @@
                 <property name="url" value="http://jboss.org"/>
                 <property name="uri" value="http://jboss.org"/>
 
-                <property name="list" value=" 1.0, 2.0, 3.0"/>
+                <property name="list" value=" 1, 2, 3"/>
+                <property name="list.date" value="12/31/2012, 01/01/2013"/>
+                <property name="list.enum" value="RED, YELLOW"/>
 
+                <!-- date time format is in us locale -->
                 <property name="date.time.short"  value="05/09/13 12:00 AM" />
                 <property name="date.time.short2" value="05/09/2013 7:03 AM" />
                 <property name="date.time.medium" value="Jun 09, 2013 7:03:47 AM" />
@@ -52,7 +55,8 @@
                 <property name="date.long"   value="June 09, 2013" />
                 <property name="date.full"   value="Saturday, April 12, 1952" />
 
-                <property name="map" value="b=bb, a = aa"/>
+                <property name="map" value="b=2, a = 1"/>
+                <property name="map.date" value="today=05/12/2013"/>
                 <property name="set" value="2.0, 1.0, 2.0, 1.0, 1.0"/>
                 <property name="logger" value="org.jberet"/>
                 <property name="pattern" value="a*b"/>

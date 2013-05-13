@@ -23,7 +23,10 @@
 package org.jberet.creation;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.Inet4Address;
@@ -66,6 +69,106 @@ public final class ValueConverter {
     private static final int[] dateFormatCodes = {DateFormat.FULL, DateFormat.LONG, DateFormat.MEDIUM, DateFormat.SHORT};
 
     public static Object convertFieldValue(String rawValue, Class<?> t, Field f, ClassLoader classLoader) {
+        Object result = convertSingleValue(rawValue, t, f, classLoader);
+        if (result != null) {
+            return result;
+        }
+        String v = rawValue.trim();
+        Class<?> elementValueType = null;
+
+        if (t.isArray()) {
+            elementValueType = t.getComponentType();
+            if (elementValueType.isPrimitive()) {
+                return parsePrimitiveArray(v, elementValueType, f);
+            } else {
+                List tempList = parseList(v, new ArrayList(), elementValueType, f, classLoader);
+                Object[] tempArray = (Object[]) Array.newInstance(elementValueType, tempList.size());
+                return tempList.toArray(tempArray);
+            }
+        }
+
+        if (t == java.util.Properties.class) {
+            java.util.Properties p = new java.util.Properties();
+            return parseMap(v, p, String.class, f, classLoader);
+        }
+
+        Type genericType = f.getGenericType();
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) genericType;
+            Type[] actualTypeArguments = pt.getActualTypeArguments();
+            Class<?>[] elementTypes = new Class<?>[actualTypeArguments.length];
+            for (int i = 0; i < actualTypeArguments.length; i++) {
+                if (actualTypeArguments[i] instanceof Class) {
+                    elementTypes[i] = (Class<?>) actualTypeArguments[i];
+                }
+                // can be ? or ? extends SomeType, which is sun.reflect.generics.reflectiveObjects.WildcardTypeImpl,
+                // not Class type.
+            }
+            switch (elementTypes.length) {
+                case 1:
+                    elementValueType = elementTypes[0];
+                    break;
+                case 2:
+                    elementValueType = elementTypes[1];
+                    break;
+            }
+        }
+        //can be List or Set (raw collection) so there is no elementValueType, set to String.class
+        if (elementValueType == null) {
+            elementValueType = String.class;
+        }
+
+        if (List.class.isAssignableFrom(t)) {
+            List l;
+            if (t == List.class || t == ArrayList.class) {
+                l = new ArrayList();
+            } else if (t == LinkedList.class) {
+                l = new LinkedList();
+            } else if (t == Vector.class) {
+                l = new Vector();
+            } else {
+                throw LOGGER.unsupportedFieldType(v, f, t);
+            }
+            return parseList(v, l, elementValueType, f, classLoader);
+        }
+        if (Map.class.isAssignableFrom(t)) {
+            Map<String, String> m;
+            if (t == Map.class || t == HashMap.class) {
+                m = new HashMap();
+            } else if (t == LinkedHashMap.class) {
+                m = new LinkedHashMap();
+            } else if (t == IdentityHashMap.class) {
+                m = new IdentityHashMap();
+            } else if (t == Hashtable.class) {
+                m = new Hashtable();
+            } else if (t == TreeMap.class || t == SortedMap.class) {
+                m = new TreeMap();
+            } else if (t == WeakHashMap.class) {
+                m = new WeakHashMap();
+            } else {
+                throw LOGGER.unsupportedFieldType(v, f, t);
+            }
+            return parseMap(v, m, elementValueType, f, classLoader);
+        }
+        if (Set.class.isAssignableFrom(t)) {
+            Set set;
+            if (t == Set.class || t == HashSet.class) {
+                set = new HashSet();
+            } else if (t == SortedSet.class || t == TreeSet.class) {
+                set = new TreeSet();
+            } else if (t == LinkedHashSet.class) {
+                set = new LinkedHashSet();
+            } else {
+                throw LOGGER.unsupportedFieldType(v, f, t);
+            }
+            set.addAll(parseList(v, new ArrayList(), elementValueType, f, classLoader));
+            return set;
+        }
+
+        throw LOGGER.unsupportedFieldType(v, f, t);
+    }
+
+    private static Object convertSingleValue(String rawValue, Class<?> t, Field f, ClassLoader classLoader) {
         String v = rawValue.trim();
         if (t == int.class || t == Integer.class) {
             return Integer.valueOf(v);
@@ -124,56 +227,6 @@ public final class ValueConverter {
         if (t == java.util.Date.class) {
             return parseDate(v, f);
         }
-        if (List.class.isAssignableFrom(t)) {
-            List<String> l;
-            if (t == List.class || t == ArrayList.class) {
-                l = new ArrayList<String>();
-            } else if (t == LinkedList.class) {
-                l = new LinkedList<String>();
-            } else if (t == Vector.class) {
-                l = new Vector<String>();
-            } else {
-                throw LOGGER.unsupportedFieldType(v, f, t);
-            }
-            return parseList(v, l);
-        }
-        if (t == java.util.Properties.class) {
-            java.util.Properties p = new java.util.Properties();
-            return parseMap(v, p, f);
-        }
-        if (Map.class.isAssignableFrom(t)) {
-            Map<String, String> m;
-            if (t == Map.class || t == HashMap.class) {
-                m = new HashMap<String, String>();
-            } else if (t == LinkedHashMap.class) {
-                m = new LinkedHashMap<String, String>();
-            } else if (t == IdentityHashMap.class) {
-                m = new IdentityHashMap<String, String>();
-            } else if (t == Hashtable.class) {
-                m = new Hashtable<String, String>();
-            } else if (t == TreeMap.class || t == SortedMap.class) {
-                m = new TreeMap<String, String>();
-            } else if (t == WeakHashMap.class) {
-                m = new WeakHashMap<String, String>();
-            } else {
-                throw LOGGER.unsupportedFieldType(v, f, t);
-            }
-            return parseMap(v, m, f);
-        }
-        if (Set.class.isAssignableFrom(t)) {
-            Set<String> set;
-            if (t == Set.class || t == HashSet.class) {
-                set = new HashSet<String>();
-            } else if(t == SortedSet.class || t == TreeSet.class) {
-                set = new TreeSet<String>();
-            } else if (t == LinkedHashSet.class) {
-                set = new LinkedHashSet<String>();
-            } else {
-                throw LOGGER.unsupportedFieldType(v, f, t);
-            }
-            set.addAll(parseList(v, null));
-            return set;
-        }
         if (t == Class.class) {
             try {
                 return classLoader.loadClass(v);
@@ -203,22 +256,88 @@ public final class ValueConverter {
                 throw LOGGER.failToInjectProperty(e, v, f);
             }
         }
-
-        throw LOGGER.unsupportedFieldType(v, f, t);
+        return null;
     }
 
-    private static List<String> parseList(String v, List<String> l) {
-        if (l == null) {
-            l = new ArrayList<String>();
+    private static Object parsePrimitiveArray(String v, Class<?> primitiveType, Field f) {
+        StringTokenizer st = new StringTokenizer(v, delimiter);
+        int count = st.countTokens();
+        String[] sVal = new String[count];
+        for(int i = 0; i < count; i++) {
+            String s = st.nextToken().trim();
+            sVal[i] = s;
         }
+        if (primitiveType == int.class) {
+            int[] result = new int[count];
+            for (int i = 0; i < count; i++) {
+                result[i] = Integer.parseInt(sVal[i]);
+            }
+            return result;
+        }
+        if (primitiveType == long.class) {
+            long[] result = new long[count];
+            for (int i = 0; i < count; i++) {
+                result[i] = Long.parseLong(sVal[i]);
+            }
+            return result;
+        }
+        if (primitiveType == double.class) {
+            double[] result = new double[count];
+            for (int i = 0; i < count; i++) {
+                result[i] = Double.parseDouble(sVal[i]);
+            }
+            return result;
+        }
+        if (primitiveType == boolean.class) {
+            boolean[] result = new boolean[count];
+            for (int i = 0; i < count; i++) {
+                result[i] = Boolean.parseBoolean(sVal[i]);
+            }
+            return result;                }
+        if (primitiveType == float.class) {
+            float[] result = new float[count];
+            for (int i = 0; i < count; i++) {
+                result[i] = Float.parseFloat(sVal[i]);
+            }
+            return result;
+        }
+        if (primitiveType == char.class) {
+            char[] result = new char[count];
+            for (int i = 0; i < count; i++) {
+                result[i] = v.charAt(0);
+            }
+            return result;
+        }
+        if (primitiveType == byte.class) {
+            byte[] result = new byte[count];
+            for (int i = 0; i < count; i++) {
+                result[i] = Byte.parseByte(sVal[i]);
+            }
+            return result;                }
+        if (primitiveType == short.class) {
+            short[] result = new short[count];
+            for (int i = 0; i < count; i++) {
+                result[i] = Short.parseShort(sVal[i]);
+            }
+            return result;
+        }
+        throw LOGGER.failToInjectProperty(null, v, f);
+    }
+
+    private static List parseList(String v, List l, Class<?> elementValueType, Field f, ClassLoader classLoader) {
         StringTokenizer st = new StringTokenizer(v, delimiter);
         while (st.hasMoreTokens()) {
-            l.add(st.nextToken().trim());
+            String s = st.nextToken().trim();
+            if (elementValueType == String.class) {
+                l.add(s);
+            } else {
+                l.add(convertSingleValue(s, elementValueType, f, classLoader));
+            }
         }
         return l;
     }
 
-    private static Map parseMap(String v, Map map, Field f) {
+    private static Map parseMap(String v, Map map, Class<?> elementValueType, Field f, ClassLoader classLoader) {
         StringTokenizer st = new StringTokenizer(v, delimiter);
         while (st.hasMoreTokens()) {
             String pair = st.nextToken().trim();
@@ -233,7 +352,11 @@ public final class ValueConverter {
             } else {
                 throw LOGGER.failToInjectProperty(null, v, f);
             }
-            map.put(key, value);
+            if (elementValueType == String.class) {
+                map.put(key, value);
+            } else {
+                map.put(key, convertSingleValue(value, elementValueType, f, classLoader));
+            }
         }
         return map;
     }

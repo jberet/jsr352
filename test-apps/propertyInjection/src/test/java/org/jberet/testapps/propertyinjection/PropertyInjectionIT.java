@@ -27,7 +27,7 @@ import org.junit.Test;
 
 public class PropertyInjectionIT extends AbstractIT {
     @Test
-    public void loadBatchXml() throws Exception {
+    public void propertyInjection() throws Exception {
         startJobAndWait("propertyInjection.xml");
     }
 }

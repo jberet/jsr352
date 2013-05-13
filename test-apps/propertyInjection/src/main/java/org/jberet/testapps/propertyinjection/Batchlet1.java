@@ -66,7 +66,7 @@ public class Batchlet1 extends Batchlet0 {
     int intNumber;
 
     @Inject @BatchProperty(name = "class")
-    Class cls;
+    Class<?> cls;
 
     @Inject @BatchProperty(name = "color")
     Color color;
@@ -81,19 +81,34 @@ public class Batchlet1 extends Batchlet0 {
     Inet6Address inet6Address;
 
     @Inject @BatchProperty(name = "map")
-    Map<String, String> mapComma;
+    Map<String, String> map;
 
     @Inject @BatchProperty(name = "map")
-    HashMap<String, String> hashMapComma;
+    Map mapRaw;
 
     @Inject @BatchProperty(name = "map")
-    Hashtable<String, String> hashtableComma;
+    Map<?, ?> mapWild;
 
     @Inject @BatchProperty(name = "map")
-    IdentityHashMap<String, String> identityHashMapComma;
+    Map<String, ?> mapWildValue;
 
     @Inject @BatchProperty(name = "map")
-    LinkedHashMap<String, String> linkedHashMapComma;
+    HashMap<String, String> hashMap;
+
+    @Inject @BatchProperty(name = "map")
+    HashMap<?, ?> hashMapWild;
+
+    @Inject @BatchProperty(name = "map")
+    Hashtable<String, ?> hashtableWildValue;
+
+    @Inject @BatchProperty(name = "map")
+    Hashtable<String, String> hashtable;
+
+    @Inject @BatchProperty(name = "map")
+    IdentityHashMap<String, String> identityHashMap;
+
+    @Inject @BatchProperty(name = "map")
+    LinkedHashMap<String, String> linkedHashMap;
 
     @Inject @BatchProperty(name = "map")
     Properties properties;
@@ -107,20 +122,52 @@ public class Batchlet1 extends Batchlet0 {
     @Inject @BatchProperty(name = "map")
     WeakHashMap<String, String> weakHashMap;
 
+    @Inject @BatchProperty(name = "map.date")
+    HashMap<String, Date> hashMapDate;
+
+    @Inject @BatchProperty(name = "map.date")
+    Hashtable<String, ?> hashtableStringWild;
+
+
     @Inject @BatchProperty(name = "set")
     Set<String> set;
+
+    @Inject @BatchProperty(name = "set")
+    Set<?> setWild;
+
+    @Inject @BatchProperty(name = "set")
+    Set rawSet;
+
+    @Inject @BatchProperty(name = "set")
+    Set<Float> setFloat;
 
     @Inject @BatchProperty(name = "set")
     LinkedHashSet<String> linkedHashSet;
 
     @Inject @BatchProperty(name = "set")
+    LinkedHashSet<Float> linkedHashSetFloat;
+
+    @Inject @BatchProperty(name = "set")
     HashSet<String> hashSet;
+
+    @Inject @BatchProperty(name = "set")
+    HashSet<?> hashSetWild;
+
+    @Inject @BatchProperty(name = "set")
+    HashSet<Float> hashSetFloat;
 
     @Inject @BatchProperty(name = "set")
     TreeSet<String> treeSet;
 
     @Inject @BatchProperty(name = "set")
+    TreeSet<Float> treeSetFloat;
+
+    @Inject @BatchProperty(name = "set")
     SortedSet<String> sortedSet;
+
+    @Inject @BatchProperty(name = "set")
+    SortedSet<Float> sortedSetFloat;
+
 
     @Inject @BatchProperty(name = "logger")
     Logger logger;
@@ -164,16 +211,64 @@ public class Batchlet1 extends Batchlet0 {
     
 
     @Inject @BatchProperty(name = "list")
-    private List<String> listComma;
+    private List<String> list;
 
     @Inject @BatchProperty(name = "list")
-    private ArrayList<String> arrayListComma;
+    List rawList;
 
     @Inject @BatchProperty(name = "list")
-    private LinkedList<String> linkedListComma;
+    List<?> listWild;
 
     @Inject @BatchProperty(name = "list")
-    private Vector<String> vectorListComma;
+    private ArrayList<String> arrayList;
+
+    @Inject @BatchProperty(name = "list")
+    ArrayList<?> arrayListWild;
+
+    @Inject @BatchProperty(name = "list")
+    private LinkedList<String> linkedList;
+
+    @Inject @BatchProperty(name = "list")
+    LinkedList<?> linkedListWild;
+
+    @Inject @BatchProperty(name = "list")
+    private Vector<String> vectorList;
+
+    @Inject @BatchProperty(name = "list")
+    private List<Double> listDouble;
+
+    @Inject @BatchProperty(name = "list")
+    private ArrayList<Double> arrayListDouble;
+
+    @Inject @BatchProperty(name = "list")
+    private LinkedList<Double> linkedListDouble;
+
+    @Inject @BatchProperty(name = "list")
+    private Vector<Double> vectorDouble;
+
+    @Inject @BatchProperty(name = "list.date")
+    List<Date> listDate;
+
+    @Inject @BatchProperty(name = "list.date")
+    List listDateString;
+
+    @Inject @BatchProperty(name = "list.enum")
+    List<Color> listColor;
+
+    @Inject @BatchProperty(name = "list")
+    private String[] listStringArray;
+
+    @Inject @BatchProperty(name = "list")
+    double[] listdoubleArray;
+
+    @Inject @BatchProperty(name = "list")
+    Double[] listDoubleArray;
+
+    @Inject @BatchProperty(name = "list.date")
+    Date[] listDateArray;
+
+    @Inject @BatchProperty(name = "list.enum")
+    Color[] listEnumArray;
 
     @Inject @BatchProperty(name = "big.integer")
     private BigInteger bigInteger;
@@ -218,26 +313,79 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("date.long:   %s%n", dateLong);
         System.out.printf("date.full:   %s%n", dateFull);
 
-        System.out.printf("list:     %s%n", listComma);
-        System.out.printf("list(AL): %s%n", arrayListComma);
-        System.out.printf("list(LL): %s%n", linkedListComma);
-        System.out.printf("list(V):  %s%n", vectorListComma);
+        System.out.printf("list:         %s%n", list);
+        System.out.printf("list(raw):    %s%n", rawList);
+        System.out.printf("list<?>:      %s%n", listWild);
+        System.out.printf("list(AL):     %s%n", arrayList);
+        System.out.printf("list(AL,?):   %s%n", arrayListWild);
+        System.out.printf("list(LL):     %s%n", linkedList);
+        System.out.printf("list(LL,?):   %s%n", linkedListWild);
+        System.out.printf("list(V):      %s%n", vectorList);
+        System.out.printf("List<Double>: %s%n", listDouble);
+        for (Double d : listDouble) {
+            System.out.printf("    * 2 = %s%n", d * 2);
+        }
+        System.out.printf("list(AL,D):   %s%n", arrayListDouble);
+        System.out.printf("list(LL,D):   %s%n", linkedListDouble);
+        System.out.printf("list(V,D):    %s%n", vectorDouble);
+        System.out.printf("list.date<D>: %s%n", listDate);
+        System.out.printf("list.date(S): %s%n", listDateString);
+        System.out.printf("list.enum(C): %s%n", listColor);
 
-        System.out.printf("map: %s%n", mapComma);
-        System.out.printf("map(HM): %s%n", hashMapComma);
-        System.out.printf("map(HT): %s%n", hashtableComma);
-        System.out.printf("map(IDHM): %s%n", identityHashMapComma);
-        System.out.printf("map(LHM): %s%n", linkedHashMapComma);
-        System.out.printf("map(P): %s%n", properties);
-        System.out.printf("map(SM): %s%n", sortedMap);
-        System.out.printf("map(TM): %s%n", treeMap);
-        System.out.printf("map(WHM): %s%n", weakHashMap);
+        System.out.printf("list String[] len: %s%n", listStringArray.length);
+        for (int i = 0; i < listStringArray.length; i++) {
+            System.out.printf("    listStringArray[%s] = %s%n", i, listStringArray[i]);
+        }
+        System.out.printf("list double[] len: %s%n", listdoubleArray.length);;
+        for (int i = 0; i < listdoubleArray.length; i++) {
+            System.out.printf("    listdoubleArray[%s] = %s%n", i, listdoubleArray[i]);
+        }
+        System.out.printf("list Double[] len: %s%n", listDoubleArray.length);;
+        for (int i = 0; i < listDoubleArray.length; i++) {
+            System.out.printf("    listDoubleArray[%s] = %s%n", i, listDoubleArray[i]);
+        }
+        System.out.printf("list Date[] len: %s%n", listDateArray.length);;
+        for (int i = 0; i < listDateArray.length; i++) {
+            System.out.printf("    listDateArray[%s] = %s%n", i, listDateArray[i]);
+        }
+        System.out.printf("list enum Color[] len: %s%n", listEnumArray.length);;
+        for (int i = 0; i < listEnumArray.length; i++) {
+            System.out.printf("    listEnumArray[%s] = %s%n", i, listEnumArray[i]);
+        }
 
-        System.out.printf("set: %s%n", set);
-        System.out.printf("set(LHS): %s%n", linkedHashSet);
-        System.out.printf("set(HS): %s%n", hashSet);
-        System.out.printf("set(TS): %s%n", treeSet);
-        System.out.printf("set(SS): %s%n", sortedSet);
+        System.out.printf("map:              %s%n", map);
+        System.out.printf("map(raw):         %s%n", mapRaw);
+        System.out.printf("map<?,?>:         %s%n", mapWild);
+        System.out.printf("map<s,?>:         %s%n", mapWildValue);
+        System.out.printf("map(HM):          %s%n", hashMap);
+        System.out.printf("map(HM,?,?):      %s%n", hashMapWild);
+        System.out.printf("map(HT):          %s%n", hashtable);
+        System.out.printf("map(HT,S,?):      %s%n", hashtableWildValue);
+        System.out.printf("map(IDHM):        %s%n", identityHashMap);
+        System.out.printf("map(LHM):         %s%n", linkedHashMap);
+        System.out.printf("map(P):           %s%n", properties);
+        System.out.printf("map(SM):          %s%n", sortedMap);
+        System.out.printf("map(TM):          %s%n", treeMap);
+        System.out.printf("map(WHM):         %s%n", weakHashMap);
+        System.out.printf("map.date(HM,D):   %s%n", hashMapDate);
+        System.out.printf("map.date(HT,S,?): %s%n", hashtableStringWild);
+
+        System.out.printf("set:        %s%n", set);
+        System.out.printf("set(raw):   %s%n", rawSet);
+        System.out.printf("set<?>:     %s%n", setWild);
+        System.out.printf("set(LHS):   %s%n", linkedHashSet);
+        System.out.printf("set(HS):    %s%n", hashSet);
+        System.out.printf("set(HS,?):  %s%n", hashSetWild);
+        System.out.printf("set(TS):    %s%n", treeSet);
+        System.out.printf("set(SS):    %s%n", sortedSet);
+        System.out.printf("Set<Float>: %s%n", setFloat);
+        for (Float f : setFloat) {
+            System.out.printf("    * 2 = %s%n", f * 2);
+        }
+        System.out.printf("set(LHS,F): %s%n", linkedHashSetFloat);
+        System.out.printf("set(HS,F):  %s%n", hashSetFloat);
+        System.out.printf("set(TS,F):  %s%n", treeSetFloat);
+        System.out.printf("set(SS,F):  %s%n", sortedSetFloat);
 
         System.out.printf("logger: %s%n", logger);
         System.out.printf("pattern: %s%n", pattern);
