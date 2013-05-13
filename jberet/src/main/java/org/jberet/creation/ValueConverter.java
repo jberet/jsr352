@@ -37,6 +37,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,10 +63,81 @@ import javax.management.ObjectName;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
+/**
+ * Converts a property string value to the target field type.  Supported field types for batch property injection:
+ * <ul>
+ *     <li>String</li>
+ *     <li>StringBuffer</li>
+ *     <li>StringBuilder</li>
+ *     <li>int</li>
+ *     <li>Integer</li>
+ *     <li>long</li>
+ *     <li>Long</li>
+ *     <li>double</li>
+ *     <li>Double</li>
+ *     <li>boolean</li>
+ *     <li>Boolean</li>
+ *     <li>char</li>
+ *     <li>Character</li>
+ *     <li>float</li>
+ *     <li>Float</li>
+ *     <li>byte</li>
+ *     <li>Byte</li>
+ *     <li>short</li>
+ *     <li>Short</li>
+ *     <li>BigInteger</li>
+ *     <li>BigDecimal</li>
+ *     <li>java.util.Date</li>
+ *     <li>Class</li>
+ *     <li>Class&lt;&#63;&gt;</li>
+ *     <li>any Enum</li>
+ *     <li>java.io.File</li>
+ *     <li>URL</li>
+ *     <li>URI</li>
+ *     <li>InetAddress</li>
+ *     <li>Inet4Address</li>
+ *     <li>Inet6Address</li>
+ *     <li>java.util.logging.Logger</li>
+ *     <li>java.util.regex.Pattern</li>
+ *     <li>javax.management.ObjectName</li>
+ *     <br/>
+ *     <li>array of any of the above single-valued type, e.g., int[], Integer[], String[], Date[], TimeUnit[], etc</li>
+ *     <br/>
+ *     <li>java.util.Collection</li>
+ *     <li>List</li>
+ *     <li>ArrayList</li>
+ *     <li>LinkedList</li>
+ *     <li>Vector</li>
+ *     <li>Set</li>
+ *     <li>HashSet</li>
+ *     <li>SortedSet</li>
+ *     <li>TreeSet</li>
+ *     <li>LinkedHashSet</li>
+ *     <li>java.util.Properties</li>
+ *     <li>Map</li>
+ *     <li>HashMap</li>
+ *     <li>Hashtable</li>
+ *     <li>IdentityHashMap</li>
+ *     <li>LinkedHashMap</li>
+ *     <li>SortedMap</li>
+ *     <li>TreeMap</li>
+ *     <li>WeakHashMap</li>
+ * </ul>
+ * <br/>
+ * Common generics collections are supported.  Wildcard is treated the same as String.  for example:<ul>
+ *     <li>Collection&lt;&#63;&gt;</li>
+ *     <li>List&lt;String&gt;</li>
+ *     <li>Set&lt;Date&gt;</li>
+ *     <li>Map&lt;&#63;, &#63;&gt;</li>
+ *     <li>Map&lt;String, &#63;&gt;</li>
+ *     <li>LinkedList&lt;TimeUnit&gt;</li>
+ *     <li>ArrayList&lt;Integer&gt;</li>
+ * </ul>
+ */
 public final class ValueConverter {
     private static final String delimiter = ",";
 
-    // order from longest to shortest to make sure input date strings are not truncated by shorter format stylers.
+    // order from longest to shortest to make sure input date strings are not truncated by shorter format styles.
     private static final int[] dateFormatCodes = {DateFormat.FULL, DateFormat.LONG, DateFormat.MEDIUM, DateFormat.SHORT};
 
     public static Object convertFieldValue(String rawValue, Class<?> t, Field f, ClassLoader classLoader) {
@@ -118,9 +190,9 @@ public final class ValueConverter {
             elementValueType = String.class;
         }
 
-        if (List.class.isAssignableFrom(t)) {
+        if (List.class.isAssignableFrom(t) || t == Collection.class) {
             List l;
-            if (t == List.class || t == ArrayList.class) {
+            if (t == List.class || t == ArrayList.class || t == Collection.class) {
                 l = new ArrayList();
             } else if (t == LinkedList.class) {
                 l = new LinkedList();
@@ -304,7 +376,7 @@ public final class ValueConverter {
         if (primitiveType == char.class) {
             char[] result = new char[count];
             for (int i = 0; i < count; i++) {
-                result[i] = v.charAt(0);
+                result[i] = sVal[i].charAt(0);
             }
             return result;
         }

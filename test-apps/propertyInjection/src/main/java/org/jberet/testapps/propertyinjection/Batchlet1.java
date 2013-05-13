@@ -31,6 +31,8 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,7 +65,79 @@ public class Batchlet1 extends Batchlet0 {
     public enum Color {RED, WHITE, YELLOW}
 
     @Inject @BatchProperty(name = "int")
-    int intNumber;
+    int anInt;
+
+    @Inject @BatchProperty(name = "int")
+    long aLong;
+
+    @Inject @BatchProperty(name = "int")
+    short aShort;
+
+    @Inject @BatchProperty(name = "int")
+    byte aByte;
+
+    @Inject @BatchProperty(name = "int")
+    char aChar;
+
+    @Inject @BatchProperty(name = "int")
+    double aDouble;
+
+    @Inject @BatchProperty(name = "int")
+    float aFloat;
+
+    @Inject @BatchProperty(name = "boolean")
+    boolean aBoolean;
+
+
+    @Inject @BatchProperty(name = "list")
+    int[] ints;
+
+    @Inject @BatchProperty(name = "list")
+    long[] longs;
+
+    @Inject @BatchProperty(name = "list")
+    short[] shorts;
+
+    @Inject @BatchProperty(name = "list")
+    byte[] bytes;
+
+    @Inject @BatchProperty(name = "list")
+    char[] chars;
+
+    @Inject @BatchProperty(name = "list")
+    double[] doubles;
+
+    @Inject @BatchProperty(name = "list")
+    float[] floats;
+
+    @Inject @BatchProperty(name = "booleans")
+    boolean[] booleans;
+
+
+    @Inject @BatchProperty(name = "list")
+    Integer[] intsWrapper;
+
+    @Inject @BatchProperty(name = "list")
+    Long[] longsWrapper;
+
+    @Inject @BatchProperty(name = "list")
+    Short[] shortsWrapper;
+
+    @Inject @BatchProperty(name = "list")
+    Byte[] bytesWrapper;
+
+    @Inject @BatchProperty(name = "list")
+    Character[] charsWrapper;
+
+    @Inject @BatchProperty(name = "list")
+    Double[] doublesWrapper;
+
+    @Inject @BatchProperty(name = "list")
+    Float[] floatsWrapper;
+
+    @Inject @BatchProperty(name = "booleans")
+    Boolean[] booleansWrapper;
+    
 
     @Inject @BatchProperty(name = "class")
     Class<?> cls;
@@ -208,7 +282,16 @@ public class Batchlet1 extends Batchlet0 {
 
     @Inject @BatchProperty(name = "date.full")
     private Date dateFull;
-    
+
+
+    @Inject @BatchProperty(name = "list")
+    private Collection<?> collectionWild;
+
+    @Inject @BatchProperty(name = "list")
+    private Collection<String> collectionString;
+
+    @Inject @BatchProperty(name = "list")
+    private Collection<Integer> collectionInteger;
 
     @Inject @BatchProperty(name = "list")
     private List<String> list;
@@ -313,6 +396,9 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("date.long:   %s%n", dateLong);
         System.out.printf("date.full:   %s%n", dateFull);
 
+        System.out.printf("list(Collection ?): %s%n", collectionWild);
+        System.out.printf("list(Collection S): %s%n", collectionString);
+        System.out.printf("list(Collection I): %s%n", collectionInteger);
         System.out.printf("list:         %s%n", list);
         System.out.printf("list(raw):    %s%n", rawList);
         System.out.printf("list<?>:      %s%n", listWild);
@@ -322,9 +408,7 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("list(LL,?):   %s%n", linkedListWild);
         System.out.printf("list(V):      %s%n", vectorList);
         System.out.printf("List<Double>: %s%n", listDouble);
-        for (Double d : listDouble) {
-            System.out.printf("    * 2 = %s%n", d * 2);
-        }
+
         System.out.printf("list(AL,D):   %s%n", arrayListDouble);
         System.out.printf("list(LL,D):   %s%n", linkedListDouble);
         System.out.printf("list(V,D):    %s%n", vectorDouble);
@@ -332,26 +416,11 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("list.date(S): %s%n", listDateString);
         System.out.printf("list.enum(C): %s%n", listColor);
 
-        System.out.printf("list String[] len: %s%n", listStringArray.length);
-        for (int i = 0; i < listStringArray.length; i++) {
-            System.out.printf("    listStringArray[%s] = %s%n", i, listStringArray[i]);
-        }
-        System.out.printf("list double[] len: %s%n", listdoubleArray.length);;
-        for (int i = 0; i < listdoubleArray.length; i++) {
-            System.out.printf("    listdoubleArray[%s] = %s%n", i, listdoubleArray[i]);
-        }
-        System.out.printf("list Double[] len: %s%n", listDoubleArray.length);;
-        for (int i = 0; i < listDoubleArray.length; i++) {
-            System.out.printf("    listDoubleArray[%s] = %s%n", i, listDoubleArray[i]);
-        }
-        System.out.printf("list Date[] len: %s%n", listDateArray.length);;
-        for (int i = 0; i < listDateArray.length; i++) {
-            System.out.printf("    listDateArray[%s] = %s%n", i, listDateArray[i]);
-        }
-        System.out.printf("list enum Color[] len: %s%n", listEnumArray.length);;
-        for (int i = 0; i < listEnumArray.length; i++) {
-            System.out.printf("    listEnumArray[%s] = %s%n", i, listEnumArray[i]);
-        }
+        System.out.printf("list String[]: %s%n", Arrays.toString(listStringArray));
+        System.out.printf("list double[]: %s%n", Arrays.toString(listdoubleArray));
+        System.out.printf("list Double[]: %s%n", Arrays.toString(listDoubleArray));
+        System.out.printf("list Date[]: %s%n", Arrays.toString(listDateArray));
+        System.out.printf("list enum Color[]: %s%n", Arrays.toString(listEnumArray));
 
         System.out.printf("map:              %s%n", map);
         System.out.printf("map(raw):         %s%n", mapRaw);
@@ -379,9 +448,7 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("set(TS):    %s%n", treeSet);
         System.out.printf("set(SS):    %s%n", sortedSet);
         System.out.printf("Set<Float>: %s%n", setFloat);
-        for (Float f : setFloat) {
-            System.out.printf("    * 2 = %s%n", f * 2);
-        }
+
         System.out.printf("set(LHS,F): %s%n", linkedHashSetFloat);
         System.out.printf("set(HS,F):  %s%n", hashSetFloat);
         System.out.printf("set(TS,F):  %s%n", treeSetFloat);
@@ -392,12 +459,39 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("object.name: %s%n", objectName);
         System.out.printf("big.integer: %s%n", bigInteger);
         System.out.printf("big.decimal: %s%n", bigDecimal);
-        System.out.printf("int: %s%n", intNumber);
         System.out.printf("url: %s%n", url);
         System.out.printf("uri: %s%n", uri);
         System.out.printf("file: %s%n", file);
         System.out.printf("stringBuilder: %s%n", stringBuilder);
         System.out.printf("stringBuffer:  %s%n", stringBuffer);
+
+        System.out.printf("int:     %s%n", anInt);
+        System.out.printf("long:    %s%n", aLong);
+        System.out.printf("byte:    %s%n", aByte);
+        System.out.printf("short:   %s%n", aShort);
+        System.out.printf("double:  %s%n", aDouble);
+        System.out.printf("float:   %s%n", aFloat);
+        System.out.printf("boolean: %s%n", aBoolean);
+        System.out.printf("char:    %s%n", aChar);
+
+        System.out.printf("ints:     %s%n", Arrays.toString(ints));
+        System.out.printf("longs:    %s%n", Arrays.toString(longs));
+        System.out.printf("bytes:    %s%n", Arrays.toString(bytes));
+        System.out.printf("shorts:   %s%n", Arrays.toString(shorts));
+        System.out.printf("doubles:  %s%n", Arrays.toString(doubles));
+        System.out.printf("floats:   %s%n", Arrays.toString(floats));
+        System.out.printf("booleans: %s%n", Arrays.toString(booleans));
+        System.out.printf("chars:    %s%n", Arrays.toString(chars));
+
+        System.out.printf("intsWrapper:     %s%n", Arrays.toString(intsWrapper));
+        System.out.printf("longsWrapper:    %s%n", Arrays.toString(longsWrapper));
+        System.out.printf("bytesWrapper:    %s%n", Arrays.toString(bytesWrapper));
+        System.out.printf("shortsWrapper:   %s%n", Arrays.toString(shortsWrapper));
+        System.out.printf("doublesWrapper:  %s%n", Arrays.toString(doublesWrapper));
+        System.out.printf("floatsWrapper:   %s%n", Arrays.toString(floatsWrapper));
+        System.out.printf("booleansWrapper: %s%n", Arrays.toString(booleansWrapper));
+        System.out.printf("charsWrapper:    %s%n", Arrays.toString(charsWrapper));
+        
         return result;
     }
 }
