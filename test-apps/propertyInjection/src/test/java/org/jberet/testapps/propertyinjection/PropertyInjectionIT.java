@@ -22,6 +22,7 @@
 
 package org.jberet.testapps.propertyinjection;
 
+import junit.framework.Assert;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Test;
 
@@ -29,5 +30,6 @@ public class PropertyInjectionIT extends AbstractIT {
     @Test
     public void propertyInjection() throws Exception {
         startJobAndWait("propertyInjection.xml");
+        Assert.assertEquals("ab 2ab2 2default2 null", stepExecution0.getExitStatus());
     }
 }

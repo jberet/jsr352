@@ -23,6 +23,7 @@
 package org.jberet.testapps.propertyinjection;
 
 import java.io.File;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.Inet4Address;
@@ -137,7 +138,28 @@ public class Batchlet1 extends Batchlet0 {
 
     @Inject @BatchProperty(name = "booleans")
     Boolean[] booleansWrapper;
-    
+
+    @Inject @BatchProperty(name = "list")
+    Object[] objectArray;
+
+    @Inject @BatchProperty(name = "list")
+    Serializable[] serializableArray;
+
+    @Inject @BatchProperty(name = "list")
+    CharSequence[] charSequenceArray;
+
+    @Inject @BatchProperty(name = "list")
+    Comparable<String>[] comparableStringArray;
+
+    @Inject @BatchProperty(name = "list")
+    String[] listStringArray;
+
+    @Inject @BatchProperty(name = "list.date")
+    Date[] listDateArray;
+
+    @Inject @BatchProperty(name = "list.enum")
+    Color[] listEnumArray;
+
 
     @Inject @BatchProperty(name = "class")
     Class<?> cls;
@@ -338,21 +360,6 @@ public class Batchlet1 extends Batchlet0 {
     @Inject @BatchProperty(name = "list.enum")
     List<Color> listColor;
 
-    @Inject @BatchProperty(name = "list")
-    private String[] listStringArray;
-
-    @Inject @BatchProperty(name = "list")
-    double[] listdoubleArray;
-
-    @Inject @BatchProperty(name = "list")
-    Double[] listDoubleArray;
-
-    @Inject @BatchProperty(name = "list.date")
-    Date[] listDateArray;
-
-    @Inject @BatchProperty(name = "list.enum")
-    Color[] listEnumArray;
-
     @Inject @BatchProperty(name = "big.integer")
     private BigInteger bigInteger;
 
@@ -373,6 +380,30 @@ public class Batchlet1 extends Batchlet0 {
 
     @Inject @BatchProperty(name = "string")
     StringBuffer stringBuffer;
+
+    @Inject @BatchProperty(name = "string")
+    Object objectField;
+
+    @Inject @BatchProperty(name = "string")
+    Serializable serializableField;
+
+    @Inject @BatchProperty(name = "string")
+    CharSequence charSequenceField;
+
+    @Inject @BatchProperty(name = "string")
+    Comparable<String> comparableString;
+
+    @Inject @BatchProperty(name = "include.not.defined")
+    String includeNotDefined;
+
+    @Inject @BatchProperty(name = "include.not.defined.2")
+    String includeNotDefined2;
+
+    @Inject @BatchProperty(name = "include.not.defined.3")
+    String includeNotDefined3;
+
+    @Inject @BatchProperty(name = "not.defined")
+    String notDefined;
 
     @Override
     public String process() throws Exception {
@@ -417,8 +448,6 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("list.enum(C): %s%n", listColor);
 
         System.out.printf("list String[]: %s%n", Arrays.toString(listStringArray));
-        System.out.printf("list double[]: %s%n", Arrays.toString(listdoubleArray));
-        System.out.printf("list Double[]: %s%n", Arrays.toString(listDoubleArray));
         System.out.printf("list Date[]: %s%n", Arrays.toString(listDateArray));
         System.out.printf("list enum Color[]: %s%n", Arrays.toString(listEnumArray));
 
@@ -462,8 +491,12 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("url: %s%n", url);
         System.out.printf("uri: %s%n", uri);
         System.out.printf("file: %s%n", file);
-        System.out.printf("stringBuilder: %s%n", stringBuilder);
-        System.out.printf("stringBuffer:  %s%n", stringBuffer);
+        System.out.printf("stringBuilder:     %s%n", stringBuilder);
+        System.out.printf("stringBuffer:      %s%n", stringBuffer);
+        System.out.printf("objectField:       %s%n", objectField);
+        System.out.printf("serializableField: %s%n", serializableField);
+        System.out.printf("charSequenceField  %s%n", charSequenceField);
+        System.out.printf("comparableString   %s%n", comparableString);
 
         System.out.printf("int:     %s%n", anInt);
         System.out.printf("long:    %s%n", aLong);
@@ -483,15 +516,24 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("booleans: %s%n", Arrays.toString(booleans));
         System.out.printf("chars:    %s%n", Arrays.toString(chars));
 
-        System.out.printf("intsWrapper:     %s%n", Arrays.toString(intsWrapper));
-        System.out.printf("longsWrapper:    %s%n", Arrays.toString(longsWrapper));
-        System.out.printf("bytesWrapper:    %s%n", Arrays.toString(bytesWrapper));
-        System.out.printf("shortsWrapper:   %s%n", Arrays.toString(shortsWrapper));
-        System.out.printf("doublesWrapper:  %s%n", Arrays.toString(doublesWrapper));
-        System.out.printf("floatsWrapper:   %s%n", Arrays.toString(floatsWrapper));
-        System.out.printf("booleansWrapper: %s%n", Arrays.toString(booleansWrapper));
-        System.out.printf("charsWrapper:    %s%n", Arrays.toString(charsWrapper));
-        
+        System.out.printf("intsWrapper:           %s%n", Arrays.toString(intsWrapper));
+        System.out.printf("longsWrapper:          %s%n", Arrays.toString(longsWrapper));
+        System.out.printf("bytesWrapper:          %s%n", Arrays.toString(bytesWrapper));
+        System.out.printf("shortsWrapper:         %s%n", Arrays.toString(shortsWrapper));
+        System.out.printf("doublesWrapper:        %s%n", Arrays.toString(doublesWrapper));
+        System.out.printf("floatsWrapper:         %s%n", Arrays.toString(floatsWrapper));
+        System.out.printf("booleansWrapper:       %s%n", Arrays.toString(booleansWrapper));
+        System.out.printf("charsWrapper:          %s%n", Arrays.toString(charsWrapper));
+        System.out.printf("objectArray:           %s%n", Arrays.toString(objectArray));
+        System.out.printf("serializableArray:     %s%n", Arrays.toString(serializableArray));
+        System.out.printf("charSequenceArray:     %s%n", Arrays.toString(charSequenceArray));
+        System.out.printf("comparableStringArray: %s%n", Arrays.toString(comparableStringArray));
+
+        System.out.printf("includeNotDefined:  %s%n", includeNotDefined);
+        System.out.printf("includeNotDefined2: %s%n", includeNotDefined2);
+        System.out.printf("includeNotDefined3: %s%n", includeNotDefined3);
+        System.out.printf("notDefined:         %s%n", notDefined);
+        result = includeNotDefined + " " + includeNotDefined2 + " " + includeNotDefined3 + " " + notDefined;
         return result;
     }
 }

@@ -90,12 +90,15 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                                 if (propName.equals("")) {
                                     propName = f.getName();
                                 }
-                                fieldVal = BatchUtil.getBatchProperty(batchProps, propName);
-                                if ("".equals(fieldVal)) {
-                                    fieldVal = null;
-                                }
-                                if (!fType.isAssignableFrom(String.class) && fieldVal != null) {
-                                    fieldVal = ValueConverter.convertFieldValue((String) fieldVal, fType, f, classLoader);
+                                String sVal = BatchUtil.getBatchProperty(batchProps, propName);
+                                if (sVal != null) {
+                                    if (sVal.length() == 0) {
+                                        fieldVal = null;
+                                    } else if (!fType.isAssignableFrom(String.class)) {
+                                        fieldVal = ValueConverter.convertFieldValue(sVal, fType, f, classLoader);
+                                    } else {
+                                        fieldVal = sVal;
+                                    }
                                 }
                             }
                         }

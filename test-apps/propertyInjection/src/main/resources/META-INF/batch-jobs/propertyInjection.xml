@@ -65,6 +65,9 @@
                 <property name="object.name" value="d:type=Foo,name=Bar"/>
                 <property name="string" value="    a b c    "/>
 
+                <property name="include.not.defined" value="a#{jobProperties['X']}b"/>
+                <property name="include.not.defined.2" value="2#{jobProperties['include.not.defined']}2"/>
+                <property name="include.not.defined.3" value="2#{jobProperties['X']}?:default;2"/>
             </properties>
         </batchlet>
     </step>

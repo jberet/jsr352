@@ -596,11 +596,14 @@ public final class PropertyResolver {
         }
 
         if (!defaultAllowed) {  //a default expression should not have default again
-            if (val != null) {
-                endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, val);
-            } else {  //not resolved:
-                throw LOGGER.unresolvableExpressionException(sb.toString());
+            if (val == null) {
+                //not resolved:
+                //in xml space, unresolved properties is set to "",for example, a#{jobProperties['no.such.prop']}b => ab
+                //when injecting unresolved properties to artifact class, null is injected for property value "".
+                //throw LOGGER.unresolvableExpressionException(sb.toString());
+                val = "";
             }
+            endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, val);
         } else {
             int startDefaultMarker = endExpression + 1;
             int endDefaultMarker = startDefaultMarker + 1;  //?:
@@ -625,7 +628,8 @@ public final class PropertyResolver {
                 }
             } else {
                 if (!hasDefault) {  //not resolved, no default:
-                    throw LOGGER.unresolvableExpressionException(sb.toString());
+                    //throw LOGGER.unresolvableExpressionException(sb.toString());
+                    endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, "");
                 } else {  //not resolved, has default: resolve and apply the default
                     StringBuilder sb4DefaultExpression = new StringBuilder(sb.substring(endDefaultMarker + 1, endDefaultExpressionMarker));
                     resolve(sb4DefaultExpression, 0, false, null);

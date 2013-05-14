@@ -129,9 +129,9 @@ public class PropertyResolverTest {
         props.setProperty("java.version", "#{systemProperties['java.version']}");  //valid one, not cycle
 
         resolver.pushJobProperties(fromJavaUtilProperties(props));
-        Assert.assertNull(resolver.resolve("#{jobProperties['one']}"));
-        Assert.assertNull(resolver.resolve("#{jobProperties['two']}"));
-        Assert.assertNull(resolver.resolve("#{jobProperties['four']}"));
+        Assert.assertEquals("", resolver.resolve("#{jobProperties['one']}"));
+        Assert.assertEquals("", resolver.resolve("#{jobProperties['two']}"));
+        Assert.assertEquals("", resolver.resolve("#{jobProperties['four']}"));
         Assert.assertEquals("TEN", resolver.resolve("#{jobProperties['seven']}"));
 
         org.junit.Assert.assertEquals(javaVersion, resolver.resolve("#{jobProperties['java.version']}"));

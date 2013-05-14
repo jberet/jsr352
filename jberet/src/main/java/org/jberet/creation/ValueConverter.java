@@ -69,6 +69,10 @@ import static org.jberet.util.BatchLogger.LOGGER;
  *     <li>String</li>
  *     <li>StringBuffer</li>
  *     <li>StringBuilder</li>
+ *     <li>Object</li>
+ *     <li>Serializable</li>
+ *     <li>CharSequence</li>
+ *     <li>Comparable&lt;String&gt;</li>
  *     <li>int</li>
  *     <li>Integer</li>
  *     <li>long</li>
@@ -101,7 +105,7 @@ import static org.jberet.util.BatchLogger.LOGGER;
  *     <li>java.util.regex.Pattern</li>
  *     <li>javax.management.ObjectName</li>
  *     <br/>
- *     <li>array of any of the above single-valued type, e.g., int[], Integer[], String[], Date[], TimeUnit[], etc</li>
+ *     <li>array of any of the above single-valued type, e.g., int[], Object[], Integer[], String[], Date[], TimeUnit[], etc</li>
  *     <br/>
  *     <li>java.util.Collection</li>
  *     <li>List</li>
@@ -400,7 +404,7 @@ public final class ValueConverter {
         StringTokenizer st = new StringTokenizer(v, delimiter);
         while (st.hasMoreTokens()) {
             String s = st.nextToken().trim();
-            if (elementValueType == String.class) {
+            if (elementValueType.isAssignableFrom(String.class)) {
                 l.add(s);
             } else {
                 l.add(convertSingleValue(s, elementValueType, f, classLoader));
