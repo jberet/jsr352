@@ -29,6 +29,9 @@
                 <property name="class" value="org.jberet.testapps.propertyinjection.Batchlet1"/>
                 <property name="color" value="RED"/>
                 <property name="file" value="/tmp"/>
+                <property name="jar.file" value="#{systemProperties['java.home']}/lib/jce.jar"/>
+                <property name="jar.files"
+                          value="#{systemProperties['java.home']}/lib/jce.jar, #{systemProperties['java.home']}/lib/management-agent.jar"/>
                 <property name="int" value="9"/>
                 <property name="boolean" value="true"/>
                 <property name="booleans" value="true, true"/>

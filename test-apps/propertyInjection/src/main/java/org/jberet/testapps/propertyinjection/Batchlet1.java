@@ -52,8 +52,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.WeakHashMap;
+import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.zip.ZipFile;
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -375,6 +377,24 @@ public class Batchlet1 extends Batchlet0 {
     @Inject @BatchProperty(name = "file")
     private File file;
 
+    @Inject @BatchProperty(name = "jar.files")
+    JarFile[] jarFiles;
+
+    @Inject @BatchProperty(name = "jar.files")
+    ZipFile[] zipFiles;
+
+    @Inject @BatchProperty(name = "jar.files")
+    List<JarFile> jarFileList;
+
+    @Inject @BatchProperty(name = "jar.files")
+    List<ZipFile> zipFileList;
+
+    @Inject @BatchProperty(name = "jar.file")
+    JarFile jarFile;
+
+    @Inject @BatchProperty(name = "jar.file")
+    ZipFile zipFile;
+
     @Inject @BatchProperty(name = "string")
     StringBuilder stringBuilder;
 
@@ -490,7 +510,13 @@ public class Batchlet1 extends Batchlet0 {
         System.out.printf("big.decimal: %s%n", bigDecimal);
         System.out.printf("url: %s%n", url);
         System.out.printf("uri: %s%n", uri);
-        System.out.printf("file: %s%n", file);
+        System.out.printf("file:        %s%n", file);
+        System.out.printf("jarFile:     %s%n", jarFile);
+        System.out.printf("zipFile:     %s%n", zipFile);
+        System.out.printf("jarFiles:    %s%n", Arrays.toString(jarFiles));
+        System.out.printf("zipFiles:    %s%n", Arrays.toString(zipFiles));
+        System.out.printf("jarFileList: %s%n", jarFileList);
+        System.out.printf("zipFileList: %s%n", zipFileList);
         System.out.printf("stringBuilder:     %s%n", stringBuilder);
         System.out.printf("stringBuffer:      %s%n", stringBuffer);
         System.out.printf("objectField:       %s%n", objectField);

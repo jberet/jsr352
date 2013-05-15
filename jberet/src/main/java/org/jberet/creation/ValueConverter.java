@@ -23,6 +23,7 @@
 package org.jberet.creation;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -56,8 +57,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.WeakHashMap;
+import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.zip.ZipFile;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -96,6 +99,8 @@ import static org.jberet.util.BatchLogger.LOGGER;
  *     <li>Class&lt;&#63;&gt;</li>
  *     <li>any Enum</li>
  *     <li>java.io.File</li>
+ *     <li>java.util.zip.ZipFile</li>
+ *     <li>java.util.jar.JarFile</li>
  *     <li>URL</li>
  *     <li>URI</li>
  *     <li>InetAddress</li>
@@ -272,6 +277,20 @@ public final class ValueConverter {
         }
         if (t == File.class) {
             return new File(v);
+        }
+        if (t == ZipFile.class) {
+            try {
+                return new ZipFile(v);
+            } catch (IOException e) {
+                throw LOGGER.failToInjectProperty(e, v, f);
+            }
+        }
+        if (t == JarFile.class) {
+            try {
+                return new JarFile(v);
+            } catch (IOException e) {
+                throw LOGGER.failToInjectProperty(e, v, f);
+            }
         }
         if (t == URL.class) {
             try {
