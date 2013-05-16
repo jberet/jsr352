@@ -61,10 +61,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.management.ObjectName;
 
-import org.jberet.testapps.common.Batchlet0;
+import org.jberet.testapps.common.BatchletNoNamed;
 
 @Named
-public class Batchlet1 extends Batchlet0 {
+public class Batchlet1 extends BatchletNoNamed {
     public enum Color {RED, WHITE, YELLOW}
 
     @Inject @BatchProperty(name = "int")

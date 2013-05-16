@@ -20,23 +20,42 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.jberet.testapps.common;
+package org.jberet.testapps.postconstruct;
 
+import java.util.Date;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.batch.api.BatchProperty;
+import javax.batch.operations.BatchRuntimeException;
+import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.testapps.common.Batchlet0;
+
 @Named
-public class Batchlet0 extends BatchletNoNamed {
+public class Batchlet1 extends Batchlet0 {
+    @Inject @BatchProperty(name = "date")
+    private Date date;
+
+    @Override
+    public String process() throws Exception {
+        return jobContext.getExitStatus();
+    }
+
     @PostConstruct
-    void ps() {
-        System.out.printf("Batchlet0 PostConstruct of %s%n", this);
-        addToJobExitStatus("Batchlet0.ps");
+    private void ps() throws Exception {
+        System.out.printf("Batchlet1 PostConstruct of %s%n", this);
+        if (jobContext == null || stepContext == null || date == null) {
+            throw new BatchRuntimeException("Some fields are not initialized: jobContext=" + jobContext +
+            ", stepContext=" + stepContext + ", date=" + date);
+        }
+        addToJobExitStatus("Batchlet1.ps");
     }
 
     @PreDestroy
-    void pd() {
-        System.out.printf("Batchlet0 PreDestroy of %s%n", this);
-        addToJobExitStatus("Batchlet0.pd");
+    private void pd() throws Exception {
+        System.out.printf("Batchlet1 PreDestroy of %s%n", this);
+        addToJobExitStatus("Batchlet1.pd");
     }
+
 }

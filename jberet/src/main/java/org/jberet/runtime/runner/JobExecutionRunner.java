@@ -77,6 +77,10 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             batchContext.setBatchStatus(BatchStatus.FAILED);
         }
 
+        for (JobListener l : batchContext.getJobListeners()) {
+            batchContext.destroyArtifact(l);
+        }
+
         if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
             batchContext.setBatchStatus(BatchStatus.COMPLETED);
         } else if (batchContext.getBatchStatus() == BatchStatus.STOPPING) {

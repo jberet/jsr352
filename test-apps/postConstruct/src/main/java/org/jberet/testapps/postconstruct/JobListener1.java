@@ -20,23 +20,45 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
  
-package org.jberet.testapps.common;
+package org.jberet.testapps.postconstruct;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.batch.api.BatchProperty;
+import javax.batch.api.listener.JobListener;
+import javax.batch.operations.BatchRuntimeException;
+import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.testapps.common.PostConstructPreDestroyBase;
+
 @Named
-public class Batchlet0 extends BatchletNoNamed {
+public class JobListener1 extends PostConstructPreDestroyBase implements JobListener {
+    @Inject @BatchProperty(name = "os.name")
+    private String osName;
+
+    @Override
+    public void beforeJob() throws Exception {
+
+    }
+
+    @Override
+    public void afterJob() throws Exception {
+
+    }
+
     @PostConstruct
-    void ps() {
-        System.out.printf("Batchlet0 PostConstruct of %s%n", this);
-        addToJobExitStatus("Batchlet0.ps");
+    public void ps() {
+        System.out.printf("JobListener1 PostConstruct of %s%n", this);
+        if (osName == null) {
+            throw new BatchRuntimeException("osNmae field has not been initialized when checking from PostConstruct method.");
+        }
+        addToJobExitStatus("JobListener1.ps");
     }
 
     @PreDestroy
-    void pd() {
-        System.out.printf("Batchlet0 PreDestroy of %s%n", this);
-        addToJobExitStatus("Batchlet0.pd");
+    public void pd() {
+        System.out.printf("JobListener1 PreDestroy of %s%n", this);
+        addToJobExitStatus("JobListener1.pd");
     }
 }

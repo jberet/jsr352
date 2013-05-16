@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2013, Red Hat, Inc., and individual contributors
+ * Copyright 2012, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -19,24 +19,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
-package org.jberet.testapps.common;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Named;
+package org.jberet.testapps.postconstruct;
 
-@Named
-public class Batchlet0 extends BatchletNoNamed {
-    @PostConstruct
-    void ps() {
-        System.out.printf("Batchlet0 PostConstruct of %s%n", this);
-        addToJobExitStatus("Batchlet0.ps");
-    }
+import javax.batch.runtime.BatchStatus;
 
-    @PreDestroy
-    void pd() {
-        System.out.printf("Batchlet0 PreDestroy of %s%n", this);
-        addToJobExitStatus("Batchlet0.pd");
+import junit.framework.Assert;
+import org.jberet.testapps.common.AbstractIT;
+import org.junit.Test;
+
+public class PostConstructIT extends AbstractIT {
+    @Test
+    public void postConstructAndPreDestroy() throws Exception {
+        String expected = "PostConstructPreDestroyBase.ps JobListener1.ps PostConstructPreDestroyBase.ps Batchlet0.ps Batchlet1.ps Batchlet1.pd Batchlet0.pd PostConstructPreDestroyBase.pd JobListener1.pd PostConstructPreDestroyBase.pd";
+        startJobAndWait("postConstruct.xml");
+        String jobExitStatus = jobExecution.getExitStatus();
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(expected, jobExitStatus);
+        System.out.printf("%njob exit status: %s%n", jobExitStatus);
     }
 }

@@ -39,24 +39,27 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     private Batchlet batchlet;
     private StepExecutionRunner stepRunner;
     private PartitionCollector collector;
+    javax.batch.api.Batchlet batchletObj;
+    JobContextImpl jobContext;
 
     public BatchletRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, StepExecutionRunner stepRunner, Batchlet batchlet) {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
         this.batchlet = batchlet;
+        this.jobContext = batchContext.getJobContext();
     }
 
     @Override
     public void run() {
         try {
-            final JobContextImpl jobContext = batchContext.getJobContext();
+            Collector collectorConfig;
             if (stepRunner.collectorDataQueue != null) {
-                Collector collectorConfig = batchContext.getStep().getPartition().getCollector();
+                collectorConfig = batchContext.getStep().getPartition().getCollector();
                 if (collectorConfig != null) {
                     collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
                 }
             }
-            final javax.batch.api.Batchlet batchletObj = jobContext.createArtifact(batchlet.getRef(), null, batchlet.getProperties(), batchContext);
+            batchletObj = jobContext.createArtifact(batchlet.getRef(), null, batchlet.getProperties(), batchContext);
 
             ConcurrencyService.submit(new Runnable() {
                 @Override
@@ -101,6 +104,8 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             if (stepRunner.completedPartitionThreads != null) {
                 stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
             }
+            jobContext.destroyArtifact(batchletObj);
+            jobContext.destroyArtifact(collector);
         }
     }
 

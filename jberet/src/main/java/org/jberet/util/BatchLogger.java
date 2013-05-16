@@ -187,4 +187,9 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 41, value = "Failed to inject value %s into field %s")
     BatchRuntimeException failToInjectProperty(@Cause Throwable th, String v, Field f);
+
+    @Message(id = 42, value = "Failed to destroy artifact %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToDestroyArtifact(@Cause Throwable cause, Object artifact);
+
 }

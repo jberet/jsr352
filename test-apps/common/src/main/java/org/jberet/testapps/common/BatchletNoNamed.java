@@ -22,29 +22,27 @@
 
 package org.jberet.testapps.common;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.batch.api.BatchProperty;
-import javax.batch.api.AbstractBatchlet;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
+import javax.batch.api.Batchlet;
 import javax.inject.Inject;
 
-public class BatchletNoNamed extends AbstractBatchlet {
+public class BatchletNoNamed extends PostConstructPreDestroyBase implements Batchlet {
     @Inject
-    private JobContext jobContext;
-
-    @Inject
-    private StepContext stepContext;
-
-    @Inject @BatchProperty(name="batchlet-prop")
+    @BatchProperty(name = "batchlet-prop")
     protected String batchletProp;
 
-    @Inject @BatchProperty(name="reference-job-prop")
+    @Inject
+    @BatchProperty(name = "reference-job-prop")
     protected String referencingJobProp;
 
-    @Inject @BatchProperty(name = "reference-system-prop")
+    @Inject
+    @BatchProperty(name = "reference-system-prop")
     protected String referencingSystemProp;
 
-    @Inject @BatchProperty(name = "reference-job-param")
+    @Inject
+    @BatchProperty(name = "reference-job-param")
     protected String referencingJobParam;
 
     @Override
@@ -58,11 +56,20 @@ public class BatchletNoNamed extends AbstractBatchlet {
         return "Processed";
     }
 
-    public JobContext getJobContext() {
-        return jobContext;
+    @Override
+    public void stop() throws Exception {
     }
 
-    public StepContext getStepContext() {
-        return stepContext;
+    @PostConstruct
+    void ps() {
+        System.out.printf("BatchletNoNamed PostConstruct of %s%n", this);
+        addToJobExitStatus("BatchletNoNamed.ps");
     }
+
+    @PreDestroy
+    void pd() {
+        System.out.printf("BatchletNoNamed PreDestroy of %s%n", this);
+        addToJobExitStatus("BatchletNoNamed.pd");
+    }
+
 }

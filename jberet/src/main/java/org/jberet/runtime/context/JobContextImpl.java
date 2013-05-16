@@ -218,6 +218,10 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         return artifactCreationData;
     }
 
+    public void destroyArtifact(Object obj) {
+        artifactFactory.destroy(obj);
+    }
+
     private void createJobListeners() {
         Listeners listeners = jobExecution.getSubstitutedJob().getListeners();
         if (listeners != null) {

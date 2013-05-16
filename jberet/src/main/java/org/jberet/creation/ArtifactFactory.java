@@ -58,9 +58,8 @@ public interface ArtifactFactory {
      * by this factory.
      *
      * @param instance to destroy
-     * @throws Exception if instance cannot be destroyed.
      */
-    public void destroy(Object instance) throws Exception;
+    public void destroy(Object instance);
 
     /**
      * Gets the class type of the artifact represented by ref.
