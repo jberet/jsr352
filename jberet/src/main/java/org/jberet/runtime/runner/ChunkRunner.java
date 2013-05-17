@@ -51,13 +51,13 @@ import org.jberet.job.Collector;
 import org.jberet.job.Listener;
 import org.jberet.job.Listeners;
 import org.jberet.metadata.ExceptionClassFilterImpl;
-import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
 public final class ChunkRunner extends AbstractRunner<StepContextImpl> implements Runnable {
+    private List<Object> allChunkRelatedListeners = new ArrayList<Object>();
     private List<ChunkListener> chunkListeners = new ArrayList<ChunkListener>();
 
     private List<SkipWriteListener> skipWriteListeners = new ArrayList<SkipWriteListener>();
@@ -72,7 +72,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private List<ItemWriteListener> itemWriteListeners = new ArrayList<ItemWriteListener>();
     private List<ItemProcessListener> itemProcessListeners = new ArrayList<ItemProcessListener>();
 
-    private JobContextImpl jobContext;
     private Chunk chunk;
     private StepExecutionRunner stepRunner;
     private StepMetrics stepMetrics;
@@ -104,7 +103,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         this.stepRunner = stepRunner;
         this.stepMetrics = stepRunner.batchContext.getStepExecution().getStepMetrics();
         this.chunk = chunk;
-        this.jobContext = batchContext.getJobContext();
 
         org.jberet.job.ItemReader readerElement = chunk.getReader();
         itemReader = jobContext.createArtifact(readerElement.getRef(), null, readerElement.getProperties(), batchContext);
@@ -209,6 +207,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             if (stepRunner.completedPartitionThreads != null) {
                 stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
             }
+            jobContext.destroyArtifact(itemReader, itemWriter, itemProcessor, collector, checkpointAlgorithm);
+            jobContext.destroyArtifact(allChunkRelatedListeners);
         }
     }
 
@@ -597,6 +597,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     cls = stepRunner.chunkRelatedListeners.get(ref);
                 }
                 o = jobContext.createArtifact(ref, cls, l.getProperties(), batchContext);
+                allChunkRelatedListeners.add(o);
                 if (o instanceof ChunkListener) {
                     chunkListeners.add((ChunkListener) o);
                 }

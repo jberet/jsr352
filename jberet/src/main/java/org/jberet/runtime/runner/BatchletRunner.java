@@ -29,7 +29,6 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.job.Batchlet;
 import org.jberet.job.Collector;
 import org.jberet.runtime.JobExecutionImpl;
-import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.util.ConcurrencyService;
 
@@ -39,14 +38,12 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     private Batchlet batchlet;
     private StepExecutionRunner stepRunner;
     private PartitionCollector collector;
-    javax.batch.api.Batchlet batchletObj;
-    JobContextImpl jobContext;
+    private javax.batch.api.Batchlet batchletObj;
 
     public BatchletRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, StepExecutionRunner stepRunner, Batchlet batchlet) {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
         this.batchlet = batchlet;
-        this.jobContext = batchContext.getJobContext();
     }
 
     @Override
@@ -104,8 +101,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             if (stepRunner.completedPartitionThreads != null) {
                 stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
             }
-            jobContext.destroyArtifact(batchletObj);
-            jobContext.destroyArtifact(collector);
+            jobContext.destroyArtifact(batchletObj, collector);
         }
     }
 

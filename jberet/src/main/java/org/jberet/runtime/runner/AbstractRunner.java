@@ -31,6 +31,7 @@ import org.jberet.job.Fail;
 import org.jberet.job.Next;
 import org.jberet.job.Stop;
 import org.jberet.runtime.context.AbstractContext;
+import org.jberet.runtime.context.JobContextImpl;
 
 public abstract class AbstractRunner<C extends AbstractContext> implements Runnable {
     /**
@@ -38,11 +39,13 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
      */
     protected String id;
     protected C batchContext;
+    protected JobContextImpl jobContext;
     protected CompositeExecutionRunner enclosingRunner;
 
     protected AbstractRunner(C batchContext, CompositeExecutionRunner enclosingRunner) {
         this.id = batchContext.getId();
         this.batchContext = batchContext;
+        this.jobContext = batchContext.getJobContext();
         this.enclosingRunner = enclosingRunner;
     }
 

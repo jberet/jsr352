@@ -60,7 +60,6 @@ import org.jberet.job.Properties;
 import org.jberet.job.Step;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
-import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
@@ -72,7 +71,7 @@ import static org.jberet.util.BatchLogger.LOGGER;
 
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements Runnable {
     Step step;
-    List<StepListener> stepListeners = new ArrayList<StepListener>();
+    private List<StepListener> stepListeners = new ArrayList<StepListener>();
     Map<String, Class<?>> chunkRelatedListeners;
     
     PartitionMapper mapper;    //programmatic partition config
@@ -106,7 +105,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
         if (allowStartIfComplete != Boolean.FALSE) {
             try {
-                List<Step> executedSteps = batchContext.getJobContext().getExecutedSteps();
+                List<Step> executedSteps = jobContext.getExecutedSteps();
                 if (executedSteps.contains(step)) {
                     StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
                     stepIds.append(step.getId());
@@ -127,7 +126,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
                 stepExecution.incrementStartCount();
                 batchContext.setBatchStatus(BatchStatus.STARTED);
-                batchContext.getJobContext().getJobExecution().addStepExecution(stepExecution);
+                jobContext.getJobExecution().addStepExecution(stepExecution);
 
                 Chunk chunk = step.getChunk();
                 Batchlet batchlet = step.getBatchlet();
@@ -156,14 +155,14 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     try {
                         l.afterStep();
                     } catch (Throwable e) {
-                        BatchLogger.LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), step.getId(), l);
+                        BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), l);
                         batchContext.setBatchStatus(BatchStatus.FAILED);
                         return;
                     }
                 }
                 batchContext.savePersistentData();
             } catch (Throwable e) {
-                LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), step.getId(), step);
+                LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), step);
                 if (e instanceof Exception) {
                     batchContext.setException((Exception) e);
                 } else {
@@ -171,6 +170,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 }
                 batchContext.setBatchStatus(BatchStatus.FAILED);
             }
+
+            jobContext.destroyArtifact(mapper, reducer, analyzer);
+            jobContext.destroyArtifact(stepListeners);
 
             BatchStatus stepStatus = batchContext.getBatchStatus();
             switch (stepStatus) {
@@ -210,7 +212,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (reducer != null) {
             reducer.beginPartitionedStep();
         }
-        boolean isRestart = batchContext.getJobContext().isRestart();
+        boolean isRestart = jobContext.isRestart();
         boolean isOverride = false;
         if (mapper != null) {
             javax.batch.api.partition.PartitionPlan partitionPlan = mapper.mapPartitions();
@@ -358,7 +360,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         Partition partition = step.getPartition();
         if (partition != null) {
             isPartitioned = true;
-            JobContextImpl jobContext = batchContext.getJobContext();
             org.jberet.job.PartitionReducer reducerConfig = partition.getReducer();
             if (reducerConfig != null) {
                 reducer = jobContext.createArtifact(reducerConfig.getRef(), null, reducerConfig.getProperties(), batchContext);
@@ -382,15 +383,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             String ref;
             for (Listener listener : listeners.getListener()) {
                 ref = listener.getRef();
-                Class<?> cls = batchContext.getJobContext().getArtifactClass(ref);
+                Class<?> cls = jobContext.getArtifactClass(ref);
                 
                 //a class can implement multiple listener interfaces, so need to check it against all listener types
                 //even after previous matches
                 if (StepListener.class.isAssignableFrom(cls)) {
-                    if (stepListeners == null) {
-                        stepListeners = new ArrayList<StepListener>();
-                    }
-                    Object o = batchContext.getJobContext().createArtifact(ref, null, listener.getProperties(), batchContext);
+                    Object o = jobContext.createArtifact(ref, null, listener.getProperties(), batchContext);
                     stepListeners.add((StepListener) o);
                 }
                 if (ChunkListener.class.isAssignableFrom(cls) || ItemReadListener.class.isAssignableFrom(cls) ||

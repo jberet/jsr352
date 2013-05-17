@@ -33,11 +33,24 @@
             </properties>
         </listener>
     </listeners>
-    <step id="step1">
+    <step id="step1" next="decision1">
+        <listeners>
+            <listener ref="StepListener1">
+                <properties>
+                    <property name="os.name" value="#systemProperties['os.name']"/>
+                </properties>
+            </listener>
+        </listeners>
         <batchlet ref="Batchlet1">
             <properties>
                 <property name="date" value="5/16/2013"/>
             </properties>
         </batchlet>
     </step>
+    <decision id="decision1" ref="postconstruct.Decider1">
+        <properties>
+            <property name="os.name" value="#systemProperties['os.name']"/>
+        </properties>
+        <end on="*"/>
+    </decision>
 </job>

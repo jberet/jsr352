@@ -25,40 +25,38 @@ package org.jberet.testapps.postconstruct;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.batch.api.BatchProperty;
-import javax.batch.api.listener.JobListener;
+import javax.batch.api.Decider;
 import javax.batch.operations.BatchRuntimeException;
+import javax.batch.runtime.StepExecution;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jberet.testapps.common.PostConstructPreDestroyBase;
 
-@Named
-public class JobListener1 extends PostConstructPreDestroyBase implements JobListener {
-    @Inject @BatchProperty(name = "os.name")
+@Named("postconstruct.Decider1")
+public class Decider1 extends PostConstructPreDestroyBase implements Decider {
+    @Inject
+    @BatchProperty(name = "os.name")
     private String osName;
 
     @Override
-    public void beforeJob() throws Exception {
-        addToJobExitStatus("JobListener1.beforeJob");
-    }
-
-    @Override
-    public void afterJob() throws Exception {
-        addToJobExitStatus("JobListener1.afterJob");
+    public String decide(StepExecution[] executions) throws Exception {
+        addToJobExitStatus("Decider1.decide");
+        return jobContext.getExitStatus();
     }
 
     @PostConstruct
     public void ps() {
-        System.out.printf("JobListener1 PostConstruct of %s%n", this);
+        System.out.printf("Decider1 PostConstruct of %s%n", this);
         if (osName == null) {
             throw new BatchRuntimeException("osNmae field has not been initialized when checking from PostConstruct method.");
         }
-        addToJobExitStatus("JobListener1.ps");
+        addToJobExitStatus("Decider1.ps");
     }
 
     @PreDestroy
     public void pd() {
-        System.out.printf("JobListener1 PreDestroy of %s%n", this);
-        addToJobExitStatus("JobListener1.pd");
+        System.out.printf("Decider1 PreDestroy of %s%n", this);
+        addToJobExitStatus("Decider1.pd");
     }
 }

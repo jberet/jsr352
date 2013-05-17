@@ -39,6 +39,7 @@ public class Batchlet1 extends Batchlet0 {
 
     @Override
     public String process() throws Exception {
+        addToJobExitStatus("Batchlet1.process");
         return jobContext.getExitStatus();
     }
 

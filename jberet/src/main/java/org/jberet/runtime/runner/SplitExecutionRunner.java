@@ -76,7 +76,7 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
                 batchContext.setBatchStatus(BatchStatus.COMPLETED);
             }
         } catch (Throwable e) {
-            LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), split.getId(), split);
+            LOGGER.failToRunJob(e, jobContext.getJobName(), split.getId(), split);
             for (AbstractContext c : batchContext.getOuterContexts()) {
                 c.setBatchStatus(BatchStatus.FAILED);
             }

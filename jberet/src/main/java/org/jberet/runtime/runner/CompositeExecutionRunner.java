@@ -58,7 +58,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         if (restartPoint != null) {
             //clear the restart point passed over from original job execution.  This execution may have its own
             //restart point or null (start from head) for use by the next restart.
-            batchContext.getJobContext().getJobExecution().setRestartPoint(null);
+            jobContext.getJobExecution().setRestartPoint(null);
             for (Object e : getJobElements()) {
                 if (e instanceof Step) {
                     Step step = (Step) e;
@@ -172,7 +172,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
     }
 
     protected void runDecision(Decision decision, StepExecution... precedingStepExecutions) {
-        Decider decider = batchContext.getJobContext().createArtifact(decision.getRef(), null, decision.getProperties());
+        Decider decider = jobContext.createArtifact(decision.getRef(), null, decision.getProperties());
         String newExitStatus;
         try {
             newExitStatus = decider.decide(precedingStepExecutions);
@@ -180,9 +180,10 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             String next = resolveTransitionElements(decision.getTransitionElements(), null, true);
             runJobElement(next, precedingStepExecutions);
         } catch (Exception e) {
-            BatchLogger.LOGGER.failToRunJob(e, batchContext.getJobContext().getJobName(), decision.getRef(), decider);
+            BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), decision.getRef(), decider);
             batchContext.setBatchStatus(BatchStatus.FAILED);
-            return;
+        } finally {
+            jobContext.destroyArtifact(decider);
         }
     }
 

@@ -60,12 +60,14 @@ public class BatchletNoNamed extends PostConstructPreDestroyBase implements Batc
     public void stop() throws Exception {
     }
 
+    //overridden in org.jberet.testapps.common.Batchlet0, so this PostConstruct should not be invoked.
     @PostConstruct
     void ps() {
         System.out.printf("BatchletNoNamed PostConstruct of %s%n", this);
         addToJobExitStatus("BatchletNoNamed.ps");
     }
 
+    //overridden in org.jberet.testapps.common.Batchlet0, so this PostConstruct should not be invoked.
     @PreDestroy
     void pd() {
         System.out.printf("BatchletNoNamed PreDestroy of %s%n", this);
