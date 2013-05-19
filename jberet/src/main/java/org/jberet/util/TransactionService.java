@@ -19,13 +19,13 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
- 
+
 package org.jberet.util;
 
 import javax.transaction.UserTransaction;
 
 public final class TransactionService {
     public static UserTransaction getTransaction() {
-        return DummyTransaction.INSTANCE;
+        return com.arjuna.ats.jta.UserTransaction.userTransaction();
     }
 }

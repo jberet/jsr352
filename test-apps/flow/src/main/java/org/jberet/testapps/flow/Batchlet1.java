@@ -40,7 +40,7 @@ public class Batchlet1 extends Batchlet0 {
         String result = super.process();
 
         String stepToVerify = "step1";
-        if (getStepContext().getStepName().equals(stepToVerify)) {
+        if (stepContext.getStepName().equals(stepToVerify)) {
             Assert.assertEquals("step-prop", referencingStepProp);
         }
 

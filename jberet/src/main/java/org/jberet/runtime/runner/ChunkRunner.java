@@ -44,6 +44,7 @@ import javax.batch.api.chunk.listener.SkipWriteListener;
 import javax.batch.api.partition.PartitionCollector;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
+import javax.transaction.Status;
 import javax.transaction.UserTransaction;
 
 import org.jberet.job.Chunk;
@@ -272,6 +273,16 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 if (isReadyToCheckpoint(processingInfo)) {
                     try {
                         doCheckpoint(processingInfo);
+
+                        //errors may happen during the above doCheckpoint (e.g., in writer.write method).  If so, need
+                        //to skip the remainder of the current loop.  If retry with rollback, chunkState has been set to
+                        //TO_RETRY; if retry with no rollback, itemState has been set to TO_RETRY_WRITE; if skip,
+                        //itemState has been set to TO_SKIP
+                        if (processingInfo.chunkState == ChunkState.TO_RETRY || processingInfo.itemState == ItemState.TO_RETRY_WRITE ||
+                                processingInfo.itemState == ItemState.TO_SKIP) {
+                            continue;
+                        }
+
                         for (ChunkListener l : chunkListeners) {
                             l.afterChunk();
                         }
@@ -284,6 +295,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
                 }
             } catch (Exception e) {
+                int txStatus = ut.getStatus();
+                if (txStatus == Status.STATUS_ACTIVE || txStatus == Status.STATUS_MARKED_ROLLBACK ||
+                        txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
+                        txStatus == Status.STATUS_COMMITTING || txStatus == Status.STATUS_ROLLING_BACK) {
+                    ut.rollback();
+                }
                 for (ChunkListener l : chunkListeners) {
                     l.onError(e);
                 }

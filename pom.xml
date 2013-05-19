@@ -48,6 +48,7 @@
         <version.javax.inject>1</version.javax.inject>
         <version.javax.transaction.jta>1.1</version.javax.transaction.jta>
         <version.junit>4.10</version.junit>
+        <version.org.jboss.narayana>5.0.0.M2</version.org.jboss.narayana>
         <version.org.jboss.logging>3.1.2.GA</version.org.jboss.logging>
         <version.org.jboss.logging.jboss-logging>3.1.2.GA</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-processor>1.1.0.Final
@@ -132,6 +133,16 @@
                 <version>${version.javax.transaction.jta}</version>
             </dependency>
             <dependency>
+                <groupId>org.jboss.narayana.arjunacore</groupId>
+                <artifactId>arjuna</artifactId>
+                <version>${version.org.jboss.narayana}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.narayana.jta</groupId>
+                <artifactId>narayana-jta</artifactId>
+                <version>${version.org.jboss.narayana}</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${version.junit}</version>
@@ -160,6 +171,10 @@
     </dependencies>
 
     <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
         <repository>
             <id>jboss-public-repository-group</id>
             <name>JBoss Public Repository Group</name>
