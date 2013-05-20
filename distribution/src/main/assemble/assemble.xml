@@ -36,6 +36,18 @@
             <unpack>false</unpack>
             <scope>runtime</scope>
             <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>javax.enterprise:cdi-api</exclude>
+                <exclude>org.jboss.interceptor:jboss-interceptor-api</exclude>
+                <exclude>javax.annotation:jsr250-api</exclude>
+                <exclude>org.jboss.logging:jboss-logging-processor</exclude>
+                <exclude>org.jboss.jdeparser:jdeparser</exclude>
+                <exclude>org.hornetq:hornetq-core</exclude>
+                <exclude>org.jboss.byteman:byteman</exclude>
+                <exclude>org.jboss.byteman:byteman-submit</exclude>
+                <exclude>jfree:jfreechart</exclude>
+                <exclude>jfree:jcommon</exclude>
+            </excludes>
         </dependencySet>
     </dependencySets>
 
