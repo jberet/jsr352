@@ -23,7 +23,7 @@
 -->
 
 <batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee">
-    <ref id="BatchletNoNamed" class="org.jberet.testapps.common.BatchletNoNamed"/>
+    <ref id="batchletNoNamed" class="org.jberet.testapps.common.BatchletNoNamed"/>
     <ref id="L1" class="SHOULD NOT REACH HERE"/>
     <ref id="L2" class="SHOULD NOT REACH HERE"/>
     <ref id="L3" class="org.jberet.testapps.loadBatchXml.StepListener3"/>

@@ -25,16 +25,16 @@
 <job id="loopback-in-flow" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <flow id="flow1">
         <step id="step1" next="step2">
-            <batchlet ref="Batchlet0"/>
+            <batchlet ref="batchlet0"/>
         </step>
 
         <step id="step2">
-            <batchlet ref="Batchlet0"/>
+            <batchlet ref="batchlet0"/>
             <next on="*" to="step3"/>
         </step>
 
         <step id="step3" next="step1">
-            <batchlet ref="Batchlet0"/>
+            <batchlet ref="batchlet0"/>
         </step>
     </flow>
 </job>

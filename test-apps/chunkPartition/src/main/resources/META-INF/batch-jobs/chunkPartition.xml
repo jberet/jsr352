@@ -86,8 +86,8 @@
                     <property name="partition.end" value="29"/>
                 </properties>
             </plan>
-            <collector ref="ChunkPartitionCollector"></collector>
-            <analyzer ref="ChunkPartitionAnalyzer">
+            <collector ref="chunkPartitionCollector"></collector>
+            <analyzer ref="chunkPartitionAnalyzer">
                 <properties>
                     <property name="thread.count" value="#{jobParameters['thread.count']}" />
                     <property name="skip.thread.check" value="#{jobParameters['skip.thread.check']}" />

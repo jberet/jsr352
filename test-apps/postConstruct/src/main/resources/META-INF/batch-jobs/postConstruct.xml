@@ -27,7 +27,7 @@
         <property name="add.to.job.exit.status" value="true"/>
     </properties>
     <listeners>
-        <listener ref="JobListener1">
+        <listener ref="jobListener1">
             <properties>
                 <property name="os.name" value="#systemProperties['os.name']"/>
             </properties>
@@ -35,13 +35,13 @@
     </listeners>
     <step id="step1" next="decision1">
         <listeners>
-            <listener ref="StepListener1">
+            <listener ref="stepListener1">
                 <properties>
                     <property name="os.name" value="#systemProperties['os.name']"/>
                 </properties>
             </listener>
         </listeners>
-        <batchlet ref="Batchlet1">
+        <batchlet ref="batchlet1">
             <properties>
                 <property name="date" value="5/16/2013"/>
             </properties>

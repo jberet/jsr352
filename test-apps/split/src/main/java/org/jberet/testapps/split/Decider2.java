@@ -32,7 +32,7 @@ import org.junit.Assert;
 /**
  * This decider follows a split, so there should be multiple StepExecution.
  */
-@Named("Decider2")
+@Named
 public class Decider2 implements Decider {
     @Override
     public String decide(StepExecution[] executions) throws Exception {

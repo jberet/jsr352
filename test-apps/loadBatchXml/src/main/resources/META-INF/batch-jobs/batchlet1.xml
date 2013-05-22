@@ -56,18 +56,18 @@
             </listener>
             <listener ref="L4"></listener>
         </listeners>
-        <batchlet ref="BatchletNoNamed">
+        <batchlet ref="batchletNoNamed">
         </batchlet>
     </step>
 
     <step id="step3">
-        <batchlet ref="BatchletNoNamed">
+        <batchlet ref="batchletNoNamed">
         </batchlet>
         <end on="*" exit-status="done"></end>
     </step>
 
     <step id="step2">
-        <batchlet ref="BatchletNoNamed">
+        <batchlet ref="batchletNoNamed">
         </batchlet>
         <stop on="xyzz" exit-status="stopped" restart="false"/>  <!-- should not reach here -->
         <fail on="abcd" exit-status="failed"/>  <!-- should not reach here -->
@@ -76,7 +76,7 @@
         <next on="*" to="decision1"></next>
     </step>
 
-    <decision id="decision1" ref="Decider1">
+    <decision id="decision1" ref="decider1">
         <properties>
             <property name="decision-prop"          value="decision-prop"></property>
             <property name="reference-job-prop"     value="#{jobProperties['job-prop']}"></property>

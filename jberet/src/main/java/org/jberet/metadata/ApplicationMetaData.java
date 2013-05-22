@@ -103,7 +103,9 @@ public class ApplicationMetaData {
                     continue;
                 }
                 if (refName.isEmpty()) {
-                    refName = cls.getSimpleName();
+                    char chars[] = cls.getSimpleName().toCharArray();
+                    chars[0] = Character.toLowerCase(chars[0]);
+                    refName = new String(chars);
                 }
                 artifactCatalog.put(refName, matchingClass);
             }

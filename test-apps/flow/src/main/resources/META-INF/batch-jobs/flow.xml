@@ -47,7 +47,7 @@
                 <!-- same property name as in job, to test property resolution precedence -->
                 <property name="job-prop-2" value="step-prop-2"></property>
             </properties>
-            <batchlet ref="Batchlet1">
+            <batchlet ref="batchlet1">
                 <properties>
                     <property name="reference-step-prop" value="step-prop"/>
                 </properties>
@@ -55,12 +55,12 @@
         </step>
 
         <step id="step3">
-            <batchlet ref="Batchlet1"/>
+            <batchlet ref="batchlet1"/>
             <end on="*" exit-status="done"></end>
         </step>
 
         <step id="step2">
-            <batchlet ref="Batchlet1"/>
+            <batchlet ref="batchlet1"/>
             <stop on="xyzz" exit-status="stopped" restart="false"/>
             <!-- should not reach here -->
             <fail on="abcd" exit-status="failed"/>
@@ -72,7 +72,7 @@
             <next on="*" to="decision1"></next>
         </step>
 
-        <decision id="decision1" ref="Decider1">
+        <decision id="decision1" ref="decider1">
             <properties>
                 <property name="decision-prop" value="decision-prop"></property>
                 <property name="reference-job-prop" value="#{jobProperties['job-prop']}"></property>
@@ -89,7 +89,7 @@
     </flow>
 
     <step id="step4">
-        <batchlet ref="Batchlet1">
+        <batchlet ref="batchlet1">
             <properties>
                 <property name="batchlet-prop" value="batchlet-prop"></property>
                 <property name="reference-job-prop" value="#{jobProperties['job-prop']}"></property>

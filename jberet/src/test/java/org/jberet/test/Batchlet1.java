@@ -31,7 +31,7 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-@Named("Batchlet1")
+@Named
 public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     @Inject @BatchProperty(name = "Batchlet1")
     private String prop1;

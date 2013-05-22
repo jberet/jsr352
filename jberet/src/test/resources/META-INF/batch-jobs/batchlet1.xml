@@ -36,7 +36,7 @@
             <property name="step-prop-3" value="#{jobProperties['job-prop']}"></property>
             <property name="unresolved-property-ref" value="#{jobProperties['xxxxxxxxxxxx']}"></property>
         </properties>
-        <batchlet ref="Batchlet1">
+        <batchlet ref="batchlet1">
             <properties>
                 <property name="int.prop" value="1" />
                 <property name="Batchlet1" value="Batchlet1"/>

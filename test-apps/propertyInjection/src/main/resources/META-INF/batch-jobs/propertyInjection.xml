@@ -24,7 +24,7 @@
 
 <job id="propertyInjection" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="step1">
-        <batchlet ref="Batchlet1">
+        <batchlet ref="batchlet1">
             <properties>
                 <property name="class" value="org.jberet.testapps.propertyinjection.Batchlet1"/>
                 <property name="color" value="RED"/>
