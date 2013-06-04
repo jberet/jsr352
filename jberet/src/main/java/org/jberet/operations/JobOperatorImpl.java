@@ -22,13 +22,10 @@
 
 package org.jberet.operations;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -47,11 +44,12 @@ import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.jberet.creation.ArtifactFactory;
 import org.jberet.creation.SimpleArtifactFactory;
 import org.jberet.job.Job;
-import org.jberet.metadata.ApplicationMetaData;
 import org.jberet.metadata.ArchiveXmlLoader;
 import org.jberet.repository.JobRepository;
 import org.jberet.repository.JobRepositoryFactory;
@@ -67,24 +65,14 @@ import static org.jberet.util.BatchLogger.LOGGER;
 public class JobOperatorImpl implements JobOperator {
     JobRepository repository = JobRepositoryFactory.getJobRepository();
     private ArtifactFactory artifactFactory = new SimpleArtifactFactory();
-    private Map<Long, Future<?>> jobExecutionResults = new HashMap<Long, Future<?>>();
 
     @Override
     public long start(String jobXMLName, Properties jobParameters) throws JobStartException, JobSecurityException {
         ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
         Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, Job.class, classLoader);
-
-        ApplicationMetaData appData;
-        try {
-            appData = new ApplicationMetaData(classLoader);
-        } catch (IOException e) {
-            throw LOGGER.failToProcessMetaData(e, jobXMLName);
-        }
-        JobInstanceImpl instance = new JobInstanceImpl(repository.nextUniqueId(), jobDefined, appData);
         repository.addJob(jobDefined);
-        repository.addJobInstance(instance);
-
-        return startJobExecution(instance, jobParameters, null);
+        JobInstanceImpl jobInstance = repository.createJobInstance(jobDefined, getApplicationName(), classLoader);
+        return startJobExecution(jobInstance, jobParameters, null);
     }
 
     @Override
@@ -244,7 +232,7 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public JobExecution getJobExecution(long executionId) throws NoSuchJobExecutionException, JobSecurityException {
-        return JobRepositoryFactory.getJobRepository().getJobExecution(executionId);
+        return repository.getJobExecution(executionId);
     }
 
     @Override
@@ -255,14 +243,20 @@ public class JobOperatorImpl implements JobOperator {
     }
 
     private long startJobExecution(JobInstanceImpl jobInstance, Properties jobParameters, JobExecutionImpl originalToRestart) throws JobStartException, JobSecurityException {
-        JobExecutionImpl jobExecution = new JobExecutionImpl(repository.nextUniqueId(), jobInstance, jobParameters);
+        JobExecutionImpl jobExecution = repository.createJobExecution(jobInstance, jobParameters);
         JobContextImpl jobContext = new JobContextImpl(jobExecution, originalToRestart, artifactFactory, repository);
 
         JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
         Future<?> result = ConcurrencyService.submit(jobExecutionRunner);
         long jobExecutionId = jobExecution.getExecutionId();
-
-        repository.addJobExecution(jobExecution);
         return jobExecutionId;
+    }
+
+    private String getApplicationName() {
+        try {
+            return InitialContext.doLookup("java:app/AppName");
+        } catch (NamingException e) {
+            return null;
+        }
     }
 }

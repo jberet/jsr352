@@ -25,15 +25,16 @@ package org.jberet.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
 import org.jberet.job.Job;
+import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
 
 public interface JobRepository {
-    long nextUniqueId();
-
     boolean addJob(Job job);
 
     boolean removeJob(String jobId);
@@ -41,20 +42,18 @@ public interface JobRepository {
     Job getJob(String jobId);
 
     Collection<Job> getJobs();
-    
 
-    boolean addJobExecution(JobExecution jobExecution);
+    JobInstanceImpl createJobInstance(Job job, String applicationName, ClassLoader classLoader);
+    void removeJobInstance(long jobInstanceId);
+    JobInstance getJobInstance(long jobInstanceId);
+    List<JobInstance> getJobInstances();
 
+    JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters);
     JobExecution getJobExecution(long jobExecutionId);
-
     List<JobExecution> getJobExecutions();
 
-
-    boolean addJobInstance(JobInstance jobInstance);
-
-    JobInstance getJobInstance(long jobInstanceId);
-
-    List<JobInstance> getJobInstances();
+    StepExecutionImpl createStepExecution(String stepName);
+    void addStepExecution(JobExecutionImpl jobExecution, StepExecutionImpl stepExecution);
 
     void savePersistentData(JobExecution jobExecution, StepExecutionImpl stepExecution);
 

@@ -44,7 +44,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
         super(step.getId(), outerContexts);
         this.step = step;
         this.classLoader = getJobContext().getClassLoader();
-        this.stepExecution = new StepExecutionImpl(getJobContext().jobRepository.nextUniqueId(), id);
+        this.stepExecution = getJobContext().jobRepository.createStepExecution(id);
 
         JobExecutionImpl originalToRestart = getJobContext().originalToRestart;
         if (originalToRestart != null) {  //currently in a restarted execution

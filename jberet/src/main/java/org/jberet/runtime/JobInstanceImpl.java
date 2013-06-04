@@ -30,23 +30,26 @@ import javax.batch.runtime.JobInstance;
 
 import org.jberet.job.Job;
 import org.jberet.metadata.ApplicationMetaData;
+import org.jberet.repository.ApplicationAndJobName;
 
 public final class JobInstanceImpl implements JobInstance {
     private long id;
-    protected Job unsubstitutedJob;
+    Job unsubstitutedJob;
+    ApplicationAndJobName applicationAndJobName;
+
     private List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
 
     private ApplicationMetaData applicationMetaData;
 
-    public JobInstanceImpl(long id, Job unsubstitutedJob, ApplicationMetaData appData) {
+    public JobInstanceImpl(long id, Job unsubstitutedJob, ApplicationAndJobName applicationAndJobName) {
         this.id = id;
+        this.applicationAndJobName = applicationAndJobName;
         this.unsubstitutedJob = unsubstitutedJob;
-        this.applicationMetaData = appData;
     }
 
     @Override
     public String getJobName() {
-        return unsubstitutedJob.getId();
+        return applicationAndJobName.jobName;
     }
 
     @Override
@@ -54,19 +57,19 @@ public final class JobInstanceImpl implements JobInstance {
         return this.id;
     }
 
-    public Job getUnsubstitutedJob() {
-        return unsubstitutedJob;
-    }
-
     public ApplicationMetaData getApplicationMetaData() {
         return applicationMetaData;
+    }
+
+    public void setApplicationMetaData(ApplicationMetaData applicationMetaData) {
+        this.applicationMetaData = applicationMetaData;
     }
 
     public List<JobExecution> getJobExecutions() {
         return Collections.unmodifiableList(this.jobExecutions);
     }
 
-    void addJobExecution(JobExecution jobExecution) {
+    public void addJobExecution(JobExecution jobExecution) {
         this.jobExecutions.add(jobExecution);
     }
 }

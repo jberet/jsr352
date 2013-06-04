@@ -179,6 +179,10 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         return jobExecution.getSubstitutedJob();
     }
 
+    public JobRepository getJobRepository() {
+        return jobRepository;
+    }
+
     /**
      * Creates a batch artifact by delegating to the proper ArtifactFactory and passing along data needed for artifact
      * loading and creation.

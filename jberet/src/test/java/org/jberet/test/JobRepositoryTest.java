@@ -22,29 +22,18 @@
 
 package org.jberet.test;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.jberet.job.Job;
 import org.jberet.metadata.ArchiveXmlLoader;
-import org.jberet.repository.impl.MemoryRepository;
-import org.junit.AfterClass;
+import org.jberet.repository.JobRepository;
+import org.jberet.repository.JobRepositoryFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MemoryRepositoryTest {
-    final private static MemoryRepository repo = MemoryRepository.INSTANCE;
+public class JobRepositoryTest {
+    final private static JobRepository repo = JobRepositoryFactory.getJobRepository();
     private Job job;
-    private static ExecutorService es = Executors.newCachedThreadPool();
-
-    @AfterClass
-    public static void afterClass() throws Exception {
-        es.shutdownNow();
-    }
 
     @Test
     public void addRemoveJob() throws Exception {
@@ -66,23 +55,4 @@ public class MemoryRepositoryTest {
         Assert.assertEquals(existingJobsCount, repo.getJobs().size());
     }
 
-    @Test
-    public void nextUniqueId() throws Exception {
-        int count = 20;
-        final List<Long> results = Collections.synchronizedList(new ArrayList<Long>());
-        for (int i = 0; i < count; i++) {
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    results.add(repo.nextUniqueId());
-                }
-            };
-            es.submit(runnable);
-        }
-        synchronized (results) {
-            for (Long l : results) {
-                Assert.assertEquals(1, Collections.frequency(results, l));
-            }
-        }
-    }
 }

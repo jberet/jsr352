@@ -69,7 +69,6 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         this.id = id;
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
-        this.jobInstance.addJobExecution(this);
         this.substitutedJob = BatchUtil.clone(jobInstance.unsubstitutedJob);
         this.startTime = this.createTime = System.currentTimeMillis();
     }

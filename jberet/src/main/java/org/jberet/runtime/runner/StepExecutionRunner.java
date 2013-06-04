@@ -126,7 +126,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
                 stepExecution.incrementStartCount();
                 batchContext.setBatchStatus(BatchStatus.STARTED);
-                jobContext.getJobExecution().addStepExecution(stepExecution);
+                jobContext.getJobRepository().addStepExecution(jobContext.getJobExecution(), stepExecution);
 
                 Chunk chunk = step.getChunk();
                 Batchlet batchlet = step.getBatchlet();

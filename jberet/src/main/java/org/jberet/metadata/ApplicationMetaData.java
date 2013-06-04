@@ -39,7 +39,7 @@ import static org.jberet.util.BatchLogger.LOGGER;
 public class ApplicationMetaData {
     private AnnotationDB annotationDB;
 
-    //current build-in default is {"javax", "java", "sun", "com.sun", "javassist"}
+    //current build-in default ignoredPkgs is {"javax", "java", "sun", "com.sun", "javassist"}
     private static String[] ignoredPkgs = {
     };
 

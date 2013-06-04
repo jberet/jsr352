@@ -22,14 +22,28 @@
 
 package org.jberet.repository;
 
-import org.jberet.repository.impl.MemoryRepository;
+import java.util.Properties;
+
+import org.jberet.config.BatchConfig;
+import org.jberet.util.BatchLogger;
 
 public final class JobRepositoryFactory {
-    private JobRepositoryFactory() {
+    public static final String JOB_REPOSITORY_TYPE_KEY = "job-repository-type";
+    public static final String REPOSITORY_TYPE_IN_MEMORY = "in-memory";
+    public static final String REPOSITORY_TYPE_JDBC = "jdbc";
 
+    private JobRepositoryFactory() {
     }
 
     public static JobRepository getJobRepository() {
-        return MemoryRepository.INSTANCE;
+        Properties configProperties = BatchConfig.getInstance().getConfigProperties();
+        String repositoryType = configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY);
+        if (repositoryType == null || repositoryType.equals(REPOSITORY_TYPE_JDBC)) {
+            return JdbcRepository.getInstance();
+        } else if(repositoryType.equals(REPOSITORY_TYPE_IN_MEMORY)) {
+            return InMemoryRepository.getInstance();
+        } else {
+            throw BatchLogger.LOGGER.unrecognizedJobRepositoryType(repositoryType);
+        }
     }
 }

@@ -25,6 +25,7 @@ package org.jberet.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Properties;
 import javax.batch.operations.BatchRuntimeException;
 import javax.batch.operations.JobExecutionAlreadyCompleteException;
 import javax.batch.operations.JobExecutionIsRunningException;
@@ -192,4 +193,13 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void failToDestroyArtifact(@Cause Throwable cause, Object artifact);
 
+    @Message(id = 43, value = "The configuration file %s is not found in the classpath, and will use the default configuration.")
+    @LogMessage(level = Logger.Level.INFO)
+    void useDefaultJBeretConfig(String configFile);
+
+    @Message(id = 44, value = "Failed to load configuration file %s")
+    BatchRuntimeException failToLoadConfig(@Cause Throwable th, String configFile);
+
+    @Message(id = 45, value = "Unrecognized job repository type %s")
+    BatchRuntimeException unrecognizedJobRepositoryType(String v);
 }
