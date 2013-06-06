@@ -65,7 +65,6 @@ public class BatchConfig {
                             throw BatchLogger.LOGGER.failToLoadConfig(e, CONFIG_FILE_NAME);
                         }
                     } else {
-                        result.put(JobRepositoryFactory.JOB_REPOSITORY_TYPE_KEY, JobRepositoryFactory.REPOSITORY_TYPE_IN_MEMORY);
                         BatchLogger.LOGGER.useDefaultJBeretConfig(CONFIG_FILE_NAME);
                     }
                     configProperties = result;

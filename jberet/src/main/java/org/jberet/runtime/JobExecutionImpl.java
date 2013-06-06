@@ -65,12 +65,16 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     private CountDownLatch jobTerminationlatch = new CountDownLatch(1);
     private CountDownLatch jobStopLatch = new CountDownLatch(1);
 
-    public JobExecutionImpl(long id, JobInstanceImpl jobInstance, Properties jobParameters) throws JobStartException {
-        this.id = id;
+    public JobExecutionImpl(JobInstanceImpl jobInstance, Properties jobParameters) throws JobStartException {
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
         this.substitutedJob = BatchUtil.clone(jobInstance.unsubstitutedJob);
         this.startTime = this.createTime = System.currentTimeMillis();
+        setBatchStatus(BatchStatus.STARTING);
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @Override

@@ -64,6 +64,17 @@ public class BatchUtil {
         return toJavaUtilProperties(step.getProperties());
     }
 
+    public static String propertiesToString(Properties properties) {
+        if (properties == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String key : properties.stringPropertyNames()) {
+            sb.append(key).append('=').append(properties.getProperty(key));
+        }
+        return sb.toString();
+    }
+
     public static Properties toJavaUtilProperties(org.jberet.job.Properties props) {
         Properties result = new Properties();
         if (props != null) {

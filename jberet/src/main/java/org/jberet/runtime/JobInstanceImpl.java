@@ -41,15 +41,22 @@ public final class JobInstanceImpl implements JobInstance {
 
     private ApplicationMetaData applicationMetaData;
 
-    public JobInstanceImpl(long id, Job unsubstitutedJob, ApplicationAndJobName applicationAndJobName) {
-        this.id = id;
+    public JobInstanceImpl(Job unsubstitutedJob, ApplicationAndJobName applicationAndJobName) {
         this.applicationAndJobName = applicationAndJobName;
         this.unsubstitutedJob = unsubstitutedJob;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @Override
     public String getJobName() {
         return applicationAndJobName.jobName;
+    }
+
+    public String getApplicationName() {
+        return applicationAndJobName.appName;
     }
 
     @Override

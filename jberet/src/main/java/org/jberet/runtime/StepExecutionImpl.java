@@ -85,10 +85,13 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
      */
     private List<Serializable> partitionWriterCheckpointInfo;
 
-    public StepExecutionImpl(long id, String stepName) {
-        this.id = id;
+    public StepExecutionImpl(String stepName) {
         this.stepName = stepName;
         startTime = System.currentTimeMillis();
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @Override

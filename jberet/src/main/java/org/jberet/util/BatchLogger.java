@@ -202,4 +202,40 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 45, value = "Unrecognized job repository type %s")
     BatchRuntimeException unrecognizedJobRepositoryType(String v);
+
+    @Message(id = 46, value = "Failed to look up datasource %s")
+    BatchRuntimeException failToLookupDataSource(@Cause Throwable cause, String dataSourceName);
+
+    @Message(id = 47, value = "Failed to obtain connection from %s, %s")
+    BatchRuntimeException failToObtainConnection(@Cause Throwable cause, Object connectionSource, Object props);
+
+    @Message(id = 48, value = "Failed to load sql properties %s")
+    BatchRuntimeException failToLoadSqlProperties(@Cause Throwable cause, String sqlFile);
+
+    @Message(id = 49, value = "Tables created for batch job repository with DDL file %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void tableCreated(String ddlFile);
+
+    @Message(id = 50, value = "Tables created for batch job repository with DDL content:%n %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void tableCreated2(String ddlContent);
+
+    @Message(id = 51, value = "Failed to create tables for batch job repository with DDL %s%n%s")
+    BatchRuntimeException failToCreateTables(@Cause Throwable cause, String ddlFile, String ddlContent);
+
+    @Message(id = 52, value = "Failed to load ddl file %s")
+    BatchRuntimeException failToLoadDDL(String ddlFile);
+
+    @Message(id = 53, value = "Failed to insert %s")
+    BatchRuntimeException failToInsert(@Cause Throwable cause, String sql);
+
+    @Message(id = 54, value = "Failed to close %s: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToClose(@Cause Throwable cause, Class<?> resourceType, Object obj);
+
+    @Message(id = 55, value = "Persisted %s with id %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void persisted(Object obj, long id);
+
+
 }

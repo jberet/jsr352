@@ -77,7 +77,6 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         resolver.setJobParameters(jobExecution.getJobParameters());
         resolver.resolve(jobExecution.getSubstitutedJob());
         createJobListeners();
-        jobExecution.setBatchStatus(BatchStatus.STARTING);
     }
 
     @Override

@@ -24,6 +24,10 @@ package org.jberet.repository;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.JobInstanceImpl;
+import org.jberet.runtime.StepExecutionImpl;
+
 public final class InMemoryRepository extends AbstractRepository {
     private final AtomicLong jobInstanceIdSequence = new AtomicLong();
     private final AtomicLong jobExecutionIdSequence = new AtomicLong();
@@ -41,17 +45,17 @@ public final class InMemoryRepository extends AbstractRepository {
     }
 
     @Override
-    long nextJobInstanceId() {
-        return jobInstanceIdSequence.incrementAndGet();
+    void insertJobInstance(JobInstanceImpl jobInstance) {
+        jobInstance.setId(jobInstanceIdSequence.incrementAndGet());
     }
 
     @Override
-    long nextJobExecutionId() {
-        return jobExecutionIdSequence.incrementAndGet();
+    void insertJobExecution(JobExecutionImpl jobExecution) {
+        jobExecution.setId(jobExecutionIdSequence.incrementAndGet());
     }
 
     @Override
-    long nextStepExecutionId() {
-        return stepExecutionIdSequence.incrementAndGet();
+    void insertStepExecution(StepExecutionImpl stepExecution, JobExecutionImpl jobExecution) {
+        stepExecution.setId(stepExecutionIdSequence.incrementAndGet());
     }
 }

@@ -49,9 +49,9 @@ public abstract class AbstractRepository implements JobRepository {
     final List<JobInstance> jobInstances = Collections.synchronizedList(new ArrayList<JobInstance>());
     final ConcurrentMap<ApplicationAndJobName, ApplicationMetaData> applicationMetaDataMap = new ConcurrentHashMap<ApplicationAndJobName, ApplicationMetaData>();
 
-    abstract long nextJobInstanceId();
-    abstract long nextJobExecutionId();
-    abstract long nextStepExecutionId();
+    abstract void insertJobInstance(JobInstanceImpl jobInstance);
+    abstract void insertJobExecution(JobExecutionImpl jobExecution);
+    abstract void insertStepExecution(StepExecutionImpl stepExecution, JobExecutionImpl jobExecution);
 
     @Override
     public boolean addJob(Job job) {
@@ -92,7 +92,8 @@ public abstract class AbstractRepository implements JobRepository {
     @Override
     public JobInstanceImpl createJobInstance(Job job, String applicationName, ClassLoader classLoader) {
         ApplicationAndJobName appJobNames = new ApplicationAndJobName(applicationName, job.getId());
-        JobInstanceImpl jobInstance = new JobInstanceImpl(nextJobInstanceId(), job, appJobNames);
+        JobInstanceImpl jobInstance = new JobInstanceImpl(job, appJobNames);
+        insertJobInstance(jobInstance);
         jobInstance.setApplicationMetaData(getApplicationMetaData(appJobNames, classLoader));
         jobInstances.add(jobInstance);
         return jobInstance;
@@ -129,7 +130,8 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters) {
-        JobExecutionImpl jobExecution = new JobExecutionImpl(nextJobExecutionId(), jobInstance, jobParameters);
+        JobExecutionImpl jobExecution = new JobExecutionImpl(jobInstance, jobParameters);
+        insertJobExecution(jobExecution);
         jobInstance.addJobExecution(jobExecution);
         return jobExecution;
     }
@@ -163,7 +165,7 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public StepExecutionImpl createStepExecution(String stepName) {
-        StepExecutionImpl stepExecution = new StepExecutionImpl(nextStepExecutionId(), stepName);
+        StepExecutionImpl stepExecution = new StepExecutionImpl(stepName);
 
 //        this stepExecution will be added to jobExecution later, after determining restart-if-complete, so that
 //        completed steps are not added to the enclosing JobExecution
@@ -174,6 +176,7 @@ public abstract class AbstractRepository implements JobRepository {
     @Override
     public void addStepExecution(JobExecutionImpl jobExecution, StepExecutionImpl stepExecution) {
         jobExecution.addStepExecution(stepExecution);
+        insertStepExecution(stepExecution, jobExecution);
     }
 
     @Override
