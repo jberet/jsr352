@@ -20,7 +20,7 @@
     <parent>
         <artifactId>jberet-parent</artifactId>
         <groupId>org.jberet</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0.Alpha1</version>
     </parent>
 
     <artifactId>distribution</artifactId>
@@ -52,7 +52,7 @@
     <dependencies>
         <dependency>
             <groupId>org.jberet</groupId>
-            <artifactId>jberet</artifactId>
+            <artifactId>jberet-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

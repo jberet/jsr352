@@ -24,7 +24,7 @@
 
     <groupId>org.jberet</groupId>
     <artifactId>jberet-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0.Alpha1</version>
 
     <name>jberet-parent</name>
     <description>Impl of JSR 352: Batch Applications for the Java Platform</description>
@@ -43,14 +43,14 @@
         <version.org.jboss.logging>3.1.2.GA</version.org.jboss.logging>
         <version.org.jboss.logging.jboss-logging>3.1.2.GA</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-processor>1.1.0.Final</version.org.jboss.logging.jboss-logging-processor>
+        <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Alpha1</version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
         <version.org.jvnet.jaxb2.maven2>0.8.2</version.org.jvnet.jaxb2.maven2>
         <version.org.scannotation>1.0.3</version.org.scannotation>
 
     </properties>
 
     <modules>
-        <module>javax.batch</module>
-        <module>jberet</module>
+        <module>jberet-core</module>
         <module>test-apps</module>
         <module>tck-porting-impl</module>
         <module>distribution</module>
@@ -87,11 +87,23 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <skipSource>true</skipSource>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.jboss.spec.javax.batch</groupId>
+                <artifactId>jboss-batch-api_1.0_spec</artifactId>
+                <version>${version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec}</version>
+            </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
@@ -148,6 +160,10 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.jboss.spec.javax.batch</groupId>
+            <artifactId>jboss-batch-api_1.0_spec</artifactId>
+        </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>

@@ -44,7 +44,7 @@
     <moduleSets>
         <moduleSet>
             <includes>
-                <include>org.jberet:jberet</include>
+                <include>org.jberet:jberet-core</include>
             </includes>
             <binaries>
                 <attachmentClassifier>jar-with-dependencies</attachmentClassifier>

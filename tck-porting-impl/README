@@ -1,5 +1,5 @@
 #To run JSR 352 sigtest:
 
-java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java6.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/batch-tck/lib/javax.inject.jar:$HOME/dev/jsr352/javax.batch/target/javax.batch-1.0-SNAPSHOT.jar
+java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java7.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Alpha1/jboss-batch-api_1.0_spec-1.0.0.Alpha1.jar
 
-java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java7.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/batch-tck/lib/javax.inject.jar:$HOME/dev/jsr352/javax.batch/target/javax.batch-1.0-SNAPSHOT.jar
+java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java6.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Alpha1/jboss-batch-api_1.0_spec-1.0.0.Alpha1.jar
