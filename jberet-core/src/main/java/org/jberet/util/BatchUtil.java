@@ -31,7 +31,7 @@ import org.jberet.job.Property;
 import org.jberet.job.Step;
 
 public class BatchUtil {
-
+    public static final String NL = System.getProperty("line.separator");
     private static ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
 
     public static ClassLoader getBatchApplicationClassLoader() {
@@ -60,7 +60,7 @@ public class BatchUtil {
         }
         StringBuilder sb = new StringBuilder();
         for (String key : properties.stringPropertyNames()) {
-            sb.append(key).append('=').append(properties.getProperty(key));
+            sb.append(key).append('=').append(properties.getProperty(key)).append(NL);
         }
         return sb.toString();
     }

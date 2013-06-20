@@ -1,5 +1,16 @@
 #To run JSR 352 sigtest:
 
-java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java7.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Alpha1/jboss-batch-api_1.0_spec-1.0.0.Alpha1.jar
+# JDK 7, batch TCK sig file, Alpha1 API
+java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java7.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Alpha1/jboss-batch-api_1.0_spec-1.0.0.Alpha1.jar:$HOME/.m2/repository/javax/enterprise/cdi-api/1.1/cdi-api-1.1.jar
 
-java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java6.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Alpha1/jboss-batch-api_1.0_spec-1.0.0.Alpha1.jar
+# JDK 7, batch TCK sig file, Beta1 API
+java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java7.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Beta1-SNAPSHOT/jboss-batch-api_1.0_spec-1.0.0.Beta1-SNAPSHOT.jar:$HOME/.m2/repository/javax/enterprise/cdi-api/1.1/cdi-api-1.1.jar
+
+# JDK 7, CTS sig file, Alpha1 API
+java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/dev/jboss-tck/tck7/trunk/src/com/sun/ts/tests/signaturetest/signature-repository/javax.batch.sig_1.0_se7 -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Alpha1/jboss-batch-api_1.0_spec-1.0.0.Alpha1.jar:$HOME/.m2/repository/javax/enterprise/cdi-api/1.1/cdi-api-1.1.jar
+
+# JDK 7, CTS sig file, Beta1 API
+java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/dev/jboss-tck/tck7/trunk/src/com/sun/ts/tests/signaturetest/signature-repository/javax.batch.sig_1.0_se7 -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Beta1-SNAPSHOT/jboss-batch-api_1.0_spec-1.0.0.Beta1-SNAPSHOT.jar:$HOME/.m2/repository/javax/enterprise/cdi-api/1.1/cdi-api-1.1.jar
+
+# JDK 6, batch TCK sig file, Alpha1 API
+java -jar $HOME/tools/sigtest/lib/sigtestdev.jar SignatureTest -static -package javax.batch -filename $HOME/batch-tck/artifacts/jsr352-api-sigtest-java6.sig -classpath $JAVA_HOME/../Classes/classes.jar:$JAVA_HOME/jre/lib/rt.jar:$HOME/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:$HOME/.m2/repository/org/jboss/spec/javax/batch/jboss-batch-api_1.0_spec/1.0.0.Alpha1/jboss-batch-api_1.0_spec-1.0.0.Alpha1.jar:$HOME/.m2/repository/javax/enterprise/cdi-api/1.1/cdi-api-1.1.jar

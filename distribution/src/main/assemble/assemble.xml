@@ -65,7 +65,14 @@
             <directory>src/main/resources</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>*</include>
+                <include>*.txt</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory>/bin</outputDirectory>
+            <includes>
+                <include>*.properties</include>
             </includes>
         </fileSet>
     </fileSets>

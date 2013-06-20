@@ -28,10 +28,11 @@ public final class JobRepositoryFactory {
     public static JobRepository getJobRepository() {
         Properties configProperties = BatchConfig.getInstance().getConfigProperties();
         String repositoryType = configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY);
-        if (repositoryType == null || repositoryType.isEmpty() || repositoryType.equals(REPOSITORY_TYPE_JDBC)) {
-            return JdbcRepository.getInstance();
-        } else if(repositoryType.equals(REPOSITORY_TYPE_IN_MEMORY)) {
+
+        if (repositoryType == null || repositoryType.isEmpty() || repositoryType.equals(REPOSITORY_TYPE_IN_MEMORY)) {
             return InMemoryRepository.getInstance();
+        } else if (repositoryType.equals(REPOSITORY_TYPE_JDBC)) {
+            return JdbcRepository.getInstance();
         } else {
             throw BatchLogger.LOGGER.unrecognizedJobRepositoryType(repositoryType);
         }
