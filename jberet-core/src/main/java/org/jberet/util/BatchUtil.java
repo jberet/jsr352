@@ -12,11 +12,7 @@
 
 package org.jberet.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -29,10 +25,16 @@ import org.jberet.job.Listener;
 import org.jberet.job.Listeners;
 import org.jberet.job.Property;
 import org.jberet.job.Step;
+import org.jboss.marshalling.cloner.ClonerConfiguration;
+import org.jboss.marshalling.cloner.ObjectCloner;
+import org.jboss.marshalling.cloner.ObjectClonerFactory;
+import org.jboss.marshalling.cloner.ObjectCloners;
 
 public class BatchUtil {
     public static final String NL = System.getProperty("line.separator");
     private static ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
+    private static final ObjectClonerFactory clonerFactory = ObjectCloners.getSerializingObjectClonerFactory();
+    private static final ObjectCloner cloner = clonerFactory.createCloner(new ClonerConfiguration());
 
     public static ClassLoader getBatchApplicationClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -115,6 +117,7 @@ public class BatchUtil {
 
     /**
      * Produces a StringBuilder containing contactinated id of elements.
+     *
      * @param elements step, job, or flow elements, and all elements are of the same type.  Either all elements are job,
      *                 or all elements are step, or all elements are flow
      * @return a StringBuilder whose string value is in the form: a -> b -> c ->
@@ -135,38 +138,14 @@ public class BatchUtil {
     }
 
     public static <T> T clone(T original) throws JobStartException {
-        T clone = null;
-        ObjectOutputStream oos = null;
-        ObjectInputStream ois = null;
         try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream(bos);
-            oos.writeObject(original);
-            oos.flush();
-            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-            ois = new ObjectInputStream(bis);
-            clone = (T) ois.readObject();
+            cloner.reset();
+            return (T) cloner.clone(original);
         } catch (IOException e) {
             throw new JobStartException(e);
         } catch (ClassNotFoundException e) {
             throw new JobStartException(e);
-        } finally {
-            if (oos != null) {
-                try {
-                    oos.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
-            if (ois != null) {
-                try {
-                    ois.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
         }
-        return clone;
     }
 
 }

@@ -55,6 +55,10 @@
             <artifactId>scannotation</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jboss.marshalling</groupId>
+            <artifactId>jboss-marshalling</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.spec.javax.transaction</groupId>
             <artifactId>jboss-transaction-api_1.2_spec</artifactId>
         </dependency>

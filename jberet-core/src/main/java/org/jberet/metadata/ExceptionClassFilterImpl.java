@@ -57,12 +57,12 @@ final public class ExceptionClassFilterImpl extends ExceptionClassFilter {
     private boolean matches(Class<? extends Throwable> th, List<String> filterClasses) {
         for (String s : filterClasses) {
             try {
-                Class<?> clazz = Class.forName(s, true, BatchUtil.getBatchApplicationClassLoader());
+                Class<?> clazz = Class.forName(s, true, th.getClassLoader());
                 if (clazz.isAssignableFrom(th)) {
                     return true;
                 }
             } catch (ClassNotFoundException e) {
-                BatchLogger.LOGGER.invalidExceptionClassFilter(s);
+                BatchLogger.LOGGER.invalidExceptionClassFilter(e, s);
             }
         }
 
