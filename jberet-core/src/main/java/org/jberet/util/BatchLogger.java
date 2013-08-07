@@ -26,7 +26,9 @@ import javax.batch.operations.JobStartException;
 import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
+import javax.xml.stream.Location;
 
+import org.jberet.job.model.XmlElement;
 import org.jberet.runtime.context.AbstractContext;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
@@ -227,5 +229,7 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     void persisted(Object obj, long id);
 
+    @Message(id = 56, value = "Unexpected XML element %s at location %s")
+    BatchRuntimeException unexpectedXmlElement(String element, Location location);
 
 }

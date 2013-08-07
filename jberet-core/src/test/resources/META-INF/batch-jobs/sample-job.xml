@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<!--
+A sample job.xml for testing job parser.  Value conventions:
+all boolean value: true
+all number value:  5
+id value: <element-type>1, e.g., job1, step1, flow1
+nested id value: qualified by enclosing id, e.g., flow1.step1
+property name/value: name1/value1, name2/value2
+the 2nd properties or listener use number 2 instead of 1 in its id or ref
+-->
+<job version="1.0" id="job1" restartable="true" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+    <properties partition="partition1">
+        <property name="name1" value="value1"/>
+        <property name="name2" value="value2"/>
+    </properties>
+
+    <listeners>
+        <listener ref="ref1">
+            <properties partition="partition1">
+                <property name="name1" value="value1"/>
+                <property name="name2" value="value2"/>
+            </properties>
+        </listener>
+        <listener ref="ref2">
+            <properties partition="partition1">
+                <property name="name1" value="value1"/>
+                <property name="name2" value="value2"/>
+            </properties>
+        </listener>
+    </listeners>
+
+    <decision id="decision1" ref="ref1">
+        <properties partition="partition1">
+            <property name="name1" value="value1"/>
+            <property name="name2" value="value2"/>
+        </properties>
+        <end on="on1" exit-status="exit-status1"/>
+        <fail on="on1" exit-status="exit-status1"/>
+        <next on="on1" to="to1"/>
+        <stop on="on1" exit-status="exit-status1" restart="restart1"/>
+    </decision>
+
+    <flow id="flow1" next="next1">
+        <decision id="flow1.decision1" ref="ref1">
+            <properties partition="partition1">
+                <property name="name1" value="value1"/>
+                <property name="name2" value="value2"/>
+            </properties>
+
+            <next on="on1" to="to1"/>
+            <stop on="on1" exit-status="exit-status1" restart="restart1"/>
+            <end on="on1" exit-status="exit-status1"/>
+            <fail on="on1" exit-status="exit-status1"/>
+        </decision>
+
+        <step id="flow1.step1" start-limit="5" allow-start-if-complete="true" next="next1">
+            <properties partition="partition1">
+                <property name="name1" value="value1"/>
+                <property name="name2" value="value2"/>
+            </properties>
+
+            <listeners>
+                <listener ref="ref1">
+                    <properties partition="partition1">
+                        <property name="name1" value="value1"/>
+                        <property name="name2" value="value2"/>
+                    </properties>
+                </listener>
+                <listener ref="ref2">
+                    <properties partition="partition1">
+                        <property name="name1" value="value1"/>
+                        <property name="name2" value="value2"/>
+                    </properties>
+                </listener>
+            </listeners>
+
+            <batchlet ref="flow1.step1.batchlet1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </batchlet>
+
+            <partition>
+                <plan partitions="5" threads="5">
+                    <properties partition="partition1">
+                        <property name="name1" value="value1"/>
+                        <property name="name2" value="value2"/>
+                    </properties>
+                </plan>
+
+                <collector ref="collector1">
+                    <properties partition="partition1">
+                        <property name="name1" value="value1"/>
+                        <property name="name2" value="value2"/>
+                    </properties>
+                </collector>
+
+                <analyzer ref="analyzer1">
+                    <properties partition="partition1">
+                        <property name="name1" value="value1"/>
+                        <property name="name2" value="value2"/>
+                    </properties>
+                </analyzer>
+
+                <reducer ref="reducer1">
+                    <properties partition="partition1">
+                        <property name="name1" value="value1"/>
+                        <property name="name2" value="value2"/>
+                    </properties>
+                </reducer>
+            </partition>
+
+            <end on="on1" exit-status="exit-status1"/>
+            <fail on="on1" exit-status="exit-status1"/>
+            <next on="on1" to="to1"/>
+            <stop on="on1" exit-status="exit-status1" restart="restart1"/>
+        </step>
+
+        <end on="on1" exit-status="exit-status1"/>
+        <fail on="on1" exit-status="exit-status1"/>
+        <next on="on1" to="to1"/>
+        <stop on="on1" exit-status="exit-status1" restart="restart1"/>
+    </flow>
+
+
+    <split id="split1" next="next1">
+        <flow id="split1.flow1" next="next1">
+
+            <decision id="split1.flow1.decision1" ref="ref1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+                <end on="on1" exit-status="exit-status1"/>
+                <fail on="on1" exit-status="exit-status1"/>
+                <next on="on1" to="to1"/>
+                <stop on="on1" exit-status="exit-status1" restart="restart1"/>
+            </decision>
+
+            <step id="split1.flow1.step1" start-limit="5" allow-start-if-complete="true" next="next1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+
+                <listeners>
+                    <listener ref="ref1">
+                        <properties partition="partition1">
+                            <property name="name1" value="value1"/>
+                            <property name="name2" value="value2"/>
+                        </properties>
+                    </listener>
+                    <listener ref="ref2">
+                        <properties partition="partition1">
+                            <property name="name1" value="value1"/>
+                            <property name="name2" value="value2"/>
+                        </properties>
+                    </listener>
+                </listeners>
+
+                <batchlet ref="split1.flow1.step1.batchlet1">
+                    <properties partition="partition1">
+                        <property name="name1" value="value1"/>
+                        <property name="name2" value="value2"/>
+                    </properties>
+                </batchlet>
+
+                <partition>
+                    <mapper ref="mapper1">
+                        <properties partition="partition1">
+                            <property name="name1" value="value1"/>
+                            <property name="name2" value="value2"/>
+                        </properties>
+                    </mapper>
+
+                    <collector ref="collector1">
+                        <properties partition="partition1">
+                            <property name="name1" value="value1"/>
+                            <property name="name2" value="value2"/>
+                        </properties>
+                    </collector>
+
+                    <analyzer ref="analyzer1">
+                        <properties partition="partition1">
+                            <property name="name1" value="value1"/>
+                            <property name="name2" value="value2"/>
+                        </properties>
+                    </analyzer>
+
+                    <reducer ref="reducer1">
+                        <properties partition="partition1">
+                            <property name="name1" value="value1"/>
+                            <property name="name2" value="value2"/>
+                        </properties>
+                    </reducer>
+                </partition>
+
+                <end on="on1" exit-status="exit-status1"/>
+                <fail on="on1" exit-status="exit-status1"/>
+                <next on="on1" to="to1"/>
+                <stop on="on1" exit-status="exit-status1" restart="restart1"/>
+            </step>
+
+            <end on="on1" exit-status="exit-status1"/>
+            <fail on="on1" exit-status="exit-status1"/>
+            <next on="on1" to="to1"/>
+            <stop on="on1" exit-status="exit-status1" restart="restart1"/>
+        </flow>
+    </split>
+
+    <step id="step1" start-limit="5" allow-start-if-complete="true" next="next1">
+        <properties partition="partition1">
+            <property name="name1" value="value1"/>
+            <property name="name2" value="value2"/>
+        </properties>
+
+        <listeners>
+            <listener ref="ref1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </listener>
+            <listener ref="ref2">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </listener>
+        </listeners>
+
+        <chunk checkpoint-policy="custom" item-count="5" time-limit="5" skip-limit="5"
+               retry-limit="5">
+            <reader ref="reader1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </reader>
+
+            <processor ref="processor1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </processor>
+
+            <writer ref="writer1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </writer>
+
+            <checkpoint-algorithm ref="checkpoint-algorithm-1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </checkpoint-algorithm>
+
+            <skippable-exception-classes>
+                <include class="include1"/>
+                <include class="include2"/>
+                <exclude class="exclude1"/>
+                <exclude class="exclude2"/>
+            </skippable-exception-classes>
+
+            <retryable-exception-classes>
+                <include class="include1"/>
+                <include class="include2"/>
+                <exclude class="exclude1"/>
+                <exclude class="exclude2"/>
+            </retryable-exception-classes>
+
+            <no-rollback-exception-classes>
+                <include class="include1"/>
+                <include class="include2"/>
+                <exclude class="exclude1"/>
+                <exclude class="exclude2"/>
+            </no-rollback-exception-classes>
+        </chunk>
+
+        <partition>
+            <mapper ref="mapper1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </mapper>
+
+            <collector ref="collector1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </collector>
+
+            <analyzer ref="analyzer1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </analyzer>
+
+            <reducer ref="reducer1">
+                <properties partition="partition1">
+                    <property name="name1" value="value1"/>
+                    <property name="name2" value="value2"/>
+                </properties>
+            </reducer>
+        </partition>
+
+        <end on="on1" exit-status="exit-status1"/>
+        <fail on="on1" exit-status="exit-status1"/>
+        <next on="on1" to="to1"/>
+        <stop on="on1" exit-status="exit-status1" restart="restart1"/>
+    </step>
+</job>
