@@ -19,21 +19,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.jberet.job.model.BatchArtifacts;
-import org.jberet.job.model.Chunk;
-import org.jberet.job.model.Decision;
-import org.jberet.job.model.ExceptionClassFilter;
-import org.jberet.job.model.Flow;
-import org.jberet.job.model.Job;
-import org.jberet.job.model.Partition;
-import org.jberet.job.model.PartitionPlan;
-import org.jberet.job.model.Properties;
-import org.jberet.job.model.RefArtifact;
-import org.jberet.job.model.Split;
-import org.jberet.job.model.Step;
-import org.jberet.job.model.Transition;
-import org.jberet.job.model.XmlAttribute;
-import org.jberet.job.model.XmlElement;
 import org.jberet.util.BatchLogger;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
@@ -518,7 +503,7 @@ public final class JobParser {
             switch (eventType) {
                 case START_ELEMENT:
                     if (element == XmlElement.PROPERTIES) {
-                        partitionPlan.setProperties(parseProperties(reader));
+                        partitionPlan.addProperties(parseProperties(reader));
                     } else {
                         throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
                     }

@@ -14,8 +14,6 @@ package org.jberet.runtime.context;
 
 import javax.batch.runtime.BatchStatus;
 
-import org.jberet.job.Properties;
-
 public abstract class AbstractContext implements Cloneable {
     protected String id;
     protected Object transientUserData;
@@ -49,13 +47,6 @@ public abstract class AbstractContext implements Cloneable {
     public abstract void setExitStatus(String status);
 
     public abstract String getExitStatus();
-
-    /**
-     * Gets the org.jberet.job.Properties configured for the element corresponding to this BatchContext.
-     *
-     * @return org.jberet.job.Properties
-     */
-    public abstract Properties getProperties2();
 
     public String getId() {
         return id;

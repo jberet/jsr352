@@ -19,7 +19,7 @@ import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 import javax.batch.runtime.context.StepContext;
 
-import org.jberet.job.Step;
+import org.jberet.job.model.Step;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchLogger;
@@ -157,12 +157,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
 
     @Override
     public Properties getProperties() {
-        return BatchUtil.toJavaUtilProperties(step.getProperties());
-    }
-
-    @Override
-    public org.jberet.job.Properties getProperties2() {
-        return step.getProperties();
+        return org.jberet.job.model.Properties.toJavaUtilProperties(step.getProperties());
     }
 
     @Override

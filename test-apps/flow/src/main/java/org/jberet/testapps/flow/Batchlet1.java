@@ -16,8 +16,8 @@ import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.junit.Assert;
 import org.jberet.testapps.common.Batchlet0;
+import org.junit.Assert;
 
 @Named
 public class Batchlet1 extends Batchlet0 {

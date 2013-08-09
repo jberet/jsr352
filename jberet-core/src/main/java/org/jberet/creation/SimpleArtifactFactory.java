@@ -29,9 +29,8 @@ import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
-import org.jberet.job.Properties;
+import org.jberet.job.model.Properties;
 import org.jberet.metadata.ApplicationMetaData;
-import org.jberet.util.BatchUtil;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -76,7 +75,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
 
     private void doInjection(final Object obj, Class<?> cls, final ClassLoader classLoader, final Map<?, ?> data) throws Exception {
         Properties batchProps = (Properties) data.get(DataKey.BATCH_PROPERTY);
-        boolean hasBatchProps = batchProps != null && batchProps.getProperty().size() > 0;
+        boolean hasBatchProps = batchProps != null && batchProps.size() > 0;
         while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
             for (Field f : cls.getDeclaredFields()) {
                 if (!f.isSynthetic()) {
@@ -95,7 +94,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                                 if (propName.equals("")) {
                                     propName = f.getName();
                                 }
-                                String sVal = BatchUtil.getBatchProperty(batchProps, propName);
+                                String sVal = batchProps.get(propName);
                                 if (sVal != null) {
                                     if (sVal.length() == 0) {
                                         fieldVal = null;

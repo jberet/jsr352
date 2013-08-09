@@ -18,8 +18,9 @@ import java.util.concurrent.TimeUnit;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 
-import org.jberet.job.Flow;
-import org.jberet.job.Split;
+import org.jberet.job.model.Flow;
+import org.jberet.job.model.JobElement;
+import org.jberet.job.model.Split;
 import org.jberet.runtime.FlowExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.SplitContextImpl;
@@ -36,14 +37,14 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
     }
 
     @Override
-    protected List<?> getJobElements() {
-        return split.getFlow();
+    protected List<? extends JobElement> getJobElements() {
+        return split.getFlows();
     }
 
     @Override
     public void run() {
         batchContext.setBatchStatus(BatchStatus.STARTED);
-        List<Flow> flows = split.getFlow();
+        List<Flow> flows = split.getFlows();
         CountDownLatch latch = new CountDownLatch(flows.size());
         try {
             for (Flow f : flows) {
@@ -73,7 +74,7 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            String next = split.getNext();  //split has no transition elements
+            String next = split.getAttributeNext();  //split has no transition elements
             if (next != null) {
                 //the last StepExecution of each flow is needed if the next element after this split is a decision
                 List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();

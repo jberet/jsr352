@@ -14,7 +14,7 @@ package org.jberet.runtime.context;
 
 import javax.batch.runtime.BatchStatus;
 
-import org.jberet.job.Flow;
+import org.jberet.job.model.Flow;
 import org.jberet.runtime.FlowExecutionImpl;
 
 public class FlowContextImpl extends AbstractContext {
@@ -56,10 +56,4 @@ public class FlowContextImpl extends AbstractContext {
     public void setExitStatus(String exitStatus) {
         flowExecution.setExitStatus(exitStatus);
     }
-
-    @Override
-    public org.jberet.job.Properties getProperties2() {
-        return null;  //flow has no <properties>
-    }
-
 }

@@ -10,20 +10,18 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.util;
+package org.jberet.job.model;
 
-import java.util.List;
 import java.util.Properties;
 
-import junit.framework.Assert;
-import org.jberet.job.Property;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.jberet.util.PropertyResolver.jobParametersToken;
-import static org.jberet.util.PropertyResolver.jobPropertiesToken;
-import static org.jberet.util.PropertyResolver.partitionPlanToken;
-import static org.jberet.util.PropertyResolver.systemPropertiesToken;
+import static org.jberet.job.model.PropertyResolver.jobParametersToken;
+import static org.jberet.job.model.PropertyResolver.jobPropertiesToken;
+import static org.jberet.job.model.PropertyResolver.partitionPlanToken;
+import static org.jberet.job.model.PropertyResolver.systemPropertiesToken;
 
 public class PropertyResolverTest {
     private static final String jobParam1 = "infile.path";
@@ -80,14 +78,10 @@ public class PropertyResolverTest {
         resolver.setResolvePartitionPlanProperties(false);
     }
 
-    private org.jberet.job.Properties fromJavaUtilProperties(Properties props) {
-        org.jberet.job.Properties result = new org.jberet.job.Properties();
-        List<Property> propertyList = result.getProperty();
+    private org.jberet.job.model.Properties fromJavaUtilProperties(Properties props) {
+        org.jberet.job.model.Properties result = new org.jberet.job.model.Properties();
         for (String s : props.stringPropertyNames()) {
-            Property toAdd = new Property();
-            toAdd.setName(s);
-            toAdd.setValue(props.getProperty(s));
-            propertyList.add(toAdd);
+            result.add(s, props.getProperty(s));
         }
         return result;
     }

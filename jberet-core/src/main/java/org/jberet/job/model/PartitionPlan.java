@@ -13,14 +13,17 @@
 package org.jberet.job.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class PartitionPlan implements Serializable {
     private static final long serialVersionUID = -7038781842409368148L;
+    private static final int DEFAULT_PARTITIONS = 1;
 
     /**
      * Specifies the number of partitions for this partitioned step. This is a an optional attribute. The default is 1.
      */
-    private int partitions = 1;
+    private String partitions;
 
     /**
      * Specifies the maximum number of threads on which to execute the partitions of this step.
@@ -28,38 +31,52 @@ public final class PartitionPlan implements Serializable {
      * it will use as many as it can up to the requested maximum. This is an optional attribute.
      * The default is the number of partitions.
      */
-    private int threads = partitions;
+    private String threads;
 
-    private Properties properties;
+    private List<Properties> propertiesList = new ArrayList<Properties>();
 
     PartitionPlan() {
     }
 
-    public Properties getProperties() {
-        return properties;
+    public List<Properties> getPropertiesList() {
+        return propertiesList;
     }
 
-    void setProperties(Properties properties) {
-        this.properties = properties;
+    void addProperties(Properties properties) {
+        propertiesList.add(properties);
     }
 
-    public int getPartitions() {
+    public String getPartitions() {
         return partitions;
+    }
+
+    public int getPartitionsInt() {
+        if (partitions == null) {
+            return DEFAULT_PARTITIONS;
+        }
+        return Integer.parseInt(partitions);
     }
 
     void setPartitions(String partitions) {
         if (partitions != null) {
-            this.partitions = Integer.parseInt(partitions);
+            this.partitions = partitions;
         }
     }
 
-    public int getThreads() {
+    public String getThreads() {
         return threads;
+    }
+
+    public int getThreadsInt() {
+        if (threads == null) {
+            return getPartitionsInt();
+        }
+        return Integer.parseInt(threads);
     }
 
     void setThreads(String threads) {
         if (threads != null) {
-            this.threads = Integer.parseInt(threads);
+            this.threads = threads;
         }
     }
 }

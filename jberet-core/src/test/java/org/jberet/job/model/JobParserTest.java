@@ -16,21 +16,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import org.jberet.job.model.JobParser;
-import org.jberet.job.model.Split;
-import org.jberet.job.model.BatchArtifacts;
-import org.jberet.job.model.Chunk;
-import org.jberet.job.model.Decision;
-import org.jberet.job.model.ExceptionClassFilter;
-import org.jberet.job.model.Flow;
-import org.jberet.job.model.Job;
-import org.jberet.job.model.JobElement;
-import org.jberet.job.model.Partition;
-import org.jberet.job.model.PartitionPlan;
-import org.jberet.job.model.Properties;
-import org.jberet.job.model.RefArtifact;
-import org.jberet.job.model.Step;
-import org.jberet.job.model.Transition;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -60,6 +45,7 @@ public final class JobParserTest {
             Assert.assertEquals(class1, batchArtifacts.getClassNameForRef(id1));
             Assert.assertEquals(class2, batchArtifacts.getClassNameForRef(id2));
             Assert.assertNull(batchArtifacts.getClassNameForRef(null));
+            Assert.assertNull(batchArtifacts.getClassNameForRef(""));
             Assert.assertNull(batchArtifacts.getClassNameForRef("no such id"));
         } finally {
             if (is != null) {
@@ -78,7 +64,7 @@ public final class JobParserTest {
             is.close();
         }
         Assert.assertEquals("job1", job.getId());
-        Assert.assertEquals(true, job.getRestartable());
+        Assert.assertEquals(true, job.getRestartableBoolean());
         checkProperties(job.getProperties());
         checkListeners(job.getListeners());
         for (JobElement element : job.getJobElements()) {
@@ -94,21 +80,27 @@ public final class JobParserTest {
             } else if (element instanceof Split) {
                 Split split = (Split) element;
                 checkSplit(split, null);
+            } else {
+                Assert.fail("Unexpected job element type: " + element);
             }
         }
     }
 
-    private void checkProperties(final Properties properties) throws Exception {
-        Assert.assertEquals("partition1", properties.getPartition());
-        Assert.assertEquals(2, properties.toJavaUtilProperties().size());
+    private void checkProperties(final Properties properties, final String... partitionNumbers) throws Exception {
+        String partitionNumber = partitionNumbers.length == 0 ? "0" : partitionNumbers[0];
+        Assert.assertEquals(partitionNumber, properties.getPartition());
+        Assert.assertEquals(2, Properties.toJavaUtilProperties(properties).size());
         Assert.assertEquals("value1", properties.get("name1"));
         Assert.assertEquals("value2", properties.get("name2"));
+        Assert.assertNull(properties.get(""));
     }
 
     private void checkListeners(final List<RefArtifact> listeners) throws Exception {
         Assert.assertEquals(2, listeners.size());
         Assert.assertEquals("ref1", listeners.get(0).getRef());
         checkProperties(listeners.get(0).getProperties());
+        Assert.assertEquals("ref2", listeners.get(1).getRef());
+        checkProperties(listeners.get(1).getProperties());
     }
 
     private void checkDecision(final Decision decision, String parentId) throws Exception {
@@ -141,9 +133,10 @@ public final class JobParserTest {
             } else if (e instanceof Split) {
                 Split split = (Split) e;
                 checkSplit(split, flowId);
+            } else {
+                Assert.fail("Unexpected job element type inside flow: " + e);
             }
         }
-
     }
 
     private void checkSplit(final Split split, final String parentId) throws Exception {
@@ -164,8 +157,8 @@ public final class JobParserTest {
             stepId = parentId + "." + stepId;
         }
         Assert.assertEquals(stepId, step.getId());
-        Assert.assertEquals(5, step.getStartLimit());
-        Assert.assertEquals(true, step.getAllowStartIfComplete());
+        Assert.assertEquals(5, step.getStartLimitInt());
+        Assert.assertEquals(true, step.getAllowStartIfCompleteBoolean());
         Assert.assertEquals("next1", step.getAttributeNext());
         checkProperties(step.getProperties());
         checkListeners(step.getListeners());
@@ -189,10 +182,10 @@ public final class JobParserTest {
 
     private void checkChunk(final Chunk chunk) throws Exception {
         Assert.assertEquals("custom", chunk.getCheckpointPolicy());
-        Assert.assertEquals(5, chunk.getItemCount());
-        Assert.assertEquals(5, chunk.getTimeLimit());
-        Assert.assertEquals(5, chunk.getSkipLimit());
-        Assert.assertEquals(5, chunk.getSkipLimit());
+        Assert.assertEquals(5, chunk.getItemCountInt());
+        Assert.assertEquals(5, chunk.getTimeLimitInt());
+        Assert.assertEquals(5, chunk.getSkipLimitInt());
+        Assert.assertEquals(5, chunk.getSkipLimitInt());
         checkRefArtifact(chunk.getReader(), "reader1");
         checkRefArtifact(chunk.getProcessor(), "processor1");
         checkRefArtifact(chunk.getWriter(), "writer1");
@@ -213,9 +206,11 @@ public final class JobParserTest {
         Assert.assertEquals(2, includes.size());
         Assert.assertEquals(true, includes.contains("include1"));
         Assert.assertEquals(true, includes.contains("include2"));
+        Assert.assertEquals(false, includes.contains(""));
         Assert.assertEquals(2, excludes.size());
         Assert.assertEquals(true, excludes.contains("exclude1"));
         Assert.assertEquals(true, excludes.contains("exclude2"));
+        Assert.assertEquals(false, excludes.contains(""));
     }
 
     private void checkPartition(final Partition partition) throws Exception {
@@ -233,9 +228,13 @@ public final class JobParserTest {
     }
 
     private void checkPlan(final PartitionPlan plan) throws Exception {
-        Assert.assertEquals(5, plan.getPartitions());
-        Assert.assertEquals(5, plan.getThreads());
-        checkProperties(plan.getProperties());
+        Assert.assertEquals(5, plan.getPartitionsInt());
+        Assert.assertEquals(5, plan.getThreadsInt());
+
+        //partition attribute values are: "0", "1", etc
+        for (int i = 0; i < plan.getPropertiesList().size(); i++) {
+            checkProperties(plan.getPropertiesList().get(i), String.valueOf(i));
+        }
     }
 
     private void checkTransitionElements(final List<Transition> transitions) throws Exception {
@@ -266,6 +265,8 @@ public final class JobParserTest {
                 Assert.assertEquals("exit-status1", stop.getExitStatus());
                 Assert.assertEquals("restart1", stop.getRestart());
                 foundStop = true;
+            } else {
+                Assert.fail("Unexpected job transition type: " + e);
             }
         }
         Assert.assertEquals(true, foundNext);

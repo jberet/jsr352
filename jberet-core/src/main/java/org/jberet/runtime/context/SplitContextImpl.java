@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.batch.runtime.BatchStatus;
 
-import org.jberet.job.Split;
+import org.jberet.job.model.Split;
 import org.jberet.runtime.FlowExecutionImpl;
 import org.jberet.runtime.SplitExecutionImpl;
 
@@ -62,10 +62,4 @@ public class SplitContextImpl extends AbstractContext {
     public void setExitStatus(String exitStatus) {
         splitExecution.setExitStatus(exitStatus);
     }
-
-    @Override
-    public org.jberet.job.Properties getProperties2() {
-        return null;  //split has no <properties>
-    }
-
 }

@@ -19,8 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.batch.operations.JobStartException;
 
-import org.jberet.job.BatchArtifactRef;
-import org.jberet.job.BatchArtifacts;
+import org.jberet.job.model.BatchArtifacts;
 import org.scannotation.AnnotationDB;
 import org.scannotation.ClasspathUrlFinder;
 
@@ -69,11 +68,7 @@ public class ApplicationMetaData {
             return result;
         }
         if (batchArtifacts != null) {
-            for (BatchArtifactRef r : batchArtifacts.getRef()) {
-                if (r.getId().equals(ref)) {
-                    return r.getClazz();
-                }
-            }
+            return batchArtifacts.getClassNameForRef(ref);
         }
         return ref;
     }

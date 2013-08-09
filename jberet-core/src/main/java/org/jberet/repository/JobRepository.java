@@ -18,7 +18,7 @@ import java.util.Properties;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
-import org.jberet.job.Job;
+import org.jberet.job.model.Job;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;

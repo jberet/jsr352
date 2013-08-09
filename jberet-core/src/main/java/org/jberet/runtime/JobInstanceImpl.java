@@ -18,7 +18,7 @@ import java.util.List;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
-import org.jberet.job.Job;
+import org.jberet.job.model.Job;
 import org.jberet.metadata.ApplicationMetaData;
 import org.jberet.repository.ApplicationAndJobName;
 

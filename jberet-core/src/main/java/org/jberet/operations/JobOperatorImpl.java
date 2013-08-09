@@ -39,7 +39,7 @@ import javax.naming.NamingException;
 
 import org.jberet.creation.ArtifactFactory;
 import org.jberet.creation.SimpleArtifactFactory;
-import org.jberet.job.Job;
+import org.jberet.job.model.Job;
 import org.jberet.metadata.ArchiveXmlLoader;
 import org.jberet.repository.JobRepository;
 import org.jberet.repository.JobRepositoryFactory;

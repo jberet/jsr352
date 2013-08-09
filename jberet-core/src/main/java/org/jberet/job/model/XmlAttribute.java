@@ -18,7 +18,7 @@ import java.util.Map;
 public enum XmlAttribute {
     UNKNOWN(null),
 
-    //attributes from job xml & batch.xml
+    //attributes from job xml & batch.xml, in alphabetical order
     ALLOW_START_IF_COMPLETE("allow-start-if-complete"),
     CHECKPOINT_POLICY("checkpoint-policy"),
     CLASS("class"),

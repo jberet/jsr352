@@ -17,9 +17,10 @@ import java.util.List;
 
 public final class Step extends AbstractJobElement {
     private static final long serialVersionUID = 7699066774192733641L;
+    private static final int DEFAULT_START_LIMIT = 0;
 
-    private int startLimit;  //default 0, no limit
-    private boolean allowStartIfComplete;  //default false
+    private String startLimit;  //default 0, no limit
+    private String allowStartIfComplete;  //default false
     private String next;
 
     private Properties properties;
@@ -32,23 +33,34 @@ public final class Step extends AbstractJobElement {
         super(id);
     }
 
-    public int getStartLimit() {
+    public String getStartLimit() {
         return startLimit;
+    }
+
+    public int getStartLimitInt() {
+        if (startLimit == null) {
+            return DEFAULT_START_LIMIT;
+        }
+        return Integer.parseInt(startLimit);
     }
 
     void setStartLimit(String startLimit) {
         if (startLimit != null) {
-            this.startLimit = Integer.parseInt(startLimit);
+            this.startLimit = startLimit;
         }
     }
 
-    public boolean getAllowStartIfComplete() {
+    public String getAllowStartIfComplete() {
         return allowStartIfComplete;
+    }
+
+    public boolean getAllowStartIfCompleteBoolean() {
+        return Boolean.parseBoolean(allowStartIfComplete);
     }
 
     void setAllowStartIfComplete(String allowStartIfComplete) {
         if (allowStartIfComplete != null) {
-            this.allowStartIfComplete = Boolean.parseBoolean(allowStartIfComplete);
+            this.allowStartIfComplete = allowStartIfComplete;
         }
     }
 

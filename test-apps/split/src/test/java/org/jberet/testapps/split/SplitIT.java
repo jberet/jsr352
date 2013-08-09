@@ -12,8 +12,8 @@
 
 package org.jberet.testapps.split;
 
-import org.junit.Test;
 import org.jberet.testapps.common.AbstractIT;
+import org.junit.Test;
 
 /**
  * Verifies split properties referencing, job element transition, and decision following split.

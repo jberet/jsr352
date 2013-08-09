@@ -18,7 +18,7 @@ import java.util.Map;
 public enum XmlElement {
     UNKNOWN(null),
 
-    //all elements from job xml
+    //all elements from job xml, in alphabetical order
     ANALYZER("analyzer"),
     BATCHLET("batchlet"),
     CHECKPOINT_ALGORITHM("checkpoint-algorithm"),

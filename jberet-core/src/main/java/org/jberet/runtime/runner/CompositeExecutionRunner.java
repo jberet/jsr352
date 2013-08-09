@@ -18,10 +18,11 @@ import javax.batch.api.Decider;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 
-import org.jberet.job.Decision;
-import org.jberet.job.Flow;
-import org.jberet.job.Split;
-import org.jberet.job.Step;
+import org.jberet.job.model.Decision;
+import org.jberet.job.model.Flow;
+import org.jberet.job.model.JobElement;
+import org.jberet.job.model.Split;
+import org.jberet.job.model.Step;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
 import org.jberet.runtime.context.SplitContextImpl;
@@ -38,7 +39,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         super(batchContext, enclosingRunner);
     }
 
-    protected abstract List<?> getJobElements();
+    protected abstract List<? extends JobElement> getJobElements();
 
     /**
      * Runs the first job element, which then transitions to the next element.  Not used for running split, whose
@@ -49,7 +50,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             //clear the restart point passed over from original job execution.  This execution may have its own
             //restart point or null (start from head) for use by the next restart.
             jobContext.getJobExecution().setRestartPoint(null);
-            for (Object e : getJobElements()) {
+            for (JobElement e : getJobElements()) {
                 if (e instanceof Step) {
                     Step step = (Step) e;
                     if (step.getId().equals(restartPoint)) {
@@ -78,7 +79,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             }
         } else {
             // the head of the composite job element is the first non-abstract element (step, flow, or split)
-            for (Object e : getJobElements()) {
+            for (JobElement e : getJobElements()) {
                 if (e instanceof Step) {
                     Step step = (Step) e;
 //                if (Boolean.parseBoolean(step.getAbstract())) {
@@ -118,7 +119,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         if (jobElementName == null) {
             return;
         }
-        for (Object e : getJobElements()) {
+        for (JobElement e : getJobElements()) {
             if (e instanceof Step) {
                 Step step = (Step) e;
                 if (step.getId().equals(jobElementName)) {

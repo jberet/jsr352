@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 import javax.batch.runtime.BatchStatus;
 
-import org.jberet.job.End;
-import org.jberet.job.Fail;
-import org.jberet.job.Next;
-import org.jberet.job.Stop;
+import org.jberet.job.model.Transition.End;
+import org.jberet.job.model.Transition.Fail;
+import org.jberet.job.model.Transition.Next;
+import org.jberet.job.model.Transition.Stop;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.JobContextImpl;
 

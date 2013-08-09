@@ -19,12 +19,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.batch.operations.JobStartException;
 
-import org.jberet.job.Flow;
-import org.jberet.job.Job;
-import org.jberet.job.Listener;
-import org.jberet.job.Listeners;
-import org.jberet.job.Property;
-import org.jberet.job.Step;
+import org.jberet.job.model.Flow;
+import org.jberet.job.model.Job;
+import org.jberet.job.model.Step;
 import org.jboss.marshalling.cloner.ClonerConfiguration;
 import org.jboss.marshalling.cloner.ObjectCloner;
 import org.jboss.marshalling.cloner.ObjectClonerFactory;
@@ -48,14 +45,6 @@ public class BatchUtil {
         return executorService;
     }
 
-    public static Properties getPropertiesFromJobDefinition(Job job) {
-        return toJavaUtilProperties(job.getProperties());
-    }
-
-    public static Properties getPropertiesFromStepDefinition(Step step) {
-        return toJavaUtilProperties(step.getProperties());
-    }
-
     public static String propertiesToString(Properties properties) {
         if (properties == null) {
             return "";
@@ -65,54 +54,6 @@ public class BatchUtil {
             sb.append(key).append('=').append(properties.getProperty(key)).append(NL);
         }
         return sb.toString();
-    }
-
-    public static Properties toJavaUtilProperties(org.jberet.job.Properties props) {
-        Properties result = new Properties();
-        if (props != null) {
-            for (org.jberet.job.Property p : props.getProperty()) {
-                String v = p.getValue();
-                if (v != null) {  //unresolvable properties have value null
-                    result.setProperty(p.getName(), v);
-                }
-            }
-        }
-        return result;
-    }
-
-    public static String getBatchProperty(org.jberet.job.Properties batchProps, String key) {
-        if (batchProps != null) {
-            for (Property p : batchProps.getProperty()) {
-                if (p.getName().equals(key)) {
-                    return p.getValue();
-                }
-            }
-        }
-        return null;
-    }
-
-    public static boolean propertiesContains(org.jberet.job.Properties props, String key) {
-        if (props == null) {
-            return false;
-        }
-        for (Property p : props.getProperty()) {
-            if (p.getName().equals(key)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean listenersContains(Listeners listeners, Listener listener) {
-        if (listeners == null) {
-            return false;
-        }
-        for (Listener l : listeners.getListener()) {
-            if (l == listener) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

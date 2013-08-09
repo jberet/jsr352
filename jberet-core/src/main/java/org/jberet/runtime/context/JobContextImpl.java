@@ -24,26 +24,25 @@ import javax.batch.runtime.StepExecution;
 import javax.batch.runtime.context.JobContext;
 
 import org.jberet.creation.ArtifactFactory;
-import org.jberet.job.Job;
-import org.jberet.job.Listener;
-import org.jberet.job.Listeners;
-import org.jberet.job.Step;
+import org.jberet.job.model.Job;
+import org.jberet.job.model.PropertyResolver;
+import org.jberet.job.model.RefArtifact;
+import org.jberet.job.model.Step;
 import org.jberet.metadata.ApplicationMetaData;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchLogger;
-import org.jberet.util.BatchUtil;
-import org.jberet.util.PropertyResolver;
 
 public class JobContextImpl extends AbstractContext implements JobContext, Cloneable {
-    JobExecutionImpl jobExecution;
+    private static final AbstractContext[] EMPTY_ABSTRACT_CONTEXT_ARRAY = new AbstractContext[0];
 
+    JobExecutionImpl jobExecution;
     private ApplicationMetaData applicationMetaData;
     private ArtifactFactory artifactFactory;
     JobRepository jobRepository;
 
-    private JobListener[] jobListeners = new JobListener[0];
+    private JobListener[] jobListeners;
 
     //to track the executed steps to detect loopback, may be accessed sub-threads (e.g., flows in split executions)
     private List<Step> executedSteps = Collections.synchronizedList(new ArrayList<Step>());
@@ -107,7 +106,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
 
     @Override
     public AbstractContext[] getOuterContexts() {
-        return new AbstractContext[0];
+        return EMPTY_ABSTRACT_CONTEXT_ARRAY;
     }
 
     @Override
@@ -127,12 +126,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
 
     @Override
     public Properties getProperties() {
-        return BatchUtil.toJavaUtilProperties(jobExecution.getSubstitutedJob().getProperties());
-    }
-
-    @Override
-    public org.jberet.job.Properties getProperties2() {
-        return jobExecution.getSubstitutedJob().getProperties();
+        return org.jberet.job.model.Properties.toJavaUtilProperties(jobExecution.getSubstitutedJob().getProperties());
     }
 
     @Override
@@ -182,9 +176,9 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
      * @param stepContextForInjection optional StepContext, needed for step-level artifact, but not for non-step-level ones
      * @return the created artifact
      */
-    public <A> A createArtifact(String ref, Class<?> cls, org.jberet.job.Properties props, StepContextImpl... stepContextForInjection) {
+    public <A> A createArtifact(String ref, Class<?> cls, org.jberet.job.model.Properties props, StepContextImpl... stepContextForInjection) {
         Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(props, stepContextForInjection);
-        A a = null;
+        A a;
         try {
             a = (A) artifactFactory.create(ref, cls, classLoader, artifactCreationData);
         } catch (Exception e) {
@@ -198,7 +192,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         return artifactFactory.getArtifactClass(ref, classLoader, artifactCreationData);
     }
 
-    private Map<ArtifactFactory.DataKey, Object> prepareCreationData(org.jberet.job.Properties props, StepContextImpl... stepContextForInjection) {
+    private Map<ArtifactFactory.DataKey, Object> prepareCreationData(org.jberet.job.model.Properties props, StepContextImpl... stepContextForInjection) {
         Map<ArtifactFactory.DataKey, Object> artifactCreationData = new HashMap<ArtifactFactory.DataKey, Object>();
         artifactCreationData.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, applicationMetaData);
         artifactCreationData.put(ArtifactFactory.DataKey.JOB_CONTEXT, this);
@@ -224,15 +218,12 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
     }
 
     private void createJobListeners() {
-        Listeners listeners = jobExecution.getSubstitutedJob().getListeners();
-        if (listeners != null) {
-            List<Listener> listenerList = listeners.getListener();
-            int count = listenerList.size();
-            this.jobListeners = new JobListener[count];
-            for (int i = 0; i < count; i++) {
-                Listener listener = listenerList.get(i);
-                this.jobListeners[i] = createArtifact(listener.getRef(), null, listener.getProperties());
-            }
+        List<RefArtifact> listeners = jobExecution.getSubstitutedJob().getListeners();
+        int count = listeners.size();
+        this.jobListeners = new JobListener[count];
+        for (int i = 0; i < count; i++) {
+            RefArtifact listener = listeners.get(i);
+            this.jobListeners[i] = createArtifact(listener.getRef(), null, listener.getProperties());
         }
     }
 

@@ -14,7 +14,7 @@ package org.jberet.test;
 
 import java.util.Collection;
 
-import org.jberet.job.Job;
+import org.jberet.job.model.Job;
 import org.jberet.metadata.ArchiveXmlLoader;
 import org.jberet.repository.JobRepository;
 import org.jberet.repository.JobRepositoryFactory;

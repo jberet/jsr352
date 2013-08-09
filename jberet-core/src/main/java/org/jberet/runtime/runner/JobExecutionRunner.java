@@ -16,7 +16,8 @@ import java.util.List;
 import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
 
-import org.jberet.job.Job;
+import org.jberet.job.model.Job;
+import org.jberet.job.model.JobElement;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.util.BatchLogger;
 
@@ -29,8 +30,8 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
     }
 
     @Override
-    protected List<?> getJobElements() {
-        return job.getDecisionOrFlowOrSplit();
+    protected List<? extends JobElement> getJobElements() {
+        return job.getJobElements();
     }
 
     @Override

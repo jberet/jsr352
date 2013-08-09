@@ -36,11 +36,15 @@ public final class ExceptionClassFilter implements Serializable {
     }
 
     void addInclude(String includeClass) {
-        include.add(includeClass);
+        if (includeClass != null && includeClass.length() > 0) {
+            include.add(includeClass);
+        }
     }
 
     void addExclude(String excludeClass) {
-        exclude.add(excludeClass);
+        if (excludeClass != null && excludeClass.length() > 0) {
+            exclude.add(excludeClass);
+        }
     }
 
     public boolean matches(Class<? extends Throwable> clazz) {

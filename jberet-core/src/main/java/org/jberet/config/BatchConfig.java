@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.jberet.repository.JobRepositoryFactory;
 import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
 

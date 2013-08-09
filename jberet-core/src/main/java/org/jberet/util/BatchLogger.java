@@ -15,7 +15,6 @@ package org.jberet.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Properties;
 import javax.batch.operations.BatchRuntimeException;
 import javax.batch.operations.JobExecutionAlreadyCompleteException;
 import javax.batch.operations.JobExecutionIsRunningException;
@@ -28,7 +27,6 @@ import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
 import javax.xml.stream.Location;
 
-import org.jberet.job.model.XmlElement;
 import org.jberet.runtime.context.AbstractContext;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
@@ -57,10 +55,10 @@ public interface BatchLogger extends BasicLogger {
     JobStartException failToGetJobXml(@Cause Throwable e, String jobName);
 
     @Message(id = 5, value = "Failed to parse and bind XML for job %s")
-    JobStartException failToParseBindJobXml(@Cause Throwable e, String jobName);
+    JobStartException failToParseJobXml(@Cause Throwable e, String jobName);
 
-    @Message(id = 6, value = "Failed to parse and bind batch XML %s")
-    JobStartException failToParseBindBatchXml(@Cause Throwable e, String batchXML);
+    @Message(id = 6, value = "Failed to parse batch XML %s")
+    JobStartException failToParseBatchXml(@Cause Throwable e, String batchXML);
 
     @Message(id = 7, value = "Failed to process batch application metadata for job %s")
     JobStartException failToProcessMetaData(@Cause Throwable e, String jobName);

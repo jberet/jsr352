@@ -12,8 +12,8 @@
 
 package org.jberet.testapps.loadBatchXml;
 
-import org.junit.Test;
 import org.jberet.testapps.common.AbstractIT;
+import org.junit.Test;
 
 /**
  * Verifies the following:

@@ -20,7 +20,7 @@ public final class Job implements Serializable {
     private static final long serialVersionUID = -3566969844084046522L;
 
     private final String id;
-    private boolean restartable;
+    private String restartable;
     private Properties properties;
     private final List<RefArtifact> listeners = new ArrayList<RefArtifact>();
     private final List<JobElement> jobElements = new ArrayList<JobElement>();
@@ -33,13 +33,17 @@ public final class Job implements Serializable {
         return id;
     }
 
-    public boolean getRestartable() {
+    public String getRestartable() {
         return restartable;
+    }
+
+    public boolean getRestartableBoolean() {
+        return Boolean.parseBoolean(restartable);
     }
 
     void setRestartable(String restartable) {
         if (restartable != null) {
-            this.restartable = Boolean.parseBoolean(restartable);
+            this.restartable = restartable;
         }
     }
 

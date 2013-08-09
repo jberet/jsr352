@@ -20,7 +20,7 @@ import java.io.Serializable;
 public abstract class Transition implements Serializable {
     private static final long serialVersionUID = -112488607616329302L;
 
-    private final String on;
+    private String on;
 
     Transition(String on) {
         this.on = on;
@@ -28,6 +28,10 @@ public abstract class Transition implements Serializable {
 
     public String getOn() {
         return on;
+    }
+
+    void setOn(String on) {
+        this.on = on;
     }
 
     public static abstract class Termination extends Transition {
@@ -65,7 +69,7 @@ public abstract class Transition implements Serializable {
 
     public static final class Stop extends Termination {
         private static final long serialVersionUID = -460513093260191729L;
-        private final String restart;
+        private String restart;
 
         Stop(String on, String restart) {
             super(on);
@@ -74,6 +78,10 @@ public abstract class Transition implements Serializable {
 
         public String getRestart() {
             return restart;
+        }
+
+        void setRestart(String restart) {
+            this.restart = restart;
         }
     }
 

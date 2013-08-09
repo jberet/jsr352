@@ -20,7 +20,7 @@ import java.io.Serializable;
 public class RefArtifact implements Serializable {
     private static final long serialVersionUID = -3101663828339367848L;
 
-    private final String ref;
+    private String ref;
     private Properties properties;
 
     RefArtifact(String ref) {
@@ -29,6 +29,10 @@ public class RefArtifact implements Serializable {
 
     public String getRef() {
         return ref;
+    }
+
+    void setRef(String ref) {
+        this.ref = ref;
     }
 
     public Properties getProperties() {

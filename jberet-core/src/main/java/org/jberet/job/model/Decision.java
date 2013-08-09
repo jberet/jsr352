@@ -15,7 +15,7 @@ package org.jberet.job.model;
 public final class Decision extends AbstractJobElement {
     private static final long serialVersionUID = -7022222093403964947L;
 
-    private final String ref;
+    private String ref;
     private Properties properties;
 
     Decision(String id, String ref) {
@@ -25,6 +25,10 @@ public final class Decision extends AbstractJobElement {
 
     public String getRef() {
         return ref;
+    }
+
+    void setRef(String ref) {
+        this.ref = ref;
     }
 
     public Properties getProperties() {

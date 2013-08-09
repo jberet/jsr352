@@ -37,11 +37,9 @@ import javax.batch.runtime.Metric;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
 
-import org.jberet.job.Chunk;
-import org.jberet.job.Collector;
-import org.jberet.job.Listener;
-import org.jberet.job.Listeners;
-import org.jberet.metadata.ExceptionClassFilterImpl;
+import org.jberet.job.model.Chunk;
+import org.jberet.job.model.ExceptionClassFilter;
+import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
 
@@ -78,9 +76,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private int skipLimit;  //default no limit
     private int retryLimit;  //default no limit
 
-    private ExceptionClassFilterImpl skippableExceptionClasses;
-    private ExceptionClassFilterImpl retryableExceptionClasses;
-    private ExceptionClassFilterImpl noRollbackExceptionClasses;
+    private ExceptionClassFilter skippableExceptionClasses;
+    private ExceptionClassFilter retryableExceptionClasses;
+    private ExceptionClassFilter noRollbackExceptionClasses;
     private int skipCount;
     private int retryCount;
 
@@ -95,19 +93,19 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         this.stepMetrics = stepRunner.batchContext.getStepExecution().getStepMetrics();
         this.chunk = chunk;
 
-        org.jberet.job.ItemReader readerElement = chunk.getReader();
+        RefArtifact readerElement = chunk.getReader();
         itemReader = jobContext.createArtifact(readerElement.getRef(), null, readerElement.getProperties(), batchContext);
 
-        org.jberet.job.ItemWriter writerElement = chunk.getWriter();
+        RefArtifact writerElement = chunk.getWriter();
         itemWriter = jobContext.createArtifact(writerElement.getRef(), null, writerElement.getProperties(), batchContext);
 
-        org.jberet.job.ItemProcessor processorElement = chunk.getProcessor();
+        RefArtifact processorElement = chunk.getProcessor();
         if (processorElement != null) {
             itemProcessor = jobContext.createArtifact(processorElement.getRef(), null, processorElement.getProperties(), batchContext);
         }
 
         if (stepRunner.collectorDataQueue != null) {
-            Collector collectorConfig = batchContext.getStep().getPartition().getCollector();
+            RefArtifact collectorConfig = batchContext.getStep().getPartition().getCollector();
             if (collectorConfig != null) {
                 collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
             }
@@ -128,7 +126,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
         } else if (attrVal.equals("custom")) {
             checkpointPolicy = "custom";
-            org.jberet.job.CheckpointAlgorithm alg = chunk.getCheckpointAlgorithm();
+            RefArtifact alg = chunk.getCheckpointAlgorithm();
             if (alg != null) {
                 checkpointAlgorithm = jobContext.createArtifact(alg.getRef(), null, alg.getProperties(), batchContext);
             } else {
@@ -147,9 +145,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             retryLimit = Integer.parseInt(attrVal);
         }
 
-        skippableExceptionClasses = (ExceptionClassFilterImpl) chunk.getSkippableExceptionClasses();
-        retryableExceptionClasses = (ExceptionClassFilterImpl) chunk.getRetryableExceptionClasses();
-        noRollbackExceptionClasses = (ExceptionClassFilterImpl) chunk.getNoRollbackExceptionClasses();
+        skippableExceptionClasses = chunk.getSkippableExceptionClasses();
+        retryableExceptionClasses = chunk.getRetryableExceptionClasses();
+        noRollbackExceptionClasses = chunk.getNoRollbackExceptionClasses();
         this.ut = stepRunner.ut;
         createChunkRelatedListeners();
     }
@@ -593,48 +591,46 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private void createChunkRelatedListeners() {
-        Listeners listeners = batchContext.getStep().getListeners();
-        if (listeners != null) {
-            String ref;
-            Object o;
-            for (Listener l : listeners.getListener()) {
-                ref = l.getRef();
-                Class<?> cls = null;
-                if (stepRunner.chunkRelatedListeners != null) {
-                    cls = stepRunner.chunkRelatedListeners.get(ref);
-                }
-                o = jobContext.createArtifact(ref, cls, l.getProperties(), batchContext);
-                allChunkRelatedListeners.add(o);
-                if (o instanceof ChunkListener) {
-                    chunkListeners.add((ChunkListener) o);
-                }
-                if (o instanceof ItemReadListener) {
-                    itemReadListeners.add((ItemReadListener) o);
-                }
-                if (o instanceof ItemWriteListener) {
-                    itemWriteListeners.add((ItemWriteListener) o);
-                }
-                if (o instanceof ItemProcessListener) {
-                    itemProcessListeners.add((ItemProcessListener) o);
-                }
-                if (o instanceof SkipReadListener) {
-                    skipReadListeners.add((SkipReadListener) o);
-                }
-                if (o instanceof SkipWriteListener) {
-                    skipWriteListeners.add((SkipWriteListener) o);
-                }
-                if (o instanceof SkipProcessListener) {
-                    skipProcessListeners.add((SkipProcessListener) o);
-                }
-                if (o instanceof RetryReadListener) {
-                    retryReadListeners.add((RetryReadListener) o);
-                }
-                if (o instanceof RetryWriteListener) {
-                    retryWriteListeners.add((RetryWriteListener) o);
-                }
-                if (o instanceof RetryProcessListener) {
-                    retryProcessListeners.add((RetryProcessListener) o);
-                }
+        final List<RefArtifact> listeners = batchContext.getStep().getListeners();
+        String ref;
+        Object o;
+        for (RefArtifact l : listeners) {
+            ref = l.getRef();
+            Class<?> cls = null;
+            if (stepRunner.chunkRelatedListeners != null) {
+                cls = stepRunner.chunkRelatedListeners.get(ref);
+            }
+            o = jobContext.createArtifact(ref, cls, l.getProperties(), batchContext);
+            allChunkRelatedListeners.add(o);
+            if (o instanceof ChunkListener) {
+                chunkListeners.add((ChunkListener) o);
+            }
+            if (o instanceof ItemReadListener) {
+                itemReadListeners.add((ItemReadListener) o);
+            }
+            if (o instanceof ItemWriteListener) {
+                itemWriteListeners.add((ItemWriteListener) o);
+            }
+            if (o instanceof ItemProcessListener) {
+                itemProcessListeners.add((ItemProcessListener) o);
+            }
+            if (o instanceof SkipReadListener) {
+                skipReadListeners.add((SkipReadListener) o);
+            }
+            if (o instanceof SkipWriteListener) {
+                skipWriteListeners.add((SkipWriteListener) o);
+            }
+            if (o instanceof SkipProcessListener) {
+                skipProcessListeners.add((SkipProcessListener) o);
+            }
+            if (o instanceof RetryReadListener) {
+                retryReadListeners.add((RetryReadListener) o);
+            }
+            if (o instanceof RetryWriteListener) {
+                retryWriteListeners.add((RetryWriteListener) o);
+            }
+            if (o instanceof RetryProcessListener) {
+                retryProcessListeners.add((RetryProcessListener) o);
             }
         }
     }

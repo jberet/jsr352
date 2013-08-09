@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import javax.batch.runtime.BatchStatus;
 
-import org.jberet.job.Flow;
+import org.jberet.job.model.Flow;
+import org.jberet.job.model.JobElement;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
 
@@ -33,8 +34,8 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
     }
 
     @Override
-    protected List<?> getJobElements() {
-        return flow.getDecisionOrFlowOrSplit();
+    protected List<? extends JobElement> getJobElements() {
+        return flow.getJobElements();
     }
 
     @Override
@@ -61,7 +62,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            String next = resolveTransitionElements(flow.getTransitionElements(), flow.getNext(), false);
+            String next = resolveTransitionElements(flow.getTransitionElements(), flow.getAttributeNext(), false);
             enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
         }
     }

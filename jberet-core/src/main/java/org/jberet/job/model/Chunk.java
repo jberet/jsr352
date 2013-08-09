@@ -19,6 +19,7 @@ public final class Chunk implements Serializable {
 
     private static final String DEFAULT_CHECKPOINT_POLICY = "item";
     private static final int DEFAULT_ITEM_COUNT = 10;
+    private static final int DEFAULT_LIMIT = 0;
 
     private RefArtifact reader;
     private RefArtifact processor;
@@ -27,22 +28,15 @@ public final class Chunk implements Serializable {
     private ExceptionClassFilter skippableExceptionClasses;
     private ExceptionClassFilter retryableExceptionClasses;
     private ExceptionClassFilter noRollbackExceptionClasses;
-
     private String checkpointPolicy = DEFAULT_CHECKPOINT_POLICY;
-    private int itemCount = DEFAULT_ITEM_COUNT;
-    private int timeLimit;  //in seconds, default 0
-    private int skipLimit;  //default no limit
-    private int retryLimit; //default no limit
+
+    //store these attributes as String since their value may be expressions that cannot parse to int or boolean
+    private String itemCount;
+    private String timeLimit;    //in seconds, default 0
+    private String skipLimit;    //default no limit
+    private String retryLimit;   //default no limit
 
     Chunk() {
-    }
-
-    public static String getDefaultCheckpointPolicy() {
-        return DEFAULT_CHECKPOINT_POLICY;
-    }
-
-    public static int getDefaultItemCount() {
-        return DEFAULT_ITEM_COUNT;
     }
 
     public RefArtifact getReader() {
@@ -109,43 +103,71 @@ public final class Chunk implements Serializable {
         this.checkpointPolicy = checkpointPolicy;
     }
 
-    public int getItemCount() {
+    public String getItemCount() {
         return itemCount;
+    }
+
+    public int getItemCountInt() {
+        if (itemCount == null) {
+            return DEFAULT_ITEM_COUNT;
+        }
+        return Integer.parseInt(itemCount);
     }
 
     void setItemCount(String itemCount) {
         if (itemCount != null) {
-            this.itemCount = Integer.parseInt(itemCount);
+            this.itemCount = itemCount;
         }
     }
 
-    public int getTimeLimit() {
+    public String getTimeLimit() {
         return timeLimit;
+    }
+
+    public int getTimeLimitInt() {
+        if (timeLimit == null) {
+            return DEFAULT_LIMIT;
+        }
+        return Integer.parseInt(timeLimit);
     }
 
     void setTimeLimit(String timeLimit) {
         if (timeLimit != null) {
-            this.timeLimit = Integer.parseInt(timeLimit);
+            this.timeLimit = timeLimit;
         }
     }
 
-    public int getSkipLimit() {
+    public String getSkipLimit() {
         return skipLimit;
+    }
+
+    public int getSkipLimitInt() {
+        if (skipLimit == null) {
+            return DEFAULT_LIMIT;
+        }
+        return Integer.parseInt(skipLimit);
     }
 
     void setSkipLimit(String skipLimit) {
         if (skipLimit != null) {
-            this.skipLimit = Integer.parseInt(skipLimit);
+            this.skipLimit = skipLimit;
         }
     }
 
-    public int getRetryLimit() {
+    public String getRetryLimit() {
         return retryLimit;
+    }
+
+    public int getRetryLimitInt() {
+        if (retryLimit == null) {
+            return DEFAULT_LIMIT;
+        }
+        return Integer.parseInt(retryLimit);
     }
 
     void setRetryLimit(String retryLimit) {
         if (retryLimit != null) {
-            this.retryLimit = Integer.parseInt(retryLimit);
+            this.retryLimit = retryLimit;
         }
     }
 }

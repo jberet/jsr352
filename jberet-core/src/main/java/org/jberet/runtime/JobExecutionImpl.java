@@ -24,7 +24,7 @@ import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.StepExecution;
 
-import org.jberet.job.Job;
+import org.jberet.job.model.Job;
 import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
 

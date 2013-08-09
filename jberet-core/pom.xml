@@ -26,29 +26,6 @@
 
     <artifactId>jberet-core</artifactId>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>${version.org.jvnet.jaxb2.maven2}</version>
-                <configuration>
-                    <strict>false</strict>
-                    <extension>true</extension>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <id>jaxb-generate</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>org.scannotation</groupId>

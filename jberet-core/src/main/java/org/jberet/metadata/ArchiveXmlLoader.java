@@ -17,21 +17,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import javax.batch.operations.JobStartException;
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.PropertyException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
-import org.jberet.job.BatchArtifacts;
-import org.jberet.job.Job;
+import org.jberet.job.model.BatchArtifacts;
+import org.jberet.job.model.JobParser;
 import org.jberet.util.BatchUtil;
-import org.xml.sax.SAXException;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -47,41 +37,25 @@ public class ArchiveXmlLoader {
     /**
      * Gets the batch artifacts definition object, loaded from the archive batch.xml if available.
      *
-     * @param classLoader the applicaton classloader used to load batch xml
+     * @param classLoader the application classloader used to load batch xml
      * @return the batch artifacts definition object
      */
     public static BatchArtifacts loadBatchXml(ClassLoader classLoader) throws JobStartException {
-        InputStream is;
         BatchArtifacts batchArtifacts = null;
-        is = classLoader.getResourceAsStream(ARCHIVE_BATCH_XML);
+        InputStream is = classLoader.getResourceAsStream(ARCHIVE_BATCH_XML);
         if (is == null) {  //the app doesn't contain META-INF/batch.xml
             return null;
         }
 
-        InputStream schemaStream = null;
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(BatchArtifacts.class);
-            Unmarshaller um = jaxbContext.createUnmarshaller();
-            schemaStream = classLoader.getResourceAsStream(BATCH_XML_SCHEMA);
-            um.setSchema(getSchema(BATCH_XML_SCHEMA, schemaStream));
-            JAXBElement<BatchArtifacts> root = um.unmarshal(new StreamSource(is), BatchArtifacts.class);
-            batchArtifacts = root.getValue();
+            batchArtifacts = JobParser.parseBatchArtifacts(is);
         } catch (Exception e) {
-            throw LOGGER.failToParseBindBatchXml(e, ARCHIVE_BATCH_XML);
+            throw LOGGER.failToParseBatchXml(e, ARCHIVE_BATCH_XML);
         } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
-            if (schemaStream != null) {
-                try {
-                    schemaStream.close();
-                } catch (IOException e) {
-                    //ignore
-                }
+            try {
+                is.close();
+            } catch (IOException e) {
+                //ignore
             }
         }
         return batchArtifacts;
@@ -93,7 +67,7 @@ public class ArchiveXmlLoader {
      * @param jobName  base name of the job xml document
      * @param rootType Job.class or Step.class
      * @param <T>      Job or Step
-     * @param cl       the applicaton classloader used to load job xml
+     * @param cl       the application classloader used to load job xml
      * @return the job or step root element
      */
     public static <T> T loadJobXml(String jobName, Class<T> rootType, ClassLoader... cl) throws JobStartException {
@@ -106,21 +80,10 @@ public class ArchiveXmlLoader {
             throw LOGGER.failToGetJobXml(e, jobName);
         }
 
-        InputStream schemaStream = null;
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Job.class);
-            Unmarshaller um = jaxbContext.createUnmarshaller();
-            schemaStream = classLoader.getResourceAsStream(JOB_XML_SCHEMA);
-            um.setSchema(getSchema(JOB_XML_SCHEMA, schemaStream));
-            try {
-                um.setProperty("com.sun.xml.bind.ObjectFactory", new JaxbObjectFactory());
-            } catch (PropertyException e) {
-                um.setProperty("com.sun.xml.internal.bind.ObjectFactory", new JaxbObjectFactory());
-            }
-            JAXBElement<T> root = um.unmarshal(new StreamSource(is), rootType);
-            jobOrStep = root.getValue();
+            jobOrStep = JobParser.parseJob(is);
         } catch (Exception e) {
-            throw LOGGER.failToParseBindJobXml(e, jobName);
+            throw LOGGER.failToParseJobXml(e, jobName);
         } finally {
             if (is != null) {
                 try {
@@ -129,20 +92,8 @@ public class ArchiveXmlLoader {
                     //ignore
                 }
             }
-            if (schemaStream != null) {
-                try {
-                    schemaStream.close();
-                } catch (IOException e) {
-                    //ignore
-                }
-            }
         }
         return (T) jobOrStep;
-    }
-
-    private static Schema getSchema(String schemaLocation, InputStream is) throws URISyntaxException, SAXException {
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        return schemaFactory.newSchema(new StreamSource(is));
     }
 
     private static InputStream getJobXml(String jobXml, ClassLoader classLoader) throws IOException {

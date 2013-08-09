@@ -10,40 +10,21 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.util;
+package org.jberet.job.model;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.Properties;
 import javax.batch.operations.BatchRuntimeException;
 
-import org.jberet.job.Analyzer;
-import org.jberet.job.Batchlet;
-import org.jberet.job.CheckpointAlgorithm;
-import org.jberet.job.Chunk;
-import org.jberet.job.Collector;
-import org.jberet.job.Decision;
-import org.jberet.job.End;
-import org.jberet.job.ExceptionClassFilter;
-import org.jberet.job.Fail;
-import org.jberet.job.Flow;
-import org.jberet.job.ItemProcessor;
-import org.jberet.job.ItemReader;
-import org.jberet.job.ItemWriter;
-import org.jberet.job.Job;
-import org.jberet.job.Listener;
-import org.jberet.job.Listeners;
-import org.jberet.job.Next;
-import org.jberet.job.Partition;
-import org.jberet.job.PartitionMapper;
-import org.jberet.job.PartitionPlan;
-import org.jberet.job.PartitionReducer;
-import org.jberet.job.Property;
-import org.jberet.job.Split;
-import org.jberet.job.Step;
-import org.jberet.job.Stop;
+import org.jberet.job.model.Transition.End;
+import org.jberet.job.model.Transition.Fail;
+import org.jberet.job.model.Transition.Next;
+import org.jberet.job.model.Transition.Stop;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -62,7 +43,7 @@ public final class PropertyResolver {
     private Properties systemProperties = System.getProperties();
     private Properties jobParameters;
     private Properties partitionPlanProperties;
-    private Deque<org.jberet.job.Properties> jobPropertiesStack = new ArrayDeque<org.jberet.job.Properties>();
+    private Deque<org.jberet.job.model.Properties> jobPropertiesStack = new ArrayDeque<org.jberet.job.model.Properties>();
 
     private boolean resolvePartitionPlanProperties;
 
@@ -78,7 +59,7 @@ public final class PropertyResolver {
         this.partitionPlanProperties = partitionPlanProperties;
     }
 
-    public void pushJobProperties(org.jberet.job.Properties jobProps) {
+    public void pushJobProperties(org.jberet.job.model.Properties jobProps) {
         this.jobPropertiesStack.push(jobProps);
     }
 
@@ -103,12 +84,12 @@ public final class PropertyResolver {
             }
         }
 
-        org.jberet.job.Properties props = job.getProperties();
+        org.jberet.job.model.Properties props = job.getProperties();
         //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
         resolve(props, false);
 
         resolve(job.getListeners());
-        resolveJobElements(job.getDecisionOrFlowOrSplit());
+        resolveJobElements(job.getJobElements());
 
         if (props != null) {  // the properties instance to pop is different from job.getProperties (a clone).
             jobPropertiesStack.pop();
@@ -142,11 +123,11 @@ public final class PropertyResolver {
     public void resolve(Step step) {
         resolve(step.getPartition());
         String oldVal, newVal;
-        oldVal = step.getNext();
+        oldVal = step.getAttributeNext();
         if (oldVal != null) {
             newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
-                step.setNext(newVal);
+                step.setAttributeNext(newVal);
             }
         }
         oldVal = step.getAllowStartIfComplete();
@@ -163,10 +144,10 @@ public final class PropertyResolver {
                 step.setStartLimit(newVal);
             }
         }
-        org.jberet.job.Properties props = step.getProperties();
+        org.jberet.job.model.Properties props = step.getProperties();
         resolve(props, false);
         resolve(step.getListeners());
-        Batchlet batchlet = step.getBatchlet();
+        RefArtifact batchlet = step.getBatchlet();
 
         if (batchlet != null) {
             oldVal = batchlet.getRef();
@@ -189,7 +170,7 @@ public final class PropertyResolver {
             return;
         }
         String oldVal, newVal;
-        Analyzer analyzer = partition.getAnalyzer();
+        RefArtifact analyzer = partition.getAnalyzer();
         if (analyzer != null) {
             oldVal = analyzer.getRef();
             newVal = resolve(oldVal);
@@ -198,7 +179,7 @@ public final class PropertyResolver {
             }
             resolve(analyzer.getProperties(), true);
         }
-        Collector collector = partition.getCollector();
+        RefArtifact collector = partition.getCollector();
         if (collector != null) {
             oldVal = collector.getRef();
             newVal = resolve(oldVal);
@@ -208,7 +189,7 @@ public final class PropertyResolver {
             resolve(collector.getProperties(), true);
 
         }
-        PartitionReducer reducer = partition.getReducer();
+        RefArtifact reducer = partition.getReducer();
         if (reducer != null) {
             oldVal = reducer.getRef();
             newVal = resolve(oldVal);
@@ -235,12 +216,12 @@ public final class PropertyResolver {
             }
             //plan properties should be resolved at job load time (1st pass)
             if (!resolvePartitionPlanProperties) {
-                for (org.jberet.job.Properties p : plan.getProperties()) {
+                for (org.jberet.job.model.Properties p : plan.getPropertiesList()) {
                     resolve(p, true);
                 }
             }
         }
-        PartitionMapper mapper = partition.getMapper();
+        RefArtifact mapper = partition.getMapper();
         if (mapper != null) {
             oldVal = mapper.getRef();
             newVal = resolve(oldVal);
@@ -299,7 +280,7 @@ public final class PropertyResolver {
             }
         }
 
-        ItemReader reader = chunk.getReader();
+        RefArtifact reader = chunk.getReader();
         oldVal = reader.getRef();
         newVal = resolve(oldVal);
         if (!oldVal.equals(newVal)) {
@@ -307,7 +288,7 @@ public final class PropertyResolver {
         }
         resolve(reader.getProperties(), true);
 
-        ItemWriter writer = chunk.getWriter();
+        RefArtifact writer = chunk.getWriter();
         oldVal = writer.getRef();
         newVal = resolve(oldVal);
         if (!oldVal.equals(newVal)) {
@@ -315,7 +296,7 @@ public final class PropertyResolver {
         }
         resolve(writer.getProperties(), true);
 
-        ItemProcessor processor = chunk.getProcessor();
+        RefArtifact processor = chunk.getProcessor();
         if (processor != null) {
             oldVal = processor.getRef();
             newVal = resolve(oldVal);
@@ -325,7 +306,7 @@ public final class PropertyResolver {
             resolve(processor.getProperties(), true);
         }
 
-        CheckpointAlgorithm checkpointAlgorithm = chunk.getCheckpointAlgorithm();
+        RefArtifact checkpointAlgorithm = chunk.getCheckpointAlgorithm();
         if (checkpointAlgorithm != null) {
             oldVal = checkpointAlgorithm.getRef();
             if (oldVal != null) {  //TODO remove the if, ref attr should be required
@@ -342,92 +323,79 @@ public final class PropertyResolver {
         if (filter == null) {
             return;
         }
-        String oldVal, newVal;
-        List<ExceptionClassFilter.Include> in = filter.getInclude();
-        if (in != null) {
-            for (ExceptionClassFilter.Include i : in) {
-                oldVal = i.getClazz();
-                newVal = resolve(oldVal);
-                if (!oldVal.equals(newVal)) {
-                    i.setClazz(newVal);
-                }
-            }
-        }
-        List<ExceptionClassFilter.Exclude> ex = filter.getExclude();
-        if (ex != null) {
-            for (ExceptionClassFilter.Exclude e : ex) {
-                oldVal = e.getClazz();
-                newVal = resolve(oldVal);
-                if (!oldVal.equals(newVal)) {
-                    e.setClazz(newVal);
-                }
+        resolveIncludeOrExclude(filter.getInclude());
+        resolveIncludeOrExclude(filter.getExclude());
+    }
+
+    private void resolveIncludeOrExclude(List<String> clude) {
+        for (ListIterator<String> it = clude.listIterator(); it.hasNext();) {
+            String oldVal = it.next();
+            String newVal = resolve(oldVal);
+            if (!oldVal.equals(newVal)) {
+                it.set(newVal);
             }
         }
     }
 
     private void resolve(Split split) {
-        String oldVal = split.getNext();
+        String oldVal = split.getAttributeNext();
         if (oldVal != null) {
             String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
-                split.setNext(newVal);
+                split.setAttributeNext(newVal);
             }
         }
-        for (Flow e : split.getFlow()) {
+        for (Flow e : split.getFlows()) {
             resolve(e);
         }
     }
 
     public void resolve(Flow flow) {
-        String oldVal = flow.getNext();
+        String oldVal = flow.getAttributeNext();
         if (oldVal != null) {
             String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
-                flow.setNext(newVal);
+                flow.setAttributeNext(newVal);
             }
         }
         resolveTransitionElements(flow.getTransitionElements());
-        resolveJobElements(flow.getDecisionOrFlowOrSplit());
+        resolveJobElements(flow.getJobElements());
     }
 
-    private void resolve(org.jberet.job.Properties props, boolean popProps) {
+    private void resolve(org.jberet.job.model.Properties props, boolean popProps) {
         if (props == null) {
             return;
         }
 
-        //push individula property to resolver one by one, so only those properties that are already defined can be
+        //push individual property to resolver one by one, so only those properties that are already defined can be
         //visible to the resolver.
-        org.jberet.job.Properties propsToPush = new org.jberet.job.Properties();
+        org.jberet.job.model.Properties propsToPush = new org.jberet.job.model.Properties();
         jobPropertiesStack.push(propsToPush);
 
         try {
-            String oldVal = props.getPartition();
-            String newVal;
-            if (oldVal != null) {
-                newVal = resolve(oldVal);
-                if (!oldVal.equals(newVal)) {
-                    props.setPartition(newVal);
+            final String oldPartitionVal = props.getPartition();
+            if (oldPartitionVal != null) {
+                final String newPartitionVal = resolve(oldPartitionVal);
+                if (!oldPartitionVal.equals(newPartitionVal)) {
+                    props.setPartition(newPartitionVal);
                 }
             }
 
-            for (Property p : props.getProperty()) {
-                oldVal = p.getName();
-                newVal = resolve(oldVal);
-                if (!oldVal.equals(newVal)) {
-                    p.setName(newVal);
-                }
-
-                propsToPush.getProperty().add(p);
-
-                oldVal = p.getValue();
-                if (oldVal != null) {
-                    newVal = resolve(oldVal);
+            Map<String, String> propertiesMapping = props.getPropertiesMapping();
+            for (final Map.Entry<String, String> entry : propertiesMapping.entrySet()) {
+                final String oldKey = entry.getKey();
+                final String newKey = resolve(oldKey);
+                final String oldVal = entry.getValue();
+                final String newVal = resolve(oldVal);
+                if (oldKey.equals(newKey)) {
                     if (!oldVal.equals(newVal)) {
-                        p.setValue(newVal);
+                        props.add(newKey, newVal);
                     }
                 } else {
-                    p.setValue("");
+                    props.remove(oldKey);
+                    props.add(newKey, newVal);
                 }
+                propsToPush.add(newKey, newVal);
             }
         } finally {
             if (popProps) {
@@ -436,11 +404,11 @@ public final class PropertyResolver {
         }
     }
 
-    private void resolve(Listeners listeners) {
+    private void resolve(List<RefArtifact> listeners) {
         if (listeners == null) {
             return;
         }
-        for (Listener l : listeners.getListener()) {
+        for (RefArtifact l : listeners) {
             String oldVal = l.getRef();
             String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
@@ -663,8 +631,8 @@ public final class PropertyResolver {
                 val = jobParameters.getProperty(variableName);
             }
         } else if (propCategory.equals(jobPropertiesToken)) {
-            for (org.jberet.job.Properties p : jobPropertiesStack) {
-                val = BatchUtil.getBatchProperty(p, variableName);
+            for (org.jberet.job.model.Properties p : jobPropertiesStack) {
+                val = p.get(variableName);
                 if (val != null) {
                     break;
                 }
