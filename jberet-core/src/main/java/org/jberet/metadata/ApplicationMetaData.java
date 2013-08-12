@@ -68,7 +68,10 @@ public class ApplicationMetaData {
             return result;
         }
         if (batchArtifacts != null) {
-            return batchArtifacts.getClassNameForRef(ref);
+            result = batchArtifacts.getClassNameForRef(ref);
+            if (result != null) {
+                return result;
+            }
         }
         return ref;
     }

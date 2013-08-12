@@ -13,30 +13,36 @@
 package org.jberet.job.model;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import javax.batch.operations.BatchRuntimeException;
+import javax.xml.stream.XMLStreamException;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.jberet.util.BatchUtil.NL;
+
 public final class JobParserTest {
     private static final String id1 = "id1";
     private static final String id2 = "id2";
+    private static final String id3 = "id3";
     private static final String class1 = "java.util.Date";
     private static final String class2 = "java.lang.Byte";
+    private static final String class3 = "java.lang.Integer";
     private static final String SAMPLE_JOB_XML = "META-INF/batch-jobs/sample-job.xml";
 
     @Test
     public void testParseBatchArtifacts() throws Exception {
         final String batchXml =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-
-                        "<batch-artifacts xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\">" +
-                        "<!-- comments 1 -->" +
-                        "<ref id=\"" + id1 + "\" class=\"" + class1 + "\"/>" +
-                        "<ref id=\"" + id2 + "\" class=\"" + class2 + "\"/>" +
-                        "<!-- comments 2 -->" +
-                        "</batch-artifacts>";
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + NL +
+                        "<batch-artifacts xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\">" + NL +
+                        "<!-- comments 1 -->" + NL +
+                        "<ref id=\"" + id1 + "\" class=\"" + class1 + "\"/>" + NL +
+                        "<ref id=\"" + id2 + "\" class=\"" + class2 + "\"/>" + NL +
+                        "<!-- comments 2 -->" + NL +
+                        "</batch-artifacts>" + NL;
 
         ByteArrayInputStream is = null;
         try {
@@ -52,6 +58,84 @@ public final class JobParserTest {
                 is.close();
             }
         }
+    }
+
+    @Test
+    public void testBatchXmlMissingEndBatchArtifacts() throws Exception {
+        final String batchXml =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + NL +
+                        "<batch-artifacts xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\">" + NL +
+                        "<!-- comments 1 -->" + NL +
+                        "<ref id=\"" + id1 + "\" class=\"" + class1 + "\"/>" + NL +
+                        "<ref id=\"" + id2 + "\" class=\"" + class2 + "\"/>" + NL;
+//                        "</batch-artifacts>" + NL;     missing root element closing
+
+        checkInvalidBatchXml(batchXml);
+    }
+
+    @Test
+    public void testBatchXmlMissingEndRef() throws Exception {
+        final String batchXml =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + NL +
+                        "<batch-artifacts xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\">" + NL +
+                        "<!-- comments 1 -->" + NL +
+                        "<ref id=\"" + id1 + "\" class=\"" + class1 + "\">" + NL +
+                        "</ref>" + NL +
+                        "<ref id=\"" + id2 + "\" class=\"" + class2 + "\">" + NL +    //missing ref element closing
+                        "<ref id=\"" + id3 + "\" class=\"" + class3 + "\"/>" + NL +
+                        "</batch-artifacts>" + NL;
+
+        checkInvalidBatchXml(batchXml);
+    }
+
+
+    @Test
+    public void testBatchXmlUnknownElement() throws Exception {
+        final String batchXml =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + NL +
+                        "<batch-artifacts xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\">" + NL +
+                        "<ref id=\"" + id1 + "\" class=\"" + class1 + "\"/>" + NL +
+                        "<ref1 id=\"" + id2 + "\" class=\"" + class2 + "\"/>" + NL +
+                        "</batch-artifacts>" + NL;
+        checkInvalidBatchXml(batchXml);
+    }
+
+    @Test
+    public void testBatchXmlWrongAttribute() throws Exception {
+        final String batchXml =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + NL +
+                        "<batch-artifacts xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\">" + NL +
+                        "<ref id=\"" + id1 + "\" value=\"" + class1 + "\"/>" + NL +
+                        "</batch-artifacts>" + NL;
+        checkInvalidBatchXml(batchXml);
+    }
+
+    @Test
+    public void testJobXmlUnknownElement() throws Exception {
+        final String batchXml =
+        "<job id=\"job1\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version=\"1.0\">" + NL +
+          "<step id=\"step1\">" + NL +
+            "<properties>" + NL +
+              "<property name=\"step-prop\" value=\"step-prop\"/>" + NL +
+            "</properties>" + NL +
+            "<batchlet ref=\"batchlet1\">" + NL +
+              "<reader ref=\"R1\"></reader>" + NL +     //unexpected element
+            "</batchlet>" + NL +
+          "</step>" + NL +
+        "</job>" + NL;
+        checkInvalidJobXml(batchXml);
+    }
+
+    @Test
+    public void testJobXmlWrongAttribute() throws Exception {
+        final String batchXml =
+        "<job id=\"job1\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version=\"1.0\">" + NL +
+          "<step id=\"step1\">" + NL +
+            "<batchlet id=\"batchlet1\">" + NL +        //the attribute should be "ref"
+            "</batchlet>" + NL +
+          "</step>" + NL +
+        "</job>" + NL;
+        checkInvalidJobXml(batchXml);
     }
 
     @Test
@@ -82,6 +166,40 @@ public final class JobParserTest {
                 checkSplit(split, null);
             } else {
                 Assert.fail("Unexpected job element type: " + element);
+            }
+        }
+    }
+
+    private void checkInvalidBatchXml(String xmlContent) throws IOException {
+        InputStream is = null;
+        try {
+            is = new ByteArrayInputStream(xmlContent.getBytes());
+            JobParser.parseBatchArtifacts(is);
+            Assert.fail("Exception should already have been thrown.");
+        } catch (XMLStreamException e) {
+            System.out.printf("Got expected exception %s%n", e);
+        } catch (BatchRuntimeException e) {
+            System.out.printf("Got expected exception %s%n", e);
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+
+    private void checkInvalidJobXml(String xmlContent) throws IOException {
+        InputStream is = null;
+        try {
+            is = new ByteArrayInputStream(xmlContent.getBytes());
+            JobParser.parseJob(is);
+            Assert.fail("Exception should already have been thrown.");
+        } catch (XMLStreamException e) {
+            System.out.printf("Got expected exception %s%n", e);
+        } catch (BatchRuntimeException e) {
+            System.out.printf("Got expected exception %s%n", e);
+        } finally {
+            if (is != null) {
+                is.close();
             }
         }
     }

@@ -227,7 +227,9 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     void persisted(Object obj, long id);
 
-    @Message(id = 56, value = "Unexpected XML element %s at location %s")
+    @Message(id = 56, value = "Unexpected XML element '%s' at location %s")
     BatchRuntimeException unexpectedXmlElement(String element, Location location);
 
+    @Message(id = 57, value = "Failed to get XML attribute '%s' at location %s")
+    BatchRuntimeException failToGetAttribute(String attributeName, Location location);
 }

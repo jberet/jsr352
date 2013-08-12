@@ -51,8 +51,8 @@ public final class JobParser {
                     case START_ELEMENT:
                         switch (element) {
                             case JOB:
-                                job = new Job(getAttributeValue(reader, XmlAttribute.ID));
-                                job.setRestartable(getAttributeValue(reader, XmlAttribute.RESTARTABLE));
+                                job = new Job(getAttributeValue(reader, XmlAttribute.ID, true));
+                                job.setRestartable(getAttributeValue(reader, XmlAttribute.RESTARTABLE, false));
                                 break;
                             case STEP:
                                 job.addJobElement(parseStep(reader));
@@ -73,12 +73,12 @@ public final class JobParser {
                                 job.addListeners(parseListeners(reader));
                                 break;
                             default:
-                                throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                                throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                         }
                         break;
                     case END_ELEMENT:
                         if (element != XmlElement.JOB) {
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                         }
                 }
             }
@@ -112,15 +112,15 @@ public final class JobParser {
                                 batchArtifacts = new BatchArtifacts();
                                 break;
                             case REF:
-                                batchArtifacts.addRef(getAttributeValue(reader, XmlAttribute.ID), getAttributeValue(reader, XmlAttribute.CLASS));
+                                batchArtifacts.addRef(getAttributeValue(reader, XmlAttribute.ID, true), getAttributeValue(reader, XmlAttribute.CLASS, true));
                                 break;
                             default:
-                                throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                                throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                         }
                         break;
                     case END_ELEMENT:
                         if (element != XmlElement.BATCH_ARTIFACTS && element != XmlElement.REF) {
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                         }
                 }
             }
@@ -131,10 +131,10 @@ public final class JobParser {
     }
 
     private static Step parseStep(final XMLStreamReader reader) throws XMLStreamException {
-        final Step step = new Step(getAttributeValue(reader, XmlAttribute.ID));
-        step.setStartLimit(getAttributeValue(reader, XmlAttribute.START_LIMIT));
-        step.setAllowStartIfComplete(getAttributeValue(reader, XmlAttribute.ALLOW_START_IF_COMPLETE));
-        step.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT));
+        final Step step = new Step(getAttributeValue(reader, XmlAttribute.ID, true));
+        step.setStartLimit(getAttributeValue(reader, XmlAttribute.START_LIMIT, false));
+        step.setAllowStartIfComplete(getAttributeValue(reader, XmlAttribute.ALLOW_START_IF_COMPLETE, false));
+        step.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT, false));
 
         while (reader.hasNext()) {
             final int eventType = reader.next();
@@ -173,7 +173,7 @@ public final class JobParser {
                             step.addTransitionElement(parseStop(reader));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
@@ -181,19 +181,23 @@ public final class JobParser {
                         case STEP:
                             return step;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
         throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
-    private static String getAttributeValue(final XMLStreamReader reader, final XmlAttribute attribute) {
-        return reader.getAttributeValue(namespaceURI, attribute.getLocalName());
+    private static String getAttributeValue(final XMLStreamReader reader, final XmlAttribute attribute, final boolean required) {
+        final String val = reader.getAttributeValue(namespaceURI, attribute.getLocalName());
+        if (val == null && required) {
+            throw BatchLogger.LOGGER.failToGetAttribute(attribute.getLocalName(), reader.getLocation());
+        }
+        return val;
     }
 
     private static Decision parseDecision(final XMLStreamReader reader) throws XMLStreamException {
-        final Decision decision = new Decision(getAttributeValue(reader, XmlAttribute.ID), getAttributeValue(reader, XmlAttribute.REF));
+        final Decision decision = new Decision(getAttributeValue(reader, XmlAttribute.ID, true), getAttributeValue(reader, XmlAttribute.REF, true));
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -219,7 +223,7 @@ public final class JobParser {
                             decision.addTransitionElement(parseStop(reader));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
@@ -227,7 +231,7 @@ public final class JobParser {
                         case DECISION:
                             return decision;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -235,8 +239,8 @@ public final class JobParser {
     }
 
     private static Flow parseFlow(final XMLStreamReader reader) throws XMLStreamException {
-        final Flow flow = new Flow(getAttributeValue(reader, XmlAttribute.ID));
-        flow.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT));
+        final Flow flow = new Flow(getAttributeValue(reader, XmlAttribute.ID, true));
+        flow.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT, false));
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -271,7 +275,7 @@ public final class JobParser {
                             flow.addTransitionElement(parseStop(reader));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
@@ -279,7 +283,7 @@ public final class JobParser {
                         case FLOW:
                             return flow;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -287,8 +291,8 @@ public final class JobParser {
     }
 
     private static Split parseSplit(final XMLStreamReader reader) throws XMLStreamException {
-        final Split split = new Split(getAttributeValue(reader, XmlAttribute.ID));
-        split.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT));
+        final Split split = new Split(getAttributeValue(reader, XmlAttribute.ID, true));
+        split.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT, false));
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -300,14 +304,14 @@ public final class JobParser {
                     if (element == XmlElement.FLOW) {
                         split.addFlow(parseFlow(reader));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.SPLIT) {
                         return split;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -316,7 +320,7 @@ public final class JobParser {
 
     private static Properties parseProperties(final XMLStreamReader reader) throws XMLStreamException {
         final Properties properties = new Properties();
-        properties.setPartition(getAttributeValue(reader, XmlAttribute.PARTITION));
+        properties.setPartition(getAttributeValue(reader, XmlAttribute.PARTITION, false));
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -326,16 +330,16 @@ public final class JobParser {
             switch (eventType) {
                 case START_ELEMENT:
                     if (element == XmlElement.PROPERTY) {
-                        properties.add(getAttributeValue(reader, XmlAttribute.NAME), getAttributeValue(reader, XmlAttribute.VALUE));
+                        properties.add(getAttributeValue(reader, XmlAttribute.NAME, true), getAttributeValue(reader, XmlAttribute.VALUE, false));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.PROPERTIES) {
                         return properties;
                     } else if (element != XmlElement.PROPERTY) {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -355,14 +359,14 @@ public final class JobParser {
                     if (element == XmlElement.LISTENER) {
                         listeners.add(parseRefArtifact(reader, element));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.LISTENERS) {
                         return listeners;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -370,7 +374,7 @@ public final class JobParser {
     }
 
     private static RefArtifact parseRefArtifact(final XMLStreamReader reader, final XmlElement artifactElementType) throws XMLStreamException {
-        final RefArtifact refArtifact = new RefArtifact(getAttributeValue(reader, XmlAttribute.REF));
+        final RefArtifact refArtifact = new RefArtifact(getAttributeValue(reader, XmlAttribute.REF, true));
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -382,14 +386,14 @@ public final class JobParser {
                     if (element == XmlElement.PROPERTIES) {
                         refArtifact.setProperties(parseProperties(reader));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == artifactElementType) {
                         return refArtifact;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -398,11 +402,11 @@ public final class JobParser {
 
     private static Chunk parseChunk(final XMLStreamReader reader) throws XMLStreamException {
         final Chunk chunk = new Chunk();
-        chunk.setCheckpointPolicy(getAttributeValue(reader, XmlAttribute.CHECKPOINT_POLICY));
-        chunk.setItemCount(getAttributeValue(reader, XmlAttribute.ITEM_COUNT));
-        chunk.setTimeLimit(getAttributeValue(reader, XmlAttribute.TIME_LIMIT));
-        chunk.setSkipLimit(getAttributeValue(reader, XmlAttribute.SKIP_LIMIT));
-        chunk.setRetryLimit(getAttributeValue(reader, XmlAttribute.RETRY_LIMIT));
+        chunk.setCheckpointPolicy(getAttributeValue(reader, XmlAttribute.CHECKPOINT_POLICY, true));
+        chunk.setItemCount(getAttributeValue(reader, XmlAttribute.ITEM_COUNT, true));
+        chunk.setTimeLimit(getAttributeValue(reader, XmlAttribute.TIME_LIMIT, true));
+        chunk.setSkipLimit(getAttributeValue(reader, XmlAttribute.SKIP_LIMIT, true));
+        chunk.setRetryLimit(getAttributeValue(reader, XmlAttribute.RETRY_LIMIT, true));
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -434,14 +438,14 @@ public final class JobParser {
                             chunk.setNoRollbackExceptionClasses(parseExceptionClassFilter(reader, XmlElement.NO_ROLLBACK_EXCEPTION_CLASSES));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.CHUNK) {
                         return chunk;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -475,14 +479,14 @@ public final class JobParser {
                             partition.setReducer(parseRefArtifact(reader, XmlElement.REDUCER));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.PARTITION) {
                         return partition;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -491,8 +495,8 @@ public final class JobParser {
 
     private static PartitionPlan parsePartitionPlan(final XMLStreamReader reader) throws XMLStreamException {
         final PartitionPlan partitionPlan = new PartitionPlan();
-        partitionPlan.setThreads(getAttributeValue(reader, XmlAttribute.THREADS));
-        partitionPlan.setPartitions(getAttributeValue(reader, XmlAttribute.PARTITIONS));
+        partitionPlan.setThreads(getAttributeValue(reader, XmlAttribute.THREADS, false));
+        partitionPlan.setPartitions(getAttributeValue(reader, XmlAttribute.PARTITIONS, false));
 
         while (reader.hasNext()) {
             final int eventType = reader.next();
@@ -505,14 +509,14 @@ public final class JobParser {
                     if (element == XmlElement.PROPERTIES) {
                         partitionPlan.addProperties(parseProperties(reader));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.PLAN) {
                         return partitionPlan;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
@@ -520,29 +524,29 @@ public final class JobParser {
     }
 
     private static Transition.Next parseNext(final XMLStreamReader reader) throws XMLStreamException {
-        final Transition.Next next = new Transition.Next(getAttributeValue(reader, XmlAttribute.ON));
-        next.setTo(getAttributeValue(reader, XmlAttribute.TO));
+        final Transition.Next next = new Transition.Next(getAttributeValue(reader, XmlAttribute.ON, true));
+        next.setTo(getAttributeValue(reader, XmlAttribute.TO, true));
         finishTransitionElement(reader, XmlElement.NEXT);
         return next;
     }
 
     private static Transition.Fail parseFail(final XMLStreamReader reader) throws XMLStreamException {
-        final Transition.Fail fail = new Transition.Fail(getAttributeValue(reader, XmlAttribute.ON));
-        fail.setExitStatus(getAttributeValue(reader, XmlAttribute.EXIT_STATUS));
+        final Transition.Fail fail = new Transition.Fail(getAttributeValue(reader, XmlAttribute.ON, true));
+        fail.setExitStatus(getAttributeValue(reader, XmlAttribute.EXIT_STATUS, false));
         finishTransitionElement(reader, XmlElement.FAIL);
         return fail;
     }
 
     private static Transition.End parseEnd(final XMLStreamReader reader) throws XMLStreamException {
-        final Transition.End end = new Transition.End(getAttributeValue(reader, XmlAttribute.ON));
-        end.setExitStatus(getAttributeValue(reader, XmlAttribute.EXIT_STATUS));
+        final Transition.End end = new Transition.End(getAttributeValue(reader, XmlAttribute.ON, true));
+        end.setExitStatus(getAttributeValue(reader, XmlAttribute.EXIT_STATUS, false));
         finishTransitionElement(reader, XmlElement.END);
         return end;
     }
 
     private static Transition.Stop parseStop(final XMLStreamReader reader) throws XMLStreamException {
-        final Transition.Stop stop = new Transition.Stop(getAttributeValue(reader, XmlAttribute.ON), getAttributeValue(reader, XmlAttribute.RESTART));
-        stop.setExitStatus(getAttributeValue(reader, XmlAttribute.EXIT_STATUS));
+        final Transition.Stop stop = new Transition.Stop(getAttributeValue(reader, XmlAttribute.ON, true), getAttributeValue(reader, XmlAttribute.RESTART, false));
+        stop.setExitStatus(getAttributeValue(reader, XmlAttribute.EXIT_STATUS, false));
         finishTransitionElement(reader, XmlElement.STOP);
         return stop;
     }
@@ -557,7 +561,7 @@ public final class JobParser {
             if (eventType == END_ELEMENT && element == transitionElement) {
                 return;
             }
-            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
         }
         throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
@@ -574,20 +578,20 @@ public final class JobParser {
                 case START_ELEMENT:
                     switch (element) {
                         case INCLUDE:
-                            filter.addInclude(getAttributeValue(reader, XmlAttribute.CLASS));
+                            filter.addInclude(getAttributeValue(reader, XmlAttribute.CLASS, true));
                             break;
                         case EXCLUDE:
-                            filter.addExclude(getAttributeValue(reader, XmlAttribute.CLASS));
+                            filter.addExclude(getAttributeValue(reader, XmlAttribute.CLASS, true));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == artifactElementType) {
                         return filter;
                     } else if (element != XmlElement.INCLUDE && element != XmlElement.EXCLUDE) {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(element.getLocalName(), reader.getLocation());
+                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }

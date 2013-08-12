@@ -15,8 +15,6 @@ package org.jberet.util;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import javax.batch.operations.JobStartException;
 
 import org.jberet.job.model.Flow;
@@ -29,7 +27,6 @@ import org.jboss.marshalling.cloner.ObjectCloners;
 
 public class BatchUtil {
     public static final String NL = System.getProperty("line.separator");
-    private static ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
     private static final ObjectClonerFactory clonerFactory = ObjectCloners.getSerializingObjectClonerFactory();
     private static final ObjectCloner cloner = clonerFactory.createCloner(new ClonerConfiguration());
 
@@ -39,10 +36,6 @@ public class BatchUtil {
             cl = BatchUtil.class.getClassLoader();
         }
         return cl;
-    }
-
-    public static ExecutorService getExecutorService() {
-        return executorService;
     }
 
     public static String propertiesToString(Properties properties) {
@@ -88,5 +81,4 @@ public class BatchUtil {
             throw new JobStartException(e);
         }
     }
-
 }

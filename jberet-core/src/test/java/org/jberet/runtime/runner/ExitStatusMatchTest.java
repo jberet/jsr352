@@ -12,7 +12,7 @@
 
 package org.jberet.runtime.runner;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.jberet.runtime.runner.StepExecutionRunner.matches;
