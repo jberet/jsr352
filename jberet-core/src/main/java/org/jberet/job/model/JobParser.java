@@ -161,6 +161,9 @@ public final class JobParser {
                             step.setPartition(parsePartition(reader));
                             break;
                         case NEXT:
+                            if (step.getAttributeNext() != null) {
+                                throw BatchLogger.LOGGER.cannotHaveBothNextAttributeAndElement(reader.getLocation(), step.getAttributeNext());
+                            }
                             step.addTransitionElement(parseNext(reader));
                             break;
                         case FAIL:
@@ -263,6 +266,9 @@ public final class JobParser {
                             flow.addJobElement(parseStep(reader));
                             break;
                         case NEXT:
+                            if (flow.getAttributeNext() != null) {
+                                throw BatchLogger.LOGGER.cannotHaveBothNextAttributeAndElement(reader.getLocation(), flow.getAttributeNext());
+                            }
                             flow.addTransitionElement(parseNext(reader));
                             break;
                         case FAIL:
@@ -402,11 +408,11 @@ public final class JobParser {
 
     private static Chunk parseChunk(final XMLStreamReader reader) throws XMLStreamException {
         final Chunk chunk = new Chunk();
-        chunk.setCheckpointPolicy(getAttributeValue(reader, XmlAttribute.CHECKPOINT_POLICY, true));
-        chunk.setItemCount(getAttributeValue(reader, XmlAttribute.ITEM_COUNT, true));
-        chunk.setTimeLimit(getAttributeValue(reader, XmlAttribute.TIME_LIMIT, true));
-        chunk.setSkipLimit(getAttributeValue(reader, XmlAttribute.SKIP_LIMIT, true));
-        chunk.setRetryLimit(getAttributeValue(reader, XmlAttribute.RETRY_LIMIT, true));
+        chunk.setCheckpointPolicy(getAttributeValue(reader, XmlAttribute.CHECKPOINT_POLICY, false));
+        chunk.setItemCount(getAttributeValue(reader, XmlAttribute.ITEM_COUNT, false));
+        chunk.setTimeLimit(getAttributeValue(reader, XmlAttribute.TIME_LIMIT, false));
+        chunk.setSkipLimit(getAttributeValue(reader, XmlAttribute.SKIP_LIMIT, false));
+        chunk.setRetryLimit(getAttributeValue(reader, XmlAttribute.RETRY_LIMIT, false));
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {

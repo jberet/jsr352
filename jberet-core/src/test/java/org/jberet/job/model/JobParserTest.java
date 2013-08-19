@@ -229,7 +229,7 @@ public final class JobParserTest {
         Assert.assertEquals(id, decision.getId());
         Assert.assertEquals("ref1", decision.getRef());
         checkProperties(decision.getProperties());
-        checkTransitionElements(decision.getTransitionElements());
+        checkTransitionElements(decision.getTransitionElements(), null);
     }
 
     private void checkFlow(final Flow flow, final String parentId) throws Exception {
@@ -238,8 +238,8 @@ public final class JobParserTest {
             flowId = parentId + "." + flowId;
         }
         Assert.assertEquals(flowId, flow.getId());
-        Assert.assertEquals("next1", flow.getAttributeNext());
-        checkTransitionElements(flow.getTransitionElements());
+//        Assert.assertEquals("next1", flow.getAttributeNext());    defer this check to checkTransitionElements
+        checkTransitionElements(flow.getTransitionElements(), flow.getAttributeNext());
 
         for (JobElement e : flow.getJobElements()) {
             if (e instanceof Decision) {
@@ -277,11 +277,11 @@ public final class JobParserTest {
         Assert.assertEquals(stepId, step.getId());
         Assert.assertEquals(5, step.getStartLimitInt());
         Assert.assertEquals(true, step.getAllowStartIfCompleteBoolean());
-        Assert.assertEquals("next1", step.getAttributeNext());
+//        Assert.assertEquals("next1", step.getAttributeNext());    defer this check to checkTransitionElements() along with next element
         checkProperties(step.getProperties());
         checkListeners(step.getListeners());
         checkPartition(step.getPartition());
-        checkTransitionElements(step.getTransitionElements());
+        checkTransitionElements(step.getTransitionElements(), step.getAttributeNext());
 
         boolean foundBatchletOrChunk = false;
         if (step.getChunk() != null) {
@@ -355,14 +355,18 @@ public final class JobParserTest {
         }
     }
 
-    private void checkTransitionElements(final List<Transition> transitions) throws Exception {
-        Assert.assertEquals(4, transitions.size());
+    private void checkTransitionElements(final List<Transition> transitions, final String nextAttributeValue) throws Exception {
+        int transitioinElementCount = nextAttributeValue == null ? 4 : 3;
+        Assert.assertEquals(transitioinElementCount, transitions.size());
         boolean foundNext = false;
         boolean foundStop = false;
         boolean foundFail = false;
         boolean foundEnd = false;
         for (Transition e : transitions) {
             if (e instanceof Transition.Next) {
+                if (nextAttributeValue != null) {
+                    Assert.fail("Cannot have both next attribute and next element. Next attribute is already set to " + nextAttributeValue);
+                }
                 Transition.Next next = (Transition.Next) e;
                 Assert.assertEquals("on1", next.getOn());
                 Assert.assertEquals("to1", next.getTo());
@@ -387,7 +391,12 @@ public final class JobParserTest {
                 Assert.fail("Unexpected job transition type: " + e);
             }
         }
-        Assert.assertEquals(true, foundNext);
+        if (nextAttributeValue == null) {
+            Assert.assertEquals(true, foundNext);
+        } else {
+            Assert.assertEquals(false, foundNext);
+            Assert.assertEquals("next1", nextAttributeValue);
+        }
         Assert.assertEquals(true, foundStop);
         Assert.assertEquals(true, foundFail);
         Assert.assertEquals(true, foundEnd);

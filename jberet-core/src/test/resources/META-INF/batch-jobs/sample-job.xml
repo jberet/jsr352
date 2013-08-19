@@ -53,7 +53,7 @@ the 2nd properties or listener use number 2 instead of 1 in its id or ref
         <stop on="on1" exit-status="exit-status1" restart="restart1"/>
     </decision>
 
-    <flow id="flow1" next="next1">
+    <flow id="flow1">
         <decision id="flow1.decision1" ref="ref1">
             <properties partition="0">
                 <property name="name1" value="value1"/>
@@ -66,7 +66,7 @@ the 2nd properties or listener use number 2 instead of 1 in its id or ref
             <fail on="on1" exit-status="exit-status1"/>
         </decision>
 
-        <step id="flow1.step1" start-limit="5" allow-start-if-complete="true" next="next1">
+        <step id="flow1.step1" start-limit="5" allow-start-if-complete="true">
             <properties partition="0">
                 <property name="name1" value="value1"/>
                 <property name="name2" value="value2"/>
@@ -215,18 +215,18 @@ the 2nd properties or listener use number 2 instead of 1 in its id or ref
 
                 <end on="on1" exit-status="exit-status1"/>
                 <fail on="on1" exit-status="exit-status1"/>
-                <next on="on1" to="to1"/>
+                <!-- next attribute is already specified, so no next element -->
                 <stop on="on1" exit-status="exit-status1" restart="restart1"/>
             </step>
 
             <end on="on1" exit-status="exit-status1"/>
             <fail on="on1" exit-status="exit-status1"/>
-            <next on="on1" to="to1"/>
+            <!-- next attribute is already specified, so no next element -->
             <stop on="on1" exit-status="exit-status1" restart="restart1"/>
         </flow>
     </split>
 
-    <step id="step1" start-limit="5" allow-start-if-complete="true" next="next1">
+    <step id="step1" start-limit="5" allow-start-if-complete="true">
         <properties partition="0">
             <property name="name1" value="value1"/>
             <property name="name2" value="value2"/>

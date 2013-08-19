@@ -232,4 +232,7 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 57, value = "Failed to get XML attribute '%s' at location %s")
     BatchRuntimeException failToGetAttribute(String attributeName, Location location);
+
+    @Message(id = 58, value = "Cannot have both next attribute and next element at location %s  Next attribute is already set to %s")
+    BatchRuntimeException cannotHaveBothNextAttributeAndElement(Location location, String nextAttributeValue);
 }
