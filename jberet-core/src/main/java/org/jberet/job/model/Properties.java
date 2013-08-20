@@ -25,15 +25,15 @@ public final class Properties implements Serializable {
     Properties() {
     }
 
-    void add(String name, String value) {
+    void add(final String name, final String value) {
         nameValues.put(name, value);
     }
 
-    void remove(String name) {
+    void remove(final String name) {
         nameValues.remove(name);
     }
 
-    public String get(String name) {
+    public String get(final String name) {
         return nameValues.get(name);
     }
 
@@ -41,7 +41,7 @@ public final class Properties implements Serializable {
         return partition;
     }
 
-    void setPartition(String partition) {
+    void setPartition(final String partition) {
         this.partition = partition;
     }
 
@@ -53,10 +53,10 @@ public final class Properties implements Serializable {
         return new LinkedHashMap<String, String>(nameValues);
     }
 
-    public static java.util.Properties toJavaUtilProperties(Properties p) {
-        java.util.Properties props = new java.util.Properties();
+    public static java.util.Properties toJavaUtilProperties(final Properties p) {
+        final java.util.Properties props = new java.util.Properties();
         if (p != null) {
-            for (Map.Entry<String, String> e : p.nameValues.entrySet()) {
+            for (final Map.Entry<String, String> e : p.nameValues.entrySet()) {
                 props.setProperty(e.getKey(), e.getValue());
             }
         }

@@ -47,7 +47,7 @@ public final class JobParserTest {
         ByteArrayInputStream is = null;
         try {
             is = new ByteArrayInputStream(batchXml.getBytes());
-            BatchArtifacts batchArtifacts = JobParser.parseBatchArtifacts(is);
+            final BatchArtifacts batchArtifacts = JobParser.parseBatchArtifacts(is);
             Assert.assertEquals(class1, batchArtifacts.getClassNameForRef(id1));
             Assert.assertEquals(class2, batchArtifacts.getClassNameForRef(id2));
             Assert.assertNull(batchArtifacts.getClassNameForRef(null));
@@ -171,7 +171,7 @@ public final class JobParserTest {
     @Test
     public void testParseJob() throws Exception {
         Job job = null;
-        InputStream is = getClass().getClassLoader().getResourceAsStream(SAMPLE_JOB_XML);
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(SAMPLE_JOB_XML);
         try {
             job = JobParser.parseJob(is);
         } finally {
@@ -181,18 +181,18 @@ public final class JobParserTest {
         Assert.assertEquals(true, job.getRestartableBoolean());
         checkProperties(job.getProperties());
         checkListeners(job.getListeners());
-        for (JobElement element : job.getJobElements()) {
+        for (final JobElement element : job.getJobElements()) {
             if (element instanceof Decision) {
-                Decision decision = (Decision) element;
+                final Decision decision = (Decision) element;
                 checkDecision(decision, null);
             } else if (element instanceof Step) {
-                Step step = (Step) element;
+                final Step step = (Step) element;
                 checkStep(step, null);
             } else if (element instanceof Flow) {
-                Flow flow = (Flow) element;
+                final Flow flow = (Flow) element;
                 checkFlow(flow, null);
             } else if (element instanceof Split) {
-                Split split = (Split) element;
+                final Split split = (Split) element;
                 checkSplit(split, null);
             } else {
                 Assert.fail("Unexpected job element type: " + element);
@@ -200,7 +200,7 @@ public final class JobParserTest {
         }
     }
 
-    private void checkInvalidBatchXml(String xmlContent) throws IOException {
+    private void checkInvalidBatchXml(final String xmlContent) throws IOException {
         InputStream is = null;
         try {
             is = new ByteArrayInputStream(xmlContent.getBytes());
@@ -217,7 +217,7 @@ public final class JobParserTest {
         }
     }
 
-    private void checkInvalidJobXml(String xmlContent) throws IOException {
+    private void checkInvalidJobXml(final String xmlContent) throws IOException {
         InputStream is = null;
         try {
             is = new ByteArrayInputStream(xmlContent.getBytes());
@@ -235,7 +235,7 @@ public final class JobParserTest {
     }
 
     private void checkProperties(final Properties properties, final String... partitionNumbers) throws Exception {
-        String partitionNumber = partitionNumbers.length == 0 ? "0" : partitionNumbers[0];
+        final String partitionNumber = partitionNumbers.length == 0 ? "0" : partitionNumbers[0];
         Assert.assertEquals(partitionNumber, properties.getPartition());
         Assert.assertEquals(2, Properties.toJavaUtilProperties(properties).size());
         Assert.assertEquals("value1", properties.get("name1"));
@@ -251,7 +251,7 @@ public final class JobParserTest {
         checkProperties(listeners.get(1).getProperties());
     }
 
-    private void checkDecision(final Decision decision, String parentId) throws Exception {
+    private void checkDecision(final Decision decision, final String parentId) throws Exception {
         String id = "decision1";
         if (parentId != null && parentId.length() > 0) {
             id = parentId + "." + id;
@@ -271,7 +271,7 @@ public final class JobParserTest {
 //        Assert.assertEquals("next1", flow.getAttributeNext());    defer this check to checkTransitionElements
         checkTransitionElements(flow.getTransitionElements(), flow.getAttributeNext());
 
-        for (JobElement e : flow.getJobElements()) {
+        for (final JobElement e : flow.getJobElements()) {
             if (e instanceof Decision) {
                 checkDecision((Decision) e, flowId);
             } else if (e instanceof Step) {
@@ -279,7 +279,7 @@ public final class JobParserTest {
             } else if (e instanceof Flow) {
                 checkFlow((Flow) e, flowId);
             } else if (e instanceof Split) {
-                Split split = (Split) e;
+                final Split split = (Split) e;
                 checkSplit(split, flowId);
             } else {
                 Assert.fail("Unexpected job element type inside flow: " + e);
@@ -294,7 +294,7 @@ public final class JobParserTest {
         }
         Assert.assertEquals(id, split.getId());
         Assert.assertEquals("next1", split.getAttributeNext());
-        for (Flow f : split.getFlows()) {
+        for (final Flow f : split.getFlows()) {
             checkFlow(f, id);
         }
     }
@@ -387,33 +387,33 @@ public final class JobParserTest {
     }
 
     private void checkTransitionElements(final List<Transition> transitions, final String nextAttributeValue) throws Exception {
-        int transitionElementCount = nextAttributeValue == null ? 4 : 3;
+        final int transitionElementCount = nextAttributeValue == null ? 4 : 3;
         Assert.assertEquals(transitionElementCount, transitions.size());
         boolean foundNext = false;
         boolean foundStop = false;
         boolean foundFail = false;
         boolean foundEnd = false;
-        for (Transition e : transitions) {
+        for (final Transition e : transitions) {
             if (e instanceof Transition.Next) {
                 if (nextAttributeValue != null) {
                     Assert.fail("Cannot have both next attribute and next element. Next attribute is already set to " + nextAttributeValue);
                 }
-                Transition.Next next = (Transition.Next) e;
+                final Transition.Next next = (Transition.Next) e;
                 Assert.assertEquals("on1", next.getOn());
                 Assert.assertEquals("to1", next.getTo());
                 foundNext = true;
             } else if (e instanceof Transition.Fail) {
-                Transition.Fail fail = (Transition.Fail) e;
+                final Transition.Fail fail = (Transition.Fail) e;
                 Assert.assertEquals("on1", fail.getOn());
                 Assert.assertEquals("exit-status1", fail.getExitStatus());
                 foundFail = true;
             } else if (e instanceof Transition.End) {
-                Transition.End end = (Transition.End) e;
+                final Transition.End end = (Transition.End) e;
                 Assert.assertEquals("on1", end.getOn());
                 Assert.assertEquals("exit-status1", end.getExitStatus());
                 foundEnd = true;
             } else if (e instanceof Transition.Stop) {
-                Transition.Stop stop = (Transition.Stop) e;
+                final Transition.Stop stop = (Transition.Stop) e;
                 Assert.assertEquals("on1", stop.getOn());
                 Assert.assertEquals("exit-status1", stop.getExitStatus());
                 Assert.assertEquals("restart1", stop.getRestart());

@@ -24,10 +24,10 @@ import org.jberet.runtime.context.FlowContextImpl;
 import static org.jberet.util.BatchLogger.LOGGER;
 
 public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowContextImpl> implements Runnable {
-    private Flow flow;
-    private CountDownLatch latch;
+    private final Flow flow;
+    private final CountDownLatch latch;
 
-    public FlowExecutionRunner(FlowContextImpl flowContext, CompositeExecutionRunner enclosingRunner, CountDownLatch latch) {
+    public FlowExecutionRunner(final FlowContextImpl flowContext, final CompositeExecutionRunner enclosingRunner, final CountDownLatch latch) {
         super(flowContext, enclosingRunner);
         this.flow = flowContext.getFlow();
         this.latch = latch;
@@ -48,7 +48,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
         } catch (Throwable e) {
             LOGGER.failToRunJob(e, jobContext.getJobName(), flow.getId(), flow);
             batchContext.setBatchStatus(BatchStatus.FAILED);
-            for (AbstractContext c : batchContext.getOuterContexts()) {
+            for (final AbstractContext c : batchContext.getOuterContexts()) {
                 c.setBatchStatus(BatchStatus.FAILED);
             }
         } finally {
@@ -62,7 +62,7 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            String next = resolveTransitionElements(flow.getTransitionElements(), flow.getAttributeNext(), false);
+            final String next = resolveTransitionElements(flow.getTransitionElements(), flow.getAttributeNext(), false);
             enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
         }
     }

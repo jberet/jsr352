@@ -73,7 +73,7 @@ public enum XmlElement {
 
     static {
         final Map<String, XmlElement> map = new HashMap<String, XmlElement>();
-        for (XmlElement element : values()) {
+        for (final XmlElement element : values()) {
             final String name = element.getLocalName();
             if (name != null) {
                 map.put(name, element);

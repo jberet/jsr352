@@ -22,7 +22,7 @@ public final class Flow extends AbstractJobElement {
 
     private final List<JobElement> jobElements = new ArrayList<JobElement>();
 
-    Flow(String id) {
+    Flow(final String id) {
         super(id);
     }
 
@@ -30,7 +30,7 @@ public final class Flow extends AbstractJobElement {
         return next;
     }
 
-    void setAttributeNext(String next) {
+    void setAttributeNext(final String next) {
         this.next = next;
     }
 
@@ -38,7 +38,7 @@ public final class Flow extends AbstractJobElement {
         return jobElements;
     }
 
-    void addJobElement(JobElement jobElement) {
+    void addJobElement(final JobElement jobElement) {
         jobElements.add(jobElement);
     }
 }

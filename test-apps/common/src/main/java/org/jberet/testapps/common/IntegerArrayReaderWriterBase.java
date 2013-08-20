@@ -65,7 +65,7 @@ public abstract class IntegerArrayReaderWriterBase {
         }
     }
 
-    public void open(Serializable checkpoint) throws Exception {
+    public void open(final Serializable checkpoint) throws Exception {
         if (data == null) {
             initData();
         }

@@ -29,10 +29,10 @@ public class JobRepositoryTest {
     public void addRemoveJob() throws Exception {
         job = ArchiveXmlLoader.loadJobXml("batchlet1.xml", Job.class);
         repo.removeJob(job.getId());
-        Collection<Job> jobs = repo.getJobs();
-        int existingJobsCount = jobs.size();
+        final Collection<Job> jobs = repo.getJobs();
+        final int existingJobsCount = jobs.size();
 
-        boolean isAdded = repo.addJob(job);
+        final boolean isAdded = repo.addJob(job);
         Assert.assertEquals(true, isAdded);  //the first time, no pre-existing job by the same jobId.
         Assert.assertEquals(existingJobsCount + 1, repo.getJobs().size());
 

@@ -60,7 +60,7 @@ public enum XmlAttribute {
 
     static {
         final Map<String, XmlAttribute> map = new HashMap<String, XmlAttribute>();
-        for (XmlAttribute attribute : values()) {
+        for (final XmlAttribute attribute : values()) {
             final String name = attribute.getLocalName();
             if (name != null) {
                 map.put(name, attribute);

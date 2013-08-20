@@ -33,16 +33,16 @@ public final class ChunkPartitionAnalyzer implements PartitionAnalyzer {
     @Inject @BatchProperty(name = "skip.thread.check")
     private boolean skipThreadCheck;
 
-    private Set<Long> childThreadIds = new HashSet<Long>();
+    private final Set<Long> childThreadIds = new HashSet<Long>();
     private int numOfCompletedPartitions;
 
     @Override
-    public void analyzeCollectorData(Serializable data) throws Exception {
+    public void analyzeCollectorData(final Serializable data) throws Exception {
         childThreadIds.add((Long) data);
     }
 
     @Override
-    public void analyzeStatus(BatchStatus batchStatus, String exitStatus) throws Exception {
+    public void analyzeStatus(final BatchStatus batchStatus, final String exitStatus) throws Exception {
         //the check for number of threads used is not very accurate.  The underlying thread pool
         //may choose a cold thread even when a warm thread has already been returned to pool and available.
         //especially when thread.count is 1, there may be 2 or more threads being used, but at one point,

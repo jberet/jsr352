@@ -40,9 +40,9 @@ public class ArchiveXmlLoader {
      * @param classLoader the application classloader used to load batch xml
      * @return the batch artifacts definition object
      */
-    public static BatchArtifacts loadBatchXml(ClassLoader classLoader) throws JobStartException {
+    public static BatchArtifacts loadBatchXml(final ClassLoader classLoader) throws JobStartException {
         BatchArtifacts batchArtifacts = null;
-        InputStream is = classLoader.getResourceAsStream(ARCHIVE_BATCH_XML);
+        final InputStream is = classLoader.getResourceAsStream(ARCHIVE_BATCH_XML);
         if (is == null) {  //the app doesn't contain META-INF/batch.xml
             return null;
         }
@@ -70,10 +70,10 @@ public class ArchiveXmlLoader {
      * @param cl       the application classloader used to load job xml
      * @return the job or step root element
      */
-    public static <T> T loadJobXml(String jobName, Class<T> rootType, ClassLoader... cl) throws JobStartException {
+    public static <T> T loadJobXml(final String jobName, final Class<T> rootType, final ClassLoader... cl) throws JobStartException {
         Object jobOrStep = null;
-        ClassLoader classLoader = cl.length > 0 ? cl[0] : BatchUtil.getBatchApplicationClassLoader();
-        InputStream is;
+        final ClassLoader classLoader = cl.length > 0 ? cl[0] : BatchUtil.getBatchApplicationClassLoader();
+        final InputStream is;
         try {
             is = getJobXml(jobName, classLoader);
         } catch (IOException e) {
@@ -96,12 +96,12 @@ public class ArchiveXmlLoader {
         return (T) jobOrStep;
     }
 
-    private static InputStream getJobXml(String jobXml, ClassLoader classLoader) throws IOException {
+    private static InputStream getJobXml(String jobXml, final ClassLoader classLoader) throws IOException {
         if (!jobXml.endsWith(".xml")) {
             jobXml += ".xml";
         }
         // META-INF first
-        String path = ARCHIVE_JOB_XML_DIR + jobXml;
+        final String path = ARCHIVE_JOB_XML_DIR + jobXml;
         InputStream is;
         is = classLoader.getResourceAsStream(path);
         if (is != null) {
@@ -110,10 +110,10 @@ public class ArchiveXmlLoader {
 
         // javax.jobpath system property. jobpath format?
         File jobFile = null;
-        String jobpath = System.getProperty("javax.jobpath");
+        final String jobpath = System.getProperty("javax.jobpath");
         if (jobpath != null && !jobpath.isEmpty()) {
-            String[] jobPathElements = jobpath.split(":");
-            for (String p : jobPathElements) {
+            final String[] jobPathElements = jobpath.split(":");
+            for (final String p : jobPathElements) {
                 jobFile = new File(p, jobXml);
                 if (jobFile.exists() && jobFile.isFile()) {
                     break;

@@ -35,19 +35,19 @@ public final class ExceptionClassFilter implements Serializable {
         return exclude;
     }
 
-    void addInclude(String includeClass) {
+    void addInclude(final String includeClass) {
         if (includeClass != null && includeClass.length() > 0) {
             include.add(includeClass);
         }
     }
 
-    void addExclude(String excludeClass) {
+    void addExclude(final String excludeClass) {
         if (excludeClass != null && excludeClass.length() > 0) {
             exclude.add(excludeClass);
         }
     }
 
-    public boolean matches(Class<? extends Throwable> clazz) {
+    public boolean matches(final Class<? extends Throwable> clazz) {
         if (include.isEmpty()) {  //nothing is included, and exclude is ignored
             return false;
         } else {
@@ -73,10 +73,10 @@ public final class ExceptionClassFilter implements Serializable {
      * @param filterClasses either the include or exclude filter list
      * @return true if the exception class is covered by the filter; false otherwise.
      */
-    private boolean matches(Class<? extends Throwable> clazz, List<String> filterClasses) {
-        for (String s : filterClasses) {
+    private boolean matches(final Class<? extends Throwable> clazz, final List<String> filterClasses) {
+        for (final String s : filterClasses) {
             try {
-                Class<?> c = Class.forName(s, true, clazz.getClassLoader());
+                final Class<?> c = Class.forName(s, true, clazz.getClassLoader());
                 if (c.isAssignableFrom(clazz)) {
                     return true;
                 }

@@ -25,21 +25,21 @@ import org.jberet.util.ConcurrencyService;
 import static org.jberet.util.BatchLogger.LOGGER;
 
 public class Main {
-    public static void main(String[] args) throws BatchRuntimeException {
+    public static void main(final String[] args) throws BatchRuntimeException {
         if (args.length == 0) {
             usage(args);
         }
-        String jobXml = args[0];
+        final String jobXml = args[0];
         if (jobXml == null || jobXml.isEmpty()) {
             usage(args);
         }
 
-        JobOperator jobOperator = BatchRuntime.getJobOperator();
-        long jobExecutionId;
-        long timeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
+        final JobOperator jobOperator = BatchRuntime.getJobOperator();
+        final long jobExecutionId;
+        final long timeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
         try {
             jobExecutionId = jobOperator.start(jobXml, null);
-            JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+            final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
             jobExecution.awaitTerminatioin(timeout, TimeUnit.SECONDS);
 
             if (!jobExecution.getBatchStatus().equals(BatchStatus.COMPLETED)) {
@@ -57,7 +57,7 @@ public class Main {
         }
     }
 
-    private static void usage(String[] args) {
+    private static void usage(final String[] args) {
         LOGGER.mainUsage(Arrays.asList(args));
     }
 }

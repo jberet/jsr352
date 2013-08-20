@@ -21,7 +21,7 @@ public final class Split extends AbstractJobElement {
     private String next;
     private final List<Flow> flows = new ArrayList<Flow>();
 
-    Split(String id) {
+    Split(final String id) {
         super(id);
     }
 
@@ -29,7 +29,7 @@ public final class Split extends AbstractJobElement {
         return next;
     }
 
-    void setAttributeNext(String next) {
+    void setAttributeNext(final String next) {
         this.next = next;
     }
 
@@ -37,7 +37,7 @@ public final class Split extends AbstractJobElement {
         return flows;
     }
 
-    void addFlow(Flow flow) {
+    void addFlow(final Flow flow) {
         flows.add(flow);
     }
 }

@@ -38,12 +38,12 @@ public class BatchUtil {
         return cl;
     }
 
-    public static String propertiesToString(Properties properties) {
+    public static String propertiesToString(final Properties properties) {
         if (properties == null) {
             return "";
         }
-        StringBuilder sb = new StringBuilder();
-        for (String key : properties.stringPropertyNames()) {
+        final StringBuilder sb = new StringBuilder();
+        for (final String key : properties.stringPropertyNames()) {
             sb.append(key).append('=').append(properties.getProperty(key)).append(NL);
         }
         return sb.toString();
@@ -56,9 +56,9 @@ public class BatchUtil {
      *                 or all elements are step, or all elements are flow
      * @return a StringBuilder whose string value is in the form: a -> b -> c ->
      */
-    public static StringBuilder toElementSequence(List<?> elements) {
-        StringBuilder sb = new StringBuilder();
-        for (Object e : elements) {
+    public static StringBuilder toElementSequence(final List<?> elements) {
+        final StringBuilder sb = new StringBuilder();
+        for (final Object e : elements) {
             if (e instanceof Step) {
                 sb.append(((Step) e).getId());
             } else if (e instanceof Job) {
@@ -71,7 +71,7 @@ public class BatchUtil {
         return sb;
     }
 
-    public static <T> T clone(T original) throws JobStartException {
+    public static <T> T clone(final T original) throws JobStartException {
         try {
             cloner.reset();
             return (T) cloner.clone(original);

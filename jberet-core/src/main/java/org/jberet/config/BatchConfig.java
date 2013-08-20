@@ -35,7 +35,7 @@ public class BatchConfig {
         return Holder.instance;
     }
 
-    public synchronized void setConfigProperties(Properties configProperties) {
+    public synchronized void setConfigProperties(final Properties configProperties) {
         this.configProperties = configProperties;
     }
 
@@ -46,7 +46,7 @@ public class BatchConfig {
                 result = configProperties;
                 if(result == null) {
                     result = new Properties();
-                    InputStream configStream = BatchUtil.getBatchApplicationClassLoader().getResourceAsStream(CONFIG_FILE_NAME);
+                    final InputStream configStream = BatchUtil.getBatchApplicationClassLoader().getResourceAsStream(CONFIG_FILE_NAME);
                     if (configStream != null) {
                         try {
                             result.load(configStream);

@@ -21,11 +21,11 @@ public final class BatchArtifacts implements Serializable {
 
     private final Map<String, String> refs = new HashMap<String, String>();
 
-    void addRef(String id, String clazz) {
+    void addRef(final String id, final String clazz) {
         refs.put(id, clazz);
     }
 
-    public String getClassNameForRef(String ref) {
+    public String getClassNameForRef(final String ref) {
         return refs.get(ref);
     }
 }

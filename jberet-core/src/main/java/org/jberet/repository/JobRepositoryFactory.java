@@ -26,8 +26,8 @@ public final class JobRepositoryFactory {
     }
 
     public static JobRepository getJobRepository() {
-        Properties configProperties = BatchConfig.getInstance().getConfigProperties();
-        String repositoryType = configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY);
+        final Properties configProperties = BatchConfig.getInstance().getConfigProperties();
+        final String repositoryType = configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY);
 
         if (repositoryType == null || repositoryType.isEmpty() || repositoryType.equals(REPOSITORY_TYPE_IN_MEMORY)) {
             return InMemoryRepository.getInstance();

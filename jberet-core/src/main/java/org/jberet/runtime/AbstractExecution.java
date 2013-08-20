@@ -55,11 +55,11 @@ public abstract class AbstractExecution implements Cloneable, Serializable {
         return batchStatus;
     }
 
-    public void setExitStatus(String exitStatus) {
+    public void setExitStatus(final String exitStatus) {
         this.exitStatus = exitStatus;
     }
 
-    public void setBatchStatus(BatchStatus batchStatus) {
+    public void setBatchStatus(final BatchStatus batchStatus) {
         this.batchStatus = batchStatus;
     }
 

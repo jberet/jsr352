@@ -21,13 +21,13 @@ import org.jberet.runtime.FlowExecutionImpl;
 import org.jberet.runtime.SplitExecutionImpl;
 
 public class SplitContextImpl extends AbstractContext {
-    private Split split;
+    private final Split split;
 
-    private SplitExecutionImpl splitExecution;
+    private final SplitExecutionImpl splitExecution;
 
-    private List<FlowExecutionImpl> flowExecutions = new ArrayList<FlowExecutionImpl>();
+    private final List<FlowExecutionImpl> flowExecutions = new ArrayList<FlowExecutionImpl>();
 
-    public SplitContextImpl(Split split, AbstractContext[] outerContexts) {
+    public SplitContextImpl(final Split split, final AbstractContext[] outerContexts) {
         super(split.getId(), outerContexts);
         this.split = split;
         this.classLoader = getJobContext().getClassLoader();
@@ -49,7 +49,7 @@ public class SplitContextImpl extends AbstractContext {
     }
 
     @Override
-    public void setBatchStatus(BatchStatus status) {
+    public void setBatchStatus(final BatchStatus status) {
         splitExecution.setBatchStatus(status);
     }
 
@@ -59,7 +59,7 @@ public class SplitContextImpl extends AbstractContext {
     }
 
     @Override
-    public void setExitStatus(String exitStatus) {
+    public void setExitStatus(final String exitStatus) {
         splitExecution.setExitStatus(exitStatus);
     }
 }

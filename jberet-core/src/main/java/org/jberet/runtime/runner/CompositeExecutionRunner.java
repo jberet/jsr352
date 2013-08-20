@@ -35,7 +35,7 @@ import org.jberet.util.ConcurrencyService;
  * job, flow and split.
  */
 public abstract class CompositeExecutionRunner<C extends AbstractContext> extends AbstractRunner<C> {
-    protected CompositeExecutionRunner(C batchContext, CompositeExecutionRunner enclosingRunner) {
+    protected CompositeExecutionRunner(final C batchContext, final CompositeExecutionRunner enclosingRunner) {
         super(batchContext, enclosingRunner);
     }
 
@@ -45,32 +45,32 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
      * Runs the first job element, which then transitions to the next element.  Not used for running split, whose
      * component elements are not sequential.
      */
-    protected void runFromHeadOrRestartPoint(String restartPoint) {
+    protected void runFromHeadOrRestartPoint(final String restartPoint) {
         if (restartPoint != null) {
             //clear the restart point passed over from original job execution.  This execution may have its own
             //restart point or null (start from head) for use by the next restart.
             jobContext.getJobExecution().setRestartPoint(null);
-            for (JobElement e : getJobElements()) {
+            for (final JobElement e : getJobElements()) {
                 if (e instanceof Step) {
-                    Step step = (Step) e;
+                    final Step step = (Step) e;
                     if (step.getId().equals(restartPoint)) {
                         runStep(step);
                         break;
                     }
                 } else if (e instanceof Flow) {
-                    Flow flow = (Flow) e;
+                    final Flow flow = (Flow) e;
                     if (flow.getId().equals(restartPoint)) {
                         runFlow(flow, null);
                         break;
                     }
                 } else if (e instanceof Split) {
-                    Split split = (Split) e;
+                    final Split split = (Split) e;
                     if (split.getId().equals(restartPoint)) {
                         runSplit(split);
                         break;
                     }
                 } else if (e instanceof Decision) {
-                    Decision decision = (Decision) e;
+                    final Decision decision = (Decision) e;
                     if (decision.getId().equals(restartPoint)) {
                         runDecision(decision);
                     }
@@ -79,26 +79,26 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             }
         } else {
             // the head of the composite job element is the first non-abstract element (step, flow, or split)
-            for (JobElement e : getJobElements()) {
+            for (final JobElement e : getJobElements()) {
                 if (e instanceof Step) {
-                    Step step = (Step) e;
+                    final Step step = (Step) e;
 //                if (Boolean.parseBoolean(step.getAbstract())) {
 //                    continue;
 //                }
                     runStep(step);
                     break;
                 } else if (e instanceof Flow) {
-                    Flow flow = (Flow) e;
+                    final Flow flow = (Flow) e;
                     //A flow cannot be abstract or have parent, so run the flow
                     runFlow(flow, null);
                     break;
                 } else if (e instanceof Split) {
-                    Split split = (Split) e;
+                    final Split split = (Split) e;
                     //A split cannot be abstract or have parent, so run the split
                     runSplit(split);
                     break;
                 } else if (e instanceof Decision) {
-                    Decision decision = (Decision) e;
+                    final Decision decision = (Decision) e;
                     batchContext.setBatchStatus(BatchStatus.FAILED);
                     BatchLogger.LOGGER.decisionCannotBeFirst(decision.getId());
                     return;
@@ -115,31 +115,31 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
      * @param jobElementName          ref name of the job element
      * @param precedingStepExecutions 0 or 1 StepExecution, 1 StepExecution is passed in for decision element, and 0 StepExecution for others.
      */
-    protected void runJobElement(String jobElementName, StepExecution... precedingStepExecutions) {
+    protected void runJobElement(final String jobElementName, final StepExecution... precedingStepExecutions) {
         if (jobElementName == null) {
             return;
         }
-        for (JobElement e : getJobElements()) {
+        for (final JobElement e : getJobElements()) {
             if (e instanceof Step) {
-                Step step = (Step) e;
+                final Step step = (Step) e;
                 if (step.getId().equals(jobElementName)) {
                     runStep(step);
                     return;
                 }
             } else if (e instanceof Decision) {
-                Decision decision = (Decision) e;
+                final Decision decision = (Decision) e;
                 if (decision.getId().equals(jobElementName)) {
                     runDecision(decision, precedingStepExecutions);
                     return;
                 }
             } else if (e instanceof Flow) {
-                Flow flow = (Flow) e;
+                final Flow flow = (Flow) e;
                 if (flow.getId().equals(jobElementName)) {
                     runFlow(flow, null);
                     return;
                 }
             } else if (e instanceof Split) {
-                Split split = (Split) e;
+                final Split split = (Split) e;
                 if (split.getId().equals(jobElementName)) {
                     runSplit(split);
                     return;
@@ -150,10 +150,10 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         throw BatchLogger.LOGGER.unrecognizableJobElement(jobElementName, id);
     }
 
-    protected void runStep(Step step) {
-        StepContextImpl stepContext = new StepContextImpl(step,
+    protected void runStep(final Step step) {
+        final StepContextImpl stepContext = new StepContextImpl(step,
                 AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
-        StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(stepContext, this);
+        final StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(stepContext, this);
 
         if (batchContext instanceof FlowContextImpl) {
             ((FlowContextImpl) batchContext).getFlowExecution().setLastStepExecution(stepContext.getStepExecution());
@@ -162,13 +162,13 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         stepExecutionRunner.run();
     }
 
-    protected void runDecision(Decision decision, StepExecution... precedingStepExecutions) {
-        Decider decider = jobContext.createArtifact(decision.getRef(), null, decision.getProperties());
-        String newExitStatus;
+    protected void runDecision(final Decision decision, final StepExecution... precedingStepExecutions) {
+        final Decider decider = jobContext.createArtifact(decision.getRef(), null, decision.getProperties());
+        final String newExitStatus;
         try {
             newExitStatus = decider.decide(precedingStepExecutions);
             batchContext.setExitStatus(newExitStatus);
-            String next = resolveTransitionElements(decision.getTransitionElements(), null, true);
+            final String next = resolveTransitionElements(decision.getTransitionElements(), null, true);
             runJobElement(next, precedingStepExecutions);
         } catch (Exception e) {
             BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), decision.getRef(), decider);
@@ -178,11 +178,11 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         }
     }
 
-    protected void runFlow(Flow flow, CountDownLatch latch) {
-        FlowContextImpl flowContext;
-        AbstractContext[] outerContextsToUse = AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext);
+    protected void runFlow(final Flow flow, final CountDownLatch latch) {
+        final FlowContextImpl flowContext;
+        final AbstractContext[] outerContextsToUse = AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext);
         if (batchContext instanceof SplitContextImpl) {
-            SplitContextImpl splitContext = (SplitContextImpl) batchContext;
+            final SplitContextImpl splitContext = (SplitContextImpl) batchContext;
             outerContextsToUse[0] = splitContext.getJobContext().clone();
             flowContext = new FlowContextImpl(flow, outerContextsToUse);
             splitContext.getFlowExecutions().add(flowContext.getFlowExecution());
@@ -190,7 +190,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             flowContext = new FlowContextImpl(flow, outerContextsToUse);
         }
 
-        FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this, latch);
+        final FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this, latch);
 
         if (latch != null) {
             ConcurrencyService.getExecutorService().submit(flowExecutionRunner);
@@ -199,10 +199,10 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         }
     }
 
-    protected void runSplit(Split split) {
-        SplitContextImpl splitContext = new SplitContextImpl(split,
+    protected void runSplit(final Split split) {
+        final SplitContextImpl splitContext = new SplitContextImpl(split,
                 AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
-        SplitExecutionRunner splitExecutionRunner = new SplitExecutionRunner(splitContext, this);
+        final SplitExecutionRunner splitExecutionRunner = new SplitExecutionRunner(splitContext, this);
         splitExecutionRunner.run();
     }
 }

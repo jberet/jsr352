@@ -30,7 +30,7 @@ abstract public class PostConstructPreDestroyBase {
     @PostConstruct
     private void ps() {
         System.out.printf("PostConstructPreDestroyBase PostConstruct of %s%n", this);
-        String p = jobContext.getProperties().getProperty("add.to.job.exit.status");
+        final String p = jobContext.getProperties().getProperty("add.to.job.exit.status");
         allowAddToJobExitStatus = Boolean.parseBoolean(p);
         addToJobExitStatus("PostConstructPreDestroyBase.ps");
     }
@@ -41,9 +41,9 @@ abstract public class PostConstructPreDestroyBase {
         addToJobExitStatus("PostConstructPreDestroyBase.pd");
     }
 
-    protected void addToJobExitStatus(String s) {
+    protected void addToJobExitStatus(final String s) {
         if (allowAddToJobExitStatus) {
-            String jes = jobContext.getExitStatus();
+            final String jes = jobContext.getExitStatus();
             if (jes == null) {
                 jobContext.setExitStatus(s);
             } else {

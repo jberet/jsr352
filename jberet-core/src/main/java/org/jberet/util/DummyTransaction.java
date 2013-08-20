@@ -48,7 +48,7 @@ public enum DummyTransaction implements UserTransaction {
     }
 
     @Override
-    public void setTransactionTimeout(int i) throws SystemException {
+    public void setTransactionTimeout(final int i) throws SystemException {
 
     }
 }

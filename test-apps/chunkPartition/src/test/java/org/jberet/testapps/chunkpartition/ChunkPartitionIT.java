@@ -29,7 +29,7 @@ public class ChunkPartitionIT extends AbstractIT {
             params.setProperty("writer.sleep.time", "100");
             startJobAndWait(jobXml);
             Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-            String exitStatus = stepExecution0.getExitStatus();
+            final String exitStatus = stepExecution0.getExitStatus();
             System.out.printf("Step exit status: %s%n", exitStatus);
             Assert.assertEquals(true, exitStatus.startsWith("PASS"));
         }

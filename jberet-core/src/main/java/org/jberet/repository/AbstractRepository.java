@@ -44,7 +44,7 @@ public abstract class AbstractRepository implements JobRepository {
     abstract void insertStepExecution(StepExecutionImpl stepExecution, JobExecutionImpl jobExecution);
 
     @Override
-    public boolean addJob(Job job) {
+    public boolean addJob(final Job job) {
         boolean result = false;
         synchronized (jobs) {
             if (!jobs.contains(job)) {
@@ -55,17 +55,17 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public boolean removeJob(String jobId) {
+    public boolean removeJob(final String jobId) {
         synchronized (jobs) {
-            Job toRemove = getJob(jobId);
+            final Job toRemove = getJob(jobId);
             return toRemove != null && jobs.remove(toRemove);
         }
     }
 
     @Override
-    public Job getJob(String jobId) {
+    public Job getJob(final String jobId) {
         synchronized (jobs) {
-            for (Job j : jobs) {
+            for (final Job j : jobs) {
                 if (j.getId().equals(jobId)) {
                     return j;
                 }
@@ -80,9 +80,9 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public JobInstanceImpl createJobInstance(Job job, String applicationName, ClassLoader classLoader) {
-        ApplicationAndJobName appJobNames = new ApplicationAndJobName(applicationName, job.getId());
-        JobInstanceImpl jobInstance = new JobInstanceImpl(job, appJobNames);
+    public JobInstanceImpl createJobInstance(final Job job, final String applicationName, final ClassLoader classLoader) {
+        final ApplicationAndJobName appJobNames = new ApplicationAndJobName(applicationName, job.getId());
+        final JobInstanceImpl jobInstance = new JobInstanceImpl(job, appJobNames);
         insertJobInstance(jobInstance);
         jobInstance.setApplicationMetaData(getApplicationMetaData(appJobNames, classLoader));
         jobInstances.add(jobInstance);
@@ -90,10 +90,10 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public void removeJobInstance(long jobInstanceIdToRemove) {
+    public void removeJobInstance(final long jobInstanceIdToRemove) {
         synchronized (jobInstances) {
             for (Iterator<JobInstance> it = jobInstances.iterator(); it.hasNext(); ) {
-                JobInstance next = it.next();
+                final JobInstance next = it.next();
                 if (next.getInstanceId() == jobInstanceIdToRemove) {
                     it.remove();
                 }
@@ -102,9 +102,9 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public JobInstance getJobInstance(long jobInstanceId) {
+    public JobInstance getJobInstance(final long jobInstanceId) {
         synchronized (jobInstances) {
-            for (JobInstance e : jobInstances) {
+            for (final JobInstance e : jobInstances) {
                 if (e.getInstanceId() == jobInstanceId) {
                     return e;
                 }
@@ -119,19 +119,19 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters) {
-        JobExecutionImpl jobExecution = new JobExecutionImpl(jobInstance, jobParameters);
+    public JobExecutionImpl createJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters) {
+        final JobExecutionImpl jobExecution = new JobExecutionImpl(jobInstance, jobParameters);
         insertJobExecution(jobExecution);
         jobInstance.addJobExecution(jobExecution);
         return jobExecution;
     }
 
     @Override
-    public JobExecution getJobExecution(long jobExecutionId) {
+    public JobExecution getJobExecution(final long jobExecutionId) {
         synchronized (jobInstances) {
-            for (JobInstance e : jobInstances) {
-                JobInstanceImpl in = (JobInstanceImpl) e;
-                for (JobExecution j : in.getJobExecutions()) {
+            for (final JobInstance e : jobInstances) {
+                final JobInstanceImpl in = (JobInstanceImpl) e;
+                for (final JobExecution j : in.getJobExecutions()) {
                     if (j.getExecutionId() == jobExecutionId) {
                         return j;
                     }
@@ -143,10 +143,10 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public List<JobExecution> getJobExecutions() {
-        List<JobExecution> result = new ArrayList<JobExecution>();
+        final List<JobExecution> result = new ArrayList<JobExecution>();
         synchronized (jobInstances) {
-            for (JobInstance e : jobInstances) {
-                JobInstanceImpl in = (JobInstanceImpl) e;
+            for (final JobInstance e : jobInstances) {
+                final JobInstanceImpl in = (JobInstanceImpl) e;
                 result.addAll(in.getJobExecutions());
             }
         }
@@ -154,8 +154,8 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public StepExecutionImpl createStepExecution(String stepName) {
-        StepExecutionImpl stepExecution = new StepExecutionImpl(stepName);
+    public StepExecutionImpl createStepExecution(final String stepName) {
+        final StepExecutionImpl stepExecution = new StepExecutionImpl(stepName);
 
 //        this stepExecution will be added to jobExecution later, after determining restart-if-complete, so that
 //        completed steps are not added to the enclosing JobExecution
@@ -164,13 +164,13 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public void addStepExecution(JobExecutionImpl jobExecution, StepExecutionImpl stepExecution) {
+    public void addStepExecution(final JobExecutionImpl jobExecution, final StepExecutionImpl stepExecution) {
         jobExecution.addStepExecution(stepExecution);
         insertStepExecution(stepExecution, jobExecution);
     }
 
     @Override
-    public void savePersistentData(JobExecution jobExecution, StepExecutionImpl stepExecution) {
+    public void savePersistentData(final JobExecution jobExecution, final StepExecutionImpl stepExecution) {
         Serializable ser = stepExecution.getPersistentUserData();
         Serializable copy;
         if (ser != null) {
@@ -190,12 +190,12 @@ public abstract class AbstractRepository implements JobRepository {
         //save stepExecution partition properties
     }
 
-    protected ApplicationMetaData getApplicationMetaData(ApplicationAndJobName applicationAndJobName, ClassLoader classLoader) {
+    protected ApplicationMetaData getApplicationMetaData(final ApplicationAndJobName applicationAndJobName, final ClassLoader classLoader) {
         ApplicationMetaData result = applicationMetaDataMap.get(applicationAndJobName);
         if (result == null) {
             try {
                 result = new ApplicationMetaData(classLoader);
-                ApplicationMetaData old = applicationMetaDataMap.putIfAbsent(applicationAndJobName, result);
+                final ApplicationMetaData old = applicationMetaDataMap.putIfAbsent(applicationAndJobName, result);
                 if (old != null) {
                     result = old;
                 }

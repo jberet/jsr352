@@ -27,16 +27,16 @@ public final class JobInstanceImpl implements JobInstance {
     Job unsubstitutedJob;
     ApplicationAndJobName applicationAndJobName;
 
-    private List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
+    private final List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
 
     private ApplicationMetaData applicationMetaData;
 
-    public JobInstanceImpl(Job unsubstitutedJob, ApplicationAndJobName applicationAndJobName) {
+    public JobInstanceImpl(final Job unsubstitutedJob, final ApplicationAndJobName applicationAndJobName) {
         this.applicationAndJobName = applicationAndJobName;
         this.unsubstitutedJob = unsubstitutedJob;
     }
 
-    public void setId(long id) {
+    public void setId(final long id) {
         this.id = id;
     }
 
@@ -58,7 +58,7 @@ public final class JobInstanceImpl implements JobInstance {
         return applicationMetaData;
     }
 
-    public void setApplicationMetaData(ApplicationMetaData applicationMetaData) {
+    public void setApplicationMetaData(final ApplicationMetaData applicationMetaData) {
         this.applicationMetaData = applicationMetaData;
     }
 
@@ -66,7 +66,7 @@ public final class JobInstanceImpl implements JobInstance {
         return Collections.unmodifiableList(this.jobExecutions);
     }
 
-    public void addJobExecution(JobExecution jobExecution) {
+    public void addJobExecution(final JobExecution jobExecution) {
         this.jobExecutions.add(jobExecution);
     }
 }

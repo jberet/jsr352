@@ -57,7 +57,7 @@ import static org.jberet.util.BatchLogger.LOGGER;
 
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements Runnable {
     Step step;
-    private List<StepListener> stepListeners = new ArrayList<StepListener>();
+    private final List<StepListener> stepListeners = new ArrayList<StepListener>();
     Map<String, Class<?>> chunkRelatedListeners;
     
     PartitionMapper mapper;    //programmatic partition config
@@ -76,9 +76,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     BlockingQueue<Boolean> completedPartitionThreads;
 
     UserTransaction ut = TransactionService.getTransaction();
-    private StepExecutionImpl stepExecution;
+    private final StepExecutionImpl stepExecution;
 
-    public StepExecutionRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner) {
+    public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
         this.stepExecution = stepContext.getStepExecution();
@@ -88,20 +88,20 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     @Override
     public void run() {
-        Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
+        final Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
         if (allowStartIfComplete != Boolean.FALSE) {
             try {
-                List<Step> executedSteps = jobContext.getExecutedSteps();
+                final List<Step> executedSteps = jobContext.getExecutedSteps();
                 if (executedSteps.contains(step)) {
-                    StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
+                    final StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
                     stepIds.append(step.getId());
                     throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
                 }
 
 
-                int startLimit = step.getStartLimitInt();
+                final int startLimit = step.getStartLimitInt();
                 if (startLimit > 0) {
-                    int startCount = stepExecution.getStartCount();
+                    final int startCount = stepExecution.getStartCount();
                     if (startCount >= startLimit) {
                         throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
                     }
@@ -111,8 +111,8 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 batchContext.setBatchStatus(BatchStatus.STARTED);
                 jobContext.getJobRepository().addStepExecution(jobContext.getJobExecution(), stepExecution);
 
-                Chunk chunk = step.getChunk();
-                RefArtifact batchlet = step.getBatchlet();
+                final Chunk chunk = step.getChunk();
+                final RefArtifact batchlet = step.getBatchlet();
                 if (chunk == null && batchlet == null) {
                     batchContext.setBatchStatus(BatchStatus.ABANDONED);
                     LOGGER.stepContainsNoChunkOrBatchlet(id);
@@ -125,7 +125,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     return;
                 }
 
-                for (StepListener l : stepListeners) {
+                for (final StepListener l : stepListeners) {
                     l.beforeStep();
                 }
 
@@ -134,7 +134,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 //record the fact this step has been executed
                 executedSteps.add(step);
 
-                for (StepListener l : stepListeners) {
+                for (final StepListener l : stepListeners) {
                     try {
                         l.afterStep();
                     } catch (Throwable e) {
@@ -157,13 +157,13 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             jobContext.destroyArtifact(mapper, reducer, analyzer);
             jobContext.destroyArtifact(stepListeners);
 
-            BatchStatus stepStatus = batchContext.getBatchStatus();
+            final BatchStatus stepStatus = batchContext.getBatchStatus();
             switch (stepStatus) {
                 case STARTED:
                     batchContext.setBatchStatus(BatchStatus.COMPLETED);
                     break;
                 case FAILED:
-                    for (AbstractContext e : batchContext.getOuterContexts()) {
+                    for (final AbstractContext e : batchContext.getOuterContexts()) {
                         e.setBatchStatus(BatchStatus.FAILED);
                     }
                     break;
@@ -174,19 +174,19 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            String next = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);
+            final String next = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);
             enclosingRunner.runJobElement(next, stepExecution);
         }
     }
 
-    private void runBatchletOrChunk(RefArtifact batchlet, Chunk chunk) throws Exception {
+    private void runBatchletOrChunk(final RefArtifact batchlet, final Chunk chunk) throws Exception {
         if (isPartitioned) {
             beginPartition();
         } else if (chunk != null) {
-            ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
+            final ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
             chunkRunner.run();
         } else {
-            BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, this, batchlet);
+            final BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, this, batchlet);
             batchletRunner.run();
         }
     }
@@ -195,10 +195,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (reducer != null) {
             reducer.beginPartitionedStep();
         }
-        boolean isRestart = jobContext.isRestart();
+        final boolean isRestart = jobContext.isRestart();
         boolean isOverride = false;
         if (mapper != null) {
-            javax.batch.api.partition.PartitionPlan partitionPlan = mapper.mapPartitions();
+            final javax.batch.api.partition.PartitionPlan partitionPlan = mapper.mapPartitions();
             isOverride = partitionPlan.getPartitionsOverride();
             numOfPartitions = partitionPlan.getPartitions();
             numOfThreads = partitionPlan.getThreads();
@@ -206,10 +206,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         } else {
             numOfPartitions = plan.getPartitionsInt();
             numOfThreads = plan.getThreadsInt();
-            List<Properties> propertiesList = plan.getPropertiesList();
+            final List<Properties> propertiesList = plan.getPropertiesList();
             partitionProperties = new java.util.Properties[propertiesList.size()];
-            for (Properties props : propertiesList) {
-                int idx = props.getPartition() == null ? 0 : Integer.parseInt(props.getPartition());
+            for (final Properties props : propertiesList) {
+                final int idx = props.getPartition() == null ? 0 : Integer.parseInt(props.getPartition());
                 partitionProperties[idx] = org.jberet.job.model.Properties.toJavaUtilProperties(props);
             }
         }
@@ -220,7 +220,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             completedPartitionThreads = new ArrayBlockingQueue<Boolean>(numOfPartitions);
         }
         collectorDataQueue = new LinkedBlockingQueue<Serializable>();
-        List<Integer> indexes = stepExecution.getPartitionPropertiesIndex();
+        final List<Integer> indexes = stepExecution.getPartitionPropertiesIndex();
 
         for (int i = 0; i < numOfPartitions; i++) {
             int partitionIndex = -1;
@@ -232,11 +232,11 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 partitionIndex = i;
             }
 
-            AbstractRunner<StepContextImpl> runner1;
-            StepContextImpl stepContext1 = batchContext.clone();
-            Step step1 = stepContext1.getStep();
+            final AbstractRunner<StepContextImpl> runner1;
+            final StepContextImpl stepContext1 = batchContext.clone();
+            final Step step1 = stepContext1.getStep();
 
-            PropertyResolver resolver = new PropertyResolver();
+            final PropertyResolver resolver = new PropertyResolver();
             if (partitionIndex >= 0 && partitionIndex < partitionProperties.length) {
                 resolver.setPartitionPlanProperties(partitionProperties[partitionIndex]);
 
@@ -248,15 +248,15 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             resolver.resolve(step1);
 
             if (isRestart && !isOverride) {
-                List<Serializable> partitionPersistentUserData = stepExecution.getPartitionPersistentUserData();
+                final List<Serializable> partitionPersistentUserData = stepExecution.getPartitionPersistentUserData();
                 if (partitionPersistentUserData != null) {
                     stepContext1.setPersistentUserData(partitionPersistentUserData.get(i));
                 }
-                List<Serializable> partitionReaderCheckpointInfo = stepExecution.getPartitionReaderCheckpointInfo();
+                final List<Serializable> partitionReaderCheckpointInfo = stepExecution.getPartitionReaderCheckpointInfo();
                 if (partitionReaderCheckpointInfo != null) {
                     stepContext1.getStepExecution().setReaderCheckpointInfo(partitionReaderCheckpointInfo.get(i));
                 }
-                List<Serializable> partitionWriterCheckpointInfo = stepExecution.getPartitionWriterCheckpointInfo();
+                final List<Serializable> partitionWriterCheckpointInfo = stepExecution.getPartitionWriterCheckpointInfo();
                 if (partitionWriterCheckpointInfo != null) {
                     stepContext1.getStepExecution().setWriterCheckpointInfo(partitionWriterCheckpointInfo.get(i));
                 }
@@ -265,7 +265,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (isRestart && isOverride && reducer != null) {
                 reducer.rollbackPartitionedStep();
             }
-            Chunk ch = step1.getChunk();
+            final Chunk ch = step1.getChunk();
             if (ch == null) {
                 runner1 = new BatchletRunner(stepContext1, enclosingRunner, this, step1.getBatchlet());
             } else {
@@ -278,18 +278,18 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         }
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
-        List<StepExecutionImpl> fromAllPartitions = new ArrayList<StepExecutionImpl>();
+        final List<StepExecutionImpl> fromAllPartitions = new ArrayList<StepExecutionImpl>();
         ut.begin();
         try {
             while (fromAllPartitions.size() < numOfPartitions) {
-                Serializable data = collectorDataQueue.take();
+                final Serializable data = collectorDataQueue.take();
                 if (data instanceof StepExecutionImpl) {
-                    StepExecutionImpl s = (StepExecutionImpl) data;
+                    final StepExecutionImpl s = (StepExecutionImpl) data;
                     fromAllPartitions.add(s);
-                    BatchStatus bs = s.getBatchStatus();
+                    final BatchStatus bs = s.getBatchStatus();
 
                     if (bs == BatchStatus.FAILED || bs == BatchStatus.STOPPED) {
-                        List<Integer> idxes = s.getPartitionPropertiesIndex();
+                        final List<Integer> idxes = s.getPartitionPropertiesIndex();
                         Integer idx = null;
                         if (idxes != null && idxes.size() > 0) {
                             idx = idxes.get(0);
@@ -340,18 +340,18 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     }
 
     private void initPartitionConfig() {
-        Partition partition = step.getPartition();
+        final Partition partition = step.getPartition();
         if (partition != null) {
             isPartitioned = true;
-            RefArtifact reducerConfig = partition.getReducer();
+            final RefArtifact reducerConfig = partition.getReducer();
             if (reducerConfig != null) {
                 reducer = jobContext.createArtifact(reducerConfig.getRef(), null, reducerConfig.getProperties(), batchContext);
             }
-            RefArtifact mapperConfig = partition.getMapper();
+            final RefArtifact mapperConfig = partition.getMapper();
             if (mapperConfig != null) {
                 mapper = jobContext.createArtifact(mapperConfig.getRef(), null, mapperConfig.getProperties(), batchContext);
             }
-            RefArtifact analyzerConfig = partition.getAnalyzer();
+            final RefArtifact analyzerConfig = partition.getAnalyzer();
             if (analyzerConfig != null) {
                 analyzer = jobContext.createArtifact(analyzerConfig.getRef(), null, analyzerConfig.getProperties(), batchContext);
             }
@@ -361,16 +361,16 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     }
 
     private void createStepListeners() {
-        List<RefArtifact> listeners = step.getListeners();
+        final List<RefArtifact> listeners = step.getListeners();
         String ref;
-        for (RefArtifact listener : listeners) {
+        for (final RefArtifact listener : listeners) {
             ref = listener.getRef();
-            Class<?> cls = jobContext.getArtifactClass(ref);
+            final Class<?> cls = jobContext.getArtifactClass(ref);
 
             //a class can implement multiple listener interfaces, so need to check it against all listener types
             //even after previous matches
             if (StepListener.class.isAssignableFrom(cls)) {
-                Object o = jobContext.createArtifact(ref, null, listener.getProperties(), batchContext);
+                final Object o = jobContext.createArtifact(ref, null, listener.getProperties(), batchContext);
                 stepListeners.add((StepListener) o);
             }
             if (ChunkListener.class.isAssignableFrom(cls) || ItemReadListener.class.isAssignableFrom(cls) ||

@@ -24,7 +24,7 @@ import org.jberet.util.BatchLogger;
 public final class JobExecutionRunner extends CompositeExecutionRunner<JobContextImpl> implements Runnable {
     private Job job;
 
-    public JobExecutionRunner(JobContextImpl jobContext) {
+    public JobExecutionRunner(final JobContextImpl jobContext) {
         super(jobContext, null);
         this.job = jobContext.getJob();
     }
@@ -42,7 +42,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         }
         try {
             // run job listeners beforeJob()
-            for (JobListener l : batchContext.getJobListeners()) {
+            for (final JobListener l : batchContext.getJobListeners()) {
                 try {
                     l.beforeJob();
                 } catch (Throwable e) {
@@ -54,7 +54,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
 
             runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPoint());
 
-            for (JobListener l : batchContext.getJobListeners()) {
+            for (final JobListener l : batchContext.getJobListeners()) {
                 try {
                     l.afterJob();
                 } catch (Throwable e) {

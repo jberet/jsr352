@@ -26,9 +26,9 @@ public class Batchlet1 extends Batchlet0 {
 
     @Override
     public String process() throws Exception {
-        String result = super.process();
+        final String result = super.process();
 
-        String stepToVerify = "step11";
+        final String stepToVerify = "step11";
         if (stepToVerify.equals(stepContext.getStepName())) {
             Assert.assertEquals("step-prop", referencingStepProp);
         }

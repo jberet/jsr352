@@ -35,17 +35,17 @@ public final class InMemoryRepository extends AbstractRepository {
     }
 
     @Override
-    void insertJobInstance(JobInstanceImpl jobInstance) {
+    void insertJobInstance(final JobInstanceImpl jobInstance) {
         jobInstance.setId(jobInstanceIdSequence.incrementAndGet());
     }
 
     @Override
-    void insertJobExecution(JobExecutionImpl jobExecution) {
+    void insertJobExecution(final JobExecutionImpl jobExecution) {
         jobExecution.setId(jobExecutionIdSequence.incrementAndGet());
     }
 
     @Override
-    void insertStepExecution(StepExecutionImpl stepExecution, JobExecutionImpl jobExecution) {
+    void insertStepExecution(final StepExecutionImpl stepExecution, final JobExecutionImpl jobExecution) {
         stepExecution.setId(stepExecutionIdSequence.incrementAndGet());
     }
 }

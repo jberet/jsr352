@@ -23,11 +23,11 @@ import com.ibm.jbatch.tck.spi.JobExecutionWaiter;
 import org.jberet.runtime.JobExecutionImpl;
 
 public final class JobExecutionWaiterImpl implements JobExecutionWaiter {
-    private JobExecutionImpl jobExecution;
-    private long sleepTime;
-    private JobOperator jobOperator;
+    private final JobExecutionImpl jobExecution;
+    private final long sleepTime;
+    private final JobOperator jobOperator;
 
-    JobExecutionWaiterImpl(long executionId, JobOperator jobOp, long sleepTime) {
+    JobExecutionWaiterImpl(final long executionId, final JobOperator jobOp, final long sleepTime) {
         try {
             this.jobOperator = jobOp;
             this.jobExecution = (JobExecutionImpl) jobOp.getJobExecution(executionId);

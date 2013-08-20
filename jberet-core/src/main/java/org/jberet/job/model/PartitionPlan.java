@@ -33,7 +33,7 @@ public final class PartitionPlan implements Serializable {
      */
     private String threads;
 
-    private List<Properties> propertiesList = new ArrayList<Properties>();
+    private final List<Properties> propertiesList = new ArrayList<Properties>();
 
     PartitionPlan() {
     }
@@ -42,7 +42,7 @@ public final class PartitionPlan implements Serializable {
         return propertiesList;
     }
 
-    void addProperties(Properties properties) {
+    void addProperties(final Properties properties) {
         propertiesList.add(properties);
     }
 
@@ -57,7 +57,7 @@ public final class PartitionPlan implements Serializable {
         return Integer.parseInt(partitions);
     }
 
-    void setPartitions(String partitions) {
+    void setPartitions(final String partitions) {
         if (partitions != null) {
             this.partitions = partitions;
         }
@@ -74,7 +74,7 @@ public final class PartitionPlan implements Serializable {
         return Integer.parseInt(threads);
     }
 
-    void setThreads(String threads) {
+    void setThreads(final String threads) {
         if (threads != null) {
             this.threads = threads;
         }

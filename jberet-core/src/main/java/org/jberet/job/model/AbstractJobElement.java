@@ -27,7 +27,7 @@ abstract class AbstractJobElement implements JobElement, Serializable {
      */
     private final List<Transition> transitions = new ArrayList<Transition>();
 
-    AbstractJobElement(String id) {
+    AbstractJobElement(final String id) {
         this.id = id;
     }
 
@@ -42,7 +42,7 @@ abstract class AbstractJobElement implements JobElement, Serializable {
     }
 
     @Override
-    public void addTransitionElement(Transition transition) {
+    public void addTransitionElement(final Transition transition) {
         transitions.add(transition);
     }
 }

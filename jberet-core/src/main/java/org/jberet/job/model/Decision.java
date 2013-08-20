@@ -18,7 +18,7 @@ public final class Decision extends AbstractJobElement {
     private String ref;
     private Properties properties;
 
-    Decision(String id, String ref) {
+    Decision(final String id, final String ref) {
         super(id);
         this.ref = ref;
     }
@@ -27,7 +27,7 @@ public final class Decision extends AbstractJobElement {
         return ref;
     }
 
-    void setRef(String ref) {
+    void setRef(final String ref) {
         this.ref = ref;
     }
 
@@ -35,7 +35,7 @@ public final class Decision extends AbstractJobElement {
         return properties;
     }
 
-    void setProperties(Properties properties) {
+    void setProperties(final Properties properties) {
         this.properties = properties;
     }
 }

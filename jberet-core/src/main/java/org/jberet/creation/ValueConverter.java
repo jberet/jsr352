@@ -139,12 +139,12 @@ public final class ValueConverter {
     // order from longest to shortest to make sure input date strings are not truncated by shorter format styles.
     private static final int[] dateFormatCodes = {DateFormat.FULL, DateFormat.LONG, DateFormat.MEDIUM, DateFormat.SHORT};
 
-    public static Object convertFieldValue(String rawValue, Class<?> t, Field f, ClassLoader classLoader) {
-        Object result = convertSingleValue(rawValue, t, f, classLoader);
+    public static Object convertFieldValue(final String rawValue, final Class<?> t, final Field f, final ClassLoader classLoader) {
+        final Object result = convertSingleValue(rawValue, t, f, classLoader);
         if (result != null) {
             return result;
         }
-        String v = rawValue.trim();
+        final String v = rawValue.trim();
         Class<?> elementValueType = null;
 
         if (t.isArray()) {
@@ -152,22 +152,22 @@ public final class ValueConverter {
             if (elementValueType.isPrimitive()) {
                 return parsePrimitiveArray(v, elementValueType, f);
             } else {
-                List tempList = parseList(v, new ArrayList(), elementValueType, f, classLoader);
-                Object[] tempArray = (Object[]) Array.newInstance(elementValueType, tempList.size());
+                final List tempList = parseList(v, new ArrayList(), elementValueType, f, classLoader);
+                final Object[] tempArray = (Object[]) Array.newInstance(elementValueType, tempList.size());
                 return tempList.toArray(tempArray);
             }
         }
 
         if (t == java.util.Properties.class) {
-            java.util.Properties p = new java.util.Properties();
+            final java.util.Properties p = new java.util.Properties();
             return parseMap(v, p, String.class, f, classLoader);
         }
 
-        Type genericType = f.getGenericType();
+        final Type genericType = f.getGenericType();
         if (genericType instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType) genericType;
-            Type[] actualTypeArguments = pt.getActualTypeArguments();
-            Class<?>[] elementTypes = new Class<?>[actualTypeArguments.length];
+            final ParameterizedType pt = (ParameterizedType) genericType;
+            final Type[] actualTypeArguments = pt.getActualTypeArguments();
+            final Class<?>[] elementTypes = new Class<?>[actualTypeArguments.length];
             for (int i = 0; i < actualTypeArguments.length; i++) {
                 if (actualTypeArguments[i] instanceof Class) {
                     elementTypes[i] = (Class<?>) actualTypeArguments[i];
@@ -190,7 +190,7 @@ public final class ValueConverter {
         }
 
         if (List.class.isAssignableFrom(t) || t == Collection.class) {
-            List l;
+            final List l;
             if (t == List.class || t == ArrayList.class || t == Collection.class) {
                 l = new ArrayList();
             } else if (t == LinkedList.class) {
@@ -203,7 +203,7 @@ public final class ValueConverter {
             return parseList(v, l, elementValueType, f, classLoader);
         }
         if (Map.class.isAssignableFrom(t)) {
-            Map<String, String> m;
+            final Map<String, String> m;
             if (t == Map.class || t == HashMap.class) {
                 m = new HashMap();
             } else if (t == LinkedHashMap.class) {
@@ -222,7 +222,7 @@ public final class ValueConverter {
             return parseMap(v, m, elementValueType, f, classLoader);
         }
         if (Set.class.isAssignableFrom(t)) {
-            Set set;
+            final Set set;
             if (t == Set.class || t == HashSet.class) {
                 set = new HashSet();
             } else if (t == SortedSet.class || t == TreeSet.class) {
@@ -239,8 +239,8 @@ public final class ValueConverter {
         throw LOGGER.unsupportedFieldType(v, f, t);
     }
 
-    private static Object convertSingleValue(String rawValue, Class<?> t, Field f, ClassLoader classLoader) {
-        String v = rawValue.trim();
+    private static Object convertSingleValue(final String rawValue, final Class<?> t, final Field f, final ClassLoader classLoader) {
+        final String v = rawValue.trim();
         if (t == int.class || t == Integer.class) {
             return Integer.valueOf(v);
         }
@@ -344,63 +344,63 @@ public final class ValueConverter {
         return null;
     }
 
-    private static Object parsePrimitiveArray(String v, Class<?> primitiveType, Field f) {
-        StringTokenizer st = new StringTokenizer(v, delimiter);
-        int count = st.countTokens();
-        String[] sVal = new String[count];
+    private static Object parsePrimitiveArray(final String v, final Class<?> primitiveType, final Field f) {
+        final StringTokenizer st = new StringTokenizer(v, delimiter);
+        final int count = st.countTokens();
+        final String[] sVal = new String[count];
         for(int i = 0; i < count; i++) {
-            String s = st.nextToken().trim();
+            final String s = st.nextToken().trim();
             sVal[i] = s;
         }
         if (primitiveType == int.class) {
-            int[] result = new int[count];
+            final int[] result = new int[count];
             for (int i = 0; i < count; i++) {
                 result[i] = Integer.parseInt(sVal[i]);
             }
             return result;
         }
         if (primitiveType == long.class) {
-            long[] result = new long[count];
+            final long[] result = new long[count];
             for (int i = 0; i < count; i++) {
                 result[i] = Long.parseLong(sVal[i]);
             }
             return result;
         }
         if (primitiveType == double.class) {
-            double[] result = new double[count];
+            final double[] result = new double[count];
             for (int i = 0; i < count; i++) {
                 result[i] = Double.parseDouble(sVal[i]);
             }
             return result;
         }
         if (primitiveType == boolean.class) {
-            boolean[] result = new boolean[count];
+            final boolean[] result = new boolean[count];
             for (int i = 0; i < count; i++) {
                 result[i] = Boolean.parseBoolean(sVal[i]);
             }
             return result;                }
         if (primitiveType == float.class) {
-            float[] result = new float[count];
+            final float[] result = new float[count];
             for (int i = 0; i < count; i++) {
                 result[i] = Float.parseFloat(sVal[i]);
             }
             return result;
         }
         if (primitiveType == char.class) {
-            char[] result = new char[count];
+            final char[] result = new char[count];
             for (int i = 0; i < count; i++) {
                 result[i] = sVal[i].charAt(0);
             }
             return result;
         }
         if (primitiveType == byte.class) {
-            byte[] result = new byte[count];
+            final byte[] result = new byte[count];
             for (int i = 0; i < count; i++) {
                 result[i] = Byte.parseByte(sVal[i]);
             }
             return result;                }
         if (primitiveType == short.class) {
-            short[] result = new short[count];
+            final short[] result = new short[count];
             for (int i = 0; i < count; i++) {
                 result[i] = Short.parseShort(sVal[i]);
             }
@@ -409,10 +409,10 @@ public final class ValueConverter {
         throw LOGGER.failToInjectProperty(null, v, f);
     }
 
-    private static List parseList(String v, List l, Class<?> elementValueType, Field f, ClassLoader classLoader) {
-        StringTokenizer st = new StringTokenizer(v, delimiter);
+    private static List parseList(final String v, final List l, final Class<?> elementValueType, final Field f, final ClassLoader classLoader) {
+        final StringTokenizer st = new StringTokenizer(v, delimiter);
         while (st.hasMoreTokens()) {
-            String s = st.nextToken().trim();
+            final String s = st.nextToken().trim();
             if (elementValueType.isAssignableFrom(String.class)) {
                 l.add(s);
             } else {
@@ -422,12 +422,13 @@ public final class ValueConverter {
         return l;
     }
 
-    private static Map parseMap(String v, Map map, Class<?> elementValueType, Field f, ClassLoader classLoader) {
-        StringTokenizer st = new StringTokenizer(v, delimiter);
+    private static Map parseMap(final String v, final Map map, final Class<?> elementValueType, final Field f, final ClassLoader classLoader) {
+        final StringTokenizer st = new StringTokenizer(v, delimiter);
         while (st.hasMoreTokens()) {
-            String pair = st.nextToken().trim();
-            int i = pair.indexOf('=');
-            String key, value;
+            final String pair = st.nextToken().trim();
+            final int i = pair.indexOf('=');
+            final String key;
+            final String value;
             if (i > 0) {
                 key = pair.substring(0, i).trim();
                 value = pair.substring(i + 1).trim();
@@ -475,9 +476,9 @@ public final class ValueConverter {
      * @param f the field in the batch artifact (the injection target field)
      * @return a java.util.Date object parsed from the input string v
      */
-    private static Date parseDate(String v, Field f) {
+    private static Date parseDate(final String v, final Field f) {
         DateFormat df;
-        for (int p : dateFormatCodes) {
+        for (final int p : dateFormatCodes) {
             df = DateFormat.getDateTimeInstance(p, p);
             df.setLenient(false);
             try {
@@ -486,7 +487,7 @@ public final class ValueConverter {
                 //ignore
             }
         }
-        for (int p : dateFormatCodes) {
+        for (final int p : dateFormatCodes) {
             df = DateFormat.getDateInstance(p);
             df.setLenient(false);
             try {

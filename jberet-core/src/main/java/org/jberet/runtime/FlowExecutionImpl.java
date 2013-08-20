@@ -15,7 +15,7 @@ package org.jberet.runtime;
 import javax.batch.runtime.StepExecution;
 
 public final class FlowExecutionImpl extends AbstractExecution {
-    private String flowId;
+    private final String flowId;
 
     /**
      * The last StepExecution of the current flow.  Needed if the next element after the current flow is a decison, or
@@ -23,7 +23,7 @@ public final class FlowExecutionImpl extends AbstractExecution {
      */
     private StepExecution lastStepExecution;
 
-    public FlowExecutionImpl(String flowId) {
+    public FlowExecutionImpl(final String flowId) {
         this.flowId = flowId;
     }
 
@@ -35,7 +35,7 @@ public final class FlowExecutionImpl extends AbstractExecution {
         return lastStepExecution;
     }
 
-    public void setLastStepExecution(StepExecution lastStepExecution) {
+    public void setLastStepExecution(final StepExecution lastStepExecution) {
         this.lastStepExecution = lastStepExecution;
     }
 

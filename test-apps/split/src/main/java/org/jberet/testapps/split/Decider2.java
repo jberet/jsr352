@@ -25,10 +25,10 @@ import org.junit.Assert;
 @Named
 public class Decider2 implements Decider {
     @Override
-    public String decide(StepExecution[] executions) throws Exception {
+    public String decide(final StepExecution[] executions) throws Exception {
         Assert.assertEquals(2, executions.length);
         System.out.printf("In decider2 StepExecution[]: %s%n", Arrays.toString(executions));
-        for (StepExecution e : executions) {
+        for (final StepExecution e : executions) {
             System.out.printf("batch status: %s, exit status: %s%n", e.getBatchStatus(), e.getExitStatus());
         }
         return "next";

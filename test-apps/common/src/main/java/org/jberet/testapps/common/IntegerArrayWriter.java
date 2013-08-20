@@ -22,7 +22,7 @@ import org.jberet.runtime.metric.MetricImpl;
 @Named("integerArrayWriter")
 public final class IntegerArrayWriter extends IntegerArrayReaderWriterBase implements ItemWriter {
     @Override
-    public void writeItems(List<Object> items) throws Exception {
+    public void writeItems(final List<Object> items) throws Exception {
         if (items == null) {
             return;
         }
@@ -34,7 +34,7 @@ public final class IntegerArrayWriter extends IntegerArrayReaderWriterBase imple
         if (writerSleepTime > 0) {
             Thread.sleep(writerSleepTime);
         }
-        for (Object o : items) {
+        for (final Object o : items) {
             data[cursor] = (Integer) o;
             cursor++;
         }

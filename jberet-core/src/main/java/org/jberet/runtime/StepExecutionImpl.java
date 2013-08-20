@@ -27,7 +27,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     private long id;
 
-    private String stepName;
+    private final String stepName;
 
     private Serializable persistentUserData;
 
@@ -37,7 +37,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     private Exception exception;
 
-    private StepMetrics stepMetrics = new StepMetrics();
+    private final StepMetrics stepMetrics = new StepMetrics();
 
     int startCount;
 
@@ -75,12 +75,12 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
      */
     private List<Serializable> partitionWriterCheckpointInfo;
 
-    public StepExecutionImpl(String stepName) {
+    public StepExecutionImpl(final String stepName) {
         this.stepName = stepName;
         startTime = System.currentTimeMillis();
     }
 
-    public void setId(long id) {
+    public void setId(final long id) {
         this.id = id;
     }
 
@@ -105,7 +105,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         this.startCount++;
     }
 
-    public void setStartCount(int startCount) {
+    public void setStartCount(final int startCount) {
         this.startCount = startCount;
     }
 
@@ -124,7 +124,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return persistentUserData;
     }
 
-    public void setPersistentUserData(Serializable persistentUserData) {
+    public void setPersistentUserData(final Serializable persistentUserData) {
         this.persistentUserData = persistentUserData;
     }
 
@@ -141,12 +141,12 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return exception;
     }
 
-    public void setException(Exception exception) {
+    public void setException(final Exception exception) {
         this.exception = exception;
     }
 
     @Override
-    public void setBatchStatus(BatchStatus batchStatus) {
+    public void setBatchStatus(final BatchStatus batchStatus) {
         super.setBatchStatus(batchStatus);
         if (batchStatus == BatchStatus.COMPLETED ||
                 batchStatus == BatchStatus.FAILED ||
@@ -159,7 +159,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return readerCheckpointInfo;
     }
 
-    public void setReaderCheckpointInfo(Serializable readerCheckpointInfo) {
+    public void setReaderCheckpointInfo(final Serializable readerCheckpointInfo) {
         this.readerCheckpointInfo = readerCheckpointInfo;
     }
 
@@ -167,7 +167,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return writerCheckpointInfo;
     }
 
-    public void setWriterCheckpointInfo(Serializable writerCheckpointInfo) {
+    public void setWriterCheckpointInfo(final Serializable writerCheckpointInfo) {
         this.writerCheckpointInfo = writerCheckpointInfo;
     }
 
@@ -175,7 +175,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return numOfPartitions;
     }
 
-    public void setNumOfPartitions(int numOfPartitions) {
+    public void setNumOfPartitions(final int numOfPartitions) {
         this.numOfPartitions = numOfPartitions;
     }
 
@@ -183,7 +183,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return partitionPropertiesIndex;
     }
 
-    public void addPartitionPropertiesIndex(Integer i) {
+    public void addPartitionPropertiesIndex(final Integer i) {
         if (partitionPropertiesIndex == null) {
             partitionPropertiesIndex = new ArrayList<Integer>();
         }
@@ -194,7 +194,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return partitionPersistentUserData;
     }
 
-    public void addPartitionPersistentUserData(Serializable d) {
+    public void addPartitionPersistentUserData(final Serializable d) {
         if (partitionPersistentUserData == null) {
             partitionPersistentUserData = new ArrayList<Serializable>();
         }
@@ -205,7 +205,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return partitionReaderCheckpointInfo;
     }
 
-    public void addPartitionReaderCheckpointInfo(Serializable s) {
+    public void addPartitionReaderCheckpointInfo(final Serializable s) {
         if (partitionReaderCheckpointInfo == null) {
             partitionReaderCheckpointInfo = new ArrayList<Serializable>();
         }
@@ -216,7 +216,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         return partitionWriterCheckpointInfo;
     }
 
-    public void addPartitionWriterCheckpointInfo(Serializable s) {
+    public void addPartitionWriterCheckpointInfo(final Serializable s) {
         if (partitionWriterCheckpointInfo == null) {
             partitionWriterCheckpointInfo = new ArrayList<Serializable>();
         }

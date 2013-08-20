@@ -47,23 +47,23 @@ public final class PropertyResolver {
 
     private boolean resolvePartitionPlanProperties;
 
-    public void setSystemProperties(Properties systemProperties) {
+    public void setSystemProperties(final Properties systemProperties) {
         this.systemProperties = systemProperties;
     }
 
-    public void setJobParameters(Properties jobParameters) {
+    public void setJobParameters(final Properties jobParameters) {
         this.jobParameters = jobParameters;
     }
 
-    public void setPartitionPlanProperties(Properties partitionPlanProperties) {
+    public void setPartitionPlanProperties(final Properties partitionPlanProperties) {
         this.partitionPlanProperties = partitionPlanProperties;
     }
 
-    public void pushJobProperties(org.jberet.job.model.Properties jobProps) {
+    public void pushJobProperties(final org.jberet.job.model.Properties jobProps) {
         this.jobPropertiesStack.push(jobProps);
     }
 
-    public void setResolvePartitionPlanProperties(boolean resolvePartitionPlanProperties) {
+    public void setResolvePartitionPlanProperties(final boolean resolvePartitionPlanProperties) {
         this.resolvePartitionPlanProperties = resolvePartitionPlanProperties;
     }
 
@@ -74,8 +74,9 @@ public final class PropertyResolver {
      *
      * @param job the job element whose properties need to be resolved
      */
-    public void resolve(Job job) {
-        String oldVal, newVal;
+    public void resolve(final Job job) {
+        final String oldVal;
+        final String newVal;
         oldVal = job.getRestartable();
         if (oldVal != null) {
             newVal = resolve(oldVal);
@@ -84,7 +85,7 @@ public final class PropertyResolver {
             }
         }
 
-        org.jberet.job.model.Properties props = job.getProperties();
+        final org.jberet.job.model.Properties props = job.getProperties();
         //do not push or pop the top-level properties.  They need to be sticky and may be referenced by lower-level props
         resolve(props, false);
 
@@ -96,11 +97,11 @@ public final class PropertyResolver {
         }
     }
 
-    private void resolveJobElements(List<?> jobElements) {
+    private void resolveJobElements(final List<?> jobElements) {
         if (jobElements == null) {
             return;
         }
-        for (Object e : jobElements) {
+        for (final Object e : jobElements) {
             if (e instanceof Step) {
                 resolve((Step) e);
             } else if (e instanceof Flow) {
@@ -120,7 +121,7 @@ public final class PropertyResolver {
      *
      * @param step the step element whose properties need to be resolved
      */
-    public void resolve(Step step) {
+    public void resolve(final Step step) {
         resolve(step.getPartition());
         String oldVal, newVal;
         oldVal = step.getAttributeNext();
@@ -144,10 +145,10 @@ public final class PropertyResolver {
                 step.setStartLimit(newVal);
             }
         }
-        org.jberet.job.model.Properties props = step.getProperties();
+        final org.jberet.job.model.Properties props = step.getProperties();
         resolve(props, false);
         resolve(step.getListeners());
-        RefArtifact batchlet = step.getBatchlet();
+        final RefArtifact batchlet = step.getBatchlet();
 
         if (batchlet != null) {
             oldVal = batchlet.getRef();
@@ -165,12 +166,12 @@ public final class PropertyResolver {
         }
     }
 
-    private void resolve(Partition partition) {
+    private void resolve(final Partition partition) {
         if (partition == null) {
             return;
         }
         String oldVal, newVal;
-        RefArtifact analyzer = partition.getAnalyzer();
+        final RefArtifact analyzer = partition.getAnalyzer();
         if (analyzer != null) {
             oldVal = analyzer.getRef();
             newVal = resolve(oldVal);
@@ -179,7 +180,7 @@ public final class PropertyResolver {
             }
             resolve(analyzer.getProperties(), true);
         }
-        RefArtifact collector = partition.getCollector();
+        final RefArtifact collector = partition.getCollector();
         if (collector != null) {
             oldVal = collector.getRef();
             newVal = resolve(oldVal);
@@ -189,7 +190,7 @@ public final class PropertyResolver {
             resolve(collector.getProperties(), true);
 
         }
-        RefArtifact reducer = partition.getReducer();
+        final RefArtifact reducer = partition.getReducer();
         if (reducer != null) {
             oldVal = reducer.getRef();
             newVal = resolve(oldVal);
@@ -198,7 +199,7 @@ public final class PropertyResolver {
             }
             resolve(reducer.getProperties(), true);
         }
-        PartitionPlan plan = partition.getPlan();
+        final PartitionPlan plan = partition.getPlan();
         if (plan != null) {
             oldVal = plan.getPartitions();
             if (oldVal != null) {
@@ -216,12 +217,12 @@ public final class PropertyResolver {
             }
             //plan properties should be resolved at job load time (1st pass)
             if (!resolvePartitionPlanProperties) {
-                for (org.jberet.job.model.Properties p : plan.getPropertiesList()) {
+                for (final org.jberet.job.model.Properties p : plan.getPropertiesList()) {
                     resolve(p, true);
                 }
             }
         }
-        RefArtifact mapper = partition.getMapper();
+        final RefArtifact mapper = partition.getMapper();
         if (mapper != null) {
             oldVal = mapper.getRef();
             newVal = resolve(oldVal);
@@ -235,7 +236,7 @@ public final class PropertyResolver {
         }
     }
 
-    private void resolve(Chunk chunk) {
+    private void resolve(final Chunk chunk) {
         if (chunk == null) {
             return;
         }
@@ -280,7 +281,7 @@ public final class PropertyResolver {
             }
         }
 
-        RefArtifact reader = chunk.getReader();
+        final RefArtifact reader = chunk.getReader();
         oldVal = reader.getRef();
         newVal = resolve(oldVal);
         if (!oldVal.equals(newVal)) {
@@ -288,7 +289,7 @@ public final class PropertyResolver {
         }
         resolve(reader.getProperties(), true);
 
-        RefArtifact writer = chunk.getWriter();
+        final RefArtifact writer = chunk.getWriter();
         oldVal = writer.getRef();
         newVal = resolve(oldVal);
         if (!oldVal.equals(newVal)) {
@@ -296,7 +297,7 @@ public final class PropertyResolver {
         }
         resolve(writer.getProperties(), true);
 
-        RefArtifact processor = chunk.getProcessor();
+        final RefArtifact processor = chunk.getProcessor();
         if (processor != null) {
             oldVal = processor.getRef();
             newVal = resolve(oldVal);
@@ -306,7 +307,7 @@ public final class PropertyResolver {
             resolve(processor.getProperties(), true);
         }
 
-        RefArtifact checkpointAlgorithm = chunk.getCheckpointAlgorithm();
+        final RefArtifact checkpointAlgorithm = chunk.getCheckpointAlgorithm();
         if (checkpointAlgorithm != null) {
             oldVal = checkpointAlgorithm.getRef();
             if (oldVal != null) {  //TODO remove the if, ref attr should be required
@@ -319,7 +320,7 @@ public final class PropertyResolver {
         }
     }
 
-    private void resolve(ExceptionClassFilter filter) {
+    private void resolve(final ExceptionClassFilter filter) {
         if (filter == null) {
             return;
         }
@@ -327,33 +328,33 @@ public final class PropertyResolver {
         resolveIncludeOrExclude(filter.getExclude());
     }
 
-    private void resolveIncludeOrExclude(List<String> clude) {
+    private void resolveIncludeOrExclude(final List<String> clude) {
         for (ListIterator<String> it = clude.listIterator(); it.hasNext();) {
-            String oldVal = it.next();
-            String newVal = resolve(oldVal);
+            final String oldVal = it.next();
+            final String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
                 it.set(newVal);
             }
         }
     }
 
-    private void resolve(Split split) {
-        String oldVal = split.getAttributeNext();
+    private void resolve(final Split split) {
+        final String oldVal = split.getAttributeNext();
         if (oldVal != null) {
-            String newVal = resolve(oldVal);
+            final String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
                 split.setAttributeNext(newVal);
             }
         }
-        for (Flow e : split.getFlows()) {
+        for (final Flow e : split.getFlows()) {
             resolve(e);
         }
     }
 
-    public void resolve(Flow flow) {
-        String oldVal = flow.getAttributeNext();
+    public void resolve(final Flow flow) {
+        final String oldVal = flow.getAttributeNext();
         if (oldVal != null) {
-            String newVal = resolve(oldVal);
+            final String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
                 flow.setAttributeNext(newVal);
             }
@@ -362,14 +363,14 @@ public final class PropertyResolver {
         resolveJobElements(flow.getJobElements());
     }
 
-    private void resolve(org.jberet.job.model.Properties props, boolean popProps) {
+    private void resolve(final org.jberet.job.model.Properties props, final boolean popProps) {
         if (props == null) {
             return;
         }
 
         //push individual property to resolver one by one, so only those properties that are already defined can be
         //visible to the resolver.
-        org.jberet.job.model.Properties propsToPush = new org.jberet.job.model.Properties();
+        final org.jberet.job.model.Properties propsToPush = new org.jberet.job.model.Properties();
         jobPropertiesStack.push(propsToPush);
 
         try {
@@ -381,7 +382,7 @@ public final class PropertyResolver {
                 }
             }
 
-            Map<String, String> propertiesMapping = props.getPropertiesMapping();
+            final Map<String, String> propertiesMapping = props.getPropertiesMapping();
             for (final Map.Entry<String, String> entry : propertiesMapping.entrySet()) {
                 final String oldKey = entry.getKey();
                 final String newKey = resolve(oldKey);
@@ -404,13 +405,13 @@ public final class PropertyResolver {
         }
     }
 
-    private void resolve(List<RefArtifact> listeners) {
+    private void resolve(final List<RefArtifact> listeners) {
         if (listeners == null) {
             return;
         }
-        for (RefArtifact l : listeners) {
-            String oldVal = l.getRef();
-            String newVal = resolve(oldVal);
+        for (final RefArtifact l : listeners) {
+            final String oldVal = l.getRef();
+            final String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
                 l.setRef(newVal);
             }
@@ -418,9 +419,9 @@ public final class PropertyResolver {
         }
     }
 
-    private void resolve(Decision decision) {
-        String oldVal = decision.getRef();
-        String newVal = resolve(oldVal);
+    private void resolve(final Decision decision) {
+        final String oldVal = decision.getRef();
+        final String newVal = resolve(oldVal);
         if (!oldVal.equals(newVal)) {
             decision.setRef(newVal);
         }
@@ -428,11 +429,11 @@ public final class PropertyResolver {
         resolveTransitionElements(decision.getTransitionElements());
     }
 
-    private void resolveTransitionElements(List<?> transitions) {
+    private void resolveTransitionElements(final List<?> transitions) {
         String oldVal, newVal;
-        for (Object e : transitions) {
+        for (final Object e : transitions) {
             if (e instanceof Next) {
-                Next next = (Next) e;
+                final Next next = (Next) e;
                 oldVal = next.getTo();
                 newVal = resolve(oldVal);
                 if (!oldVal.equals(newVal)) {
@@ -444,7 +445,7 @@ public final class PropertyResolver {
                     next.setOn(newVal);
                 }
             } else if (e instanceof Fail) {
-                Fail fail = (Fail) e;
+                final Fail fail = (Fail) e;
                 oldVal = fail.getOn();
                 newVal = resolve(oldVal);
                 if (!oldVal.equals(newVal)) {
@@ -458,7 +459,7 @@ public final class PropertyResolver {
                     }
                 }
             } else if (e instanceof End) {
-                End end = (End) e;
+                final End end = (End) e;
                 oldVal = end.getOn();
                 newVal = resolve(oldVal);
                 if (!oldVal.equals(newVal)) {
@@ -472,7 +473,7 @@ public final class PropertyResolver {
                     }
                 }
             } else if (e instanceof Stop) {
-                Stop stop = (Stop) e;
+                final Stop stop = (Stop) e;
                 oldVal = stop.getOn();
                 newVal = resolve(oldVal);
                 if (!oldVal.equals(newVal)) {
@@ -499,11 +500,11 @@ public final class PropertyResolver {
 
 
 
-    public String resolve(String rawVale) {
+    public String resolve(final String rawVale) {
         if (rawVale.length() < shortestTemplateLen || !rawVale.contains(prefix)) {
             return rawVale;
         }
-        StringBuilder sb = new StringBuilder(rawVale);
+        final StringBuilder sb = new StringBuilder(rawVale);
         try {
             resolve(sb, 0, true, null);
         } catch (BatchRuntimeException e) {
@@ -513,21 +514,21 @@ public final class PropertyResolver {
         return sb.toString();
     }
 
-    private void resolve(StringBuilder sb, int start, boolean defaultAllowed, LinkedList<String> referringExpressions)
+    private void resolve(final StringBuilder sb, final int start, final boolean defaultAllowed, final LinkedList<String> referringExpressions)
                                         throws BatchRuntimeException {
         //distance-to-end doesn't have space for any template, so no variable referenced
         if (sb.length() - start < shortestTemplateLen) {
             return;
         }
-        int startExpression = sb.indexOf(prefix, start);
+        final int startExpression = sb.indexOf(prefix, start);
         if (startExpression < 0) {    //doesn't reference any variable
             return;
         }
-        int startPropCategory = startExpression + prefixLen;
-        int openBracket = sb.indexOf("[", startPropCategory);
-        String propCategory = sb.substring(startPropCategory, openBracket);
-        int startVariableName = openBracket + 2;  //jump to the next char after ', the start of variable name
-        int endBracket = sb.indexOf("]", startVariableName + 1);
+        final int startPropCategory = startExpression + prefixLen;
+        final int openBracket = sb.indexOf("[", startPropCategory);
+        final String propCategory = sb.substring(startPropCategory, openBracket);
+        final int startVariableName = openBracket + 2;  //jump to the next char after ', the start of variable name
+        final int endBracket = sb.indexOf("]", startVariableName + 1);
         int endExpression = endBracket + 1;
 
         if (endExpression >= sb.length()) {
@@ -537,7 +538,7 @@ public final class PropertyResolver {
         }
 
         int endCurrentPass = endExpression;
-        String expression = sb.substring(startExpression, endExpression + 1);
+        final String expression = sb.substring(startExpression, endExpression + 1);
         if (referringExpressions != null && referringExpressions.contains(expression)) {
             throw LOGGER.cycleInPropertyReference(referringExpressions);
         }
@@ -547,7 +548,7 @@ public final class PropertyResolver {
             return;
         }
 
-        String variableName = sb.substring(startVariableName, endBracket - 1);  // ['abc']
+        final String variableName = sb.substring(startVariableName, endBracket - 1);  // ['abc']
         String val = getPropertyValue(variableName, propCategory, sb);
         if (val != null) {
             val = reresolve(expression, val, defaultAllowed, referringExpressions);
@@ -563,15 +564,15 @@ public final class PropertyResolver {
             }
             endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, val);
         } else {
-            int startDefaultMarker = endExpression + 1;
-            int endDefaultMarker = startDefaultMarker + 1;  //?:
+            final int startDefaultMarker = endExpression + 1;
+            final int endDefaultMarker = startDefaultMarker + 1;  //?:
             String next2Chars = null;
             if (endDefaultMarker >= sb.length()) {
                 //no default value expression
             } else {
                 next2Chars = sb.substring(startDefaultMarker, endDefaultMarker + 1);
             }
-            boolean hasDefault = defaultValuePrefix.equals(next2Chars);
+            final boolean hasDefault = defaultValuePrefix.equals(next2Chars);
 
             int endDefaultExpressionMarker = sb.indexOf(";", endDefaultMarker + 1);
             if (endDefaultExpressionMarker < 0) {
@@ -589,7 +590,7 @@ public final class PropertyResolver {
                     //throw LOGGER.unresolvableExpressionException(sb.toString());
                     endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endExpression, "");
                 } else {  //not resolved, has default: resolve and apply the default
-                    StringBuilder sb4DefaultExpression = new StringBuilder(sb.substring(endDefaultMarker + 1, endDefaultExpressionMarker));
+                    final StringBuilder sb4DefaultExpression = new StringBuilder(sb.substring(endDefaultMarker + 1, endDefaultExpressionMarker));
                     resolve(sb4DefaultExpression, 0, false, null);
                     endCurrentPass = replaceAndGetEndPosition(sb, startExpression, endDefaultExpressionMarker, sb4DefaultExpression.toString());
                 }
@@ -599,7 +600,7 @@ public final class PropertyResolver {
         resolve(sb, endCurrentPass + 1, true, null);
     }
 
-    private String reresolve(String expression, String currentlyResolvedToVal, boolean defaultAllowed, LinkedList<String> referringExpressions)
+    private String reresolve(final String expression, final String currentlyResolvedToVal, final boolean defaultAllowed, LinkedList<String> referringExpressions)
                                 throws BatchRuntimeException {
         if (currentlyResolvedToVal.length() < shortestTemplateLen || !currentlyResolvedToVal.contains(prefix)) {
             return currentlyResolvedToVal;
@@ -608,7 +609,7 @@ public final class PropertyResolver {
             referringExpressions = new LinkedList<String>();
         }
         referringExpressions.add(expression);
-        StringBuilder sb = new StringBuilder(currentlyResolvedToVal);
+        final StringBuilder sb = new StringBuilder(currentlyResolvedToVal);
 
         try {
             resolve(sb, 0, defaultAllowed, referringExpressions);
@@ -619,19 +620,19 @@ public final class PropertyResolver {
         return sb.toString();
     }
 
-    private int replaceAndGetEndPosition(StringBuilder sb, int startExpression, int endExpression, String replacingVal) {
+    private int replaceAndGetEndPosition(final StringBuilder sb, final int startExpression, final int endExpression, final String replacingVal) {
         sb.replace(startExpression, endExpression + 1, replacingVal);
         return startExpression - 1 + replacingVal.length();
     }
 
-    private String getPropertyValue(String variableName, String propCategory, StringBuilder sb) {
+    private String getPropertyValue(final String variableName, final String propCategory, final StringBuilder sb) {
         String val = null;
         if (propCategory.equals(jobParametersToken)) {
             if (jobParameters != null) {
                 val = jobParameters.getProperty(variableName);
             }
         } else if (propCategory.equals(jobPropertiesToken)) {
-            for (org.jberet.job.model.Properties p : jobPropertiesStack) {
+            for (final org.jberet.job.model.Properties p : jobPropertiesStack) {
                 val = p.get(variableName);
                 if (val != null) {
                     break;

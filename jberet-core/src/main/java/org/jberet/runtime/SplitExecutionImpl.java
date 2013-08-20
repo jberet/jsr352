@@ -13,9 +13,9 @@
 package org.jberet.runtime;
 
 public final class SplitExecutionImpl extends AbstractExecution {
-    private String splitId;
+    private final String splitId;
 
-    public SplitExecutionImpl(String splitId) {
+    public SplitExecutionImpl(final String splitId) {
         this.splitId = splitId;
     }
 

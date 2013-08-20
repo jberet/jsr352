@@ -25,7 +25,7 @@ public final class Job implements Serializable {
     private final List<RefArtifact> listeners = new ArrayList<RefArtifact>();
     private final List<JobElement> jobElements = new ArrayList<JobElement>();
 
-    Job(String id) {
+    Job(final String id) {
         this.id = id;
     }
 
@@ -41,7 +41,7 @@ public final class Job implements Serializable {
         return Boolean.parseBoolean(restartable);
     }
 
-    void setRestartable(String restartable) {
+    void setRestartable(final String restartable) {
         if (restartable != null) {
             this.restartable = restartable;
         }
@@ -51,7 +51,7 @@ public final class Job implements Serializable {
         return properties;
     }
 
-    void setProperties(Properties properties) {
+    void setProperties(final Properties properties) {
         this.properties = properties;
     }
 
@@ -59,11 +59,11 @@ public final class Job implements Serializable {
         return listeners;
     }
 
-    void addListener(RefArtifact listener) {
+    void addListener(final RefArtifact listener) {
         listeners.add(listener);
     }
 
-    void addListeners(List<RefArtifact> ls) {
+    void addListeners(final List<RefArtifact> ls) {
         listeners.addAll(ls);
     }
 
@@ -71,7 +71,7 @@ public final class Job implements Serializable {
         return jobElements;
     }
 
-    void addJobElement(JobElement jobElement) {
+    void addJobElement(final JobElement jobElement) {
         jobElements.add(jobElement);
     }
 }

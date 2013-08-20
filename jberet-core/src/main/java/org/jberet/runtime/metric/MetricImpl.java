@@ -21,14 +21,14 @@ public class MetricImpl implements Metric, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private MetricType type;
+    private final MetricType type;
     private long value;
 
-    public MetricImpl(MetricType type) {
+    public MetricImpl(final MetricType type) {
         this.type = type;
     }
 
-    public MetricImpl(MetricType type, long value1) {
+    public MetricImpl(final MetricType type, final long value1) {
         this.type = type;
         this.value = value1;
     }
@@ -43,20 +43,20 @@ public class MetricImpl implements Metric, Serializable {
         return value;
     }
 
-    public void setValue(long value1) {
+    public void setValue(final long value1) {
         this.value = value1;
     }
 
-    public void increment(long i) {
+    public void increment(final long i) {
         this.value += i;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (!(o instanceof MetricImpl)) return false;
 
-        MetricImpl metric = (MetricImpl) o;
+        final MetricImpl metric = (MetricImpl) o;
         return type == metric.type;
     }
 
@@ -75,8 +75,8 @@ public class MetricImpl implements Metric, Serializable {
         return sb.toString();
     }
 
-    public static long getMetric(StepExecution stepExecution, Metric.MetricType type) {
-        for (Metric m : stepExecution.getMetrics()) {
+    public static long getMetric(final StepExecution stepExecution, final Metric.MetricType type) {
+        for (final Metric m : stepExecution.getMetrics()) {
             if (m.getType() == type) {
                 return m.getValue();
             }
@@ -84,8 +84,8 @@ public class MetricImpl implements Metric, Serializable {
         return 0;
     }
 
-    public static long getMetric(StepContext stepContext, Metric.MetricType type) {
-        for (Metric m : stepContext.getMetrics()) {
+    public static long getMetric(final StepContext stepContext, final Metric.MetricType type) {
+        for (final Metric m : stepContext.getMetrics()) {
             if (m.getType() == type) {
                 return m.getValue();
             }

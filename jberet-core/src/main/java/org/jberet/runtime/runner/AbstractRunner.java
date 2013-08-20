@@ -32,22 +32,22 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
     protected JobContextImpl jobContext;
     protected CompositeExecutionRunner enclosingRunner;
 
-    protected AbstractRunner(C batchContext, CompositeExecutionRunner enclosingRunner) {
+    protected AbstractRunner(final C batchContext, final CompositeExecutionRunner enclosingRunner) {
         this.id = batchContext.getId();
         this.batchContext = batchContext;
         this.jobContext = batchContext.getJobContext();
         this.enclosingRunner = enclosingRunner;
     }
 
-    protected static final boolean matches(String text, String pattern) {
+    protected static final boolean matches(final String text, String pattern) {
         if (pattern.equals("*")) {
             return true;
         }
-        boolean containsQuestionMark = pattern.contains("?");
+        final boolean containsQuestionMark = pattern.contains("?");
         if (containsQuestionMark) {
             pattern = pattern.replace('?', '.');
         }
-        boolean containsAsterisk = pattern.contains("*");
+        final boolean containsAsterisk = pattern.contains("*");
         if (containsAsterisk) {
             pattern = pattern.replace("*", ".*");
         }
@@ -68,34 +68,34 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
      *                       bearing on the current batchContext.
      * @return the ref name of the next execution element
      */
-    protected String resolveTransitionElements(List<?> transitionElements, String nextAttr, boolean partOfDecision) {
-        String exitStatus = batchContext.getExitStatus();
-        for (Object e : transitionElements) {  //end, fail. next, stop
+    protected String resolveTransitionElements(final List<?> transitionElements, final String nextAttr, final boolean partOfDecision) {
+        final String exitStatus = batchContext.getExitStatus();
+        for (final Object e : transitionElements) {  //end, fail. next, stop
             if (e instanceof Next) {
-                Next next = (Next) e;
+                final Next next = (Next) e;
                 if (matches(exitStatus, next.getOn())) {
                     return next.getTo();
                 }
             } else if (e instanceof End) {
-                End end = (End) e;
+                final End end = (End) e;
                 if (matches(exitStatus, end.getOn())) {
                     setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.COMPLETED,
                             exitStatus, end.getExitStatus(), partOfDecision);
                     return null;
                 }
             } else if (e instanceof Fail) {
-                Fail fail = (Fail) e;
+                final Fail fail = (Fail) e;
                 if (matches(exitStatus, fail.getOn())) {
                     setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.FAILED,
                             exitStatus, fail.getExitStatus(), partOfDecision);
                     return null;
                 }
             } else {  //stop
-                Stop stop = (Stop) e;
+                final Stop stop = (Stop) e;
                 if (matches(exitStatus, stop.getOn())) {
                     setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.STOPPED,
                             exitStatus, stop.getExitStatus(), partOfDecision);
-                    String restartPoint = stop.getRestart();  //job-level step, flow or split to restart
+                    final String restartPoint = stop.getRestart();  //job-level step, flow or split to restart
                     if (restartPoint != null) {
                         batchContext.getJobContext().getJobExecution().setRestartPoint(restartPoint);
                     }
@@ -106,9 +106,9 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
         return nextAttr;
     }
 
-    private void setOuterContextStatus(AbstractContext[] outerContexts, BatchStatus batchStatus,
-                                       String currentExitStatus, String newExitStatus, boolean partOfDecision) {
-        String exitStatusToUse;
+    private void setOuterContextStatus(final AbstractContext[] outerContexts, final BatchStatus batchStatus,
+                                       final String currentExitStatus, final String newExitStatus, final boolean partOfDecision) {
+        final String exitStatusToUse;
         //for decision, the currentExitStatus is from the decider class
         if (partOfDecision) {
             exitStatusToUse = newExitStatus != null ? newExitStatus : currentExitStatus;
@@ -123,7 +123,7 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
             batchContext.setExitStatus(exitStatusToUse);
         }
 
-        for (AbstractContext c : outerContexts) {
+        for (final AbstractContext c : outerContexts) {
             c.setBatchStatus(batchStatus);
 
             //inside this method are all terminating transition elements, and

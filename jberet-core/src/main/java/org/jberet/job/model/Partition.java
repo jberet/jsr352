@@ -30,7 +30,7 @@ public final class Partition implements Serializable {
         return mapper;
     }
 
-    void setMapper(RefArtifact mapper) {
+    void setMapper(final RefArtifact mapper) {
         this.mapper = mapper;
     }
 
@@ -38,7 +38,7 @@ public final class Partition implements Serializable {
         return plan;
     }
 
-    void setPlan(PartitionPlan plan) {
+    void setPlan(final PartitionPlan plan) {
         this.plan = plan;
     }
 
@@ -46,7 +46,7 @@ public final class Partition implements Serializable {
         return collector;
     }
 
-    void setCollector(RefArtifact collector) {
+    void setCollector(final RefArtifact collector) {
         this.collector = collector;
     }
 
@@ -54,7 +54,7 @@ public final class Partition implements Serializable {
         return analyzer;
     }
 
-    void setAnalyzer(RefArtifact analyzer) {
+    void setAnalyzer(final RefArtifact analyzer) {
         this.analyzer = analyzer;
     }
 
@@ -62,7 +62,7 @@ public final class Partition implements Serializable {
         return reducer;
     }
 
-    void setReducer(RefArtifact reducer) {
+    void setReducer(final RefArtifact reducer) {
         this.reducer = reducer;
     }
 }

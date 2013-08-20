@@ -30,7 +30,7 @@ public class Decider1 extends PostConstructPreDestroyBase implements Decider {
     private String osName;
 
     @Override
-    public String decide(StepExecution[] executions) throws Exception {
+    public String decide(final StepExecution[] executions) throws Exception {
         addToJobExitStatus("Decider1.decide");
         return jobContext.getExitStatus();
     }

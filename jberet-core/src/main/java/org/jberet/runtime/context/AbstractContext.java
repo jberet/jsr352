@@ -26,11 +26,11 @@ public abstract class AbstractContext implements Cloneable {
      */
     protected AbstractContext[] outerContexts;
 
-    protected AbstractContext(String id) {
+    protected AbstractContext(final String id) {
         this.id = id;
     }
 
-    protected AbstractContext(String id, AbstractContext[] outerContexts) {
+    protected AbstractContext(final String id, final AbstractContext[] outerContexts) {
         this.id = id;
         this.outerContexts = outerContexts;
     }
@@ -56,7 +56,7 @@ public abstract class AbstractContext implements Cloneable {
         return transientUserData;
     }
 
-    public void setTransientUserData(Object data) {
+    public void setTransientUserData(final Object data) {
         this.transientUserData = data;
     }
 
@@ -79,11 +79,11 @@ public abstract class AbstractContext implements Cloneable {
      * @param add          the additional BatchContext; should not be nul
      * @return a newly expanded array of BatchContext
      */
-    public static AbstractContext[] addToContextArray(AbstractContext[] contextArray, AbstractContext add) {
+    public static AbstractContext[] addToContextArray(final AbstractContext[] contextArray, final AbstractContext add) {
         if (contextArray == null) {
             return new AbstractContext[]{add};
         }
-        AbstractContext[] result = new AbstractContext[contextArray.length + 1];
+        final AbstractContext[] result = new AbstractContext[contextArray.length + 1];
         System.arraycopy(contextArray, 0, result, 0, contextArray.length);
         result[contextArray.length] = add;
         return result;

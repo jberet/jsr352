@@ -29,7 +29,7 @@ import org.junit.Test;
 public class ExceptionClassFilterTest {
     @Test
     public void exceptionClassFilter2() throws Exception {
-        Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class);
+        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class);
         Chunk chunk = getChunk(job, "exception-class-filter-step");
 
         ExceptionClassFilter filter = chunk.getSkippableExceptionClasses();
@@ -74,7 +74,7 @@ public class ExceptionClassFilterTest {
         Assert.assertEquals(true, filter.matches(AlreadyConnectedException.class));
     }
 
-    private void verifyExceptionClassesFilter(ExceptionClassFilter filter) {
+    private void verifyExceptionClassesFilter(final ExceptionClassFilter filter) {
         Assert.assertEquals(true, filter.matches(RuntimeException.class));  //included
         Assert.assertEquals(false, filter.matches(IllegalStateException.class));  //excluded
         Assert.assertEquals(true, filter.matches(IllegalArgumentException.class));  // superclass included
@@ -85,11 +85,11 @@ public class ExceptionClassFilterTest {
         Assert.assertEquals(false, filter.matches(Error.class));
     }
 
-    protected static Chunk getChunk(Job job, String stepId) {
-        List<JobElement> steps = job.getJobElements();
-        for (JobElement s : steps) {
+    protected static Chunk getChunk(final Job job, final String stepId) {
+        final List<JobElement> steps = job.getJobElements();
+        for (final JobElement s : steps) {
             if (s instanceof Step) {
-                Step step = (Step) s;
+                final Step step = (Step) s;
                 if (stepId.equals(step.getId())) {
                     return step.getChunk();
                 }

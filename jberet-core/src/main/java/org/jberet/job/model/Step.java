@@ -29,7 +29,7 @@ public final class Step extends AbstractJobElement {
     private Chunk chunk;
     private Partition partition;
 
-    Step(String id) {
+    Step(final String id) {
         super(id);
     }
 
@@ -44,7 +44,7 @@ public final class Step extends AbstractJobElement {
         return Integer.parseInt(startLimit);
     }
 
-    void setStartLimit(String startLimit) {
+    void setStartLimit(final String startLimit) {
         if (startLimit != null) {
             this.startLimit = startLimit;
         }
@@ -58,7 +58,7 @@ public final class Step extends AbstractJobElement {
         return Boolean.parseBoolean(allowStartIfComplete);
     }
 
-    void setAllowStartIfComplete(String allowStartIfComplete) {
+    void setAllowStartIfComplete(final String allowStartIfComplete) {
         if (allowStartIfComplete != null) {
             this.allowStartIfComplete = allowStartIfComplete;
         }
@@ -68,7 +68,7 @@ public final class Step extends AbstractJobElement {
         return next;
     }
 
-    void setAttributeNext(String next) {
+    void setAttributeNext(final String next) {
         this.next = next;
     }
 
@@ -76,7 +76,7 @@ public final class Step extends AbstractJobElement {
         return properties;
     }
 
-    void setProperties(Properties properties) {
+    void setProperties(final Properties properties) {
         this.properties = properties;
     }
 
@@ -84,11 +84,11 @@ public final class Step extends AbstractJobElement {
         return listeners;
     }
 
-    void addListener(RefArtifact listener) {
+    void addListener(final RefArtifact listener) {
         listeners.add(listener);
     }
 
-    void addListeners(List<RefArtifact> ls) {
+    void addListeners(final List<RefArtifact> ls) {
         listeners.addAll(ls);
     }
 
@@ -96,7 +96,7 @@ public final class Step extends AbstractJobElement {
         return batchlet;
     }
 
-    void setBatchlet(RefArtifact batchlet) {
+    void setBatchlet(final RefArtifact batchlet) {
         this.batchlet = batchlet;
     }
 
@@ -104,7 +104,7 @@ public final class Step extends AbstractJobElement {
         return chunk;
     }
 
-    void setChunk(Chunk chunk) {
+    void setChunk(final Chunk chunk) {
         this.chunk = chunk;
     }
 
@@ -112,7 +112,7 @@ public final class Step extends AbstractJobElement {
         return partition;
     }
 
-    void setPartition(Partition partition) {
+    void setPartition(final Partition partition) {
         this.partition = partition;
     }
 }

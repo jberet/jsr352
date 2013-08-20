@@ -29,9 +29,9 @@ import static org.jberet.util.BatchLogger.LOGGER;
 
 public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitContextImpl> implements Runnable {
     private static final long SPLIT_FLOW_TIMEOUT_SECONDS = 300;
-    private Split split;
+    private final Split split;
 
-    public SplitExecutionRunner(SplitContextImpl splitContext, CompositeExecutionRunner enclosingRunner) {
+    public SplitExecutionRunner(final SplitContextImpl splitContext, final CompositeExecutionRunner enclosingRunner) {
         super(splitContext, enclosingRunner);
         this.split = splitContext.getSplit();
     }
@@ -44,20 +44,20 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
     @Override
     public void run() {
         batchContext.setBatchStatus(BatchStatus.STARTED);
-        List<Flow> flows = split.getFlows();
-        CountDownLatch latch = new CountDownLatch(flows.size());
+        final List<Flow> flows = split.getFlows();
+        final CountDownLatch latch = new CountDownLatch(flows.size());
         try {
-            for (Flow f : flows) {
+            for (final Flow f : flows) {
                 runFlow(f, latch);
             }
             latch.await(SPLIT_FLOW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
             //check FlowResults from each flow
-            List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
+            final List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
             for (int i = 0; i < fes.size(); i++) {
                 if (fes.get(i).getBatchStatus().equals(BatchStatus.FAILED)) {
                     batchContext.setBatchStatus(BatchStatus.FAILED);
-                    for (AbstractContext c : batchContext.getOuterContexts()) {
+                    for (final AbstractContext c : batchContext.getOuterContexts()) {
                         c.setBatchStatus(BatchStatus.FAILED);
                     }
                     break;
@@ -68,17 +68,17 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
             }
         } catch (Throwable e) {
             LOGGER.failToRunJob(e, jobContext.getJobName(), split.getId(), split);
-            for (AbstractContext c : batchContext.getOuterContexts()) {
+            for (final AbstractContext c : batchContext.getOuterContexts()) {
                 c.setBatchStatus(BatchStatus.FAILED);
             }
         }
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            String next = split.getAttributeNext();  //split has no transition elements
+            final String next = split.getAttributeNext();  //split has no transition elements
             if (next != null) {
                 //the last StepExecution of each flow is needed if the next element after this split is a decision
-                List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
-                StepExecution[] stepExecutions = new StepExecution[fes.size()];
+                final List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
+                final StepExecution[] stepExecutions = new StepExecution[fes.size()];
                 for (int i = 0; i < fes.size(); i++) {
                     stepExecutions[i] = fes.get(i).getLastStepExecution();
                 }

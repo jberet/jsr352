@@ -19,7 +19,7 @@ import com.ibm.jbatch.tck.spi.JobExecutionWaiterFactory;
 
 public final class JobExecutionWaiterFactoryImpl implements JobExecutionWaiterFactory {
     @Override
-    public JobExecutionWaiter createWaiter(long executionId, JobOperator jobOp, long sleepTime) {
+    public JobExecutionWaiter createWaiter(final long executionId, final JobOperator jobOp, final long sleepTime) {
         return new JobExecutionWaiterImpl(executionId, jobOp, sleepTime);
     }
 }

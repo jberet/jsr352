@@ -22,7 +22,7 @@ public abstract class Transition implements Serializable {
 
     private String on;
 
-    Transition(String on) {
+    Transition(final String on) {
         this.on = on;
     }
 
@@ -30,7 +30,7 @@ public abstract class Transition implements Serializable {
         return on;
     }
 
-    void setOn(String on) {
+    void setOn(final String on) {
         this.on = on;
     }
 
@@ -38,7 +38,7 @@ public abstract class Transition implements Serializable {
         private static final long serialVersionUID = 4417648893108466995L;
         private String exitStatus;
 
-        Termination(String on) {
+        Termination(final String on) {
             super(on);
         }
 
@@ -46,7 +46,7 @@ public abstract class Transition implements Serializable {
             return exitStatus;
         }
 
-        void setExitStatus(String exitStatus) {
+        void setExitStatus(final String exitStatus) {
             this.exitStatus = exitStatus;
         }
     }
@@ -54,7 +54,7 @@ public abstract class Transition implements Serializable {
     public static final class End extends Termination {
         private static final long serialVersionUID = -6145098395052085455L;
 
-        End(String on) {
+        End(final String on) {
             super(on);
         }
     }
@@ -62,7 +62,7 @@ public abstract class Transition implements Serializable {
     public static final class Fail extends Termination {
         private static final long serialVersionUID = -5653099756045482389L;
 
-        Fail(String on) {
+        Fail(final String on) {
             super(on);
         }
     }
@@ -71,7 +71,7 @@ public abstract class Transition implements Serializable {
         private static final long serialVersionUID = -460513093260191729L;
         private String restart;
 
-        Stop(String on, String restart) {
+        Stop(final String on, final String restart) {
             super(on);
             this.restart = restart;
         }
@@ -80,7 +80,7 @@ public abstract class Transition implements Serializable {
             return restart;
         }
 
-        void setRestart(String restart) {
+        void setRestart(final String restart) {
             this.restart = restart;
         }
     }
@@ -89,7 +89,7 @@ public abstract class Transition implements Serializable {
         private static final long serialVersionUID = 6985540748982496047L;
         private String to;
 
-        Next(String on) {
+        Next(final String on) {
             super(on);
         }
 
@@ -97,7 +97,7 @@ public abstract class Transition implements Serializable {
             return to;
         }
 
-        void setTo(String to) {
+        void setTo(final String to) {
             this.to = to;
         }
     }

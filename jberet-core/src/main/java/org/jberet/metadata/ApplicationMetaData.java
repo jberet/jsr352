@@ -26,23 +26,23 @@ import org.scannotation.ClasspathUrlFinder;
 import static org.jberet.util.BatchLogger.LOGGER;
 
 public class ApplicationMetaData {
-    private AnnotationDB annotationDB;
+    private final AnnotationDB annotationDB;
 
     //current build-in default ignoredPkgs is {"javax", "java", "sun", "com.sun", "javassist"}
-    private static String[] ignoredPkgs = {
+    private static final String[] ignoredPkgs = {
     };
 
-    private Map<String, String> artifactCatalog = new HashMap<String, String>();
+    private final Map<String, String> artifactCatalog = new HashMap<String, String>();
 
-    private BatchArtifacts batchArtifacts;
+    private final BatchArtifacts batchArtifacts;
 
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
-    public ApplicationMetaData(ClassLoader classLoader) throws IOException, JobStartException {
+    public ApplicationMetaData(final ClassLoader classLoader) throws IOException, JobStartException {
         this.classLoader = classLoader;
         annotationDB = new AnnotationDB();
         annotationDB.addIgnoredPackages(ignoredPkgs);
-        URL[] urls = ClasspathUrlFinder.findClassPaths();
+        final URL[] urls = ClasspathUrlFinder.findClassPaths();
 //        System.out.println("classpath urls: ");
 //        for (URL u : urls) {
 //            System.out.println(u);
@@ -62,7 +62,7 @@ public class ApplicationMetaData {
         return classLoader;
     }
 
-    public String getClassNameForRef(String ref) {
+    public String getClassNameForRef(final String ref) {
         String result = artifactCatalog.get(ref);
         if (result != null) {
             return result;
@@ -77,12 +77,12 @@ public class ApplicationMetaData {
     }
 
     private void identifyArtifacts() {
-        Map<String, Set<String>> annotationIndex = annotationDB.getAnnotationIndex();
-        Set<String> namedClasses = annotationIndex.get("javax.inject.Named");
+        final Map<String, Set<String>> annotationIndex = annotationDB.getAnnotationIndex();
+        final Set<String> namedClasses = annotationIndex.get("javax.inject.Named");
         if (namedClasses != null) {
-            for (String matchingClass : namedClasses) {
+            for (final String matchingClass : namedClasses) {
                 String refName;
-                Class<?> cls;
+                final Class<?> cls;
                 try {
                     cls = this.classLoader.loadClass(matchingClass);
                     refName = cls.getAnnotation(javax.inject.Named.class).value();
@@ -91,7 +91,7 @@ public class ApplicationMetaData {
                     continue;
                 }
                 if (refName.isEmpty()) {
-                    char chars[] = cls.getSimpleName().toCharArray();
+                    final char[] chars = cls.getSimpleName().toCharArray();
                     chars[0] = Character.toLowerCase(chars[0]);
                     refName = new String(chars);
                 }

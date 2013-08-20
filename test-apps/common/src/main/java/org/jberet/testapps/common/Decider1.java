@@ -45,8 +45,8 @@ public class Decider1 implements Decider {
     private JobContext jobContext;
 
     @Override
-    public String decide(StepExecution[] stepExecutions) throws Exception {
-        StepExecution stepExecution = stepExecutions[0];
+    public String decide(final StepExecution[] stepExecutions) throws Exception {
+        final StepExecution stepExecution = stepExecutions[0];
         Assert.assertEquals("decision-prop", decisionProp);
         Assert.assertEquals("job-prop", referencingJobProp);
         Assert.assertThat(referencingStepProp, not(equalTo("step-prop")));

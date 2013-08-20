@@ -18,11 +18,11 @@ import org.jberet.job.model.Flow;
 import org.jberet.runtime.FlowExecutionImpl;
 
 public class FlowContextImpl extends AbstractContext {
-    private Flow flow;
+    private final Flow flow;
 
-    private FlowExecutionImpl flowExecution;
+    private final FlowExecutionImpl flowExecution;
 
-    public FlowContextImpl(Flow flow, AbstractContext[] outerContexts) {
+    public FlowContextImpl(final Flow flow, final AbstractContext[] outerContexts) {
         super(flow.getId(), outerContexts);
         this.flow = flow;
         this.classLoader = getJobContext().getClassLoader();
@@ -43,7 +43,7 @@ public class FlowContextImpl extends AbstractContext {
     }
 
     @Override
-    public void setBatchStatus(BatchStatus status) {
+    public void setBatchStatus(final BatchStatus status) {
         flowExecution.setBatchStatus(status);
     }
 
@@ -53,7 +53,7 @@ public class FlowContextImpl extends AbstractContext {
     }
 
     @Override
-    public void setExitStatus(String exitStatus) {
+    public void setExitStatus(final String exitStatus) {
         flowExecution.setExitStatus(exitStatus);
     }
 }

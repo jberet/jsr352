@@ -49,7 +49,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
 
     JobExecutionImpl originalToRestart;
 
-    public JobContextImpl(JobExecutionImpl jobExecution, JobExecutionImpl originalToRestart, ArtifactFactory artifactFactory, JobRepository jobRepository) {
+    public JobContextImpl(final JobExecutionImpl jobExecution, final JobExecutionImpl originalToRestart, final ArtifactFactory artifactFactory, final JobRepository jobRepository) {
         super(jobExecution.getSubstitutedJob().getId());
         this.jobExecution = jobExecution;
         this.applicationMetaData = jobExecution.getJobInstance().getApplicationMetaData();
@@ -62,7 +62,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
             this.jobExecution.setRestartPoint(originalToRestart.getRestartPoint());
         }
 
-        PropertyResolver resolver = new PropertyResolver();
+        final PropertyResolver resolver = new PropertyResolver();
         resolver.setJobParameters(jobExecution.getJobParameters());
         resolver.resolve(jobExecution.getSubstitutedJob());
         createJobListeners();
@@ -140,12 +140,12 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
     }
 
     @Override
-    public void setBatchStatus(BatchStatus status) {
+    public void setBatchStatus(final BatchStatus status) {
         jobExecution.setBatchStatus(status);
     }
 
     @Override
-    public void setExitStatus(String status) {
+    public void setExitStatus(final String status) {
         jobExecution.setExitStatus(status);
     }
 
@@ -176,9 +176,9 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
      * @param stepContextForInjection optional StepContext, needed for step-level artifact, but not for non-step-level ones
      * @return the created artifact
      */
-    public <A> A createArtifact(String ref, Class<?> cls, org.jberet.job.model.Properties props, StepContextImpl... stepContextForInjection) {
-        Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(props, stepContextForInjection);
-        A a;
+    public <A> A createArtifact(final String ref, final Class<?> cls, final org.jberet.job.model.Properties props, final StepContextImpl... stepContextForInjection) {
+        final Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(props, stepContextForInjection);
+        final A a;
         try {
             a = (A) artifactFactory.create(ref, cls, classLoader, artifactCreationData);
         } catch (Exception e) {
@@ -187,13 +187,13 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         return a;
     }
 
-    public Class<?> getArtifactClass(String ref) {
-        Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(null);
+    public Class<?> getArtifactClass(final String ref) {
+        final Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(null);
         return artifactFactory.getArtifactClass(ref, classLoader, artifactCreationData);
     }
 
-    private Map<ArtifactFactory.DataKey, Object> prepareCreationData(org.jberet.job.model.Properties props, StepContextImpl... stepContextForInjection) {
-        Map<ArtifactFactory.DataKey, Object> artifactCreationData = new HashMap<ArtifactFactory.DataKey, Object>();
+    private Map<ArtifactFactory.DataKey, Object> prepareCreationData(final org.jberet.job.model.Properties props, final StepContextImpl... stepContextForInjection) {
+        final Map<ArtifactFactory.DataKey, Object> artifactCreationData = new HashMap<ArtifactFactory.DataKey, Object>();
         artifactCreationData.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, applicationMetaData);
         artifactCreationData.put(ArtifactFactory.DataKey.JOB_CONTEXT, this);
         if (props != null) {
@@ -205,38 +205,38 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         return artifactCreationData;
     }
 
-    public void destroyArtifact(Object... objs) {
-        for (Object obj : objs) {
+    public void destroyArtifact(final Object... objs) {
+        for (final Object obj : objs) {
             artifactFactory.destroy(obj);
         }
     }
 
-    public void destroyArtifact(List<?> list) {
-        for (Object obj : list) {
+    public void destroyArtifact(final List<?> list) {
+        for (final Object obj : list) {
             artifactFactory.destroy(obj);
         }
     }
 
     private void createJobListeners() {
-        List<RefArtifact> listeners = jobExecution.getSubstitutedJob().getListeners();
-        int count = listeners.size();
+        final List<RefArtifact> listeners = jobExecution.getSubstitutedJob().getListeners();
+        final int count = listeners.size();
         this.jobListeners = new JobListener[count];
         for (int i = 0; i < count; i++) {
-            RefArtifact listener = listeners.get(i);
+            final RefArtifact listener = listeners.get(i);
             this.jobListeners[i] = createArtifact(listener.getRef(), null, listener.getProperties());
         }
     }
 
     public void saveInactiveStepExecutions() {
         if (originalToRestart != null) {
-            List<StepExecutionImpl> currentInactives = jobExecution.getInactiveStepExecutions();
+            final List<StepExecutionImpl> currentInactives = jobExecution.getInactiveStepExecutions();
 
-            List<StepExecution> originalStepExecutions = originalToRestart.getStepExecutions();
-            List<StepExecution> currentStepExecutions = jobExecution.getStepExecutions();
+            final List<StepExecution> originalStepExecutions = originalToRestart.getStepExecutions();
+            final List<StepExecution> currentStepExecutions = jobExecution.getStepExecutions();
 
-            for (StepExecution originalStep : originalStepExecutions) {
+            for (final StepExecution originalStep : originalStepExecutions) {
                 boolean matched = false;
-                for (StepExecution currentStep : currentStepExecutions) {
+                for (final StepExecution currentStep : currentStepExecutions) {
                     if (originalStep.getStepName().equals(currentStep.getStepName())) {
                         matched = true;
                         break;
@@ -247,9 +247,9 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
                 }
             }
 
-            for (StepExecutionImpl originalStep : originalToRestart.getInactiveStepExecutions()) {
+            for (final StepExecutionImpl originalStep : originalToRestart.getInactiveStepExecutions()) {
                 boolean matched = false;
-                for (StepExecutionImpl currentStep : currentInactives) {
+                for (final StepExecutionImpl currentStep : currentInactives) {
                     if (originalStep.getStepName().equals(currentStep.getStepName())) {
                         matched = true;
                         break;

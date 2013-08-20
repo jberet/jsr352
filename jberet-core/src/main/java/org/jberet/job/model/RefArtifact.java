@@ -23,7 +23,7 @@ public class RefArtifact implements Serializable {
     private String ref;
     private Properties properties;
 
-    RefArtifact(String ref) {
+    RefArtifact(final String ref) {
         this.ref = ref;
     }
 
@@ -31,7 +31,7 @@ public class RefArtifact implements Serializable {
         return ref;
     }
 
-    void setRef(String ref) {
+    void setRef(final String ref) {
         this.ref = ref;
     }
 
@@ -39,7 +39,7 @@ public class RefArtifact implements Serializable {
         return properties;
     }
 
-    void setProperties(Properties properties) {
+    void setProperties(final Properties properties) {
         this.properties = properties;
     }
 }

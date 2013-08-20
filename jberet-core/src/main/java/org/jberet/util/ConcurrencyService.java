@@ -19,17 +19,17 @@ import java.util.concurrent.Future;
 
 public class ConcurrencyService {
 
-    private static ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
+    private static final ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
 
     public static ExecutorService getExecutorService() {
         return executorService;
     }
 
-    public static Future<?> submit(Runnable r) {
+    public static Future<?> submit(final Runnable r) {
         return executorService.submit(r);
     }
 
-    public static <V> Future<V> submit(Callable<V> c) {
+    public static <V> Future<V> submit(final Callable<V> c) {
         return executorService.submit(c);
     }
 

@@ -46,13 +46,13 @@ public class PropertyResolverTest {
     private static final String sysProp2 = "sysProp2";
     private static final String sysProp2Val = "sysProp2 val";
 
-    private PropertyResolver resolver = new PropertyResolver();
-    private Properties jobParams = new Properties();
-    private Properties partitionPlan = new Properties();
-    private Properties jobProps1 = new Properties();
-    private Properties jobProps2 = new Properties();
-    private Properties jobProps3 = new Properties();
-    private Properties sysProps = System.getProperties();
+    private final PropertyResolver resolver = new PropertyResolver();
+    private final Properties jobParams = new Properties();
+    private final Properties partitionPlan = new Properties();
+    private final Properties jobProps1 = new Properties();
+    private final Properties jobProps2 = new Properties();
+    private final Properties jobProps3 = new Properties();
+    private final Properties sysProps = System.getProperties();
 
     String javaVersion = sysProps.getProperty("java.version");
     String osName = sysProps.getProperty("os.name");
@@ -78,24 +78,24 @@ public class PropertyResolverTest {
         resolver.setResolvePartitionPlanProperties(false);
     }
 
-    private org.jberet.job.model.Properties fromJavaUtilProperties(Properties props) {
-        org.jberet.job.model.Properties result = new org.jberet.job.model.Properties();
-        for (String s : props.stringPropertyNames()) {
+    private org.jberet.job.model.Properties fromJavaUtilProperties(final Properties props) {
+        final org.jberet.job.model.Properties result = new org.jberet.job.model.Properties();
+        for (final String s : props.stringPropertyNames()) {
             result.add(s, props.getProperty(s));
         }
         return result;
     }
 
-    private void run(String[] raws, String[] expected) {
+    private void run(final String[] raws, final String[] expected) {
         for (int i = 0, j = raws.length; i < j; i++) {
-            String actual = resolver.resolve(raws[i]);
+            final String actual = resolver.resolve(raws[i]);
             Assert.assertEquals(expected[i], actual);
 //            System.out.println("Expected: " + expected[i] + ", actual: " + actual);
         }
     }
 
     @Test public void cycle() {
-        Properties props = new Properties();
+        final Properties props = new Properties();
         props.setProperty("one", "#{jobProperties['one']}");  //self reference
 
         props.setProperty("two", "#{jobProperties['three']}");  //mutual reference
@@ -122,13 +122,13 @@ public class PropertyResolverTest {
     }
 
     @Test public void literal() {
-        String[] raw = {"", "1", " 2 ", "#3", "4name@company.com", "5 people", "$6",
+        final String[] raw = {"", "1", " 2 ", "#3", "4name@company.com", "5 people", "$6",
         "~!@#$%^&*()_+\":?></.raw,?:\\][[]qwert" };
         run(raw, raw);
     }
 
     @Test public void singleVariableAndUnusedDefault() {
-        String[] raw = {
+        final String[] raw = {
                 String.format("#{%s['%s']}", jobParametersToken, jobParam1),
                 String.format("#{%s['%s']}", partitionPlanToken, partitionPlan1),
 
@@ -141,7 +141,7 @@ public class PropertyResolverTest {
         };
 
         //defaults (literal value) are not used, since the variable can be resolved
-        String[] raw2 = {
+        final String[] raw2 = {
                 String.format("#{%s['%s']}?:in.txt;", jobParametersToken, jobParam1),
                 String.format("#{%s['%s']}?:in.txt;", partitionPlanToken, partitionPlan1),
 
@@ -154,7 +154,7 @@ public class PropertyResolverTest {
         };
         
         //defaults (expression value) not used
-        String[] raw3 = {
+        final String[] raw3 = {
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};", jobParametersToken, jobParam1),
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};", partitionPlanToken, partitionPlan1),
 
@@ -166,7 +166,7 @@ public class PropertyResolverTest {
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']}", systemPropertiesToken, sysProp2)
         };
 
-        String[] expected = {
+        final String[] expected = {
             jobParam1Val,
                 null,
                 jobProp1Val,
@@ -186,9 +186,9 @@ public class PropertyResolverTest {
     }
 
     @Test public void literalVariableMix() {
-        String preLiteral = "#";
-        String postLiteral = ";";
-        String[] raw = {
+        final String preLiteral = "#";
+        final String postLiteral = ";";
+        final String[] raw = {
                 String.format("%s#{%s['%s']}%s", preLiteral, jobParametersToken, jobParam1, postLiteral),
                 String.format("%s#{%s['%s']}%s", preLiteral, partitionPlanToken, partitionPlan1, postLiteral),
 
@@ -199,7 +199,7 @@ public class PropertyResolverTest {
                 String.format("%s#{%s['%s']}%s", preLiteral, systemPropertiesToken, sysProp1, postLiteral),
                 String.format("%s#{%s['%s']}%s", preLiteral, systemPropertiesToken, sysProp2, postLiteral)
         };
-        String[] expected = {
+        final String[] expected = {
                 preLiteral + jobParam1Val + postLiteral,
                 raw[1],
                 preLiteral + jobProp1Val + postLiteral,
@@ -215,7 +215,7 @@ public class PropertyResolverTest {
         //defaults (literal value) are used, since the variable cannot be resolved
         //the last param below reprents non-existent, unresolvable variable
         //there can be more text after the default value (see ?:3;x)
-        String[] raw = {
+        final String[] raw = {
                 String.format("#{%s['%s']}?:1.txt", jobParametersToken, "x"),
                 String.format("#{%s['%s']}?:3;x", partitionPlanToken, "."),
 
@@ -227,7 +227,7 @@ public class PropertyResolverTest {
                 String.format("#{%s['%s']}?::", systemPropertiesToken, "*")
         };
 
-        String[] expected = {
+        final String[] expected = {
                 "1.txt", raw[1], "4.txt", " 5 ", "#6", "$7", ":"
         };
 
@@ -238,7 +238,7 @@ public class PropertyResolverTest {
         //defaults (expression value) are used, since the variable cannot be resolved
         //the last param below reprents non-existent, unresolvable variable
         //there can be more text after the default value
-        String[] raw = {
+        final String[] raw = {
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};!", jobParametersToken, ""),
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};", partitionPlanToken, ""),
 
@@ -249,8 +249,8 @@ public class PropertyResolverTest {
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']}", systemPropertiesToken, ""),
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']}", systemPropertiesToken, "")
         };
-        String s = sysProps.getProperty("os.name");
-        String[] expected = {
+        final String s = sysProps.getProperty("os.name");
+        final String[] expected = {
                 s + "!", "#{partitionPlan['']}?:" + osName + ";",
                 s, s, s, s, s
         };
@@ -259,12 +259,12 @@ public class PropertyResolverTest {
     }
 
     @Test public void noDefaultHasDefault() {
-        String[] raw = {
+        final String[] raw = {
                 String.format("#{%s['%s']}#{%s['%s']}?:#{systemProperties['os.name']}", systemPropertiesToken, "java.version", jobParametersToken, ""),
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};#{%s['%s']}", jobParametersToken, "", systemPropertiesToken, "java.version"),
         };
 
-        String[] expected = {
+        final String[] expected = {
                 javaVersion + osName,
                 osName + javaVersion
         };
@@ -272,20 +272,20 @@ public class PropertyResolverTest {
     }
 
     @Test public void mixedCategory() {
-        String[] raw = {
+        final String[] raw = {
                 String.format("#{%s['%s']}#{%s['%s']}#{%s['%s']}",
                         jobParametersToken, jobParam1, systemPropertiesToken, "file.separator", jobParametersToken, jobParam2)};
-        String[] expected = {
+        final String[] expected = {
                 jobParam1Val + sysProps.getProperty("file.separator") + jobParam2Val
         };
         run(raw, expected);
     }
 
     @Test public void partitionPlan() {
-        String preLiteral = "#";
-        String postLiteral = ";";
+        final String preLiteral = "#";
+        final String postLiteral = ";";
         resolver.setResolvePartitionPlanProperties(true);
-        String[] raw = {
+        final String[] raw = {
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};", partitionPlanToken, ""),
                 String.format("#{%s['%s']}?:3;x", partitionPlanToken, "."),
                 String.format("%s#{%s['%s']}%s", preLiteral, partitionPlanToken, partitionPlan1, postLiteral),
@@ -293,7 +293,7 @@ public class PropertyResolverTest {
                 String.format("#{%s['%s']}?:in.txt;", partitionPlanToken, partitionPlan1),
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};", partitionPlanToken, partitionPlan1)
         };
-        String[] expected = {
+        final String[] expected = {
                 osName,
                 "3x",
                 preLiteral + partitionPlan1Val + postLiteral,

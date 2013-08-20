@@ -63,7 +63,7 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
         System.out.printf("Job properties from injected JobContext: %s%n", jobContext.getProperties());
         System.out.printf("Step properties from injected StepContext: %s%n", stepContext.getProperties());
 
-        String fooExpected = "foo";
+        final String fooExpected = "foo";
         if (fooExpected.equals(foo)) {
             System.out.printf("Injected batchlet property foo: %s%n", foo);
         } else {

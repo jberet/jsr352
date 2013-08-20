@@ -20,17 +20,17 @@ public final class ApplicationAndJobName {
     public String appName;
     public String jobName;
 
-    public ApplicationAndJobName(String appName, String jobName) {
+    public ApplicationAndJobName(final String appName, final String jobName) {
         this.appName = appName;
         this.jobName = jobName;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ApplicationAndJobName that = (ApplicationAndJobName) o;
+        final ApplicationAndJobName that = (ApplicationAndJobName) o;
 
         if (appName != null ? !appName.equals(that.appName) : that.appName != null) return false;
         if (jobName != null ? !jobName.equals(that.jobName) : that.jobName != null) return false;

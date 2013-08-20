@@ -24,12 +24,12 @@ import org.jberet.util.ConcurrencyService;
 import static org.jberet.util.BatchLogger.LOGGER;
 
 public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Runnable {
-    private RefArtifact batchlet;
-    private StepExecutionRunner stepRunner;
+    private final RefArtifact batchlet;
+    private final StepExecutionRunner stepRunner;
     private PartitionCollector collector;
     private javax.batch.api.Batchlet batchletObj;
 
-    public BatchletRunner(StepContextImpl stepContext, CompositeExecutionRunner enclosingRunner, StepExecutionRunner stepRunner, RefArtifact batchlet) {
+    public BatchletRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner, final StepExecutionRunner stepRunner, final RefArtifact batchlet) {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
         this.batchlet = batchlet;
@@ -38,7 +38,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     @Override
     public void run() {
         try {
-            RefArtifact collectorConfig;
+            final RefArtifact collectorConfig;
             if (stepRunner.collectorDataQueue != null) {
                 collectorConfig = batchContext.getStep().getPartition().getCollector();
                 if (collectorConfig != null) {
@@ -62,7 +62,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
                 }
             });
 
-            String exitStatus = batchletObj.process();
+            final String exitStatus = batchletObj.process();
             batchContext.setExitStatus(exitStatus);
             if (collector != null) {
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());

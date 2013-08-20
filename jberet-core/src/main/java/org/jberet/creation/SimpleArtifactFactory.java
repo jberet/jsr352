@@ -39,10 +39,10 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
     }
 
     @Override
-    public Class<?> getArtifactClass(String ref, ClassLoader classLoader, Map<?, ?> data) {
-        ApplicationMetaData appData = (ApplicationMetaData) data.get(DataKey.APPLICATION_META_DATA);
-        String className = appData.getClassNameForRef(ref);
-        Class<?> cls;
+    public Class<?> getArtifactClass(final String ref, final ClassLoader classLoader, final Map<?, ?> data) {
+        final ApplicationMetaData appData = (ApplicationMetaData) data.get(DataKey.APPLICATION_META_DATA);
+        final String className = appData.getClassNameForRef(ref);
+        final Class<?> cls;
         try {
             cls = classLoader.loadClass(className);
         } catch (ClassNotFoundException e) {
@@ -52,18 +52,18 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
     }
 
     @Override
-    public Object create(String ref, Class<?> cls, ClassLoader classLoader, Map<?, ?> data) throws Exception {
+    public Object create(final String ref, Class<?> cls, final ClassLoader classLoader, final Map<?, ?> data) throws Exception {
         if (cls == null) {
             cls = getArtifactClass(ref, classLoader, data);
         }
-        Object obj = cls.newInstance();
+        final Object obj = cls.newInstance();
         doInjection(obj, cls, classLoader, data);
         invokeAnnotatedLifecycleMethod(obj, cls, PostConstruct.class);
         return obj;
     }
 
     @Override
-    public void destroy(Object instance) {
+    public void destroy(final Object instance) {
         if (instance != null) {
             try {
                 invokeAnnotatedLifecycleMethod(instance, instance.getClass(), PreDestroy.class);
@@ -74,27 +74,27 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
     }
 
     private void doInjection(final Object obj, Class<?> cls, final ClassLoader classLoader, final Map<?, ?> data) throws Exception {
-        Properties batchProps = (Properties) data.get(DataKey.BATCH_PROPERTY);
-        boolean hasBatchProps = batchProps != null && batchProps.size() > 0;
+        final Properties batchProps = (Properties) data.get(DataKey.BATCH_PROPERTY);
+        final boolean hasBatchProps = batchProps != null && batchProps.size() > 0;
         while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
-            for (Field f : cls.getDeclaredFields()) {
+            for (final Field f : cls.getDeclaredFields()) {
                 if (!f.isSynthetic()) {
                     Object fieldVal = null;
                     if (f.getAnnotation(Inject.class) != null) {
-                        Class<?> fType = f.getType();
+                        final Class<?> fType = f.getType();
                         if (fType == JobContext.class) {
                             fieldVal = data.get(DataKey.JOB_CONTEXT);
                         } else if (fType == StepContext.class) {
                             //fieldVal may be null when StepContext was not stored in data map, as in job listeners
                             fieldVal = data.get(DataKey.STEP_CONTEXT);
                         } else if (hasBatchProps) {
-                            BatchProperty batchPropertyAnn = f.getAnnotation(BatchProperty.class);
+                            final BatchProperty batchPropertyAnn = f.getAnnotation(BatchProperty.class);
                             if (batchPropertyAnn != null) {
                                 String propName = batchPropertyAnn.name();
                                 if (propName.equals("")) {
                                     propName = f.getName();
                                 }
-                                String sVal = batchProps.get(propName);
+                                final String sVal = batchProps.get(propName);
                                 if (sVal != null) {
                                     if (sVal.length() == 0) {
                                         fieldVal = null;
@@ -117,18 +117,18 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
     }
 
     private void invokeAnnotatedLifecycleMethod(final Object obj, Class<?> cls, final Class<? extends Annotation> annCls) throws Exception{
-        List<Method> lifecycleMethods = new ArrayList<Method>();
+        final List<Method> lifecycleMethods = new ArrayList<Method>();
         while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
-            Method[] methods = cls.getDeclaredMethods();
-            for (Method m : methods) {
+            final Method[] methods = cls.getDeclaredMethods();
+            for (final Method m : methods) {
                 if (m.getAnnotation(annCls) != null) {  //the lifecyle annotation is present
-                    int modifiers = m.getModifiers();
-                    String mName = m.getName();
+                    final int modifiers = m.getModifiers();
+                    final String mName = m.getName();
                     if (Modifier.isPrivate(modifiers)) {
                         lifecycleMethods.add(m);
                     } else {
                         boolean alreadyAdded = false;
-                        for (Method lm : lifecycleMethods) {
+                        for (final Method lm : lifecycleMethods) {
                             if (lm.getName().equals(mName)) {
                                 if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
                                     alreadyAdded = true;
@@ -154,7 +154,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
         if (annCls == PostConstruct.class) {
             Collections.reverse(lifecycleMethods);
         }
-        for(Method m : lifecycleMethods) {
+        for(final Method m : lifecycleMethods) {
             if (System.getSecurityManager() == null) {
                 if (!m.isAccessible()) {
                     m.setAccessible(true);
@@ -182,7 +182,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
         private final Object obj;
         private final Object val;
 
-        public SetFieldPrivilegedExceptionAction(Field field, Object obj, Object val) {
+        public SetFieldPrivilegedExceptionAction(final Field field, final Object obj, final Object val) {
             this.field = field;
             this.obj = obj;
             this.val = val;
@@ -202,7 +202,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
         private final Method method;
         private final Object obj;
 
-        public InvokeMethodPrivilegedExceptionAction(Method method, Object obj) {
+        public InvokeMethodPrivilegedExceptionAction(final Method method, final Object obj) {
             this.method = method;
             this.obj = obj;
         }

@@ -26,7 +26,7 @@ public class MainTest {
 
     @Test
     public void testMain() throws Exception {
-        String args[] = {jobXmlName};
+        final String[] args = {jobXmlName};
         Main.main(args);
 
     }
@@ -56,12 +56,12 @@ public class MainTest {
 //        final String[] names = {"Linux", "Mac OS X", "Windows", "Solaris", null};
 //        System.out.printf("print names with String.valueOf(): %s%n", String.valueOf(names));
 
-        Method toString = this.getClass().getDeclaredMethod("toString");
+        final Method toString = this.getClass().getDeclaredMethod("toString");
         System.out.printf("getDeclaredMethod(toString): %s%n", toString);
         System.out.printf("toString getDeclaringClass: %s%n", toString.getDeclaringClass());
 
-        Class<?> superClass = this.getClass().getSuperclass();
-        Method superString = superClass.getDeclaredMethod("toString");
+        final Class<?> superClass = this.getClass().getSuperclass();
+        final Method superString = superClass.getDeclaredMethod("toString");
         System.out.printf("Object toString: %s%n", superString);
         System.out.printf("super toString getDeclaringClass: %s%n", superString.getDeclaringClass());
     }

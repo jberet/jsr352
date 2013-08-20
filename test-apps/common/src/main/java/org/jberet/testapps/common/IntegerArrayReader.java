@@ -25,7 +25,7 @@ public final class IntegerArrayReader extends IntegerArrayReaderWriterBase imple
         if (cursor == readerFailAt) {
             throw new ArithmeticException("Failing at reader.fail.at point " + readerFailAt);
         }
-        Integer result = data[cursor];
+        final Integer result = data[cursor];
         cursor++;
         return result;
     }

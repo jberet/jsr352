@@ -31,25 +31,25 @@ abstract public class AbstractIT {
     protected List<StepExecution> stepExecutions;
     protected StepExecution stepExecution0;
 
-    protected void startJob(String jobXml) {
+    protected void startJob(final String jobXml) {
         jobExecutionId = jobOperator.start(jobXml, params);
         jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
     }
 
-    protected void awaitTermination(JobExecutionImpl... exes) throws InterruptedException {
-        JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
+    protected void awaitTermination(final JobExecutionImpl... exes) throws InterruptedException {
+        final JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
         exe.awaitTerminatioin(jobTimeout, TimeUnit.SECONDS);
         stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
         stepExecution0 = stepExecutions.get(0);
     }
 
-    protected void startJobAndWait(String jobXml) throws Exception {
+    protected void startJobAndWait(final String jobXml) throws Exception {
         startJob(jobXml);
         awaitTermination();
     }
 
-    protected void restartAndWait(long... oldJobExecutionIds) throws InterruptedException {
-        long restartId = oldJobExecutionIds.length == 0 ? jobExecutionId : oldJobExecutionIds[0];
+    protected void restartAndWait(final long... oldJobExecutionIds) throws InterruptedException {
+        final long restartId = oldJobExecutionIds.length == 0 ? jobExecutionId : oldJobExecutionIds[0];
         jobExecutionId = jobOperator.restart(restartId, params);
         jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         awaitTermination();

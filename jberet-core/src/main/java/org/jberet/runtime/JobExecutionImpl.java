@@ -34,15 +34,15 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private long id;
 
-    private JobInstanceImpl jobInstance;
+    private final JobInstanceImpl jobInstance;
 
     private Job substitutedJob;
 
-    private List<StepExecution> stepExecutions = new ArrayList<StepExecution>();
+    private final List<StepExecution> stepExecutions = new ArrayList<StepExecution>();
 
-    private List<StepExecutionImpl> inactiveStepExecutions = new ArrayList<StepExecutionImpl>();
+    private final List<StepExecutionImpl> inactiveStepExecutions = new ArrayList<StepExecutionImpl>();
 
-    private Properties jobParameters;
+    private final Properties jobParameters;
 
     protected long createTime;
     protected long lastUpdatedTime;
@@ -55,7 +55,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     private CountDownLatch jobTerminationlatch = new CountDownLatch(1);
     private CountDownLatch jobStopLatch = new CountDownLatch(1);
 
-    public JobExecutionImpl(JobInstanceImpl jobInstance, Properties jobParameters) throws JobStartException {
+    public JobExecutionImpl(final JobInstanceImpl jobInstance, final Properties jobParameters) throws JobStartException {
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
         this.substitutedJob = BatchUtil.clone(jobInstance.unsubstitutedJob);
@@ -63,7 +63,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         setBatchStatus(BatchStatus.STARTING);
     }
 
-    public void setId(long id) {
+    public void setId(final long id) {
         this.id = id;
     }
 
@@ -79,14 +79,14 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     //It's possible the (fast) job is already terminated and the latch nulled when this method is called
-    public void awaitTerminatioin(long timeout, TimeUnit timeUnit) throws InterruptedException {
+    public void awaitTerminatioin(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
         if (jobTerminationlatch != null) {
             jobTerminationlatch.await(timeout, timeUnit);
         }
     }
 
     //It's possible the (fast) job is already terminated and the latch nulled when this method is called
-    public void awaitStop(long timeout, TimeUnit timeUnit) throws InterruptedException {
+    public void awaitStop(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
         if (jobStopLatch != null) {
             jobStopLatch.await(timeout, timeUnit);
         }
@@ -97,7 +97,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     @Override
-    public void setBatchStatus(BatchStatus batchStatus) {
+    public void setBatchStatus(final BatchStatus batchStatus) {
         super.setBatchStatus(batchStatus);
         lastUpdatedTime = System.currentTimeMillis();
     }
@@ -137,7 +137,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         }
     }
 
-    public void addStepExecution(StepExecution stepExecution) {
+    public void addStepExecution(final StepExecution stepExecution) {
         synchronized (stepExecutions) {
             this.stepExecutions.add(stepExecution);
         }
@@ -148,7 +148,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         return inactiveStepExecutions;
     }
 
-    public void setRestartPoint(String restartPoint) {
+    public void setRestartPoint(final String restartPoint) {
         this.restartPoint = restartPoint;
     }
 
