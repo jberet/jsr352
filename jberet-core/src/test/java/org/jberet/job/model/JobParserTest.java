@@ -139,6 +139,36 @@ public final class JobParserTest {
     }
 
     @Test
+    public void testJobXmlBothNextAttributeAndElementInStep() throws Exception {
+        final String batchXml =
+                "<job id=\"job1\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version=\"1.0\">" + NL +
+                        "<step id=\"step1\" next=\"step2\">" + NL +
+                        "<batchlet ref=\"batchlet1\">" + NL +
+                        "</batchlet>" + NL +
+                        "<next on=\"*\" to=\"step2\">" + NL +
+                        "</step>" + NL +
+                        "</job>" + NL;
+        checkInvalidJobXml(batchXml);
+    }
+
+    @Test
+    public void testJobXmlBothNextAttributeAndElementInFlow() throws Exception {
+        final String batchXml =
+                "<job id=\"job1\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version=\"1.0\">" + NL +
+                        "<flow id=\"flow1\" next=\"next1\">" + NL +
+
+                        "<step id=\"step1\">" + NL +
+                        "<batchlet ref=\"batchlet1\">" + NL +
+                        "</batchlet>" + NL +
+                        "</step>" + NL +
+
+                        "<next on=\"?\" to=\"next1\">" + NL +
+                        "</flow>" + NL +
+                        "</job>" + NL;
+        checkInvalidJobXml(batchXml);
+    }
+
+    @Test
     public void testParseJob() throws Exception {
         Job job = null;
         InputStream is = getClass().getClassLoader().getResourceAsStream(SAMPLE_JOB_XML);
@@ -343,6 +373,7 @@ public final class JobParserTest {
             foundMapperOrPlan = true;
             checkPlan(partition.getPlan());
         }
+        Assert.assertEquals(true, foundMapperOrPlan);
     }
 
     private void checkPlan(final PartitionPlan plan) throws Exception {
@@ -356,8 +387,8 @@ public final class JobParserTest {
     }
 
     private void checkTransitionElements(final List<Transition> transitions, final String nextAttributeValue) throws Exception {
-        int transitioinElementCount = nextAttributeValue == null ? 4 : 3;
-        Assert.assertEquals(transitioinElementCount, transitions.size());
+        int transitionElementCount = nextAttributeValue == null ? 4 : 3;
+        Assert.assertEquals(transitionElementCount, transitions.size());
         boolean foundNext = false;
         boolean foundStop = false;
         boolean foundFail = false;
