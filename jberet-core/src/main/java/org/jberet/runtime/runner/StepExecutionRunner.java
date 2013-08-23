@@ -50,8 +50,6 @@ import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
-import org.jberet.util.ConcurrencyService;
-import org.jberet.util.TransactionService;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -75,13 +73,14 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     BlockingQueue<Serializable> collectorDataQueue;
     BlockingQueue<Boolean> completedPartitionThreads;
 
-    UserTransaction ut = TransactionService.getTransaction();
+    UserTransaction ut;
     private final StepExecutionImpl stepExecution;
 
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
         this.stepExecution = stepContext.getStepExecution();
+        ut = jobContext.getBatchEnvironment().getUserTransaction();
         createStepListeners();
         initPartitionConfig();
     }
@@ -274,7 +273,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (i >= numOfThreads) {
                 completedPartitionThreads.take();
             }
-            ConcurrencyService.submit(runner1);
+            jobContext.getBatchEnvironment().getExecutorService().submit(runner1);
         }
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;

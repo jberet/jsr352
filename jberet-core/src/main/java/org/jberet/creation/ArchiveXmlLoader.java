@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.metadata;
+package org.jberet.creation;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -28,8 +28,9 @@ import static org.jberet.util.BatchLogger.LOGGER;
 public class ArchiveXmlLoader {
     public final static String ARCHIVE_JOB_XML_DIR = "META-INF/batch-jobs/";
     public final static String ARCHIVE_BATCH_XML = "META-INF/batch.xml";
-    public static final String JOB_XML_SCHEMA = "jobXML_1_0.xsd";
-    public static final String BATCH_XML_SCHEMA = "batchXML_1_0.xsd";
+
+    //public static final String JOB_XML_SCHEMA = "jobXML_1_0.xsd";
+    //public static final String BATCH_XML_SCHEMA = "batchXML_1_0.xsd";
 
 //    since inheritance is deferred from 1.0, this cache is not needed.
 //    private static ConcurrentMap<String, Object> loadedJobsByName = new ConcurrentHashMap<String, Object>();
@@ -129,5 +130,4 @@ public class ArchiveXmlLoader {
         is = new BufferedInputStream(new FileInputStream(jobFile));
         return is;
     }
-
 }

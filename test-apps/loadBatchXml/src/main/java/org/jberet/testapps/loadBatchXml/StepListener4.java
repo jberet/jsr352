@@ -29,10 +29,10 @@ public class StepListener4 extends AbstractStepListener implements StepListener 
     private String listenerProp = "default";  //unmatched property
 
     @Inject @BatchProperty(name = "reference-job-prop")
-    private Object referencedProp;  //nothing to inject
+    private String referencedProp;  //nothing to inject
 
     @Inject @BatchProperty(name = "reference-step-prop")
-    private Object referencedStepProp;  //nothing to inject
+    private String referencedStepProp;  //nothing to inject
 
     @Inject
     private JobContext jobContext;

@@ -14,20 +14,20 @@ package org.jberet.test;
 
 import java.util.Collection;
 
+import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.job.model.Job;
-import org.jberet.metadata.ArchiveXmlLoader;
 import org.jberet.repository.JobRepository;
 import org.jberet.repository.JobRepositoryFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class JobRepositoryTest {
-    final private static JobRepository repo = JobRepositoryFactory.getJobRepository();
+    final private static JobRepository repo = JobRepositoryFactory.getJobRepository(null);
     private Job job;
 
     @Test
     public void addRemoveJob() throws Exception {
-        job = ArchiveXmlLoader.loadJobXml("batchlet1.xml", Job.class);
+        job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class);
         repo.removeJob(job.getId());
         final Collection<Job> jobs = repo.getJobs();
         final int existingJobsCount = jobs.size();

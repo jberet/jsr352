@@ -48,6 +48,11 @@
             <artifactId>junit</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-se</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

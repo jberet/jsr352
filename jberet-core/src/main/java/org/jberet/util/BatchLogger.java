@@ -39,7 +39,7 @@ import org.jboss.logging.annotations.MessageLogger;
 public interface BatchLogger extends BasicLogger {
     BatchLogger LOGGER = org.jboss.logging.Logger.getMessageLogger(BatchLogger.class, BatchLogger.class.getPackage().getName());
 
-    @Message(id = 1, value = "Failed to create artifact with ref name %s")
+    @Message(id = 1, value = "Failed to create artifact with ref name %s.  Ensure CDI beans.xml is present and batch.xml, if any, is configured properly.")
     IllegalStateException failToCreateArtifact(@Cause Throwable e, String ref);
 
     @LogMessage(level = Logger.Level.ERROR)
@@ -184,7 +184,7 @@ public interface BatchLogger extends BasicLogger {
     void failToDestroyArtifact(@Cause Throwable cause, Object artifact);
 
     @Message(id = 43, value = "The configuration file %s is not found in the classpath, and will use the default configuration.")
-    @LogMessage(level = Logger.Level.INFO)
+    @LogMessage(level = Logger.Level.TRACE)
     void useDefaultJBeretConfig(String configFile);
 
     @Message(id = 44, value = "Failed to load configuration file %s")

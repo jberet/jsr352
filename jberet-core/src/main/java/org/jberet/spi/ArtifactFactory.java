@@ -10,26 +10,9 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.creation;
-
-import java.util.Map;
+package org.jberet.spi;
 
 public interface ArtifactFactory {
-    public static enum DataKey {
-        APPLICATION_META_DATA,
-        JOB_CONTEXT,
-        STEP_CONTEXT,
-        BATCH_PROPERTY;
-    }
-
-    /**
-     * The initialize method is invoked once during the
-     * initialization of the batch runtime.
-     *
-     * @throws Exception if artifact factory cannot be loaded. * The batch runtime responds by issuing an error message * and disabling itself.
-     */
-    public void initialize() throws Exception;
-
     /**
      * The create method creates an instance
      * corresponding to a ref value from a Job XML.
@@ -37,11 +20,10 @@ public interface ArtifactFactory {
      * @param ref value from Job XML
      * @param cls the class type of the target artifact.  Either ref or cls may be specified.
      * @param classLoader the class loader for loading the artifact class
-     * @param data a map of key-value pair for creating the artifact
      * @return instance corresponding to ref value
      * @throws Exception if instance cannot be created.
      */
-    public Object create(String ref, Class<?> cls, ClassLoader classLoader, Map<?, ?> data) throws Exception;
+    public Object create(String ref, Class<?> cls, ClassLoader classLoader) throws Exception;
 
     /**
      * The destroy method destroys an instance created
@@ -55,8 +37,7 @@ public interface ArtifactFactory {
      * Gets the class type of the artifact represented by ref.
      * @param ref the ref name of the artifact
      * @param classLoader the class loader for loading the artifact class
-     * @param data a map of key-value pair for creating the artifact
      * @return the Class type of the artifact represented by ref
      */
-    public Class<?> getArtifactClass(String ref, ClassLoader classLoader, Map<?, ?> data);
+    public Class<?> getArtifactClass(String ref, ClassLoader classLoader);
 }

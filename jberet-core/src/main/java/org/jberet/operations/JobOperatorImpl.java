@@ -14,9 +14,11 @@ package org.jberet.operations;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.Future;
 import javax.batch.operations.JobExecutionAlreadyCompleteException;
@@ -37,24 +39,35 @@ import javax.batch.runtime.StepExecution;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.jberet.creation.ArtifactFactory;
-import org.jberet.creation.SimpleArtifactFactory;
+import org.jberet.creation.ArchiveXmlLoader;
+import org.jberet.creation.ArtifactFactoryWrapper;
 import org.jberet.job.model.Job;
-import org.jberet.metadata.ArchiveXmlLoader;
 import org.jberet.repository.JobRepository;
 import org.jberet.repository.JobRepositoryFactory;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.runner.JobExecutionRunner;
+import org.jberet.spi.ArtifactFactory;
+import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchUtil;
-import org.jberet.util.ConcurrencyService;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
 public class JobOperatorImpl implements JobOperator {
-    JobRepository repository = JobRepositoryFactory.getJobRepository();
-    private ArtifactFactory artifactFactory = new SimpleArtifactFactory();
+    final JobRepository repository;
+    private BatchEnvironment batchEnvironment;
+    private final ArtifactFactory artifactFactory;
+
+    public JobOperatorImpl() {
+        ServiceLoader<BatchEnvironment> serviceLoader = ServiceLoader.load(BatchEnvironment.class);
+        for (Iterator<BatchEnvironment> it = serviceLoader.iterator(); it.hasNext();) {
+            batchEnvironment = it.next();
+            break;
+        }
+        artifactFactory = new ArtifactFactoryWrapper(batchEnvironment.getArtifactFactory());
+        repository = JobRepositoryFactory.getJobRepository(batchEnvironment);
+    }
 
     @Override
     public long start(final String jobXMLName, final Properties jobParameters) throws JobStartException, JobSecurityException {
@@ -234,10 +247,10 @@ public class JobOperatorImpl implements JobOperator {
 
     private long startJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters, final JobExecutionImpl originalToRestart) throws JobStartException, JobSecurityException {
         final JobExecutionImpl jobExecution = repository.createJobExecution(jobInstance, jobParameters);
-        final JobContextImpl jobContext = new JobContextImpl(jobExecution, originalToRestart, artifactFactory, repository);
+        final JobContextImpl jobContext = new JobContextImpl(jobExecution, originalToRestart, artifactFactory, repository, batchEnvironment);
 
         final JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
-        final Future<?> result = ConcurrencyService.submit(jobExecutionRunner);
+        final Future<?> result = jobContext.getBatchEnvironment().getExecutorService().submit(jobExecutionRunner);
         final long jobExecutionId = jobExecution.getExecutionId();
         return jobExecutionId;
     }

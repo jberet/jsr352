@@ -28,7 +28,6 @@ import org.jberet.runtime.context.FlowContextImpl;
 import org.jberet.runtime.context.SplitContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.util.BatchLogger;
-import org.jberet.util.ConcurrencyService;
 
 /**
  * A runner for job elements that can contain other job elements.  Examples of such composite job elements are
@@ -193,7 +192,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         final FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this, latch);
 
         if (latch != null) {
-            ConcurrencyService.getExecutorService().submit(flowExecutionRunner);
+            jobContext.getBatchEnvironment().getExecutorService().submit(flowExecutionRunner);
         } else {
             flowExecutionRunner.run();
         }

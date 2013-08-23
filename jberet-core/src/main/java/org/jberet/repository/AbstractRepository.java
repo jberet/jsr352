@@ -12,7 +12,6 @@
 
 package org.jberet.repository;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,24 +19,18 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
 import org.jberet.job.model.Job;
-import org.jberet.metadata.ApplicationMetaData;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
 
-import static org.jberet.util.BatchLogger.LOGGER;
-
 public abstract class AbstractRepository implements JobRepository {
     final List<Job> jobs = Collections.synchronizedList(new ArrayList<Job>());
     final List<JobInstance> jobInstances = Collections.synchronizedList(new ArrayList<JobInstance>());
-    final ConcurrentMap<ApplicationAndJobName, ApplicationMetaData> applicationMetaDataMap = new ConcurrentHashMap<ApplicationAndJobName, ApplicationMetaData>();
 
     abstract void insertJobInstance(JobInstanceImpl jobInstance);
     abstract void insertJobExecution(JobExecutionImpl jobExecution);
@@ -84,7 +77,6 @@ public abstract class AbstractRepository implements JobRepository {
         final ApplicationAndJobName appJobNames = new ApplicationAndJobName(applicationName, job.getId());
         final JobInstanceImpl jobInstance = new JobInstanceImpl(job, appJobNames);
         insertJobInstance(jobInstance);
-        jobInstance.setApplicationMetaData(getApplicationMetaData(appJobNames, classLoader));
         jobInstances.add(jobInstance);
         return jobInstance;
     }
@@ -188,22 +180,5 @@ public abstract class AbstractRepository implements JobRepository {
             stepExecution.setWriterCheckpointInfo(copy);
         }
         //save stepExecution partition properties
-    }
-
-    protected ApplicationMetaData getApplicationMetaData(final ApplicationAndJobName applicationAndJobName, final ClassLoader classLoader) {
-        ApplicationMetaData result = applicationMetaDataMap.get(applicationAndJobName);
-        if (result == null) {
-            try {
-                result = new ApplicationMetaData(classLoader);
-                final ApplicationMetaData old = applicationMetaDataMap.putIfAbsent(applicationAndJobName, result);
-                if (old != null) {
-                    result = old;
-                }
-            } catch (IOException e) {
-                throw LOGGER.failToProcessMetaData(e, applicationAndJobName.toString());
-            }
-        }
-
-        return result;
     }
 }

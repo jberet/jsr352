@@ -26,10 +26,10 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.jberet.config.BatchConfig;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
 
@@ -64,9 +64,9 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String SELECT_STEP_EXECUTION = "select-step-execution";
     private static final String INSERT_STEP_EXECUTION = "insert-step-execution";
 
-    private final Properties configProperties;
+    private Properties configProperties;
     private Context namingContext;
-    private final String dataSourceName;
+    private String dataSourceName;
     private DataSource dataSource;
     private String dbUrl;
     private String dbUser;
@@ -78,12 +78,15 @@ public final class JdbcRepository extends AbstractRepository {
         private static final JdbcRepository instance = new JdbcRepository();
     }
 
-    static JdbcRepository getInstance() {
+    static JdbcRepository getInstance(BatchEnvironment batchEnvironment) {
         return Holder.instance;
     }
 
     private JdbcRepository() {
-        configProperties = BatchConfig.getInstance().getConfigProperties();
+    }
+
+    private void init(BatchEnvironment batchEnvironment) {
+        configProperties = batchEnvironment.getBatchConfigurationProperties();
         dataSourceName = configProperties.getProperty(DATASOURCE_JNDI_KEY);
         dbUrl = configProperties.getProperty(DB_URL_KEY);
 

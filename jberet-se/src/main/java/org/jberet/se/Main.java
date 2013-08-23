@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet;
+package org.jberet.se;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +20,6 @@ import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
-import org.jberet.util.ConcurrencyService;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -46,14 +45,7 @@ public class Main {
                 throw new BatchRuntimeException(String.format("The job did not complete: %s%n", jobXml));
             }
         } catch (InterruptedException e) {
-            //ignore
-        } finally {
-            try {
-                ConcurrencyService.shutdown();
-                ConcurrencyService.getExecutorService().awaitTermination(timeout, TimeUnit.MINUTES);
-            } catch (InterruptedException e) {
-                //ignore
-            }
+            throw new BatchRuntimeException(e);
         }
     }
 

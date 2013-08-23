@@ -29,10 +29,10 @@ public class StepListener3 extends AbstractStepListener implements StepListener 
     private String listenerProp;  //injected
 
     @Inject @BatchProperty(name = "reference-job-prop")
-    private Object referencedProp;
+    private String referencedProp;
 
     @Inject @BatchProperty(name = "reference-step-prop")
-    private Object referencedStepProp;
+    private String referencedStepProp;
 
     @Inject @BatchProperty(name="reference-job-prop-2")
     private String referenceJobProp2;

@@ -17,12 +17,12 @@ import java.io.IOException;
 import java.nio.channels.AlreadyConnectedException;
 import java.util.List;
 
+import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
 import org.jberet.job.model.Step;
-import org.jberet.metadata.ArchiveXmlLoader;
 import org.junit.Assert;
 import org.junit.Test;
 

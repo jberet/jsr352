@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
-
+ 
 package org.jberet.creation;
 
 import java.lang.annotation.Annotation;
@@ -21,7 +21,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.batch.api.BatchProperty;
@@ -30,38 +29,13 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
 import org.jberet.job.model.Properties;
-import org.jberet.metadata.ApplicationMetaData;
+import org.jberet.runtime.context.JobContextImpl;
+import org.jberet.runtime.context.StepContextImpl;
+import org.jberet.spi.ArtifactFactory;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
-public final class SimpleArtifactFactory implements ArtifactFactory {
-    public void initialize() throws Exception {
-    }
-
-    @Override
-    public Class<?> getArtifactClass(final String ref, final ClassLoader classLoader, final Map<?, ?> data) {
-        final ApplicationMetaData appData = (ApplicationMetaData) data.get(DataKey.APPLICATION_META_DATA);
-        final String className = appData.getClassNameForRef(ref);
-        final Class<?> cls;
-        try {
-            cls = classLoader.loadClass(className);
-        } catch (ClassNotFoundException e) {
-            throw LOGGER.failToCreateArtifact(e, ref);
-        }
-        return cls;
-    }
-
-    @Override
-    public Object create(final String ref, Class<?> cls, final ClassLoader classLoader, final Map<?, ?> data) throws Exception {
-        if (cls == null) {
-            cls = getArtifactClass(ref, classLoader, data);
-        }
-        final Object obj = cls.newInstance();
-        doInjection(obj, cls, classLoader, data);
-        invokeAnnotatedLifecycleMethod(obj, cls, PostConstruct.class);
-        return obj;
-    }
-
+public abstract class AbstractArtifactFactory implements ArtifactFactory {
     @Override
     public void destroy(final Object instance) {
         if (instance != null) {
@@ -73,8 +47,11 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
         }
     }
 
-    private void doInjection(final Object obj, Class<?> cls, final ClassLoader classLoader, final Map<?, ?> data) throws Exception {
-        final Properties batchProps = (Properties) data.get(DataKey.BATCH_PROPERTY);
+    protected void doInjection(final Object obj, Class<?> cls,
+                             final ClassLoader classLoader,
+                             final JobContextImpl jobContext,
+                             final StepContextImpl stepContext,
+                             final Properties batchProps) throws Exception {
         final boolean hasBatchProps = batchProps != null && batchProps.size() > 0;
         while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
             for (final Field f : cls.getDeclaredFields()) {
@@ -83,10 +60,10 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
                     if (f.getAnnotation(Inject.class) != null) {
                         final Class<?> fType = f.getType();
                         if (fType == JobContext.class) {
-                            fieldVal = data.get(DataKey.JOB_CONTEXT);
+                            fieldVal = jobContext;
                         } else if (fType == StepContext.class) {
                             //fieldVal may be null when StepContext was not stored in data map, as in job listeners
-                            fieldVal = data.get(DataKey.STEP_CONTEXT);
+                            fieldVal = stepContext;
                         } else if (hasBatchProps) {
                             final BatchProperty batchPropertyAnn = f.getAnnotation(BatchProperty.class);
                             if (batchPropertyAnn != null) {
@@ -116,7 +93,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
         }
     }
 
-    private void invokeAnnotatedLifecycleMethod(final Object obj, Class<?> cls, final Class<? extends Annotation> annCls) throws Exception{
+    protected void invokeAnnotatedLifecycleMethod(final Object obj, Class<?> cls, final Class<? extends Annotation> annCls) throws Exception{
         final List<Method> lifecycleMethods = new ArrayList<Method>();
         while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
             final Method[] methods = cls.getDeclaredMethods();
@@ -177,7 +154,7 @@ public final class SimpleArtifactFactory implements ArtifactFactory {
         }
     }
 
-    private static class SetFieldPrivilegedExceptionAction implements java.security.PrivilegedExceptionAction<Void> {
+    private static class SetFieldPrivilegedExceptionAction implements PrivilegedExceptionAction<Void> {
         private final Field field;
         private final Object obj;
         private final Object val;

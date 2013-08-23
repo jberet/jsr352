@@ -30,7 +30,7 @@ public class JobListener1 extends AbstractJobListener implements JobListener {
     private String listenerProp;  //injected
 
     @Inject @BatchProperty(name = "reference-job-prop")
-    private Object referenceJobProp;
+    private String referenceJobProp;
 
     @Inject @BatchProperty(name="reference-job-param")
     private String referenceJobParam;

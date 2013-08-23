@@ -19,7 +19,6 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
 import org.jberet.job.model.Job;
-import org.jberet.metadata.ApplicationMetaData;
 import org.jberet.repository.ApplicationAndJobName;
 
 public final class JobInstanceImpl implements JobInstance {
@@ -28,8 +27,6 @@ public final class JobInstanceImpl implements JobInstance {
     ApplicationAndJobName applicationAndJobName;
 
     private final List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
-
-    private ApplicationMetaData applicationMetaData;
 
     public JobInstanceImpl(final Job unsubstitutedJob, final ApplicationAndJobName applicationAndJobName) {
         this.applicationAndJobName = applicationAndJobName;
@@ -52,14 +49,6 @@ public final class JobInstanceImpl implements JobInstance {
     @Override
     public long getInstanceId() {
         return this.id;
-    }
-
-    public ApplicationMetaData getApplicationMetaData() {
-        return applicationMetaData;
-    }
-
-    public void setApplicationMetaData(final ApplicationMetaData applicationMetaData) {
-        this.applicationMetaData = applicationMetaData;
     }
 
     public List<JobExecution> getJobExecutions() {

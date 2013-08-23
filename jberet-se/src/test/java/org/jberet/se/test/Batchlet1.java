@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.test;
+package org.jberet.se.test;
 
 import javax.batch.api.AbstractBatchlet;
 import javax.batch.api.BatchProperty;

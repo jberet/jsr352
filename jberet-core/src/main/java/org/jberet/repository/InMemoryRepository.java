@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.spi.BatchEnvironment;
 
 public final class InMemoryRepository extends AbstractRepository {
     private final AtomicLong jobInstanceIdSequence = new AtomicLong();
@@ -30,7 +31,7 @@ public final class InMemoryRepository extends AbstractRepository {
         private static final InMemoryRepository instance = new InMemoryRepository();
     }
 
-    static InMemoryRepository getInstance() {
+    static InMemoryRepository getInstance(BatchEnvironment batchEnvironment) {
         return Holder.instance;
     }
 

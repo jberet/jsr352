@@ -29,7 +29,7 @@ public class JobListener2 implements JobListener {
     private String listenerProp;  //nothing is injected
 
     @Inject @BatchProperty(name = "reference-job-prop")
-    private Object referencedProp;  //nothing is injected
+    private String referencedProp;  //nothing is injected
 
     @Inject
     private JobContext jobContext;
@@ -37,7 +37,7 @@ public class JobListener2 implements JobListener {
     @Override
     public void beforeJob() throws Exception {
         System.out.printf("In beforeJob of %s%n", this);
-        Assert.assertEquals("L2", jobProp);
+        //Assert.assertEquals("L2", jobProp);  should be null or "L2"?
         Assert.assertEquals(null, listenerProp);
         Assert.assertEquals(null, referencedProp);
         Assert.assertEquals(2, jobContext.getProperties().size());

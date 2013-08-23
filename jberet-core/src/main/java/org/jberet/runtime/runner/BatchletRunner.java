@@ -19,7 +19,6 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
-import org.jberet.util.ConcurrencyService;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -47,7 +46,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             }
             batchletObj = jobContext.createArtifact(batchlet.getRef(), null, batchlet.getProperties(), batchContext);
 
-            ConcurrencyService.submit(new Runnable() {
+            jobContext.getBatchEnvironment().getExecutorService().submit(new Runnable() {
                 @Override
                 public void run() {
                     try {

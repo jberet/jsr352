@@ -9,44 +9,64 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
-package org.jberet.config;
+
+package org.jberet.se;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.transaction.UserTransaction;
 
+import org.jberet.spi.ArtifactFactory;
+import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchLogger;
-import org.jberet.util.BatchUtil;
+import org.jberet.util.BatchThreadFactory;
 
-public class BatchConfig {
+/**
+ * Represents the Java SE batch runtime environment and its services.
+ */
+public final class BatchSEEnvironment implements BatchEnvironment {
+    private static final ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
+
     public static final String CONFIG_FILE_NAME = "jberet.properties";
 
     private volatile Properties configProperties;
 
-    private BatchConfig() {
+    @Override
+    public ClassLoader getClassLoader() {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl == null) {
+            cl = BatchSEEnvironment.class.getClassLoader();
+        }
+        return cl;
     }
 
-    private static class Holder {
-        private static final BatchConfig instance = new BatchConfig();
+    @Override
+    public ArtifactFactory getArtifactFactory() {
+        return new SEArtifactFactory();
     }
 
-    public static BatchConfig getInstance() {
-        return Holder.instance;
+    @Override
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
-    public synchronized void setConfigProperties(final Properties configProperties) {
-        this.configProperties = configProperties;
+    @Override
+    public UserTransaction getUserTransaction() {
+        return com.arjuna.ats.jta.UserTransaction.userTransaction();
     }
 
-    public Properties getConfigProperties() {
+    @Override
+    public Properties getBatchConfigurationProperties() {
         Properties result = configProperties;
-        if(result == null) {
+        if (result == null) {
             synchronized (this) {
                 result = configProperties;
-                if(result == null) {
+                if (result == null) {
                     result = new Properties();
-                    final InputStream configStream = BatchUtil.getBatchApplicationClassLoader().getResourceAsStream(CONFIG_FILE_NAME);
+                    final InputStream configStream = getClassLoader().getResourceAsStream(CONFIG_FILE_NAME);
                     if (configStream != null) {
                         try {
                             result.load(configStream);

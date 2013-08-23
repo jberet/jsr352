@@ -14,31 +14,31 @@ package org.jberet.runtime.context;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 import javax.batch.runtime.context.JobContext;
 
-import org.jberet.creation.ArtifactFactory;
+import org.jberet.creation.ArchiveXmlLoader;
+import org.jberet.creation.ArtifactCreationContext;
+import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.PropertyResolver;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.job.model.Step;
-import org.jberet.metadata.ApplicationMetaData;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.spi.ArtifactFactory;
+import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchLogger;
 
 public class JobContextImpl extends AbstractContext implements JobContext, Cloneable {
     private static final AbstractContext[] EMPTY_ABSTRACT_CONTEXT_ARRAY = new AbstractContext[0];
 
     JobExecutionImpl jobExecution;
-    private ApplicationMetaData applicationMetaData;
     private ArtifactFactory artifactFactory;
     JobRepository jobRepository;
 
@@ -48,12 +48,18 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
     private List<Step> executedSteps = Collections.synchronizedList(new ArrayList<Step>());
 
     JobExecutionImpl originalToRestart;
+    final BatchEnvironment batchEnvironment;
+    BatchArtifacts batchArtifacts;
 
-    public JobContextImpl(final JobExecutionImpl jobExecution, final JobExecutionImpl originalToRestart, final ArtifactFactory artifactFactory, final JobRepository jobRepository) {
+    public JobContextImpl(final JobExecutionImpl jobExecution,
+                          final JobExecutionImpl originalToRestart,
+                          final ArtifactFactory artifactFactory,
+                          final JobRepository jobRepository,
+                          final BatchEnvironment batchEnvironment) {
         super(jobExecution.getSubstitutedJob().getId());
         this.jobExecution = jobExecution;
-        this.applicationMetaData = jobExecution.getJobInstance().getApplicationMetaData();
-        this.classLoader = applicationMetaData.getClassLoader();
+        this.batchEnvironment = batchEnvironment;
+        this.classLoader = batchEnvironment.getClassLoader();
         this.artifactFactory = artifactFactory;
         this.jobRepository = jobRepository;
 
@@ -65,6 +71,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         final PropertyResolver resolver = new PropertyResolver();
         resolver.setJobParameters(jobExecution.getJobParameters());
         resolver.resolve(jobExecution.getSubstitutedJob());
+        batchArtifacts = ArchiveXmlLoader.loadBatchXml(classLoader);
         createJobListeners();
     }
 
@@ -94,10 +101,6 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
 
     public JobListener[] getJobListeners() {
         return this.jobListeners;
-    }
-
-    public ApplicationMetaData getApplicationMetaData() {
-        return applicationMetaData;
     }
 
     public Properties getJobParameters() {
@@ -166,6 +169,14 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         return jobRepository;
     }
 
+    public BatchArtifacts getBatchArtifacts() {
+        return batchArtifacts;
+    }
+
+    public BatchEnvironment getBatchEnvironment() {
+        return batchEnvironment;
+    }
+
     /**
      * Creates a batch artifact by delegating to the proper ArtifactFactory and passing along data needed for artifact
      * loading and creation.
@@ -177,32 +188,27 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
      * @return the created artifact
      */
     public <A> A createArtifact(final String ref, final Class<?> cls, final org.jberet.job.model.Properties props, final StepContextImpl... stepContextForInjection) {
-        final Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(props, stepContextForInjection);
+        prepareCreationContext(props, stepContextForInjection);
         final A a;
         try {
-            a = (A) artifactFactory.create(ref, cls, classLoader, artifactCreationData);
+            a = (A) artifactFactory.create(ref, cls, classLoader);
         } catch (Exception e) {
             throw BatchLogger.LOGGER.failToCreateArtifact(e, ref);
+        }
+        if (a == null) {
+            throw BatchLogger.LOGGER.failToCreateArtifact(null, ref);
         }
         return a;
     }
 
     public Class<?> getArtifactClass(final String ref) {
-        final Map<ArtifactFactory.DataKey, Object> artifactCreationData = prepareCreationData(null);
-        return artifactFactory.getArtifactClass(ref, classLoader, artifactCreationData);
+        prepareCreationContext(null);
+        return artifactFactory.getArtifactClass(ref, classLoader);
     }
 
-    private Map<ArtifactFactory.DataKey, Object> prepareCreationData(final org.jberet.job.model.Properties props, final StepContextImpl... stepContextForInjection) {
-        final Map<ArtifactFactory.DataKey, Object> artifactCreationData = new HashMap<ArtifactFactory.DataKey, Object>();
-        artifactCreationData.put(ArtifactFactory.DataKey.APPLICATION_META_DATA, applicationMetaData);
-        artifactCreationData.put(ArtifactFactory.DataKey.JOB_CONTEXT, this);
-        if (props != null) {
-            artifactCreationData.put(ArtifactFactory.DataKey.BATCH_PROPERTY, props);
-        }
-        if (stepContextForInjection.length > 0) {
-            artifactCreationData.put(ArtifactFactory.DataKey.STEP_CONTEXT, stepContextForInjection[0]);
-        }
-        return artifactCreationData;
+    private void prepareCreationContext(final org.jberet.job.model.Properties props, final StepContextImpl... stepContextForInjection) {
+        final StepContextImpl sc = stepContextForInjection.length > 0 ? stepContextForInjection[0] : null;
+        ArtifactCreationContext.resetArtifactCreationContext(this, sc, props);
     }
 
     public void destroyArtifact(final Object... objs) {
