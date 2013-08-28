@@ -27,7 +27,7 @@ public class JobRepositoryTest {
 
     @Test
     public void addRemoveJob() throws Exception {
-        job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class);
+        job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class, this.getClass().getClassLoader());
         repo.removeJob(job.getId());
         final Collection<Job> jobs = repo.getJobs();
         final int existingJobsCount = jobs.size();

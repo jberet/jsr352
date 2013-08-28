@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.util;
+package org.jberet.se;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;

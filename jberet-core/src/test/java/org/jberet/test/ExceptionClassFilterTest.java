@@ -29,7 +29,7 @@ import org.junit.Test;
 public class ExceptionClassFilterTest {
     @Test
     public void exceptionClassFilter2() throws Exception {
-        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class);
+        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class, this.getClass().getClassLoader());
         Chunk chunk = getChunk(job, "exception-class-filter-step");
 
         ExceptionClassFilter filter = chunk.getSkippableExceptionClasses();

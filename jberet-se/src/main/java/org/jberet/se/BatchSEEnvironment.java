@@ -22,7 +22,6 @@ import javax.transaction.UserTransaction;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchLogger;
-import org.jberet.util.BatchThreadFactory;
 
 /**
  * Represents the Java SE batch runtime environment and its services.

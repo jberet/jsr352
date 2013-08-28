@@ -50,7 +50,6 @@ import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.util.BatchUtil;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -71,7 +70,7 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public long start(final String jobXMLName, final Properties jobParameters) throws JobStartException, JobSecurityException {
-        final ClassLoader classLoader = BatchUtil.getBatchApplicationClassLoader();
+        final ClassLoader classLoader = batchEnvironment.getClassLoader();
         final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, Job.class, classLoader);
         repository.addJob(jobDefined);
         final JobInstanceImpl jobInstance = repository.createJobInstance(jobDefined, getApplicationName(), classLoader);

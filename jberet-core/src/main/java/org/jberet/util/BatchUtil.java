@@ -30,14 +30,6 @@ public class BatchUtil {
     private static final ObjectClonerFactory clonerFactory = ObjectCloners.getSerializingObjectClonerFactory();
     private static final ObjectCloner cloner = clonerFactory.createCloner(new ClonerConfiguration());
 
-    public static ClassLoader getBatchApplicationClassLoader() {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl == null) {
-            cl = BatchUtil.class.getClassLoader();
-        }
-        return cl;
-    }
-
     public static String propertiesToString(final Properties properties) {
         if (properties == null) {
             return "";

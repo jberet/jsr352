@@ -21,7 +21,6 @@ import javax.batch.operations.JobStartException;
 
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.JobParser;
-import org.jberet.util.BatchUtil;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -68,12 +67,10 @@ public class ArchiveXmlLoader {
      * @param jobName  base name of the job xml document
      * @param rootType Job.class or Step.class
      * @param <T>      Job or Step
-     * @param cl       the application classloader used to load job xml
      * @return the job or step root element
      */
-    public static <T> T loadJobXml(final String jobName, final Class<T> rootType, final ClassLoader... cl) throws JobStartException {
+    public static <T> T loadJobXml(final String jobName, final Class<T> rootType, final ClassLoader classLoader) throws JobStartException {
         Object jobOrStep = null;
-        final ClassLoader classLoader = cl.length > 0 ? cl[0] : BatchUtil.getBatchApplicationClassLoader();
         final InputStream is;
         try {
             is = getJobXml(jobName, classLoader);
