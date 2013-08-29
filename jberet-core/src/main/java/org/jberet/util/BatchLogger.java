@@ -97,8 +97,8 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void invalidExceptionClassFilter(@Cause Throwable cause, String cls);
 
-    @Message(id = 17, value = "The job: %s already exists in the job repository and cannot be added again.")
-    @LogMessage(level = Logger.Level.WARN)
+    @Message(id = 17, value = "The job: %s already exists in the job repository and will not be added.")
+    @LogMessage(level = Logger.Level.TRACE)
     void jobAlreadyExists(String jobId);
 
     @Message(id = 18, value = "Failed to run job %s, %s, %s")
@@ -235,4 +235,10 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 58, value = "Cannot have both next attribute and next element at location %s  Next attribute is already set to %s")
     BatchRuntimeException cannotHaveBothNextAttributeAndElement(Location location, String nextAttributeValue);
+
+    @Message(id = 59, value = "The job instance: %s already exists in the job repository and cannot be added again.")
+    BatchRuntimeException jobInstanceAlreadyExists(long jobInstanceId);
+
+    @Message(id = 60, value = "The job execution: %s already exists in the job repository and cannot be added again.")
+    BatchRuntimeException jobExecutionAlreadyExists(long jobExecutionId);
 }

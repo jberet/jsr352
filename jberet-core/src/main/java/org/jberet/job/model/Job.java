@@ -59,10 +59,6 @@ public final class Job implements Serializable {
         return listeners;
     }
 
-    void addListener(final RefArtifact listener) {
-        listeners.add(listener);
-    }
-
     void addListeners(final List<RefArtifact> ls) {
         listeners.addAll(ls);
     }
@@ -73,5 +69,22 @@ public final class Job implements Serializable {
 
     void addJobElement(final JobElement jobElement) {
         jobElements.add(jobElement);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final Job job = (Job) o;
+
+        if (!id.equals(job.id)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

@@ -222,4 +222,21 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         }
         partitionWriterCheckpointInfo.add(s);
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final StepExecutionImpl that = (StepExecutionImpl) o;
+
+        if (id != that.id) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
 }

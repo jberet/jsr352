@@ -23,25 +23,21 @@ import org.junit.Test;
 
 public class JobRepositoryTest {
     final private static JobRepository repo = JobRepositoryFactory.getJobRepository(null);
-    private Job job;
 
     @Test
     public void addRemoveJob() throws Exception {
-        job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class, this.getClass().getClassLoader());
+        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class, this.getClass().getClassLoader());
         repo.removeJob(job.getId());
         final Collection<Job> jobs = repo.getJobs();
         final int existingJobsCount = jobs.size();
 
-        final boolean isAdded = repo.addJob(job);
-        Assert.assertEquals(true, isAdded);  //the first time, no pre-existing job by the same jobId.
+        repo.addJob(job);
         Assert.assertEquals(existingJobsCount + 1, repo.getJobs().size());
 
-        boolean isRemoved = repo.removeJob(job.getId());
-        Assert.assertEquals(true, isRemoved);
+        repo.removeJob(job.getId());
         Assert.assertEquals(existingJobsCount, repo.getJobs().size());
 
-        isRemoved = repo.removeJob(job.getId());
-        Assert.assertEquals(false, isRemoved);
+        repo.removeJob(job.getId());
         Assert.assertEquals(existingJobsCount, repo.getJobs().size());
     }
 

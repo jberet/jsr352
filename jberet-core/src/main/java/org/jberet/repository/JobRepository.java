@@ -24,9 +24,9 @@ import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
 
 public interface JobRepository {
-    boolean addJob(Job job);
+    void addJob(Job job);
 
-    boolean removeJob(String jobId);
+    void removeJob(String jobId);
 
     Job getJob(String jobId);
 
@@ -39,7 +39,7 @@ public interface JobRepository {
 
     JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters);
     JobExecution getJobExecution(long jobExecutionId);
-    List<JobExecution> getJobExecutions();
+    Collection<JobExecution> getJobExecutions();
 
     StepExecutionImpl createStepExecution(String stepName);
     void addStepExecution(JobExecutionImpl jobExecution, StepExecutionImpl stepExecution);

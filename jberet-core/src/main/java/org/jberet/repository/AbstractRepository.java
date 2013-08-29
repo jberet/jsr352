@@ -17,8 +17,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
@@ -26,50 +30,53 @@ import org.jberet.job.model.Job;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
 
 public abstract class AbstractRepository implements JobRepository {
-    final List<Job> jobs = Collections.synchronizedList(new ArrayList<Job>());
-    final List<JobInstance> jobInstances = Collections.synchronizedList(new ArrayList<JobInstance>());
+    final ConcurrentMap<String, Job> jobs = new ConcurrentHashMap<String, Job>();
+    final Map<Long, JobInstance> jobInstances = Collections.synchronizedMap(new LinkedHashMap<Long, JobInstance>());
+    final ConcurrentMap<Long, JobExecution> jobExecutions = new ConcurrentHashMap<Long, JobExecution>();
 
     abstract void insertJobInstance(JobInstanceImpl jobInstance);
     abstract void insertJobExecution(JobExecutionImpl jobExecution);
     abstract void insertStepExecution(StepExecutionImpl stepExecution, JobExecutionImpl jobExecution);
 
     @Override
-    public boolean addJob(final Job job) {
-        boolean result = false;
-        synchronized (jobs) {
-            if (!jobs.contains(job)) {
-                result = jobs.add(job);
-            }
+    public void addJob(final Job job) {
+        final Job existing = jobs.putIfAbsent(job.getId(), job);
+        if (existing != null) {
+            BatchLogger.LOGGER.jobAlreadyExists(job.getId());
         }
-        return result;
     }
 
     @Override
-    public boolean removeJob(final String jobId) {
-        synchronized (jobs) {
-            final Job toRemove = getJob(jobId);
-            return toRemove != null && jobs.remove(toRemove);
+    public void removeJob(final String jobId) {
+        jobs.remove(jobId);
+        synchronized (jobInstances) {
+            for (Iterator<Map.Entry<Long, JobInstance>> it = jobInstances.entrySet().iterator(); it.hasNext();) {
+                final JobInstance ji = it.next().getValue();
+                if (ji.getJobName().equals(jobId)) {
+                    it.remove();
+                }
+            }
+        }
+        for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext();) {
+            final JobExecution je = it.next().getValue();
+            if (je.getJobName().equals(jobId)) {
+                it.remove();
+            }
         }
     }
 
     @Override
     public Job getJob(final String jobId) {
-        synchronized (jobs) {
-            for (final Job j : jobs) {
-                if (j.getId().equals(jobId)) {
-                    return j;
-                }
-            }
-        }
-        return null;
+        return jobs.get(jobId);
     }
 
     @Override
     public Collection<Job> getJobs() {
-        return Collections.unmodifiableCollection(jobs);
+        return jobs.values();
     }
 
     @Override
@@ -77,82 +84,62 @@ public abstract class AbstractRepository implements JobRepository {
         final ApplicationAndJobName appJobNames = new ApplicationAndJobName(applicationName, job.getId());
         final JobInstanceImpl jobInstance = new JobInstanceImpl(job, appJobNames);
         insertJobInstance(jobInstance);
-        jobInstances.add(jobInstance);
+        final JobInstance jobInstanceExisting = jobInstances.put(jobInstance.getInstanceId(), jobInstance);
+        if (jobInstanceExisting != null) {
+            throw BatchLogger.LOGGER.jobInstanceAlreadyExists(jobInstance.getInstanceId());
+        }
         return jobInstance;
     }
 
     @Override
     public void removeJobInstance(final long jobInstanceIdToRemove) {
-        synchronized (jobInstances) {
-            for (Iterator<JobInstance> it = jobInstances.iterator(); it.hasNext(); ) {
-                final JobInstance next = it.next();
-                if (next.getInstanceId() == jobInstanceIdToRemove) {
-                    it.remove();
-                }
-            }
-        }
+        jobInstances.remove(jobInstanceIdToRemove);
     }
 
     @Override
     public JobInstance getJobInstance(final long jobInstanceId) {
-        synchronized (jobInstances) {
-            for (final JobInstance e : jobInstances) {
-                if (e.getInstanceId() == jobInstanceId) {
-                    return e;
-                }
-            }
-        }
-        return null;
+        return jobInstances.get(jobInstanceId);
     }
 
     @Override
     public List<JobInstance> getJobInstances() {
-        return Collections.unmodifiableList(jobInstances);
-    }
-
-    @Override
-    public JobExecutionImpl createJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters) {
-        final JobExecutionImpl jobExecution = new JobExecutionImpl(jobInstance, jobParameters);
-        insertJobExecution(jobExecution);
-        jobInstance.addJobExecution(jobExecution);
-        return jobExecution;
-    }
-
-    @Override
-    public JobExecution getJobExecution(final long jobExecutionId) {
+        final List<JobInstance> result = new ArrayList<JobInstance>();
         synchronized (jobInstances) {
-            for (final JobInstance e : jobInstances) {
-                final JobInstanceImpl in = (JobInstanceImpl) e;
-                for (final JobExecution j : in.getJobExecutions()) {
-                    if (j.getExecutionId() == jobExecutionId) {
-                        return j;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<JobExecution> getJobExecutions() {
-        final List<JobExecution> result = new ArrayList<JobExecution>();
-        synchronized (jobInstances) {
-            for (final JobInstance e : jobInstances) {
-                final JobInstanceImpl in = (JobInstanceImpl) e;
-                result.addAll(in.getJobExecutions());
+            for (final JobInstance e : jobInstances.values()) {
+                result.add(e);
             }
         }
         return result;
     }
 
     @Override
-    public StepExecutionImpl createStepExecution(final String stepName) {
-        final StepExecutionImpl stepExecution = new StepExecutionImpl(stepName);
+    public JobExecutionImpl createJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters) {
+        final JobExecutionImpl jobExecution = new JobExecutionImpl(jobInstance, jobParameters);
+        insertJobExecution(jobExecution);
+        final JobExecution jobExecutionExisting = jobExecutions.putIfAbsent(jobExecution.getExecutionId(), jobExecution);
+        if (jobExecutionExisting != null) {
+            throw BatchLogger.LOGGER.jobExecutionAlreadyExists(jobExecutionExisting.getExecutionId());
+        }
+        jobInstance.addJobExecution(jobExecution);
+        return jobExecution;
+    }
 
+    @Override
+    public JobExecution getJobExecution(final long jobExecutionId) {
+        return jobExecutions.get(jobExecutionId);
+    }
+
+    @Override
+    public Collection<JobExecution> getJobExecutions() {
+        return jobExecutions.values();
+    }
+
+    @Override
+    public StepExecutionImpl createStepExecution(final String stepName) {
 //        this stepExecution will be added to jobExecution later, after determining restart-if-complete, so that
 //        completed steps are not added to the enclosing JobExecution
 //        jobExecution.addStepExecution(stepExecution);
-        return stepExecution;
+        return new StepExecutionImpl(stepName);
     }
 
     @Override

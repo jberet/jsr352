@@ -58,4 +58,21 @@ public final class JobInstanceImpl implements JobInstance {
     public void addJobExecution(final JobExecution jobExecution) {
         this.jobExecutions.add(jobExecution);
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final JobInstanceImpl that = (JobInstanceImpl) o;
+
+        if (id != that.id) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
 }

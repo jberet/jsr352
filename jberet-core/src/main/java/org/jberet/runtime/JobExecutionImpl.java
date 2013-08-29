@@ -30,6 +30,7 @@ import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
 
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution, Cloneable {
+    private static final long serialVersionUID = 3706885354351337764L;
     public static final String JOB_EXECUTION_TIMEOUT_SECONDS_KEY = "org.jberet.job.execution.timeout.seconds";
     public static final long JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT = 300L;
 
@@ -173,5 +174,22 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         substitutedJob = null;
         endTime = System.currentTimeMillis();
         ArtifactCreationContext.removeCurrentArtifactCreationContext();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final JobExecutionImpl that = (JobExecutionImpl) o;
+
+        if (id != that.id) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
     }
 }

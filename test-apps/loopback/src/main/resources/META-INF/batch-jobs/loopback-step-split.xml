@@ -12,7 +12,7 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="loopback-split-self" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="loopback-step-split" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="step0" next="split1">
         <batchlet ref="batchlet0"/>
     </step>
