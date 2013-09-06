@@ -18,12 +18,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>jberet-parent</artifactId>
         <groupId>org.jberet</groupId>
+        <artifactId>jberet-parent</artifactId>
         <version>1.0.0.Alpha4-SNAPSHOT</version>
     </parent>
 
-    <artifactId>distribution</artifactId>
+    <artifactId>jberet-distribution</artifactId>
     <packaging>pom</packaging>
 
     <build>
@@ -43,7 +43,6 @@
                 <configuration>
                     <descriptor>src/main/assemble/assemble.xml</descriptor>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <finalName>jberet-${project.version}</finalName>
                 </configuration>
             </plugin>
         </plugins>
