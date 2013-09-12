@@ -13,6 +13,8 @@
 package org.jberet.util;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Properties;
 import javax.batch.operations.JobStartException;
@@ -26,7 +28,7 @@ import org.jboss.marshalling.cloner.ObjectClonerFactory;
 import org.jboss.marshalling.cloner.ObjectCloners;
 
 public class BatchUtil {
-    public static final String NL = System.getProperty("line.separator");
+    public static final String NL = getSystemProperty("line.separator");
     private static final ObjectClonerFactory clonerFactory = ObjectCloners.getSerializingObjectClonerFactory();
     private static final ObjectCloner cloner = clonerFactory.createCloner(new ClonerConfiguration());
 
@@ -72,5 +74,17 @@ public class BatchUtil {
         } catch (ClassNotFoundException e) {
             throw new JobStartException(e);
         }
+    }
+
+    private static String getSystemProperty(final String key) {
+        if (System.getSecurityManager() == null) {
+            return System.getProperty(key);
+        }
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            @Override
+            public String run() {
+                return System.getProperty(key);
+            }
+        });
     }
 }

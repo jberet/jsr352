@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import javax.batch.operations.JobStartException;
 
 import org.jberet.job.model.BatchArtifacts;
@@ -108,7 +110,7 @@ public class ArchiveXmlLoader {
 
         // javax.jobpath system property. jobpath format?
         File jobFile = null;
-        final String jobpath = System.getProperty("javax.jobpath");
+        final String jobpath = getSystemProperty("javax.jobpath");
         if (jobpath != null && !jobpath.isEmpty()) {
             final String[] jobPathElements = jobpath.split(":");
             for (final String p : jobPathElements) {
@@ -121,10 +123,22 @@ public class ArchiveXmlLoader {
 
         // default location: current directory
         if (jobFile == null) {
-            jobFile = new File(System.getProperty("user.dir"), jobXml);
+            jobFile = new File(getSystemProperty("user.dir"), jobXml);
         }
 
         is = new BufferedInputStream(new FileInputStream(jobFile));
         return is;
+    }
+
+    private static String getSystemProperty(final String key) {
+        if (System.getSecurityManager() == null) {
+            return System.getProperty(key);
+        }
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            @Override
+            public String run() {
+                return System.getProperty(key);
+            }
+        });
     }
 }

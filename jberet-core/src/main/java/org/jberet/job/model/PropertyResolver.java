@@ -12,6 +12,8 @@
 
 package org.jberet.job.model;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -40,7 +42,7 @@ public final class PropertyResolver {
     private static final int shortestTemplateLen = "#{jobProperties['x']}".length();
     private static final int prefixLen = prefix.length();
 
-    private Properties systemProperties = System.getProperties();
+    private Properties systemProperties = getSystemProperties();
     private Properties jobParameters;
     private Properties partitionPlanProperties;
     private Deque<org.jberet.job.model.Properties> jobPropertiesStack = new ArrayDeque<org.jberet.job.model.Properties>();
@@ -648,6 +650,18 @@ public final class PropertyResolver {
             LOGGER.unrecognizedPropertyReference(propCategory, variableName, sb.toString());
         }
         return val;
+    }
+
+    private static Properties getSystemProperties() {
+        if (System.getSecurityManager() == null) {
+            return System.getProperties();
+        }
+        return AccessController.doPrivileged(new PrivilegedAction<Properties>() {
+            @Override
+            public Properties run() {
+                return System.getProperties();
+            }
+        });
     }
 
 }
