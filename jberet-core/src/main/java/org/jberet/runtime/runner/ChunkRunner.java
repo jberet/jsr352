@@ -42,6 +42,7 @@ import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
+import org.jberet.spi.ThreadContextSetup.TearDownHandle;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -154,50 +155,55 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     @Override
     public void run() {
+        final TearDownHandle handle = jobContext.getBatchEnvironment().getThreadContextSetup().setup();
         try {
-            ut.setTransactionTimeout(checkpointTimeout());
-            ut.begin();
             try {
-                itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
-                itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
-            } catch (Exception e) {
-                ut.rollback();
-                throw e;
-            }
-            ut.commit();
-
-            readProcessWriteItems();
-
-            ut.begin();
-            try {
-                itemReader.close();
-                itemWriter.close();
-            } catch (Exception e) {
-                ut.rollback();
-                throw e;
-            }
-            //collect data at the end of the partition
-            if (collector != null) {
-                stepRunner.collectorDataQueue.put(collector.collectPartitionData());
-            }
-            ut.commit();
-        } catch (Exception e) {
-            batchContext.setException(e);
-            LOGGER.failToRunJob(e, jobContext.getJobName(), batchContext.getStepName(), chunk);
-            batchContext.setBatchStatus(BatchStatus.FAILED);
-        } finally {
-            try {
-                if (stepRunner.collectorDataQueue != null) {
-                    stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
+                ut.setTransactionTimeout(checkpointTimeout());
+                ut.begin();
+                try {
+                    itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
+                    itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
+                } catch (Exception e) {
+                    ut.rollback();
+                    throw e;
                 }
-            } catch (InterruptedException e) {
-                //ignore
+                ut.commit();
+
+                readProcessWriteItems();
+
+                ut.begin();
+                try {
+                    itemReader.close();
+                    itemWriter.close();
+                } catch (Exception e) {
+                    ut.rollback();
+                    throw e;
+                }
+                //collect data at the end of the partition
+                if (collector != null) {
+                    stepRunner.collectorDataQueue.put(collector.collectPartitionData());
+                }
+                ut.commit();
+            } catch (Exception e) {
+                batchContext.setException(e);
+                LOGGER.failToRunJob(e, jobContext.getJobName(), batchContext.getStepName(), chunk);
+                batchContext.setBatchStatus(BatchStatus.FAILED);
+            } finally {
+                try {
+                    if (stepRunner.collectorDataQueue != null) {
+                        stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
+                    }
+                } catch (InterruptedException e) {
+                    //ignore
+                }
+                if (stepRunner.completedPartitionThreads != null) {
+                    stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
+                }
+                jobContext.destroyArtifact(itemReader, itemWriter, itemProcessor, collector, checkpointAlgorithm);
+                jobContext.destroyArtifact(allChunkRelatedListeners);
             }
-            if (stepRunner.completedPartitionThreads != null) {
-                stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
-            }
-            jobContext.destroyArtifact(itemReader, itemWriter, itemProcessor, collector, checkpointAlgorithm);
-            jobContext.destroyArtifact(allChunkRelatedListeners);
+        } finally {
+            handle.tearDown();
         }
     }
 
@@ -428,7 +434,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        processingInfo.timerExpired = true;
+                        final TearDownHandle handle = jobContext.getBatchEnvironment().getThreadContextSetup().setup();
+                        try {
+                            processingInfo.timerExpired = true;
+                        } finally {
+                            handle.tearDown();
+                        }
                     }
                 }, timeLimit * 1000);
             }

@@ -17,10 +17,14 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
+import org.jberet.spi.ThreadContextSetup;
+import org.jberet.spi.ThreadContextSetup.TearDownHandle;
 import org.jberet.util.BatchLogger;
 
 /**
@@ -28,6 +32,19 @@ import org.jberet.util.BatchLogger;
  */
 public final class BatchSEEnvironment implements BatchEnvironment {
     private static final ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
+
+    private static final TearDownHandle NO_OP_THREAD_CONTEXT_TEAR_DOWN = new TearDownHandle() {
+        @Override
+        public void tearDown() {
+            // no-op
+        }
+    };
+    private static final ThreadContextSetup NO_OP_THREAD_CONTEXT_SETUP = new ThreadContextSetup() {
+        @Override
+        public TearDownHandle setup() {
+            return NO_OP_THREAD_CONTEXT_TEAR_DOWN;
+        }
+    };
 
     public static final String CONFIG_FILE_NAME = "jberet.properties";
 
@@ -80,5 +97,15 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             }
         }
         return result;
+    }
+
+    @Override
+    public ThreadContextSetup getThreadContextSetup() {
+        return NO_OP_THREAD_CONTEXT_SETUP;
+    }
+
+    @Override
+    public <T> T lookup(final String name) throws NamingException {
+        return InitialContext.doLookup(name);
     }
 }
