@@ -95,7 +95,7 @@ public final class JdbcRepository extends AbstractRepository {
         //if neither is specified, use default dbUrl;
         if (dataSourceName != null) {
             try {
-                dataSource = (DataSource) namingContext.lookup(dataSourceName);
+                dataSource = batchEnvironment.lookup(dataSourceName);
             } catch (NamingException e) {
                 throw BatchLogger.LOGGER.failToLookupDataSource(e, dataSourceName);
             }
