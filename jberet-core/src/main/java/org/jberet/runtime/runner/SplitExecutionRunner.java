@@ -24,6 +24,7 @@ import org.jberet.job.model.Split;
 import org.jberet.runtime.FlowExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.SplitContextImpl;
+import org.jberet.spi.ThreadContextSetup.TearDownHandle;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -43,47 +44,52 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
 
     @Override
     public void run() {
-        batchContext.setBatchStatus(BatchStatus.STARTED);
-        final List<Flow> flows = split.getFlows();
-        final CountDownLatch latch = new CountDownLatch(flows.size());
+        final TearDownHandle handle = jobContext.getBatchEnvironment().getThreadContextSetup().setup();
         try {
-            for (final Flow f : flows) {
-                runFlow(f, latch);
-            }
-            latch.await(SPLIT_FLOW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-
-            //check FlowResults from each flow
-            final List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
-            for (int i = 0; i < fes.size(); i++) {
-                if (fes.get(i).getBatchStatus().equals(BatchStatus.FAILED)) {
-                    batchContext.setBatchStatus(BatchStatus.FAILED);
-                    for (final AbstractContext c : batchContext.getOuterContexts()) {
-                        c.setBatchStatus(BatchStatus.FAILED);
-                    }
-                    break;
+            batchContext.setBatchStatus(BatchStatus.STARTED);
+            final List<Flow> flows = split.getFlows();
+            final CountDownLatch latch = new CountDownLatch(flows.size());
+            try {
+                for (final Flow f : flows) {
+                    runFlow(f, latch);
                 }
-            }
-            if (batchContext.getBatchStatus().equals(BatchStatus.STARTED)) {
-                batchContext.setBatchStatus(BatchStatus.COMPLETED);
-            }
-        } catch (Throwable e) {
-            LOGGER.failToRunJob(e, jobContext.getJobName(), split.getId(), split);
-            for (final AbstractContext c : batchContext.getOuterContexts()) {
-                c.setBatchStatus(BatchStatus.FAILED);
-            }
-        }
+                latch.await(SPLIT_FLOW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            final String next = split.getAttributeNext();  //split has no transition elements
-            if (next != null) {
-                //the last StepExecution of each flow is needed if the next element after this split is a decision
+                //check FlowResults from each flow
                 final List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
-                final StepExecution[] stepExecutions = new StepExecution[fes.size()];
                 for (int i = 0; i < fes.size(); i++) {
-                    stepExecutions[i] = fes.get(i).getLastStepExecution();
+                    if (fes.get(i).getBatchStatus().equals(BatchStatus.FAILED)) {
+                        batchContext.setBatchStatus(BatchStatus.FAILED);
+                        for (final AbstractContext c : batchContext.getOuterContexts()) {
+                            c.setBatchStatus(BatchStatus.FAILED);
+                        }
+                        break;
+                    }
                 }
-                enclosingRunner.runJobElement(next, stepExecutions);
+                if (batchContext.getBatchStatus().equals(BatchStatus.STARTED)) {
+                    batchContext.setBatchStatus(BatchStatus.COMPLETED);
+                }
+            } catch (Throwable e) {
+                LOGGER.failToRunJob(e, jobContext.getJobName(), split.getId(), split);
+                for (final AbstractContext c : batchContext.getOuterContexts()) {
+                    c.setBatchStatus(BatchStatus.FAILED);
+                }
             }
+
+            if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
+                final String next = split.getAttributeNext();  //split has no transition elements
+                if (next != null) {
+                    //the last StepExecution of each flow is needed if the next element after this split is a decision
+                    final List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
+                    final StepExecution[] stepExecutions = new StepExecution[fes.size()];
+                    for (int i = 0; i < fes.size(); i++) {
+                        stepExecutions[i] = fes.get(i).getLastStepExecution();
+                    }
+                    enclosingRunner.runJobElement(next, stepExecutions);
+                }
+            }
+        } finally {
+            handle.tearDown();
         }
     }
 

@@ -20,6 +20,7 @@ import org.jberet.job.model.Flow;
 import org.jberet.job.model.JobElement;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
+import org.jberet.spi.ThreadContextSetup.TearDownHandle;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -40,30 +41,35 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
 
     @Override
     public void run() {
-        batchContext.setBatchStatus(BatchStatus.STARTED);
-        jobContext.setBatchStatus(BatchStatus.STARTED);
-
+        final TearDownHandle handle = jobContext.getBatchEnvironment().getThreadContextSetup().setup();
         try {
-            runFromHeadOrRestartPoint(null);
-        } catch (Throwable e) {
-            LOGGER.failToRunJob(e, jobContext.getJobName(), flow.getId(), flow);
-            batchContext.setBatchStatus(BatchStatus.FAILED);
-            for (final AbstractContext c : batchContext.getOuterContexts()) {
-                c.setBatchStatus(BatchStatus.FAILED);
+            batchContext.setBatchStatus(BatchStatus.STARTED);
+            jobContext.setBatchStatus(BatchStatus.STARTED);
+
+            try {
+                runFromHeadOrRestartPoint(null);
+            } catch (Throwable e) {
+                LOGGER.failToRunJob(e, jobContext.getJobName(), flow.getId(), flow);
+                batchContext.setBatchStatus(BatchStatus.FAILED);
+                for (final AbstractContext c : batchContext.getOuterContexts()) {
+                    c.setBatchStatus(BatchStatus.FAILED);
+                }
+            } finally {
+                if (latch != null) {
+                    latch.countDown();
+                }
+            }
+
+            if (batchContext.getBatchStatus() == BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
+                batchContext.setBatchStatus(BatchStatus.COMPLETED);
+            }
+
+            if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
+                final String next = resolveTransitionElements(flow.getTransitionElements(), flow.getAttributeNext(), false);
+                enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
             }
         } finally {
-            if (latch != null) {
-                latch.countDown();
-            }
-        }
-
-        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {  //has not been marked as failed, stopped or abandoned
-            batchContext.setBatchStatus(BatchStatus.COMPLETED);
-        }
-
-        if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            final String next = resolveTransitionElements(flow.getTransitionElements(), flow.getAttributeNext(), false);
-            enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
+            handle.tearDown();
         }
     }
 
