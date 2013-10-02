@@ -192,7 +192,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         final FlowExecutionRunner flowExecutionRunner = new FlowExecutionRunner(flowContext, this, latch);
 
         if (latch != null) {
-            jobContext.getBatchEnvironment().getExecutorService().submit(flowExecutionRunner);
+            jobContext.getBatchEnvironment().submitTask(flowExecutionRunner);
         } else {
             flowExecutionRunner.run();
         }

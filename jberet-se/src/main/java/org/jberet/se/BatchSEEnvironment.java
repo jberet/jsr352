@@ -15,16 +15,16 @@ package org.jberet.se;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.spi.ThreadContextSetup;
-import org.jberet.spi.ThreadContextSetup.TearDownHandle;
 import org.jberet.util.BatchLogger;
 
 /**
@@ -32,19 +32,6 @@ import org.jberet.util.BatchLogger;
  */
 public final class BatchSEEnvironment implements BatchEnvironment {
     private static final ExecutorService executorService = Executors.newCachedThreadPool(new BatchThreadFactory());
-
-    private static final TearDownHandle NO_OP_THREAD_CONTEXT_TEAR_DOWN = new TearDownHandle() {
-        @Override
-        public void tearDown() {
-            // no-op
-        }
-    };
-    private static final ThreadContextSetup NO_OP_THREAD_CONTEXT_SETUP = new ThreadContextSetup() {
-        @Override
-        public TearDownHandle setup() {
-            return NO_OP_THREAD_CONTEXT_TEAR_DOWN;
-        }
-    };
 
     public static final String CONFIG_FILE_NAME = "jberet.properties";
 
@@ -65,8 +52,18 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     }
 
     @Override
-    public ExecutorService getExecutorService() {
-        return executorService;
+    public Future<?> submitTask(final Runnable task) {
+        return executorService.submit(task);
+    }
+
+    @Override
+    public <T> Future<T> submitTask(final Runnable task, final T result) {
+        return executorService.submit(task, result);
+    }
+
+    @Override
+    public <T> Future<T> submitTask(final Callable<T> task) {
+        return executorService.submit(task);
     }
 
     @Override
@@ -97,11 +94,6 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             }
         }
         return result;
-    }
-
-    @Override
-    public ThreadContextSetup getThreadContextSetup() {
-        return NO_OP_THREAD_CONTEXT_SETUP;
     }
 
     @Override
