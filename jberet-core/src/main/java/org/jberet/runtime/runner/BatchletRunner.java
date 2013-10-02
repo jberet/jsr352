@@ -19,7 +19,6 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
-import org.jberet.spi.ThreadContextSetup.TearDownHandle;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
@@ -37,67 +36,59 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
 
     @Override
     public void run() {
-        final TearDownHandle handle = jobContext.getBatchEnvironment().getThreadContextSetup().setup();
         try {
-            try {
-                final RefArtifact collectorConfig;
-                if (stepRunner.collectorDataQueue != null) {
-                    collectorConfig = batchContext.getStep().getPartition().getCollector();
-                    if (collectorConfig != null) {
-                        collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
+            final RefArtifact collectorConfig;
+            if (stepRunner.collectorDataQueue != null) {
+                collectorConfig = batchContext.getStep().getPartition().getCollector();
+                if (collectorConfig != null) {
+                    collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
+                }
+            }
+            batchletObj = jobContext.createArtifact(batchlet.getRef(), null, batchlet.getProperties(), batchContext);
+            jobContext.getBatchEnvironment().submitTask(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        jobContext.getJobExecution().awaitStop(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+                        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
+                            batchContext.setBatchStatus(BatchStatus.STOPPING);
+                            batchletObj.stop();
+                        }
+                    } catch (Exception e) {
+                        LOGGER.failToStopJob(e, jobContext.getJobName(), batchContext.getStepName(), batchletObj);
                     }
                 }
-                batchletObj = jobContext.createArtifact(batchlet.getRef(), null, batchlet.getProperties(), batchContext);
-                jobContext.getBatchEnvironment().getExecutorService().submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        final TearDownHandle handle = jobContext.getBatchEnvironment().getThreadContextSetup().setup();
-                        try {
-                            jobContext.getJobExecution().awaitStop(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
-                            if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
-                                batchContext.setBatchStatus(BatchStatus.STOPPING);
-                                batchletObj.stop();
-                            }
-                        } catch (Exception e) {
-                            LOGGER.failToStopJob(e, jobContext.getJobName(), batchContext.getStepName(), batchletObj);
-                        } finally {
-                            handle.tearDown();
-                        }
-                    }
-                });
+            });
 
-                final String exitStatus = batchletObj.process();
-                batchContext.setExitStatus(exitStatus);
+            final String exitStatus = batchletObj.process();
+            batchContext.setExitStatus(exitStatus);
+            if (collector != null) {
+                stepRunner.collectorDataQueue.put(collector.collectPartitionData());
+            }
+        } catch (Exception e) {
+            //TODO remove this block.  collector is not called for unhandled exceptions.
+            try {
                 if (collector != null) {
                     stepRunner.collectorDataQueue.put(collector.collectPartitionData());
                 }
-            } catch (Exception e) {
-                //TODO remove this block.  collector is not called for unhandled exceptions.
-                try {
-                    if (collector != null) {
-                        stepRunner.collectorDataQueue.put(collector.collectPartitionData());
-                    }
-                } catch (Exception e1) {
-                    //ignore
-                }
-                batchContext.setException(e);
-                LOGGER.failToRunBatchlet(e, batchlet);
-                batchContext.setBatchStatus(BatchStatus.FAILED);
-            } finally {
-                try {
-                    if (stepRunner.collectorDataQueue != null) {
-                        stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
-                    }
-                } catch (InterruptedException e) {
-                    //ignore
-                }
-                if (stepRunner.completedPartitionThreads != null) {
-                    stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
-                }
-                jobContext.destroyArtifact(batchletObj, collector);
+            } catch (Exception e1) {
+                //ignore
             }
+            batchContext.setException(e);
+            LOGGER.failToRunBatchlet(e, batchlet);
+            batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
-            handle.tearDown();
+            try {
+                if (stepRunner.collectorDataQueue != null) {
+                    stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
+                }
+            } catch (InterruptedException e) {
+                //ignore
+            }
+            if (stepRunner.completedPartitionThreads != null) {
+                stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
+            }
+            jobContext.destroyArtifact(batchletObj, collector);
         }
     }
 
