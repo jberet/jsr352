@@ -48,7 +48,6 @@ import org.jberet.job.model.Step;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.StepContextImpl;
-import org.jberet.spi.ThreadContextSetup.TearDownHandle;
 import org.jberet.util.BatchLogger;
 import org.jberet.util.BatchUtil;
 
@@ -88,99 +87,94 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     @Override
     public void run() {
-        final TearDownHandle handle = jobContext.getBatchEnvironment().getThreadContextSetup().setup();
-        try {
-            final Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
-            if (allowStartIfComplete != Boolean.FALSE) {
-                try {
-                    final List<Step> executedSteps = jobContext.getExecutedSteps();
-                    if (executedSteps.contains(step)) {
-                        final StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
-                        stepIds.append(step.getId());
-                        throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
-                    }
-
-
-                    final int startLimit = step.getStartLimitInt();
-                    if (startLimit > 0) {
-                        final int startCount = stepExecution.getStartCount();
-                        if (startCount >= startLimit) {
-                            throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
-                        }
-                    }
-
-                    stepExecution.incrementStartCount();
-                    batchContext.setBatchStatus(BatchStatus.STARTED);
-                    jobContext.getJobRepository().addStepExecution(jobContext.getJobExecution(), stepExecution);
-
-                    final Chunk chunk = step.getChunk();
-                    final RefArtifact batchlet = step.getBatchlet();
-                    if (chunk == null && batchlet == null) {
-                        batchContext.setBatchStatus(BatchStatus.ABANDONED);
-                        LOGGER.stepContainsNoChunkOrBatchlet(id);
-                        return;
-                    }
-
-                    if (chunk != null && batchlet != null) {
-                        batchContext.setBatchStatus(BatchStatus.ABANDONED);
-                        LOGGER.cannotContainBothChunkAndBatchlet(id);
-                        return;
-                    }
-
-                    for (final StepListener l : stepListeners) {
-                        l.beforeStep();
-                    }
-
-                    runBatchletOrChunk(batchlet, chunk);
-
-                    //record the fact this step has been executed
-                    executedSteps.add(step);
-
-                    for (final StepListener l : stepListeners) {
-                        try {
-                            l.afterStep();
-                        } catch (Throwable e) {
-                            BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), l);
-                            batchContext.setBatchStatus(BatchStatus.FAILED);
-                            return;
-                        }
-                    }
-                    batchContext.savePersistentData();
-                } catch (Throwable e) {
-                    LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), step);
-                    if (e instanceof Exception) {
-                        batchContext.setException((Exception) e);
-                    } else {
-                        batchContext.setException(new BatchRuntimeException(e));
-                    }
-                    batchContext.setBatchStatus(BatchStatus.FAILED);
+        final Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
+        if (allowStartIfComplete != Boolean.FALSE) {
+            try {
+                final List<Step> executedSteps = jobContext.getExecutedSteps();
+                if (executedSteps.contains(step)) {
+                    final StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
+                    stepIds.append(step.getId());
+                    throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
                 }
 
-                jobContext.destroyArtifact(mapper, reducer, analyzer);
-                jobContext.destroyArtifact(stepListeners);
 
-                final BatchStatus stepStatus = batchContext.getBatchStatus();
-                switch (stepStatus) {
-                    case STARTED:
-                        batchContext.setBatchStatus(BatchStatus.COMPLETED);
-                        break;
-                    case FAILED:
-                        for (final AbstractContext e : batchContext.getOuterContexts()) {
-                            e.setBatchStatus(BatchStatus.FAILED);
-                        }
-                        break;
-                    case STOPPING:
-                        batchContext.setBatchStatus(BatchStatus.STOPPED);
-                        break;
+                final int startLimit = step.getStartLimitInt();
+                if (startLimit > 0) {
+                    final int startCount = stepExecution.getStartCount();
+                    if (startCount >= startLimit) {
+                        throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
+                    }
                 }
+
+                stepExecution.incrementStartCount();
+                batchContext.setBatchStatus(BatchStatus.STARTED);
+                jobContext.getJobRepository().addStepExecution(jobContext.getJobExecution(), stepExecution);
+
+                final Chunk chunk = step.getChunk();
+                final RefArtifact batchlet = step.getBatchlet();
+                if (chunk == null && batchlet == null) {
+                    batchContext.setBatchStatus(BatchStatus.ABANDONED);
+                    LOGGER.stepContainsNoChunkOrBatchlet(id);
+                    return;
+                }
+
+                if (chunk != null && batchlet != null) {
+                    batchContext.setBatchStatus(BatchStatus.ABANDONED);
+                    LOGGER.cannotContainBothChunkAndBatchlet(id);
+                    return;
+                }
+
+                for (final StepListener l : stepListeners) {
+                    l.beforeStep();
+                }
+
+                runBatchletOrChunk(batchlet, chunk);
+
+                //record the fact this step has been executed
+                executedSteps.add(step);
+
+                for (final StepListener l : stepListeners) {
+                    try {
+                        l.afterStep();
+                    } catch (Throwable e) {
+                        BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), l);
+                        batchContext.setBatchStatus(BatchStatus.FAILED);
+                        return;
+                    }
+                }
+                batchContext.savePersistentData();
+            } catch (Throwable e) {
+                LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), step);
+                if (e instanceof Exception) {
+                    batchContext.setException((Exception) e);
+                } else {
+                    batchContext.setException(new BatchRuntimeException(e));
+                }
+                batchContext.setBatchStatus(BatchStatus.FAILED);
             }
 
-            if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-                final String next = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);
-                enclosingRunner.runJobElement(next, stepExecution);
+            jobContext.destroyArtifact(mapper, reducer, analyzer);
+            jobContext.destroyArtifact(stepListeners);
+
+            final BatchStatus stepStatus = batchContext.getBatchStatus();
+            switch (stepStatus) {
+                case STARTED:
+                    batchContext.setBatchStatus(BatchStatus.COMPLETED);
+                    break;
+                case FAILED:
+                    for (final AbstractContext e : batchContext.getOuterContexts()) {
+                        e.setBatchStatus(BatchStatus.FAILED);
+                    }
+                    break;
+                case STOPPING:
+                    batchContext.setBatchStatus(BatchStatus.STOPPED);
+                    break;
             }
-        } finally {
-            handle.tearDown();
+        }
+
+        if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
+            final String next = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);
+            enclosingRunner.runJobElement(next, stepExecution);
         }
     }
 
@@ -279,7 +273,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (i >= numOfThreads) {
                 completedPartitionThreads.take();
             }
-            jobContext.getBatchEnvironment().getExecutorService().submit(runner1);
+            jobContext.getBatchEnvironment().submitTask(runner1);
         }
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;

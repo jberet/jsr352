@@ -249,7 +249,7 @@ public class JobOperatorImpl implements JobOperator {
         final JobContextImpl jobContext = new JobContextImpl(jobExecution, originalToRestart, artifactFactory, repository, batchEnvironment);
 
         final JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
-        final Future<?> result = jobContext.getBatchEnvironment().getExecutorService().submit(jobExecutionRunner);
+        final Future<?> result = jobContext.getBatchEnvironment().submitTask(jobExecutionRunner);
         final long jobExecutionId = jobExecution.getExecutionId();
         return jobExecutionId;
     }

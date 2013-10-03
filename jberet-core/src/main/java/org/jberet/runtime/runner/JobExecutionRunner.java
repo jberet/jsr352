@@ -19,7 +19,6 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
 import org.jberet.runtime.context.JobContextImpl;
-import org.jberet.spi.ThreadContextSetup.TearDownHandle;
 import org.jberet.util.BatchLogger;
 
 public final class JobExecutionRunner extends CompositeExecutionRunner<JobContextImpl> implements Runnable {
@@ -37,51 +36,46 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
 
     @Override
     public void run() {
-        final TearDownHandle handle = jobContext.getBatchEnvironment().getThreadContextSetup().setup();
-        try {
-            // the job may be stopped right after starting
-            if (batchContext.getBatchStatus() != BatchStatus.STOPPING) {
-                batchContext.setBatchStatus(BatchStatus.STARTED);
-            }
-            try {
-                // run job listeners beforeJob()
-                for (final JobListener l : batchContext.getJobListeners()) {
-                    try {
-                        l.beforeJob();
-                    } catch (Throwable e) {
-                        BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", l);
-                        batchContext.setBatchStatus(BatchStatus.FAILED);
-                        return;
-                    }
-                }
-
-                runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPoint());
-
-                for (final JobListener l : batchContext.getJobListeners()) {
-                    try {
-                        l.afterJob();
-                    } catch (Throwable e) {
-                        BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", l);
-                        batchContext.setBatchStatus(BatchStatus.FAILED);
-                        return;
-                    }
-                }
-            } catch (Throwable e) {
-                BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", job);
-                batchContext.setBatchStatus(BatchStatus.FAILED);
-            }
-
-            batchContext.destroyArtifact(batchContext.getJobListeners());
-
-            if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
-                batchContext.setBatchStatus(BatchStatus.COMPLETED);
-            } else if (batchContext.getBatchStatus() == BatchStatus.STOPPING) {
-                batchContext.setBatchStatus(BatchStatus.STOPPED);
-            }
-            batchContext.saveInactiveStepExecutions();
-            batchContext.getJobExecution().cleanUp();
-        } finally {
-            handle.tearDown();
+        // the job may be stopped right after starting
+        if (batchContext.getBatchStatus() != BatchStatus.STOPPING) {
+            batchContext.setBatchStatus(BatchStatus.STARTED);
         }
+        try {
+            // run job listeners beforeJob()
+            for (final JobListener l : batchContext.getJobListeners()) {
+                try {
+                    l.beforeJob();
+                } catch (Throwable e) {
+                    BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", l);
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
+                    return;
+                }
+            }
+
+            runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPoint());
+
+            for (final JobListener l : batchContext.getJobListeners()) {
+                try {
+                    l.afterJob();
+                } catch (Throwable e) {
+                    BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", l);
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
+                    return;
+                }
+            }
+        } catch (Throwable e) {
+            BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", job);
+            batchContext.setBatchStatus(BatchStatus.FAILED);
+        }
+
+        batchContext.destroyArtifact(batchContext.getJobListeners());
+
+        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
+            batchContext.setBatchStatus(BatchStatus.COMPLETED);
+        } else if (batchContext.getBatchStatus() == BatchStatus.STOPPING) {
+            batchContext.setBatchStatus(BatchStatus.STOPPED);
+        }
+        batchContext.saveInactiveStepExecutions();
+        batchContext.getJobExecution().cleanUp();
     }
 }

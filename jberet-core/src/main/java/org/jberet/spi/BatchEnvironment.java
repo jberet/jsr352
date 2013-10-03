@@ -12,7 +12,8 @@
 package org.jberet.spi;
 
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import javax.naming.NamingException;
 
 public interface BatchEnvironment {
@@ -29,10 +30,45 @@ public interface BatchEnvironment {
     ArtifactFactory getArtifactFactory();
 
     /**
-     * Gets an ExecutorService appropriate for the current runtime environment.
-     * @return an ExecutorService
+     * Submits a {@link Runnable runnable} task for execution and returns a {@link java.util.concurrent.Future future} representing that
+     * task. The futures {@link java.util.concurrent.Future#get() geth} method will return {@code null} upon successful
+     * completion.
+     *
+     * @param task the task to submit
+     *
+     * @return a future representing pending completion of the task
+     *
+     * @see java.util.concurrent.ExecutorService#submit(Runnable)
      */
-    ExecutorService getExecutorService();
+    Future<?> submitTask(Runnable task);
+
+    /**
+     * Submits a {@link Runnable runnable} task for execution and returns a {@link Future future} representing that
+     * task. The {@link Future future's} get method will return the given result upon successful completion.
+     *
+     * @param task   the task to submit
+     * @param result the result to return
+     * @param <T>    the type of the result
+     *
+     * @return a {@link Future future} representing pending completion of the task
+     *
+     * @see java.util.concurrent.ExecutorService#submit(Runnable, Object)
+     */
+    <T> Future<T> submitTask(Runnable task, T result);
+
+    /**
+     * Submits a value-returning task for execution and returns a {@link Future future} representing the pending
+     * results of the task. The {@link Future future's} get method will return the task's result upon successful
+     * completion.
+     *
+     * @param task the task to submit
+     * @param <T>  the type of the result
+     *
+     * @return a {@link Future future} representing pending completion of the task
+     *
+     * @see java.util.concurrent.ExecutorService#submit(java.util.concurrent.Callable)
+     */
+    <T> Future<T> submitTask(Callable<T> task);
 
     /**
      * Gets the UserTransaction
@@ -45,13 +81,6 @@ public interface BatchEnvironment {
      * @return a key-value map of batch configuration
      */
     Properties getBatchConfigurationProperties();
-
-    /**
-     * Allows setup of the local thread context before execution.
-     *
-     * @return the thread context setup to use
-     */
-    ThreadContextSetup getThreadContextSetup();
 
     /**
      * Retrieves the named object.
