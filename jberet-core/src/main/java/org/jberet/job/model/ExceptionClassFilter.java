@@ -47,22 +47,30 @@ public final class ExceptionClassFilter implements Serializable {
         }
     }
 
-    public boolean matches(final Class<? extends Throwable> clazz) {
+    /**
+     * Checks if an exception should be included or excluded.
+     *
+     * @param clazz the exception to check
+     * @param cl    the class loader to check for the exception on
+     *
+     * @return {@code true} if the exception should be include, otherwise {@code false}
+     */
+    public boolean matches(final Class<? extends Throwable> clazz, final ClassLoader cl) {
         if (include.isEmpty()) {  //nothing is included, and exclude is ignored
             return false;
         } else {
             //only <include> is present
             if (exclude.isEmpty()) {
-                return matches(clazz, include);
+                return matches(clazz, cl, include);
             }
             //both <include> and <exclude> are present
             //if not covered by include, then return false
-            if (!matches(clazz, include)) {
+            if (!matches(clazz, cl, include)) {
                 return false;
             }
 
             //by now it is covered by include, if it is covered by exclude
-            return !matches(clazz, exclude);
+            return !matches(clazz, cl, exclude);
         }
     }
 
@@ -70,13 +78,15 @@ public final class ExceptionClassFilter implements Serializable {
      * Checks if an exception class is covered by a the filter list, which can be either include or exclude list.
      *
      * @param clazz         the exception class to check
+     * @param cl            the class loader used to check for the class on
      * @param filterClasses either the include or exclude filter list
+     *
      * @return true if the exception class is covered by the filter; false otherwise.
      */
-    private boolean matches(final Class<? extends Throwable> clazz, final List<String> filterClasses) {
+    private boolean matches(final Class<? extends Throwable> clazz, final ClassLoader cl, final List<String> filterClasses) {
         for (final String s : filterClasses) {
             try {
-                final Class<?> c = Class.forName(s, true, clazz.getClassLoader());
+                Class<?> c = Class.forName(s, true, cl);
                 if (c.isAssignableFrom(clazz)) {
                     return true;
                 }
