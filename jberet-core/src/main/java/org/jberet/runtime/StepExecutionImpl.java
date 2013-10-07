@@ -80,6 +80,56 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         startTime = System.currentTimeMillis();
     }
 
+    /**
+     * Creates StepExecutionImpl from database records.
+     * @param id
+     * @param stepName
+     * @param startTime
+     * @param endTime
+     * @param batchStatus
+     * @param exitStatus
+     * @param persistentUserData
+     * @param readCount
+     * @param writeCount
+     * @param commitCount
+     * @param rollbackCount
+     * @param readSkipCount
+     * @param processSkipCount
+     * @param filterCount
+     * @param writeSkipCount
+     */
+    public StepExecutionImpl(final long id,
+                             final String stepName,
+                             final long startTime,
+                             final long endTime,
+                             final String batchStatus,
+                             final String exitStatus,
+                             final Object persistentUserData,
+                             final long readCount,
+                             final long writeCount,
+                             final long commitCount,
+                             final long rollbackCount,
+                             final long readSkipCount,
+                             final long processSkipCount,
+                             final long filterCount,
+                             final long writeSkipCount) {
+        this.id = id;
+        this.stepName = stepName;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.batchStatus = Enum.valueOf(BatchStatus.class, batchStatus);
+        this.exitStatus = exitStatus;
+        this.persistentUserData = (Serializable) persistentUserData;
+        stepMetrics.set(Metric.MetricType.READ_COUNT, readCount);
+        stepMetrics.set(Metric.MetricType.WRITE_COUNT, writeCount);
+        stepMetrics.set(Metric.MetricType.COMMIT_COUNT, commitCount);
+        stepMetrics.set(Metric.MetricType.ROLLBACK_COUNT, rollbackCount);
+        stepMetrics.set(Metric.MetricType.READ_SKIP_COUNT, readSkipCount);
+        stepMetrics.set(Metric.MetricType.PROCESS_SKIP_COUNT, processSkipCount);
+        stepMetrics.set(Metric.MetricType.FILTER_COUNT, filterCount);
+        stepMetrics.set(Metric.MetricType.WRITE_SKIP_COUNT, writeSkipCount);
+    }
+
     public void setId(final long id) {
         this.id = id;
     }

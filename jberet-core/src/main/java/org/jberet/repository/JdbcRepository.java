@@ -21,11 +21,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.JobInstance;
+import javax.batch.runtime.StepExecution;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.jberet.job.model.Job;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
@@ -53,17 +59,70 @@ public final class JdbcRepository extends AbstractRepository {
 
     //keys used in *.sql files
     private static final String SELECT_ALL_JOB_INSTANCES = "select-all-job-instances";
-    private static final String SELECT_JOB_INSTANCE = "select-job-instance";
-    private static final String INSERT_JOB_INSTANCE = "insert-job-instance";
+    private static final String COUNT_JOB_INSTANCES_BY_JOB_NAME = "count-job-instances-by-job-name";
+    private static final String SELECT_JOB_INSTANCES_BY_JOB_NAME = "select-job-instances-by-job-name";
+    private static final String SELECT_JOB_INSTANCE  = "select-job-instance";
+    private static final String INSERT_JOB_INSTANCE  = "insert-job-instance";
 
     private static final String SELECT_ALL_JOB_EXECUTIONS = "select-all-job-executions";
+    private static final String SELECT_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID = "select-job-executions-by-job-instance-id";
     private static final String SELECT_JOB_EXECUTION = "select-job-execution";
     private static final String INSERT_JOB_EXECUTION = "insert-job-execution";
 
     private static final String SELECT_ALL_STEP_EXECUTIONS = "select-all-step-executions";
+    private static final String SELECT_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID = "select-step-executions-by-job-execution-id";
     private static final String SELECT_STEP_EXECUTION = "select-step-execution";
     private static final String INSERT_STEP_EXECUTION = "insert-step-execution";
 
+    /**
+     * A class to hold all table names and column names.  Commented-out column names are already defined in other tables,
+     * and are kept there as comment line for completeness.
+     */
+    private static class TableColumn {
+        //table name
+        private static final String JOB_INSTANCE = "JOB_INSTANCE";
+        //column names
+        //private static final String JOBINSTANCEID = "JOBINSTANCEID";
+        private static final String JOBNAME = "JOBNAME";
+        private static final String APPLICATIONNAME = "APPLICATIONNAME";
+        
+        //table name
+        private static final String JOB_EXECUTION = "JOB_EXECUTION";
+        //column names
+        //private static final String JOBEXECUTIONID = "JOBEXECUTIONID";
+        private static final String JOBINSTANCEID = "JOBINSTANCEID";
+        private static final String CREATETIME = "CREATETIME";
+        //private static final String STARTTIME = "STARTTIME";
+        //private static final String ENDTIME = "ENDTIME";
+        private static final String LASTUPDATEDTIME = "LASTUPDATEDTIME";
+        //private static final String BATCHSTATUS = "BATCHSTATUS";
+        //private static final String EXITSTATUS = "EXITSTATUS";
+        private static final String JOBPARAMETERS = "JOBPARAMETERS";
+        
+        //table name
+        private static final String STEP_EXECUTION = "STEP_EXECUTION";
+        //column names
+        private static final String STEPEXECUTIONID = "STEPEXECUTIONID";
+        private static final String JOBEXECUTIONID = "JOBEXECUTIONID";
+        private static final String STEPNAME = "STEPNAME";
+        private static final String STARTTIME = "STARTTIME";
+        private static final String ENDTIME = "ENDTIME";
+        private static final String BATCHSTATUS = "BATCHSTATUS";
+        private static final String EXITSTATUS = "EXITSTATUS";
+        private static final String PERSISTENTUSERDATA = "PERSISTENTUSERDATA";
+        private static final String READCOUNT = "READCOUNT";
+        private static final String WRITECOUNT = "WRITECOUNT";
+        private static final String COMMITCOUNT = "COMMITCOUNT";
+        private static final String ROLLBACKCOUNT = "ROLLBACKCOUNT";
+        private static final String READSKIPCOUNT = "READSKIPCOUNT";
+        private static final String PROCESSSKIPCOUNT = "PROCESSSKIPCOUNT";
+        private static final String FILTERCOUNT = "FILTERCOUNT";
+        private static final String WRITESKIPCOUNT = "WRITESKIPCOUNT";
+        
+        private TableColumn() {}
+    }
+
+    private static volatile JdbcRepository instance;
     private Properties configProperties;
     private Context namingContext;
     private String dataSourceName;
@@ -74,18 +133,20 @@ public final class JdbcRepository extends AbstractRepository {
     private Properties dbProperties;
     private final Properties sqls = new Properties();
 
-    private static class Holder {
-        private static final JdbcRepository instance = new JdbcRepository();
+    static JdbcRepository getInstance(final BatchEnvironment batchEnvironment) {
+        JdbcRepository result = instance;
+        if(result == null) {
+            synchronized (JdbcRepository.class) {
+                result = instance;
+                if(result == null) {
+                    instance = result = new JdbcRepository(batchEnvironment);
+                }
+            }
+        }
+        return result;
     }
 
-    static JdbcRepository getInstance(BatchEnvironment batchEnvironment) {
-        return Holder.instance;
-    }
-
-    private JdbcRepository() {
-    }
-
-    private void init(BatchEnvironment batchEnvironment) {
+    private JdbcRepository(final BatchEnvironment batchEnvironment) {
         configProperties = batchEnvironment.getBatchConfigurationProperties();
         dataSourceName = configProperties.getProperty(DATASOURCE_JNDI_KEY);
         dbUrl = configProperties.getProperty(DB_URL_KEY);
@@ -184,18 +245,7 @@ public final class JdbcRepository extends AbstractRepository {
             BatchLogger.LOGGER.tableCreated(ddlFile);
             BatchLogger.LOGGER.tableCreated2(ddlString);
         } finally {
-            try {
-                getJobInstancesStatement.close();
-            } catch (Exception e) {
-                BatchLogger.LOGGER.failToClose(e, PreparedStatement.class, getJobInstancesStatement);
-            }
-            try {
-                if (batchDDLStatement != null) {
-                    batchDDLStatement.close();
-                }
-            } catch (Exception e) {
-                BatchLogger.LOGGER.failToClose(e, Statement.class, batchDDLStatement);
-            }
+            close(connection, getJobInstancesStatement, batchDDLStatement);
             try {
                 if (ddlResource != null) {
                     ddlResource.close();
@@ -203,29 +253,19 @@ public final class JdbcRepository extends AbstractRepository {
             } catch (Exception e) {
                 BatchLogger.LOGGER.failToClose(e, InputStream.class, ddlResource);
             }
-            try {
-                connection.close();
-            } catch (Exception e) {
-                BatchLogger.LOGGER.failToClose(e, Connection.class, connection);
-            }
         }
     }
 
-    private Connection getConnection() {
-        if (dataSource != null) {
-            try {
-                return dataSource.getConnection();
-            } catch (SQLException e) {
-                throw BatchLogger.LOGGER.failToObtainConnection(e, dataSource, dataSourceName);
-            }
-        } else {
-            try {
-                return DriverManager.getConnection(dbUrl, dbProperties);
-            } catch (SQLException e) {
-                throw BatchLogger.LOGGER.failToObtainConnection(e, dbUrl, dbProperties);
-            }
+    @Override
+    public List<StepExecution> getStepExecutions(final long jobExecutionId) {
+        //check cache first, if not found, then retrieve from database
+        List<StepExecution> stepExecutions = super.getStepExecutions(jobExecutionId);
+        if (stepExecutions.isEmpty()) {
+            stepExecutions = selectStepExecutions(jobExecutionId);
         }
+        return stepExecutions;
     }
+
 
     @Override
     void insertJobInstance(final JobInstanceImpl jobInstance) {
@@ -242,21 +282,95 @@ public final class JdbcRepository extends AbstractRepository {
             jobInstance.setId(resultSet.getLong(1));
             BatchLogger.LOGGER.persisted(jobInstance, jobInstance.getInstanceId());
         } catch (SQLException e) {
-            throw BatchLogger.LOGGER.failToInsert(e, insert);
+            throw BatchLogger.LOGGER.failToRunQuery(e, insert);
         } finally {
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                BatchLogger.LOGGER.failToClose(e, PreparedStatement.class, preparedStatement);
-            }
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                BatchLogger.LOGGER.failToClose(e, Connection.class, connection);
-            }
+            close(connection, preparedStatement, null);
         }
+    }
+
+    List<JobInstance> selectJobInstances(final String jobName) {
+        final String select = (jobName == null) ? sqls.getProperty(SELECT_ALL_JOB_INSTANCES) :
+                sqls.getProperty(SELECT_JOB_INSTANCES_BY_JOB_NAME);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        final List<JobInstance> result = new ArrayList<JobInstance>();
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            if (jobName != null) {
+                preparedStatement.setString(1, jobName);
+            }
+            final ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                final long i = rs.getLong(TableColumn.JOBINSTANCEID);
+                JobInstance jobInstance1 = jobInstances.get(i);
+                if (jobInstance1 == null) {
+                    final String appName = rs.getString(TableColumn.APPLICATIONNAME);
+                    if (jobName == null) {
+                        final String goodJobName = rs.getString(TableColumn.JOBNAME);
+                        jobInstance1 = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
+                    } else {
+                        jobInstance1 = new JobInstanceImpl(getJob(jobName), new ApplicationAndJobName(appName, jobName));
+                    }
+                    jobInstances.put(i, jobInstance1);
+                }
+                //this job instance is already in the cache, so get it from the cache
+                result.add(jobInstance1);
+            }
+        } catch (SQLException e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return result;
+    }
+
+    JobInstance selectJobInstance(final long jobInstanceId) {
+        final String select = sqls.getProperty(SELECT_JOB_INSTANCE);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        JobInstance result = null;
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setLong(1, jobInstanceId);
+            final ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                result = jobInstances.get(jobInstanceId);
+                if (result == null) {
+                    final String appName = rs.getString(TableColumn.APPLICATIONNAME);
+                    final String goodJobName = rs.getString(TableColumn.JOBNAME);
+                    result = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
+                    jobInstances.put(jobInstanceId, result);
+                }
+                break;
+            }
+        } catch (SQLException e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return result;
+    }
+
+    int countJobInstance(final String jobName) {
+        final String select = sqls.getProperty(COUNT_JOB_INSTANCES_BY_JOB_NAME);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        int count = 0;
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setString(1, jobName);
+            final ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                count = rs.getInt(1);
+                break;
+            }
+        } catch (SQLException e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return count;
     }
 
     @Override
@@ -277,21 +391,71 @@ public final class JdbcRepository extends AbstractRepository {
             jobExecution.setId(resultSet.getLong(1));
             BatchLogger.LOGGER.persisted(jobExecution, jobExecution.getExecutionId());
         } catch (SQLException e) {
-            throw BatchLogger.LOGGER.failToInsert(e, insert);
+            throw BatchLogger.LOGGER.failToRunQuery(e, insert);
         } finally {
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                BatchLogger.LOGGER.failToClose(e, PreparedStatement.class, preparedStatement);
-            }
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                BatchLogger.LOGGER.failToClose(e, Connection.class, connection);
-            }
+            close(connection, preparedStatement, null);
         }
+    }
+
+    JobExecution selectJobExecution(final long jobExecutionId) {
+        final String select = sqls.getProperty(SELECT_JOB_EXECUTION);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        JobExecution result = null;
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setLong(1, jobExecutionId);
+            final ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                result = jobExecutions.get(jobExecutionId);
+                if (result == null) {
+                    final long jobInstanceId = rs.getLong(TableColumn.JOBINSTANCEID);
+                    result = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId), null);
+                    jobExecutions.put(jobExecutionId, result);
+                }
+                break;
+            }
+        } catch (SQLException e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return result;
+    }
+
+    List<JobExecution> selectJobExecutions(final Long jobInstanceId) {
+        final String select = (jobInstanceId == null) ? sqls.getProperty(SELECT_ALL_JOB_EXECUTIONS) :
+                sqls.getProperty(SELECT_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        final List<JobExecution> result = new ArrayList<JobExecution>();
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            if (jobInstanceId != null) {
+                preparedStatement.setLong(1, jobInstanceId);
+            }
+            final ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                final long i = rs.getLong(TableColumn.JOBEXECUTIONID);
+                JobExecution jobExecution1 = jobExecutions.get(i);
+                if (jobExecution1 == null) {
+                    if (jobInstanceId == null) {
+                        final long jobInstanceId1 = rs.getLong(TableColumn.JOBINSTANCEID);
+                        jobExecution1 = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId1), null);
+                    } else {
+                        jobExecution1 = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId), null);
+                    }
+                    jobExecutions.put(i, jobExecution1);
+                }
+                //this job instance is already in the cache, so get it from the cache
+                result.add(jobExecution1);
+            }
+        } catch (SQLException e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return result;
     }
 
     @Override
@@ -311,20 +475,117 @@ public final class JdbcRepository extends AbstractRepository {
             stepExecution.setId(resultSet.getLong(1));
             BatchLogger.LOGGER.persisted(stepExecution, stepExecution.getStepExecutionId());
         } catch (SQLException e) {
-            throw BatchLogger.LOGGER.failToInsert(e, insert);
+            throw BatchLogger.LOGGER.failToRunQuery(e, insert);
         } finally {
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                BatchLogger.LOGGER.failToClose(e, PreparedStatement.class, preparedStatement);
+            close(connection, preparedStatement, null);
+        }
+    }
+
+    StepExecution selectStepExecution(final long stepExecutionId) {
+        final String select = sqls.getProperty(SELECT_STEP_EXECUTION);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        List<StepExecution> result = new ArrayList<StepExecution>();
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setLong(1, stepExecutionId);
+            createStepExecutionsFromResultSet(preparedStatement.executeQuery(), result);
+        } catch (SQLException e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return result.get(0);
+    }
+
+    /**
+     * Retrieves a list of StepExecution from database by JobExecution id.  This method does not check the cache, so it
+     * should only be called after the cache has been searched without a match.
+     * @param jobExecutionId    if null, retrieves all StepExecutions; otherwise, retrieves all StepExecutions belongs to the JobExecution id
+     * @return a list of StepExecutions
+     */
+    List<StepExecution> selectStepExecutions(final Long jobExecutionId) {
+        final String select = (jobExecutionId == null) ? sqls.getProperty(SELECT_ALL_STEP_EXECUTIONS) :
+                sqls.getProperty(SELECT_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        final List<StepExecution> result = new ArrayList<StepExecution>();
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            if (jobExecutionId != null) {
+                preparedStatement.setLong(1, jobExecutionId);
             }
+            createStepExecutionsFromResultSet(preparedStatement.executeQuery(), result);
+        } catch (SQLException e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return result;
+    }
+
+    private void createStepExecutionsFromResultSet(final ResultSet rs, final List<StepExecution> result) throws SQLException {
+        while (rs.next()) {
+            final StepExecutionImpl e = new StepExecutionImpl(
+                    rs.getLong(TableColumn.STEPEXECUTIONID),
+                    rs.getString(TableColumn.STEPNAME),
+                    rs.getLong(TableColumn.STARTTIME),
+                    rs.getLong(TableColumn.ENDTIME),
+                    rs.getString(TableColumn.BATCHSTATUS),
+                    rs.getString(TableColumn.EXITSTATUS),
+                    rs.getObject(TableColumn.PERSISTENTUSERDATA),
+                    rs.getInt(TableColumn.READCOUNT),
+                    rs.getInt(TableColumn.WRITECOUNT),
+                    rs.getInt(TableColumn.COMMITCOUNT),
+                    rs.getInt(TableColumn.ROLLBACKCOUNT),
+                    rs.getInt(TableColumn.READSKIPCOUNT),
+                    rs.getInt(TableColumn.PROCESSSKIPCOUNT),
+                    rs.getInt(TableColumn.FILTERCOUNT),
+                    rs.getInt(TableColumn.WRITESKIPCOUNT)
+            );
+            result.add(e);
+        }
+    }
+    
+
+    private Connection getConnection() {
+        if (dataSource != null) {
             try {
-                connection.close();
+                return dataSource.getConnection();
             } catch (SQLException e) {
-                BatchLogger.LOGGER.failToClose(e, Connection.class, connection);
+                throw BatchLogger.LOGGER.failToObtainConnection(e, dataSource, dataSourceName);
+            }
+        } else {
+            try {
+                return DriverManager.getConnection(dbUrl, dbProperties);
+            } catch (SQLException e) {
+                throw BatchLogger.LOGGER.failToObtainConnection(e, dbUrl, dbProperties);
             }
         }
     }
+
+    private void close(final Connection conn, final Statement stmt1, final Statement stmt2) {
+        try {
+            if (stmt1 != null) {
+                stmt1.close();
+            }
+        } catch (SQLException e) {
+            BatchLogger.LOGGER.failToClose(e, PreparedStatement.class, stmt1);
+        }
+
+        try {
+            if (stmt2 != null) {
+                stmt2.close();
+            }
+        } catch (SQLException e) {
+            BatchLogger.LOGGER.failToClose(e, PreparedStatement.class, stmt2);
+        }
+
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            BatchLogger.LOGGER.failToClose(e, Connection.class, conn);
+        }
+    }
+
 }

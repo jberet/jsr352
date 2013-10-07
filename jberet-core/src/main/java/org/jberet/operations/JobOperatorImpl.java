@@ -107,12 +107,7 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public int getJobInstanceCount(final String jobName) throws NoSuchJobException, JobSecurityException {
-        int count = 0;
-        for (final JobInstance e : repository.getJobInstances()) {
-            if (e.getJobName().equals(jobName)) {
-                count++;
-            }
-        }
+        final int count = repository.getJobInstanceCount(jobName);
         if (count == 0) {
             throw LOGGER.noSuchJobException(jobName);
         }
@@ -123,19 +118,17 @@ public class JobOperatorImpl implements JobOperator {
     public List<JobInstance> getJobInstances(final String jobName, final int start, final int count) throws NoSuchJobException, JobSecurityException {
         final LinkedList<JobInstance> result = new LinkedList<JobInstance>();
         int pos = 0;
-        final List<JobInstance> instances = repository.getJobInstances();
+        final List<JobInstance> instances = repository.getJobInstances(jobName);
         for (int i = instances.size() - 1; i >= 0; i--) {
             final JobInstance e = instances.get(i);
-            if (e.getJobName().equals(jobName)) {
-                if (pos >= start) {
-                    if (result.size() < count) {
-                        result.add(e);
-                    } else {
-                        break;
-                    }
+            if (pos >= start) {
+                if (result.size() < count) {
+                    result.add(e);
+                } else {
+                    break;
                 }
-                pos++;
             }
+            pos++;
         }
         if (pos == 0) {
             throw LOGGER.noSuchJobException(jobName);
@@ -240,8 +233,7 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<StepExecution> getStepExecutions(final long jobExecutionId) throws
             NoSuchJobExecutionException, JobSecurityException {
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(jobExecutionId);
-        return jobExecution.getStepExecutions();
+        return repository.getStepExecutions(jobExecutionId);
     }
 
     private long startJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters, final JobExecutionImpl originalToRestart) throws JobStartException, JobSecurityException {

@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
+import javax.batch.runtime.StepExecution;
 
 import org.jberet.job.model.Job;
 import org.jberet.runtime.JobExecutionImpl;
@@ -102,14 +103,29 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public List<JobInstance> getJobInstances() {
+    public List<JobInstance> getJobInstances(final String jobName) {
         final List<JobInstance> result = new ArrayList<JobInstance>();
         synchronized (jobInstances) {
             for (final JobInstance e : jobInstances.values()) {
-                result.add(e);
+                if (e.getJobName().equals(jobName)) {
+                    result.add(e);
+                }
             }
         }
         return result;
+    }
+
+    @Override
+    public int getJobInstanceCount(final String jobName) {
+        int count = 0;
+        synchronized (jobInstances) {
+            for (final JobInstance e : jobInstances.values()) {
+                if (e.getJobName().equals(jobName)) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     @Override
@@ -132,6 +148,12 @@ public abstract class AbstractRepository implements JobRepository {
     @Override
     public Collection<JobExecution> getJobExecutions() {
         return jobExecutions.values();
+    }
+
+    @Override
+    public List<StepExecution> getStepExecutions(final long jobExecutionId) {
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(jobExecutionId);
+        return jobExecution.getStepExecutions();
     }
 
     @Override

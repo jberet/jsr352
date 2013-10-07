@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Properties;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
+import javax.batch.runtime.StepExecution;
 
 import org.jberet.job.model.Job;
 import org.jberet.runtime.JobExecutionImpl;
@@ -35,12 +36,14 @@ public interface JobRepository {
     JobInstanceImpl createJobInstance(Job job, String applicationName, ClassLoader classLoader);
     void removeJobInstance(long jobInstanceId);
     JobInstance getJobInstance(long jobInstanceId);
-    List<JobInstance> getJobInstances();
+    List<JobInstance> getJobInstances(String jobName);
+    int getJobInstanceCount(String jobName);
 
     JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters);
     JobExecution getJobExecution(long jobExecutionId);
     Collection<JobExecution> getJobExecutions();
 
+    List<StepExecution> getStepExecutions(long jobExecutionId);
     StepExecutionImpl createStepExecution(String stepName);
     void addStepExecution(JobExecutionImpl jobExecution, StepExecutionImpl stepExecution);
 

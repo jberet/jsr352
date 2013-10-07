@@ -17,8 +17,8 @@ package org.jberet.repository;
  * containing the job definition.
  */
 public final class ApplicationAndJobName {
-    public String appName;
-    public String jobName;
+    public final String appName;
+    public final String jobName;
 
     public ApplicationAndJobName(final String appName, final String jobName) {
         this.appName = appName;

@@ -17,19 +17,19 @@ import javax.batch.operations.JobOperator;
 import javax.batch.operations.JobSecurityException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.StepExecution;
 
 import com.ibm.jbatch.tck.spi.JobExecutionTimeoutException;
 import com.ibm.jbatch.tck.spi.JobExecutionWaiter;
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.StepExecutionImpl;
 
 public final class JobExecutionWaiterImpl implements JobExecutionWaiter {
     private final JobExecutionImpl jobExecution;
     private final long sleepTime;
-    private final JobOperator jobOperator;
 
     JobExecutionWaiterImpl(final long executionId, final JobOperator jobOp, final long sleepTime) {
         try {
-            this.jobOperator = jobOp;
             this.jobExecution = (JobExecutionImpl) jobOp.getJobExecution(executionId);
             this.sleepTime = sleepTime;
         } catch (JobSecurityException e) {
@@ -41,13 +41,22 @@ public final class JobExecutionWaiterImpl implements JobExecutionWaiter {
 
     @Override
     public JobExecution awaitTermination() throws JobExecutionTimeoutException {
+        System.out.printf("Before awaitTermination for JobExecution %s, timeout %d%n", jobExecution, sleepTime);
         try {
-            jobExecution.awaitTerminatioin(sleepTime, TimeUnit.MILLISECONDS);
+            jobExecution.awaitTermination(sleepTime, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            //unexpected interrup, ignore.
+            //unexpected interrupt, ignore.
+            e.printStackTrace();
         }
-        System.out.printf("awaitTerminatioin for jobName %s, jobExecution %s, timeout %s milliseconds, BatchStatus: %s%n",
-                jobExecution.getJobName(), jobExecution.getExecutionId(), sleepTime, jobExecution.getBatchStatus());
+        System.out.printf("After awaitTermination for jobName %s, jobExecution %s, BatchStatus %s, StepExecutions %s%n",
+                jobExecution.getJobName(), jobExecution.getExecutionId(), jobExecution.getBatchStatus(),
+                jobExecution.getStepExecutions());
+
+        for (final StepExecution e : jobExecution.getStepExecutions()) {
+            final StepExecutionImpl e2 = (StepExecutionImpl) e;
+            System.out.printf("StepExecution %s, batch status %s, exit status %s, exception %s%n",
+                    e2, e2.getBatchStatus(), e2.getExitStatus(), e2.getException());
+        }
 
         return jobExecution;
     }

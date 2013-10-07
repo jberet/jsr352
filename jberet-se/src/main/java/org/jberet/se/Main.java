@@ -39,7 +39,7 @@ public class Main {
         try {
             jobExecutionId = jobOperator.start(jobXml, null);
             final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-            jobExecution.awaitTerminatioin(timeout, TimeUnit.SECONDS);
+            jobExecution.awaitTermination(timeout, TimeUnit.SECONDS);
 
             if (!jobExecution.getBatchStatus().equals(BatchStatus.COMPLETED)) {
                 throw new BatchRuntimeException(String.format("The job did not complete: %s%n", jobXml));

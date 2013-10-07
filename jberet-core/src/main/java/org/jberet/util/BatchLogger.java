@@ -216,8 +216,8 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 52, value = "Failed to load ddl file %s")
     BatchRuntimeException failToLoadDDL(String ddlFile);
 
-    @Message(id = 53, value = "Failed to insert %s")
-    BatchRuntimeException failToInsert(@Cause Throwable cause, String sql);
+    @Message(id = 53, value = "Failed to run %s")
+    BatchRuntimeException failToRunQuery(@Cause Throwable cause, String sql);
 
     @Message(id = 54, value = "Failed to close %s: %s")
     @LogMessage(level = Logger.Level.WARN)

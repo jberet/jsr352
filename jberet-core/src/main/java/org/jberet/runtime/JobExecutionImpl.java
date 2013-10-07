@@ -81,7 +81,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     //It's possible the (fast) job is already terminated and the latch nulled when this method is called
-    public void awaitTerminatioin(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
+    public void awaitTermination(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
         if (jobTerminationlatch != null) {
             jobTerminationlatch.await(timeout, timeUnit);
         }
