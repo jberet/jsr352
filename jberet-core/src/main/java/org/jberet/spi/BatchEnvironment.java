@@ -14,7 +14,6 @@ package org.jberet.spi;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import javax.naming.NamingException;
 
 public interface BatchEnvironment {
     /**
@@ -81,17 +80,4 @@ public interface BatchEnvironment {
      * @return a key-value map of batch configuration
      */
     Properties getBatchConfigurationProperties();
-
-    /**
-     * Retrieves the named object.
-     *
-     * @param name the name of the object to look up
-     * @param <T>  the type of the object to return
-     *
-     * @return the object that was bound to the name
-     *
-     * @throws NamingException if a naming exception occurs
-     * @see javax.naming.Context#lookup(String)
-     */
-    <T> T lookup(String name) throws NamingException;
 }
