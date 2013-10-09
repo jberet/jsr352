@@ -248,7 +248,7 @@ public class JobOperatorImpl implements JobOperator {
 
     private String getApplicationName() {
         try {
-            return batchEnvironment.lookup("java:app/AppName");
+            return InitialContext.doLookup("java:app/AppName");
         } catch (NamingException e) {
             return null;
         }

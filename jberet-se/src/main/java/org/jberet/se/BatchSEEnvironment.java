@@ -19,8 +19,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
 import org.jberet.spi.ArtifactFactory;
@@ -94,10 +92,5 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             }
         }
         return result;
-    }
-
-    @Override
-    public <T> T lookup(final String name) throws NamingException {
-        return InitialContext.doLookup(name);
     }
 }
