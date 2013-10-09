@@ -28,6 +28,7 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
@@ -156,7 +157,7 @@ public final class JdbcRepository extends AbstractRepository {
         //if neither is specified, use default dbUrl;
         if (dataSourceName != null) {
             try {
-                dataSource = batchEnvironment.lookup(dataSourceName);
+                dataSource = InitialContext.doLookup(dataSourceName);
             } catch (NamingException e) {
                 throw BatchLogger.LOGGER.failToLookupDataSource(e, dataSourceName);
             }
