@@ -28,11 +28,6 @@ public class MetricImpl implements Metric, Serializable {
         this.type = type;
     }
 
-    public MetricImpl(final MetricType type, final long value1) {
-        this.type = type;
-        this.value = value1;
-    }
-
     @Override
     public MetricType getType() {
         return type;
@@ -68,10 +63,7 @@ public class MetricImpl implements Metric, Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("MetricImpl");
-        sb.append("{name='").append(type).append('\'');
-        sb.append(", value=").append(value);
-        sb.append('}');
+        sb.append(type).append('=').append(value);
         return sb.toString();
     }
 

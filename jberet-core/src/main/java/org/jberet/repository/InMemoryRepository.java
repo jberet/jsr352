@@ -14,6 +14,8 @@ package org.jberet.repository;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.batch.runtime.StepExecution;
+
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
@@ -48,5 +50,10 @@ public final class InMemoryRepository extends AbstractRepository {
     @Override
     void insertStepExecution(final StepExecutionImpl stepExecution, final JobExecutionImpl jobExecution) {
         stepExecution.setId(stepExecutionIdSequence.incrementAndGet());
+    }
+
+    @Override
+    public void updateStepExecution(final StepExecution stepExecution) {
+        // do nothing
     }
 }

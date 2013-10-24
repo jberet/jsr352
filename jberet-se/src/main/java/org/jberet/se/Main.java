@@ -27,17 +27,31 @@ public class Main {
     public static void main(final String[] args) throws BatchRuntimeException {
         if (args.length == 0) {
             usage(args);
+            return;
         }
         final String jobXml = args[0];
         if (jobXml == null || jobXml.isEmpty()) {
             usage(args);
+            return;
+        }
+
+        final java.util.Properties jobParameters = new java.util.Properties();
+        for (int i = 1; i < args.length; i++) {
+            int equalSignPos = args[i].indexOf('=');
+            if (equalSignPos <= 0) {
+                usage(args);
+                return;
+            }
+            final String key = args[i].substring(0, equalSignPos).trim();
+            final String val = args[i].substring(equalSignPos + 1).trim();
+            jobParameters.setProperty(key, val);
         }
 
         final JobOperator jobOperator = BatchRuntime.getJobOperator();
         final long jobExecutionId;
         final long timeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
         try {
-            jobExecutionId = jobOperator.start(jobXml, null);
+            jobExecutionId = jobOperator.start(jobXml, jobParameters);
             final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
             jobExecution.awaitTermination(timeout, TimeUnit.SECONDS);
 

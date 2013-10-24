@@ -41,11 +41,13 @@ public interface JobRepository {
 
     JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters);
     JobExecution getJobExecution(long jobExecutionId);
-    Collection<JobExecution> getJobExecutions();
+    List<JobExecution> getJobExecutions(JobInstance jobInstance);
+    void updateJobExecution(JobExecution jobExecution);
 
     List<StepExecution> getStepExecutions(long jobExecutionId);
     StepExecutionImpl createStepExecution(String stepName);
     void addStepExecution(JobExecutionImpl jobExecution, StepExecutionImpl stepExecution);
+    void updateStepExecution(StepExecution stepExecution);
 
     void savePersistentData(JobExecution jobExecution, StepExecutionImpl stepExecution);
 

@@ -12,6 +12,7 @@
 
 package org.jberet.runtime;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -63,6 +64,36 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         this.substitutedJob = BatchUtil.clone(jobInstance.unsubstitutedJob);
         this.startTime = this.createTime = System.currentTimeMillis();
         setBatchStatus(BatchStatus.STARTING);
+    }
+
+    public JobExecutionImpl(final JobInstanceImpl jobInstance,
+                            final long id,
+                            final Properties jobParameters,
+                            final Timestamp createTime,
+                            final Timestamp startTime,
+                            final Timestamp endTime,
+                            final Timestamp lastUpdatedTime,
+                            final String batchStatus,
+                            final String exitStatus
+                            ) {
+        this.jobInstance = jobInstance;
+        this.jobParameters = jobParameters;
+        this.id = id;
+
+        if (createTime != null) {
+            this.createTime = createTime.getTime();
+        }
+        if (startTime != null) {
+            this.startTime = startTime.getTime();
+        }
+        if (endTime != null) {
+            this.endTime = endTime.getTime();
+        }
+        if (lastUpdatedTime != null) {
+            this.lastUpdatedTime = lastUpdatedTime.getTime();
+        }
+        this.batchStatus = BatchStatus.valueOf(batchStatus);
+        this.exitStatus = exitStatus;
     }
 
     public void setId(final long id) {
@@ -166,14 +197,18 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         jobStopLatch.countDown();
     }
 
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+        this.lastUpdatedTime = endTime;
+    }
+
     public void cleanUp() {
-        jobTerminationlatch.countDown();
+        substitutedJob = null;
+        ArtifactCreationContext.removeCurrentArtifactCreationContext();
         jobStopLatch.countDown();
         jobStopLatch = null;
+        jobTerminationlatch.countDown();
         jobTerminationlatch = null;
-        substitutedJob = null;
-        endTime = System.currentTimeMillis();
-        ArtifactCreationContext.removeCurrentArtifactCreationContext();
     }
 
     @Override

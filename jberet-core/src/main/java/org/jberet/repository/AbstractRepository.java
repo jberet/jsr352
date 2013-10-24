@@ -146,8 +146,15 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public Collection<JobExecution> getJobExecutions() {
-        return jobExecutions.values();
+    public List<JobExecution> getJobExecutions(final JobInstance jobInstance) {
+        if (jobInstance == null) {
+            //return all JobExecution
+            final List<JobExecution> result = new ArrayList<JobExecution>();
+            result.addAll(this.jobExecutions.values());
+            return result;
+        } else {
+            return ((JobInstanceImpl) jobInstance).getJobExecutions();
+        }
     }
 
     @Override
@@ -189,5 +196,11 @@ public abstract class AbstractRepository implements JobRepository {
             stepExecution.setWriterCheckpointInfo(copy);
         }
         //save stepExecution partition properties
+    }
+
+    @Override
+    public void updateJobExecution(final JobExecution jobExecution) {
+        final JobExecutionImpl jobExecutionImpl = (JobExecutionImpl) jobExecution;
+        jobExecutionImpl.setEndTime(System.currentTimeMillis());
     }
 }

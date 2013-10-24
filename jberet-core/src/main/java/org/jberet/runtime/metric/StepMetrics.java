@@ -38,6 +38,10 @@ final public class StepMetrics {
         targetMetric.setValue(value);
     }
 
+    public long get(final Metric.MetricType name) {
+        return metricsMapping.get(name).getValue();
+    }
+
     public void increment(final Metric.MetricType name, final long value) {
         final MetricImpl targetMetric = metricsMapping.get(name);
         targetMetric.increment(value);

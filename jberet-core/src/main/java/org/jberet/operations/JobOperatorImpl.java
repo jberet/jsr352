@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.concurrent.Future;
 import javax.batch.operations.JobExecutionAlreadyCompleteException;
 import javax.batch.operations.JobExecutionIsRunningException;
 import javax.batch.operations.JobExecutionNotMostRecentException;
@@ -140,10 +139,10 @@ public class JobOperatorImpl implements JobOperator {
     public List<Long> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
         final List<Long> result = new ArrayList<Long>();
         boolean jobExists = false;
-        for (final JobExecution e : repository.getJobExecutions()) {
-            final BatchStatus s = e.getBatchStatus();
+        for (final JobExecution e : repository.getJobExecutions(null)) {
             if (e.getJobName().equals(jobName)) {
                 jobExists = true;
+                final BatchStatus s = e.getBatchStatus();
                 if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
                     result.add(e.getExecutionId());
                 }
@@ -222,7 +221,7 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<JobExecution> getJobExecutions(final JobInstance instance) throws
             NoSuchJobInstanceException, JobSecurityException {
-        return ((JobInstanceImpl) instance).getJobExecutions();
+        return repository.getJobExecutions(instance);
     }
 
     @Override
@@ -241,7 +240,7 @@ public class JobOperatorImpl implements JobOperator {
         final JobContextImpl jobContext = new JobContextImpl(jobExecution, originalToRestart, artifactFactory, repository, batchEnvironment);
 
         final JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
-        final Future<?> result = jobContext.getBatchEnvironment().submitTask(jobExecutionRunner);
+        jobContext.getBatchEnvironment().submitTask(jobExecutionRunner);
         final long jobExecutionId = jobExecution.getExecutionId();
         return jobExecutionId;
     }

@@ -171,6 +171,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     break;
             }
         }
+        batchContext.getJobContext().getJobRepository().updateStepExecution(stepExecution);
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             final String next = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);

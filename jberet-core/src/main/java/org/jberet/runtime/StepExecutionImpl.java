@@ -13,6 +13,7 @@
 package org.jberet.runtime;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import javax.batch.runtime.BatchStatus;
@@ -100,8 +101,8 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
      */
     public StepExecutionImpl(final long id,
                              final String stepName,
-                             final long startTime,
-                             final long endTime,
+                             final Timestamp startTime,
+                             final Timestamp endTime,
                              final String batchStatus,
                              final String exitStatus,
                              final Object persistentUserData,
@@ -115,8 +116,13 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
                              final long writeSkipCount) {
         this.id = id;
         this.stepName = stepName;
-        this.startTime = startTime;
-        this.endTime = endTime;
+
+        if (startTime != null) {
+            this.startTime = startTime.getTime();
+        }
+        if (endTime != null) {
+            this.endTime = endTime.getTime();
+        }
         this.batchStatus = Enum.valueOf(BatchStatus.class, batchStatus);
         this.exitStatus = exitStatus;
         this.persistentUserData = (Serializable) persistentUserData;

@@ -16,6 +16,7 @@ import javax.batch.api.AbstractBatchlet;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.Batchlet;
 import javax.batch.operations.BatchRuntimeException;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
@@ -74,7 +75,7 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
         } else {
             throw new BatchRuntimeException(String.format("Expecting int.prop %s, but got %s", 1, intProp));
         }
-        return "Processed";
+        return BatchStatus.COMPLETED.name();
     }
 
     @Override

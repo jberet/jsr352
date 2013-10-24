@@ -12,26 +12,15 @@
 
 package org.jberet.se.test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jberet.se.Main;
 import org.junit.Test;
 
-public class MainTest {
-    public Map<? extends Number, ?> integers = new HashMap<Integer, String>();
-
+public class Batchlet1Test {
     private static final String jobXmlName = "batchlet1.xml";
+    private static final String[] args = {jobXmlName, "param1.key=param1.val", "param2.key=param2.val"};
 
     @Test
     public void testMain() throws Exception {
-        final String[] args = {jobXmlName};
         Main.main(args);
-
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 }

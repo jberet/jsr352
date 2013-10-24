@@ -12,11 +12,16 @@
 
 package org.jberet.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import javax.batch.operations.JobStartException;
 
 import org.jberet.job.model.Flow;
@@ -29,6 +34,7 @@ import org.jboss.marshalling.cloner.ObjectCloners;
 
 public class BatchUtil {
     public static final String NL = getSystemProperty("line.separator");
+    private static final String keyValDelimiter = " = ";
     private static final ObjectClonerFactory clonerFactory = ObjectCloners.getSerializingObjectClonerFactory();
     private static final ObjectCloner cloner = clonerFactory.createCloner(new ClonerConfiguration());
 
@@ -38,9 +44,68 @@ public class BatchUtil {
         }
         final StringBuilder sb = new StringBuilder();
         for (final String key : properties.stringPropertyNames()) {
-            sb.append(key).append('=').append(properties.getProperty(key)).append(NL);
+            sb.append(key).append(keyValDelimiter).append(properties.getProperty(key)).append(NL);
         }
         return sb.toString();
+    }
+
+    public static Properties stringToProperties(final String content) {
+        final Properties result = new Properties();
+        if (content == null || content.isEmpty()) {
+            return result;
+        }
+        final StringTokenizer st = new StringTokenizer(content, NL);
+        while (st.hasMoreTokens()) {
+            final String line = st.nextToken();
+            final int delimiterPos = line.indexOf(keyValDelimiter);
+            if (delimiterPos > 0) {
+                result.setProperty(line.substring(0, delimiterPos), line.substring(delimiterPos + keyValDelimiter.length()));
+            }
+        }
+        return result;
+    }
+
+    public static byte[] objectToBytes(final Object obj) throws IOException {
+        if (obj == null) {
+            return null;
+        }
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(bos);
+            out.writeObject(obj);
+            return bos.toByteArray();
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+                bos.close();
+            } catch (IOException e2) {
+                //ignore
+            }
+        }
+    }
+
+    public static Object bytesToObject(final byte[] bytes) throws IOException, ClassNotFoundException {
+        if (bytes == null) {
+            return null;
+        }
+        final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        ObjectInputStream in = null;
+        try {
+            in = new ObjectInputStream(bis);
+            return in.readObject();
+        } finally {
+            try {
+                bis.close();
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException e2) {
+                //ignore
+            }
+        }
     }
 
     /**
@@ -66,6 +131,9 @@ public class BatchUtil {
     }
 
     public static <T> T clone(final T original) throws JobStartException {
+        if (original == null) {
+            return null;
+        }
         try {
             cloner.reset();
             return (T) cloner.clone(original);
