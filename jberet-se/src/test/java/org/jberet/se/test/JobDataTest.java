@@ -89,7 +89,8 @@ public class JobDataTest {
         Assert.assertEquals(BatchStatus.COMPLETED.name(), exitStatus1);
         Assert.assertNotNull(startTime1);
         Assert.assertNotNull(endTime1);
-        //Assert.assertNotNull(persistentUserData);
+        //Assert.assertEquals(new Integer(1), persistentUserData);
+        Assert.assertEquals("Persistent User Data", persistentUserData);
         Assert.assertNotNull(metrics);
         System.out.printf("StepExecution id: %s, stepName: %s, batchStatus: %s, exitStatus: %s, startTime: %s, endTime: %s, persistentUserData: %s, metrics: %s",
                 stepExecution.getStepExecutionId(), stepName1, batchStatus1, exitStatus1, startTime1, endTime1, persistentUserData,

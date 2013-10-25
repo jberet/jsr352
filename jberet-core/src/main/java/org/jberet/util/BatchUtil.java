@@ -109,7 +109,7 @@ public class BatchUtil {
     }
 
     /**
-     * Produces a StringBuilder containing contactinated id of elements.
+     * Produces a StringBuilder containing concatenated id of elements.
      *
      * @param elements step, job, or flow elements, and all elements are of the same type.  Either all elements are job,
      *                 or all elements are step, or all elements are flow

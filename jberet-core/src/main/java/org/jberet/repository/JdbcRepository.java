@@ -600,7 +600,8 @@ public final class JdbcRepository extends AbstractRepository {
         return result;
     }
 
-    private void createStepExecutionsFromResultSet(final ResultSet rs, final List<StepExecution> result) throws SQLException {
+    private void createStepExecutionsFromResultSet(final ResultSet rs, final List<StepExecution> result)
+            throws SQLException, ClassNotFoundException, IOException {
         while (rs.next()) {
             final StepExecutionImpl e = new StepExecutionImpl(
                     rs.getLong(TableColumn.STEPEXECUTIONID),
@@ -609,7 +610,7 @@ public final class JdbcRepository extends AbstractRepository {
                     rs.getTimestamp(TableColumn.ENDTIME),
                     rs.getString(TableColumn.BATCHSTATUS),
                     rs.getString(TableColumn.EXITSTATUS),
-                    rs.getObject(TableColumn.PERSISTENTUSERDATA),
+                    BatchUtil.bytesToObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),
                     rs.getInt(TableColumn.READCOUNT),
                     rs.getInt(TableColumn.WRITECOUNT),
                     rs.getInt(TableColumn.COMMITCOUNT),

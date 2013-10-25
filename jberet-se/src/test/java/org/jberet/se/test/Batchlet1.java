@@ -75,6 +75,8 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
         } else {
             throw new BatchRuntimeException(String.format("Expecting int.prop %s, but got %s", 1, intProp));
         }
+        //stepContext.setPersistentUserData(new Integer(1));  // integer works
+        stepContext.setPersistentUserData("Persistent User Data");
         return BatchStatus.COMPLETED.name();
     }
 
