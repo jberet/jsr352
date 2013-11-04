@@ -12,8 +12,8 @@
 
 package org.jberet.testapps.propertyinjection;
 
-import junit.framework.Assert;
 import org.jberet.testapps.common.AbstractIT;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class PropertyInjectionIT extends AbstractIT {

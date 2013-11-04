@@ -43,8 +43,6 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private final List<StepExecution> stepExecutions = new ArrayList<StepExecution>();
 
-    private final List<StepExecutionImpl> inactiveStepExecutions = new ArrayList<StepExecutionImpl>();
-
     private final Properties jobParameters;
 
     protected long createTime;
@@ -55,7 +53,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
      */
     String restartPoint;
 
-    private CountDownLatch jobTerminationlatch = new CountDownLatch(1);
+    private CountDownLatch jobTerminationLatch = new CountDownLatch(1);
     private CountDownLatch jobStopLatch = new CountDownLatch(1);
 
     public JobExecutionImpl(final JobInstanceImpl jobInstance, final Properties jobParameters) throws JobStartException {
@@ -113,8 +111,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     //It's possible the (fast) job is already terminated and the latch nulled when this method is called
     public void awaitTermination(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
-        if (jobTerminationlatch != null) {
-            jobTerminationlatch.await(timeout, timeUnit);
+        if (jobTerminationLatch != null) {
+            jobTerminationLatch.await(timeout, timeUnit);
         }
     }
 
@@ -177,10 +175,6 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         lastUpdatedTime = System.currentTimeMillis();
     }
 
-    public List<StepExecutionImpl> getInactiveStepExecutions() {
-        return inactiveStepExecutions;
-    }
-
     public void setRestartPoint(final String restartPoint) {
         this.restartPoint = restartPoint;
     }
@@ -207,8 +201,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         ArtifactCreationContext.removeCurrentArtifactCreationContext();
         jobStopLatch.countDown();
         jobStopLatch = null;
-        jobTerminationlatch.countDown();
-        jobTerminationlatch = null;
+        jobTerminationLatch.countDown();
+        jobTerminationLatch = null;
     }
 
     @Override

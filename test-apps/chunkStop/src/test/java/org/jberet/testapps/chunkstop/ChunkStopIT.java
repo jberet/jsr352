@@ -15,10 +15,10 @@ package org.jberet.testapps.chunkstop;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 
-import junit.framework.Assert;
 import org.jberet.runtime.metric.MetricImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

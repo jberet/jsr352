@@ -75,7 +75,6 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         } else if (batchContext.getBatchStatus() == BatchStatus.STOPPING) {
             batchContext.setBatchStatus(BatchStatus.STOPPED);
         }
-        batchContext.saveInactiveStepExecutions();
         batchContext.getJobRepository().updateJobExecution(batchContext.getJobExecution());
         batchContext.getJobExecution().cleanUp();
     }

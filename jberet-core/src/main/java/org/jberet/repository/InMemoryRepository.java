@@ -13,7 +13,7 @@
 package org.jberet.repository;
 
 import java.util.concurrent.atomic.AtomicLong;
-
+import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
@@ -33,7 +33,7 @@ public final class InMemoryRepository extends AbstractRepository {
         private static final InMemoryRepository instance = new InMemoryRepository();
     }
 
-    static InMemoryRepository getInstance(BatchEnvironment batchEnvironment) {
+    static InMemoryRepository getInstance(final BatchEnvironment batchEnvironment) {
         return Holder.instance;
     }
 
@@ -55,5 +55,22 @@ public final class InMemoryRepository extends AbstractRepository {
     @Override
     public void updateStepExecution(final StepExecution stepExecution) {
         // do nothing
+    }
+
+    @Override
+    public int countStepStartTimes(final String stepName, final long jobInstanceId) {
+        int count = 0;
+        final JobInstanceImpl jobInstanceImpl = (JobInstanceImpl) jobInstances.get(jobInstanceId);
+        if (jobInstanceImpl != null) {
+            for(final JobExecution jobExecution : jobInstanceImpl.getJobExecutions()) {
+                final JobExecutionImpl jobExecutionImpl = (JobExecutionImpl) jobExecution;
+                for (final StepExecution stepExecution : jobExecutionImpl.getStepExecutions()) {
+                    if (stepExecution.getStepName().equals(stepName)) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
     }
 }

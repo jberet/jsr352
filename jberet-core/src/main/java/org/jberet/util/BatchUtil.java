@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
@@ -87,7 +88,7 @@ public class BatchUtil {
         }
     }
 
-    public static Object bytesToObject(final byte[] bytes) throws IOException, ClassNotFoundException {
+    public static Serializable bytesToSerializableObject(final byte[] bytes) throws IOException, ClassNotFoundException {
         if (bytes == null) {
             return null;
         }
@@ -95,7 +96,7 @@ public class BatchUtil {
         ObjectInputStream in = null;
         try {
             in = new ObjectInputStream(bis);
-            return in.readObject();
+            return (Serializable) in.readObject();
         } finally {
             try {
                 bis.close();

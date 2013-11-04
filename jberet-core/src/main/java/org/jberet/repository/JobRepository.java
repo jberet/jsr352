@@ -48,6 +48,11 @@ public interface JobRepository {
     StepExecutionImpl createStepExecution(String stepName);
     void addStepExecution(JobExecutionImpl jobExecution, StepExecutionImpl stepExecution);
     void updateStepExecution(StepExecution stepExecution);
+    StepExecutionImpl findOriginalStepExecutionForRestart(String stepName, JobExecutionImpl jobExecutionToRestart);
+    int countStepStartTimes(String stepName, long jobInstanceId);
+
+    void addPartitionExecution(StepExecutionImpl enclosingStepExecution, StepExecutionImpl partitionExecution);
+    List<StepExecutionImpl> getPartitionExecutions(long stepExecutionId, StepExecutionImpl stepExecution, boolean notCompletedOnly);
 
     void savePersistentData(JobExecution jobExecution, StepExecutionImpl stepExecution);
 

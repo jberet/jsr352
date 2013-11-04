@@ -14,8 +14,8 @@ package org.jberet.testapps.chunkpartition;
 
 import javax.batch.runtime.BatchStatus;
 
-import junit.framework.Assert;
 import org.jberet.testapps.common.AbstractIT;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class ChunkPartitionIT extends AbstractIT {

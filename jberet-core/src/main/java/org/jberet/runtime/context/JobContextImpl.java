@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Properties;
 import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.StepExecution;
 import javax.batch.runtime.context.JobContext;
 
 import org.jberet.creation.ArchiveXmlLoader;
@@ -30,7 +29,6 @@ import org.jberet.job.model.RefArtifact;
 import org.jberet.job.model.Step;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
-import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchLogger;
@@ -230,41 +228,6 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         for (int i = 0; i < count; i++) {
             final RefArtifact listener = listeners.get(i);
             this.jobListeners[i] = createArtifact(listener.getRef(), null, listener.getProperties());
-        }
-    }
-
-    public void saveInactiveStepExecutions() {
-        if (originalToRestart != null) {
-            final List<StepExecutionImpl> currentInactives = jobExecution.getInactiveStepExecutions();
-
-            final List<StepExecution> originalStepExecutions = originalToRestart.getStepExecutions();
-            final List<StepExecution> currentStepExecutions = jobExecution.getStepExecutions();
-
-            for (final StepExecution originalStep : originalStepExecutions) {
-                boolean matched = false;
-                for (final StepExecution currentStep : currentStepExecutions) {
-                    if (originalStep.getStepName().equals(currentStep.getStepName())) {
-                        matched = true;
-                        break;
-                    }
-                }
-                if (!matched) {
-                    currentInactives.add((StepExecutionImpl) originalStep);
-                }
-            }
-
-            for (final StepExecutionImpl originalStep : originalToRestart.getInactiveStepExecutions()) {
-                boolean matched = false;
-                for (final StepExecutionImpl currentStep : currentInactives) {
-                    if (originalStep.getStepName().equals(currentStep.getStepName())) {
-                        matched = true;
-                        break;
-                    }
-                }
-                if (!matched) {
-                    currentInactives.add(originalStep);
-                }
-            }
         }
     }
 }

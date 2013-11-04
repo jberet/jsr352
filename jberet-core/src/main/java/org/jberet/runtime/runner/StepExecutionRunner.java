@@ -100,13 +100,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
                 final int startLimit = step.getStartLimitInt();
                 if (startLimit > 0) {
-                    final int startCount = stepExecution.getStartCount();
+                    final int startCount = jobContext.getJobRepository().countStepStartTimes(stepExecution.getStepName(), jobContext.getInstanceId());
                     if (startCount >= startLimit) {
                         throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
                     }
                 }
 
-                stepExecution.incrementStartCount();
                 batchContext.setBatchStatus(BatchStatus.STARTED);
                 jobContext.getJobRepository().addStepExecution(jobContext.getJobExecution(), stepExecution);
 
@@ -213,24 +212,23 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 partitionProperties[idx] = org.jberet.job.model.Properties.toJavaUtilProperties(props);
             }
         }
-        if (isRestart && !isOverride) {
-            numOfPartitions = batchContext.getStepExecution().getNumOfPartitions();
+        final boolean isRestartNotOverride = isRestart && !isOverride;
+        List<StepExecutionImpl> abortedPartitionExecutionsFromPrevious = null;
+        if (isRestartNotOverride) {
+            //need to carry over partition execution data from previous run of the same step
+            final StepExecutionImpl originalStepExecution = batchContext.getOriginalStepExecution();
+            abortedPartitionExecutionsFromPrevious =
+                jobContext.getJobRepository().getPartitionExecutions(originalStepExecution.getStepExecutionId(), originalStepExecution, true);
+            numOfPartitions = abortedPartitionExecutionsFromPrevious.size();
         }
         if (numOfPartitions > numOfThreads) {
             completedPartitionThreads = new ArrayBlockingQueue<Boolean>(numOfPartitions);
         }
         collectorDataQueue = new LinkedBlockingQueue<Serializable>();
-        final List<Integer> indexes = stepExecution.getPartitionPropertiesIndex();
 
         for (int i = 0; i < numOfPartitions; i++) {
-            int partitionIndex = -1;
-            if (isRestart && !isOverride) {
-                if (indexes != null && i < indexes.size()) {
-                    partitionIndex = indexes.get(i);
-                }
-            } else {
-                partitionIndex = i;
-            }
+            final StepExecutionImpl partitionExecution = isRestartNotOverride ? abortedPartitionExecutionsFromPrevious.get(i) : null;
+            final int partitionIndex = isRestartNotOverride ? partitionExecution.getPartitionId() : i;
 
             final AbstractRunner<StepContextImpl> runner1;
             final StepContextImpl stepContext1 = batchContext.clone();
@@ -240,26 +238,20 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (partitionIndex >= 0 && partitionIndex < partitionProperties.length) {
                 resolver.setPartitionPlanProperties(partitionProperties[partitionIndex]);
 
-                //associate this chunk represeted by this StepExecutionImpl with this partition properties index.  If this
+                //associate this partition represented by this StepExecutionImpl with this partition properties index.  If this
                 //partition fails or is stopped, the restart process can select this partition properties.
-                stepContext1.getStepExecution().addPartitionPropertiesIndex(partitionIndex);
+                stepContext1.getStepExecution().setPartitionId(partitionIndex);
+            } else {
+                //some partitioned steps may not have any partition properties
+                stepContext1.getStepExecution().setPartitionId(i);
             }
             resolver.setResolvePartitionPlanProperties(true);
             resolver.resolve(step1);
 
-            if (isRestart && !isOverride) {
-                final List<Serializable> partitionPersistentUserData = stepExecution.getPartitionPersistentUserData();
-                if (partitionPersistentUserData != null) {
-                    stepContext1.setPersistentUserData(partitionPersistentUserData.get(i));
-                }
-                final List<Serializable> partitionReaderCheckpointInfo = stepExecution.getPartitionReaderCheckpointInfo();
-                if (partitionReaderCheckpointInfo != null) {
-                    stepContext1.getStepExecution().setReaderCheckpointInfo(partitionReaderCheckpointInfo.get(i));
-                }
-                final List<Serializable> partitionWriterCheckpointInfo = stepExecution.getPartitionWriterCheckpointInfo();
-                if (partitionWriterCheckpointInfo != null) {
-                    stepContext1.getStepExecution().setWriterCheckpointInfo(partitionWriterCheckpointInfo.get(i));
-                }
+            if (isRestartNotOverride) {
+                stepContext1.setPersistentUserData(partitionExecution.getPersistentUserData());
+                stepContext1.getStepExecution().setReaderCheckpointInfo(partitionExecution.getReaderCheckpointInfo());
+                stepContext1.getStepExecution().setWriterCheckpointInfo(partitionExecution.getWriterCheckpointInfo());
             }
 
             if (isRestart && isOverride && reducer != null) {
@@ -274,6 +266,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (i >= numOfThreads) {
                 completedPartitionThreads.take();
             }
+            jobContext.getJobRepository().addPartitionExecution(stepExecution, stepContext1.getStepExecution());
             jobContext.getBatchEnvironment().submitTask(runner1);
         }
 
@@ -289,16 +282,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     final BatchStatus bs = s.getBatchStatus();
 
                     if (bs == BatchStatus.FAILED || bs == BatchStatus.STOPPED) {
-                        final List<Integer> idxes = s.getPartitionPropertiesIndex();
-                        Integer idx = null;
-                        if (idxes != null && idxes.size() > 0) {
-                            idx = idxes.get(0);
-                        }
-                        stepExecution.addPartitionPropertiesIndex(idx);
-                        stepExecution.setNumOfPartitions(stepExecution.getNumOfPartitions() + 1);
-                        stepExecution.addPartitionPersistentUserData(s.getPersistentUserData());
-                        stepExecution.addPartitionReaderCheckpointInfo(s.getReaderCheckpointInfo());
-                        stepExecution.addPartitionWriterCheckpointInfo(s.getWriterCheckpointInfo());
                         if(consolidatedBatchStatus != BatchStatus.FAILED) {
                             consolidatedBatchStatus = bs;
                         }

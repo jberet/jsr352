@@ -45,6 +45,11 @@ import org.jberet.runtime.metric.StepMetrics;
 
 import static org.jberet.util.BatchLogger.LOGGER;
 
+/**
+ * This runner class is responsible for running a chunk-type step (not just a chunk range of a step).  In a partitioned
+ * step execution, multiple ChunkRunner instances are created, one for each partition.  The StepContextImpl and
+ * StepExecutionImpl associated with each ChunkRunner in a partition are cloned from the original counterparts.
+ */
 public final class ChunkRunner extends AbstractRunner<StepContextImpl> implements Runnable {
     private final List<Object> allChunkRelatedListeners = new ArrayList<Object>();
     private final List<ChunkListener> chunkListeners = new ArrayList<ChunkListener>();
@@ -181,6 +186,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
             ut.commit();
+            //set batch status to indicate that either the main step, or a partition has completed successfully.
+            //note that when a chunk range is completed, we should not set batch status as completed.
+            //make sure the step has not been set to STOPPED.
+            if(batchContext.getBatchStatus() == BatchStatus.STARTED) {
+                batchContext.setBatchStatus(BatchStatus.COMPLETED);
+            }
         } catch (Exception e) {
             batchContext.setException(e);
             LOGGER.failToRunJob(e, jobContext.getJobName(), batchContext.getStepName(), chunk);

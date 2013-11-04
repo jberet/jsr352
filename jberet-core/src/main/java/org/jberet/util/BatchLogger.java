@@ -241,4 +241,8 @@ public interface BatchLogger extends BasicLogger {
 
     @Message(id = 60, value = "The job execution: %s already exists in the job repository and cannot be added again.")
     BatchRuntimeException jobExecutionAlreadyExists(long jobExecutionId);
+
+    @Message(id = 61, value = "Could not find the original step execution to restart.  Current step execution id: %s, step name: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void couldNotFindOriginalStepToRestart(long currentStepExecutionId, String stepName);
 }

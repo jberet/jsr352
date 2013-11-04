@@ -24,6 +24,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.Metric;
@@ -76,6 +77,14 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String INSERT_STEP_EXECUTION = "insert-step-execution";
     private static final String UPDATE_STEP_EXECUTION = "update-step-execution";
 
+    private static final String FIND_ORIGINAL_STEP_EXECUTION = "find-original-step-execution";
+    private static final String COUNT_STEP_EXECUTIONS_BY_JOB_INSTANCE_ID = "count-step-executions-by-job-instance-id";
+
+    private static final String SELECT_ALL_PARTITION_EXECUTIONS = "select-all-partition-executions";
+    private static final String SELECT_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID = "select-partition-executions-by-step-execution-id";
+    private static final String INSERT_PARTITION_EXECUTION = "insert-partition-execution";
+    private static final String UPDATE_PARTITION_EXECUTION = "update-partition-execution";
+
     /**
      * A class to hold all table names and column names.  Commented-out column names are already defined in other tables,
      * and are kept there as comment line for completeness.
@@ -120,6 +129,13 @@ public final class JdbcRepository extends AbstractRepository {
         private static final String PROCESSSKIPCOUNT = "PROCESSSKIPCOUNT";
         private static final String FILTERCOUNT = "FILTERCOUNT";
         private static final String WRITESKIPCOUNT = "WRITESKIPCOUNT";
+        private static final String READERCHECKPOINTINFO = "READERCHECKPOINTINFO";
+        private static final String WRITERCHECKPOINTINFO = "WRITERCHECKPOINTINFO";
+
+        //table name
+        private static final String PARTITION_EXECUTION = "PARTITION_EXECUTION";
+        //column names.  Other column names are already declared in other tables
+        private static final String PARTITIONEXECUTIONID = "PARTITIONEXECUTIONID";
 
         private TableColumn() {}
     }
@@ -532,7 +548,7 @@ public final class JdbcRepository extends AbstractRepository {
         final String update = sqls.getProperty(UPDATE_STEP_EXECUTION);
         final Connection connection = getConnection();
         final StepExecutionImpl stepExecutionImpl = (StepExecutionImpl) stepExecution;
-                PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(update);
             preparedStatement.setTimestamp(1, new Timestamp(stepExecution.getEndTime().getTime()));
@@ -547,13 +563,48 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(10, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
             preparedStatement.setLong(11, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
             preparedStatement.setLong(12, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
-            preparedStatement.setLong(13, stepExecution.getStepExecutionId());
+            preparedStatement.setBytes(13, BatchUtil.objectToBytes(stepExecutionImpl.getReaderCheckpointInfo()));
+            preparedStatement.setBytes(14, BatchUtil.objectToBytes(stepExecutionImpl.getWriterCheckpointInfo()));
+
+            preparedStatement.setLong(15, stepExecution.getStepExecutionId());
 
             preparedStatement.executeUpdate();
         } catch (Exception e) {
             throw BatchLogger.LOGGER.failToRunQuery(e, update);
         } finally {
             close(connection, preparedStatement, null);
+        }
+    }
+
+    @Override
+    public void savePersistentData(final JobExecution jobExecution, final StepExecutionImpl stepExecution) {
+        //super.savePersistentData() serialize persistent data and checkpoint info to avoid further modification
+        super.savePersistentData(jobExecution, stepExecution);
+        final int partitionId = stepExecution.getPartitionId();
+        if (partitionId < 0) {
+            //stepExecution is for the main step, and should map to the STEP_EXECUTIOIN table
+            updateStepExecution(stepExecution);
+        } else {
+            //stepExecutionId is for a partition execution, and should map to the PARTITION_EXECUTION table
+            final String update = sqls.getProperty(UPDATE_PARTITION_EXECUTION);
+            final Connection connection = getConnection();
+            PreparedStatement preparedStatement = null;
+            try {
+                preparedStatement = connection.prepareStatement(update);
+                preparedStatement.setString(1, stepExecution.getBatchStatus().name());
+                preparedStatement.setString(2, stepExecution.getExitStatus());
+                preparedStatement.setBytes(3, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
+                preparedStatement.setBytes(4, BatchUtil.objectToBytes(stepExecution.getReaderCheckpointInfo()));
+                preparedStatement.setBytes(5, BatchUtil.objectToBytes(stepExecution.getWriterCheckpointInfo()));
+                preparedStatement.setInt(6, partitionId);
+                preparedStatement.setLong(7, stepExecution.getStepExecutionId());
+
+                preparedStatement.executeUpdate();
+            } catch (Exception e) {
+                throw BatchLogger.LOGGER.failToRunQuery(e, update);
+            } finally {
+                close(connection, preparedStatement, null);
+            }
         }
     }
 
@@ -565,7 +616,7 @@ public final class JdbcRepository extends AbstractRepository {
         try {
             preparedStatement = connection.prepareStatement(select);
             preparedStatement.setLong(1, stepExecutionId);
-            createStepExecutionsFromResultSet(preparedStatement.executeQuery(), result);
+            createStepExecutionsFromResultSet(preparedStatement.executeQuery(), result, false);
         } catch (Exception e) {
             throw BatchLogger.LOGGER.failToRunQuery(e, select);
         } finally {
@@ -591,7 +642,7 @@ public final class JdbcRepository extends AbstractRepository {
             if (jobExecutionId != null) {
                 preparedStatement.setLong(1, jobExecutionId);
             }
-            createStepExecutionsFromResultSet(preparedStatement.executeQuery(), result);
+            createStepExecutionsFromResultSet(preparedStatement.executeQuery(), result, false);
         } catch (Exception e) {
             throw BatchLogger.LOGGER.failToRunQuery(e, select);
         } finally {
@@ -600,7 +651,84 @@ public final class JdbcRepository extends AbstractRepository {
         return result;
     }
 
-    private void createStepExecutionsFromResultSet(final ResultSet rs, final List<StepExecution> result)
+    @Override
+    public void addPartitionExecution(final StepExecutionImpl enclosingStepExecution, final StepExecutionImpl partitionExecution) {
+        super.addPartitionExecution(enclosingStepExecution, partitionExecution);
+        final String insert = sqls.getProperty(INSERT_PARTITION_EXECUTION);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(insert);
+            preparedStatement.setInt(1, partitionExecution.getPartitionId());
+            preparedStatement.setLong(2, partitionExecution.getStepExecutionId());
+            preparedStatement.setString(3, partitionExecution.getBatchStatus().name());
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, insert);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+    }
+
+    @Override
+    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName, final JobExecutionImpl jobExecutionToRestart) {
+        StepExecutionImpl result = super.findOriginalStepExecutionForRestart(stepName, jobExecutionToRestart);
+        if (result != null) {
+            return result;
+        }
+        final String select = sqls.getProperty(FIND_ORIGINAL_STEP_EXECUTION);
+        final Connection connection = getConnection();
+        final List<StepExecution> results = new ArrayList<StepExecution>();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setLong(1, jobExecutionToRestart.getJobInstance().getInstanceId());
+            preparedStatement.setString(2, stepName);
+            createStepExecutionsFromResultSet(preparedStatement.executeQuery(), results, true);
+        } catch (Exception e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return results.size() > 0 ? (StepExecutionImpl) results.get(0) : null;
+    }
+
+    @Override
+    public List<StepExecutionImpl> getPartitionExecutions(final long stepExecutionId,
+                                                          final StepExecutionImpl stepExecution,
+                                                          final boolean notCompletedOnly) {
+        List<StepExecutionImpl> result = super.getPartitionExecutions(stepExecutionId, stepExecution, notCompletedOnly);
+        if (result != null && !result.isEmpty()) {
+            return result;
+        }
+        final String select = sqls.getProperty(SELECT_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        result = new ArrayList<StepExecutionImpl>();
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setLong(1, stepExecutionId);
+            final ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                result.add(new StepExecutionImpl(
+                        rs.getInt(TableColumn.PARTITIONEXECUTIONID),
+                        rs.getLong(TableColumn.STEPEXECUTIONID),
+                        BatchStatus.valueOf(rs.getString(TableColumn.BATCHSTATUS)),
+                        rs.getString(TableColumn.EXITSTATUS),
+                        BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),
+                        BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.READERCHECKPOINTINFO)),
+                        BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.WRITERCHECKPOINTINFO))
+                ));
+            }
+        } catch (Exception e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return result;
+    }
+
+    private void createStepExecutionsFromResultSet(final ResultSet rs, final List<StepExecution> result, final boolean top1)
             throws SQLException, ClassNotFoundException, IOException {
         while (rs.next()) {
             final StepExecutionImpl e = new StepExecutionImpl(
@@ -610,7 +738,7 @@ public final class JdbcRepository extends AbstractRepository {
                     rs.getTimestamp(TableColumn.ENDTIME),
                     rs.getString(TableColumn.BATCHSTATUS),
                     rs.getString(TableColumn.EXITSTATUS),
-                    BatchUtil.bytesToObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),
                     rs.getInt(TableColumn.READCOUNT),
                     rs.getInt(TableColumn.WRITECOUNT),
                     rs.getInt(TableColumn.COMMITCOUNT),
@@ -618,12 +746,40 @@ public final class JdbcRepository extends AbstractRepository {
                     rs.getInt(TableColumn.READSKIPCOUNT),
                     rs.getInt(TableColumn.PROCESSSKIPCOUNT),
                     rs.getInt(TableColumn.FILTERCOUNT),
-                    rs.getInt(TableColumn.WRITESKIPCOUNT)
+                    rs.getInt(TableColumn.WRITESKIPCOUNT),
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.READERCHECKPOINTINFO)),
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.WRITERCHECKPOINTINFO))
             );
             result.add(e);
+            if (top1) {
+                return;
+            }
         }
     }
 
+    @Override
+    public int countStepStartTimes(final String stepName, final long jobInstanceId) {
+        final String select = sqls.getProperty(COUNT_STEP_EXECUTIONS_BY_JOB_INSTANCE_ID);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        int count = 0;
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setString(1, stepName);
+            preparedStatement.setLong(2, jobInstanceId);
+            final ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                count = rs.getInt(1);
+                break;
+            }
+        } catch (Exception e) {
+            throw BatchLogger.LOGGER.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null);
+        }
+        return count;
+    }
 
     private Connection getConnection() {
         if (dataSource != null) {

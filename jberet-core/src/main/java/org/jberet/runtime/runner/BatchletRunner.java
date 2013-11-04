@@ -61,6 +61,12 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             });
 
             final String exitStatus = batchletObj.process();
+
+            //set batch status to indicate that either the main step, or a partition has completed successfully.
+            //make sure the step has not been set to STOPPED. The same in ChunkRunner.run().
+            if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
+                batchContext.setBatchStatus(BatchStatus.COMPLETED);
+            }
             batchContext.setExitStatus(exitStatus);
             if (collector != null) {
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());

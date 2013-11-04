@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
@@ -158,17 +159,17 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(final long jobExecutionId) {
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(jobExecutionId);
-        return jobExecution.getStepExecutions();
-    }
-
-    @Override
     public StepExecutionImpl createStepExecution(final String stepName) {
 //        this stepExecution will be added to jobExecution later, after determining restart-if-complete, so that
 //        completed steps are not added to the enclosing JobExecution
 //        jobExecution.addStepExecution(stepExecution);
         return new StepExecutionImpl(stepName);
+    }
+
+    @Override
+    public List<StepExecution> getStepExecutions(final long jobExecutionId) {
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(jobExecutionId);
+        return jobExecution.getStepExecutions();
     }
 
     @Override
@@ -179,6 +180,7 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public void savePersistentData(final JobExecution jobExecution, final StepExecutionImpl stepExecution) {
+        //persistent data and checkpoint info can be mutable objects, so serialize them to avoid further modification.
         Serializable ser = stepExecution.getPersistentUserData();
         Serializable copy;
         if (ser != null) {
@@ -202,5 +204,58 @@ public abstract class AbstractRepository implements JobRepository {
     public void updateJobExecution(final JobExecution jobExecution) {
         final JobExecutionImpl jobExecutionImpl = (JobExecutionImpl) jobExecution;
         jobExecutionImpl.setEndTime(System.currentTimeMillis());
+    }
+
+    @Override
+    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName, final JobExecutionImpl jobExecutionToRestart) {
+        for (final StepExecution stepExecution : jobExecutionToRestart.getStepExecutions()) {
+            if (stepName.equals(stepExecution.getStepName())) {
+                return (StepExecutionImpl) stepExecution;
+            }
+        }
+        StepExecutionImpl result = null;
+        // the same-named StepExecution is not found in the jobExecutionToRestart.  It's still possible the same-named
+        // StepExecution may exit in JobExecution earlier than jobExecutionToRestart for the same JobInstance.
+        final long instanceId = jobExecutionToRestart.getJobInstance().getInstanceId();
+        for (final JobExecution jobExecution : jobExecutions.values()) {
+            final JobExecutionImpl jobExecutionImpl = (JobExecutionImpl) jobExecution;
+            //skip the JobExecution that has already been checked above
+            if (instanceId == jobExecutionImpl.getJobInstance().getInstanceId() &&
+                    jobExecutionImpl.getExecutionId() != jobExecutionToRestart.getExecutionId()) {
+                for (final StepExecution stepExecution : jobExecutionImpl.getStepExecutions()) {
+                    if (stepExecution.getStepName().equals(stepName)) {
+                        if (result == null || result.getStepExecutionId() < stepExecution.getStepExecutionId()) {
+                            result = (StepExecutionImpl) stepExecution;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void addPartitionExecution(final StepExecutionImpl enclosingStepExecution, final StepExecutionImpl partitionExecution) {
+        enclosingStepExecution.getPartitionExecutions().add(partitionExecution);
+    }
+
+    @Override
+    public List<StepExecutionImpl> getPartitionExecutions(final long stepExecutionId,
+                                                          final StepExecutionImpl stepExecution,
+                                                          final boolean notCompletedOnly) {
+        if (stepExecution != null) {
+            final List<StepExecutionImpl> partitionExecutions = stepExecution.getPartitionExecutions();
+            if (partitionExecutions.isEmpty() || !notCompletedOnly) {
+                return partitionExecutions;
+            }
+            final List<StepExecutionImpl> result = new ArrayList<StepExecutionImpl>();
+            for (StepExecutionImpl sei : partitionExecutions) {
+                if (sei.getBatchStatus() != BatchStatus.COMPLETED) {
+                    result.add(sei);
+                }
+            }
+            return result;
+        }
+        return null;
     }
 }

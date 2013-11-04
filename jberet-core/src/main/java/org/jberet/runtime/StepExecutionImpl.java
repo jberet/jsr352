@@ -28,7 +28,15 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     private long id;
 
-    private final String stepName;
+    /**
+     * If this instance is assigned to a partition, partitionId represents the id for that partition.  Its value should
+     * be the same as the partition attribute of the target partition properties in job xml.  The default value -1
+     * indicates that this StepExecutionImpl is for the main step execution, and is not a cloned instance for any
+     * partition.
+     */
+    private int partitionId = -1;
+
+    private String stepName;
 
     private Serializable persistentUserData;
 
@@ -40,41 +48,14 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     private final StepMetrics stepMetrics = new StepMetrics();
 
-    int startCount;
-
     /**
-     * To remember the numOfPartitions for restart purpose.  This field should not be cloned.  This field is set on the
-     * main StepExecution only.
+     * For a partitioned step, records the partitions contained in the current step.  If it is a first-time started
+     * step, it contains all partitions, which can be checked for restart purpose later.  For a restarted step, it
+     * contains all FAILED or STOPPED partition executions from previous run of the same step in the same JobInstance.
+     * These partition executions are carried over when the StepContext is created.  Note this field should only be
+     * in the main step, and not in any StepExecution clones.
      */
-    private int numOfPartitions;
-
-    /**
-     * To remember the index of the partition plan properties for failed or stopped partition on the step main thread.
-     * This field should not be cloned.  On a cloned StepExecutionImpl, it contains a single index of the partition's
-     * plan properties index.
-     */
-    private List<Integer> partitionPropertiesIndex;
-
-    /**
-     * To remember the persistent user data from each failed or stopped partition on the step main thread.  The element
-     * order must be same as partitionPropertiesIndex.  This field should not be cloned.  On a cloned StepExecutionImpl,
-     * it should not be used.
-     */
-    private List<Serializable> partitionPersistentUserData;
-
-    /**
-     * To remember the reader checkpoint info from each failed or stopped partition on the step main thread.  The 
-     * element order must be same as other partition-related list in this class.  This field should not be clone.  On a
-     * cloned StepExecutionImpl, it should not be used.
-     */
-    private List<Serializable> partitionReaderCheckpointInfo;
-
-    /**
-     * To remember the writer checkpoint info from each failed or stopped partition on the step main thread.  The 
-     * element order must be same as other partition-related list in this class.  This field should not be clone.  On a
-     * cloned StepExecutionImpl, it should not be used.
-     */
-    private List<Serializable> partitionWriterCheckpointInfo;
+    private List<StepExecutionImpl> partitionExecutions = new ArrayList<StepExecutionImpl>();
 
     public StepExecutionImpl(final String stepName) {
         this.stepName = stepName;
@@ -105,7 +86,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
                              final Timestamp endTime,
                              final String batchStatus,
                              final String exitStatus,
-                             final Object persistentUserData,
+                             final Serializable persistentUserData,
                              final long readCount,
                              final long writeCount,
                              final long commitCount,
@@ -113,7 +94,9 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
                              final long readSkipCount,
                              final long processSkipCount,
                              final long filterCount,
-                             final long writeSkipCount) {
+                             final long writeSkipCount,
+                             final Serializable readerCheckpointInfo,
+                             final Serializable writerCheckpointInfo) {
         this.id = id;
         this.stepName = stepName;
 
@@ -125,7 +108,9 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         }
         this.batchStatus = Enum.valueOf(BatchStatus.class, batchStatus);
         this.exitStatus = exitStatus;
-        this.persistentUserData = (Serializable) persistentUserData;
+        this.persistentUserData = persistentUserData;
+        this.readerCheckpointInfo = readerCheckpointInfo;
+        this.writerCheckpointInfo = writerCheckpointInfo;
         stepMetrics.set(Metric.MetricType.READ_COUNT, readCount);
         stepMetrics.set(Metric.MetricType.WRITE_COUNT, writeCount);
         stepMetrics.set(Metric.MetricType.COMMIT_COUNT, commitCount);
@@ -134,6 +119,33 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         stepMetrics.set(Metric.MetricType.PROCESS_SKIP_COUNT, processSkipCount);
         stepMetrics.set(Metric.MetricType.FILTER_COUNT, filterCount);
         stepMetrics.set(Metric.MetricType.WRITE_SKIP_COUNT, writeSkipCount);
+    }
+
+    /**
+     * Creates a partition execution data structure.
+     * @param partitionId
+     * @param stepExecutionId
+     * @param batchStatus
+     * @param exitStatus
+     * @param persistentUserData
+     * @param readerCheckpointInfo
+     * @param writerCheckpointInfo
+     */
+    public StepExecutionImpl(final int partitionId,
+                             final long stepExecutionId,
+                             final BatchStatus batchStatus,
+                             final String exitStatus,
+                             final Serializable persistentUserData,
+                             final Serializable readerCheckpointInfo,
+                             final Serializable writerCheckpointInfo
+                             ) {
+        this.partitionId = partitionId;
+        this.id = stepExecutionId;
+        this.batchStatus = batchStatus;
+        this.exitStatus = exitStatus;
+        this.persistentUserData = persistentUserData;
+        this.readerCheckpointInfo = readerCheckpointInfo;
+        this.writerCheckpointInfo = writerCheckpointInfo;
     }
 
     public void setId(final long id) {
@@ -148,21 +160,9 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         } catch (CloneNotSupportedException e) {
             BatchLogger.LOGGER.failToClone(e, this, "", stepName);
         }
-        result.numOfPartitions = 0;
-        result.partitionPropertiesIndex = null;
+        result.partitionId = 0;     //overwrite the default -1 to indicate it's for a partition
+        result.partitionExecutions = null;
         return result;
-    }
-
-    public int getStartCount() {
-        return startCount;
-    }
-
-    public void incrementStartCount() {
-        this.startCount++;
-    }
-
-    public void setStartCount(final int startCount) {
-        this.startCount = startCount;
     }
 
     @Override
@@ -227,72 +227,35 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         this.writerCheckpointInfo = writerCheckpointInfo;
     }
 
-    public int getNumOfPartitions() {
-        return numOfPartitions;
+    public int getPartitionId() {
+        return partitionId;
     }
 
-    public void setNumOfPartitions(final int numOfPartitions) {
-        this.numOfPartitions = numOfPartitions;
+    public void setPartitionId(final int partitionId) {
+        this.partitionId = partitionId;
     }
 
-    public List<Integer> getPartitionPropertiesIndex() {
-        return partitionPropertiesIndex;
-    }
-
-    public void addPartitionPropertiesIndex(final Integer i) {
-        if (partitionPropertiesIndex == null) {
-            partitionPropertiesIndex = new ArrayList<Integer>();
-        }
-        partitionPropertiesIndex.add(i);
-    }
-
-    public List<Serializable> getPartitionPersistentUserData() {
-        return partitionPersistentUserData;
-    }
-
-    public void addPartitionPersistentUserData(final Serializable d) {
-        if (partitionPersistentUserData == null) {
-            partitionPersistentUserData = new ArrayList<Serializable>();
-        }
-        partitionPersistentUserData.add(d);
-    }
-
-    public List<Serializable> getPartitionReaderCheckpointInfo() {
-        return partitionReaderCheckpointInfo;
-    }
-
-    public void addPartitionReaderCheckpointInfo(final Serializable s) {
-        if (partitionReaderCheckpointInfo == null) {
-            partitionReaderCheckpointInfo = new ArrayList<Serializable>();
-        }
-        partitionReaderCheckpointInfo.add(s);
-    }
-
-    public List<Serializable> getPartitionWriterCheckpointInfo() {
-        return partitionWriterCheckpointInfo;
-    }
-
-    public void addPartitionWriterCheckpointInfo(final Serializable s) {
-        if (partitionWriterCheckpointInfo == null) {
-            partitionWriterCheckpointInfo = new ArrayList<Serializable>();
-        }
-        partitionWriterCheckpointInfo.add(s);
+    public List<StepExecutionImpl> getPartitionExecutions() {
+        return partitionExecutions;
     }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof StepExecutionImpl)) return false;
 
         final StepExecutionImpl that = (StepExecutionImpl) o;
 
         if (id != that.id) return false;
+        if (partitionId != that.partitionId) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return (int) (id ^ (id >>> 32));
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + partitionId;
+        return result;
     }
 }
