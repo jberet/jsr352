@@ -147,7 +147,7 @@ public final class JdbcRepository extends AbstractRepository {
     private String dbUrl;
     private String dbUser;
     private String dbPassword;
-    private Properties dbProperties;
+    private final Properties dbProperties;
     private final Properties sqls = new Properties();
 
     static JdbcRepository getInstance(final BatchEnvironment batchEnvironment) {
@@ -167,6 +167,7 @@ public final class JdbcRepository extends AbstractRepository {
         configProperties = batchEnvironment.getBatchConfigurationProperties();
         dataSourceName = configProperties.getProperty(DATASOURCE_JNDI_KEY);
         dbUrl = configProperties.getProperty(DB_URL_KEY);
+        dbProperties = new Properties();
 
         //if dataSourceName is configured, use dataSourceName;
         //else if dbUrl is specified, use dbUrl;
@@ -178,7 +179,6 @@ public final class JdbcRepository extends AbstractRepository {
                 throw BatchLogger.LOGGER.failToLookupDataSource(e, dataSourceName);
             }
         } else {
-            dbProperties = new Properties();
             if (dbUrl == null) {
                 dbUrl = DEFAULT_DB_URL;
                 dbUser = configProperties.getProperty(DB_USER_KEY);
