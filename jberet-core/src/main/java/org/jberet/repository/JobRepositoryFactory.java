@@ -15,7 +15,7 @@ package org.jberet.repository;
 import java.util.Properties;
 
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 
 public final class JobRepositoryFactory {
     public static final String JOB_REPOSITORY_TYPE_KEY = "job-repository-type";

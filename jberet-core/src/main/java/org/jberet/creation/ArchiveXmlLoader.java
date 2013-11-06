@@ -24,7 +24,7 @@ import javax.batch.operations.JobStartException;
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.JobParser;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 public class ArchiveXmlLoader {
     public final static String ARCHIVE_JOB_XML_DIR = "META-INF/batch-jobs/";

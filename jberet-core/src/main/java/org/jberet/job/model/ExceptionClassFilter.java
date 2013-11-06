@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 
 public final class ExceptionClassFilter implements Serializable {
     private static final long serialVersionUID = -6174512038188933722L;

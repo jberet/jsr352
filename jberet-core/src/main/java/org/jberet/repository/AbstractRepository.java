@@ -32,7 +32,7 @@ import org.jberet.job.model.Job;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 import org.jberet.util.BatchUtil;
 
 public abstract class AbstractRepository implements JobRepository {

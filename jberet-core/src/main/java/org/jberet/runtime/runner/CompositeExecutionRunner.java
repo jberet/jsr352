@@ -27,7 +27,7 @@ import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
 import org.jberet.runtime.context.SplitContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 
 /**
  * A runner for job elements that can contain other job elements.  Examples of such composite job elements are

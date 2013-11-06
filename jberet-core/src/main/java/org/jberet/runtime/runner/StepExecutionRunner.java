@@ -48,10 +48,10 @@ import org.jberet.job.model.Step;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.StepContextImpl;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 import org.jberet.util.BatchUtil;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements Runnable {
     Step step;

@@ -54,7 +54,7 @@ import java.util.zip.ZipFile;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 /**
  * Converts a property string value to the target field type.  Supported field types for batch property injection:

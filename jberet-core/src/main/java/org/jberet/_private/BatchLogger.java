@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.util;
+package org.jberet._private;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -34,18 +34,15 @@ import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
+import org.jboss.logging.annotations.ValidIdRange;
 
-@MessageLogger(projectCode = "jberet")
+@MessageLogger(projectCode = "JBERET")
+@ValidIdRange(min = 1, max = 49999)
 public interface BatchLogger extends BasicLogger {
-    BatchLogger LOGGER = org.jboss.logging.Logger.getMessageLogger(BatchLogger.class, BatchLogger.class.getPackage().getName());
+    BatchLogger LOGGER = org.jboss.logging.Logger.getMessageLogger(BatchLogger.class, "org.jberet");
 
     @Message(id = 1, value = "Failed to create artifact with ref name %s.  Ensure CDI beans.xml is present and batch.xml, if any, is configured properly.")
     IllegalStateException failToCreateArtifact(@Cause Throwable e, String ref);
-
-    @LogMessage(level = Logger.Level.ERROR)
-    @Message(id = 2,
-            value = "Usage: java -classpath ... -Dkey1=val1 ... org.jberet.Main jobXML%nThe following application args are invalid:%n%s")
-    void mainUsage(List<String> args);
 
     @LogMessage(level = Logger.Level.WARN)
     @Message(id = 3, value = "Failed to run batchlet %s")
@@ -182,13 +179,6 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 42, value = "Failed to destroy artifact %s")
     @LogMessage(level = Logger.Level.WARN)
     void failToDestroyArtifact(@Cause Throwable cause, Object artifact);
-
-    @Message(id = 43, value = "The configuration file %s is not found in the classpath, and will use the default configuration.")
-    @LogMessage(level = Logger.Level.TRACE)
-    void useDefaultJBeretConfig(String configFile);
-
-    @Message(id = 44, value = "Failed to load configuration file %s")
-    BatchRuntimeException failToLoadConfig(@Cause Throwable th, String configFile);
 
     @Message(id = 45, value = "Unrecognized job repository type %s")
     BatchRuntimeException unrecognizedJobRepositoryType(String v);

@@ -43,7 +43,7 @@ import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 /**
  * This runner class is responsible for running a chunk-type step (not just a chunk range of a step).  In a partitioned

@@ -16,7 +16,7 @@ import javax.annotation.PostConstruct;
 
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.spi.ArtifactFactory;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 
 public final class ArtifactFactoryWrapper extends AbstractArtifactFactory {
     private final ArtifactFactory factory;

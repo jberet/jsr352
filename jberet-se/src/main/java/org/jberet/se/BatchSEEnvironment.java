@@ -21,9 +21,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.transaction.UserTransaction;
 
+import org.jberet.se._private.SEBatchLogger;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.util.BatchLogger;
 
 /**
  * Represents the Java SE batch runtime environment and its services.
@@ -82,10 +82,10 @@ public final class BatchSEEnvironment implements BatchEnvironment {
                         try {
                             result.load(configStream);
                         } catch (IOException e) {
-                            throw BatchLogger.LOGGER.failToLoadConfig(e, CONFIG_FILE_NAME);
+                            throw SEBatchLogger.LOGGER.failToLoadConfig(e, CONFIG_FILE_NAME);
                         }
                     } else {
-                        BatchLogger.LOGGER.useDefaultJBeretConfig(CONFIG_FILE_NAME);
+                        SEBatchLogger.LOGGER.useDefaultJBeretConfig(CONFIG_FILE_NAME);
                     }
                     configProperties = result;
                 }

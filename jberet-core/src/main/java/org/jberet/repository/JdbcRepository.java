@@ -37,7 +37,7 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 import org.jberet.util.BatchUtil;
 
 public final class JdbcRepository extends AbstractRepository {

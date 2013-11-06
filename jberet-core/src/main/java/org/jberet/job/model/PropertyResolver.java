@@ -28,7 +28,7 @@ import org.jberet.job.model.Transition.Fail;
 import org.jberet.job.model.Transition.Next;
 import org.jberet.job.model.Transition.Stop;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 public final class PropertyResolver {
     protected static final String jobParametersToken = "jobParameters";

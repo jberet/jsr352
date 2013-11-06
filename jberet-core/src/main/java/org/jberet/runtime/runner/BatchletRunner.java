@@ -20,7 +20,7 @@ import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Runnable {
     private final RefArtifact batchlet;

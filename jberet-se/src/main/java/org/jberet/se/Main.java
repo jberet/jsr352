@@ -21,8 +21,6 @@ import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 
-import static org.jberet.util.BatchLogger.LOGGER;
-
 public class Main {
     public static void main(final String[] args) throws BatchRuntimeException {
         if (args.length == 0) {
@@ -64,6 +62,6 @@ public class Main {
     }
 
     private static void usage(final String[] args) {
-        LOGGER.mainUsage(Arrays.asList(args));
+        System.err.printf("Usage: java -classpath ... -Dkey1=val1 ... org.jberet.Main jobXML%nThe following application args are invalid:%n%s", Arrays.asList(args));
     }
 }

@@ -31,7 +31,7 @@ import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 
 public class JobContextImpl extends AbstractContext implements JobContext, Cloneable {
     private static final AbstractContext[] EMPTY_ABSTRACT_CONTEXT_ARRAY = new AbstractContext[0];

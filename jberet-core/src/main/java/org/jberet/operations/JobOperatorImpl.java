@@ -50,7 +50,7 @@ import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 public class JobOperatorImpl implements JobOperator {
     final JobRepository repository;
