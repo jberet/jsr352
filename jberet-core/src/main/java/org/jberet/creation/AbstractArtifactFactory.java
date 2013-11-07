@@ -9,7 +9,7 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.creation;
 
 import java.lang.annotation.Annotation;
@@ -33,7 +33,7 @@ import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.ArtifactFactory;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 public abstract class AbstractArtifactFactory implements ArtifactFactory {
     @Override

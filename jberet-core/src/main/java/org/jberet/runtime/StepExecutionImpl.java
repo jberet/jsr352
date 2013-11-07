@@ -21,7 +21,7 @@ import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.metric.StepMetrics;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 
 public final class StepExecutionImpl extends AbstractExecution implements StepExecution, Serializable, Cloneable {
     private static final long serialVersionUID = 1L;

@@ -48,10 +48,11 @@ import org.jberet.job.model.Step;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.StepContextImpl;
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchLogger;
 import org.jberet.util.BatchUtil;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
 
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements Runnable {
     Step step;
@@ -94,7 +95,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 if (executedSteps.contains(step)) {
                     final StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
                     stepIds.append(step.getId());
-                    throw LOGGER.loopbackStep(step.getId(), stepIds.toString());
+                    throw MESSAGES.loopbackStep(step.getId(), stepIds.toString());
                 }
 
 
@@ -102,7 +103,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 if (startLimit > 0) {
                     final int startCount = jobContext.getJobRepository().countStepStartTimes(stepExecution.getStepName(), jobContext.getInstanceId());
                     if (startCount >= startLimit) {
-                        throw LOGGER.stepReachedStartLimit(step.getId(), startLimit, startCount);
+                        throw MESSAGES.stepReachedStartLimit(step.getId(), startLimit, startCount);
                     }
                 }
 

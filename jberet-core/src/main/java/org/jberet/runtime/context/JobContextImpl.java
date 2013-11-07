@@ -20,6 +20,8 @@ import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.context.JobContext;
 
+import org.jberet._private.BatchLogger;
+import org.jberet._private.BatchMessages;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactCreationContext;
 import org.jberet.job.model.BatchArtifacts;
@@ -31,7 +33,6 @@ import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.util.BatchLogger;
 
 public class JobContextImpl extends AbstractContext implements JobContext, Cloneable {
     private static final AbstractContext[] EMPTY_ABSTRACT_CONTEXT_ARRAY = new AbstractContext[0];
@@ -191,10 +192,10 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         try {
             a = (A) artifactFactory.create(ref, cls, classLoader);
         } catch (Exception e) {
-            throw BatchLogger.LOGGER.failToCreateArtifact(e, ref);
+            throw BatchMessages.MESSAGES.failToCreateArtifact(e, ref);
         }
         if (a == null) {
-            throw BatchLogger.LOGGER.failToCreateArtifact(null, ref);
+            throw BatchMessages.MESSAGES.failToCreateArtifact(null, ref);
         }
         return a;
     }

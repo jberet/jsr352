@@ -19,7 +19,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.jberet.util.BatchLogger;
+import org.jberet._private.BatchMessages;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -73,12 +73,12 @@ public final class JobParser {
                                 job.addListeners(parseListeners(reader));
                                 break;
                             default:
-                                throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                                throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                         }
                         break;
                     case END_ELEMENT:
                         if (element != XmlElement.JOB) {
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                         }
                 }
             }
@@ -115,12 +115,12 @@ public final class JobParser {
                                 batchArtifacts.addRef(getAttributeValue(reader, XmlAttribute.ID, true), getAttributeValue(reader, XmlAttribute.CLASS, true));
                                 break;
                             default:
-                                throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                                throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                         }
                         break;
                     case END_ELEMENT:
                         if (element != XmlElement.BATCH_ARTIFACTS && element != XmlElement.REF) {
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                         }
                 }
             }
@@ -162,7 +162,7 @@ public final class JobParser {
                             break;
                         case NEXT:
                             if (step.getAttributeNext() != null) {
-                                throw BatchLogger.LOGGER.cannotHaveBothNextAttributeAndElement(reader.getLocation(), step.getAttributeNext());
+                                throw BatchMessages.MESSAGES.cannotHaveBothNextAttributeAndElement(reader.getLocation(), step.getAttributeNext());
                             }
                             step.addTransitionElement(parseNext(reader));
                             break;
@@ -176,7 +176,7 @@ public final class JobParser {
                             step.addTransitionElement(parseStop(reader));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
@@ -184,17 +184,17 @@ public final class JobParser {
                         case STEP:
                             return step;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static String getAttributeValue(final XMLStreamReader reader, final XmlAttribute attribute, final boolean required) {
         final String val = reader.getAttributeValue(namespaceURI, attribute.getLocalName());
         if (val == null && required) {
-            throw BatchLogger.LOGGER.failToGetAttribute(attribute.getLocalName(), reader.getLocation());
+            throw BatchMessages.MESSAGES.failToGetAttribute(attribute.getLocalName(), reader.getLocation());
         }
         return val;
     }
@@ -226,7 +226,7 @@ public final class JobParser {
                             decision.addTransitionElement(parseStop(reader));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
@@ -234,11 +234,11 @@ public final class JobParser {
                         case DECISION:
                             return decision;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static Flow parseFlow(final XMLStreamReader reader) throws XMLStreamException {
@@ -267,7 +267,7 @@ public final class JobParser {
                             break;
                         case NEXT:
                             if (flow.getAttributeNext() != null) {
-                                throw BatchLogger.LOGGER.cannotHaveBothNextAttributeAndElement(reader.getLocation(), flow.getAttributeNext());
+                                throw BatchMessages.MESSAGES.cannotHaveBothNextAttributeAndElement(reader.getLocation(), flow.getAttributeNext());
                             }
                             flow.addTransitionElement(parseNext(reader));
                             break;
@@ -281,7 +281,7 @@ public final class JobParser {
                             flow.addTransitionElement(parseStop(reader));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
@@ -289,11 +289,11 @@ public final class JobParser {
                         case FLOW:
                             return flow;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static Split parseSplit(final XMLStreamReader reader) throws XMLStreamException {
@@ -310,18 +310,18 @@ public final class JobParser {
                     if (element == XmlElement.FLOW) {
                         split.addFlow(parseFlow(reader));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.SPLIT) {
                         return split;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static Properties parseProperties(final XMLStreamReader reader) throws XMLStreamException {
@@ -338,18 +338,18 @@ public final class JobParser {
                     if (element == XmlElement.PROPERTY) {
                         properties.add(getAttributeValue(reader, XmlAttribute.NAME, true), getAttributeValue(reader, XmlAttribute.VALUE, false));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.PROPERTIES) {
                         return properties;
                     } else if (element != XmlElement.PROPERTY) {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static List<RefArtifact> parseListeners(final XMLStreamReader reader) throws XMLStreamException {
@@ -365,18 +365,18 @@ public final class JobParser {
                     if (element == XmlElement.LISTENER) {
                         listeners.add(parseRefArtifact(reader, element));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.LISTENERS) {
                         return listeners;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static RefArtifact parseRefArtifact(final XMLStreamReader reader, final XmlElement artifactElementType) throws XMLStreamException {
@@ -392,18 +392,18 @@ public final class JobParser {
                     if (element == XmlElement.PROPERTIES) {
                         refArtifact.setProperties(parseProperties(reader));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == artifactElementType) {
                         return refArtifact;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static Chunk parseChunk(final XMLStreamReader reader) throws XMLStreamException {
@@ -444,18 +444,18 @@ public final class JobParser {
                             chunk.setNoRollbackExceptionClasses(parseExceptionClassFilter(reader, XmlElement.NO_ROLLBACK_EXCEPTION_CLASSES));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.CHUNK) {
                         return chunk;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static Partition parsePartition(final XMLStreamReader reader) throws XMLStreamException {
@@ -485,18 +485,18 @@ public final class JobParser {
                             partition.setReducer(parseRefArtifact(reader, XmlElement.REDUCER));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.PARTITION) {
                         return partition;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static PartitionPlan parsePartitionPlan(final XMLStreamReader reader) throws XMLStreamException {
@@ -515,18 +515,18 @@ public final class JobParser {
                     if (element == XmlElement.PROPERTIES) {
                         partitionPlan.addProperties(parseProperties(reader));
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == XmlElement.PLAN) {
                         return partitionPlan;
                     } else {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static Transition.Next parseNext(final XMLStreamReader reader) throws XMLStreamException {
@@ -567,9 +567,9 @@ public final class JobParser {
             if (eventType == END_ELEMENT && element == transitionElement) {
                 return;
             }
-            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
     private static ExceptionClassFilter parseExceptionClassFilter(final XMLStreamReader reader, final XmlElement artifactElementType) throws XMLStreamException {
@@ -590,17 +590,17 @@ public final class JobParser {
                             filter.addExclude(getAttributeValue(reader, XmlAttribute.CLASS, true));
                             break;
                         default:
-                            throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                            throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
                     break;
                 case END_ELEMENT:
                     if (element == artifactElementType) {
                         return filter;
                     } else if (element != XmlElement.INCLUDE && element != XmlElement.EXCLUDE) {
-                        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
             }
         }
-        throw BatchLogger.LOGGER.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 }

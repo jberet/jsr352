@@ -25,7 +25,7 @@ import org.jberet.runtime.FlowExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.SplitContextImpl;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitContextImpl> implements Runnable {
     private static final long SPLIT_FLOW_TIMEOUT_SECONDS = 300;

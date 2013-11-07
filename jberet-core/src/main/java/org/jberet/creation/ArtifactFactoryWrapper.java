@@ -14,9 +14,9 @@ package org.jberet.creation;
 
 import javax.annotation.PostConstruct;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.spi.ArtifactFactory;
-import org.jberet.util.BatchLogger;
 
 public final class ArtifactFactoryWrapper extends AbstractArtifactFactory {
     private final ArtifactFactory factory;
@@ -62,7 +62,7 @@ public final class ArtifactFactoryWrapper extends AbstractArtifactFactory {
         try {
             cls = classLoader.loadClass(className);
         } catch (ClassNotFoundException e) {
-            BatchLogger.LOGGER.failToCreateArtifact(e, ref);
+            throw BatchMessages.MESSAGES.failToCreateArtifact(e, ref);
         }
         return cls;
     }

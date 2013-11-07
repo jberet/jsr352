@@ -21,7 +21,7 @@ import org.jberet.job.model.JobElement;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
 
 public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowContextImpl> implements Runnable {
     private final Flow flow;

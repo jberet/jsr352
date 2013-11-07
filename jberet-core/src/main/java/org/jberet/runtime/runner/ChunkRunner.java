@@ -43,7 +43,8 @@ import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
 
 /**
  * This runner class is responsible for running a chunk-type step (not just a chunk range of a step).  In a partitioned
@@ -122,7 +123,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             if (attrVal != null) {
                 itemCount = Integer.parseInt(attrVal);
                 if (itemCount < 1) {
-                    throw LOGGER.invalidItemCount(itemCount);
+                    throw MESSAGES.invalidItemCount(itemCount);
                 }
             }
             attrVal = chunk.getTimeLimit();
@@ -135,10 +136,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             if (alg != null) {
                 checkpointAlgorithm = jobContext.createArtifact(alg.getRef(), null, alg.getProperties(), batchContext);
             } else {
-                throw LOGGER.checkpointAlgorithmMissing(stepRunner.step.getId());
+                throw MESSAGES.checkpointAlgorithmMissing(stepRunner.step.getId());
             }
         } else {
-            throw LOGGER.invalidCheckpointPolicy(attrVal);
+            throw MESSAGES.invalidCheckpointPolicy(attrVal);
         }
 
         attrVal = chunk.getSkipLimit();

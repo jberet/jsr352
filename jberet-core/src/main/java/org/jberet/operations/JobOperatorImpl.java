@@ -50,7 +50,7 @@ import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
 
 public class JobOperatorImpl implements JobOperator {
     final JobRepository repository;
@@ -81,12 +81,12 @@ public class JobOperatorImpl implements JobOperator {
             JobExecutionNotRunningException, JobSecurityException {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) repository.getJobExecution(executionId);
         if (jobExecution == null) {
-            throw LOGGER.noSuchJobExecution(executionId);
+            throw MESSAGES.noSuchJobExecution(executionId);
         }
         final BatchStatus s = jobExecution.getBatchStatus();
         if (s == BatchStatus.STOPPED || s == BatchStatus.FAILED || s == BatchStatus.ABANDONED ||
                 s == BatchStatus.COMPLETED) {
-            throw LOGGER.jobExecutionNotRunningException(executionId, s);
+            throw MESSAGES.jobExecutionNotRunningException(executionId, s);
         } else if (s == BatchStatus.STOPPING) {
             //in process of stopping, do nothing
         } else {
@@ -108,7 +108,7 @@ public class JobOperatorImpl implements JobOperator {
     public int getJobInstanceCount(final String jobName) throws NoSuchJobException, JobSecurityException {
         final int count = repository.getJobInstanceCount(jobName);
         if (count == 0) {
-            throw LOGGER.noSuchJobException(jobName);
+            throw MESSAGES.noSuchJobException(jobName);
         }
         return count;
     }
@@ -130,7 +130,7 @@ public class JobOperatorImpl implements JobOperator {
             pos++;
         }
         if (pos == 0) {
-            throw LOGGER.noSuchJobException(jobName);
+            throw MESSAGES.noSuchJobException(jobName);
         }
         return result;
     }
@@ -149,7 +149,7 @@ public class JobOperatorImpl implements JobOperator {
             }
         }
         if (!jobExists) {
-            throw LOGGER.noSuchJobException(jobName);
+            throw MESSAGES.noSuchJobException(jobName);
         }
         return result;
     }
@@ -165,17 +165,17 @@ public class JobOperatorImpl implements JobOperator {
         long newExecutionId = 0;
         final JobExecutionImpl originalToRestart = (JobExecutionImpl) getJobExecution(executionId);
         if (originalToRestart == null) {
-            throw LOGGER.noSuchJobExecution(executionId);
+            throw MESSAGES.noSuchJobExecution(executionId);
         }
         final BatchStatus previousStatus = originalToRestart.getBatchStatus();
         if (previousStatus == BatchStatus.COMPLETED) {
-            throw LOGGER.jobExecutionAlreadyCompleteException(executionId);
+            throw MESSAGES.jobExecutionAlreadyCompleteException(executionId);
         }
         if (previousStatus == BatchStatus.ABANDONED ||
                 previousStatus == BatchStatus.STARTED ||
                 previousStatus == BatchStatus.STARTING ||
                 previousStatus == BatchStatus.STOPPING) {
-            throw LOGGER.jobRestartException(executionId, previousStatus);
+            throw MESSAGES.jobRestartException(executionId, previousStatus);
         }
         if (previousStatus == BatchStatus.FAILED ||
                 previousStatus == BatchStatus.STOPPED) {
@@ -183,7 +183,7 @@ public class JobOperatorImpl implements JobOperator {
             final List<JobExecution> executions = jobInstance.getJobExecutions();
             final JobExecution mostRecentExecution = executions.get(executions.size() - 1);
             if (executionId != mostRecentExecution.getExecutionId()) {
-                throw LOGGER.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
+                throw MESSAGES.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
             }
             try {
                 newExecutionId = startJobExecution(jobInstance, restartParameters, originalToRestart);
@@ -199,7 +199,7 @@ public class JobOperatorImpl implements JobOperator {
             NoSuchJobExecutionException, JobExecutionIsRunningException, JobSecurityException {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(executionId);
         if (jobExecution == null) {
-            throw LOGGER.noSuchJobExecution(executionId);
+            throw MESSAGES.noSuchJobExecution(executionId);
         }
         final BatchStatus batchStatus = jobExecution.getBatchStatus();
         if (batchStatus == BatchStatus.COMPLETED ||
@@ -208,7 +208,7 @@ public class JobOperatorImpl implements JobOperator {
                 batchStatus == BatchStatus.ABANDONED) {
             jobExecution.setBatchStatus(BatchStatus.ABANDONED);
         } else {
-            throw LOGGER.jobExecutionIsRunningException(executionId);
+            throw MESSAGES.jobExecutionIsRunningException(executionId);
         }
     }
 

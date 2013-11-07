@@ -54,7 +54,7 @@ import java.util.zip.ZipFile;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import static org.jberet.util.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
 
 /**
  * Converts a property string value to the target field type.  Supported field types for batch property injection:
@@ -198,7 +198,7 @@ public final class ValueConverter {
             } else if (t == Vector.class) {
                 l = new Vector();
             } else {
-                throw LOGGER.unsupportedFieldType(v, f, t);
+                throw MESSAGES.unsupportedFieldType(v, f, t);
             }
             return parseList(v, l, elementValueType, f, classLoader);
         }
@@ -217,7 +217,7 @@ public final class ValueConverter {
             } else if (t == WeakHashMap.class) {
                 m = new WeakHashMap();
             } else {
-                throw LOGGER.unsupportedFieldType(v, f, t);
+                throw MESSAGES.unsupportedFieldType(v, f, t);
             }
             return parseMap(v, m, elementValueType, f, classLoader);
         }
@@ -230,13 +230,13 @@ public final class ValueConverter {
             } else if (t == LinkedHashSet.class) {
                 set = new LinkedHashSet();
             } else {
-                throw LOGGER.unsupportedFieldType(v, f, t);
+                throw MESSAGES.unsupportedFieldType(v, f, t);
             }
             set.addAll(parseList(v, new ArrayList(), elementValueType, f, classLoader));
             return set;
         }
 
-        throw LOGGER.unsupportedFieldType(v, f, t);
+        throw MESSAGES.unsupportedFieldType(v, f, t);
     }
 
     private static Object convertSingleValue(final String rawValue, final Class<?> t, final Field f, final ClassLoader classLoader) {
@@ -272,35 +272,35 @@ public final class ValueConverter {
             try {
                 return new ZipFile(v);
             } catch (IOException e) {
-                throw LOGGER.failToInjectProperty(e, v, f);
+                throw MESSAGES.failToInjectProperty(e, v, f);
             }
         }
         if (t == JarFile.class) {
             try {
                 return new JarFile(v);
             } catch (IOException e) {
-                throw LOGGER.failToInjectProperty(e, v, f);
+                throw MESSAGES.failToInjectProperty(e, v, f);
             }
         }
         if (t == URL.class) {
             try {
                 return new URI(v).toURL();
             } catch (Exception e) {
-                throw LOGGER.failToInjectProperty(e, v, f);
+                throw MESSAGES.failToInjectProperty(e, v, f);
             }
         }
         if (t == URI.class) {
             try {
                 return new URI(v);
             } catch (Exception e) {
-                throw LOGGER.failToInjectProperty(e, v, f);
+                throw MESSAGES.failToInjectProperty(e, v, f);
             }
         }
         if (t == InetAddress.class || t == Inet4Address.class || t == Inet6Address.class) {
             try {
                 return InetAddress.getByName(v);
             } catch (Exception e) {
-                throw LOGGER.failToInjectProperty(e, v, f);
+                throw MESSAGES.failToInjectProperty(e, v, f);
             }
         }
         if (t == BigDecimal.class) {
@@ -316,7 +316,7 @@ public final class ValueConverter {
             try {
                 return classLoader.loadClass(v);
             } catch (ClassNotFoundException e) {
-                throw LOGGER.failToInjectProperty(e, v, f);
+                throw MESSAGES.failToInjectProperty(e, v, f);
             }
         }
         if (t.isEnum()) {
@@ -338,7 +338,7 @@ public final class ValueConverter {
             try {
                 return new ObjectName(v);
             } catch (MalformedObjectNameException e) {
-                throw LOGGER.failToInjectProperty(e, v, f);
+                throw MESSAGES.failToInjectProperty(e, v, f);
             }
         }
         return null;
@@ -406,7 +406,7 @@ public final class ValueConverter {
             }
             return result;
         }
-        throw LOGGER.failToInjectProperty(null, v, f);
+        throw MESSAGES.failToInjectProperty(null, v, f);
     }
 
     private static List parseList(final String v, final List l, final Class<?> elementValueType, final Field f, final ClassLoader classLoader) {
@@ -436,7 +436,7 @@ public final class ValueConverter {
                 key = pair;
                 value = null;
             } else {
-                throw LOGGER.failToInjectProperty(null, v, f);
+                throw MESSAGES.failToInjectProperty(null, v, f);
             }
             if (elementValueType == String.class) {
                 map.put(key, value);
@@ -496,7 +496,7 @@ public final class ValueConverter {
                 //ignore
             }
         }
-        throw LOGGER.failToInjectProperty(null, v, f);
+        throw MESSAGES.failToInjectProperty(null, v, f);
     }
 
 }
