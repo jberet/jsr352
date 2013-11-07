@@ -23,8 +23,7 @@ import javax.batch.operations.JobStartException;
 
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.JobParser;
-
-import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
 
 public class ArchiveXmlLoader {
     public final static String ARCHIVE_JOB_XML_DIR = "META-INF/batch-jobs/";
@@ -52,7 +51,7 @@ public class ArchiveXmlLoader {
         try {
             batchArtifacts = JobParser.parseBatchArtifacts(is);
         } catch (Exception e) {
-            throw LOGGER.failToParseBatchXml(e, ARCHIVE_BATCH_XML);
+            throw MESSAGES.failToParseBatchXml(e, ARCHIVE_BATCH_XML);
         } finally {
             try {
                 is.close();
@@ -77,13 +76,13 @@ public class ArchiveXmlLoader {
         try {
             is = getJobXml(jobName, classLoader);
         } catch (IOException e) {
-            throw LOGGER.failToGetJobXml(e, jobName);
+            throw MESSAGES.failToGetJobXml(e, jobName);
         }
 
         try {
             jobOrStep = JobParser.parseJob(is);
         } catch (Exception e) {
-            throw LOGGER.failToParseJobXml(e, jobName);
+            throw MESSAGES.failToParseJobXml(e, jobName);
         } finally {
             if (is != null) {
                 try {

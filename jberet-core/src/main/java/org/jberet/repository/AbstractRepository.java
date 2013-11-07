@@ -28,6 +28,7 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Job;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
@@ -88,7 +89,7 @@ public abstract class AbstractRepository implements JobRepository {
         insertJobInstance(jobInstance);
         final JobInstance jobInstanceExisting = jobInstances.put(jobInstance.getInstanceId(), jobInstance);
         if (jobInstanceExisting != null) {
-            throw BatchLogger.LOGGER.jobInstanceAlreadyExists(jobInstance.getInstanceId());
+            throw BatchMessages.MESSAGES.jobInstanceAlreadyExists(jobInstance.getInstanceId());
         }
         return jobInstance;
     }
@@ -135,7 +136,7 @@ public abstract class AbstractRepository implements JobRepository {
         insertJobExecution(jobExecution);
         final JobExecution jobExecutionExisting = jobExecutions.putIfAbsent(jobExecution.getExecutionId(), jobExecution);
         if (jobExecutionExisting != null) {
-            throw BatchLogger.LOGGER.jobExecutionAlreadyExists(jobExecutionExisting.getExecutionId());
+            throw BatchMessages.MESSAGES.jobExecutionAlreadyExists(jobExecutionExisting.getExecutionId());
         }
         jobInstance.addJobExecution(jobExecution);
         return jobExecution;

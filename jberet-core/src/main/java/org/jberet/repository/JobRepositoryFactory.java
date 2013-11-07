@@ -14,8 +14,8 @@ package org.jberet.repository;
 
 import java.util.Properties;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet._private.BatchLogger;
 
 public final class JobRepositoryFactory {
     public static final String JOB_REPOSITORY_TYPE_KEY = "job-repository-type";
@@ -36,7 +36,7 @@ public final class JobRepositoryFactory {
         } else if (repositoryType.equals(REPOSITORY_TYPE_JDBC)) {
             return JdbcRepository.getInstance(batchEnvironment);
         } else {
-            throw BatchLogger.LOGGER.unrecognizedJobRepositoryType(repositoryType);
+            throw BatchMessages.MESSAGES.unrecognizedJobRepositoryType(repositoryType);
         }
     }
 }

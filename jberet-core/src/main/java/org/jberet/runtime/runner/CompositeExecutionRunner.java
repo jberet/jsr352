@@ -18,6 +18,8 @@ import javax.batch.api.Decider;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 
+import org.jberet._private.BatchMessages;
+import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Decision;
 import org.jberet.job.model.Flow;
 import org.jberet.job.model.JobElement;
@@ -27,7 +29,6 @@ import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
 import org.jberet.runtime.context.SplitContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
-import org.jberet._private.BatchLogger;
 
 /**
  * A runner for job elements that can contain other job elements.  Examples of such composite job elements are
@@ -146,7 +147,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             }
         }
 
-        throw BatchLogger.LOGGER.unrecognizableJobElement(jobElementName, id);
+        throw BatchMessages.MESSAGES.unrecognizableJobElement(jobElementName, id);
     }
 
     protected void runStep(final Step step) {

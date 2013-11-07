@@ -29,6 +29,7 @@ import org.jberet.job.model.Transition.Next;
 import org.jberet.job.model.Transition.Stop;
 
 import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
 
 public final class PropertyResolver {
     protected static final String jobParametersToken = "jobParameters";
@@ -542,7 +543,7 @@ public final class PropertyResolver {
         int endCurrentPass = endExpression;
         final String expression = sb.substring(startExpression, endExpression + 1);
         if (referringExpressions != null && referringExpressions.contains(expression)) {
-            throw LOGGER.cycleInPropertyReference(referringExpressions);
+            throw MESSAGES.cycleInPropertyReference(referringExpressions);
         }
 
         if (!resolvePartitionPlanProperties && propCategory.equals(partitionPlanToken)) {
