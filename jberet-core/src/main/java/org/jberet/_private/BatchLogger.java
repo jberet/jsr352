@@ -78,11 +78,11 @@ public interface BatchLogger extends BasicLogger {
     void failToDestroyArtifact(@Cause Throwable cause, Object artifact);
 
     @Message(id = 14, value = "Tables created for batch job repository with DDL file %s")
-    @LogMessage(level = Logger.Level.INFO)
+    @LogMessage(level = Logger.Level.DEBUG)
     void tableCreated(String ddlFile);
 
     @Message(id = 15, value = "Tables created for batch job repository with DDL content:%n %s")
-    @LogMessage(level = Logger.Level.INFO)
+    @LogMessage(level = Logger.Level.DEBUG)
     void tableCreated2(String ddlContent);
 
     @Message(id = 16, value = "Failed to close %s: %s")
@@ -90,7 +90,7 @@ public interface BatchLogger extends BasicLogger {
     void failToClose(@Cause Throwable cause, Class<?> resourceType, Object obj);
 
     @Message(id = 17, value = "Persisted %s with id %s")
-    @LogMessage(level = Logger.Level.INFO)
+    @LogMessage(level = Logger.Level.DEBUG)
     void persisted(Object obj, long id);
 
     @Message(id = 18, value = "Could not find the original step execution to restart.  Current step execution id: %s, step name: %s")
