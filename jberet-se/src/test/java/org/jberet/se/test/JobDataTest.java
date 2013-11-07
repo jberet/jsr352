@@ -35,24 +35,26 @@ import org.junit.Test;
  */
 public class JobDataTest {
     private static final String jobName = "batchlet1";
-    private static final String stepName = "step1";
+    private static final String stepName = "step2";
+    private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
     @Test
     public void testJobData() throws Exception {
-        final JobOperator jobOperator = BatchRuntime.getJobOperator();
         //get the latest JobInstance for job named by jobName
         final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, 0, 1);
         Assert.assertEquals(1, jobInstances.size());
 
         final JobInstance jobInstance = jobInstances.get(0);
-        System.out.printf("JobInstance id: %s%n", jobInstance.getInstanceId());
         Assert.assertEquals(jobName, jobInstance.getJobName());
         Assert.assertNotEquals(0, jobInstance.getInstanceId());
 
         final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
-        Assert.assertEquals(1, jobExecutions.size());
+        //the job was executed 2 times during Batchlet1Test for the latest job instance
+        Assert.assertEquals(2, jobExecutions.size());
 
-        final JobExecution jobExecution = jobExecutions.get(0);
+        final JobExecution jobExecution = jobExecutions.get(1);
+        System.out.printf("JobInstance id: %s%n", jobInstance.getInstanceId());
+
         final BatchStatus batchStatus = jobExecution.getBatchStatus();
         final String exitStatus = jobExecution.getExitStatus();
         final Date createTime = jobExecution.getCreateTime();
@@ -62,8 +64,8 @@ public class JobDataTest {
         final Properties jobParameters = jobExecution.getJobParameters();
         Assert.assertEquals(jobName, jobExecution.getJobName());
         Assert.assertNotEquals(0, jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.COMPLETED, batchStatus);
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), exitStatus);
+        Assert.assertEquals(BatchStatus.STOPPED, batchStatus);
+        Assert.assertEquals(Batchlet1.ACTION_STOP, exitStatus);
         Assert.assertNotNull(createTime);
         Assert.assertNotNull(lastUpdatedTime);
         Assert.assertNotNull(endTime);
@@ -86,7 +88,7 @@ public class JobDataTest {
         Assert.assertNotNull(stepExecution.getStepExecutionId());
         Assert.assertEquals(stepName, stepName1);
         Assert.assertEquals(BatchStatus.COMPLETED, batchStatus1);
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), exitStatus1);
+        Assert.assertEquals(Batchlet1.ACTION_STOP, exitStatus1);
         Assert.assertNotNull(startTime1);
         Assert.assertNotNull(endTime1);
         //Assert.assertEquals(new Integer(1), persistentUserData);
@@ -96,4 +98,5 @@ public class JobDataTest {
                 stepExecution.getStepExecutionId(), stepName1, batchStatus1, exitStatus1, startTime1, endTime1, persistentUserData,
                 Arrays.toString(metrics));
     }
+
 }

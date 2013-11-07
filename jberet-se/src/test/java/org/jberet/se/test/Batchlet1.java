@@ -22,28 +22,46 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.junit.Assert;
+
 @Named
 public class Batchlet1 extends AbstractBatchlet implements Batchlet {
-    @Inject @BatchProperty(name = "Batchlet1")
+    static final String ACTION_STOP = "stop";
+    static final String ACTION_FAIL = "fail";
+    static final String ACTION_END = "end";
+    static final String ACTION_OTHER = "other";
+
+    @Inject
+    @BatchProperty(name = "Batchlet1")
     private String prop1;
 
-    @Inject @BatchProperty  //default name
+    @Inject
+    @BatchProperty  //default name
     private String defaultName;
 
-    @Inject @BatchProperty(name = "no-such-property")
+    @Inject
+    @BatchProperty(name = "no-such-property")
     private String noSuchProperty;
 
-    @Inject @BatchProperty(name = "no-such-property")
+    @Inject
+    @BatchProperty(name = "no-such-property")
     private String defaultValue = "defaultValue";
 
-    @Inject @BatchProperty(name = "foo")
+    @Inject
+    @BatchProperty(name = "foo")
     private String foo;
 
-    @Inject @BatchProperty(name = "job-param")
+    @Inject
+    @BatchProperty(name = "job-param")
     String jobParam;
 
-    @Inject @BatchProperty(name="int.prop")
+    @Inject
+    @BatchProperty(name = "int.prop")
     private int intProp;
+
+    @Inject
+    @BatchProperty
+    private String action;
 
     @Inject
     private JobContext jobContext;
@@ -53,31 +71,30 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
 
     @Override
     public String process() throws Exception {
-        System.out.printf("Injected batchlet property: %s => %s%n", "Batchlet1", prop1);
-        System.out.printf("Injected batch property with default name: %s => %s%n", "defaultName", defaultName);
-        System.out.printf("Undeclared batch property: %s => %s%n", "no-such-property", noSuchProperty);
-        System.out.printf("Undeclared batch property: %s => %s%n", "no-such-property", defaultValue);
-        System.out.printf("Injected job param %s => %s%n", "job-param", jobParam);
+        final String stepName = stepContext.getStepName();
+        System.out.printf("For %s action in %s: %s%n", stepName, this, action);
 
-        System.out.printf("Injected JobContext: %s%n", jobContext);
-        System.out.printf("Injected StepContext: %s%n", stepContext);
-        System.out.printf("Job properties from injected JobContext: %s%n", jobContext.getProperties());
-        System.out.printf("Step properties from injected StepContext: %s%n", stepContext.getProperties());
+        //batchlet1 in step1 does not have "action" property
+        if (stepName.equals("step1")) {
+            Assert.assertEquals("Batchlet1", prop1);
+            Assert.assertEquals("defaultName", defaultName);
+            Assert.assertEquals(null, noSuchProperty);
+            //Assert.assertEquals("defaultValue", defaultValue);
+            Assert.assertEquals("jobParamDefault", jobParam);
+            Assert.assertEquals("foo", foo);
+            Assert.assertEquals(1, intProp);
+            Assert.assertEquals(4, jobContext.getProperties().size());
+            Assert.assertEquals(4, stepContext.getProperties().size());
 
-        final String fooExpected = "foo";
-        if (fooExpected.equals(foo)) {
-            System.out.printf("Injected batchlet property foo: %s%n", foo);
-        } else {
-            throw new BatchRuntimeException(String.format("Expecting batchlet property foo to be %s, but got %s", fooExpected, foo));
+            //System.out.printf("Job properties from injected JobContext: %s%n", jobContext.getProperties());
+            //System.out.printf("Step properties from injected StepContext: %s%n", stepContext.getProperties());
+        } else if (stepName.equals("step2")) {
+            Assert.assertNotNull(action);
         }
-        if (intProp == 1) {
-            System.out.printf("Injected int.prop: %s%n", intProp);
-        } else {
-            throw new BatchRuntimeException(String.format("Expecting int.prop %s, but got %s", 1, intProp));
-        }
-        //stepContext.setPersistentUserData(new Integer(1));  // integer works
+
+        //stepContext.setPersistentUserData(new Integer(1));  // integer works fine.
         stepContext.setPersistentUserData("Persistent User Data");
-        return BatchStatus.COMPLETED.name();
+        return action;
     }
 
     @Override

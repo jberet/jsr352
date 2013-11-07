@@ -19,7 +19,7 @@
         <property name="job-prop" value="job-prop"></property>
         <property name="foo" value="foo"/>
     </properties>
-    <step id="step1">
+    <step id="step1" next="step2" start-limit="1">
         <properties>
             <property name="step-prop" value="step-prop"></property>
             <property name="step-prop-2" value="#{jobProperties['step-prop']}"></property>
@@ -39,5 +39,15 @@
             </properties>
         </batchlet>
     </step>
-
+    <step id="step2" start-limit="3" allow-start-if-complete="true">
+        <batchlet ref="batchlet1">
+            <properties>
+                <property name="action" value="#{jobParameters['action']}"/>
+            </properties>
+        </batchlet>
+        <!-- transition elements reset the exit status for the JOB -->
+        <fail on="fail" exit-status="fail"/>
+        <stop on="stop" exit-status="stop" restart="step2"/>
+        <end  on="end" exit-status="end"/>
+    </step>
 </job>
