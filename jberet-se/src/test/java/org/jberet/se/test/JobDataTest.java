@@ -28,6 +28,7 @@ import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -36,18 +37,17 @@ import org.junit.Test;
  * separate JVM to avoid having any in-memory stats.
  */
 public class JobDataTest {
-    private static final String jobName = "batchlet1";
-    private static final String stepName = "step2";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
     @Test
     public void testJobData() throws Exception {
+        final String stepName = "step2";
         //get the latest JobInstance for job named by jobName
-        final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, 0, 1);
+        final List<JobInstance> jobInstances = jobOperator.getJobInstances(Batchlet1Test.jobName, 0, 1);
         Assert.assertEquals(1, jobInstances.size());
 
         final JobInstance jobInstance = jobInstances.get(0);
-        Assert.assertEquals(jobName, jobInstance.getJobName());
+        Assert.assertEquals(Batchlet1Test.jobName, jobInstance.getJobName());
         Assert.assertNotEquals(0, jobInstance.getInstanceId());
 
         final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
@@ -64,7 +64,7 @@ public class JobDataTest {
         final Date lastUpdatedTime = jobExecution.getLastUpdatedTime();
         final Date startTime = jobExecution.getStartTime();
         final Properties jobParameters = jobExecution.getJobParameters();
-        Assert.assertEquals(jobName, jobExecution.getJobName());
+        Assert.assertEquals(Batchlet1Test.jobName, jobExecution.getJobName());
         Assert.assertNotEquals(0, jobExecution.getExecutionId());
         Assert.assertEquals(BatchStatus.STOPPED, batchStatus);
         Assert.assertEquals(Batchlet1.ACTION_STOP, exitStatus);
@@ -103,8 +103,38 @@ public class JobDataTest {
         restartJobMatchOther(jobExecution.getExecutionId());
     }
 
+    @Ignore
+    @Test
+    public void testRestartPositionFromBatchlet2Test() throws Exception {
+        final List<JobInstance> jobInstances = jobOperator.getJobInstances(Batchlet2Test.jobName, 0, 1);
+        final JobInstance jobInstance = jobInstances.get(0);
+        final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
+        final JobExecution originalJobExecution = jobExecutions.get(0);
+        final long previousJobExecutionId = originalJobExecution.getExecutionId();
+
+        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
+        System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
+        final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+
+        final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+
+        Assert.assertEquals(2, stepExecutions.size());
+        Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(0).getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED.name(), stepExecutions.get(0).getExitStatus());
+        Assert.assertEquals("stepC", stepExecutions.get(0).getStepName());
+
+        Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED.name(), stepExecutions.get(1).getExitStatus());
+        Assert.assertEquals("stepE", stepExecutions.get(1).getStepName());
+    }
+
     private long restartJobMatchOther(final long previousJobExecutionId) throws Exception {
-        //restart the job and run to complete, not matching any elements in step2.
+        //restart the job and run to complete, not matching any transition elements in step2.
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);

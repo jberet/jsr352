@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="org.jberet.se.test.batchlet2" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <!--
+     The initial job start will complete stepA, stepB, stepC, stepD, and stop at stepE.
+
+     The restart will begin with stepB, as specified in stepE's stop element.  So stepA should not appear in restart,
+     even though stepA allows start if complete.
+
+     stepB does not allow start if complete, so restart will skip stepB.
+
+     stepC allows start if complete, so the first step during restart is stepC.
+
+     stepD is skipped during restart since it does not allow start if complete.
+
+     The original JobExecution STOPPED at stepE, but stepE itself COMPLETED. Since stepE allow-start-if-complete is true,
+     so stepE is re-run during restart.
+
+     So the restart JobExecution contains 2 StepExecutions (stepC & stepE), and the restart JobExecution COMPLETED.
+     -->
+    <step id="stepA" allow-start-if-complete="true" next="stepB">
+        <batchlet ref="batchlet1"/>
+    </step>
+    <step id="stepB" allow-start-if-complete="false" next="stepC">
+        <batchlet ref="batchlet1"/>
+    </step>
+    <step id="stepC" allow-start-if-complete="true" next="stepD">
+        <batchlet ref="batchlet1"/>
+    </step>
+    <step id="stepD" allow-start-if-complete="false" next="stepE">
+        <batchlet ref="batchlet1"/>
+    </step>
+    <step id="stepE" allow-start-if-complete="true">
+        <batchlet ref="batchlet1">
+            <properties>
+                <property name="action" value="#{jobParameters['action']}"/>
+            </properties>
+        </batchlet>
+        <stop on="stop" exit-status="stop" restart="stepB"/>
+    </step>
+</job>

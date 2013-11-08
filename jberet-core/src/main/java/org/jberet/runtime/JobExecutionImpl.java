@@ -25,9 +25,9 @@ import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.StepExecution;
 
+import org.jberet._private.BatchLogger;
 import org.jberet.creation.ArtifactCreationContext;
 import org.jberet.job.model.Job;
-import org.jberet._private.BatchLogger;
 import org.jberet.util.BatchUtil;
 
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution, Cloneable {

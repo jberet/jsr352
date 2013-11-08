@@ -16,10 +16,10 @@ import java.util.List;
 import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
 import org.jberet.runtime.context.JobContextImpl;
-import org.jberet._private.BatchLogger;
 
 public final class JobExecutionRunner extends CompositeExecutionRunner<JobContextImpl> implements Runnable {
     private Job job;

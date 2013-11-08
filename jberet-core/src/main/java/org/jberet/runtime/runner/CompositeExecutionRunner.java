@@ -18,8 +18,8 @@ import javax.batch.api.Decider;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 
-import org.jberet._private.BatchMessages;
 import org.jberet._private.BatchLogger;
+import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Decision;
 import org.jberet.job.model.Flow;
 import org.jberet.job.model.JobElement;

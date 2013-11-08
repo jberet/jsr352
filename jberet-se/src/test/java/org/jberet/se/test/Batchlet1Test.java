@@ -23,7 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class Batchlet1Test {
-    private static final String jobXmlName = "batchlet1.xml";
+    static final String jobName = "org.jberet.se.test.batchlet1";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
     @Test
@@ -45,7 +45,7 @@ public class Batchlet1Test {
         final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         //start the job and complete step1 and step2, not matching any transition element in step2
         System.out.printf("Start with params %s%n", params);
-        final long jobExecutionId = jobOperator.start(jobXmlName, params);
+        final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
@@ -64,7 +64,7 @@ public class Batchlet1Test {
         //start the job and complete step1 and step2, matching <end> element in step2
         final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_END);
         System.out.printf("Start with params %s%n", params);
-        final long jobExecutionId = jobOperator.start(jobXmlName, params);
+        final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
@@ -83,7 +83,7 @@ public class Batchlet1Test {
         //start the job and fail at the end of step2, matching <fail> element in step2
         final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_FAIL);
         System.out.printf("Start with params %s%n", params);
-        final long jobExecutionId = jobOperator.start(jobXmlName, params);
+        final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());

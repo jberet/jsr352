@@ -38,6 +38,7 @@ import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.BatchStatus;
 import javax.transaction.UserTransaction;
 
+import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.Partition;
 import org.jberet.job.model.PartitionPlan;
@@ -48,7 +49,6 @@ import org.jberet.job.model.Step;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.StepContextImpl;
-import org.jberet._private.BatchLogger;
 import org.jberet.util.BatchUtil;
 
 import static org.jberet._private.BatchLogger.LOGGER;
