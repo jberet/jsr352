@@ -51,7 +51,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     /**
      * Which job-level step, flow, decision or split to restart this job execution, if it were to be restarted.
      */
-    String restartPoint;
+    private String restartPosition;
 
     private CountDownLatch jobTerminationLatch = new CountDownLatch(1);
     private CountDownLatch jobStopLatch = new CountDownLatch(1);
@@ -72,8 +72,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
                             final Timestamp endTime,
                             final Timestamp lastUpdatedTime,
                             final String batchStatus,
-                            final String exitStatus
-                            ) {
+                            final String exitStatus,
+                            final String restartPosition) {
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
         this.id = id;
@@ -92,6 +92,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         }
         this.batchStatus = BatchStatus.valueOf(batchStatus);
         this.exitStatus = exitStatus;
+        this.restartPosition = restartPosition;
     }
 
     public void setId(final long id) {
@@ -175,12 +176,12 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         lastUpdatedTime = System.currentTimeMillis();
     }
 
-    public void setRestartPoint(final String restartPoint) {
-        this.restartPoint = restartPoint;
+    public void setRestartPosition(final String restartPosition) {
+        this.restartPosition = restartPosition;
     }
 
-    public String getRestartPoint() {
-        return restartPoint;
+    public String getRestartPosition() {
+        return restartPosition;
     }
 
     public boolean isStopRequested() {
@@ -191,7 +192,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         jobStopLatch.countDown();
     }
 
-    public void setEndTime(long endTime) {
+    public void setEndTime(final long endTime) {
         this.endTime = endTime;
         this.lastUpdatedTime = endTime;
     }

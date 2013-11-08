@@ -110,6 +110,7 @@ public final class JdbcRepository extends AbstractRepository {
         //private static final String BATCHSTATUS = "BATCHSTATUS";
         //private static final String EXITSTATUS = "EXITSTATUS";
         private static final String JOBPARAMETERS = "JOBPARAMETERS";
+        private static final String RESTARTPOSITION = "RESTARTPOSITION";
 
         //table name
         private static final String STEP_EXECUTION = "STEP_EXECUTION";
@@ -423,7 +424,7 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public void updateJobExecution(JobExecution jobExecution) {
+    public void updateJobExecution(final JobExecution jobExecution) {
         super.updateJobExecution(jobExecution);
         final String update = sqls.getProperty(UPDATE_JOB_EXECUTION);
         final Connection connection = getConnection();
@@ -434,7 +435,8 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setTimestamp(2, new Timestamp(jobExecution.getLastUpdatedTime().getTime()));
             preparedStatement.setString(3, jobExecution.getBatchStatus().name());
             preparedStatement.setString(4, jobExecution.getExitStatus());
-            preparedStatement.setLong(5, jobExecution.getExecutionId());
+            preparedStatement.setString(5, ((JobExecutionImpl) jobExecution).getRestartPosition());
+            preparedStatement.setLong(6, jobExecution.getExecutionId());  //where clause
             preparedStatement.executeUpdate();
         } catch (Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, update);
@@ -506,7 +508,8 @@ public final class JdbcRepository extends AbstractRepository {
                             new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId), i, jobParameters1,
                                     rs.getTimestamp(TableColumn.CREATETIME), rs.getTimestamp(TableColumn.STARTTIME),
                                     rs.getTimestamp(TableColumn.ENDTIME), rs.getTimestamp(TableColumn.LASTUPDATEDTIME),
-                                    rs.getString(TableColumn.BATCHSTATUS), rs.getString(TableColumn.EXITSTATUS));
+                                    rs.getString(TableColumn.BATCHSTATUS), rs.getString(TableColumn.EXITSTATUS),
+                                    rs.getString(TableColumn.RESTARTPOSITION));
 
                     jobExecutions.put(i, jobExecution1);
                 }

@@ -64,7 +64,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
 
         if (originalToRestart != null) {
             this.originalToRestart = originalToRestart;
-            this.jobExecution.setRestartPoint(originalToRestart.getRestartPoint());
+            this.jobExecution.setRestartPosition(originalToRestart.getRestartPosition());
         }
 
         final PropertyResolver resolver = new PropertyResolver();

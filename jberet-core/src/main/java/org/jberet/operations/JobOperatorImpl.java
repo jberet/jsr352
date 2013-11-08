@@ -15,7 +15,6 @@ package org.jberet.operations;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -115,7 +114,7 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public List<JobInstance> getJobInstances(final String jobName, final int start, final int count) throws NoSuchJobException, JobSecurityException {
-        final LinkedList<JobInstance> result = new LinkedList<JobInstance>();
+        final List<JobInstance> result = new ArrayList<JobInstance>();
         int pos = 0;
         final List<JobInstance> instances = repository.getJobInstances(jobName);
         for (int i = instances.size() - 1; i >= 0; i--) {

@@ -97,7 +97,7 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
                             exitStatus, stop.getExitStatus(), partOfDecision);
                     final String restartPoint = stop.getRestart();  //job-level step, flow or split to restart
                     if (restartPoint != null) {
-                        batchContext.getJobContext().getJobExecution().setRestartPoint(restartPoint);
+                        batchContext.getJobContext().getJobExecution().setRestartPosition(restartPoint);
                     }
                     return null;
                 }

@@ -52,7 +52,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
                 }
             }
 
-            runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPoint());
+            runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPosition());
 
             for (final JobListener l : batchContext.getJobListeners()) {
                 try {

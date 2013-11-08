@@ -28,7 +28,6 @@ import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -103,7 +102,6 @@ public class JobDataTest {
         restartJobMatchOther(jobExecution.getExecutionId());
     }
 
-    @Ignore
     @Test
     public void testRestartPositionFromBatchlet2Test() throws Exception {
         final List<JobInstance> jobInstances = jobOperator.getJobInstances(Batchlet2Test.jobName, 0, 1);
@@ -124,13 +122,13 @@ public class JobDataTest {
         Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
         Assert.assertEquals(2, stepExecutions.size());
+        Assert.assertEquals("stepC", stepExecutions.get(0).getStepName());
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(0).getBatchStatus());
         Assert.assertEquals(BatchStatus.COMPLETED.name(), stepExecutions.get(0).getExitStatus());
-        Assert.assertEquals("stepC", stepExecutions.get(0).getStepName());
 
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), stepExecutions.get(1).getExitStatus());
         Assert.assertEquals("stepE", stepExecutions.get(1).getStepName());
+        Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
+        Assert.assertEquals(Batchlet1.ACTION_OTHER, stepExecutions.get(1).getExitStatus());
     }
 
     private long restartJobMatchOther(final long previousJobExecutionId) throws Exception {

@@ -49,7 +49,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         if (restartPoint != null) {
             //clear the restart point passed over from original job execution.  This execution may have its own
             //restart point or null (start from head) for use by the next restart.
-            jobContext.getJobExecution().setRestartPoint(null);
+            jobContext.getJobExecution().setRestartPosition(null);
             for (final JobElement e : getJobElements()) {
                 if (e instanceof Step) {
                     final Step step = (Step) e;
