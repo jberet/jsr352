@@ -177,13 +177,22 @@ public class JobOperatorImpl implements JobOperator {
                 previousStatus == BatchStatus.STOPPING) {
             throw MESSAGES.jobRestartException(executionId, previousStatus);
         }
-        if (previousStatus == BatchStatus.FAILED ||
-                previousStatus == BatchStatus.STOPPED) {
+        if (previousStatus == BatchStatus.FAILED || previousStatus == BatchStatus.STOPPED) {
             final JobInstanceImpl jobInstance = (JobInstanceImpl) getJobInstance(executionId);
-            final List<JobExecution> executions = jobInstance.getJobExecutions();
+            final List<JobExecution> executions = getJobExecutions(jobInstance);
             final JobExecution mostRecentExecution = executions.get(executions.size() - 1);
             if (executionId != mostRecentExecution.getExecutionId()) {
                 throw MESSAGES.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
+            }
+
+            // the job may not have been loaded, e.g., when the restart is performed in a new JVM
+            final String jobName = originalToRestart.getJobName();
+            if (repository.getJob(jobName) == null) {
+                final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobName, Job.class, batchEnvironment.getClassLoader());
+                repository.addJob(jobDefined);
+            }
+            if (jobInstance.getUnsubstitutedJob() == null) {
+                jobInstance.setUnsubstitutedJob(repository.getJob(jobName));
             }
             try {
                 newExecutionId = startJobExecution(jobInstance, restartParameters, originalToRestart);

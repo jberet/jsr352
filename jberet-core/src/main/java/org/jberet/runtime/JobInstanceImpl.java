@@ -59,6 +59,14 @@ public final class JobInstanceImpl implements JobInstance {
         this.jobExecutions.add(jobExecution);
     }
 
+    public Job getUnsubstitutedJob() {
+        return unsubstitutedJob;
+    }
+
+    public void setUnsubstitutedJob(final Job unsubstitutedJob) {
+        this.unsubstitutedJob = unsubstitutedJob;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

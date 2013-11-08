@@ -30,21 +30,20 @@ public class Batchlet1Test {
     public void testBatchlet1() throws Exception {
         long jobExecutionId;
         jobExecutionId = startJobMatchEnd();
-        jobExecutionId = startJobMatchNone();
+        jobExecutionId = startJobMatchOther();
         jobExecutionId = startJobMatchFail();
         jobExecutionId = restartJobMatchStop(jobExecutionId);
     }
 
-    private Properties createParams(final String key, final String val) {
+    static Properties createParams(final String key, final String val) {
         final Properties params = new Properties();
         params.setProperty(key, val);
         return params;
     }
 
-    private long startJobMatchNone() throws Exception {
-        final Properties params = createParams("action", Batchlet1.ACTION_OTHER);
+    private long startJobMatchOther() throws Exception {
+        final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         //start the job and complete step1 and step2, not matching any transition element in step2
-        params.setProperty("action", Batchlet1.ACTION_OTHER);
         System.out.printf("Start with params %s%n", params);
         final long jobExecutionId = jobOperator.start(jobXmlName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
@@ -63,7 +62,7 @@ public class Batchlet1Test {
 
     private long startJobMatchEnd() throws Exception {
         //start the job and complete step1 and step2, matching <end> element in step2
-        final Properties params = createParams("action", Batchlet1.ACTION_END);
+        final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_END);
         System.out.printf("Start with params %s%n", params);
         final long jobExecutionId = jobOperator.start(jobXmlName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
@@ -82,8 +81,7 @@ public class Batchlet1Test {
 
     private long startJobMatchFail() throws Exception {
         //start the job and fail at the end of step2, matching <fail> element in step2
-        final Properties params = createParams("action", Batchlet1.ACTION_FAIL);
-        params.setProperty("action", Batchlet1.ACTION_FAIL);
+        final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_FAIL);
         System.out.printf("Start with params %s%n", params);
         final long jobExecutionId = jobOperator.start(jobXmlName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
@@ -107,7 +105,7 @@ public class Batchlet1Test {
     private long restartJobMatchStop(final long previousJobExecutionId) throws Exception {
         //restart the job and stop at the end of step2, matching <stop> element in step2.
         //next time this job execution is restarted, it should restart from restart-point step2
-        final Properties params = createParams("action", Batchlet1.ACTION_STOP);
+        final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_STOP);
         System.out.printf("Restart with params %s%n", params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);

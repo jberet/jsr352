@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
@@ -25,6 +26,7 @@ import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
+import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -94,9 +96,27 @@ public class JobDataTest {
         //Assert.assertEquals(new Integer(1), persistentUserData);
         Assert.assertEquals("Persistent User Data", persistentUserData);
         Assert.assertNotNull(metrics);
-        System.out.printf("StepExecution id: %s, stepName: %s, batchStatus: %s, exitStatus: %s, startTime: %s, endTime: %s, persistentUserData: %s, metrics: %s",
+        System.out.printf("StepExecution id: %s, stepName: %s, batchStatus: %s, exitStatus: %s, startTime: %s, endTime: %s, persistentUserData: %s, metrics: %s%n",
                 stepExecution.getStepExecutionId(), stepName1, batchStatus1, exitStatus1, startTime1, endTime1, persistentUserData,
                 Arrays.toString(metrics));
+
+        restartJobMatchOther(jobExecution.getExecutionId());
     }
 
+    private long restartJobMatchOther(final long previousJobExecutionId) throws Exception {
+        //restart the job and run to complete, not matching any elements in step2.
+        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
+        System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
+        final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+
+        Assert.assertEquals(1, jobExecution.getStepExecutions().size());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
+        Assert.assertEquals(Batchlet1.ACTION_OTHER, jobExecution.getStepExecutions().get(0).getExitStatus());
+        return jobExecutionId;
+    }
 }

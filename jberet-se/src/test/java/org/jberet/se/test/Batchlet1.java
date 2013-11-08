@@ -26,6 +26,7 @@ import org.junit.Assert;
 
 @Named
 public class Batchlet1 extends AbstractBatchlet implements Batchlet {
+    static final String ACTION = "action";
     static final String ACTION_STOP = "stop";
     static final String ACTION_FAIL = "fail";
     static final String ACTION_END = "end";
