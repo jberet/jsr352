@@ -28,6 +28,7 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     static final String ACTION_STOP = "stop";
     static final String ACTION_FAIL = "fail";
     static final String ACTION_END = "end";
+    static final String ACTION_EXCEPTION = "exception";
     static final String ACTION_OTHER = "other";
 
     @Inject
@@ -93,6 +94,10 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
 
         //stepContext.setPersistentUserData(new Integer(1));  // integer works fine.
         stepContext.setPersistentUserData("Persistent User Data");
+        if (ACTION_EXCEPTION.equals(action)) {
+            stepContext.setExitStatus(ACTION_EXCEPTION);
+            throw new RuntimeException("Exception from " + this.getClass().getName() + " to fail the job execution.");
+        }
         return action;
     }
 

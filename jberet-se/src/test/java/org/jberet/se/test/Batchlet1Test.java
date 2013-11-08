@@ -24,6 +24,8 @@ import org.junit.Test;
 
 public class Batchlet1Test {
     static final String jobName = "org.jberet.se.test.batchlet1";
+    static final String jobName2 = "org.jberet.se.test.batchlet2";
+    static final String jobName3 = "org.jberet.se.test.batchlet3";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
     @Test
@@ -33,6 +35,59 @@ public class Batchlet1Test {
         jobExecutionId = startJobMatchOther();
         jobExecutionId = startJobMatchFail();
         jobExecutionId = restartJobMatchStop(jobExecutionId);
+    }
+
+    @Test
+    public void testStopWithRestartPoint() throws Exception {
+        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_STOP);
+        System.out.printf("Start with params %s%n", params);
+        final long jobExecutionId = jobOperator.start(jobName2, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
+        Assert.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());
+
+        Assert.assertEquals(5, jobExecution.getStepExecutions().size());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(2).getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(3).getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(4).getBatchStatus());
+    }
+
+    @Test
+    public void testStepFail3Times() throws Exception {
+        final JobExecutionImpl[] jobExecutions = new JobExecutionImpl[3];
+        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_EXCEPTION);
+        {
+            System.out.printf("Start with params %s%n", params);
+            long jobExecutionId = jobOperator.start(jobName3, params);
+            JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+            jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+            jobExecutions[0] = jobExecution;
+
+            System.out.printf("Restart with params %s%n", params);
+            jobExecutionId = jobOperator.restart(jobExecutionId, params);
+            jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+            jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+            jobExecutions[1] = jobExecution;
+
+            System.out.printf("Restart with params %s%n", params);
+            jobExecutionId = jobOperator.restart(jobExecutionId, params);
+            jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+            jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+            jobExecutions[2] = jobExecution;
+        }
+        for (final JobExecutionImpl e : jobExecutions) {
+            System.out.printf("JobExecution id: %s%n", e.getExecutionId());
+            Assert.assertEquals(BatchStatus.FAILED, e.getBatchStatus());
+            Assert.assertEquals(BatchStatus.FAILED.name(), e.getExitStatus());
+
+            Assert.assertEquals(1, e.getStepExecutions().size());
+            Assert.assertEquals(BatchStatus.FAILED, e.getStepExecutions().get(0).getBatchStatus());
+            Assert.assertEquals(Batchlet1.ACTION_EXCEPTION, e.getStepExecutions().get(0).getExitStatus());
+        }
     }
 
     static Properties createParams(final String key, final String val) {

@@ -104,12 +104,7 @@ public class JobDataTest {
 
     @Test
     public void testRestartPositionFromBatchlet2Test() throws Exception {
-        final List<JobInstance> jobInstances = jobOperator.getJobInstances(Batchlet2Test.jobName, 0, 1);
-        final JobInstance jobInstance = jobInstances.get(0);
-        final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
-        final JobExecution originalJobExecution = jobExecutions.get(0);
-        final long previousJobExecutionId = originalJobExecution.getExecutionId();
-
+        final long previousJobExecutionId = getOriginalJobExecutionId(Batchlet1Test.jobName2);
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
@@ -129,6 +124,30 @@ public class JobDataTest {
         Assert.assertEquals("stepE", stepExecutions.get(1).getStepName());
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
         Assert.assertEquals(Batchlet1.ACTION_OTHER, stepExecutions.get(1).getExitStatus());
+    }
+
+    @Test
+    public void testRestartWithLimit() throws Exception {
+        final long previousJobExecutionId = getOriginalJobExecutionId(Batchlet1Test.jobName3);
+        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
+        System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
+        final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+
+        final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
+        Assert.assertEquals(0, stepExecutions.size());
+    }
+
+    private long getOriginalJobExecutionId(final String jobName) {
+        final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, 0, 1);
+        final JobInstance jobInstance = jobInstances.get(0);
+        final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
+        final JobExecution originalJobExecution = jobExecutions.get(jobExecutions.size() - 1);
+        return originalJobExecution.getExecutionId();
     }
 
     private long restartJobMatchOther(final long previousJobExecutionId) throws Exception {
