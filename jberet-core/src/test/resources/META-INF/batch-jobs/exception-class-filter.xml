@@ -22,7 +22,7 @@
             <skippable-exception-classes>
             </skippable-exception-classes>
             <retryable-exception-classes>
-                <include class="java.lang.RuntimeException"></include>
+                <include class="java.lang.RuntimeException "></include>
             </retryable-exception-classes>
             <no-rollback-exception-classes>
                 <exclude class="java.lang.IllegalStateException"></exclude>
@@ -50,6 +50,35 @@
                 <include class="java.lang.RuntimeException"></include>
                 <include class="java.lang.Exception"></include>
                 <exclude class=""></exclude>
+            </no-rollback-exception-classes>
+        </chunk>
+    </step>
+    <step id="exception-class-filter-step3">
+        <chunk>
+            <reader ref="R1"></reader>
+            <processor ref="P1"></processor>
+            <writer ref="W1"></writer>
+
+            <skippable-exception-classes>
+                <include class="java.lang.Exception"></include>
+                <include class="java.io.EOFException"></include>
+                <exclude class="java.io.IOException"></exclude>
+            </skippable-exception-classes>
+
+            <!--
+    java.lang.Exception
+        java.lang.RuntimeException
+            javax.xml.ws.WebServiceException
+                javax.xml.ws.ProtocolException
+                    javax.xml.ws.http.HTTPException
+            -->
+            <retryable-exception-classes>
+                <include class="java.lang.Exception"></include>
+                <include class="javax.xml.ws.WebServiceException"></include>
+                <exclude class="java.lang.RuntimeException"></exclude>
+            </retryable-exception-classes>
+            <no-rollback-exception-classes>
+                <include class="java.io.IOException"/>
             </no-rollback-exception-classes>
         </chunk>
     </step>

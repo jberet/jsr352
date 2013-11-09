@@ -559,13 +559,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private boolean needSkip(final Exception e) {
         return skippableExceptionClasses != null &&
                 ((skipLimit >= 0 && skipCount < skipLimit) || skipLimit < 0) &&
-                skippableExceptionClasses.matches(e.getClass(), batchContext.getClassLoader());
+                skippableExceptionClasses.matches(e.getClass());
     }
 
     private boolean needRetry(final Exception e) {
         return retryableExceptionClasses != null &&
                 ((retryLimit >= 0 && retryCount < retryLimit) || retryLimit < 0) &&
-                retryableExceptionClasses.matches(e.getClass(), batchContext.getClassLoader());
+                retryableExceptionClasses.matches(e.getClass());
     }
 
     private void toSkipOrRetry(final Exception e, final ProcessingInfo processingInfo) {
@@ -598,8 +598,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private boolean needRollbackBeforeRetry(final Exception e) {
         //if no-rollback-exceptions not configured, by default need to rollback the current chunk
         //else if the current exception does not match the configured no-rollback-exceptions, need to rollback
-        return noRollbackExceptionClasses == null ||
-                !noRollbackExceptionClasses.matches(e.getClass(), batchContext.getClassLoader());
+        return noRollbackExceptionClasses == null || !noRollbackExceptionClasses.matches(e.getClass());
     }
 
     private void createChunkRelatedListeners() {

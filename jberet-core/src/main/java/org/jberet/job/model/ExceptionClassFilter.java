@@ -16,8 +16,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jberet._private.BatchLogger;
-
 public final class ExceptionClassFilter implements Serializable {
     private static final long serialVersionUID = -6174512038188933722L;
 
@@ -36,14 +34,20 @@ public final class ExceptionClassFilter implements Serializable {
     }
 
     void addInclude(final String includeClass) {
-        if (includeClass != null && includeClass.length() > 0) {
-            include.add(includeClass);
+        if (includeClass != null) {
+            final String trimmed = includeClass.trim();
+            if (!trimmed.isEmpty()) {
+                include.add(trimmed);
+            }
         }
     }
 
     void addExclude(final String excludeClass) {
-        if (excludeClass != null && excludeClass.length() > 0) {
-            exclude.add(excludeClass);
+        if (excludeClass != null) {
+            final String trimmed = excludeClass.trim();
+            if (!trimmed.isEmpty()) {
+                exclude.add(trimmed);
+            }
         }
     }
 
@@ -51,50 +55,63 @@ public final class ExceptionClassFilter implements Serializable {
      * Checks if an exception should be included or excluded.
      *
      * @param clazz the exception to check
-     * @param cl    the class loader to check for the exception on
-     *
      * @return {@code true} if the exception should be include, otherwise {@code false}
      */
-    public boolean matches(final Class<? extends Throwable> clazz, final ClassLoader cl) {
+    public boolean matches(final Class<? extends Throwable> clazz) {
         if (include.isEmpty()) {  //nothing is included, and exclude is ignored
             return false;
-        } else {
-            //only <include> is present
-            if (exclude.isEmpty()) {
-                return matches(clazz, cl, include);
-            }
-            //both <include> and <exclude> are present
-            //if not covered by include, then return false
-            if (!matches(clazz, cl, include)) {
-                return false;
-            }
-
-            //by now it is covered by include, if it is covered by exclude
-            return !matches(clazz, cl, exclude);
         }
+        final String clazzName = clazz.getName();
+        if (include.contains(clazzName)) {
+            return true;
+        }
+        if (exclude.contains(clazzName)) {
+            return false;
+        }
+        //by now the exception class itself is not contained in either include or exclude list.
+        //check its superclass against each element in include and exclude list.
+        final int shortestDistanceToInclude = getShortestDistance(clazz, include);
+        if (shortestDistanceToInclude == Integer.MAX_VALUE) {
+            return false;
+        } else if (shortestDistanceToInclude == 1) {
+            return true;
+        } else if (exclude.isEmpty()) {
+            return true;
+        }
+        return shortestDistanceToInclude < getShortestDistance(clazz, exclude);
     }
 
     /**
-     * Checks if an exception class is covered by a the filter list, which can be either include or exclude list.
+     * Calculates the distance from clazz to each element of filterClasses, and return the min.
      *
-     * @param clazz         the exception class to check
-     * @param cl            the class loader used to check for the class on
-     * @param filterClasses either the include or exclude filter list
-     *
-     * @return true if the exception class is covered by the filter; false otherwise.
+     * @param clazz         the exception class to check all of its super classes
+     * @param filterClasses the list of filter classes
+     * @return the shortest distance
      */
-    private boolean matches(final Class<? extends Throwable> clazz, final ClassLoader cl, final List<String> filterClasses) {
-        for (final String s : filterClasses) {
-            try {
-                Class<?> c = Class.forName(s, true, cl);
-                if (c.isAssignableFrom(clazz)) {
-                    return true;
+    private int getShortestDistance(final Class<? extends Throwable> clazz, final List<String> filterClasses) {
+        int result = Integer.MAX_VALUE;
+        for (final String filterClass : filterClasses) {
+            int distance = 0;
+            boolean found = false;
+            Class<?> superclass = clazz.getSuperclass();
+            while (superclass != Throwable.class && superclass != Object.class) {
+                distance++;
+                if (superclass.getName().equals(filterClass)) {
+                    found = true;
+                    break;
                 }
-            } catch (ClassNotFoundException e) {
-                BatchLogger.LOGGER.invalidExceptionClassFilter(e, s);
+                superclass = superclass.getSuperclass();
+            }
+
+            if (found) {
+                if (distance == 1) {
+                    return distance;
+                }
+                if (distance < result) {
+                    result = distance;
+                }
             }
         }
-
-        return false;
+        return result;
     }
 }

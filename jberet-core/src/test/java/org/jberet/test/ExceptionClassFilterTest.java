@@ -34,57 +34,74 @@ public class ExceptionClassFilterTest {
         Chunk chunk = getChunk(job, "exception-class-filter-step");
 
         ExceptionClassFilter filter = chunk.getSkippableExceptionClasses();
-        Assert.assertEquals(false, filter.matches(Exception.class, cl));
-        Assert.assertEquals(false, filter.matches(IOException.class, cl));
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
 
         filter = chunk.getRetryableExceptionClasses();
-        Assert.assertEquals(true, filter.matches(RuntimeException.class, cl));
-        Assert.assertEquals(true, filter.matches(IllegalStateException.class, cl));
-        Assert.assertEquals(true, filter.matches(AlreadyConnectedException.class, cl));
-        Assert.assertEquals(false, filter.matches(Exception.class, cl));
-        Assert.assertEquals(false, filter.matches(IOException.class, cl));
+        Assert.assertEquals(true, filter.matches(RuntimeException.class));
+        Assert.assertEquals(true, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(true, filter.matches(AlreadyConnectedException.class));
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
 
         filter = chunk.getNoRollbackExceptionClasses();
-        Assert.assertEquals(false, filter.matches(Exception.class, cl));
-        Assert.assertEquals(false, filter.matches(RuntimeException.class, cl));
-        Assert.assertEquals(false, filter.matches(IOException.class, cl));
-        Assert.assertEquals(false, filter.matches(IllegalStateException.class, cl));
-        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class, cl));
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(RuntimeException.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
+        Assert.assertEquals(false, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
 
         chunk = getChunk(job, "exception-class-filter-step2");
         filter = chunk.getSkippableExceptionClasses();
-        Assert.assertEquals(false, filter.matches(Exception.class, cl));
-        Assert.assertEquals(false, filter.matches(IOException.class, cl));
-        Assert.assertEquals(false, filter.matches(IllegalStateException.class, cl));
-        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class, cl));
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
+        Assert.assertEquals(false, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
 
         filter = chunk.getRetryableExceptionClasses();
-        Assert.assertEquals(true, filter.matches(RuntimeException.class, cl));
-        Assert.assertEquals(true, filter.matches(Exception.class, cl));
-        Assert.assertEquals(true, filter.matches(IllegalArgumentException.class, cl));
-        Assert.assertEquals(false, filter.matches(IllegalStateException.class, cl));
-        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class, cl));
-        Assert.assertEquals(false, filter.matches(IOException.class, cl));
-        Assert.assertEquals(false, filter.matches(FileNotFoundException.class, cl));
+        Assert.assertEquals(true, filter.matches(RuntimeException.class));
+        Assert.assertEquals(true, filter.matches(Exception.class));
+        Assert.assertEquals(true, filter.matches(IllegalArgumentException.class));
+        Assert.assertEquals(false, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
+        Assert.assertEquals(true, filter.matches(FileNotFoundException.class));
 
         filter = chunk.getNoRollbackExceptionClasses();
-        Assert.assertEquals(true, filter.matches(Exception.class, cl));
-        Assert.assertEquals(true, filter.matches(RuntimeException.class, cl));
-        Assert.assertEquals(true, filter.matches(FileNotFoundException.class, cl));
-        Assert.assertEquals(true, filter.matches(IllegalStateException.class, cl));
-        Assert.assertEquals(true, filter.matches(AlreadyConnectedException.class, cl));
-    }
+        Assert.assertEquals(true, filter.matches(Exception.class));
+        Assert.assertEquals(true, filter.matches(RuntimeException.class));
+        Assert.assertEquals(true, filter.matches(FileNotFoundException.class));
+        Assert.assertEquals(true, filter.matches(IllegalStateException.class));
+        Assert.assertEquals(true, filter.matches(AlreadyConnectedException.class));
 
-    private void verifyExceptionClassesFilter(final ExceptionClassFilter filter) {
-        final ClassLoader cl = this.getClass().getClassLoader();
-        Assert.assertEquals(true, filter.matches(RuntimeException.class, cl));  //included
-        Assert.assertEquals(false, filter.matches(IllegalStateException.class, cl));  //excluded
-        Assert.assertEquals(true, filter.matches(IllegalArgumentException.class, cl));  // superclass included
-        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class, cl));  //superclass excluded
-        Assert.assertEquals(false, filter.matches(IOException.class, cl));  //not included
-        Assert.assertEquals(false, filter.matches(Exception.class, cl));  //not included
-        Assert.assertEquals(false, filter.matches(Throwable.class, cl));
-        Assert.assertEquals(false, filter.matches(Error.class, cl));
+        chunk = getChunk(job, "exception-class-filter-step3");
+        filter = chunk.getSkippableExceptionClasses();
+        Assert.assertEquals(true, filter.matches(Exception.class));
+        Assert.assertEquals(true, filter.matches(java.io.EOFException.class));
+        Assert.assertEquals(false, filter.matches(IOException.class));
+        Assert.assertEquals(false, filter.matches(java.io.FileNotFoundException.class));
+        Assert.assertEquals(true, filter.matches(AlreadyConnectedException.class));
+
+        filter = chunk.getRetryableExceptionClasses();
+        Assert.assertEquals(true, filter.matches(Exception.class));
+        Assert.assertEquals(true, filter.matches(javax.xml.ws.WebServiceException.class));
+        Assert.assertEquals(false, filter.matches(java.lang.RuntimeException.class));
+        Assert.assertEquals(true, filter.matches(IOException.class));
+        Assert.assertEquals(true, filter.matches(FileNotFoundException.class));
+        Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
+        Assert.assertEquals(true, filter.matches(javax.xml.ws.ProtocolException.class));
+        Assert.assertEquals(true, filter.matches(javax.xml.ws.http.HTTPException.class));
+
+        filter = chunk.getNoRollbackExceptionClasses();
+        Assert.assertEquals(true, filter.matches(IOException.class));
+        Assert.assertEquals(true, filter.matches(java.io.FileNotFoundException.class));
+        Assert.assertEquals(true, filter.matches(java.util.zip.ZipException.class));
+        Assert.assertEquals(true, filter.matches(java.util.jar.JarException.class));
+        Assert.assertEquals(false, filter.matches(Exception.class));
+        Assert.assertEquals(false, filter.matches(Throwable.class));
+        Assert.assertEquals(false, filter.matches(Error.class));
+        Assert.assertEquals(false, filter.matches(RuntimeException.class));
+        Assert.assertEquals(false, filter.matches(IllegalStateException.class));
     }
 
     protected static Chunk getChunk(final Job job, final String stepId) {
