@@ -19,35 +19,13 @@ import java.util.List;
 public final class ExceptionClassFilter implements Serializable {
     private static final long serialVersionUID = -6174512038188933722L;
 
-    private final List<String> include = new ArrayList<String>();
-    private final List<String> exclude = new ArrayList<String>();
+    final List<String> include = new ArrayList<String>();
+    final List<String> exclude = new ArrayList<String>();
 
-    ExceptionClassFilter() {
-    }
-
-    public List<String> getInclude() {
-        return include;
-    }
-
-    public List<String> getExclude() {
-        return exclude;
-    }
-
-    void addInclude(final String includeClass) {
-        if (includeClass != null) {
-            final String trimmed = includeClass.trim();
-            if (!trimmed.isEmpty()) {
-                include.add(trimmed);
-            }
-        }
-    }
-
-    void addExclude(final String excludeClass) {
-        if (excludeClass != null) {
-            final String trimmed = excludeClass.trim();
-            if (!trimmed.isEmpty()) {
-                exclude.add(trimmed);
-            }
+    static void addExceptionClassTo(final String exceptionClass, final List<String> includeOrExcludeList) {
+        final String trimmed = exceptionClass.trim();
+        if (!trimmed.isEmpty()) {
+            includeOrExcludeList.add(trimmed);
         }
     }
 

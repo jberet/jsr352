@@ -327,8 +327,8 @@ public final class PropertyResolver {
         if (filter == null) {
             return;
         }
-        resolveIncludeOrExclude(filter.getInclude());
-        resolveIncludeOrExclude(filter.getExclude());
+        resolveIncludeOrExclude(filter.include);
+        resolveIncludeOrExclude(filter.exclude);
     }
 
     private void resolveIncludeOrExclude(final List<String> clude) {

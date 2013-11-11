@@ -584,10 +584,10 @@ public final class JobParser {
                 case START_ELEMENT:
                     switch (element) {
                         case INCLUDE:
-                            filter.addInclude(getAttributeValue(reader, XmlAttribute.CLASS, true));
+                            ExceptionClassFilter.addExceptionClassTo(getAttributeValue(reader, XmlAttribute.CLASS, true), filter.include);
                             break;
                         case EXCLUDE:
-                            filter.addExclude(getAttributeValue(reader, XmlAttribute.CLASS, true));
+                            ExceptionClassFilter.addExceptionClassTo(getAttributeValue(reader, XmlAttribute.CLASS, true), filter.exclude);
                             break;
                         default:
                             throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());

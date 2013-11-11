@@ -349,8 +349,8 @@ public final class JobParserTest {
     }
 
     private void checkExceptionClassFilter(final ExceptionClassFilter filter) throws Exception {
-        final List<String> includes = filter.getInclude();
-        final List<String> excludes = filter.getExclude();
+        final List<String> includes = filter.include;
+        final List<String> excludes = filter.exclude;
         Assert.assertEquals(2, includes.size());
         Assert.assertEquals(true, includes.contains("include1"));
         Assert.assertEquals(true, includes.contains("include2"));
