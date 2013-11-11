@@ -35,7 +35,7 @@ public class Main {
 
         final java.util.Properties jobParameters = new java.util.Properties();
         for (int i = 1; i < args.length; i++) {
-            int equalSignPos = args[i].indexOf('=');
+            final int equalSignPos = args[i].indexOf('=');
             if (equalSignPos <= 0) {
                 usage(args);
                 return;
@@ -47,11 +47,10 @@ public class Main {
 
         final JobOperator jobOperator = BatchRuntime.getJobOperator();
         final long jobExecutionId;
-        final long timeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
         try {
             jobExecutionId = jobOperator.start(jobXml, jobParameters);
             final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-            jobExecution.awaitTermination(timeout, TimeUnit.SECONDS);
+            jobExecution.awaitTermination(0, TimeUnit.SECONDS);  //no timeout
 
             if (!jobExecution.getBatchStatus().equals(BatchStatus.COMPLETED)) {
                 throw new BatchRuntimeException(String.format("The job did not complete: %s%n", jobXml));

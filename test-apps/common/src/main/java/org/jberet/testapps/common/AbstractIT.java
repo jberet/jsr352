@@ -22,7 +22,7 @@ import javax.batch.runtime.StepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 
 abstract public class AbstractIT {
-    protected long jobTimeout = Long.getLong(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_KEY, JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT);
+    protected long jobTimeout;
 
     protected Properties params = new Properties();
     protected JobOperator jobOperator = BatchRuntime.getJobOperator();
@@ -31,7 +31,7 @@ abstract public class AbstractIT {
     protected List<StepExecution> stepExecutions;
     protected StepExecution stepExecution0;
 
-    protected long getJobTimeout() {
+    protected long getJobTimeoutMinutes() {
         return jobTimeout;
     }
 
@@ -42,7 +42,7 @@ abstract public class AbstractIT {
 
     protected void awaitTermination(final JobExecutionImpl... exes) throws InterruptedException {
         final JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
-        exe.awaitTermination(getJobTimeout(), TimeUnit.SECONDS);
+        exe.awaitTermination(getJobTimeoutMinutes(), TimeUnit.MINUTES);
         stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
         stepExecution0 = stepExecutions.get(0);
     }

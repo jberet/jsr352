@@ -109,7 +109,7 @@ public class JobDataTest {
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        jobExecution.awaitTermination(Batchlet1Test.waitTimeoutMinutes, TimeUnit.MINUTES);
 
         final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
@@ -133,7 +133,7 @@ public class JobDataTest {
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        jobExecution.awaitTermination(Batchlet1Test.waitTimeoutMinutes, TimeUnit.MINUTES);
 
         final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
@@ -156,7 +156,7 @@ public class JobDataTest {
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        jobExecution.awaitTermination(Batchlet1Test.waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());

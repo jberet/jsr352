@@ -12,12 +12,10 @@
 
 package org.jberet.runtime.runner;
 
-import java.util.concurrent.TimeUnit;
 import javax.batch.api.partition.PartitionCollector;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet.job.model.RefArtifact;
-import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
 
 import static org.jberet._private.BatchLogger.LOGGER;
@@ -49,7 +47,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
                 @Override
                 public void run() {
                     try {
-                        jobContext.getJobExecution().awaitStop(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+                        jobContext.getJobExecution().awaitStop();
                         if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
                             batchContext.setBatchStatus(BatchStatus.STOPPING);
                             batchletObj.stop();

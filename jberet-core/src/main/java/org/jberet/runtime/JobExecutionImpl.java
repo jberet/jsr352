@@ -32,8 +32,6 @@ import org.jberet.util.BatchUtil;
 
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution, Cloneable {
     private static final long serialVersionUID = 3706885354351337764L;
-    public static final String JOB_EXECUTION_TIMEOUT_SECONDS_KEY = "org.jberet.job.execution.timeout.seconds";
-    public static final long JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT = 300L;
 
     private long id;
 
@@ -113,14 +111,18 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     //It's possible the (fast) job is already terminated and the latch nulled when this method is called
     public void awaitTermination(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
         if (jobTerminationLatch != null) {
-            jobTerminationLatch.await(timeout, timeUnit);
+            if (timeout <= 0) {
+                jobTerminationLatch.await();
+            } else {
+                jobTerminationLatch.await(timeout, timeUnit);
+            }
         }
     }
 
-    //It's possible the (fast) job is already terminated and the latch nulled when this method is called
-    public void awaitStop(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
+    //It's possible the (fast) job is already terminated and the latch nulled when this method is called.
+    public void awaitStop() throws InterruptedException {
         if (jobStopLatch != null) {
-            jobStopLatch.await(timeout, timeUnit);
+            jobStopLatch.await();
         }
     }
 

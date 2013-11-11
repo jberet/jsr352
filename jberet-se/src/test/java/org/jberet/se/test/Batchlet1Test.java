@@ -27,6 +27,7 @@ public class Batchlet1Test {
     static final String jobName2 = "org.jberet.se.test.batchlet2";
     static final String jobName3 = "org.jberet.se.test.batchlet3";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
+    static final int waitTimeoutMinutes = 0;
 
     @Test
     public void testBatchlet1() throws Exception {
@@ -43,7 +44,7 @@ public class Batchlet1Test {
         System.out.printf("Start with params %s%n", params);
         final long jobExecutionId = jobOperator.start(jobName2, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
         Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
         Assert.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());
@@ -64,19 +65,19 @@ public class Batchlet1Test {
             System.out.printf("Start with params %s%n", params);
             long jobExecutionId = jobOperator.start(jobName3, params);
             JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-            jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+            jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
             jobExecutions[0] = jobExecution;
 
             System.out.printf("Restart with params %s%n", params);
             jobExecutionId = jobOperator.restart(jobExecutionId, params);
             jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-            jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+            jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
             jobExecutions[1] = jobExecution;
 
             System.out.printf("Restart with params %s%n", params);
             jobExecutionId = jobOperator.restart(jobExecutionId, params);
             jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-            jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+            jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
             jobExecutions[2] = jobExecution;
         }
         for (final JobExecutionImpl e : jobExecutions) {
@@ -102,7 +103,7 @@ public class Batchlet1Test {
         System.out.printf("Start with params %s%n", params);
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
@@ -121,7 +122,7 @@ public class Batchlet1Test {
         System.out.printf("Start with params %s%n", params);
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertEquals(Batchlet1.ACTION_END, jobExecution.getExitStatus());
@@ -140,7 +141,7 @@ public class Batchlet1Test {
         System.out.printf("Start with params %s%n", params);
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         Assert.assertEquals(Batchlet1.ACTION_FAIL, jobExecution.getExitStatus());  //set by <fail> element
@@ -164,7 +165,7 @@ public class Batchlet1Test {
         System.out.printf("Restart with params %s%n", params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(JobExecutionImpl.JOB_EXECUTION_TIMEOUT_SECONDS_DEFAULT, TimeUnit.SECONDS);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
         Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
         Assert.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());

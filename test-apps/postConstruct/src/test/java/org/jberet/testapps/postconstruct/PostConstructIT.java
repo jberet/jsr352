@@ -29,7 +29,7 @@ public class PostConstructIT extends AbstractIT {
     }
 
     @Override
-    protected long getJobTimeout() {
-        return 20;
+    protected long getJobTimeoutMinutes() {
+        return 1;
     }
 }
