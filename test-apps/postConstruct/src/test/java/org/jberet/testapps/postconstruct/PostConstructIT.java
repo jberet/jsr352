@@ -27,4 +27,9 @@ public class PostConstructIT extends AbstractIT {
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertEquals(expected, jobExitStatus);
     }
+
+    @Override
+    protected long getJobTimeout() {
+        return 20;
+    }
 }

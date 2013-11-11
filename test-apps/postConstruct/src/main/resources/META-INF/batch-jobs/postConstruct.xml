@@ -12,7 +12,7 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="propertyInjection" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="postConstruct" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <properties>
         <property name="add.to.job.exit.status" value="true"/>
     </properties>

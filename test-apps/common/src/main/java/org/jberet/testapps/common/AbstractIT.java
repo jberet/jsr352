@@ -31,6 +31,10 @@ abstract public class AbstractIT {
     protected List<StepExecution> stepExecutions;
     protected StepExecution stepExecution0;
 
+    protected long getJobTimeout() {
+        return jobTimeout;
+    }
+
     protected void startJob(final String jobXml) {
         jobExecutionId = jobOperator.start(jobXml, params);
         jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
@@ -38,7 +42,7 @@ abstract public class AbstractIT {
 
     protected void awaitTermination(final JobExecutionImpl... exes) throws InterruptedException {
         final JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
-        exe.awaitTermination(jobTimeout, TimeUnit.SECONDS);
+        exe.awaitTermination(getJobTimeout(), TimeUnit.SECONDS);
         stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
         stepExecution0 = stepExecutions.get(0);
     }

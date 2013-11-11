@@ -13,16 +13,66 @@
 package org.jberet.test;
 
 import java.util.Collection;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import javax.transaction.UserTransaction;
 
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.job.model.Job;
 import org.jberet.repository.JobRepository;
 import org.jberet.repository.JobRepositoryFactory;
+import org.jberet.spi.ArtifactFactory;
+import org.jberet.spi.BatchEnvironment;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class JobRepositoryTest {
-    final private static JobRepository repo = JobRepositoryFactory.getJobRepository(null);
+    private static JobRepository repo;
+
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        final BatchEnvironment batchEnvironment = new BatchEnvironment() {
+            @Override
+            public ClassLoader getClassLoader() {
+                return Thread.currentThread().getContextClassLoader();
+            }
+
+            @Override
+            public ArtifactFactory getArtifactFactory() {
+                return null;
+            }
+
+            @Override
+            public Future<?> submitTask(final Runnable task) {
+                return null;
+            }
+
+            @Override
+            public <T> Future<T> submitTask(final Runnable task, final T result) {
+                return null;
+            }
+
+            @Override
+            public <T> Future<T> submitTask(final Callable<T> task) {
+                return null;
+            }
+
+            @Override
+            public UserTransaction getUserTransaction() {
+                return null;
+            }
+
+            @Override
+            public Properties getBatchConfigurationProperties() {
+                final Properties props = new Properties();
+                //props.setProperty(JobRepositoryFactory.JOB_REPOSITORY_TYPE_KEY, JobRepositoryFactory.REPOSITORY_TYPE_JDBC);
+                return props;
+            }
+        };
+        repo = JobRepositoryFactory.getJobRepository(batchEnvironment);
+    }
 
     @Test
     public void addRemoveJob() throws Exception {
