@@ -35,6 +35,12 @@ public final class BatchSEEnvironment implements BatchEnvironment {
 
     private volatile Properties configProperties;
 
+    private final UserTransaction ut;
+
+    public BatchSEEnvironment() {
+        this.ut = com.arjuna.ats.jta.UserTransaction.userTransaction();
+    }
+
     @Override
     public ClassLoader getClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -66,7 +72,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
 
     @Override
     public UserTransaction getUserTransaction() {
-        return com.arjuna.ats.jta.UserTransaction.userTransaction();
+        return this.ut;
     }
 
     @Override

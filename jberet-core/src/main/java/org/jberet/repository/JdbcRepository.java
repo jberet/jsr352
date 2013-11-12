@@ -32,6 +32,8 @@ import javax.batch.runtime.StepExecution;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.transaction.Status;
+import javax.transaction.UserTransaction;
 
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
@@ -151,6 +153,7 @@ public final class JdbcRepository extends AbstractRepository {
     private String dbPassword;
     private final Properties dbProperties;
     private final Properties sqls = new Properties();
+    private final BatchEnvironment batchEnvironment;
 
     static JdbcRepository getInstance(final BatchEnvironment batchEnvironment) {
         JdbcRepository result = instance;
@@ -170,11 +173,12 @@ public final class JdbcRepository extends AbstractRepository {
         dataSourceName = configProperties.getProperty(DATASOURCE_JNDI_KEY);
         dbUrl = configProperties.getProperty(DB_URL_KEY);
         dbProperties = new Properties();
+        this.batchEnvironment = batchEnvironment;
 
         //if dataSourceName is configured, use dataSourceName;
         //else if dbUrl is specified, use dbUrl;
         //if neither is specified, use default dbUrl;
-        if (dataSourceName != null) {
+        if (dataSourceName != null && !dataSourceName.isEmpty()) {
             try {
                 dataSource = InitialContext.doLookup(dataSourceName);
             } catch (NamingException e) {
@@ -794,8 +798,13 @@ public final class JdbcRepository extends AbstractRepository {
             }
         } else {
             try {
-                return DriverManager.getConnection(dbUrl, dbProperties);
-            } catch (SQLException e) {
+                final Connection conn = DriverManager.getConnection(dbUrl, dbProperties);
+                final UserTransaction ut = batchEnvironment.getUserTransaction();
+                if (ut != null && ut.getStatus() == Status.STATUS_ACTIVE) {
+                    conn.setAutoCommit(false);
+                }
+                return conn;
+            } catch (Exception e) {
                 throw BatchMessages.MESSAGES.failToObtainConnection(e, dbUrl, dbProperties);
             }
         }

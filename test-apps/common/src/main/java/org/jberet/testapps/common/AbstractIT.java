@@ -31,7 +31,7 @@ abstract public class AbstractIT {
     protected List<StepExecution> stepExecutions;
     protected StepExecution stepExecution0;
 
-    protected long getJobTimeoutMinutes() {
+    protected long getJobTimeoutSeconds() {
         return jobTimeout;
     }
 
@@ -42,7 +42,7 @@ abstract public class AbstractIT {
 
     protected void awaitTermination(final JobExecutionImpl... exes) throws InterruptedException {
         final JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
-        exe.awaitTermination(getJobTimeoutMinutes(), TimeUnit.MINUTES);
+        exe.awaitTermination(getJobTimeoutSeconds(), TimeUnit.SECONDS);
         stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
         stepExecution0 = stepExecutions.get(0);
     }

@@ -89,7 +89,7 @@ public interface BatchMessages {
     @Message(id = 620, value = "Unrecognized job repository type %s")
     BatchRuntimeException unrecognizedJobRepositoryType(String v);
 
-    @Message(id = 621, value = "Failed to look up datasource %s")
+    @Message(id = 621, value = "Failed to look up datasource by jndi name %s.")
     BatchRuntimeException failToLookupDataSource(@Cause Throwable cause, String dataSourceName);
 
     @Message(id = 622, value = "Failed to obtain connection from %s, %s")
