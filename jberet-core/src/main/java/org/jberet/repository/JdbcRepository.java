@@ -32,8 +32,6 @@ import javax.batch.runtime.StepExecution;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.transaction.Status;
-import javax.transaction.UserTransaction;
 
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
@@ -153,7 +151,6 @@ public final class JdbcRepository extends AbstractRepository {
     private String dbPassword;
     private final Properties dbProperties;
     private final Properties sqls = new Properties();
-    private final BatchEnvironment batchEnvironment;
 
     static JdbcRepository getInstance(final BatchEnvironment batchEnvironment) {
         JdbcRepository result = instance;
@@ -173,7 +170,6 @@ public final class JdbcRepository extends AbstractRepository {
         dataSourceName = configProperties.getProperty(DATASOURCE_JNDI_KEY);
         dbUrl = configProperties.getProperty(DB_URL_KEY);
         dbProperties = new Properties();
-        this.batchEnvironment = batchEnvironment;
 
         //if dataSourceName is configured, use dataSourceName;
         //else if dbUrl is specified, use dbUrl;
@@ -718,15 +714,19 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(1, stepExecutionId);
             final ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                result.add(new StepExecutionImpl(
-                        rs.getInt(TableColumn.PARTITIONEXECUTIONID),
-                        rs.getLong(TableColumn.STEPEXECUTIONID),
-                        BatchStatus.valueOf(rs.getString(TableColumn.BATCHSTATUS)),
-                        rs.getString(TableColumn.EXITSTATUS),
-                        BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),
-                        BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.READERCHECKPOINTINFO)),
-                        BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.WRITERCHECKPOINTINFO))
-                ));
+                final String batchStatusValue = rs.getString(TableColumn.BATCHSTATUS);
+                if (!notCompletedOnly ||
+                    !BatchStatus.COMPLETED.name().equals(batchStatusValue)) {
+                    result.add(new StepExecutionImpl(
+                            rs.getInt(TableColumn.PARTITIONEXECUTIONID),
+                            rs.getLong(TableColumn.STEPEXECUTIONID),
+                            BatchStatus.valueOf(batchStatusValue),
+                            rs.getString(TableColumn.EXITSTATUS),
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.READERCHECKPOINTINFO)),
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.WRITERCHECKPOINTINFO))
+                    ));
+                }
             }
         } catch (Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
@@ -798,12 +798,7 @@ public final class JdbcRepository extends AbstractRepository {
             }
         } else {
             try {
-                final Connection conn = DriverManager.getConnection(dbUrl, dbProperties);
-                final UserTransaction ut = batchEnvironment.getUserTransaction();
-                if (ut != null && ut.getStatus() == Status.STATUS_ACTIVE) {
-                    conn.setAutoCommit(false);
-                }
-                return conn;
+                return DriverManager.getConnection(dbUrl, dbProperties);
             } catch (Exception e) {
                 throw BatchMessages.MESSAGES.failToObtainConnection(e, dbUrl, dbProperties);
             }

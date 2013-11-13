@@ -46,7 +46,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
 
     private Exception exception;
 
-    private final StepMetrics stepMetrics = new StepMetrics();
+    private StepMetrics stepMetrics = new StepMetrics();
 
     /**
      * For a partitioned step, records the partitions contained in the current step.  If it is a first-time started
@@ -162,6 +162,7 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         }
         result.partitionId = 0;     //overwrite the default -1 to indicate it's for a partition
         result.partitionExecutions = null;
+        result.stepMetrics = new StepMetrics();
         return result;
     }
 

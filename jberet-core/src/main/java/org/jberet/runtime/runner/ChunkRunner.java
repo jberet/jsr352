@@ -40,6 +40,7 @@ import javax.transaction.UserTransaction;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.RefArtifact;
+import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
 
@@ -70,6 +71,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private final Chunk chunk;
     private final StepExecutionRunner stepRunner;
     private final StepMetrics stepMetrics;
+    private final StepExecutionImpl stepOrPartitionExecution;
     private final ItemReader itemReader;
     private final ItemWriter itemWriter;
     private ItemProcessor itemProcessor;
@@ -96,8 +98,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     public ChunkRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner, final StepExecutionRunner stepRunner, final Chunk chunk) {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
-        this.stepMetrics = stepRunner.batchContext.getStepExecution().getStepMetrics();
         this.chunk = chunk;
+        this.stepOrPartitionExecution = stepContext.getStepExecution();
+        this.stepMetrics = this.stepOrPartitionExecution.getStepMetrics();
 
         final RefArtifact readerElement = chunk.getReader();
         itemReader = jobContext.createArtifact(readerElement.getRef(), null, readerElement.getProperties(), batchContext);
@@ -164,8 +167,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             ut.setTransactionTimeout(checkpointTimeout());
             ut.begin();
             try {
-                itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
-                itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
+                itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
+                itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
             } catch (Exception e) {
                 ut.rollback();
                 throw e;
@@ -200,7 +203,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         } finally {
             try {
                 if (stepRunner.collectorDataQueue != null) {
-                    stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
+                    stepRunner.collectorDataQueue.put(stepOrPartitionExecution);
                 }
             } catch (InterruptedException e) {
                 //ignore
@@ -485,8 +488,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 for (final ItemWriteListener l : itemWriteListeners) {
                     l.afterWrite(outputList);
                 }
-                batchContext.getStepExecution().setReaderCheckpointInfo(itemReader.checkpointInfo());
-                batchContext.getStepExecution().setWriterCheckpointInfo(itemWriter.checkpointInfo());
+                stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
+                stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
                 batchContext.savePersistentData();
 
                 outputList.clear();
@@ -547,8 +550,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
         itemReader.close();
         itemWriter.close();
-        itemReader.open(batchContext.getStepExecution().getReaderCheckpointInfo());
-        itemWriter.open(batchContext.getStepExecution().getWriterCheckpointInfo());
+        itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
+        itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
         processingInfo.chunkState = ChunkState.TO_RETRY;
         processingInfo.itemState = ItemState.RUNNING;
         if (collector != null) {

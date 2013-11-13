@@ -12,8 +12,8 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="chunkPartition" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="step1">
+<job id="org.jberet.test.chunkPartition" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="org.jberet.test.chunkPartition.step1">
         <chunk item-count="3">
             <reader ref="integerArrayReader">
                 <properties>

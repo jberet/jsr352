@@ -17,9 +17,12 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.StepExecutionImpl;
 
 abstract public class AbstractIT {
     protected long jobTimeout;
@@ -29,7 +32,7 @@ abstract public class AbstractIT {
     protected long jobExecutionId;
     protected JobExecutionImpl jobExecution;
     protected List<StepExecution> stepExecutions;
-    protected StepExecution stepExecution0;
+    protected StepExecutionImpl stepExecution0;
 
     protected long getJobTimeoutSeconds() {
         return jobTimeout;
@@ -44,7 +47,7 @@ abstract public class AbstractIT {
         final JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
         exe.awaitTermination(getJobTimeoutSeconds(), TimeUnit.SECONDS);
         stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
-        stepExecution0 = stepExecutions.get(0);
+        stepExecution0 = (StepExecutionImpl) stepExecutions.get(0);
     }
 
     protected void startJobAndWait(final String jobXml) throws Exception {
@@ -57,5 +60,13 @@ abstract public class AbstractIT {
         jobExecutionId = jobOperator.restart(restartId, params);
         jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         awaitTermination();
+    }
+
+    protected long getOriginalJobExecutionId(final String jobName) {
+        final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, 0, 1);
+        final JobInstance jobInstance = jobInstances.get(0);
+        final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
+        final JobExecution originalJobExecution = jobExecutions.get(jobExecutions.size() - 1);
+        return originalJobExecution.getExecutionId();
     }
 }

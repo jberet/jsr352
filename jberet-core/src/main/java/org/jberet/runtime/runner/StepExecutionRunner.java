@@ -74,8 +74,8 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     BlockingQueue<Serializable> collectorDataQueue;
     BlockingQueue<Boolean> completedPartitionThreads;
 
-    UserTransaction ut;
-    private final StepExecutionImpl stepExecution;
+    final UserTransaction ut;
+    final StepExecutionImpl stepExecution;
 
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
@@ -279,6 +279,13 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 final Serializable data = collectorDataQueue.take();
                 if (data instanceof StepExecutionImpl) {
                     final StepExecutionImpl s = (StepExecutionImpl) data;
+
+                    if (step.getChunk() != null) {
+                        stepExecution.getStepMetrics().addStepMetrics(s.getStepMetrics());
+                    }
+                    //save status and data for the terminated partition
+                    jobContext.getJobRepository().savePersistentData(jobContext.getJobExecution(), s);
+
                     fromAllPartitions.add(s);
                     final BatchStatus bs = s.getBatchStatus();
 

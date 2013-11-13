@@ -17,6 +17,7 @@ import javax.batch.api.chunk.ItemWriter;
 import javax.batch.runtime.Metric;
 import javax.inject.Named;
 
+import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.MetricImpl;
 
 @Named("integerArrayWriter")
@@ -27,7 +28,7 @@ public final class IntegerArrayWriter extends IntegerArrayReaderWriterBase imple
             return;
         }
 
-        if (MetricImpl.getMetric(stepContext, Metric.MetricType.WRITE_COUNT) + items.size() >= writerFailAt
+        if (MetricImpl.getMetric(((StepContextImpl) stepContext).getStepExecution(), Metric.MetricType.WRITE_COUNT) + items.size() >= writerFailAt
                 && writerFailAt >= 0) {
             throw new ArithmeticException("Failing at writer.fail.at point " + writerFailAt);
         }

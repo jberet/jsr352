@@ -47,6 +47,15 @@ final public class StepMetrics {
         targetMetric.increment(value);
     }
 
+    public void addStepMetrics(final StepMetrics other) {
+        for (final Map.Entry<Metric.MetricType, MetricImpl> e : other.metricsMapping.entrySet()) {
+            final long number = e.getValue().getValue();
+            if (number > 0) {
+                increment(e.getKey(), number);
+            }
+        }
+    }
+
     @Override
     public String toString() {
         return "StepMetrics: " + metricsMapping;
