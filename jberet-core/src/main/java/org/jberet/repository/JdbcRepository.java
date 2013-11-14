@@ -33,6 +33,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.google.common.base.Throwables;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.runtime.JobExecutionImpl;
@@ -558,19 +559,23 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setTimestamp(1, new Timestamp(stepExecution.getEndTime().getTime()));
             preparedStatement.setString(2, stepExecution.getBatchStatus().name());
             preparedStatement.setString(3, stepExecution.getExitStatus());
-            preparedStatement.setBytes(4, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
-            preparedStatement.setLong(5, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
-            preparedStatement.setLong(6, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
-            preparedStatement.setLong(7, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
-            preparedStatement.setLong(8, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.ROLLBACK_COUNT));
-            preparedStatement.setLong(9, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_SKIP_COUNT));
-            preparedStatement.setLong(10, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
-            preparedStatement.setLong(11, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
-            preparedStatement.setLong(12, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
-            preparedStatement.setBytes(13, BatchUtil.objectToBytes(stepExecutionImpl.getReaderCheckpointInfo()));
-            preparedStatement.setBytes(14, BatchUtil.objectToBytes(stepExecutionImpl.getWriterCheckpointInfo()));
 
-            preparedStatement.setLong(15, stepExecution.getStepExecutionId());
+            final Exception exception = stepExecutionImpl.getException();
+            preparedStatement.setString(4, exception == null ? null : Throwables.getStackTraceAsString(exception));
+
+            preparedStatement.setBytes(5, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
+            preparedStatement.setLong(6, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
+            preparedStatement.setLong(7, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
+            preparedStatement.setLong(8, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
+            preparedStatement.setLong(9, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.ROLLBACK_COUNT));
+            preparedStatement.setLong(10, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_SKIP_COUNT));
+            preparedStatement.setLong(11, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
+            preparedStatement.setLong(12, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
+            preparedStatement.setLong(13, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
+            preparedStatement.setBytes(14, BatchUtil.objectToBytes(stepExecutionImpl.getReaderCheckpointInfo()));
+            preparedStatement.setBytes(15, BatchUtil.objectToBytes(stepExecutionImpl.getWriterCheckpointInfo()));
+
+            preparedStatement.setLong(16, stepExecution.getStepExecutionId());
 
             preparedStatement.executeUpdate();
         } catch (Exception e) {
@@ -597,11 +602,15 @@ public final class JdbcRepository extends AbstractRepository {
                 preparedStatement = connection.prepareStatement(update);
                 preparedStatement.setString(1, stepExecution.getBatchStatus().name());
                 preparedStatement.setString(2, stepExecution.getExitStatus());
-                preparedStatement.setBytes(3, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
-                preparedStatement.setBytes(4, BatchUtil.objectToBytes(stepExecution.getReaderCheckpointInfo()));
-                preparedStatement.setBytes(5, BatchUtil.objectToBytes(stepExecution.getWriterCheckpointInfo()));
-                preparedStatement.setInt(6, partitionId);
-                preparedStatement.setLong(7, stepExecution.getStepExecutionId());
+
+                final Exception exception = stepExecution.getException();
+                preparedStatement.setString(3, exception == null ? null : Throwables.getStackTraceAsString(exception));
+
+                preparedStatement.setBytes(4, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
+                preparedStatement.setBytes(5, BatchUtil.objectToBytes(stepExecution.getReaderCheckpointInfo()));
+                preparedStatement.setBytes(6, BatchUtil.objectToBytes(stepExecution.getWriterCheckpointInfo()));
+                preparedStatement.setInt(7, partitionId);
+                preparedStatement.setLong(8, stepExecution.getStepExecutionId());
 
                 preparedStatement.executeUpdate();
             } catch (Exception e) {

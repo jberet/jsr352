@@ -293,6 +293,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                         if(consolidatedBatchStatus != BatchStatus.FAILED) {
                             consolidatedBatchStatus = bs;
                         }
+                        if (batchContext.getException() == null && s.getException() != null) {
+                            batchContext.setException(s.getException());
+                        }
                     }
 
                     if (analyzer != null) {

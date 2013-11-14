@@ -12,8 +12,6 @@
 
 package org.jberet.tck.impl;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.operations.JobSecurityException;
@@ -21,6 +19,7 @@ import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.StepExecution;
 
+import com.google.common.base.Throwables;
 import com.ibm.jbatch.tck.spi.JobExecutionTimeoutException;
 import com.ibm.jbatch.tck.spi.JobExecutionWaiter;
 import org.jberet.runtime.JobExecutionImpl;
@@ -56,14 +55,8 @@ public final class JobExecutionWaiterImpl implements JobExecutionWaiter {
 
         for (final StepExecution e : jobExecution.getStepExecutions()) {
             final StepExecutionImpl e2 = (StepExecutionImpl) e;
-            String exceptionString = null;
-            if (e2.getException() != null) {
-                final StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e2.getException().printStackTrace(pw);
-                exceptionString = sw.toString();
-                pw.close();
-            }
+            final Exception exception = e2.getException();
+            final String exceptionString = exception == null ? null : Throwables.getStackTraceAsString(exception);
             System.out.printf("StepExecution %s, batch status %s, exit status %s, exception %s%n",
                     e2, e2.getBatchStatus(), e2.getExitStatus(), exceptionString);
         }
