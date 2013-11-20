@@ -39,6 +39,7 @@ import javax.transaction.UserTransaction;
 
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.ExceptionClassFilter;
+import org.jberet.job.model.Properties;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
@@ -164,7 +165,17 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     @Override
     public void run() {
         try {
-            ut.setTransactionTimeout(checkpointTimeout());
+            //When running in EE environment, set global transaction timeout for the current thread
+            // from javax.transaction.global.timeout property at step level
+            final Properties stepProps = stepRunner.step.getProperties();
+            int globalTimeout = 180; //default 180 seconds defined by spec
+            if (stepProps != null) {
+                final String globalTimeoutProp = stepProps.get("javax.transaction.global.timeout");
+                if (globalTimeoutProp != null) {
+                    globalTimeout = Integer.valueOf(globalTimeoutProp);
+                }
+            }
+            ut.setTransactionTimeout(globalTimeout);
             ut.begin();
             try {
                 itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
@@ -257,6 +268,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     }
                     //if during Chunk RETRYING, and an item is skipped, the ut is still active so no need to begin a new one
                     if (ut.getStatus() != Status.STATUS_ACTIVE) {
+                        if (checkpointAlgorithm != null) {
+                            ut.setTransactionTimeout(checkpointAlgorithm.checkpointTimeout());
+                        }
                         ut.begin();
                     }
                     for (final ChunkListener l : chunkListeners) {
@@ -429,14 +443,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 processingInfo.failurePoint.equals(currentPosition)) {
             //if failurePoint is null, should fail with NPE
             processingInfo.chunkState = ChunkState.TO_END_RETRY;
-        }
-    }
-
-    private int checkpointTimeout() throws Exception {
-        if (checkpointPolicy.equals("item")) {
-            return 0;  //0 indicates jta system default
-        } else {
-            return checkpointAlgorithm.checkpointTimeout();
         }
     }
 
