@@ -250,11 +250,15 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
                 if (processingInfo.chunkState == ChunkState.TO_START_NEW ||
                         processingInfo.chunkState == ChunkState.TO_RETRY ||
+                        processingInfo.chunkState == ChunkState.RETRYING ||
                         processingInfo.chunkState == ChunkState.TO_END_RETRY) {
                     if (processingInfo.chunkState == ChunkState.TO_START_NEW || processingInfo.chunkState == ChunkState.TO_END_RETRY) {
                         processingInfo.reset();
                     }
-                    ut.begin();
+                    //if during Chunk RETRYING, and an item is skipped, the ut is still active so no need to begin a new one
+                    if (ut.getStatus() != Status.STATUS_ACTIVE) {
+                        ut.begin();
+                    }
                     for (final ChunkListener l : chunkListeners) {
                         l.beforeChunk();
                     }
@@ -450,8 +454,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         } else {
             checkpointAlgorithm.beginCheckpoint();
         }
-        processingInfo.chunkState = (processingInfo.chunkState == ChunkState.TO_RETRY) ?
-                ChunkState.RETRYING : ChunkState.RUNNING;
+        //if chunk is already RETRYING, do not change it to RUNNING
+        if (processingInfo.chunkState == ChunkState.TO_RETRY) {
+            processingInfo.chunkState = ChunkState.RETRYING;
+        } else if (processingInfo.chunkState != ChunkState.RETRYING) {
+            processingInfo.chunkState = ChunkState.RUNNING;
+        }
     }
 
     private boolean isReadyToCheckpoint(final ProcessingInfo processingInfo) throws Exception {
@@ -499,7 +507,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
                     processingInfo.chunkState = ChunkState.JOB_STOPPED;
                     batchContext.setBatchStatus(BatchStatus.STOPPED);
-                } else if (processingInfo.chunkState != ChunkState.DEPLETED) {
+                } else if (processingInfo.chunkState != ChunkState.DEPLETED && processingInfo.chunkState != ChunkState.RETRYING) {
                     processingInfo.chunkState = ChunkState.TO_START_NEW;
                 }
                 if (collector != null) {
