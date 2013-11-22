@@ -124,6 +124,10 @@ public class ArchiveXmlLoader {
         // default location: current directory
         if (jobFile == null) {
             jobFile = new File(getSystemProperty("user.dir"), jobXml);
+            if (!jobFile.exists() || !jobFile.isFile()) {
+                //may be an absolute path to the job file
+                jobFile = new File(jobXml);
+            }
         }
 
         is = new BufferedInputStream(new FileInputStream(jobFile));

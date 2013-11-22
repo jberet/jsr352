@@ -25,4 +25,7 @@ public interface SEBatchLogger {
     @Message(id = 50001, value = "The configuration file %s is not found in the classpath, and will use the default configuration.")
     @LogMessage(level = Logger.Level.TRACE)
     void useDefaultJBeretConfig(String configFile);
+
+    @Message(id = 50002, value = "Failed to get a valid value for configuration property %s; current value is %s.")
+    BatchRuntimeException failToGetConfigProperty(String propName, String value, @Cause Throwable throwable);
 }
