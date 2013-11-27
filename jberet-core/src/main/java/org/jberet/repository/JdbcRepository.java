@@ -175,6 +175,9 @@ public final class JdbcRepository extends AbstractRepository {
         //if dataSourceName is configured, use dataSourceName;
         //else if dbUrl is specified, use dbUrl;
         //if neither is specified, use default dbUrl;
+        if (dataSourceName != null) {
+            dataSourceName = dataSourceName.trim();
+        }
         if (dataSourceName != null && !dataSourceName.isEmpty()) {
             try {
                 dataSource = InitialContext.doLookup(dataSourceName);
@@ -182,29 +185,35 @@ public final class JdbcRepository extends AbstractRepository {
                 throw BatchMessages.MESSAGES.failToLookupDataSource(e, dataSourceName);
             }
         } else {
-            if (dbUrl == null) {
+            if (dbUrl != null) {
+                dbUrl = dbUrl.trim();
+            }
+            if (dbUrl == null || dbUrl.isEmpty()) {
                 dbUrl = DEFAULT_DB_URL;
-                dbUser = configProperties.getProperty(DB_USER_KEY);
-                if (dbUser != null) {
-                    dbProperties.setProperty("user", dbUser);
-                }
-                dbPassword = configProperties.getProperty(DB_PASSWORD_KEY);
-                if (dbPassword != null) {
-                    dbProperties.setProperty("password", dbPassword);
-                }
-                final String s = configProperties.getProperty(DB_PROPERTIES_KEY);
-                if (s != null) {
-                    final String[] ss = s.split(DB_PROPERTY_DELIM);
-                    for (final String kv : ss) {
-                        final int equalSign = kv.indexOf('=');
-                        if (equalSign > 0) {
-                            dbProperties.setProperty(kv.substring(0, equalSign), kv.substring(equalSign + 1));
-                        }
+            }
+            dbUser = configProperties.getProperty(DB_USER_KEY);
+            if (dbUser != null) {
+                dbProperties.setProperty("user", dbUser.trim());
+            }
+            dbPassword = configProperties.getProperty(DB_PASSWORD_KEY);
+            if (dbPassword != null) {
+                dbProperties.setProperty("password", dbPassword.trim());
+            }
+            final String s = configProperties.getProperty(DB_PROPERTIES_KEY);
+            if (s != null) {
+                final String[] ss = s.trim().split(DB_PROPERTY_DELIM);
+                for (final String kv : ss) {
+                    final int equalSign = kv.indexOf('=');
+                    if (equalSign > 0) {
+                        dbProperties.setProperty(kv.substring(0, equalSign), kv.substring(equalSign + 1));
                     }
                 }
             }
         }
-        String sqlFile = dbProperties.getProperty(SQL_FILE_NAME_KEY);
+        String sqlFile = configProperties.getProperty(SQL_FILE_NAME_KEY);
+        if (sqlFile != null) {
+            sqlFile = sqlFile.trim();
+        }
         if (sqlFile == null || sqlFile.isEmpty()) {
             sqlFile = DEFAULT_SQL_FILE;
         }
@@ -240,6 +249,9 @@ public final class JdbcRepository extends AbstractRepository {
             getJobInstancesStatement.executeQuery();
         } catch (SQLException e) {
             String ddlFile = configProperties.getProperty(DDL_FILE_NAME_KEY);
+            if (ddlFile != null) {
+                ddlFile = ddlFile.trim();
+            }
             String ddlString = null;
             try {
                 if (ddlFile == null || ddlFile.isEmpty()) {

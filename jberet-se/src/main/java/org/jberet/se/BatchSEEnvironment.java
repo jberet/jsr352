@@ -115,12 +115,12 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     }
 
     void createThreadPoolExecutor() {
-        final String threadPoolType = configProperties.getProperty(THREAD_POOL_TYPE);
+        String threadPoolType = configProperties.getProperty(THREAD_POOL_TYPE);
         final String threadFactoryProp = configProperties.getProperty(THREAD_FACTORY);
         final ThreadFactory threadFactory;
         if (threadFactoryProp != null && !threadFactoryProp.isEmpty()) {
             try {
-                final Class<?> threadFactoryClass = getClassLoader().loadClass(threadFactoryProp);
+                final Class<?> threadFactoryClass = getClassLoader().loadClass(threadFactoryProp.trim());
                 threadFactory = (ThreadFactory) threadFactoryClass.newInstance();
             } catch (Exception e) {
                 throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_FACTORY, threadFactoryProp, e);
@@ -129,7 +129,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             threadFactory = new BatchThreadFactory();
         }
 
-        if (threadPoolType == null || threadPoolType.isEmpty() || threadPoolType.equalsIgnoreCase(THREAD_POOL_TYPE_CACHED)) {
+        if (threadPoolType == null || threadPoolType.isEmpty() || threadPoolType.trim().equalsIgnoreCase(THREAD_POOL_TYPE_CACHED)) {
             executorService = Executors.newCachedThreadPool(threadFactory);
             return;
         }
@@ -137,11 +137,12 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         final String coreSizeProp = configProperties.getProperty(THREAD_POOL_CORE_SIZE);
         final int coreSize;
         try {
-            coreSize = Integer.parseInt(coreSizeProp);
-        } catch (NumberFormatException e) {
+            coreSize = Integer.parseInt(coreSizeProp.trim());
+        } catch (Exception e) {
             throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_CORE_SIZE, coreSizeProp, e);
         }
 
+        threadPoolType = threadPoolType.trim();
         if (threadPoolType.equalsIgnoreCase(THREAD_POOL_TYPE_FIXED)) {
             executorService = Executors.newFixedThreadPool(coreSize, threadFactory);
             return;
@@ -151,29 +152,34 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             final String maxSizeProp = configProperties.getProperty(THREAD_POOL_MAX_SIZE);
             final int maxSize;
             try {
-                maxSize = Integer.parseInt(maxSizeProp);
-            } catch (NumberFormatException e) {
+                maxSize = Integer.parseInt(maxSizeProp.trim());
+            } catch (Exception e) {
                 throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_MAX_SIZE, maxSizeProp, e);
             }
 
             final String keepAliveProp = configProperties.getProperty(THREAD_POOL_KEEP_ALIVE_TIME);
             final long keepAliveSeconds;
             try {
-                keepAliveSeconds = Long.parseLong(keepAliveProp);
-            } catch (NumberFormatException e) {
+                keepAliveSeconds = Long.parseLong(keepAliveProp.trim());
+            } catch (Exception e) {
                 throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_KEEP_ALIVE_TIME, keepAliveProp, e);
             }
 
             final String queueCapacityProp = configProperties.getProperty(THREAD_POOL_QUEUE_CAPACITY);
             final int queueCapacity;
             try {
-                queueCapacity = Integer.parseInt(queueCapacityProp);
-            } catch (NumberFormatException e) {
+                queueCapacity = Integer.parseInt(queueCapacityProp.trim());
+            } catch (Exception e) {
                 throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_QUEUE_CAPACITY, queueCapacityProp, e);
             }
 
-            final boolean allowCoreThreadTimeout = Boolean.parseBoolean(configProperties.getProperty(THREAD_POOL_ALLOW_CORE_THREAD_TIMEOUT));
-            final boolean prestartAllCoreThreads = Boolean.parseBoolean(configProperties.getProperty(THREAD_POOL_PRESTART_ALL_CORE_THREADS));
+            final String allowCoreThreadTimeoutProp = configProperties.getProperty(THREAD_POOL_ALLOW_CORE_THREAD_TIMEOUT);
+            final boolean allowCoreThreadTimeout = allowCoreThreadTimeoutProp == null || allowCoreThreadTimeoutProp.isEmpty() ? false :
+                    Boolean.parseBoolean(allowCoreThreadTimeoutProp.trim());
+
+            final String prestartAllCoreThreadsProp = configProperties.getProperty(THREAD_POOL_PRESTART_ALL_CORE_THREADS);
+            final boolean prestartAllCoreThreads = prestartAllCoreThreadsProp == null || prestartAllCoreThreadsProp.isEmpty() ? false :
+                    Boolean.parseBoolean(prestartAllCoreThreadsProp.trim());
 
             final BlockingQueue<Runnable> workQueue = queueCapacity > 0 ?
                     new LinkedBlockingQueue<Runnable>(queueCapacity) : new SynchronousQueue<Runnable>(true);
@@ -183,7 +189,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
 
             if (rejectionPolicyProp != null && !rejectionPolicyProp.isEmpty()) {
                 try {
-                    final Class<?> aClass = getClassLoader().loadClass(rejectionPolicyProp);
+                    final Class<?> aClass = getClassLoader().loadClass(rejectionPolicyProp.trim());
                     rejectionHandler = (RejectedExecutionHandler) aClass.newInstance();
                 } catch (Exception e) {
                     throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_REJECTION_POLICY, rejectionPolicyProp, e);
@@ -191,7 +197,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             }
 
             final ThreadPoolExecutor threadPoolExecutor = rejectionHandler == null ?
-                    new ThreadPoolExecutor(coreSize, maxSize, keepAliveSeconds, TimeUnit.SECONDS, workQueue, threadFactory):
+                    new ThreadPoolExecutor(coreSize, maxSize, keepAliveSeconds, TimeUnit.SECONDS, workQueue, threadFactory) :
                     new ThreadPoolExecutor(coreSize, maxSize, keepAliveSeconds, TimeUnit.SECONDS, workQueue, threadFactory, rejectionHandler);
 
             if (allowCoreThreadTimeout) {

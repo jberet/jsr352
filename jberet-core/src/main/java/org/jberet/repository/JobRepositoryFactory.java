@@ -30,10 +30,13 @@ public final class JobRepositoryFactory {
         if (batchEnvironment != null) {
             final Properties configProperties = batchEnvironment.getBatchConfigurationProperties();
             repositoryType = configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY);
+            if (repositoryType != null) {
+                repositoryType = repositoryType.trim();
+            }
         }
-        if (repositoryType == null || repositoryType.isEmpty() || repositoryType.equals(REPOSITORY_TYPE_JDBC)) {
+        if (repositoryType == null || repositoryType.isEmpty() || repositoryType.equalsIgnoreCase(REPOSITORY_TYPE_JDBC)) {
             return JdbcRepository.getInstance(batchEnvironment);
-        } else if (repositoryType.equals(REPOSITORY_TYPE_IN_MEMORY)) {
+        } else if (repositoryType.equalsIgnoreCase(REPOSITORY_TYPE_IN_MEMORY)) {
             return InMemoryRepository.getInstance(batchEnvironment);
         } else {
             throw BatchMessages.MESSAGES.unrecognizedJobRepositoryType(repositoryType);
