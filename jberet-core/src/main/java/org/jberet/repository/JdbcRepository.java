@@ -54,7 +54,7 @@ public final class JdbcRepository extends AbstractRepository {
     public static final String DB_PROPERTY_DELIM = ":";
 
     //defaults for entries in jberet.properties
-    private static final String DEFAULT_DATASOURCE = "java:jboss/datasources/ExampleDS";
+    //private static final String DEFAULT_DATASOURCE = "java:jboss/datasources/ExampleDS";
     //    private static final String DEFAULT_DB_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     private static final String DEFAULT_DB_URL = "jdbc:h2:~/jberet-repo";
     private static final String DEFAULT_SQL_FILE = "sql/jberet-h2-sql.properties";
@@ -123,6 +123,7 @@ public final class JdbcRepository extends AbstractRepository {
         private static final String ENDTIME = "ENDTIME";
         private static final String BATCHSTATUS = "BATCHSTATUS";
         private static final String EXITSTATUS = "EXITSTATUS";
+        //private static final String EXECUTIONEXCEPTION = "EXECUTIONEXCEPTION";
         private static final String PERSISTENTUSERDATA = "PERSISTENTUSERDATA";
         private static final String READCOUNT = "READCOUNT";
         private static final String WRITECOUNT = "WRITECOUNT";
@@ -267,8 +268,11 @@ public final class JdbcRepository extends AbstractRepository {
 
 
                 batchDDLStatement = connection.createStatement();
-                for (final String ddlEntry : ddls) {
-                    batchDDLStatement.addBatch(ddlEntry);
+                for (String ddlEntry : ddls) {
+                    ddlEntry = ddlEntry.trim();
+                    if (!ddlEntry.isEmpty()) {
+                        batchDDLStatement.addBatch(ddlEntry);
+                    }
                 }
                 batchDDLStatement.executeBatch();
             } catch (Exception sqlException) {
