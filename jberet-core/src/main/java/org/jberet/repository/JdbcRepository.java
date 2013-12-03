@@ -32,6 +32,9 @@ import javax.batch.runtime.StepExecution;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 
 import com.google.common.base.Throwables;
 import org.jberet._private.BatchLogger;
@@ -83,6 +86,7 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String COUNT_STEP_EXECUTIONS_BY_JOB_INSTANCE_ID = "count-step-executions-by-job-instance-id";
 
     private static final String SELECT_ALL_PARTITION_EXECUTIONS = "select-all-partition-executions";
+    private static final String COUNT_PARTITION_EXECUTIONS = "count-partition-executions";
     private static final String SELECT_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID = "select-partition-executions-by-step-execution-id";
     private static final String INSERT_PARTITION_EXECUTION = "insert-partition-execution";
     private static final String UPDATE_PARTITION_EXECUTION = "update-partition-execution";
@@ -235,18 +239,18 @@ public final class JdbcRepository extends AbstractRepository {
                 }
             }
         }
-        createTables();
+        createTables(batchEnvironment.getUserTransaction());
     }
 
-    private void createTables() {
-        //first test table existence by running a query
-        final String getJobInstances = sqls.getProperty(SELECT_ALL_JOB_INSTANCES);
-        final Connection connection = getConnection();
+    private void createTables(final UserTransaction ut) {
+        //first test table existence by running a query against the last table in the ddl entry list
+        final String getJobInstances = sqls.getProperty(COUNT_PARTITION_EXECUTIONS);
+        final Connection connection1 = getConnection();
         PreparedStatement getJobInstancesStatement = null;
         Statement batchDDLStatement = null;
         InputStream ddlResource = null;
         try {
-            getJobInstancesStatement = connection.prepareStatement(getJobInstances);
+            getJobInstancesStatement = connection1.prepareStatement(getJobInstances);
             getJobInstancesStatement.executeQuery();
         } catch (SQLException e) {
             String ddlFile = configProperties.getProperty(DDL_FILE_NAME_KEY);
@@ -254,20 +258,32 @@ public final class JdbcRepository extends AbstractRepository {
                 ddlFile = ddlFile.trim();
             }
             String ddlString = null;
+
+            if (ddlFile == null || ddlFile.isEmpty()) {
+                ddlFile = DEFAULT_DDL_FILE;
+            }
+            ddlResource = this.getClass().getClassLoader().getResourceAsStream(ddlFile);
+            if (ddlResource == null) {
+                throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
+            }
+            final java.util.Scanner scanner = new java.util.Scanner(ddlResource, "UTF-8").useDelimiter("\\A");
+            ddlString = scanner.hasNext() ? scanner.next() : "";
+            final String[] ddls = ddlString.split(";");
+
+            boolean newTransaction = false;
+            Boolean originalAutoCommit = null;
+            Connection connection2 = null;
             try {
-                if (ddlFile == null || ddlFile.isEmpty()) {
-                    ddlFile = DEFAULT_DDL_FILE;
+                if (ut.getStatus() != Status.STATUS_ACTIVE) {
+                    newTransaction = true;
+                    ut.begin();
                 }
-                ddlResource = this.getClass().getClassLoader().getResourceAsStream(ddlFile);
-                if (ddlResource == null) {
-                    throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
+                connection2 = getConnection();
+                if (connection2.getAutoCommit()) {
+                    originalAutoCommit = Boolean.TRUE;
+                    connection2.setAutoCommit(false);
                 }
-                final java.util.Scanner scanner = new java.util.Scanner(ddlResource, "UTF-8").useDelimiter("\\A");
-                ddlString = scanner.hasNext() ? scanner.next() : "";
-                final String[] ddls = ddlString.split(";");
-
-
-                batchDDLStatement = connection.createStatement();
+                batchDDLStatement = connection2.createStatement();
                 for (String ddlEntry : ddls) {
                     ddlEntry = ddlEntry.trim();
                     if (!ddlEntry.isEmpty()) {
@@ -275,13 +291,32 @@ public final class JdbcRepository extends AbstractRepository {
                     }
                 }
                 batchDDLStatement.executeBatch();
-            } catch (Exception sqlException) {
-                throw BatchMessages.MESSAGES.failToCreateTables(sqlException, ddlFile, ddlString);
+                if (newTransaction) {
+                    ut.commit();
+                }
+            } catch (Exception e1) {
+                if (newTransaction) {
+                    try {
+                        ut.rollback();
+                    } catch (SystemException e2) {
+                        //ignore
+                    }
+                }
+                throw BatchMessages.MESSAGES.failToCreateTables(e1, ddlFile, ddlString);
+            } finally {
+                if (originalAutoCommit != null) {
+                    try {
+                        connection2.setAutoCommit(originalAutoCommit);
+                    } catch (SQLException e1) {
+                        //ignore
+                    }
+                }
+                close(connection2, null, null);
             }
             BatchLogger.LOGGER.tableCreated(ddlFile);
             BatchLogger.LOGGER.tableCreated2(ddlString);
         } finally {
-            close(connection, getJobInstancesStatement, batchDDLStatement);
+            close(connection1, getJobInstancesStatement, batchDDLStatement);
             try {
                 if (ddlResource != null) {
                     ddlResource.close();

@@ -96,4 +96,8 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 18, value = "Could not find the original step execution to restart.  Current step execution id: %s, step name: %s")
     @LogMessage(level = Logger.Level.WARN)
     void couldNotFindOriginalStepToRestart(long currentStepExecutionId, String stepName);
+
+    @Message(id = 19, value = "Encountered errors when creating batch job repository tables.")
+    @LogMessage(level = Logger.Level.WARN)
+    void errorWhenCreatingTable(@Cause Throwable cause);
 }
