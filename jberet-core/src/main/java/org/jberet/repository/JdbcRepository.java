@@ -60,8 +60,8 @@ public final class JdbcRepository extends AbstractRepository {
     //private static final String DEFAULT_DATASOURCE = "java:jboss/datasources/ExampleDS";
     //    private static final String DEFAULT_DB_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     private static final String DEFAULT_DB_URL = "jdbc:h2:~/jberet-repo";
-    private static final String DEFAULT_SQL_FILE = "sql/jberet-h2-sql.properties";
-    private static final String DEFAULT_DDL_FILE = "sql/jberet-h2.ddl";
+    private static final String DEFAULT_SQL_FILE = "sql/jberet-sql.properties";
+    private static final String DEFAULT_DDL_FILE = "sql/jberet.ddl";
 
     //keys used in *.sql files
     private static final String SELECT_ALL_JOB_INSTANCES = "select-all-job-instances";
@@ -269,6 +269,7 @@ public final class JdbcRepository extends AbstractRepository {
             final java.util.Scanner scanner = new java.util.Scanner(ddlResource, "UTF-8").useDelimiter("\\A");
             ddlString = scanner.hasNext() ? scanner.next() : "";
             final String[] ddls = ddlString.split(";");
+            scanner.close();
 
             boolean newTransaction = false;
             Boolean originalAutoCommit = null;

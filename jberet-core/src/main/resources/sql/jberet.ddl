@@ -1,3 +1,7 @@
+/*
+ Default DDL file, using h2 database for job repository.
+ */
+
 CREATE TABLE IF NOT EXISTS JOB_INSTANCE
 (
   JOBINSTANCEID   IDENTITY PRIMARY KEY NOT NULL,

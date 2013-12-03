@@ -16,6 +16,11 @@ import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
 import org.jberet.creation.ArchiveXmlLoader;
@@ -61,7 +66,32 @@ public class JobRepositoryTest {
 
             @Override
             public UserTransaction getUserTransaction() {
-                return null;
+                return new UserTransaction() {
+                    @Override
+                    public void begin() throws NotSupportedException, SystemException {
+                    }
+
+                    @Override
+                    public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException, SecurityException, IllegalStateException, SystemException {
+                    }
+
+                    @Override
+                    public void rollback() throws IllegalStateException, SecurityException, SystemException {
+                    }
+
+                    @Override
+                    public void setRollbackOnly() throws IllegalStateException, SystemException {
+                    }
+
+                    @Override
+                    public int getStatus() throws SystemException {
+                        return 0;
+                    }
+
+                    @Override
+                    public void setTransactionTimeout(final int seconds) throws SystemException {
+                    }
+                };
             }
 
             @Override
