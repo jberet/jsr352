@@ -301,6 +301,7 @@ public final class JdbcRepository extends AbstractRepository {
                         BatchLogger.LOGGER.addDDLEntry(ddlEntry);
                     }
                 }
+                scanner.close();
                 batchDDLStatement.executeBatch();
                 if (newTransaction) {
                     ut.commit();
