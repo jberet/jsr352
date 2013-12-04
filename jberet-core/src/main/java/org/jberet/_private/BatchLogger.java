@@ -81,9 +81,9 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.DEBUG)
     void tableCreated(String ddlFile);
 
-    @Message(id = 15, value = "Tables created for batch job repository with DDL content:%n %s")
+    @Message(id = 15, value = "Adding ddl entry for batch job repository:%n %s")
     @LogMessage(level = Logger.Level.DEBUG)
-    void tableCreated2(String ddlContent);
+    void addDDLEntry(String ddlContent);
 
     @Message(id = 16, value = "Failed to close %s: %s")
     @LogMessage(level = Logger.Level.WARN)

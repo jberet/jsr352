@@ -157,6 +157,8 @@ public final class JdbcRepository extends AbstractRepository {
     private String dbPassword;
     private final Properties dbProperties;
     private final Properties sqls = new Properties();
+    private boolean isOracle;
+    private int[] idIndexInOracle;
 
     static JdbcRepository getInstance(final BatchEnvironment batchEnvironment) {
         JdbcRepository result = instance;
@@ -245,10 +247,22 @@ public final class JdbcRepository extends AbstractRepository {
     private void createTables(final UserTransaction ut) {
         //first test table existence by running a query against the last table in the ddl entry list
         final String getJobInstances = sqls.getProperty(COUNT_PARTITION_EXECUTIONS);
-        final Connection connection1 = getConnection();
+        Connection connection1 = getConnection();
         PreparedStatement getJobInstancesStatement = null;
         Statement batchDDLStatement = null;
         InputStream ddlResource = null;
+
+        try {
+            if(connection1.getMetaData().getDatabaseProductName().startsWith("Oracle")) {
+                isOracle = true;
+                idIndexInOracle = new int[] {1};
+            }
+        } catch (SQLException e) {
+            close(connection1, null, null);
+            connection1 = getConnection();
+        } catch (Exception e) { //ignore
+        }
+
         try {
             getJobInstancesStatement = connection1.prepareStatement(getJobInstances);
             getJobInstancesStatement.executeQuery();
@@ -257,7 +271,6 @@ public final class JdbcRepository extends AbstractRepository {
             if (ddlFile != null) {
                 ddlFile = ddlFile.trim();
             }
-            String ddlString = null;
 
             if (ddlFile == null || ddlFile.isEmpty()) {
                 ddlFile = DEFAULT_DDL_FILE;
@@ -266,11 +279,7 @@ public final class JdbcRepository extends AbstractRepository {
             if (ddlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
             }
-            final java.util.Scanner scanner = new java.util.Scanner(ddlResource, "UTF-8").useDelimiter("\\A");
-            ddlString = scanner.hasNext() ? scanner.next() : "";
-            final String[] ddls = ddlString.split(";");
-            scanner.close();
-
+            final java.util.Scanner scanner = new java.util.Scanner(ddlResource).useDelimiter("!");
             boolean newTransaction = false;
             Boolean originalAutoCommit = null;
             Connection connection2 = null;
@@ -285,10 +294,11 @@ public final class JdbcRepository extends AbstractRepository {
                     connection2.setAutoCommit(false);
                 }
                 batchDDLStatement = connection2.createStatement();
-                for (String ddlEntry : ddls) {
-                    ddlEntry = ddlEntry.trim();
+                while (scanner.hasNext()) {
+                    final String ddlEntry = scanner.next().trim();
                     if (!ddlEntry.isEmpty()) {
                         batchDDLStatement.addBatch(ddlEntry);
+                        BatchLogger.LOGGER.addDDLEntry(ddlEntry);
                     }
                 }
                 batchDDLStatement.executeBatch();
@@ -303,7 +313,7 @@ public final class JdbcRepository extends AbstractRepository {
                         //ignore
                     }
                 }
-                throw BatchMessages.MESSAGES.failToCreateTables(e1, ddlFile, ddlString);
+                throw BatchMessages.MESSAGES.failToCreateTables(e1, ddlFile);
             } finally {
                 if (originalAutoCommit != null) {
                     try {
@@ -315,7 +325,6 @@ public final class JdbcRepository extends AbstractRepository {
                 close(connection2, null, null);
             }
             BatchLogger.LOGGER.tableCreated(ddlFile);
-            BatchLogger.LOGGER.tableCreated2(ddlString);
         } finally {
             close(connection1, getJobInstancesStatement, batchDDLStatement);
             try {
@@ -344,7 +353,8 @@ public final class JdbcRepository extends AbstractRepository {
         final Connection connection = getConnection();
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement = isOracle ? connection.prepareStatement(insert, idIndexInOracle) :
+                    connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, jobInstance.getJobName());
             preparedStatement.setString(2, jobInstance.getApplicationName());
             preparedStatement.executeUpdate();
@@ -458,7 +468,8 @@ public final class JdbcRepository extends AbstractRepository {
         final Connection connection = getConnection();
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement = isOracle ? connection.prepareStatement(insert, idIndexInOracle) :
+                    connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setLong(1, jobExecution.getJobInstance().getInstanceId());
             preparedStatement.setTimestamp(2, new Timestamp(jobExecution.getCreateTime().getTime()));
             preparedStatement.setTimestamp(3, new Timestamp(jobExecution.getStartTime().getTime()));
@@ -583,7 +594,8 @@ public final class JdbcRepository extends AbstractRepository {
         final Connection connection = getConnection();
         PreparedStatement preparedStatement = null;
         try {
-            preparedStatement = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement = isOracle ? connection.prepareStatement(insert, idIndexInOracle) :
+                    connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setLong(1, jobExecution.getExecutionId());
             preparedStatement.setString(2, stepExecution.getStepName());
             preparedStatement.setTimestamp(3, new Timestamp(stepExecution.getStartTime().getTime()));
@@ -889,5 +901,4 @@ public final class JdbcRepository extends AbstractRepository {
             BatchLogger.LOGGER.failToClose(e, Connection.class, conn);
         }
     }
-
 }
