@@ -85,7 +85,7 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String FIND_ORIGINAL_STEP_EXECUTION = "find-original-step-execution";
     private static final String COUNT_STEP_EXECUTIONS_BY_JOB_INSTANCE_ID = "count-step-executions-by-job-instance-id";
 
-    private static final String SELECT_ALL_PARTITION_EXECUTIONS = "select-all-partition-executions";
+    //private static final String SELECT_ALL_PARTITION_EXECUTIONS = "select-all-partition-executions";
     private static final String COUNT_PARTITION_EXECUTIONS = "count-partition-executions";
     private static final String SELECT_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID = "select-partition-executions-by-step-execution-id";
     private static final String INSERT_PARTITION_EXECUTION = "insert-partition-execution";
@@ -141,7 +141,7 @@ public final class JdbcRepository extends AbstractRepository {
         private static final String WRITERCHECKPOINTINFO = "WRITERCHECKPOINTINFO";
 
         //table name
-        private static final String PARTITION_EXECUTION = "PARTITION_EXECUTION";
+        //private static final String PARTITION_EXECUTION = "PARTITION_EXECUTION";
         //column names.  Other column names are already declared in other tables
         private static final String PARTITIONEXECUTIONID = "PARTITIONEXECUTIONID";
 
@@ -933,7 +933,6 @@ public final class JdbcRepository extends AbstractRepository {
         } else {
             ddlFile = DEFAULT_DDL_FILE;
         }
-        System.out.printf("## ddlFile: %s, databaseProductName: %s%n", ddlFile, databaseProductName);
         BatchLogger.LOGGER.ddlFileAndDatabaseProductName(ddlFile, databaseProductName);
         return ddlFile;
     }
