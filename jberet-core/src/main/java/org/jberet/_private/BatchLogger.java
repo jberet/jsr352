@@ -12,6 +12,8 @@
 
 package org.jberet._private;
 
+import java.sql.Connection;
+
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
@@ -100,4 +102,13 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 19, value = "Encountered errors when creating batch job repository tables.")
     @LogMessage(level = Logger.Level.WARN)
     void errorWhenCreatingTable(@Cause Throwable cause);
+
+    @Message(id = 20, value = "Failed to get database product name from connection %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToGetDatabaseProductName(@Cause Throwable cause, Connection connection);
+
+    @Message(id = 21, value = "About to initialize batch job repository with ddl-file: %s for database %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void ddlFileAndDatabaseProductName(String ddlFile, String databaseProductName);
+
 }

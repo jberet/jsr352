@@ -252,29 +252,26 @@ public final class JdbcRepository extends AbstractRepository {
         Statement batchDDLStatement = null;
         InputStream ddlResource = null;
 
+        String databaseProductName = "";
         try {
-            if(connection1.getMetaData().getDatabaseProductName().startsWith("Oracle")) {
-                isOracle = true;
-                idIndexInOracle = new int[] {1};
-            }
+            databaseProductName = connection1.getMetaData().getDatabaseProductName().trim();
         } catch (SQLException e) {
+            BatchLogger.LOGGER.failToGetDatabaseProductName(e, connection1);
             close(connection1, null, null);
             connection1 = getConnection();
-        } catch (Exception e) { //ignore
+        } catch (Exception e) {
+            BatchLogger.LOGGER.failToGetDatabaseProductName(e, connection1);
+        }
+        if(databaseProductName.startsWith("Oracle")) {
+            isOracle = true;
+            idIndexInOracle = new int[] {1};
         }
 
         try {
             getJobInstancesStatement = connection1.prepareStatement(getJobInstances);
             getJobInstancesStatement.executeQuery();
         } catch (SQLException e) {
-            String ddlFile = configProperties.getProperty(DDL_FILE_NAME_KEY);
-            if (ddlFile != null) {
-                ddlFile = ddlFile.trim();
-            }
-
-            if (ddlFile == null || ddlFile.isEmpty()) {
-                ddlFile = DEFAULT_DDL_FILE;
-            }
+            String ddlFile = getDDLLocation(databaseProductName);
             ddlResource = this.getClass().getClassLoader().getResourceAsStream(ddlFile);
             if (ddlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
@@ -901,5 +898,43 @@ public final class JdbcRepository extends AbstractRepository {
         } catch (SQLException e) {
             BatchLogger.LOGGER.failToClose(e, Connection.class, conn);
         }
+    }
+
+    /**
+     * If {@value #DDL_FILE_NAME_KEY} property is explicitly set, use it;
+     * else determine the appropriate ddl file location based on {@code databaseProductName};
+     * if no match, then return the default value {@value #DEFAULT_DDL_FILE}.
+     * @param databaseProductName a valid database product name, or "".  Must not be null
+     * @return location of ddl file resource, e.g., sql/jberet.ddl
+     */
+    private String getDDLLocation(final String databaseProductName) {
+        String ddlFile = configProperties.getProperty(DDL_FILE_NAME_KEY);
+        if (ddlFile != null) {
+            ddlFile = ddlFile.trim();
+            if (!ddlFile.isEmpty()) {
+                BatchLogger.LOGGER.ddlFileAndDatabaseProductName(ddlFile, databaseProductName);
+                return ddlFile;
+            }
+        }
+        if (databaseProductName.contains("MySQL")) {
+            ddlFile = "sql/jberet-mysql.ddl";
+        } else if (databaseProductName.startsWith("Oracle")) {
+            ddlFile = "sql/jberet-oracle.ddl";
+        } else if (databaseProductName.contains("PostgreSQL")) {
+            ddlFile = "sql/jberet-postgresql.ddl";
+        } else if (databaseProductName.startsWith("Microsoft SQL Server")) {
+            ddlFile = "sql/jberet-mssqlserver.ddl";
+        } else if (databaseProductName.contains("DB2")) {
+            ddlFile = "sql/jberet-db2.ddl";
+        } else if (databaseProductName.contains("Adaptive Server Enterprise") || databaseProductName.contains("Sybase")) {
+            ddlFile = "sql/jberet-sybase.ddl";
+        } else if (databaseProductName.contains("Derby")) {
+            ddlFile = "sql/jberet-derby.ddl";
+        } else {
+            ddlFile = DEFAULT_DDL_FILE;
+        }
+        System.out.printf("## ddlFile: %s, databaseProductName: %s%n", ddlFile, databaseProductName);
+        BatchLogger.LOGGER.ddlFileAndDatabaseProductName(ddlFile, databaseProductName);
+        return ddlFile;
     }
 }
