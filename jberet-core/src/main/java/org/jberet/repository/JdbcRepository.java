@@ -32,9 +32,6 @@ import javax.batch.runtime.StepExecution;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
 
 import com.google.common.base.Throwables;
 import org.jberet._private.BatchLogger;
@@ -241,15 +238,14 @@ public final class JdbcRepository extends AbstractRepository {
                 }
             }
         }
-        createTables(batchEnvironment.getUserTransaction());
+        createTables();
     }
 
-    private void createTables(final UserTransaction ut) {
+    private void createTables() {
         //first test table existence by running a query against the last table in the ddl entry list
-        final String getJobInstances = sqls.getProperty(COUNT_PARTITION_EXECUTIONS);
+        final String countPartitionExecutions = sqls.getProperty(COUNT_PARTITION_EXECUTIONS);
         Connection connection1 = getConnection();
-        PreparedStatement getJobInstancesStatement = null;
-        Statement batchDDLStatement = null;
+        PreparedStatement countPartitionExecutionStatement = null;
         InputStream ddlResource = null;
 
         String databaseProductName = "";
@@ -268,8 +264,8 @@ public final class JdbcRepository extends AbstractRepository {
         }
 
         try {
-            getJobInstancesStatement = connection1.prepareStatement(getJobInstances);
-            getJobInstancesStatement.executeQuery();
+            countPartitionExecutionStatement = connection1.prepareStatement(countPartitionExecutions);
+            countPartitionExecutionStatement.executeQuery();
         } catch (SQLException e) {
             String ddlFile = getDDLLocation(databaseProductName);
             ddlResource = this.getClass().getClassLoader().getResourceAsStream(ddlFile);
@@ -277,19 +273,10 @@ public final class JdbcRepository extends AbstractRepository {
                 throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
             }
             final java.util.Scanner scanner = new java.util.Scanner(ddlResource).useDelimiter("!");
-            boolean newTransaction = false;
-            Boolean originalAutoCommit = null;
             Connection connection2 = null;
+            Statement batchDDLStatement = null;
             try {
-                if (ut.getStatus() != Status.STATUS_ACTIVE) {
-                    newTransaction = true;
-                    ut.begin();
-                }
                 connection2 = getConnection();
-                if (connection2.getAutoCommit()) {
-                    originalAutoCommit = Boolean.TRUE;
-                    connection2.setAutoCommit(false);
-                }
                 batchDDLStatement = connection2.createStatement();
                 while (scanner.hasNext()) {
                     final String ddlEntry = scanner.next().trim();
@@ -300,31 +287,14 @@ public final class JdbcRepository extends AbstractRepository {
                 }
                 scanner.close();
                 batchDDLStatement.executeBatch();
-                if (newTransaction) {
-                    ut.commit();
-                }
             } catch (Exception e1) {
-                if (newTransaction) {
-                    try {
-                        ut.rollback();
-                    } catch (SystemException e2) {
-                        //ignore
-                    }
-                }
                 throw BatchMessages.MESSAGES.failToCreateTables(e1, ddlFile);
             } finally {
-                if (originalAutoCommit != null) {
-                    try {
-                        connection2.setAutoCommit(originalAutoCommit);
-                    } catch (SQLException e1) {
-                        //ignore
-                    }
-                }
-                close(connection2, null, null);
+                close(connection2, batchDDLStatement, null);
             }
             BatchLogger.LOGGER.tableCreated(ddlFile);
         } finally {
-            close(connection1, getJobInstancesStatement, batchDDLStatement);
+            close(connection1, countPartitionExecutionStatement, null);
             try {
                 if (ddlResource != null) {
                     ddlResource.close();
@@ -931,6 +901,7 @@ public final class JdbcRepository extends AbstractRepository {
         } else if (databaseProductName.contains("Derby")) {
             ddlFile = "sql/jberet-derby.ddl";
         } else {
+            // H2, HSQLDB
             ddlFile = DEFAULT_DDL_FILE;
         }
         BatchLogger.LOGGER.ddlFileAndDatabaseProductName(ddlFile, databaseProductName);
