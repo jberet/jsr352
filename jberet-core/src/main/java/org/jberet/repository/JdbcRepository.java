@@ -288,7 +288,7 @@ public final class JdbcRepository extends AbstractRepository {
                 scanner.close();
                 batchDDLStatement.executeBatch();
             } catch (Exception e1) {
-                throw BatchMessages.MESSAGES.failToCreateTables(e1, ddlFile);
+                throw BatchMessages.MESSAGES.failToCreateTables(e1, databaseProductName, ddlFile);
             } finally {
                 close(connection2, batchDDLStatement, null);
             }
@@ -900,6 +900,8 @@ public final class JdbcRepository extends AbstractRepository {
             ddlFile = "sql/jberet-sybase.ddl";
         } else if (databaseProductName.contains("Derby")) {
             ddlFile = "sql/jberet-derby.ddl";
+        } else if (databaseProductName.startsWith("Firebird")) {
+            ddlFile = "sql/jberet-firebird.ddl";
         } else {
             // H2, HSQLDB
             ddlFile = DEFAULT_DDL_FILE;

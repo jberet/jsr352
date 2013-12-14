@@ -98,8 +98,8 @@ public interface BatchMessages {
     @Message(id = 623, value = "Failed to load sql properties %s")
     BatchRuntimeException failToLoadSqlProperties(@Cause Throwable cause, String sqlFile);
 
-    @Message(id = 624, value = "Failed to create tables for batch job repository with DDL %s")
-    BatchRuntimeException failToCreateTables(@Cause Throwable cause, String ddlFile);
+    @Message(id = 624, value = "Failed to create tables for batch job repository database product name %s with DDL %s")
+    BatchRuntimeException failToCreateTables(@Cause Throwable cause, String databaseProductName, String ddlFile);
 
     @Message(id = 625, value = "Failed to load ddl file %s")
     BatchRuntimeException failToLoadDDL(String ddlFile);
