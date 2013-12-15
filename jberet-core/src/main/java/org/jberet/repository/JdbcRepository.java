@@ -272,7 +272,7 @@ public final class JdbcRepository extends AbstractRepository {
             if (ddlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
             }
-            final java.util.Scanner scanner = new java.util.Scanner(ddlResource).useDelimiter("!");
+            final java.util.Scanner scanner = new java.util.Scanner(ddlResource).useDelimiter("!!");
             Connection connection2 = null;
             Statement batchDDLStatement = null;
             try {
