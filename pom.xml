@@ -32,21 +32,27 @@
     <packaging>pom</packaging>
 
     <properties>
+        <!-- the inherited version does not support forkCount or reuseForks, so override with newer version -->
+        <version.surefire.plugin>2.16</version.surefire.plugin>
+        <version.dependency.plugin>2.8</version.dependency.plugin>
 
         <!-- Dependency versions. Please keep alphabetical -->
         <version.com.google.guava>13.0.1</version.com.google.guava>
-        <version.com.h2database>1.3.170</version.com.h2database>
+        <version.com.h2database>1.3.173</version.com.h2database>
         <version.javax.enterprise>1.1</version.javax.enterprise>
         <version.javax.inject>1</version.javax.inject>
         <version.junit>4.11</version.junit>
-        <version.org.jboss.narayana>5.0.0.M4</version.org.jboss.narayana>
+        <version.org.jboss.narayana>5.0.0.CR2</version.org.jboss.narayana>
         <version.org.jboss.logging.jboss-logging>3.1.3.GA</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-tools>1.2.0.Beta1</version.org.jboss.logging.jboss-logging-tools>
-        <version.org.jboss.marshalling>1.4.0.Final</version.org.jboss.marshalling>
-        <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final</version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
-        <version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>1.0.0.Final</version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>
-        <version.org.jboss.weld.weld>2.0.2.Final</version.org.jboss.weld.weld>
-        <version.org.jboss.weld.weld-api>2.0.SP1</version.org.jboss.weld.weld-api>
+        <version.org.jboss.marshalling>1.4.2.Final</version.org.jboss.marshalling>
+        <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final
+        </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
+        <version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>1.0.0.Final
+        </version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>
+        <version.org.jboss.weld.weld-api>2.1.Final</version.org.jboss.weld.weld-api>
+        <version.org.jboss.weld.weld>2.1.1.Final</version.org.jboss.weld.weld>
+        <version.org.jboss.weld.weld-se>2.1.1.Final</version.org.jboss.weld.weld-se>
     </properties>
 
     <modules>
@@ -205,7 +211,7 @@
             <dependency>
                 <groupId>org.jboss.weld.se</groupId>
                 <artifactId>weld-se</artifactId>
-                <version>${version.org.jboss.weld.weld}</version>
+                <version>${version.org.jboss.weld.weld-se}</version>
                 <optional>true</optional>
             </dependency>
             <dependency>
