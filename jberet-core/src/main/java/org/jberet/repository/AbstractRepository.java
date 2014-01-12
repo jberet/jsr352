@@ -31,8 +31,10 @@ import javax.batch.runtime.StepExecution;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Job;
+import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
 
@@ -180,23 +182,23 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public void savePersistentData(final JobExecution jobExecution, final StepExecutionImpl stepExecution) {
+    public void savePersistentData(final JobExecution jobExecution, final AbstractStepExecution stepOrPartitionExecution) {
         //persistent data and checkpoint info can be mutable objects, so serialize them to avoid further modification.
-        Serializable ser = stepExecution.getPersistentUserData();
+        Serializable ser = stepOrPartitionExecution.getPersistentUserData();
         Serializable copy;
         if (ser != null) {
             copy = BatchUtil.clone(ser);
-            stepExecution.setPersistentUserData(copy);
+            stepOrPartitionExecution.setPersistentUserData(copy);
         }
-        ser = stepExecution.getReaderCheckpointInfo();
+        ser = stepOrPartitionExecution.getReaderCheckpointInfo();
         if (ser != null) {
             copy = BatchUtil.clone(ser);
-            stepExecution.setReaderCheckpointInfo(copy);
+            stepOrPartitionExecution.setReaderCheckpointInfo(copy);
         }
-        ser = stepExecution.getWriterCheckpointInfo();
+        ser = stepOrPartitionExecution.getWriterCheckpointInfo();
         if (ser != null) {
             copy = BatchUtil.clone(ser);
-            stepExecution.setWriterCheckpointInfo(copy);
+            stepOrPartitionExecution.setWriterCheckpointInfo(copy);
         }
         //save stepExecution partition properties
     }
@@ -236,21 +238,21 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public void addPartitionExecution(final StepExecutionImpl enclosingStepExecution, final StepExecutionImpl partitionExecution) {
+    public void addPartitionExecution(final StepExecutionImpl enclosingStepExecution, final PartitionExecutionImpl partitionExecution) {
         enclosingStepExecution.getPartitionExecutions().add(partitionExecution);
     }
 
     @Override
-    public List<StepExecutionImpl> getPartitionExecutions(final long stepExecutionId,
-                                                          final StepExecutionImpl stepExecution,
-                                                          final boolean notCompletedOnly) {
+    public List<PartitionExecutionImpl> getPartitionExecutions(final long stepExecutionId,
+                                                               final StepExecutionImpl stepExecution,
+                                                               final boolean notCompletedOnly) {
         if (stepExecution != null) {
-            final List<StepExecutionImpl> partitionExecutions = stepExecution.getPartitionExecutions();
+            final List<PartitionExecutionImpl> partitionExecutions = stepExecution.getPartitionExecutions();
             if (partitionExecutions.isEmpty() || !notCompletedOnly) {
                 return partitionExecutions;
             }
-            final List<StepExecutionImpl> result = new ArrayList<StepExecutionImpl>();
-            for (StepExecutionImpl sei : partitionExecutions) {
+            final List<PartitionExecutionImpl> result = new ArrayList<PartitionExecutionImpl>();
+            for (PartitionExecutionImpl sei : partitionExecutions) {
                 if (sei.getBatchStatus() != BatchStatus.COMPLETED) {
                     result.add(sei);
                 }

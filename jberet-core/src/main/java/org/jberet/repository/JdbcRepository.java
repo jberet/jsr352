@@ -36,8 +36,10 @@ import javax.sql.DataSource;
 import com.google.common.base.Throwables;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
+import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchUtil;
@@ -618,31 +620,31 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public void savePersistentData(final JobExecution jobExecution, final StepExecutionImpl stepExecution) {
+    public void savePersistentData(final JobExecution jobExecution, final AbstractStepExecution stepOrPartitionExecution) {
         //super.savePersistentData() serialize persistent data and checkpoint info to avoid further modification
-        super.savePersistentData(jobExecution, stepExecution);
-        final int partitionId = stepExecution.getPartitionId();
-        if (partitionId < 0) {
+        super.savePersistentData(jobExecution, stepOrPartitionExecution);
+        if (stepOrPartitionExecution instanceof StepExecutionImpl) {
             //stepExecution is for the main step, and should map to the STEP_EXECUTIOIN table
-            updateStepExecution(stepExecution);
+            updateStepExecution(stepOrPartitionExecution);
         } else {
             //stepExecutionId is for a partition execution, and should map to the PARTITION_EXECUTION table
+            final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) stepOrPartitionExecution;
             final String update = sqls.getProperty(UPDATE_PARTITION_EXECUTION);
             final Connection connection = getConnection();
             PreparedStatement preparedStatement = null;
             try {
                 preparedStatement = connection.prepareStatement(update);
-                preparedStatement.setString(1, stepExecution.getBatchStatus().name());
-                preparedStatement.setString(2, stepExecution.getExitStatus());
+                preparedStatement.setString(1, partitionExecution.getBatchStatus().name());
+                preparedStatement.setString(2, partitionExecution.getExitStatus());
 
-                final Exception exception = stepExecution.getException();
+                final Exception exception = partitionExecution.getException();
                 preparedStatement.setString(3, exception == null ? null : Throwables.getStackTraceAsString(exception));
 
-                preparedStatement.setBytes(4, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
-                preparedStatement.setBytes(5, BatchUtil.objectToBytes(stepExecution.getReaderCheckpointInfo()));
-                preparedStatement.setBytes(6, BatchUtil.objectToBytes(stepExecution.getWriterCheckpointInfo()));
-                preparedStatement.setInt(7, partitionId);
-                preparedStatement.setLong(8, stepExecution.getStepExecutionId());
+                preparedStatement.setBytes(4, BatchUtil.objectToBytes(partitionExecution.getPersistentUserData()));
+                preparedStatement.setBytes(5, BatchUtil.objectToBytes(partitionExecution.getReaderCheckpointInfo()));
+                preparedStatement.setBytes(6, BatchUtil.objectToBytes(partitionExecution.getWriterCheckpointInfo()));
+                preparedStatement.setInt(7, partitionExecution.getPartitionId());
+                preparedStatement.setLong(8, partitionExecution.getStepExecutionId());
 
                 preparedStatement.executeUpdate();
             } catch (Exception e) {
@@ -697,7 +699,7 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public void addPartitionExecution(final StepExecutionImpl enclosingStepExecution, final StepExecutionImpl partitionExecution) {
+    public void addPartitionExecution(final StepExecutionImpl enclosingStepExecution, final PartitionExecutionImpl partitionExecution) {
         super.addPartitionExecution(enclosingStepExecution, partitionExecution);
         final String insert = sqls.getProperty(INSERT_PARTITION_EXECUTION);
         final Connection connection = getConnection();
@@ -739,17 +741,17 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public List<StepExecutionImpl> getPartitionExecutions(final long stepExecutionId,
-                                                          final StepExecutionImpl stepExecution,
-                                                          final boolean notCompletedOnly) {
-        List<StepExecutionImpl> result = super.getPartitionExecutions(stepExecutionId, stepExecution, notCompletedOnly);
+    public List<PartitionExecutionImpl> getPartitionExecutions(final long stepExecutionId,
+                                                               final StepExecutionImpl stepExecution,
+                                                               final boolean notCompletedOnly) {
+        List<PartitionExecutionImpl> result = super.getPartitionExecutions(stepExecutionId, stepExecution, notCompletedOnly);
         if (result != null && !result.isEmpty()) {
             return result;
         }
         final String select = sqls.getProperty(SELECT_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID);
         final Connection connection = getConnection();
         PreparedStatement preparedStatement = null;
-        result = new ArrayList<StepExecutionImpl>();
+        result = new ArrayList<PartitionExecutionImpl>();
         try {
             preparedStatement = connection.prepareStatement(select);
             preparedStatement.setLong(1, stepExecutionId);
@@ -758,9 +760,10 @@ public final class JdbcRepository extends AbstractRepository {
                 final String batchStatusValue = rs.getString(TableColumn.BATCHSTATUS);
                 if (!notCompletedOnly ||
                     !BatchStatus.COMPLETED.name().equals(batchStatusValue)) {
-                    result.add(new StepExecutionImpl(
+                    result.add(new PartitionExecutionImpl(
                             rs.getInt(TableColumn.PARTITIONEXECUTIONID),
                             rs.getLong(TableColumn.STEPEXECUTIONID),
+                            stepExecution.getStepName(),
                             BatchStatus.valueOf(batchStatusValue),
                             rs.getString(TableColumn.EXITSTATUS),
                             BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),

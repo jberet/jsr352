@@ -28,8 +28,10 @@ public final class IntegerArrayWriter extends IntegerArrayReaderWriterBase imple
             return;
         }
 
-        if (MetricImpl.getMetric(((StepContextImpl) stepContext).getStepExecution(), Metric.MetricType.WRITE_COUNT) + items.size() >= writerFailAt
+        final long writeCount = MetricImpl.getMetric(((StepContextImpl) stepContext).getStepExecution(), Metric.MetricType.WRITE_COUNT);
+        if (writeCount + items.size() >= writerFailAt
                 && writerFailAt >= 0) {
+            System.out.printf("About to throw ArithmeticException for writerFailAt %s, WRITE_COUNT %s", writerFailAt, writeCount);
             throw new ArithmeticException("Failing at writer.fail.at point " + writerFailAt);
         }
         if (writerSleepTime > 0) {

@@ -46,6 +46,7 @@ import org.jberet.job.model.Properties;
 import org.jberet.job.model.PropertyResolver;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.job.model.Step;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.StepContextImpl;
@@ -80,7 +81,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
-        this.stepExecution = stepContext.getStepExecution();
+        this.stepExecution = (StepExecutionImpl) stepContext.getStepExecution();
         ut = jobContext.getBatchEnvironment().getUserTransaction();
         createStepListeners();
         initPartitionConfig();
@@ -214,12 +215,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
         }
         final boolean isRestartNotOverride = isRestart && !isOverride;
-        List<StepExecutionImpl> abortedPartitionExecutionsFromPrevious = null;
+        List<PartitionExecutionImpl> abortedPartitionExecutionsFromPrevious = null;
         if (isRestartNotOverride) {
             //need to carry over partition execution data from previous run of the same step
             final StepExecutionImpl originalStepExecution = batchContext.getOriginalStepExecution();
             abortedPartitionExecutionsFromPrevious =
-                jobContext.getJobRepository().getPartitionExecutions(originalStepExecution.getStepExecutionId(), originalStepExecution, true);
+                    jobContext.getJobRepository().getPartitionExecutions(originalStepExecution.getStepExecutionId(), originalStepExecution, true);
             numOfPartitions = abortedPartitionExecutionsFromPrevious.size();
         }
         if (numOfPartitions > numOfThreads) {
@@ -228,12 +229,13 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         collectorDataQueue = new LinkedBlockingQueue<Serializable>();
 
         for (int i = 0; i < numOfPartitions; i++) {
-            final StepExecutionImpl partitionExecution = isRestartNotOverride ? abortedPartitionExecutionsFromPrevious.get(i) : null;
+            final PartitionExecutionImpl partitionExecution = isRestartNotOverride ? abortedPartitionExecutionsFromPrevious.get(i) : null;
             final int partitionIndex = isRestartNotOverride ? partitionExecution.getPartitionId() : i;
 
             final AbstractRunner<StepContextImpl> runner1;
             final StepContextImpl stepContext1 = batchContext.clone();
             final Step step1 = stepContext1.getStep();
+            final PartitionExecutionImpl partitionExecution1 = (PartitionExecutionImpl) stepContext1.getStepExecution();
 
             final PropertyResolver resolver = new PropertyResolver();
             if (partitionIndex >= 0 && partitionIndex < partitionProperties.length) {
@@ -241,10 +243,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
                 //associate this partition represented by this StepExecutionImpl with this partition properties index.  If this
                 //partition fails or is stopped, the restart process can select this partition properties.
-                stepContext1.getStepExecution().setPartitionId(partitionIndex);
+                partitionExecution1.setPartitionId(partitionIndex);
             } else {
                 //some partitioned steps may not have any partition properties
-                stepContext1.getStepExecution().setPartitionId(i);
+                partitionExecution1.setPartitionId(i);
             }
             resolver.setResolvePartitionPlanProperties(true);
             resolver.resolve(step1);
@@ -267,18 +269,18 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (i >= numOfThreads) {
                 completedPartitionThreads.take();
             }
-            jobContext.getJobRepository().addPartitionExecution(stepExecution, stepContext1.getStepExecution());
+            jobContext.getJobRepository().addPartitionExecution(stepExecution, partitionExecution1);
             jobContext.getBatchEnvironment().submitTask(runner1);
         }
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
-        final List<StepExecutionImpl> fromAllPartitions = new ArrayList<StepExecutionImpl>();
+        final List<PartitionExecutionImpl> fromAllPartitions = new ArrayList<PartitionExecutionImpl>();
         ut.begin();
         try {
             while (fromAllPartitions.size() < numOfPartitions) {
                 final Serializable data = collectorDataQueue.take();
-                if (data instanceof StepExecutionImpl) {
-                    final StepExecutionImpl s = (StepExecutionImpl) data;
+                if (data instanceof PartitionExecutionImpl) {
+                    final PartitionExecutionImpl s = (PartitionExecutionImpl) data;
 
                     if (step.getChunk() != null) {
                         stepExecution.getStepMetrics().addStepMetrics(s.getStepMetrics());
@@ -290,7 +292,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     final BatchStatus bs = s.getBatchStatus();
 
                     if (bs == BatchStatus.FAILED || bs == BatchStatus.STOPPED) {
-                        if(consolidatedBatchStatus != BatchStatus.FAILED) {
+                        if (consolidatedBatchStatus != BatchStatus.FAILED) {
                             consolidatedBatchStatus = bs;
                         }
                         if (batchContext.getException() == null && s.getException() != null) {

@@ -18,6 +18,7 @@ import javax.batch.runtime.BatchStatus;
 
 public abstract class AbstractExecution implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
+    protected long version;
     protected long startTime;
     protected long endTime;
 

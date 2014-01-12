@@ -9,12 +9,13 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.runtime.metric;
 
 import java.io.Serializable;
 import javax.batch.runtime.Metric;
-import javax.batch.runtime.StepExecution;
+
+import org.jberet.runtime.AbstractStepExecution;
 
 public class MetricImpl implements Metric, Serializable {
 
@@ -66,7 +67,7 @@ public class MetricImpl implements Metric, Serializable {
         return sb.toString();
     }
 
-    public static long getMetric(final StepExecution stepExecution, final Metric.MetricType type) {
+    public static long getMetric(final AbstractStepExecution stepExecution, final Metric.MetricType type) {
         for (final Metric m : stepExecution.getMetrics()) {
             if (m.getType() == type) {
                 return m.getValue();

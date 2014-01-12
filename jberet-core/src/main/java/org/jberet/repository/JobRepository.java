@@ -20,8 +20,10 @@ import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 
 import org.jberet.job.model.Job;
+import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 
 public interface JobRepository {
@@ -51,9 +53,9 @@ public interface JobRepository {
     StepExecutionImpl findOriginalStepExecutionForRestart(String stepName, JobExecutionImpl jobExecutionToRestart);
     int countStepStartTimes(String stepName, long jobInstanceId);
 
-    void addPartitionExecution(StepExecutionImpl enclosingStepExecution, StepExecutionImpl partitionExecution);
-    List<StepExecutionImpl> getPartitionExecutions(long stepExecutionId, StepExecutionImpl stepExecution, boolean notCompletedOnly);
+    void addPartitionExecution(StepExecutionImpl enclosingStepExecution, PartitionExecutionImpl partitionExecution);
+    List<PartitionExecutionImpl> getPartitionExecutions(long stepExecutionId, StepExecutionImpl stepExecution, boolean notCompletedOnly);
 
-    void savePersistentData(JobExecution jobExecution, StepExecutionImpl stepExecution);
+    void savePersistentData(JobExecution jobExecution, AbstractStepExecution stepOrPartitionExecution);
 
 }

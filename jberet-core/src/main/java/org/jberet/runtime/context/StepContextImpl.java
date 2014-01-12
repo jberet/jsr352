@@ -20,13 +20,23 @@ import javax.batch.runtime.context.StepContext;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Step;
+import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
 
+/**
+ * Represents the execution context for either a step execution or partition execution.
+ */
 public class StepContextImpl extends AbstractContext implements StepContext, Cloneable {
     private Step step;
-    private StepExecutionImpl stepExecution;
+
+    /**
+     * The step execution or partition execution associated with this context
+     */
+    private AbstractStepExecution stepExecution;
+
     private StepExecutionImpl originalStepExecution;
     Boolean allowStartIfComplete;
 
@@ -67,10 +77,10 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
         StepContextImpl c = null;
         try {
             c = (StepContextImpl) super.clone();
-            c.stepExecution = stepExecution.clone();
+            c.stepExecution = new PartitionExecutionImpl(stepExecution);
             c.outerContexts = new AbstractContext[outerContexts.length];
             c.outerContexts[0] = getJobContext().clone();
-            for(int i = 1; i < c.outerContexts.length; i++) {
+            for (int i = 1; i < c.outerContexts.length; i++) {
                 c.outerContexts[i] = outerContexts[i];
             }
             c.step = BatchUtil.clone(step);
@@ -84,7 +94,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
         return this.step;
     }
 
-    public StepExecutionImpl getStepExecution() {
+    public AbstractStepExecution getStepExecution() {
         return this.stepExecution;
     }
 

@@ -17,7 +17,7 @@ import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 
-import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.metric.MetricImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
@@ -58,13 +58,13 @@ public class ChunkPartitionIT extends AbstractIT {
         startJobAndWait(jobChunkPartitionFailComplete);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
-        final List<StepExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
+        final List<PartitionExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
 
         //1 should completed and 2 should failed, but the order can be random
         int completedPartitionCount = 0;
         int failedPartitionCount = 0;
         System.out.printf("StepExecution id: %s, step name: %s%n", stepExecution0.getStepExecutionId(), stepExecution0.getStepName());
-        for (final StepExecutionImpl e : partitionExecutions) {
+        for (final PartitionExecutionImpl e : partitionExecutions) {
             final BatchStatus batchStatus = e.getBatchStatus();
             System.out.printf("Partition execution id: %s, status %s, StepExecution id: %s%n",
                     e.getPartitionId(), batchStatus, e.getStepExecutionId());
@@ -101,9 +101,9 @@ public class ChunkPartitionIT extends AbstractIT {
         startJobAndWait(jobChunkPartitionMetricsCombined);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
-        final List<StepExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
+        final List<PartitionExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
 
-        for (final StepExecutionImpl e : partitionExecutions) {
+        for (final PartitionExecutionImpl e : partitionExecutions) {
             final BatchStatus batchStatus = e.getBatchStatus();
             Assert.assertEquals(BatchStatus.COMPLETED, e.getBatchStatus());
         }

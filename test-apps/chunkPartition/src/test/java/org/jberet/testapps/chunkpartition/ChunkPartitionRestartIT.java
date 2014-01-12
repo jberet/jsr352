@@ -16,7 +16,7 @@ import java.util.List;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 
-import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.metric.MetricImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
@@ -30,11 +30,11 @@ public class ChunkPartitionRestartIT extends AbstractIT {
 
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
-        final List<StepExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
+        final List<PartitionExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
 
         //2 should completed
         Assert.assertEquals(2, partitionExecutions.size());
-        for (final StepExecutionImpl e : partitionExecutions) {
+        for (final PartitionExecutionImpl e : partitionExecutions) {
             final BatchStatus batchStatus = e.getBatchStatus();
             System.out.printf("Partition execution id: %s, status %s, StepExecution id: %s%n",
                     e.getPartitionId(), batchStatus, e.getStepExecutionId());

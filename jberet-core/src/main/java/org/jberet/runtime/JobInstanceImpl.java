@@ -23,13 +23,16 @@ import org.jberet.repository.ApplicationAndJobName;
 
 public final class JobInstanceImpl implements JobInstance {
     private long id;
+    private long version;
+    private String jobName;
+    private String applicationName;
     Job unsubstitutedJob;
-    ApplicationAndJobName applicationAndJobName;
 
     private final List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
 
     public JobInstanceImpl(final Job unsubstitutedJob, final ApplicationAndJobName applicationAndJobName) {
-        this.applicationAndJobName = applicationAndJobName;
+        this.jobName = applicationAndJobName.jobName;
+        this.applicationName = applicationAndJobName.appName;
         this.unsubstitutedJob = unsubstitutedJob;
     }
 
@@ -39,11 +42,11 @@ public final class JobInstanceImpl implements JobInstance {
 
     @Override
     public String getJobName() {
-        return applicationAndJobName.jobName;
+        return this.jobName;
     }
 
     public String getApplicationName() {
-        return applicationAndJobName.appName;
+        return this.applicationName;
     }
 
     @Override

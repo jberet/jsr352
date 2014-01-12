@@ -18,35 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
-import javax.batch.runtime.StepExecution;
 
-import org.jberet._private.BatchLogger;
-import org.jberet.runtime.metric.StepMetrics;
-
-public final class StepExecutionImpl extends AbstractExecution implements StepExecution, Serializable, Cloneable {
+public final class StepExecutionImpl extends AbstractStepExecution {
     private static final long serialVersionUID = 1L;
-
-    private long id;
-
-    /**
-     * If this instance is assigned to a partition, partitionId represents the id for that partition.  Its value should
-     * be the same as the partition attribute of the target partition properties in job xml.  The default value -1
-     * indicates that this StepExecutionImpl is for the main step execution, and is not a cloned instance for any
-     * partition.
-     */
-    private int partitionId = -1;
-
-    private String stepName;
-
-    private Serializable persistentUserData;
-
-    private Serializable readerCheckpointInfo;
-
-    private Serializable writerCheckpointInfo;
-
-    private Exception exception;
-
-    private StepMetrics stepMetrics = new StepMetrics();
 
     /**
      * For a partitioned step, records the partitions contained in the current step.  If it is a first-time started
@@ -55,15 +29,15 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
      * These partition executions are carried over when the StepContext is created.  Note this field should only be
      * in the main step, and not in any StepExecution clones.
      */
-    private List<StepExecutionImpl> partitionExecutions = new ArrayList<StepExecutionImpl>();
+    private List<PartitionExecutionImpl> partitionExecutions = new ArrayList<PartitionExecutionImpl>();
 
     public StepExecutionImpl(final String stepName) {
-        this.stepName = stepName;
-        startTime = System.currentTimeMillis();
+        super(stepName);
     }
 
     /**
      * Creates StepExecutionImpl from database records.
+     *
      * @param id
      * @param stepName
      * @param startTime
@@ -121,142 +95,28 @@ public final class StepExecutionImpl extends AbstractExecution implements StepEx
         stepMetrics.set(Metric.MetricType.WRITE_SKIP_COUNT, writeSkipCount);
     }
 
-    /**
-     * Creates a partition execution data structure.
-     * @param partitionId
-     * @param stepExecutionId
-     * @param batchStatus
-     * @param exitStatus
-     * @param persistentUserData
-     * @param readerCheckpointInfo
-     * @param writerCheckpointInfo
-     */
-    public StepExecutionImpl(final int partitionId,
-                             final long stepExecutionId,
-                             final BatchStatus batchStatus,
-                             final String exitStatus,
-                             final Serializable persistentUserData,
-                             final Serializable readerCheckpointInfo,
-                             final Serializable writerCheckpointInfo
-                             ) {
-        this.partitionId = partitionId;
-        this.id = stepExecutionId;
-        this.batchStatus = batchStatus;
-        this.exitStatus = exitStatus;
-        this.persistentUserData = persistentUserData;
-        this.readerCheckpointInfo = readerCheckpointInfo;
-        this.writerCheckpointInfo = writerCheckpointInfo;
-    }
-
-    public void setId(final long id) {
-        this.id = id;
-    }
-
     @Override
-    public StepExecutionImpl clone() throws CloneNotSupportedException {
-        StepExecutionImpl result = null;
-        try {
-            result = (StepExecutionImpl) super.clone();
-        } catch (CloneNotSupportedException e) {
-            BatchLogger.LOGGER.failToClone(e, this, "", stepName);
-        }
-        result.partitionId = 0;     //overwrite the default -1 to indicate it's for a partition
-        result.partitionExecutions = null;
-        result.stepMetrics = new StepMetrics();
-        return result;
-    }
-
-    @Override
-    public long getStepExecutionId() {
-        return this.id;
-    }
-
-    @Override
-    public String getStepName() {
-        return stepName;
-    }
-
-    @Override
-    public Serializable getPersistentUserData() {
-        return persistentUserData;
-    }
-
-    public void setPersistentUserData(final Serializable persistentUserData) {
-        this.persistentUserData = persistentUserData;
-    }
-
-    @Override
-    public Metric[] getMetrics() {
-        return stepMetrics.getMetrics();
-    }
-
-    public StepMetrics getStepMetrics() {
-        return this.stepMetrics;
-    }
-
-    public Exception getException() {
-        return exception;
-    }
-
-    public void setException(final Exception exception) {
-        this.exception = exception;
-    }
-
-    @Override
-    public void setBatchStatus(final BatchStatus batchStatus) {
-        super.setBatchStatus(batchStatus);
-        if (batchStatus == BatchStatus.COMPLETED ||
-                batchStatus == BatchStatus.FAILED ||
-                batchStatus == BatchStatus.STOPPED) {
-            endTime = System.currentTimeMillis();
-        }
-    }
-
-    public Serializable getReaderCheckpointInfo() {
-        return readerCheckpointInfo;
-    }
-
-    public void setReaderCheckpointInfo(final Serializable readerCheckpointInfo) {
-        this.readerCheckpointInfo = readerCheckpointInfo;
-    }
-
-    public Serializable getWriterCheckpointInfo() {
-        return writerCheckpointInfo;
-    }
-
-    public void setWriterCheckpointInfo(final Serializable writerCheckpointInfo) {
-        this.writerCheckpointInfo = writerCheckpointInfo;
-    }
-
-    public int getPartitionId() {
-        return partitionId;
-    }
-
-    public void setPartitionId(final int partitionId) {
-        this.partitionId = partitionId;
-    }
-
-    public List<StepExecutionImpl> getPartitionExecutions() {
+    public List<PartitionExecutionImpl> getPartitionExecutions() {
         return partitionExecutions;
     }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof StepExecutionImpl)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
         final StepExecutionImpl that = (StepExecutionImpl) o;
 
-        if (id != that.id) return false;
-        if (partitionId != that.partitionId) return false;
+        if (!partitionExecutions.equals(that.partitionExecutions)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + partitionId;
+        int result = super.hashCode();
+        result = 31 * result + partitionExecutions.hashCode();
         return result;
     }
 }

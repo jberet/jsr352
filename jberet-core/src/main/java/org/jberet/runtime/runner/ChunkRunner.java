@@ -41,7 +41,7 @@ import org.jberet.job.model.Chunk;
 import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.RefArtifact;
-import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
 
@@ -72,7 +72,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private final Chunk chunk;
     private final StepExecutionRunner stepRunner;
     private final StepMetrics stepMetrics;
-    private final StepExecutionImpl stepOrPartitionExecution;
+    private AbstractStepExecution stepOrPartitionExecution;
     private final ItemReader itemReader;
     private final ItemWriter itemWriter;
     private ItemProcessor itemProcessor;
@@ -204,7 +204,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             //set batch status to indicate that either the main step, or a partition has completed successfully.
             //note that when a chunk range is completed, we should not set batch status as completed.
             //make sure the step has not been set to STOPPED.
-            if(batchContext.getBatchStatus() == BatchStatus.STARTED) {
+            if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
                 batchContext.setBatchStatus(BatchStatus.COMPLETED);
             }
         } catch (Exception e) {
