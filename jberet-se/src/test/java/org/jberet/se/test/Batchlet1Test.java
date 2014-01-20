@@ -19,6 +19,7 @@ import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.StepExecutionImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,6 +27,7 @@ public class Batchlet1Test {
     static final String jobName = "org.jberet.se.test.batchlet1";
     static final String jobName2 = "org.jberet.se.test.batchlet2";
     static final String jobName3 = "org.jberet.se.test.batchlet3";
+    static final String jobName4 = "org.jberet.se.test.batchlet4";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
 
@@ -89,6 +91,30 @@ public class Batchlet1Test {
             Assert.assertEquals(BatchStatus.FAILED, e.getStepExecutions().get(0).getBatchStatus());
             Assert.assertEquals(Batchlet1.ACTION_EXCEPTION, e.getStepExecutions().get(0).getExitStatus());
         }
+    }
+
+    /**
+     * stepFailWithLongException will throw an exception with very long message, and the exception should be truncated
+     * and stored in job repository STEP_EXECUTION table without causing database error.
+     * @throws Exception
+     */
+    @Test
+    public void testStepFailWithLongException() throws Exception {
+        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_LONG_EXCEPTION);
+        System.out.printf("Start with params %s%n", params);
+        final long jobExecutionId = jobOperator.start(jobName4, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        final StepExecutionImpl stepExecution = (StepExecutionImpl) jobExecution.getStepExecutions().get(0);
+        Assert.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
+        Assert.assertEquals(Batchlet1.ACTION_LONG_EXCEPTION, stepExecution.getExitStatus());
+
+        final Exception exception = stepExecution.getException();
+        Assert.assertNotNull(exception);
+        final String message = exception.getMessage();
+        //System.out.printf("Step exception message: %s%n", message.substring(0, Math.min(message.length(), 1000)));
+        Assert.assertEquals(true, message.startsWith(Batchlet1.ACTION_LONG_EXCEPTION));
     }
 
     static Properties createParams(final String key, final String val) {

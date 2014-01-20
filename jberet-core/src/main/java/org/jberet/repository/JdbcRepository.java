@@ -95,6 +95,12 @@ public final class JdbcRepository extends AbstractRepository {
      * and are kept there as comment line for completeness.
      */
     private static class TableColumn {
+        /**
+         * Size of EXECUTIONEXCEPTION column in STEP_EXECUTION and PARTITION_EXECUTION table.  Values will be truncated
+         * to fit this size before saving to database.
+         */
+        private static final int EXECUTION_EXCEPTION_LENGTH_LIMIT = 2048;
+
         //table name
         private static final String JOB_INSTANCE = "JOB_INSTANCE";
         //column names
@@ -593,10 +599,7 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setTimestamp(1, new Timestamp(stepExecution.getEndTime().getTime()));
             preparedStatement.setString(2, stepExecution.getBatchStatus().name());
             preparedStatement.setString(3, stepExecution.getExitStatus());
-
-            final Exception exception = stepExecutionImpl.getException();
-            preparedStatement.setString(4, exception == null ? null : Throwables.getStackTraceAsString(exception));
-
+            preparedStatement.setString(4, formatException(stepExecutionImpl.getException()));
             preparedStatement.setBytes(5, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
             preparedStatement.setLong(6, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
             preparedStatement.setLong(7, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
@@ -636,10 +639,7 @@ public final class JdbcRepository extends AbstractRepository {
                 preparedStatement = connection.prepareStatement(update);
                 preparedStatement.setString(1, partitionExecution.getBatchStatus().name());
                 preparedStatement.setString(2, partitionExecution.getExitStatus());
-
-                final Exception exception = partitionExecution.getException();
-                preparedStatement.setString(3, exception == null ? null : Throwables.getStackTraceAsString(exception));
-
+                preparedStatement.setString(3, formatException(partitionExecution.getException()));
                 preparedStatement.setBytes(4, BatchUtil.objectToBytes(partitionExecution.getPersistentUserData()));
                 preparedStatement.setBytes(5, BatchUtil.objectToBytes(partitionExecution.getReaderCheckpointInfo()));
                 preparedStatement.setBytes(6, BatchUtil.objectToBytes(partitionExecution.getWriterCheckpointInfo()));
@@ -911,5 +911,17 @@ public final class JdbcRepository extends AbstractRepository {
         }
         BatchLogger.LOGGER.ddlFileAndDatabaseProductName(ddlFile, databaseProductName);
         return ddlFile;
+    }
+
+    private static String formatException(final Exception exception) {
+        if (exception == null) {
+            return null;
+        }
+        String asString = Throwables.getStackTraceAsString(exception);
+        if (asString.length() <= TableColumn.EXECUTION_EXCEPTION_LENGTH_LIMIT) {
+            return asString;
+        }
+        asString = exception + BatchUtil.NL + Throwables.getRootCause(exception);
+        return asString.substring(0, Math.min(TableColumn.EXECUTION_EXCEPTION_LENGTH_LIMIT, asString.length()));
     }
 }

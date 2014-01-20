@@ -20,6 +20,7 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.util.BatchUtil;
 import org.junit.Assert;
 
 @Named
@@ -29,6 +30,7 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     static final String ACTION_FAIL = "fail";
     static final String ACTION_END = "end";
     static final String ACTION_EXCEPTION = "exception";
+    static final String ACTION_LONG_EXCEPTION = "longException";
     static final String ACTION_OTHER = "other";
 
     @Inject
@@ -97,6 +99,9 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
         if (ACTION_EXCEPTION.equals(action)) {
             stepContext.setExitStatus(ACTION_EXCEPTION);
             throw new RuntimeException("Exception from " + this.getClass().getName() + " to fail the job execution.");
+        } else if (ACTION_LONG_EXCEPTION.equals(action)) {
+            stepContext.setExitStatus(ACTION_LONG_EXCEPTION);
+            throw generateLongNestedException();
         }
         return action;
     }
@@ -104,5 +109,13 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     @Override
     public void stop() throws Exception {
         System.out.printf("in @Stop, %s%n", Thread.currentThread());
+    }
+
+    private static Exception generateLongNestedException() {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            sb.append(Long.MAX_VALUE).append(BatchUtil.NL);
+        }
+        return new IllegalStateException(ACTION_LONG_EXCEPTION, new ArithmeticException(sb.toString()));
     }
 }
