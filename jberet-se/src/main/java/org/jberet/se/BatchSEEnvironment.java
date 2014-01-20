@@ -72,7 +72,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         }
 
         createThreadPoolExecutor();
-        this.ut = com.arjuna.ats.jta.UserTransaction.userTransaction();
+        this.ut = BatchSETransaction.getInstance();
     }
 
     @Override

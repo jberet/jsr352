@@ -34,14 +34,6 @@ Cheng Fang - Initial API and implementation
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jboss.narayana.arjunacore</groupId>
-            <artifactId>arjuna</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.narayana.jta</groupId>
-            <artifactId>narayana-jta</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.weld</groupId>
             <artifactId>weld-api</artifactId>
         </dependency>
