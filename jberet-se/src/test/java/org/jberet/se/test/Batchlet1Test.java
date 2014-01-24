@@ -96,6 +96,7 @@ public class Batchlet1Test {
     /**
      * stepFailWithLongException will throw an exception with very long message, and the exception should be truncated
      * and stored in job repository STEP_EXECUTION table without causing database error.
+     *
      * @throws Exception
      */
     @Test
@@ -119,7 +120,9 @@ public class Batchlet1Test {
 
     static Properties createParams(final String key, final String val) {
         final Properties params = new Properties();
-        params.setProperty(key, val);
+        if (key != null) {
+            params.setProperty(key, val);
+        }
         return params;
     }
 

@@ -65,7 +65,7 @@ public class CsvBeanReader implements ItemReader {
 
     @Inject
     @BatchProperty
-    protected Class<?> beanType;
+    protected Class beanType;
 
     @Inject
     @BatchProperty

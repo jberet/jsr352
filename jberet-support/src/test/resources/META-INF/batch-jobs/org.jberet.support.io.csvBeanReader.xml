@@ -17,20 +17,11 @@
         <chunk item-count="3">
             <reader ref="csvBeanReader">
                 <properties>
-                    <property name="data.count" value="30"/>
-                    <property name="reader.fail.at" value="-1"/>
-                    <property name="partition.start" value="#{partitionPlan['partition.start']}"/>
-                    <property name="partition.end" value="#{partitionPlan['partition.end']}"/>
+                    <property name="resource" value="person.csv"/>
+                    <property name="beanType" value="org.jberet.support.io.Person"/>
                 </properties>
             </reader>
-            <writer ref="integerArrayWriter">
-                <properties>
-                    <property name="data.count" value="30"/>
-                    <property name="writer.fail.at" value="-1"/>
-                    <property name="writer.sleep.time" value="#{jobParameters['writer.sleep.time']}"/>
-                    <property name="partition.start" value="#{partitionPlan['partition.start']}"/>
-                    <property name="partition.end" value="#{partitionPlan['partition.end']}"/>
-                </properties>
+            <writer ref="dumpItemWriter">
             </writer>
         </chunk>
     </step>

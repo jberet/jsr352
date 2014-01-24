@@ -18,7 +18,6 @@ import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 
 import org.jberet.runtime.JobExecutionImpl;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CsvBeanReaderTest {
@@ -26,8 +25,8 @@ public class CsvBeanReaderTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
 
-    @Test @Ignore
-    public void testStopWithRestartPoint() throws Exception {
+    @Test
+    public void testDefault() throws Exception {
         final Properties params = createParams(null, null);
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
@@ -36,7 +35,9 @@ public class CsvBeanReaderTest {
 
     static Properties createParams(final String key, final String val) {
         final Properties params = new Properties();
-        params.setProperty(key, val);
+        if (key != null) {
+            params.setProperty(key, val);
+        }
         return params;
     }
 

@@ -27,7 +27,26 @@
                 <groupId>org.jberet</groupId>
                 <artifactId>jberet-core</artifactId>
                 <version>${project.version}</version>
+                <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.jberet</groupId>
+                <artifactId>jberet-se</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!--
+            <dependency>
+                <groupId>org.jboss.weld</groupId>
+                <artifactId>weld-core</artifactId>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.weld.se</groupId>
+                <artifactId>weld-se</artifactId>
+                <scope>test</scope>
+            </dependency>
+            -->
         </dependencies>
     </dependencyManagement>
 
@@ -39,6 +58,18 @@
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-se</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld.se</groupId>
+            <artifactId>weld-se</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
