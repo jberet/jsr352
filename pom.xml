@@ -62,6 +62,7 @@
         <module>tck-porting-impl</module>
         <module>jberet-distribution</module>
         <module>jberet-jpa-repository</module>
+        <module>jberet-support</module>
     </modules>
 
     <build>
