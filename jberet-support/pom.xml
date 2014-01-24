@@ -35,18 +35,18 @@
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!--
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-core</artifactId>
+                <version>${version.org.jboss.weld.weld}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld.se</groupId>
                 <artifactId>weld-se</artifactId>
+                <version>${version.org.jboss.weld.weld-se}</version>
                 <scope>test</scope>
             </dependency>
-            -->
         </dependencies>
     </dependencyManagement>
 

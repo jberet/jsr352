@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
-import javax.annotation.PostConstruct;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.inject.Inject;
@@ -35,6 +34,10 @@ import org.supercsv.comment.CommentMatcher;
 import org.supercsv.comment.CommentMatches;
 import org.supercsv.encoder.CsvEncoder;
 import org.supercsv.encoder.SelectiveCsvEncoder;
+import org.supercsv.io.ICsvBeanReader;
+import org.supercsv.io.ICsvListReader;
+import org.supercsv.io.ICsvMapReader;
+import org.supercsv.io.ICsvReader;
 import org.supercsv.prefs.CsvPreference;
 import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.quote.ColumnQuoteMode;
@@ -51,9 +54,14 @@ import static org.jberet.support.io.CsvProperties.SKIP_COMMENTS_KEY;
 import static org.jberet.support.io.CsvProperties.STANDARD_PREFERENCE;
 import static org.jberet.support.io.CsvProperties.TAB_PREFERENCE;
 
+/**
+ * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads from a CSV resource into a user-defined
+ * bean, java.util.List&lt;String&gt;, or java.util.Map&lt;String, String&gt;.
+ */
 @Named
-public class CsvBeanReader implements ItemReader {
+public class CsvItemReader implements ItemReader {
     private static final Class[] stringParameterTypes = {String.class};
+    private static final CellProcessor[] noCellProcessors = new CellProcessor[0];
 
     @Inject
     @BatchProperty
@@ -107,29 +115,7 @@ public class CsvBeanReader implements ItemReader {
     @BatchProperty
     protected String quoteMode;
 
-    protected FastForwardCsvBeanReader delegateReader;
-
-    @PostConstruct
-    protected void postConstruct() {
-        delegateReader = new FastForwardCsvBeanReader(getInputReader(), getCsvPreference());
-        try {
-            final String[] header = delegateReader.getHeader(true);//first line check true
-            if (this.nameMapping == null) {
-                this.nameMapping = header;
-            }
-        } catch (final IOException e) {
-            throw SupportLogger.LOGGER.failToReadCsvHeader(e, resource);
-        }
-        if (this.end == 0) {
-            this.end = Integer.MAX_VALUE;
-        }
-        if (beanType == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(null, BEAN_TYPE_KEY);
-        }
-        if (nameMapping == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(null, NAME_MAPPING_KEY);
-        }
-    }
+    protected ICsvReader delegateReader;
 
     @Override
     public void open(final Serializable checkpoint) {
@@ -146,7 +132,30 @@ public class CsvBeanReader implements ItemReader {
         if (startRowNumber < this.start || startRowNumber > this.end) {
             throw SupportLogger.LOGGER.invalidStartPosition(startRowNumber, this.start, this.end);
         }
-        delegateReader.setStartRowNumber(startRowNumber);
+        if (beanType == null) {
+            throw SupportLogger.LOGGER.invalidCsvPreference(null, BEAN_TYPE_KEY);
+        } else if (java.util.List.class.isAssignableFrom(beanType)) {
+            delegateReader = new FastForwardCsvListReader(getInputReader(), getCsvPreference(), startRowNumber);
+        } else if (java.util.Map.class.isAssignableFrom(beanType)) {
+            delegateReader = new FastForwardCsvMapReader(getInputReader(), getCsvPreference(), startRowNumber);
+        } else {
+            delegateReader = new FastForwardCsvBeanReader(getInputReader(), getCsvPreference(), startRowNumber);
+        }
+
+        try {
+            final String[] header = delegateReader.getHeader(true);//first line check true
+            if (this.nameMapping == null) {
+                this.nameMapping = header;
+            }
+        } catch (final IOException e) {
+            throw SupportLogger.LOGGER.failToReadCsvHeader(e, resource);
+        }
+        if (this.end == 0) {
+            this.end = Integer.MAX_VALUE;
+        }
+        if (nameMapping == null) {
+            throw SupportLogger.LOGGER.invalidCsvPreference(null, NAME_MAPPING_KEY);
+        }
     }
 
     @Override
@@ -160,10 +169,27 @@ public class CsvBeanReader implements ItemReader {
             return null;
         }
         final CellProcessor[] cellProcessors = getCellProcessors();
-        if (cellProcessors == null || cellProcessors.length == 0) {
-            return delegateReader.read(beanType, getNameMapping());
+        final Object result;
+        if (delegateReader instanceof org.supercsv.io.ICsvBeanReader) {
+            if (cellProcessors.length == 0) {
+                result = ((ICsvBeanReader) delegateReader).read(beanType, getNameMapping());
+            } else {
+                result = ((ICsvBeanReader) delegateReader).read(beanType, getNameMapping(), cellProcessors);
+            }
+        } else if (delegateReader instanceof ICsvListReader) {
+            if (cellProcessors.length == 0) {
+                result = ((ICsvListReader) delegateReader).read();
+            } else {
+                result = ((ICsvListReader) delegateReader).read(cellProcessors);
+            }
+        } else {
+            if (cellProcessors.length == 0) {
+                result = ((ICsvMapReader) delegateReader).read(getNameMapping());
+            } else {
+                result = ((ICsvMapReader) delegateReader).read(getNameMapping(), cellProcessors);
+            }
         }
-        return delegateReader.read(beanType, getNameMapping(), cellProcessors);
+        return result;
     }
 
     @Override
@@ -248,20 +274,20 @@ public class CsvBeanReader implements ItemReader {
                 }
             } else {
                 SupportLogger.LOGGER.notFile(resource);
-                inputStream = CsvBeanReader.class.getClassLoader().getResourceAsStream(resource);
+                inputStream = CsvItemReader.class.getClassLoader().getResourceAsStream(resource);
             }
         }
         return new InputStreamReader(inputStream);
     }
 
     /**
-     * Gets the cell processors for reading CSV resource.  The default implementation returns null, and subclasses may
-     * choose to override it to provide more meaningful cell processors.
+     * Gets the cell processors for reading CSV resource.  The default implementation returns an empty array,
+     * and subclasses may override it to provide more meaningful cell processors.
      *
      * @return an array of cell processors
      */
     protected CellProcessor[] getCellProcessors() {
-        return null;
+        return noCellProcessors;
     }
 
     /**
@@ -380,7 +406,7 @@ public class CsvBeanReader implements ItemReader {
         int paramQuoteCharPosition = -1;
         String matcherName = null;
         String matcherParam = null;
-        CommentMatcher commentMatcher;
+        final CommentMatcher commentMatcher;
         if (singleQuote1 >= 0) {
             if (doubleQuote1 >= 0) {
                 //both ' and " are present, choose the one that appears first as the param quote
@@ -435,7 +461,7 @@ public class CsvBeanReader implements ItemReader {
 
     private <T> T loadAndInstantiate(final String className, final String contextVal, final String param) {
         try {
-            final Class<?> aClass = CsvBeanReader.class.getClassLoader().loadClass(className);
+            final Class<?> aClass = CsvItemReader.class.getClassLoader().loadClass(className);
             if (param == null) {
                 return (T) aClass.newInstance();
             } else {

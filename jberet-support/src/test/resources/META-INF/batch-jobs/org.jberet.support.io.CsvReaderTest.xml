@@ -12,13 +12,13 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="org.jberet.support.io.csvBeanReader" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="org.jberet.support.io.csvBeanReader.step1">
+<job id="org.jberet.support.io.CsvReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="org.jberet.support.io.CsvReaderTest.step1">
         <chunk item-count="3">
-            <reader ref="csvBeanReader">
+            <reader ref="csvItemReader">
                 <properties>
                     <property name="resource" value="person.csv"/>
-                    <property name="beanType" value="org.jberet.support.io.Person"/>
+                    <property name="beanType" value="#{jobParameters['beanType']}"/>
                 </properties>
             </reader>
             <writer ref="dumpItemWriter">

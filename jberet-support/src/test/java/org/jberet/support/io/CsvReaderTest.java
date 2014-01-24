@@ -20,14 +20,30 @@ import javax.batch.runtime.BatchRuntime;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Test;
 
-public class CsvBeanReaderTest {
-    static final String jobName = "org.jberet.support.io.csvBeanReader";
+public class CsvReaderTest {
+    static final String jobName = "org.jberet.support.io.CsvReaderTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
 
     @Test
-    public void testDefault() throws Exception {
-        final Properties params = createParams(null, null);
+    public void testBeanType() throws Exception {
+        final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "org.jberet.support.io.Person");
+        final long jobExecutionId = jobOperator.start(jobName, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
+    }
+
+    @Test
+    public void testListType() throws Exception {
+        final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "java.util.List");
+        final long jobExecutionId = jobOperator.start(jobName, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
+    }
+
+    @Test
+    public void testMapType() throws Exception {
+        final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "java.util.Map");
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);

@@ -26,6 +26,16 @@ import org.supercsv.prefs.CsvPreference;
 import org.supercsv.util.BeanInterfaceProxy;
 import org.supercsv.util.MethodCache;
 
+/**
+ * Copied and modified from supercsv CsvBeanReader to support fast forward.
+ * CsvBeanReader reads a CSV file by instantiating a bean for every row and mapping each column to a field on the bean
+ * (using the supplied name mapping). The bean to populate can be either a class or interface. If a class is used, it
+ * must be a valid Javabean, i.e. it must have a default no-argument constructor and getter/setter methods. An interface
+ * may also be used if it defines getters/setters - a proxy object will be created that implements the interface.
+ *
+ * @author Kasper B. Graversen
+ * @author James Bassett
+ */
 class FastForwardCsvBeanReader extends AbstractCsvReader implements ICsvBeanReader {
 
     // temporary storage of processed columns to be mapped to the bean
@@ -34,7 +44,7 @@ class FastForwardCsvBeanReader extends AbstractCsvReader implements ICsvBeanRead
     // cache of methods for mapping from columns to fields
     private final MethodCache cache = new MethodCache();
 
-    private int startRowNumber;
+    private final int startRowNumber;
 
     /**
      * Constructs a new <tt>CsvBeanReader</tt> with the supplied Reader and CSV preferences. Note that the
@@ -42,14 +52,11 @@ class FastForwardCsvBeanReader extends AbstractCsvReader implements ICsvBeanRead
      *
      * @param reader      the reader
      * @param preferences the CSV preferences
+     * @param startRowNumber the row number to start reading
      * @throws NullPointerException if reader or preferences are null
      */
-    FastForwardCsvBeanReader(final Reader reader, final CsvPreference preferences) {
+    FastForwardCsvBeanReader(final Reader reader, final CsvPreference preferences, final int startRowNumber) {
         super(reader, preferences);
-
-    }
-
-    void setStartRowNumber(final int startRowNumber) {
         this.startRowNumber = startRowNumber;
     }
 

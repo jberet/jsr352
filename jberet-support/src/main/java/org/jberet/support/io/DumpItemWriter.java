@@ -17,6 +17,10 @@ import java.util.List;
 import javax.batch.api.chunk.ItemWriter;
 import javax.inject.Named;
 
+/**
+ * An implementation of {@code javax.batch.api.chunk.ItemWriter} that prints out the data content by calling the item's
+ * {@code toString()} method.
+ */
 @Named
 public class DumpItemWriter implements ItemWriter {
     @Override

@@ -58,6 +58,16 @@ public class CsvProperties {
     public static final String BEAN_TYPE_KEY = "beanType";
 
     /**
+     * The property value to instruct the reader to read values into a list of string.
+     */
+    public static final String LIST = "List";
+
+    /**
+     * The property value to instruct the reader to read values into a string map, whose key is the each column header
+     */
+    public static final String MAP = "Map";
+
+    /**
      * The property key to specify the location of the CSV file.  The value can be file path, URL, or any resource that
      * can be loaded with application class loader.
      */
