@@ -115,7 +115,13 @@ public class CsvItemReader implements ItemReader {
     @BatchProperty
     protected String quoteMode;
 
+    @Inject
+    @BatchProperty
+    protected String cellProcessors;
+
     protected ICsvReader delegateReader;
+
+    private CellProcessor[] cellProcessorInstances;
 
     @Override
     public void open(final Serializable checkpoint) {
@@ -142,8 +148,9 @@ public class CsvItemReader implements ItemReader {
             delegateReader = new FastForwardCsvBeanReader(getInputReader(), getCsvPreference(), startRowNumber);
         }
 
+        String[] header;
         try {
-            final String[] header = delegateReader.getHeader(true);//first line check true
+            header = delegateReader.getHeader(true);//first line check true
             if (this.nameMapping == null) {
                 this.nameMapping = header;
             }
@@ -156,6 +163,7 @@ public class CsvItemReader implements ItemReader {
         if (nameMapping == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(null, NAME_MAPPING_KEY);
         }
+        this.cellProcessorInstances = getCellProcessors(header);
     }
 
     @Override
@@ -168,25 +176,24 @@ public class CsvItemReader implements ItemReader {
         if (delegateReader.getRowNumber() == this.end) {
             return null;
         }
-        final CellProcessor[] cellProcessors = getCellProcessors();
         final Object result;
         if (delegateReader instanceof org.supercsv.io.ICsvBeanReader) {
-            if (cellProcessors.length == 0) {
+            if (cellProcessorInstances.length == 0) {
                 result = ((ICsvBeanReader) delegateReader).read(beanType, getNameMapping());
             } else {
-                result = ((ICsvBeanReader) delegateReader).read(beanType, getNameMapping(), cellProcessors);
+                result = ((ICsvBeanReader) delegateReader).read(beanType, getNameMapping(), cellProcessorInstances);
             }
         } else if (delegateReader instanceof ICsvListReader) {
-            if (cellProcessors.length == 0) {
+            if (cellProcessorInstances.length == 0) {
                 result = ((ICsvListReader) delegateReader).read();
             } else {
-                result = ((ICsvListReader) delegateReader).read(cellProcessors);
+                result = ((ICsvListReader) delegateReader).read(cellProcessorInstances);
             }
         } else {
-            if (cellProcessors.length == 0) {
+            if (cellProcessorInstances.length == 0) {
                 result = ((ICsvMapReader) delegateReader).read(getNameMapping());
             } else {
-                result = ((ICsvMapReader) delegateReader).read(getNameMapping(), cellProcessors);
+                result = ((ICsvMapReader) delegateReader).read(getNameMapping(), cellProcessorInstances);
             }
         }
         return result;
@@ -286,8 +293,11 @@ public class CsvItemReader implements ItemReader {
      *
      * @return an array of cell processors
      */
-    protected CellProcessor[] getCellProcessors() {
-        return noCellProcessors;
+    protected CellProcessor[] getCellProcessors(final String[] header) {
+        if (this.cellProcessors == null) {
+            return noCellProcessors;
+        }
+        return CellProcessorConfig.parseCellProcessors(this.cellProcessors, header);
     }
 
     /**
@@ -400,36 +410,11 @@ public class CsvItemReader implements ItemReader {
      */
     protected CommentMatcher getCommentMatcher(String val) {
         val = val.trim();
-        final int singleQuote1 = val.indexOf("'");
-        final int doubleQuote1 = val.indexOf("\"");
-        char paramQuoteChar = 0;
-        int paramQuoteCharPosition = -1;
+        final char paramQuoteChar = '\'';
+        final int singleQuote1 = val.indexOf(paramQuoteChar);
         String matcherName = null;
         String matcherParam = null;
-        final CommentMatcher commentMatcher;
-        if (singleQuote1 >= 0) {
-            if (doubleQuote1 >= 0) {
-                //both ' and " are present, choose the one that appears first as the param quote
-                if (singleQuote1 < doubleQuote1) {
-                    // ' appears first
-                    paramQuoteChar = '\'';
-                    paramQuoteCharPosition = singleQuote1;
-                } else {
-                    // " appears first
-                    paramQuoteChar = '"';
-                    paramQuoteCharPosition = doubleQuote1;
-                }
-            } else {
-                //only ' is present
-                paramQuoteChar = '\'';
-                paramQuoteCharPosition = singleQuote1;
-            }
-        } else if (doubleQuote1 >= 0) {
-            //only " is present
-            paramQuoteChar = '"';
-            paramQuoteCharPosition = doubleQuote1;
-        } else {
-            //neither ' nor " is present
+        if (singleQuote1 < 0) {
             final String[] parts = val.split("\\s");
             if (parts.length == 1) {
                 //there is only 1 chunk, assume it's the custom CommentMatcher type
@@ -442,12 +427,13 @@ public class CsvItemReader implements ItemReader {
             }
         }
         if (matcherName == null) {
-            matcherName = val.substring(0, paramQuoteCharPosition - 1).trim();
+            matcherName = val.substring(0, singleQuote1 - 1).trim();
             final int paramQuoteCharEnd = val.lastIndexOf(paramQuoteChar);
-            matcherParam = val.substring(paramQuoteChar + 1, paramQuoteCharEnd);
+            matcherParam = val.substring(singleQuote1 + 1, paramQuoteCharEnd);
             matcherName = matcherName.split("\\s")[0];
         }
 
+        final CommentMatcher commentMatcher;
         if (matcherName.equalsIgnoreCase("startsWith") || matcherName.equalsIgnoreCase("starts") || matcherName.equalsIgnoreCase("start")) {
             commentMatcher = new org.supercsv.comment.CommentStartsWith(matcherParam);
         } else if (matcherName.equalsIgnoreCase("matches") || matcherName.equalsIgnoreCase("match")) {

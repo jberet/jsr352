@@ -15,7 +15,7 @@ package org.jberet.support.io;
 /**
  * A collection of property keys and values used to configure CSV-related batch artifacts in JSL document.
  */
-public class CsvProperties {
+public final class CsvProperties {
     /**
      * The property key to specify the start position in the data set
      */
@@ -53,19 +53,10 @@ public class CsvProperties {
     public static final String TAB_PREFERENCE = "TAB_PREFERENCE";
 
     /**
-     * The property key to specify a fully-qualified class or interface name that maps to a row of the source CSV file
+     * The property key to specify a fully-qualified class or interface name that maps to a row of the source CSV file.
+     * For example, java.util.List, java.util.Map, org.jberet.support.io.Person, my.own.BeanType, etc.
      */
     public static final String BEAN_TYPE_KEY = "beanType";
-
-    /**
-     * The property value to instruct the reader to read values into a list of string.
-     */
-    public static final String LIST = "List";
-
-    /**
-     * The property value to instruct the reader to read values into a string map, whose key is the each column header
-     */
-    public static final String MAP = "Map";
 
     /**
      * The property key to specify the location of the CSV file.  The value can be file path, URL, or any resource that
@@ -122,4 +113,31 @@ public class CsvProperties {
      * The property key to specify target bean fields.
      */
     public static final String NAME_MAPPING_KEY = "nameMapping";
+
+    /**
+     * The property key to specify a list of cell processors, one for each column. See
+     * <a href="http://supercsv.sourceforge.net/cell_processors.html">Super CSV docs</a> for supported cell processor
+     * types. The rules and syntax are as follows:
+     * <ul>
+     *     <li>The size of the resultant list must equal to the number CSV columns.</li>
+     *     <li>Cell processors appear in the same order as CSV columns.</li>
+     *     <li>If no cell processor is needed for a column, enter null.</li>
+     *     <li>Each column may have null, 1, 2, or multiple cell processors, separated by semi-colon (;)</li>
+     *     <li>Cell processors for each column must appear in its own line, and cell processors for different
+     *     columns must be separated with new line characters.</li>
+     *     <li>Cell processors may contain parameters, and parameters are separated with comma (,).</li>
+     *     <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'</li>
+     * </ul>
+     * For example, to specify cell processors for 5-column CSV:
+     * <pre>
+     * value = "
+     * null
+     * Optional, StrMinMax(1, 20)
+     * ParseLong
+     * NotNull
+     * Optional, ParseDate('dd/MM/yyyy')
+     * "
+     * </pre>
+     */
+    public static final String CELL_PROCESSORS_KEY = "cellProcessors";
 }
