@@ -18,8 +18,10 @@
             <reader ref="csvItemReader">
                 <properties>
                     <property name="resource" value="person.csv"/>
+                    <property name="quoteChar" value="|"/> <!-- override the default quoteChar ", which is present in csv -->
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="skipComments" value="starts with '#'"/>
+                    <property name="nameMapping" value="#{jobParameters['nameMapping']}"/>
                     <property name="cellProcessors" value= "#{jobParameters['cellProcessors']}"/>
                 </properties>
             </reader>

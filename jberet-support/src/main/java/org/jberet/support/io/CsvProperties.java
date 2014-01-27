@@ -67,6 +67,8 @@ public final class CsvProperties {
     /**
      * The quote character (used when a cell contains special characters, such as the delimiter char, a quote char,
      * or spans multiple lines). See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     * The default quoteChar is double quote ("). If " is present in the CSV data cells, specify quoteChar to some
+     * other characters, e.g., |.
      */
     public static final String QUOTE_CHAR_KEY = "quoteChar";
 

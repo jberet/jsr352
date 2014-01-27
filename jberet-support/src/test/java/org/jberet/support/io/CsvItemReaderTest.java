@@ -28,10 +28,18 @@ public class CsvItemReaderTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
 
+    static final String nameMapping =
+            "number, gender, title, givenName, middleInitial, surname, streetAddress, city, state, zipCode, country, countryFull, emailAddress, username, password, telephoneNumber, mothersMaiden, birthday, CCType, CCNumber, CVV2, CCExpires, nationalID, UPS, color, occupation, company, vehicle, domain, bloodType, pounds, kilograms, feetInches, centimeters, GUID, latitude, longitude";
+
     @Test
     public void testBeanType() throws Exception {
         final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "org.jberet.support.io.Person");
-        params.setProperty("cellProcessors", "ParseInt; null; null; null; null; null; null; null; null; null");
+        params.setProperty("cellProcessors",
+            "ParseInt; null; null; null; null; null; null; null; null; null;" +
+                "null; null; null; null; null; null; null; null; null; null;" +
+                "null; null; null; null; null; null; null; null; null; null;" +
+                "null; null; null; null; null; null; null"
+        );
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);

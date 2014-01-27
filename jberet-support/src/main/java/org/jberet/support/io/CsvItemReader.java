@@ -14,7 +14,6 @@ package org.jberet.support.io;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -158,7 +157,7 @@ public class CsvItemReader implements ItemReader {
             delegateReader = new FastForwardCsvBeanReader(getInputReader(), getCsvPreference(), startRowNumber);
         }
 
-        String[] header;
+        final String[] header;
         try {
             header = delegateReader.getHeader(true);//first line check true
             if (this.nameMapping == null) {
@@ -269,32 +268,31 @@ public class CsvItemReader implements ItemReader {
      * @return {@code java.io.Reader} that represents the CSV resource
      */
     protected Reader getInputReader() {
-        InputStream inputStream;
         if (resource == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
         }
+        final UnicodeBOMInputStream bomin;
         try {
-            final URL url = new URL(resource);
+            InputStream inputStream;
             try {
+                final URL url = new URL(resource);
                 inputStream = url.openStream();
-            } catch (final IOException e) {
-                throw SupportLogger.LOGGER.failToOpenStream(e, resource);
-            }
-        } catch (final MalformedURLException e) {
-            SupportLogger.LOGGER.notUrl(e, resource);
-            final File file = new File(resource);
-            if (file.exists()) {
-                try {
+            } catch (final MalformedURLException e) {
+                SupportLogger.LOGGER.notUrl(e, resource);
+                final File file = new File(resource);
+                if (file.exists()) {
                     inputStream = new FileInputStream(file);
-                } catch (final FileNotFoundException e1) {
-                    throw SupportLogger.LOGGER.failToOpenStream(e, resource);
+                } else {
+                    SupportLogger.LOGGER.notFile(resource);
+                    inputStream = CsvItemReader.class.getClassLoader().getResourceAsStream(resource);
                 }
-            } else {
-                SupportLogger.LOGGER.notFile(resource);
-                inputStream = CsvItemReader.class.getClassLoader().getResourceAsStream(resource);
             }
+            bomin = new UnicodeBOMInputStream(inputStream);
+            bomin.skipBOM();
+        } catch (final IOException e) {
+            throw SupportLogger.LOGGER.failToOpenStream(e, resource);
         }
-        return new InputStreamReader(inputStream);
+        return new InputStreamReader(bomin);
     }
 
     /**
