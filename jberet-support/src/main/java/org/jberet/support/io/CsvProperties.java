@@ -9,7 +9,7 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.support.io;
 
 /**
@@ -97,6 +97,42 @@ public final class CsvProperties {
     public static final String SKIP_COMMENTS_KEY = "skipComments";
 
     /**
+     * The property value to indicate the use of a {@code org.supercsv.comment.CommentStartsWith} comment matcher.
+     * For example,
+     * <ul>
+     * <li>"startsWith '#'"</li>
+     * <li>"starts with '##'"</li>
+     * <li>"start with '###'"</li>
+     * </ul>
+     */
+    public static final String STARTS_WITH = "startsWith";
+
+    /**
+     * A fuzzy variant of STARTS_WITH.
+     */
+    public static final String STARTS_WITH_FUZZY = "starts";
+
+    /**
+     * A fuzzy variant of STARTS_WITH.
+     */
+    public static final String STARTS_WITH_FUZZY2 = "start";
+
+    /**
+     * The property value to indicate the use of a {@code org.supercsv.comment.CommentMatches} comment matcher.
+     * For example,
+     * <ul>
+     * <li>"matches 'some regexp'"</li>
+     * <li>"match 'some regexp'"</li>
+     * </ul>
+     */
+    public static final String MATCHES = "matches";
+
+    /**
+     * A fuzzy variant of MATCHES.
+     */
+    public static final String MATCHES_FUZZY = "match";
+
+    /**
      * Use your own encoder when writing CSV. See the section on custom encoders below.
      * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
      */
@@ -110,6 +146,35 @@ public final class CsvProperties {
     public static final String QUOTE_MODE_KEY = "quoteMode";
 
     /**
+     * The property value to indicate the default behavior for the current property. For example, the default
+     * quoteMode, or the default encoder.
+     */
+    public static final String DEFAULT = "default";
+
+    /**
+     * The property value to indicate always enable surrounding quotes for writing.
+     */
+    public static final String ALWAYS = "always";
+
+    /**
+     * The property value to indicate selected columns.  For example,
+     * <ul>
+     * <li>"select true, true, false, false"</li>
+     * <li>"select 1, 2, 3, 4</li>
+     * </ul>
+     */
+    public static final String SELECT = "select";
+
+    /**
+     * The property value to indicate selected columns.  For example,
+     * <ul>
+     * <li>"column true, true, false, false"</li>
+     * <li>"column 1, 2, 3, 4</li>
+     * </ul>
+     */
+    public static final String COLUMN = "column";
+
+    /**
      * The property key to specify target bean fields.
      */
     public static final String NAME_MAPPING_KEY = "nameMapping";
@@ -119,23 +184,23 @@ public final class CsvProperties {
      * <a href="http://supercsv.sourceforge.net/cell_processors.html">Super CSV docs</a> for supported cell processor
      * types. The rules and syntax are as follows:
      * <ul>
-     *     <li>The size of the resultant list must equal to the number CSV columns.</li>
-     *     <li>Cell processors appear in the same order as CSV columns.</li>
-     *     <li>If no cell processor is needed for a column, enter null.</li>
-     *     <li>Each column may have null, 1, 2, or multiple cell processors, separated by semi-colon (;)</li>
-     *     <li>Cell processors for each column must appear in its own line, and cell processors for different
-     *     columns must be separated with new line characters.</li>
-     *     <li>Cell processors may contain parameters, and parameters are separated with comma (,).</li>
-     *     <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'</li>
+     * <li>The size of the resultant list must equal to the number of CSV columns.</li>
+     * <li>Cell processors appear in the same order as CSV columns.</li>
+     * <li>If no cell processor is needed for a column, enter null.</li>
+     * <li>Each column may have null, 1, 2, or multiple cell processors, separated by comma (,)</li>
+     * <li>Cell processors for each column must appear in its own line, and cell processors for different
+     * columns must be separated with new line characters.</li>
+     * <li>Cell processors may contain parameters enclosed in parenthesis, and multiple parameters are separated with comma (,).</li>
+     * <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'</li>
      * </ul>
      * For example, to specify cell processors for 5-column CSV:
      * <pre>
      * value = "
-     * null
-     * Optional, StrMinMax(1, 20)
-     * ParseLong
-     * NotNull
-     * Optional, ParseDate('dd/MM/yyyy')
+     *      null
+     *      Optional, StrMinMax(1, 20)
+     *      ParseLong
+     *      NotNull
+     *      Optional, ParseDate('dd/MM/yyyy')
      * "
      * </pre>
      */

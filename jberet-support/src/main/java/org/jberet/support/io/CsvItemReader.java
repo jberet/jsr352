@@ -43,15 +43,24 @@ import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.quote.ColumnQuoteMode;
 import org.supercsv.quote.QuoteMode;
 
+import static org.jberet.support.io.CsvProperties.ALWAYS;
 import static org.jberet.support.io.CsvProperties.BEAN_TYPE_KEY;
+import static org.jberet.support.io.CsvProperties.COLUMN;
+import static org.jberet.support.io.CsvProperties.DEFAULT;
 import static org.jberet.support.io.CsvProperties.ENCODER_KEY;
 import static org.jberet.support.io.CsvProperties.EXCEL_NORTH_EUROPE_PREFERENCE;
 import static org.jberet.support.io.CsvProperties.EXCEL_PREFERENCE;
+import static org.jberet.support.io.CsvProperties.MATCHES;
+import static org.jberet.support.io.CsvProperties.MATCHES_FUZZY;
 import static org.jberet.support.io.CsvProperties.NAME_MAPPING_KEY;
 import static org.jberet.support.io.CsvProperties.PREFERENCE_KEY;
 import static org.jberet.support.io.CsvProperties.RESOURCE_KEY;
+import static org.jberet.support.io.CsvProperties.SELECT;
 import static org.jberet.support.io.CsvProperties.SKIP_COMMENTS_KEY;
 import static org.jberet.support.io.CsvProperties.STANDARD_PREFERENCE;
+import static org.jberet.support.io.CsvProperties.STARTS_WITH;
+import static org.jberet.support.io.CsvProperties.STARTS_WITH_FUZZY;
+import static org.jberet.support.io.CsvProperties.STARTS_WITH_FUZZY2;
 import static org.jberet.support.io.CsvProperties.TAB_PREFERENCE;
 
 /**
@@ -62,6 +71,7 @@ import static org.jberet.support.io.CsvProperties.TAB_PREFERENCE;
 public class CsvItemReader implements ItemReader {
     private static final Class[] stringParameterTypes = {String.class};
     private static final CellProcessor[] noCellProcessors = new CellProcessor[0];
+    static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     @Inject
     @BatchProperty
@@ -331,9 +341,9 @@ public class CsvItemReader implements ItemReader {
         if (parts.length == 1) {
             //there is only 1 chunk, either default, always, or custom encoder
             quoteModeName = parts[0];
-            if (quoteModeName.equalsIgnoreCase("default")) {
+            if (quoteModeName.equalsIgnoreCase(DEFAULT)) {
                 return null;
-            } else if (quoteModeName.equalsIgnoreCase("always")) {
+            } else if (quoteModeName.equalsIgnoreCase(ALWAYS)) {
                 return new AlwaysQuoteMode();
             } else {
                 return loadAndInstantiate(quoteModeName, val, null);
@@ -341,10 +351,10 @@ public class CsvItemReader implements ItemReader {
         } else {
             quoteModeName = parts[0];
             final String encoderNameLowerCase = quoteModeName.toLowerCase();
-            if (encoderNameLowerCase.startsWith("select") || encoderNameLowerCase.startsWith("column")) {
+            if (encoderNameLowerCase.startsWith(SELECT) || encoderNameLowerCase.startsWith(COLUMN)) {
                 try {
                     Integer.parseInt(parts[1]);
-                    return new ColumnQuoteMode(convertToIntParams(parts));
+                    return new ColumnQuoteMode(convertToIntParams(parts, 1, parts.length - 1));
                 } catch (final NumberFormatException e) {
                     return new ColumnQuoteMode(convertToBooleanParams(parts));
                 }
@@ -374,7 +384,7 @@ public class CsvItemReader implements ItemReader {
         if (parts.length == 1) {
             //there is only 1 chunk, either default, or custom encoder
             encoderName = parts[0];
-            if (encoderName.equalsIgnoreCase("default")) {
+            if (encoderName.equalsIgnoreCase(DEFAULT)) {
                 return null;
             } else {
                 return loadAndInstantiate(encoderName, val, null);
@@ -382,10 +392,10 @@ public class CsvItemReader implements ItemReader {
         } else {
             encoderName = parts[0];
             final String encoderNameLowerCase = encoderName.toLowerCase();
-            if (encoderNameLowerCase.startsWith("select") || encoderNameLowerCase.startsWith("column")) {
+            if (encoderNameLowerCase.startsWith(SELECT) || encoderNameLowerCase.startsWith(COLUMN)) {
                 try {
                     Integer.parseInt(parts[1]);
-                    return new SelectiveCsvEncoder(convertToIntParams(parts));
+                    return new SelectiveCsvEncoder(convertToIntParams(parts, 1, parts.length - 1));
                 } catch (final NumberFormatException e) {
                     return new SelectiveCsvEncoder(convertToBooleanParams(parts));
                 }
@@ -434,9 +444,10 @@ public class CsvItemReader implements ItemReader {
         }
 
         final CommentMatcher commentMatcher;
-        if (matcherName.equalsIgnoreCase("startsWith") || matcherName.equalsIgnoreCase("starts") || matcherName.equalsIgnoreCase("start")) {
+        if (matcherName.equalsIgnoreCase(STARTS_WITH) || matcherName.equalsIgnoreCase(STARTS_WITH_FUZZY)
+                || matcherName.equalsIgnoreCase(STARTS_WITH_FUZZY2)) {
             commentMatcher = new org.supercsv.comment.CommentStartsWith(matcherParam);
-        } else if (matcherName.equalsIgnoreCase("matches") || matcherName.equalsIgnoreCase("match")) {
+        } else if (matcherName.equalsIgnoreCase(MATCHES) || matcherName.equalsIgnoreCase(MATCHES_FUZZY)) {
             commentMatcher = new CommentMatches(matcherParam);
         } else {
             throw SupportLogger.LOGGER.invalidCsvPreference(val, SKIP_COMMENTS_KEY);
@@ -455,14 +466,14 @@ public class CsvItemReader implements ItemReader {
                 return (T) constructor.newInstance(param);
             }
         } catch (final Exception e) {
-            throw SupportLogger.LOGGER.failToLoadClass(e, contextVal);
+            throw SupportLogger.LOGGER.failToLoadOrCreateCustomType(e, contextVal);
         }
     }
 
-    private int[] convertToIntParams(final String[] strings) {
-        final int[] ints = new int[strings.length - 1];
-        for (int i = 1; i < strings.length; i++) {
-            ints[i - 1] = Integer.parseInt(strings[i]);
+    static int[] convertToIntParams(final String[] strings, final int start, final int count) {
+        final int[] ints = new int[count];
+        for (int i = start, j = 0; j < count && i < strings.length; i++, j++) {
+            ints[j] = Integer.parseInt(strings[i]);
         }
         return ints;
     }

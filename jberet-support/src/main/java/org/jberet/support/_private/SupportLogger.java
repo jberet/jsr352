@@ -12,6 +12,7 @@
 
 package org.jberet.support._private;
 
+import java.util.List;
 import javax.batch.operations.BatchRuntimeException;
 
 import org.jboss.logging.Logger;
@@ -32,8 +33,8 @@ public interface SupportLogger {
     @Message(id = 60001, value = "Failed to read header from CSV resource %s")
     BatchRuntimeException failToReadCsvHeader(@Cause Throwable th, String csvResource);
 
-    @Message(id = 60002, value = "Failed to load class based on property value %s")
-    BatchRuntimeException failToLoadClass(@Cause Throwable th, String contextStringVal);
+    @Message(id = 60002, value = "Failed to load or instantiate custom type based on property value %s")
+    BatchRuntimeException failToLoadOrCreateCustomType(@Cause Throwable th, String contextStringVal);
 
     @Message(id = 60003, value = "Invalid property value format (missing quote): %s")
     BatchRuntimeException missingQuote(String propertyVal);
@@ -44,15 +45,31 @@ public interface SupportLogger {
     @Message(id = 60005, value = "Invalid position %s to start reading, the configured range is between %s and %s")
     BatchRuntimeException invalidStartPosition(int startPosition, int start, int end);
 
+    @Message(id = 60006, value = "The number of CellProcessor %s and the number of headers %s are different.")
+    BatchRuntimeException numberOfCellProcessorsAndHeaderDiff(int cellProcessorCount, int headerCount);
+
+    @Message(id = 60007, value = "Unexpected character %s at position %s in character array %s")
+    BatchRuntimeException unexpectedChar(char ch, int position, String chars);
+
+    @Message(id = 60008, value = "Invalid parameters for CellProcessor: %s %s")
+    BatchRuntimeException invalidParamsForCellProcessor(String cellProcessorName, String[] params);
+
+    @Message(id = 60009, value = "Unsupported CellProcessor: %s %s")
+    BatchRuntimeException unsupportedCellProcessor(String cellProcessorName, String[] params);
 
 
 
-    @Message(id = 60006, value = "The resource is not a URL %s")
+
+    @Message(id = 60010, value = "The resource is not a URL %s")
     @LogMessage(level = Logger.Level.TRACE)
     void notUrl(@Cause Throwable throwable, String resource);
 
-    @Message(id = 60007, value = "The resource is not a file %s")
+    @Message(id = 60011, value = "The resource is not a file %s")
     @LogMessage(level = Logger.Level.TRACE)
     void notFile(String resource);
+
+    @Message(id = 60012, value = "About to create CSV CellProcessor with %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void createCellProcessor(List<String> cellProcessorVal);
 
 }
