@@ -307,7 +307,7 @@ public class CsvItemReader implements ItemReader {
         if (this.cellProcessors == null) {
             return noCellProcessors;
         }
-        return CellProcessorConfig.parseCellProcessors(this.cellProcessors, header);
+        return CellProcessorConfig.parseCellProcessors(this.cellProcessors.trim(), header);
     }
 
     /**

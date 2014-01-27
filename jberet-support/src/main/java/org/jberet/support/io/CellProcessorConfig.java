@@ -84,7 +84,8 @@ class CellProcessorConfig {
      * @return an array of {@code CellProcessor}, one for each line in the raw property value
      */
     static CellProcessor[] parseCellProcessors(final String val, final String[] header) {
-        final String[] parts = val.split("\\r?\\n");
+        //final String[] parts = val.split("\\r?\\n");  //new line
+        final String[] parts = val.split(";");
         if (parts.length != header.length) {
             throw SupportLogger.LOGGER.numberOfCellProcessorsAndHeaderDiff(parts.length, header.length);
         }

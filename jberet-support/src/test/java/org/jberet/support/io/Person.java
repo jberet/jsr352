@@ -16,7 +16,7 @@ package org.jberet.support.io;
  * A bean class for person.csv.
  */
 public class Person {
-    private String number;
+    private int number;
     private String gender;
     private String title;
     private String givenName;
@@ -27,11 +27,11 @@ public class Person {
     private String state;
     private String zipCode;
 
-    public String getNumber() {
+    public int getNumber() {
         return number;
     }
 
-    public void setNumber(final String number) {
+    public void setNumber(final int number) {
         this.number = number;
     }
 

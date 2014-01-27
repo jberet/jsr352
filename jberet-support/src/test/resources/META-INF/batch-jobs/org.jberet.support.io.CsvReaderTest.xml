@@ -20,6 +20,7 @@
                     <property name="resource" value="person.csv"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="skipComments" value="starts with '#'"/>
+                    <property name="cellProcessors" value= "#{jobParameters['cellProcessors']}"/>
                 </properties>
             </reader>
             <writer ref="dumpItemWriter">

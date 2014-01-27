@@ -188,18 +188,17 @@ public final class CsvProperties {
      * <li>Cell processors appear in the same order as CSV columns.</li>
      * <li>If no cell processor is needed for a column, enter null.</li>
      * <li>Each column may have null, 1, 2, or multiple cell processors, separated by comma (,)</li>
-     * <li>Cell processors for each column must appear in its own line, and cell processors for different
-     * columns must be separated with new line characters.</li>
+     * <li>Cell processors for different columns must be separated with semi-colon (;).</li>
      * <li>Cell processors may contain parameters enclosed in parenthesis, and multiple parameters are separated with comma (,).</li>
      * <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'</li>
      * </ul>
      * For example, to specify cell processors for 5-column CSV:
      * <pre>
      * value = "
-     *      null
-     *      Optional, StrMinMax(1, 20)
-     *      ParseLong
-     *      NotNull
+     *      null;
+     *      Optional, StrMinMax(1, 20);
+     *      ParseLong;
+     *      NotNull;
      *      Optional, ParseDate('dd/MM/yyyy')
      * "
      * </pre>

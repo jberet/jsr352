@@ -29,13 +29,13 @@ public class CellProcessorConfigTest {
 
     @Test
     public void testParseCellProcessors7() throws Exception {
-        final String val = "null" + BatchUtil.NL
-                + "Optional, StrMinMax(1, 20)" + BatchUtil.NL
-                + "ParseLong()" + BatchUtil.NL
-                + "NotNull, ParseInt" + BatchUtil.NL
-                + "ParseDate( 'dd/MM/yyyy' )" + BatchUtil.NL
-                + "StrMinMax(1, 20)" + BatchUtil.NL
-                + "Optional, StrMinMax(1, 20), ParseDate('dd/MM/yyyy')" + BatchUtil.NL;
+        final String val = "null;"
+                + "Optional, StrMinMax(1, 20);"
+                + "ParseLong();"
+                + "NotNull, ParseInt;"
+                + "ParseDate( 'dd/MM/yyyy' );"
+                + "StrMinMax(1, 20);"
+                + "Optional, StrMinMax(1, 20), ParseDate('dd/MM/yyyy')";
         final CellProcessor[] cellProcessors = CellProcessorConfig.parseCellProcessors(val, createHeader(7));
         System.out.printf("Resolved cell processors: %s%n", Arrays.toString(cellProcessors));
     }

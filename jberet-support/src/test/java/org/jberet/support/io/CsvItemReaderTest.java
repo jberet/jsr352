@@ -31,6 +31,7 @@ public class CsvItemReaderTest {
     @Test
     public void testBeanType() throws Exception {
         final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "org.jberet.support.io.Person");
+        params.setProperty("cellProcessors", "ParseInt; null; null; null; null; null; null; null; null; null");
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
