@@ -64,7 +64,9 @@ import static org.jberet.support.io.CsvProperties.TAB_PREFERENCE;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads from a CSV resource into a user-defined
- * bean, java.util.List&lt;String&gt;, or java.util.Map&lt;String, String&gt;.
+ * bean, java.util.List&lt;String&gt;, or java.util.Map&lt;String, String&gt;. Data files delimited with characters
+ * other than comma (e.g., tab, |) are also supported by configuring {@code preference}, {@code delimiterChar},
+ * or {@code quoteChar} properties in job xml.
  */
 @Named
 public class CsvItemReader implements ItemReader {

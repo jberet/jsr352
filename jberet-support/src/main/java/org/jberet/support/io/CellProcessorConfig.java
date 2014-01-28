@@ -242,12 +242,15 @@ class CellProcessorConfig {
                 }
                 current = previous == null ? new Optional() : new Optional(previous);
             } else if (name.equalsIgnoreCase("ParseBool")) {
-                //do not support params (String[] trueValues, String[] falseValues)
                 if (params.length == 0) {
+                    //use the default true and false string values in org.supercsv.cellprocessor.ParseBool
                     current = previous == null ? new ParseBool() : new ParseBool((BoolCellProcessor) previous);
                 } else if (params.length == 2) {
-                    current = previous == null ? new ParseBool(params[0], params[1]) :
-                            new ParseBool(params[0], params[1], (BoolCellProcessor) previous);
+                    //use custom true and false values: can be either single value or multiple values
+                    final String[] trueValues = params[0].trim().split("\\s*,\\s*");
+                    final String[] falseValues = params[1].trim().split("\\s*,\\s*");
+                    current = previous == null ? new ParseBool(trueValues, falseValues) :
+                            new ParseBool(trueValues, falseValues, (BoolCellProcessor) previous);
                 } else {
                     throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
                 }
