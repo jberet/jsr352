@@ -182,7 +182,7 @@ public class CsvItemReader implements ItemReader {
 
     @Override
     public Object readItem() throws Exception {
-        if (delegateReader.getRowNumber() == this.end) {
+        if (delegateReader.getRowNumber() > this.end) {
             return null;
         }
         final Object result;
@@ -232,11 +232,12 @@ public class CsvItemReader implements ItemReader {
             throw SupportLogger.LOGGER.invalidCsvPreference(preference, PREFERENCE_KEY);
         }
 
+        //do not trim quoteChar or delimiterChar. They can be tab (\t) and after trim, it will be just empty
         if (quoteChar != null || delimiterChar != null || endOfLineSymbols != null ||
                 surroundingSpacesNeedQuotes != null || skipComments != null || encoder != null || quoteMode != null) {
             final CsvPreference.Builder builder = new CsvPreference.Builder(
-                    quoteChar == null ? (char) csvPreference.getQuoteChar() : quoteChar.trim().charAt(0),
-                    delimiterChar == null ? csvPreference.getDelimiterChar() : (int) delimiterChar.trim().charAt(0),
+                    quoteChar == null ? (char) csvPreference.getQuoteChar() : quoteChar.charAt(0),
+                    delimiterChar == null ? csvPreference.getDelimiterChar() : (int) delimiterChar.charAt(0),
                     endOfLineSymbols == null ? csvPreference.getEndOfLineSymbols() : endOfLineSymbols.trim()
             );
             if (surroundingSpacesNeedQuotes != null) {

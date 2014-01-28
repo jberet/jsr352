@@ -17,6 +17,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
+import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
@@ -25,40 +26,80 @@ import org.junit.Test;
 
 public class CsvItemReaderTest {
     static final String jobName = "org.jberet.support.io.CsvReaderTest";
+    static final String personResource = "person.csv";
+    static final String personPipeResource = "person-pipe.txt";
+    static final String personTabResource = "person-tab.txt";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
 
     static final String nameMapping =
-            "number, gender, title, givenName, middleInitial, surname, streetAddress, city, state, zipCode, country, countryFull, emailAddress, username, password, telephoneNumber, mothersMaiden, birthday, CCType, CCNumber, CVV2, CCExpires, nationalID, UPS, color, occupation, company, vehicle, domain, bloodType, pounds, kilograms, feetInches, centimeters, GUID, latitude, longitude";
+    "number, gender, title, givenName, middleInitial, surname, streetAddress, city, state, zipCode, " +
+    "country, countryFull, emailAddress, username, password, telephoneNumber, mothersMaiden, birthday, CCType, CCNumber, " +
+    "CVV2, CCExpires, nationalID, UPS, color, occupation, company, vehicle, domain, bloodType, " +
+    "pounds, kilograms, feetInches, centimeters, GUID, latitude, longitude";
+
+    static final String cellProcessors =
+    "NotNull, ParseLong; null; null; null; ParseChar; null; null; null; null; null;" +
+            "null; null; null; null; null; null; null; Optional, ParseDate('MM/dd/yyyy'); null; null;" +
+            "null; null; null; null; null; null; null; null; null; null;" +
+            "ParseBigDecimal('en_us'); ParseBigDecimal; null; ParseInt; null; ParseDouble; ParseDouble";
 
     @Test
     public void testBeanType() throws Exception {
+        //override the default quote char ", which is used in feetInches cell
+        testBeanType0(personResource, null, null, "|");
+    }
+
+    @Test
+    public void testBeanTypeTab() throws Exception {
+        //override the default quote char ", which is used in feetInches cell
+        testBeanType0(personTabResource, CsvProperties.TAB_PREFERENCE, null, "|");
+    }
+
+    @Test
+    public void testBeanTypePipe() throws Exception {
+        //override the default quote char ", which is used in feetInches cell. | is already used as the delimiterChar
+        //so cannot be used as quoteChar again.
+        testBeanType0(personPipeResource, null, "|", "^");
+    }
+
+    private void testBeanType0(final String resource, final String preference, final String delimiterChar, final String quoteChar) throws Exception {
         final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "org.jberet.support.io.Person");
-        params.setProperty("cellProcessors",
-            "ParseInt; null; null; null; null; null; null; null; null; null;" +
-                "null; null; null; null; null; null; null; null; null; null;" +
-                "null; null; null; null; null; null; null; null; null; null;" +
-                "null; null; null; null; null; null; null"
-        );
+        params.setProperty(CsvProperties.RESOURCE_KEY, resource);
+
+        if (preference != null) {
+            params.setProperty(CsvProperties.PREFERENCE_KEY, preference);
+        }
+        if (delimiterChar != null) {
+            params.setProperty(CsvProperties.DELIMITER_CHAR_KEY, delimiterChar);
+        }
+        if (quoteChar != null) {
+            params.setProperty(CsvProperties.QUOTE_CHAR_KEY, quoteChar);
+        }
+        params.setProperty("cellProcessors", cellProcessors);
+
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
     @Test
-    public void testListType() throws Exception {
+    public void testListAndMapType() throws Exception {
         final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "java.util.List");
-        final long jobExecutionId = jobOperator.start(jobName, params);
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-    }
+        params.setProperty(CsvProperties.RESOURCE_KEY, personResource);
+        params.setProperty(CsvProperties.QUOTE_CHAR_KEY, "|");
 
-    @Test
-    public void testMapType() throws Exception {
-        final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "java.util.Map");
-        final long jobExecutionId = jobOperator.start(jobName, params);
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        long jobExecutionId = jobOperator.start(jobName, params);
+        JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+
+        params.setProperty(CsvProperties.BEAN_TYPE_KEY, "java.util.Map");
+        jobExecutionId = jobOperator.start(jobName, params);
+        jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
     @Test @Ignore("restore it if needed")

@@ -12,15 +12,18 @@
  
 package org.jberet.support.io;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 /**
  * A bean class for person.csv.
  */
 public class Person {
-    private int number;
+    private long number;
     private String gender;
     private String title;
     private String givenName;
-    private String middleInitial;
+    private char middleInitial;
     private String surname;
     private String streetAddress;
     private String city;
@@ -33,7 +36,7 @@ public class Person {
     private String password;
     private String telephoneNumber;
     private String mothersMaiden;
-    private String birthday;
+    private Date birthday;
     private String CCType;
     private String CCNumber;
     private String CVV2;
@@ -46,19 +49,19 @@ public class Person {
     private String vehicle;
     private String domain;
     private String bloodType;
-    private String pounds;
-    private String kilograms;
+    private BigDecimal pounds;
+    private BigDecimal kilograms;
     private String feetInches;
-    private String centimeters;
+    private int centimeters;
     private String GUID;
-    private String latitude;
-    private String longitude;
+    private double latitude;
+    private double longitude;
 
-    public int getNumber() {
+    public long getNumber() {
         return number;
     }
 
-    public void setNumber(final int number) {
+    public void setNumber(final long number) {
         this.number = number;
     }
 
@@ -86,11 +89,11 @@ public class Person {
         this.givenName = givenName;
     }
 
-    public String getMiddleInitial() {
+    public char getMiddleInitial() {
         return middleInitial;
     }
 
-    public void setMiddleInitial(final String middleInitial) {
+    public void setMiddleInitial(final char middleInitial) {
         this.middleInitial = middleInitial;
     }
 
@@ -190,11 +193,11 @@ public class Person {
         this.mothersMaiden = mothersMaiden;
     }
 
-    public String getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(final String birthday) {
+    public void setBirthday(final Date birthday) {
         this.birthday = birthday;
     }
 
@@ -294,19 +297,19 @@ public class Person {
         this.bloodType = bloodType;
     }
 
-    public String getPounds() {
+    public BigDecimal getPounds() {
         return pounds;
     }
 
-    public void setPounds(final String pounds) {
+    public void setPounds(final BigDecimal pounds) {
         this.pounds = pounds;
     }
 
-    public String getKilograms() {
+    public BigDecimal getKilograms() {
         return kilograms;
     }
 
-    public void setKilograms(final String kilograms) {
+    public void setKilograms(final BigDecimal kilograms) {
         this.kilograms = kilograms;
     }
 
@@ -318,11 +321,11 @@ public class Person {
         this.feetInches = feetInches;
     }
 
-    public String getCentimeters() {
+    public int getCentimeters() {
         return centimeters;
     }
 
-    public void setCentimeters(final String centimeters) {
+    public void setCentimeters(final int centimeters) {
         this.centimeters = centimeters;
     }
 
@@ -334,19 +337,19 @@ public class Person {
         this.GUID = GUID;
     }
 
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(final String latitude) {
+    public void setLatitude(final double latitude) {
         this.latitude = latitude;
     }
 
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(final String longitude) {
+    public void setLongitude(final double longitude) {
         this.longitude = longitude;
     }
 
