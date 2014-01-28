@@ -39,10 +39,43 @@ public class CsvItemReaderTest {
     "pounds, kilograms, feetInches, centimeters, GUID, latitude, longitude";
 
     static final String cellProcessors =
-    "NotNull, ParseLong; null; null; null; ParseChar; null; null; null; null; null;" +
-            "null; null; null; null; null; null; null; Optional, ParseDate('MM/dd/yyyy'); null; null;" +
-            "null; null; null; null; null; null; null; null; null; null;" +
-            "ParseBigDecimal('en_us'); ParseBigDecimal; null; ParseInt; null; ParseDouble; ParseDouble";
+                    "NotNull, LMinMax(1, 99999); " +    //Number  convert to long and enforce range
+                    "Token('male', 'M'), Token('female', 'F');" +   //Gender
+                    "null; " +  //Title
+                    "StrNotNullOrEmpty; " +  //GivenName
+                    "ParseChar; " +     //MiddleInitial
+                    "null; " +      //Surname
+                    "null; " +      //StreetAddress
+                    "null; " +      //City
+                    "null; " +      //State
+                    "Strlen(5);" +       //ZipCode
+                    "Equals('US'); " +      //Country
+                    "IsElementOf('United States', 'United States of America'); " +      //CountryFull
+                    "RequireSubStr('@'), ForbidSubStr('@gmail.com', '@yahoo.com'); " +      //EmailAddress rules
+                    "Unique; " +      //UserName  must be unique
+                    "StrMinMax(8, 20), StrRegEx('^[a-zA-Z0-9]*$');" +      //Password, enforce length and regex rule
+                    "null; " +      //TelephoneNumber
+                    "null; " +      //MothersMaiden
+                    "Optional, ParseDate('MM/dd/yyyy'); " +     //Birthday
+                    "IsIncludedIn('Visa', 'MasterCard', 'Discover', 'AmericanExpress'; " +      //CCType
+                    "null;" +       //CCNumber
+                    "StrMinMax(3, 4); " +      //CVV2
+                    "null; " +      //CCExpires
+                    "null; " +      //NationalID
+                    "null; " +      //UPS
+                    "null; " +      //Color
+                    "null; " +      //Occupation
+                    "null; " +      //Company
+                    "null; " +      //Vehicle
+                    "RequireSubStr('.'); " +      //Domain
+                    "NotNull, StrReplace('\\+', '');" +       //BloodType, + is java regex meta char, so need to escape it
+                    "ParseBigDecimal('en_us'); " +      //Pounds
+                    "ParseBigDecimal; " +       //Kilograms
+                    "null; " +      //FeetInches
+                    "ParseInt; " +      //Centimeters
+                    "Truncate(10, '...'); " +       //GUID
+                    "DMinMax(-99999, 99999); " +       //Latitude  convert to double and enforce range
+                    "ParseDouble";          //Longitude
 
     @Test
     public void testBeanType() throws Exception {

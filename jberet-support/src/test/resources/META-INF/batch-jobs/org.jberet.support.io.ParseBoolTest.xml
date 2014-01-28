@@ -20,6 +20,7 @@
                     <property name="resource" value="#{jobParameters['resource']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="cellProcessors" value= "#{jobParameters['cellProcessors']}"/>
+                    <property name="skipComments" value="#{jobParameters['skipComments']}"/>
                 </properties>
             </reader>
             <writer ref="dumpItemWriter">

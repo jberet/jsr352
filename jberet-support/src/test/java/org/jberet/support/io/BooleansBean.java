@@ -20,18 +20,14 @@ final public class BooleansBean {
 
     private boolean boolYesNo;
     private boolean boolOnOff;
+    private String description;
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("BooleansBean{");
-        sb.append("boolTrueFalse=").append(boolTrueFalse);
-        sb.append(", bool10=").append(bool10);
-        sb.append(", boolyn=").append(boolyn);
-        sb.append(", booltf=").append(booltf);
-        sb.append(", boolYesNo=").append(boolYesNo);
-        sb.append(", boolOnOff=").append(boolOnOff);
-        sb.append('}');
-        return sb.toString();
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
     public boolean isBoolTrueFalse() {
@@ -80,5 +76,19 @@ final public class BooleansBean {
 
     public void setBoolOnOff(final boolean boolOnOff) {
         this.boolOnOff = boolOnOff;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("BooleansBean{");
+        sb.append("boolTrueFalse=").append(boolTrueFalse);
+        sb.append(", bool10=").append(bool10);
+        sb.append(", boolyn=").append(boolyn);
+        sb.append(", booltf=").append(booltf);
+        sb.append(", boolYesNo=").append(boolYesNo);
+        sb.append(", boolOnOff=").append(boolOnOff);
+        sb.append(", description='").append(description).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

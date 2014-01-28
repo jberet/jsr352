@@ -107,29 +107,33 @@ class CellProcessorConfig {
                 final char ch = chars[i];
                 switch (ch) {
                     case '(':
-                        if (insideParams == 0) {
-                            insideParams++;
-                            // add the processor name as the first element
-                            final String s = line.substring(processorStartPosition, i).trim();
-                            if (!s.isEmpty()) {
-                                oneProcessorValue.add(s);
+                        if (insideQuote == 0) {
+                            if (insideParams == 0) {
+                                insideParams++;
+                                // add the processor name as the first element
+                                final String s = line.substring(processorStartPosition, i).trim();
+                                if (!s.isEmpty()) {
+                                    oneProcessorValue.add(s);
+                                }
+                                paramStartPosition = i + 1;
+                            } else {
+                                throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
                             }
-                            paramStartPosition = i + 1;
-                        } else {
-                            throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
                         }
                         break;
                     case ')':
-                        if (insideParams == 1) {
-                            insideParams--;
-                            //end of param
-                            addParam(line, paramStartPosition, i, oneProcessorValue);
-                            //end of current processor
-                            endCurrentProcessor(line, processorStartPosition, i, oneProcessorValue, processorValuesInThisLine, true);
-                            processorStartPosition = i + 1;
-                            oneProcessorValue = new ArrayList<String>();
-                        } else {
-                            throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
+                        if (insideQuote == 0) {
+                            if (insideParams == 1) {
+                                insideParams--;
+                                //end of param
+                                addParam(line, paramStartPosition, i, oneProcessorValue);
+                                //end of current processor
+                                endCurrentProcessor(line, processorStartPosition, i, oneProcessorValue, processorValuesInThisLine, true);
+                                processorStartPosition = i + 1;
+                                oneProcessorValue = new ArrayList<String>();
+                            } else {
+                                throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
+                            }
                         }
                         break;
                     case '\'':
@@ -142,19 +146,19 @@ class CellProcessorConfig {
                         }
                         break;
                     case ',':
-                        if (insideParams == 0) {
-                            //end of current processor
-                            endCurrentProcessor(line, processorStartPosition, i, oneProcessorValue, processorValuesInThisLine, false);
-                            processorStartPosition = i + 1;
-                            oneProcessorValue = new ArrayList<String>();
-                        } else if (insideParams == 1) {
-                            if (insideQuote == 0) {
+                        if (insideQuote == 0) {
+                            if (insideParams == 0) {
+                                //end of current processor
+                                endCurrentProcessor(line, processorStartPosition, i, oneProcessorValue, processorValuesInThisLine, false);
+                                processorStartPosition = i + 1;
+                                oneProcessorValue = new ArrayList<String>();
+                            } else if (insideParams == 1) {
                                 // add the param to the current processor
                                 addParam(line, paramStartPosition, i, oneProcessorValue);
                                 paramStartPosition = i + 1;
+                            } else {
+                                throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
                             }
-                        } else {
-                            throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
                         }
                         break;
                 }

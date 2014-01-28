@@ -31,17 +31,25 @@ public class ParseBoolTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
     static final String tmpdir = System.getProperty("java.io.tmpdir");
+    public final String skipComments = "matches '\\(,.*,\\)'";
 
     @Test
     public void testParseBoolDefault() throws Exception {
         //use the default boolean true false values in org.supercsv.cellprocessor.ParseBool
         final String data =
-                "boolTrueFalse,bool10,boolyn,booltf" + BatchUtil.NL +
-                        "true,      1,     y,     t" + BatchUtil.NL +
-                        "false,     0,     n,     f";
+                "boolTrueFalse,bool10,boolyn,booltf,boolYesNo,boolOnOff,description" + BatchUtil.NL +
+                        "(, THIS IS A COMMENT ,)" + BatchUtil.NL +
+                        "true,      1,     y,     t,,," + BatchUtil.NL +
+                        "false,     0,     n,     f,,,";
 
         final String cellProcessors =
-                "NotNull, ParseBool; NotNull, Trim, ParseBool; NotNull, Trim, ParseBool; NotNull, Trim, ParseBool";
+                        "NotNull, ParseBool; " +
+                        "NotNull, Trim, ParseBool; " +
+                        "NotNull, Trim, ParseBool; " +
+                        "NotNull, Trim, ParseBool;" +
+                        "Optional, ParseBool;" +
+                        "Optional, ParseBool;" +
+                        "ConvertNullTo('This row contains booleans parsed from strings, (e.g., \'true\', 1, y, t).')";
         testParseBool0("testParseBoolDefault", data, cellProcessors);
     }
 
@@ -88,10 +96,11 @@ public class ParseBoolTest {
         final Properties params = CsvItemReaderTest.createParams(CsvProperties.BEAN_TYPE_KEY, BooleansBean.class.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
         params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
+        params.setProperty(CsvProperties.SKIP_COMMENTS_KEY, skipComments);
         System.out.printf("CSV resource to read: %s%n", resource);
 
-        long jobExecutionId = jobOperator.start(jobName, params);
-        JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        final long jobExecutionId = jobOperator.start(jobName, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
