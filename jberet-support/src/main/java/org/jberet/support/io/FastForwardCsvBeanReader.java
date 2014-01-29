@@ -36,7 +36,7 @@ import org.supercsv.util.MethodCache;
  * @author Kasper B. Graversen
  * @author James Bassett
  */
-class FastForwardCsvBeanReader extends AbstractCsvReader implements ICsvBeanReader {
+final class FastForwardCsvBeanReader extends AbstractCsvReader implements ICsvBeanReader {
 
     // temporary storage of processed columns to be mapped to the bean
     private final List<Object> processedColumns = new ArrayList<Object>();

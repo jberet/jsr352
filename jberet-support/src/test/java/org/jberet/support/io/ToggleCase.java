@@ -16,7 +16,7 @@ import org.supercsv.cellprocessor.CellProcessorAdaptor;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.util.CsvContext;
 
-public class ToggleCase extends CellProcessorAdaptor {
+public final class ToggleCase extends CellProcessorAdaptor {
     private static String upper = "A";
     private static String lower = "a";
     private String whichCase = upper;

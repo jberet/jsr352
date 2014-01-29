@@ -40,7 +40,7 @@ import java.io.PushbackInputStream;
  * <p>Use the {@link #skipBOM()} method to remove the detected BOM from the
  * wrapped <code>InputStream</code> object.</p>
  */
-public class UnicodeBOMInputStream extends InputStream
+public final class UnicodeBOMInputStream extends InputStream
 {
     /**
      * Type safe enumeration class that describes the different types of Unicode

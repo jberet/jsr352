@@ -39,7 +39,7 @@ public class CsvItemReaderTest {
     "pounds, kilograms, feetInches, centimeters, GUID, latitude, longitude";
 
     static final String cellProcessors =
-                    "NotNull, LMinMax(1, 99999); " +    //Number  convert to long and enforce range
+                    "NotNull, UniqueHashCode, LMinMax(1, 99999); " +    //Number  convert to long and enforce range
                     "Token('male', 'M'), Token('female', 'F');" +   //Gender
                     "null; " +  //Title
                     "StrNotNullOrEmpty; " +  //GivenName

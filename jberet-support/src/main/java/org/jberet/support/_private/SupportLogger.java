@@ -76,4 +76,8 @@ public interface SupportLogger {
     @LogMessage(level = Logger.Level.WARN)
     void maybeMissingEndQuote(String line);
 
+    @Message(id = 60014, value = "About to write items, number of items %s, element type %s")
+    @LogMessage(level = Logger.Level.TRACE)
+    void aboutToWriteItems(int itemCount, Class<?> elementType);
+
 }

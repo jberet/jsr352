@@ -9,7 +9,7 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.support.io;
 
 import java.io.Serializable;
@@ -17,12 +17,13 @@ import java.util.List;
 import javax.batch.api.chunk.ItemWriter;
 import javax.inject.Named;
 
+import org.jberet.support._private.SupportLogger;
+
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemWriter} that prints out the data content by calling the item's
- * {@code toString()} method.
+ * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes data to CSV file or resource.
  */
 @Named
-public final class DumpItemWriter implements ItemWriter {
+public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter {
     @Override
     public void open(final Serializable checkpoint) throws Exception {
 
@@ -35,10 +36,8 @@ public final class DumpItemWriter implements ItemWriter {
 
     @Override
     public void writeItems(final List<Object> items) throws Exception {
-        System.out.printf("%nNumber of items %s, element type %s%n", items.size(), items.get(0).getClass());
-        for (final Object e : items) {
-            System.out.printf("%s%n%n", e);
-        }
+        SupportLogger.LOGGER.aboutToWriteItems(items.size(), items.get(0).getClass());
+
     }
 
     @Override

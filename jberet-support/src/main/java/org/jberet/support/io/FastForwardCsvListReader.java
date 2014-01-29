@@ -17,7 +17,7 @@ import org.supercsv.prefs.CsvPreference;
  * @author Kasper B. Graversen
  * @author James Bassett
  */
-class FastForwardCsvListReader extends AbstractCsvReader implements ICsvListReader {
+final class FastForwardCsvListReader extends AbstractCsvReader implements ICsvListReader {
     private final int startRowNumber;
 
     /**

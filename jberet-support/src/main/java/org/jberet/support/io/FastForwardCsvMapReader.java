@@ -21,7 +21,7 @@ import org.supercsv.util.Util;
  * @author Kasper B. Graversen
  * @author James Bassett
  */
-class FastForwardCsvMapReader extends AbstractCsvReader implements ICsvMapReader {
+final class FastForwardCsvMapReader extends AbstractCsvReader implements ICsvMapReader {
     private final int startRowNumber;
 
     /**

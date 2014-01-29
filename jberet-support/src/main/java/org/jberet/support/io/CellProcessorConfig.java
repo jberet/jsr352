@@ -64,7 +64,8 @@ import org.supercsv.cellprocessor.ift.StringCellProcessor;
  * {@code org.supercsv.cellprocessor.ift.CellProcessor}, which can be consumed by
  * {@code org.jberet.support.io.CsvItemReader}.
  */
-class CellProcessorConfig {
+final class CellProcessorConfig {
+    static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     /**
      * Parses the property value for cellProcessors into an array of {@code CellProcessor}. The number of the
@@ -226,7 +227,7 @@ class CellProcessorConfig {
             final String name = oneProcessorValue.get(0);
             final String[] params;
             if (oneProcessorValue.size() == 1) {
-                params = CsvItemReader.EMPTY_STRING_ARRAY;
+                params = EMPTY_STRING_ARRAY;
             } else {
                 params = new String[oneProcessorValue.size() - 1];
                 for (int i = 1; i < oneProcessorValue.size(); i++) {
@@ -487,7 +488,7 @@ class CellProcessorConfig {
                 }
             } else if (params.length == 1) {
                 if (previous == null) {
-                    constructorParamTypes = new Class[]{String.class};
+                    constructorParamTypes = CsvItemReaderWriterBase.stringParameterTypes;
                     final Constructor<?> constructor = cellProcessorClass.getConstructor(constructorParamTypes);
                     result = (CellProcessor) constructor.newInstance(params[0]);
                 } else {
