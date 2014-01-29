@@ -44,7 +44,7 @@ public class CsvItemReaderTest {
                     "null; " +  //Title
                     "StrNotNullOrEmpty; " +  //GivenName
                     "ParseChar; " +     //MiddleInitial
-                    "null; " +      //Surname
+                    "org.jberet.support.io.ToggleCase(a);" +      //Surname to lower case with a custom cell processor
                     "null; " +      //StreetAddress
                     "null; " +      //City
                     "null; " +      //State
