@@ -69,7 +69,11 @@ public interface SupportLogger {
     void notFile(String resource);
 
     @Message(id = 60012, value = "About to create CSV CellProcessor with %s")
-    @LogMessage(level = Logger.Level.INFO)
+    @LogMessage(level = Logger.Level.TRACE)
     void createCellProcessor(List<String> cellProcessorVal);
+
+    @Message(id = 60013, value = "The CellProcessor value may be missing an ending single quote: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void maybeMissingEndQuote(String line);
 
 }

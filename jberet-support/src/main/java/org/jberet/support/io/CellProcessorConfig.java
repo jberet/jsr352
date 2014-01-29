@@ -122,7 +122,7 @@ class CellProcessorConfig {
                         }
                         break;
                     case ')':
-                        if (insideQuote == 0) {
+                        if (insideQuote == 0 || (insideQuote == 1 && i == chars.length - 1)) {
                             if (insideParams == 1) {
                                 insideParams--;
                                 //end of param
@@ -163,6 +163,9 @@ class CellProcessorConfig {
                         break;
                 }
             } //end parsing a line
+            if (insideQuote == 1) {
+                SupportLogger.LOGGER.maybeMissingEndQuote(line);
+            }
             if (processorStartPosition < i) {
                 oneProcessorValue.add(line.substring(processorStartPosition, i).trim());
             }
@@ -204,7 +207,8 @@ class CellProcessorConfig {
                 if (s.endsWith("'")) {
                     s = s.substring(1, s.length() - 1);
                 } else {
-                    throw SupportLogger.LOGGER.missingQuote(line);
+                    SupportLogger.LOGGER.maybeMissingEndQuote(line);
+                    s = s.substring(1, s.length());
                 }
             }
             oneProcessorValue.add(s);
