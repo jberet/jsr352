@@ -37,7 +37,7 @@ import static org.jberet.support.io.CsvProperties.MATCHES;
 import static org.jberet.support.io.CsvProperties.MATCHES_FUZZY;
 import static org.jberet.support.io.CsvProperties.PREFERENCE_KEY;
 import static org.jberet.support.io.CsvProperties.SELECT;
-import static org.jberet.support.io.CsvProperties.SKIP_COMMENTS_KEY;
+import static org.jberet.support.io.CsvProperties.COMMENT_MATCHER_KEY;
 import static org.jberet.support.io.CsvProperties.STANDARD_PREFERENCE;
 import static org.jberet.support.io.CsvProperties.STARTS_WITH;
 import static org.jberet.support.io.CsvProperties.STARTS_WITH_FUZZY;
@@ -55,6 +55,10 @@ public abstract class CsvItemReaderWriterBase {
     @Inject
     @BatchProperty
     protected String resource;
+
+    @Inject
+    @BatchProperty
+    protected Class beanType;
 
     @Inject
     @BatchProperty
@@ -78,7 +82,7 @@ public abstract class CsvItemReaderWriterBase {
 
     @Inject
     @BatchProperty
-    protected String skipComments;
+    protected String commentMatcher;
 
     @Inject
     @BatchProperty
@@ -91,6 +95,8 @@ public abstract class CsvItemReaderWriterBase {
     @Inject
     @BatchProperty
     protected String cellProcessors;
+
+    protected CellProcessor[] cellProcessorInstances;
 
     /**
      * Creates or obtains {@code org.supercsv.prefs.CsvPreference} according to the configuration in JSL document.
@@ -113,7 +119,7 @@ public abstract class CsvItemReaderWriterBase {
 
         //do not trim quoteChar or delimiterChar. They can be tab (\t) and after trim, it will be just empty
         if (quoteChar != null || delimiterChar != null || endOfLineSymbols != null ||
-                surroundingSpacesNeedQuotes != null || skipComments != null || encoder != null || quoteMode != null) {
+                surroundingSpacesNeedQuotes != null || commentMatcher != null || encoder != null || quoteMode != null) {
             final CsvPreference.Builder builder = new CsvPreference.Builder(
                     quoteChar == null ? (char) csvPreference.getQuoteChar() : quoteChar.charAt(0),
                     delimiterChar == null ? csvPreference.getDelimiterChar() : (int) delimiterChar.charAt(0),
@@ -122,8 +128,8 @@ public abstract class CsvItemReaderWriterBase {
             if (surroundingSpacesNeedQuotes != null) {
                 builder.surroundingSpacesNeedQuotes(Boolean.parseBoolean(surroundingSpacesNeedQuotes.trim()));
             }
-            if (skipComments != null) {
-                builder.skipComments(getCommentMatcher(skipComments));
+            if (commentMatcher != null) {
+                builder.skipComments(getCommentMatcher(commentMatcher));
             }
             if (encoder != null) {
                 final CsvEncoder encoder1 = getEncoder(encoder);
@@ -253,7 +259,7 @@ public abstract class CsvItemReaderWriterBase {
     /**
      * Gets the configured {@code org.supercsv.comment.CommentMatcher}.
      *
-     * @param val property value of skipComments property in this batch artifact. For example,
+     * @param val property value of commentMatcher property in this batch artifact. For example,
      *            <ul>
      *            <li>starts with '#'</li>
      *            <li>startswith  '##'</li>
@@ -295,13 +301,13 @@ public abstract class CsvItemReaderWriterBase {
         } else if (matcherName.equalsIgnoreCase(MATCHES) || matcherName.equalsIgnoreCase(MATCHES_FUZZY)) {
             commentMatcher = new CommentMatches(matcherParam);
         } else {
-            throw SupportLogger.LOGGER.invalidCsvPreference(val, SKIP_COMMENTS_KEY);
+            throw SupportLogger.LOGGER.invalidCsvPreference(val, COMMENT_MATCHER_KEY);
         }
 
         return commentMatcher;
     }
 
-    private <T> T loadAndInstantiate(final String className, final String contextVal, final String param) {
+    private static <T> T loadAndInstantiate(final String className, final String contextVal, final String param) {
         try {
             final Class<?> aClass = CsvItemReaderWriterBase.class.getClassLoader().loadClass(className);
             if (param == null) {

@@ -20,10 +20,17 @@
                     <property name="resource" value="#{jobParameters['resource']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="cellProcessors" value= "#{jobParameters['cellProcessors']}"/>
-                    <property name="skipComments" value="#{jobParameters['skipComments']}"/>
+                    <property name="commentMatcher" value="#{jobParameters['commentMatcher']}"/>
                 </properties>
             </reader>
-            <writer ref="dumpItemWriter">
+            <writer ref="csvItemWriter">
+                <properties>
+                    <property name="resource" value="#{jobParameters['writeResource']}"/>
+                    <property name="overwrite" value="true"/>
+                    <property name="beanType" value="#{jobParameters['beanType']}"/>
+                    <property name="header" value="#{jobParameters['header']}"/>
+                    <property name="writeComments" value="#{jobParameters['writeComments']}"/>
+                </properties>
             </writer>
         </chunk>
     </step>

@@ -12,6 +12,7 @@
 
 package org.jberet.support._private;
 
+import java.io.Serializable;
 import java.util.List;
 import javax.batch.operations.BatchRuntimeException;
 
@@ -79,5 +80,15 @@ public interface SupportLogger {
     @Message(id = 60014, value = "About to write items, number of items %s, element type %s")
     @LogMessage(level = Logger.Level.TRACE)
     void aboutToWriteItems(int itemCount, Class<?> elementType);
+
+    @Message(id = 60015, value = "Open CsvItemWriter with checkpoint %s, which is ignored for CsvItemWriter.")
+    @LogMessage(level = Logger.Level.TRACE)
+    void openCsvItemWriter(Serializable checkpoint);
+
+    @Message(id = 60016, value = "About to overwrite existing StepContext.getTransientUserData: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void existingTransientUserData(Object transientUserData);
+
+
 
 }

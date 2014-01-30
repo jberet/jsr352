@@ -31,13 +31,14 @@ public class ParseBoolTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
     static final String tmpdir = System.getProperty("java.io.tmpdir");
-    public final String skipComments = "matches '\\(,.*,\\)'";
+    public final String commentMatcher = "matches '\\(,.*,\\)'";
+    static final String writeComments = "# Comments written by csv writer.";
 
     @Test
     public void testParseBoolDefault() throws Exception {
         //use the default boolean true false values in org.supercsv.cellprocessor.ParseBool
-        final String data =
-                "boolTrueFalse,bool10,boolyn,booltf,boolYesNo,boolOnOff,description" + BatchUtil.NL +
+        final String header = "boolTrueFalse,bool10,boolyn,booltf,boolYesNo,boolOnOff,description";
+        final String data = header + BatchUtil.NL +
                         "(, THIS IS A COMMENT ,)" + BatchUtil.NL +
                         "true,      1,     y,     t,,," + BatchUtil.NL +
                         "false,     0,     n,     f,,,";
@@ -50,15 +51,15 @@ public class ParseBoolTest {
                         "Optional, ParseBool;" +
                         "Optional, ParseBool;" +
                         "ConvertNullTo('This row contains booleans parsed from strings, (e.g., \'true\', 1, y, t).')";
-        testParseBool0("testParseBoolDefault", data, cellProcessors);
+        testParseBool0("testParseBoolDefault", data, cellProcessors, header, writeComments);
     }
 
     @Test
     public void testParseBoolSingleCustomValue() throws Exception {
         //use the SINGLE true or false string value to override the default boolean true false values in
         // org.supercsv.cellprocessor.ParseBool
-        final String data =
-                "boolTrueFalse,bool10,boolyn,booltf,boolYesNo,boolOnOff" + BatchUtil.NL +
+        final String header = "boolTrueFalse,bool10,boolyn,booltf,boolYesNo,boolOnOff";
+        final String data = header + BatchUtil.NL +
                         "true,      1,     y,     t,      yes,       on" + BatchUtil.NL +
                         "false,     0,     n,     f,       no,      off";
 
@@ -69,35 +70,41 @@ public class ParseBoolTest {
                         "Optional, Trim, ParseBool('t', 'f'); " +
                         "Optional, Trim, ParseBool('yes', 'no');" +
                         "Optional, Trim, ParseBool('on', 'off')";
-        testParseBool0("testParseBoolSingleCustomValue", data, cellProcessors);
+        testParseBool0("testParseBoolSingleCustomValue", data, cellProcessors, header, writeComments);
     }
 
     @Test
     public void testParseBoolMultipleCustomValues() throws Exception {
         //use multiple true or false string values to override the default boolean true false values in
         // org.supercsv.cellprocessor.ParseBool
-        final String data =
-                "boolTrueFalse,bool10,boolyn,booltf,boolYesNo,boolOnOff" + BatchUtil.NL +
-                        "true,      1,     y,     t,      yes,       on" + BatchUtil.NL +
-                        "false,     0,     n,     f,       no,      off";
+        final String header = "boolTrueFalse,bool10,boolyn,booltf,boolYesNo,boolOnOff";
+        final String data = header + BatchUtil.NL +
+                "true,      1,     y,     t,      yes,       on" + BatchUtil.NL +
+                "false,     0,     n,     f,       no,      off";
 
         final String cellProcessors =
                 "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off');" +
-                "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
-                "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
-                "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
-                "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off');" +
-                "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off')";
-        testParseBool0("testParseBoolMultipleCustomValues", data, cellProcessors);
+                        "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
+                        "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
+                        "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
+                        "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off');" +
+                        "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off')";
+        testParseBool0("testParseBoolMultipleCustomValues", data, cellProcessors, header, writeComments);
     }
 
-    private void testParseBool0(final String fileName, final String data, final String cellProcessors) throws Exception {
+    private void testParseBool0(final String fileName, final String data, final String cellProcessors,
+                                final String header, final String writeComments) throws Exception {
         final String resource = saveFileToTmpdir(fileName, data).getPath();
+        final String writeResource = resource + ".out";
+        //final String writeResource = CsvProperties.RESOURCE_STEP_CONTEXT;
         final Properties params = CsvItemReaderTest.createParams(CsvProperties.BEAN_TYPE_KEY, BooleansBean.class.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
+        params.setProperty("writeResource", writeResource);
         params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
-        params.setProperty(CsvProperties.SKIP_COMMENTS_KEY, skipComments);
-        System.out.printf("CSV resource to read: %s%n", resource);
+        params.setProperty(CsvProperties.COMMENT_MATCHER_KEY, commentMatcher);
+        params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
+        params.setProperty(CsvProperties.HEADER_KEY, header);
+        System.out.printf("CSV resource to read: %n%s, to write: %n%s%n", resource, writeResource);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);

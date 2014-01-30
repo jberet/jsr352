@@ -59,10 +59,24 @@ public final class CsvProperties {
     public static final String BEAN_TYPE_KEY = "beanType";
 
     /**
-     * The property key to specify the location of the CSV file.  The value can be file path, URL, or any resource that
-     * can be loaded with application class loader.
+     * The property key to specify the location of the CSV file.  For reader, the value can be file path, URL,
+     * or any resource that can be loaded with application class loader. For writer, the value can be a file location,
+     * or {@code StepContext}, which indicates that data will be saved as transient user data in the current
+     * {@code StepContext}. Saving CSV data to {@code StepContext} should be used with caution, and is mostly used
+     * for testing small amount of data.  Any existing {@code StepContext} transient user data will be overwritten.
      */
     public static final String RESOURCE_KEY = "resource";
+
+    /**
+     * The property value to specify writing CSV data to {@code StepContext} as transient user data.
+     */
+    public static final String RESOURCE_STEP_CONTEXT = "StepContext";
+
+    /**
+     * The property key to instruct CSV writer whether to overwrite output file or append to it. Valid values are true
+     * (overwrite mode), or false (append mode), and it defaults to false (append mode).
+     */
+    public static final String OVERWRITE_KEY = "overwrite";
 
     /**
      * The quote character (used when a cell contains special characters, such as the delimiter char, a quote char,
@@ -92,11 +106,23 @@ public final class CsvProperties {
     public static final String SURROUNDING_SPACES_NEED_QUOTES_KEY = "surroundingSpacesNeedQuotes";
 
     /**
-     * Skips comments (what makes up a comment is determined by the CommentMatcher you supply). See the section
-     * on skipping comments below for more information.
-     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     * The property key to specify a {@code CommentMatcher} for reading CSV resource. The {@code CommentMatcher}
+     * determines whether a line should be considered a comment.
+     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>. For example,
+     * <ul>
+     *     <li>"startsWith #"</li>
+     *     <li>"matches 'regexp'"</li>
+     *     <li>"my.own.CommentMatcherImpl"</li>
+     * </ul>
      */
-    public static final String SKIP_COMMENTS_KEY = "skipComments";
+    public static final String COMMENT_MATCHER_KEY = "commentMatcher";
+
+    /**
+     * The property key to specify the complete comment line for the reader. The comments should already include
+     * the required comment-defining characters or regular expressions. The value of this property will be written
+     * out as a comment line verbatim as the first line.
+     */
+    public static final String WRITE_COMMENTS_KEY = "writeComments";
 
     /**
      * The property value to indicate the use of a {@code org.supercsv.comment.CommentStartsWith} comment matcher.
@@ -177,9 +203,15 @@ public final class CsvProperties {
     public static final String COLUMN = "column";
 
     /**
-     * The property key to specify target bean fields.
+     * The property key to specify the bean fields or map keys corresponding to CSV columns. If the CSV columns exactly
+     * match bean fields or map keys, then no need to specify this property.
      */
     public static final String NAME_MAPPING_KEY = "nameMapping";
+
+    /**
+     * The property key to specify the CSV header for write out. Only used in {@code CsvItemWriter}.
+     */
+    public static final String HEADER_KEY = "header";
 
     /**
      * The property key to specify a list of cell processors, one for each column. See

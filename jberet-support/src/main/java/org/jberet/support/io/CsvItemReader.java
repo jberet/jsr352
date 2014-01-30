@@ -27,7 +27,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jberet.support._private.SupportLogger;
-import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.ICsvBeanReader;
 import org.supercsv.io.ICsvListReader;
 import org.supercsv.io.ICsvMapReader;
@@ -53,13 +52,7 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
     @BatchProperty
     protected int end;
 
-    @Inject
-    @BatchProperty
-    protected Class beanType;
-
     protected ICsvReader delegateReader;
-
-    private CellProcessor[] cellProcessorInstances;
 
     @Override
     public void open(final Serializable checkpoint) {
