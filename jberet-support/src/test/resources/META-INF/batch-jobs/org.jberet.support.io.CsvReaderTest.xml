@@ -29,7 +29,17 @@
                     <property name="cellProcessors" value= "#{jobParameters['cellProcessors']}"/>
                 </properties>
             </reader>
-            <writer ref="dumpItemWriter">
+            <writer ref="csvItemWriter">
+                <properties>
+                    <property name="resource" value="#{jobParameters['writeResource']}"/>
+                    <property name="overwrite" value="true"/>
+                    <property name="preference" value="#{jobParameters['preference']}"/>
+                    <property name="delimiterChar" value="#{jobParameters['delimiterChar']}"/>
+                    <property name="quoteChar" value="#{jobParameters['quoteChar']}"/>
+                    <property name="beanType" value="#{jobParameters['beanType']}"/>
+                    <property name="header" value="#{jobParameters['header']}"/>
+                    <property name="writeComments" value="#{jobParameters['writeComments']}"/>
+                </properties>
             </writer>
         </chunk>
     </step>

@@ -30,9 +30,7 @@ public class ParseBoolTest {
     static final String jobName = "org.jberet.support.io.ParseBoolTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
-    static final String tmpdir = System.getProperty("java.io.tmpdir");
     public final String commentMatcher = "matches '\\(,.*,\\)'";
-    static final String writeComments = "# Comments written by csv writer.";
 
     @Test
     public void testParseBoolDefault() throws Exception {
@@ -51,7 +49,7 @@ public class ParseBoolTest {
                         "Optional, ParseBool;" +
                         "Optional, ParseBool;" +
                         "ConvertNullTo('This row contains booleans parsed from strings, (e.g., \'true\', 1, y, t).')";
-        testParseBool0("testParseBoolDefault", data, cellProcessors, header, writeComments);
+        testParseBool0("testParseBoolDefault", data, cellProcessors, header, CsvItemReaderWriterTest.writeComments);
     }
 
     @Test
@@ -70,7 +68,7 @@ public class ParseBoolTest {
                         "Optional, Trim, ParseBool('t', 'f'); " +
                         "Optional, Trim, ParseBool('yes', 'no');" +
                         "Optional, Trim, ParseBool('on', 'off')";
-        testParseBool0("testParseBoolSingleCustomValue", data, cellProcessors, header, writeComments);
+        testParseBool0("testParseBoolSingleCustomValue", data, cellProcessors, header, CsvItemReaderWriterTest.writeComments);
     }
 
     @Test
@@ -89,7 +87,7 @@ public class ParseBoolTest {
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off');" +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off')";
-        testParseBool0("testParseBoolMultipleCustomValues", data, cellProcessors, header, writeComments);
+        testParseBool0("testParseBoolMultipleCustomValues", data, cellProcessors, header, CsvItemReaderWriterTest.writeComments);
     }
 
     private void testParseBool0(final String fileName, final String data, final String cellProcessors,
@@ -97,7 +95,7 @@ public class ParseBoolTest {
         final String resource = saveFileToTmpdir(fileName, data).getPath();
         final String writeResource = resource + ".out";
         //final String writeResource = CsvProperties.RESOURCE_STEP_CONTEXT;
-        final Properties params = CsvItemReaderTest.createParams(CsvProperties.BEAN_TYPE_KEY, BooleansBean.class.getName());
+        final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, BooleansBean.class.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
         params.setProperty("writeResource", writeResource);
         params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
@@ -113,7 +111,7 @@ public class ParseBoolTest {
     }
 
     static File saveFileToTmpdir(final String fileName, final String content) throws Exception {
-        final File file = new File(tmpdir, fileName);
+        final File file = new File(CsvItemReaderWriterTest.tmpdir, fileName);
         BufferedWriter bufferedWriter = null;
         try {
             bufferedWriter = new BufferedWriter(new FileWriter(file));

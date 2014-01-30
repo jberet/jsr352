@@ -12,6 +12,7 @@
 
 package org.jberet.support.io;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -24,13 +25,15 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class CsvItemReaderTest {
+public class CsvItemReaderWriterTest {
     static final String jobName = "org.jberet.support.io.CsvReaderTest";
     static final String personResource = "person.csv";
     static final String personPipeResource = "person-pipe.txt";
     static final String personTabResource = "person-tab.txt";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
+    static final String writeComments = "# Comments written by csv writer.";
+    static final String tmpdir = System.getProperty("java.io.tmpdir");
 
     static final String nameMapping =
     "number, gender, title, givenName, middleInitial, surname, streetAddress, city, state, zipCode, " +
@@ -80,24 +83,31 @@ public class CsvItemReaderTest {
     @Test
     public void testBeanType() throws Exception {
         //override the default quote char ", which is used in feetInches cell
-        testBeanType0(personResource, null, null, "|");
+        testReadWrite0(personResource, "testBeanTypeTab.out", org.jberet.support.io.Person.class.getName(), null, null, "|");
     }
 
     @Test
     public void testBeanTypeTab() throws Exception {
         //override the default quote char ", which is used in feetInches cell
-        testBeanType0(personTabResource, CsvProperties.TAB_PREFERENCE, null, "|");
+        testReadWrite0(personTabResource, "testBeanTypeTab.out", org.jberet.support.io.Person.class.getName(), CsvProperties.TAB_PREFERENCE, null, "|");
     }
 
     @Test
     public void testBeanTypePipe() throws Exception {
         //override the default quote char ", which is used in feetInches cell. | is already used as the delimiterChar
         //so cannot be used as quoteChar again.
-        testBeanType0(personPipeResource, null, "|", "^");
+        testReadWrite0(personPipeResource, "testBeanTypePipe.out", org.jberet.support.io.Person.class.getName(), null, "|", "^");
     }
 
-    private void testBeanType0(final String resource, final String preference, final String delimiterChar, final String quoteChar) throws Exception {
-        final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "org.jberet.support.io.Person");
+    //test will print out the path of output file from CsvItemWriter, which can then be verified.
+    //e.g., CSV resource to read:
+    //person.csv,
+    //to write:
+    //        /var/folders/s3/2m3bc7_n0550tp44h4bcgwtm0000gn/T/testMapType.out
+    private void testReadWrite0(final String resource, final String writeResource,
+                                final String beanType, final String preference,
+                                final String delimiterChar, final String quoteChar) throws Exception {
+        final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, beanType);
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
 
         if (preference != null) {
@@ -109,7 +119,13 @@ public class CsvItemReaderTest {
         if (quoteChar != null) {
             params.setProperty(CsvProperties.QUOTE_CHAR_KEY, quoteChar);
         }
-        params.setProperty("cellProcessors", cellProcessors);
+        params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
+
+        final String writeResourceFullPath = new File(tmpdir, writeResource).getPath();
+        params.setProperty("writeResource", writeResourceFullPath);
+        params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
+        params.setProperty(CsvProperties.HEADER_KEY, nameMapping);
+        System.out.printf("CSV resource to read: %n%s, %nto write: %n%s%n", resource, writeResourceFullPath);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
@@ -118,21 +134,13 @@ public class CsvItemReaderTest {
     }
 
     @Test
-    public void testListAndMapType() throws Exception {
-        final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, "java.util.List");
-        params.setProperty(CsvProperties.RESOURCE_KEY, personResource);
-        params.setProperty(CsvProperties.QUOTE_CHAR_KEY, "|");
+    public void testListType() throws Exception {
+        testReadWrite0(personResource, "testListType.out", java.util.List.class.getName(), null, null, "|");
+    }
 
-        long jobExecutionId = jobOperator.start(jobName, params);
-        JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-
-        params.setProperty(CsvProperties.BEAN_TYPE_KEY, "java.util.Map");
-        jobExecutionId = jobOperator.start(jobName, params);
-        jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    @Test
+    public void testMapType() throws Exception {
+        testReadWrite0(personResource, "testMapType.out", java.util.Map.class.getName(), null, null, "|");
     }
 
     @Test @Ignore("restore it if needed")
