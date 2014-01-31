@@ -41,6 +41,7 @@ import static org.jberet.support.io.CsvProperties.RESOURCE_KEY;
  * bean, java.util.List&lt;String&gt;, or java.util.Map&lt;String, String&gt;. Data files delimited with characters
  * other than comma (e.g., tab, |) are also supported by configuring {@code preference}, {@code delimiterChar},
  * or {@code quoteChar} properties in job xml.
+ * This class is not designed to be thread-safe and its instance should not be shared between threads.
  */
 @Named
 public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader {
@@ -99,7 +100,10 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
 
     @Override
     public void close() throws Exception {
-        delegateReader.close();
+        if (delegateReader != null) {
+            delegateReader.close();
+            delegateReader = null;
+        }
     }
 
     @Override

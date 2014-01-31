@@ -39,6 +39,7 @@ import static org.jberet.support.io.CsvProperties.RESOURCE_KEY;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes data to CSV file or resource.
+ * This class is not designed to be thread-safe and its instance should not be shared between threads.
  */
 @Named
 public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter {
@@ -87,14 +88,17 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
 
     @Override
     public void close() throws Exception {
-        if (resource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT)) {
-            final Object transientUserData = stepContext.getTransientUserData();
-            if (transientUserData != null) {
-                SupportLogger.LOGGER.existingTransientUserData(transientUserData);
+        if (delegateWriter != null) {
+            if (resource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT)) {
+                final Object transientUserData = stepContext.getTransientUserData();
+                if (transientUserData != null) {
+                    SupportLogger.LOGGER.existingTransientUserData(transientUserData);
+                }
+                stepContext.setTransientUserData(stringWriter.toString());
             }
-            stepContext.setTransientUserData(stringWriter.toString());
+            delegateWriter.close();
+            delegateWriter = null;
         }
-        delegateWriter.close();
     }
 
     @Override
