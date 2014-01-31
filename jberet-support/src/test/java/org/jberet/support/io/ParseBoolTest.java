@@ -41,7 +41,7 @@ public class ParseBoolTest {
                         "true,      1,     y,     t,,," + BatchUtil.NL +
                         "false,     0,     n,     f,,,";
 
-        final String cellProcessors =
+        final String readerCellProcessors =
                         "NotNull, ParseBool; " +
                         "NotNull, Trim, ParseBool; " +
                         "NotNull, Trim, ParseBool; " +
@@ -49,7 +49,8 @@ public class ParseBoolTest {
                         "Optional, ParseBool;" +
                         "Optional, ParseBool;" +
                         "ConvertNullTo('This row contains booleans parsed from strings, (e.g., \'true\', 1, y, t).')";
-        testParseBool0("testParseBoolDefault", data, cellProcessors, header, CsvItemReaderWriterTest.writeComments);
+        testParseBool0("testParseBoolDefault", data, readerCellProcessors, null, header,
+                CsvItemReaderWriterTest.writeComments, false, null, null);
     }
 
     @Test
@@ -61,14 +62,15 @@ public class ParseBoolTest {
                         "true,      1,     y,     t,      yes,       on" + BatchUtil.NL +
                         "false,     0,     n,     f,       no,      off";
 
-        final String cellProcessors =
+        final String readerCellProcessors =
                         "Optional, ParseBool('true', 'false');" +
                         "Optional, Trim, ParseBool('1', '0'); " +
                         "Optional, Trim, ParseBool('y', 'n'); " +
                         "Optional, Trim, ParseBool('t', 'f'); " +
                         "Optional, Trim, ParseBool('yes', 'no');" +
                         "Optional, Trim, ParseBool('on', 'off')";
-        testParseBool0("testParseBoolSingleCustomValue", data, cellProcessors, header, CsvItemReaderWriterTest.writeComments);
+        testParseBool0("testParseBoolSingleCustomValue", data, readerCellProcessors, null, header,
+                CsvItemReaderWriterTest.writeComments, false, null, null);
     }
 
     @Test
@@ -80,28 +82,69 @@ public class ParseBoolTest {
                 "true,      1,     y,     t,      yes,       on" + BatchUtil.NL +
                 "false,     0,     n,     f,       no,      off";
 
-        final String cellProcessors =
+        final String readerCellProcessors =
                 "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off');" +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off');" +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off')";
-        testParseBool0("testParseBoolMultipleCustomValues", data, cellProcessors, header, CsvItemReaderWriterTest.writeComments);
+        testParseBool0("testParseBoolMultipleCustomValues", data, readerCellProcessors, null, header,
+                CsvItemReaderWriterTest.writeComments, false, null, null);
     }
 
-    private void testParseBool0(final String fileName, final String data, final String cellProcessors,
-                                final String header, final String writeComments) throws Exception {
+    @Test
+    public void testFmtBoolAndWriteToStepContext() throws Exception {
+        final String header = "boolTrueFalse,bool10,boolyn,booltf";
+        final String data = header + BatchUtil.NL +
+                "true,      1,     y,     t" + BatchUtil.NL +
+                "false,     0,     n,     f";
+
+        final String readerCellProcessors =
+                        "Optional, ParseBool('true', 'false');" +
+                        "Optional, Trim, ParseBool('1', '0'); " +
+                        "Optional, Trim, ParseBool('y', 'n'); " +
+                        "Optional, Trim, ParseBool('t', 'f')";
+        final String writerCellProcessors = "FmtBool(1, 0); FmtBool(1, 0); FmtBool(1, 0); FmtBool(1, 0)";
+
+        //expect comment, each column name, 1, and 0
+        final String expect = CsvItemReaderWriterTest.writeComments + ", " + header + ", 1, 0";
+
+        //forbid true, false, since FmtBool formats true to 1 and false to 0
+        final String forbid = "true, false";
+
+        testParseBool0("testParseBoolSingleCustomValue", data, readerCellProcessors, writerCellProcessors, header,
+                CsvItemReaderWriterTest.writeComments, true, expect, forbid);
+    }
+
+    private void testParseBool0(final String fileName, final String data,
+                                final String readerCellProcessors, final String writerCellProcessors,
+                                final String header, final String writeComments,
+                                final boolean writeToStepContext,
+                                final String expect, final String forbid) throws Exception {
         final String resource = saveFileToTmpdir(fileName, data).getPath();
-        final String writeResource = resource + ".out";
-        //final String writeResource = CsvProperties.RESOURCE_STEP_CONTEXT;
+        final String writeResource = writeToStepContext ? CsvProperties.RESOURCE_STEP_CONTEXT : resource + ".out";
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, BooleansBean.class.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
         params.setProperty("writeResource", writeResource);
-        params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
+
+        if (readerCellProcessors != null) {
+            params.setProperty("readerCellProcessors", readerCellProcessors);
+        }
+        if (writerCellProcessors != null) {
+            params.setProperty("writerCellProcessors", writerCellProcessors);
+        }
         params.setProperty(CsvProperties.COMMENT_MATCHER_KEY, commentMatcher);
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
         params.setProperty(CsvProperties.HEADER_KEY, header);
+        params.setProperty("validate", String.valueOf(writeToStepContext));
+        if (expect != null) {
+            params.setProperty("expect", expect);
+        }
+        if (forbid != null) {
+            params.setProperty("forbid", forbid);
+        }
+
         System.out.printf("CSV resource to read: %n%s, to write: %n%s%n", resource, writeResource);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
