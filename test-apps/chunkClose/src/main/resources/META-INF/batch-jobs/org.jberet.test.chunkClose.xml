@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+  ~
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<job id="org.jberet.test.chunkClose" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="org.jberet.test.chunkClose.step1">
+        <chunk item-count="3">
+            <reader ref="closingItemReader">
+                <properties>
+                    <property name="failReaderAtOpen" value="#{jobParameters['failReaderAtOpen']}"/>
+                    <property name="stopReadAt" value="#{jobParameters['stopReadAt']}"/>
+                    <property name="failReadAt" value="#{jobParameters['failReadAt']}"/>
+                </properties>
+            </reader>
+            <writer ref="closingItemWriter">
+                <properties>
+                    <property name="failWriterAtOpen" value="#{jobParameters['failWriterAtOpen']}"/>
+                    <property name="failWriteAt" value="#{jobParameters['failWriteAt']}"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>

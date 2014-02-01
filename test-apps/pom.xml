@@ -24,6 +24,7 @@
         <module>split</module>
         <module>chunkStop</module>
         <module>chunkPartition</module>
+        <module>chunkClose</module>
         <module>propertyInjection</module>
         <module>postConstruct</module>
     </modules>
