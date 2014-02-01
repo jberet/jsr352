@@ -29,6 +29,7 @@ import org.supercsv.quote.QuoteMode;
 
 import static org.jberet.support.io.CsvProperties.ALWAYS;
 import static org.jberet.support.io.CsvProperties.COLUMN;
+import static org.jberet.support.io.CsvProperties.COMMENT_MATCHER_KEY;
 import static org.jberet.support.io.CsvProperties.DEFAULT;
 import static org.jberet.support.io.CsvProperties.ENCODER_KEY;
 import static org.jberet.support.io.CsvProperties.EXCEL_NORTH_EUROPE_PREFERENCE;
@@ -37,7 +38,6 @@ import static org.jberet.support.io.CsvProperties.MATCHES;
 import static org.jberet.support.io.CsvProperties.MATCHES_FUZZY;
 import static org.jberet.support.io.CsvProperties.PREFERENCE_KEY;
 import static org.jberet.support.io.CsvProperties.SELECT;
-import static org.jberet.support.io.CsvProperties.COMMENT_MATCHER_KEY;
 import static org.jberet.support.io.CsvProperties.STANDARD_PREFERENCE;
 import static org.jberet.support.io.CsvProperties.STARTS_WITH;
 import static org.jberet.support.io.CsvProperties.STARTS_WITH_FUZZY;

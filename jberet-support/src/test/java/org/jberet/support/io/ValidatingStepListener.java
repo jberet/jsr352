@@ -52,6 +52,9 @@ final public class ValidatingStepListener implements StepListener {
             return;
         }
         final Object transientUserData = stepContext.getTransientUserData();
+        if (transientUserData == null) {
+            throw new BatchRuntimeException("transientUserData is not set.");
+        }
         if (transientUserData instanceof String) {
             final String data = (String) transientUserData;
             System.out.printf("transientUserData:%n%s%n", data);

@@ -58,37 +58,32 @@ public interface SupportLogger {
     @Message(id = 60009, value = "Unsupported CellProcessor: %s %s")
     BatchRuntimeException unsupportedCellProcessor(String cellProcessorName, String[] params);
 
+    @Message(id = 60010, value = "The target CSV resource already exists: %s")
+    BatchRuntimeException csvResourceAlreadyExists(Object taretCsvResource);
 
 
-
-    @Message(id = 60010, value = "The resource is not a URL %s")
+    @Message(id = 60011, value = "The resource is not a URL %s")
     @LogMessage(level = Logger.Level.TRACE)
     void notUrl(@Cause Throwable throwable, String resource);
 
-    @Message(id = 60011, value = "The resource is not a file %s")
+    @Message(id = 60012, value = "The resource is not a file %s")
     @LogMessage(level = Logger.Level.TRACE)
     void notFile(String resource);
 
-    @Message(id = 60012, value = "About to create CSV CellProcessor with %s")
+    @Message(id = 60013, value = "About to create CSV CellProcessor with %s")
     @LogMessage(level = Logger.Level.TRACE)
     void createCellProcessor(List<String> cellProcessorVal);
 
-    @Message(id = 60013, value = "The CellProcessor value may be missing an ending single quote: %s")
+    @Message(id = 60014, value = "The CellProcessor value may be missing an ending single quote: %s")
     @LogMessage(level = Logger.Level.WARN)
     void maybeMissingEndQuote(String line);
 
-    @Message(id = 60014, value = "About to write items, number of items %s, element type %s")
+    @Message(id = 60015, value = "About to write items, number of items %s, element type %s")
     @LogMessage(level = Logger.Level.TRACE)
     void aboutToWriteItems(int itemCount, Class<?> elementType);
 
-    @Message(id = 60015, value = "Open CsvItemWriter with checkpoint %s, which is ignored for CsvItemWriter.")
+    @Message(id = 60016, value = "Open CsvItemWriter with checkpoint %s, which is ignored for CsvItemWriter.")
     @LogMessage(level = Logger.Level.TRACE)
     void openCsvItemWriter(Serializable checkpoint);
-
-    @Message(id = 60016, value = "About to overwrite existing StepContext.getTransientUserData: %s")
-    @LogMessage(level = Logger.Level.WARN)
-    void existingTransientUserData(Object transientUserData);
-
-
 
 }

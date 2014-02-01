@@ -73,10 +73,26 @@ public final class CsvProperties {
     public static final String RESOURCE_STEP_CONTEXT = "StepContext";
 
     /**
-     * The property key to instruct CSV writer whether to overwrite output file or append to it. Valid values are true
-     * (overwrite mode), or false (append mode), and it defaults to false (append mode).
+     * The property key to instruct {@code org.jberet.support.io.CsvItemWriter}, when the target CSV resource already
+     * exists, whether to append to, or overwrite the existing resource, or fail. Valid values are {@code append},
+     * {@code overwrite}, and {@code failIfExists}.
      */
-    public static final String OVERWRITE_KEY = "overwrite";
+    public static final String WRITE_MODE_KEY = "writeMode";
+
+    /**
+     * The property value to specify writeMode of append for {@code org.jberet.support.io.CsvItemWriter}.
+     */
+    public static final String APPEND = "append";
+
+    /**
+     * The property value to specify writeMode of overwrite for {@code org.jberet.support.io.CsvItemWriter}.
+     */
+    public static final String OVERWRITE = "overwrite";
+
+    /**
+     * The property value to specify writeMode of failIfExists for {@code org.jberet.support.io.CsvItemWriter}.
+     */
+    public static final String FAIL_IF_EXISTS = "failIfExists";
 
     /**
      * The quote character (used when a cell contains special characters, such as the delimiter char, a quote char,

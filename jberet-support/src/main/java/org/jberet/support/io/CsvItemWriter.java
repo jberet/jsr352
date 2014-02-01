@@ -12,6 +12,7 @@
 
 package org.jberet.support.io;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
@@ -34,8 +35,14 @@ import org.supercsv.io.ICsvListWriter;
 import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.io.ICsvWriter;
 
+import static org.jberet.support.io.CsvProperties.APPEND;
 import static org.jberet.support.io.CsvProperties.BEAN_TYPE_KEY;
+import static org.jberet.support.io.CsvProperties.FAIL_IF_EXISTS;
+import static org.jberet.support.io.CsvProperties.HEADER_KEY;
+import static org.jberet.support.io.CsvProperties.OVERWRITE;
 import static org.jberet.support.io.CsvProperties.RESOURCE_KEY;
+import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
+import static org.jberet.support.io.CsvProperties.WRITE_MODE_KEY;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes data to CSV file or resource.
@@ -56,7 +63,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
 
     @Inject
     @BatchProperty
-    protected boolean overwrite;
+    protected String writeMode;
 
     private StringWriter stringWriter;
     protected ICsvWriter delegateWriter;
@@ -74,7 +81,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
             delegateWriter = new CsvBeanWriter(getOutputWriter(), getCsvPreference());
         }
         if (header == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(null, CsvProperties.HEADER_KEY);
+            throw SupportLogger.LOGGER.invalidCsvPreference(null, HEADER_KEY);
         }
         if (this.nameMapping == null) {
             this.nameMapping = header;
@@ -89,12 +96,15 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
     @Override
     public void close() throws Exception {
         if (delegateWriter != null) {
-            if (resource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT)) {
+            if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
                 final Object transientUserData = stepContext.getTransientUserData();
-                if (transientUserData != null) {
-                    SupportLogger.LOGGER.existingTransientUserData(transientUserData);
+                if (OVERWRITE.equalsIgnoreCase(writeMode) || transientUserData == null) {
+                    stepContext.setTransientUserData(stringWriter.toString());
+                } else {
+                    stepContext.setTransientUserData(transientUserData + getCsvPreference().getEndOfLineSymbols() +
+                    stringWriter.toString());
                 }
-                stepContext.setTransientUserData(stringWriter.toString());
+                stringWriter = null;
             }
             delegateWriter.close();
             delegateWriter = null;
@@ -150,13 +160,36 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
         if (resource == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
         }
-        if (resource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT)) {
-            return stringWriter = new StringWriter();
+        if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
+            if (writeMode == null || writeMode.equalsIgnoreCase(APPEND) || writeMode.equalsIgnoreCase(OVERWRITE)) {
+                return stringWriter = new StringWriter();
+            }
+            if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
+                final Object transientUserData = stepContext.getTransientUserData();
+                if (transientUserData != null) {
+                    throw SupportLogger.LOGGER.csvResourceAlreadyExists(transientUserData);
+                }
+                return stringWriter = new StringWriter();
+            }
+            throw SupportLogger.LOGGER.invalidCsvPreference(writeMode, WRITE_MODE_KEY);
         }
         try {
-            return new FileWriter(resource, !overwrite);
+            final File file = new File(resource);
+            if (writeMode == null || writeMode.equalsIgnoreCase(APPEND)) {
+                return new FileWriter(file, true);
+            }
+            if (writeMode.equalsIgnoreCase(OVERWRITE)) {
+                return new FileWriter(file);
+            }
+            if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
+                if(file.exists()) {
+                    throw SupportLogger.LOGGER.csvResourceAlreadyExists(file.getPath());
+                }
+                return new FileWriter(resource);
+            }
+            throw SupportLogger.LOGGER.invalidCsvPreference(writeMode, WRITE_MODE_KEY);
         } catch (final IOException e) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(resource, CsvProperties.RESOURCE_KEY);
+            throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
         }
     }
 }

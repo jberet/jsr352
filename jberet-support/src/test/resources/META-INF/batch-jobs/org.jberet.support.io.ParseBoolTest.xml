@@ -35,7 +35,7 @@
             <writer ref="csvItemWriter">
                 <properties>
                     <property name="resource" value="#{jobParameters['writeResource']}"/>
-                    <property name="overwrite" value="true"/>
+                    <property name="writeMode" value="#{jobParameters['writeMode']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="header" value="#{jobParameters['header']}"/>
                     <property name="cellProcessors" value= "#{jobParameters['writerCellProcessors']}"/>
