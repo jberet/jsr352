@@ -140,7 +140,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     } catch (Throwable e) {
                         BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), l);
                         batchContext.setBatchStatus(BatchStatus.FAILED);
-                        return;
                     }
                 }
                 batchContext.savePersistentData();

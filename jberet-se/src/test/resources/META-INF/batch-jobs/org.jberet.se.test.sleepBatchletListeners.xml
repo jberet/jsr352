@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="org.jberet.se.test.sleepBatchletListeners" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <listeners>
+        <listener ref="failJobListener">
+            <properties>
+                <property name="failBeforeJob" value="#{jobParameters['failBeforeJob']}"/>
+                <property name="failAfterJob"  value="#{jobParameters['failAfterJob']}"/>
+            </properties>
+        </listener>
+    </listeners>
+    <step id="org.jberet.se.test.sleepBatchletListeners.step1">
+        <listeners>
+            <listener ref="failStepListener">
+                <properties>
+                    <property name="failBeforeStep" value="#{jobParameters['failBeforeStep']}"/>
+                    <property name="failAfterStep"  value="#{jobParameters['failAfterStep']}"/>
+                </properties>
+            </listener>
+        </listeners>
+        <batchlet ref="sleepBatchlet">
+            <properties>
+                <property name="sleep.minutes" value="0"/>
+            </properties>
+        </batchlet>
+    </step>
+</job>

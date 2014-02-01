@@ -22,7 +22,7 @@ import org.jberet.job.model.JobElement;
 import org.jberet.runtime.context.JobContextImpl;
 
 public final class JobExecutionRunner extends CompositeExecutionRunner<JobContextImpl> implements Runnable {
-    private Job job;
+    private final Job job;
 
     public JobExecutionRunner(final JobContextImpl jobContext) {
         super(jobContext, null);
@@ -45,10 +45,11 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             for (final JobListener l : batchContext.getJobListeners()) {
                 try {
                     l.beforeJob();
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", l);
                     batchContext.setBatchStatus(BatchStatus.FAILED);
                     return;
+                    //TODO: fix the flow, if beforeJob fails, shoud afterJob still run?
                 }
             }
 
@@ -57,13 +58,13 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             for (final JobListener l : batchContext.getJobListeners()) {
                 try {
                     l.afterJob();
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", l);
                     batchContext.setBatchStatus(BatchStatus.FAILED);
                     return;
                 }
             }
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", job);
             batchContext.setBatchStatus(BatchStatus.FAILED);
         }

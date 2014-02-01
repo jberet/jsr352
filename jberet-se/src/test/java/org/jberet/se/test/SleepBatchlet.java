@@ -20,6 +20,9 @@ import javax.inject.Named;
 
 @Named
 public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
+    static final String INTERRUPTED = "Interrupted";
+    static final String SLEPT = "Slept";
+
     @Inject
     @BatchProperty(name = "sleep.minutes")
     private int sleepMinutes;
@@ -31,10 +34,10 @@ public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
         processThread = Thread.currentThread();
         try {
             Thread.sleep(sleepMinutes * 60 * 1000);
-        } catch (InterruptedException e) {
-            return "Interrupted";
+        } catch (final InterruptedException e) {
+            return INTERRUPTED;
         }
-        return "Slept";
+        return SLEPT;
     }
 
     @Override

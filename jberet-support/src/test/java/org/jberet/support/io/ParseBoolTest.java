@@ -119,7 +119,6 @@ public class ParseBoolTest {
     }
 
     @Test
-    @Ignore("should fix this failure next")
     public void testInvalidWriteMode() throws Exception {
         final String header = "boolTrueFalse,bool10";
         final String data = header + BatchUtil.NL + "true, 1";
@@ -171,7 +170,7 @@ public class ParseBoolTest {
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobStatus);
+        Assert.assertEquals(jobStatus, jobExecution.getBatchStatus());
     }
 
     static File saveFileToTmpdir(final String fileName, final String content) throws Exception {
