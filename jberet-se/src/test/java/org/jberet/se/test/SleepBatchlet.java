@@ -15,6 +15,8 @@ package org.jberet.se.test;
 import javax.batch.api.AbstractBatchlet;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.Batchlet;
+import javax.batch.operations.BatchRuntimeException;
+import javax.batch.runtime.context.JobContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -27,11 +29,19 @@ public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
     @BatchProperty(name = "sleep.minutes")
     private int sleepMinutes;
 
+    @Inject
+    @BatchProperty
+    private boolean failInProcess;
+
     private Thread processThread;
 
     @Override
     public String process() throws Exception {
         processThread = Thread.currentThread();
+        if (failInProcess) {
+            throw new BatchRuntimeException("failInProcess is set to true");
+        }
+
         try {
             Thread.sleep(sleepMinutes * 60 * 1000);
         } catch (final InterruptedException e) {
@@ -44,5 +54,16 @@ public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
     public void stop() throws Exception {
         System.out.printf("in @Stop, %s%n", Thread.currentThread());
         processThread.interrupt();
+    }
+
+    static void appendJobExitStatus(final JobContext jobContext, final String status) {
+        final String exitStatus = jobContext.getExitStatus();
+        final String newStatus;
+        if (exitStatus == null) {
+            newStatus = status;
+        } else {
+            newStatus = exitStatus + " " + status;
+        }
+        jobContext.setExitStatus(newStatus);
     }
 }

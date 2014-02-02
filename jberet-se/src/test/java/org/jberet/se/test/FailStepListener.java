@@ -14,6 +14,7 @@ package org.jberet.se.test;
 
 import javax.batch.api.BatchProperty;
 import javax.batch.operations.BatchRuntimeException;
+import javax.batch.runtime.context.JobContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -26,9 +27,13 @@ public final class FailStepListener implements javax.batch.api.listener.StepList
     @Inject
     @BatchProperty
     private boolean failAfterStep;
+
+    @Inject
+    private JobContext jobContext;
     
     @Override
     public void beforeStep() throws Exception {
+        SleepBatchlet.appendJobExitStatus(jobContext, "beforeStep");
         if (failBeforeStep) {
             throw new BatchRuntimeException("failBeforeStep is set to " + failBeforeStep);
         }
@@ -37,6 +42,7 @@ public final class FailStepListener implements javax.batch.api.listener.StepList
 
     @Override
     public void afterStep() throws Exception {
+        SleepBatchlet.appendJobExitStatus(jobContext, "afterStep");
         if (failAfterStep) {
             throw new BatchRuntimeException("failAfterStep is set to " + failAfterStep);
         }

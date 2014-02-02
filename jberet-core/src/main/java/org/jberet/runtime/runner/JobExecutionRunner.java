@@ -41,19 +41,21 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             batchContext.setBatchStatus(BatchStatus.STARTED);
         }
         try {
+            boolean beforeJobFailed = false;
             // run job listeners beforeJob()
             for (final JobListener l : batchContext.getJobListeners()) {
                 try {
                     l.beforeJob();
                 } catch (final Throwable e) {
+                    beforeJobFailed = true;
                     BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", l);
                     batchContext.setBatchStatus(BatchStatus.FAILED);
-                    return;
-                    //TODO: fix the flow, if beforeJob fails, shoud afterJob still run?
+                    break;
                 }
             }
-
-            runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPosition());
+            if (!beforeJobFailed) {
+                runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPosition());
+            }
 
             for (final JobListener l : batchContext.getJobListeners()) {
                 try {
@@ -61,7 +63,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
                 } catch (final Throwable e) {
                     BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", l);
                     batchContext.setBatchStatus(BatchStatus.FAILED);
-                    return;
+                    break;
                 }
             }
         } catch (final Throwable e) {

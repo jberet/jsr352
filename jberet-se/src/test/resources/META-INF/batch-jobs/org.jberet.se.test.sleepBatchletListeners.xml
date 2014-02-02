@@ -33,6 +33,7 @@
         <batchlet ref="sleepBatchlet">
             <properties>
                 <property name="sleep.minutes" value="0"/>
+                <property name="failInProcess" value="#{jobParameters['failInProcess']]"/>
             </properties>
         </batchlet>
     </step>
