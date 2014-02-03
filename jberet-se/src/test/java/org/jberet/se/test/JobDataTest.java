@@ -12,6 +12,10 @@
 
 package org.jberet.se.test;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
@@ -32,8 +36,7 @@ import org.junit.Test;
 
 /**
  * This test verifies the job data in jdbc job repository from executing the previous test class Batchlet1Test.
- * This test class itself does not start any job, and is configured in pom.xml surefire plugin to run test in
- * separate JVM to avoid having any in-memory stats.
+ * This test class is configured in pom.xml surefire plugin to run test in separate JVM to avoid having any in-memory stats.
  */
 public class JobDataTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
@@ -102,9 +105,10 @@ public class JobDataTest {
         restartJobMatchOther(jobExecution.getExecutionId());
     }
 
+    // restart the job execution stopped in org.jberet.se.test.Batchlet1Test.testStopWithRestartPoint()
     @Test
     public void testRestartPositionFromBatchlet2Test() throws Exception {
-        final long previousJobExecutionId = getOriginalJobExecutionId(Batchlet1Test.jobName2);
+        final long previousJobExecutionId = getOriginalJobExecutionIdFromFile(Batchlet1Test.jobName2ExecutionIdSaveTo);
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
@@ -124,11 +128,13 @@ public class JobDataTest {
         Assert.assertEquals("stepE", stepExecutions.get(1).getStepName());
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
         Assert.assertEquals(Batchlet1.ACTION_OTHER, stepExecutions.get(1).getExitStatus());
+        Batchlet1Test.jobName2ExecutionIdSaveTo.delete();
     }
 
+    // restart the job execution failed in org.jberet.se.test.Batchlet1Test.testStepFail3Times()
     @Test
     public void testRestartWithLimit() throws Exception {
-        final long previousJobExecutionId = getOriginalJobExecutionId(Batchlet1Test.jobName3);
+        final long previousJobExecutionId = getOriginalJobExecutionIdFromFile(Batchlet1Test.jobName3ExecutionIdSaveTo);
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
@@ -140,14 +146,43 @@ public class JobDataTest {
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
         Assert.assertEquals(0, stepExecutions.size());
+        Batchlet1Test.jobName3ExecutionIdSaveTo.delete();
     }
 
+    /**
+     * Retrieves the job execution id of the previously failed or stopped job execution for restarting purpose.
+     * This method will cause the jdbc repository to load from database relevant JobExecution and JobInstance.
+     * To test cold restart more completely, getOriginalJobExecutionId(File file) method should be used to avoid
+     * the pre-fetching.
+     * @param jobName the name of the job that previously failed or stopped
+     * @return a job execution id used for restart
+     */
     private long getOriginalJobExecutionId(final String jobName) {
         final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, 0, 1);
         final JobInstance jobInstance = jobInstances.get(0);
         final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
         final JobExecution originalJobExecution = jobExecutions.get(jobExecutions.size() - 1);
         return originalJobExecution.getExecutionId();
+    }
+
+    /**
+     * Retrieves the job execution id of the previously failed or stopped job execution for restarting purpose.
+     * @param file a file that contains the job execution id to be retrieved
+     * @return a job execution id used for restart
+     * @throws IOException
+     */
+    private long getOriginalJobExecutionIdFromFile(final File file) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        try {
+            final String s = br.readLine();
+            return Long.parseLong(s);
+        } finally {
+            try {
+                br.close();
+            } catch (final IOException e) {
+                //ignore
+            }
+        }
     }
 
     private long restartJobMatchOther(final long previousJobExecutionId) throws Exception {

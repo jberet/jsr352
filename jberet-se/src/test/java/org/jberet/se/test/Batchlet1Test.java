@@ -12,6 +12,10 @@
 
 package org.jberet.se.test;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
@@ -24,10 +28,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class Batchlet1Test {
+    static final String tmpdir = System.getProperty("java.io.tmpdir");
     static final String jobName = "org.jberet.se.test.batchlet1";
     static final String jobName2 = "org.jberet.se.test.batchlet2";
     static final String jobName3 = "org.jberet.se.test.batchlet3";
     static final String jobName4 = "org.jberet.se.test.batchlet4";
+    static final File jobName2ExecutionIdSaveTo = new File(tmpdir, jobName2 + ".executionId");
+    static final File jobName3ExecutionIdSaveTo = new File(tmpdir, jobName3 + ".executionId");
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 0;
 
@@ -40,6 +47,8 @@ public class Batchlet1Test {
         jobExecutionId = restartJobMatchStop(jobExecutionId);
     }
 
+    // the stopped job execution in this test will be restarted in test
+    // org.jberet.se.test.JobDataTest.testRestartPositionFromBatchlet2Test()
     @Test
     public void testStopWithRestartPoint() throws Exception {
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_STOP);
@@ -57,8 +66,11 @@ public class Batchlet1Test {
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(2).getBatchStatus());
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(3).getBatchStatus());
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(4).getBatchStatus());
+        writeOutExecutionId(jobExecutionId, jobName2ExecutionIdSaveTo);
     }
 
+    // the failed job execution in this test will be restarted in test
+    // org.jberet.se.test.JobDataTest.testRestartWithLimit()
     @Test
     public void testStepFail3Times() throws Exception {
         final JobExecutionImpl[] jobExecutions = new JobExecutionImpl[3];
@@ -91,6 +103,7 @@ public class Batchlet1Test {
             Assert.assertEquals(BatchStatus.FAILED, e.getStepExecutions().get(0).getBatchStatus());
             Assert.assertEquals(Batchlet1.ACTION_EXCEPTION, e.getStepExecutions().get(0).getExitStatus());
         }
+        writeOutExecutionId(jobExecutions[2].getExecutionId(), jobName3ExecutionIdSaveTo);
     }
 
     /**
@@ -206,5 +219,20 @@ public class Batchlet1Test {
         // step2 exit status from batchlet1.process method return value, not from <stop exit-status> element
         Assert.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getStepExecutions().get(0).getExitStatus());
         return jobExecutionId;
+    }
+
+    static void writeOutExecutionId(final long executionId, final File file) throws IOException {
+        final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        final String s = String.valueOf(executionId);
+        try {
+            bw.write(s, 0, s.length());
+            System.out.printf("Wrote out job execution id to: %s%n", file.getPath());
+        } finally {
+            try {
+                bw.close();
+            } catch (IOException e) {
+                //ignore
+            }
+        }
     }
 }

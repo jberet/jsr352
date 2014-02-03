@@ -403,6 +403,7 @@ public final class JdbcRepository extends AbstractRepository {
                     final String appName = rs.getString(TableColumn.APPLICATIONNAME);
                     final String goodJobName = rs.getString(TableColumn.JOBNAME);
                     result = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
+                    ((JobInstanceImpl) result).setId(jobInstanceId);
                     jobInstances.put(jobInstanceId, result);
                 }
                 break;
@@ -504,6 +505,8 @@ public final class JdbcRepository extends AbstractRepository {
                     final long jobInstanceId = rs.getLong(TableColumn.JOBINSTANCEID);
                     result = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId), null);
                     result.setId(jobExecutionId);
+                    result.setBatchStatus(BatchStatus.valueOf(rs.getString(TableColumn.BATCHSTATUS)));
+                    result.setRestartPosition(rs.getString(TableColumn.RESTARTPOSITION));
                     jobExecutions.put(jobExecutionId, result);
                 }
                 break;
