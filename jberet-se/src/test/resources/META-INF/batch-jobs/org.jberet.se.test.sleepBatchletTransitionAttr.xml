@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="org.jberet.se.test.sleepBatchletTransitionAttr" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="org.jberet.se.test.sleepBatchletTransitionAttr.step1" next="org.jberet.se.test.sleepBatchletTransitionAttr.step2">
+        <batchlet ref="sleepBatchlet">
+            <properties>
+                <property name="failInProcess" value="true"/>
+            </properties>
+        </batchlet>
+    </step>
+
+    <!-- step2 will not run since step1 already failed, and the job already failed -->
+    <step id="org.jberet.se.test.sleepBatchletTransitionAttr.step2">
+        <batchlet ref="sleepBatchlet">
+        </batchlet>
+    </step>
+</job>

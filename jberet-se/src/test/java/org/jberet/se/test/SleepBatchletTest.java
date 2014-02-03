@@ -29,6 +29,8 @@ public class SleepBatchletTest {
     private final JobOperator operator = BatchRuntime.getJobOperator();
     private static final String jobName = "org.jberet.se.test.sleepBatchlet.xml";
     private static final String listenerJobName = "org.jberet.se.test.sleepBatchletListeners";
+    private static final String transitionJobName = "org.jberet.se.test.sleepBatchletTransition";
+    private static final String transitionAttrJobName = "org.jberet.se.test.sleepBatchletTransitionAttr";
 
     @Test
     @Ignore("It will pass but takes too long")
@@ -131,7 +133,7 @@ public class SleepBatchletTest {
 
     /**
      * Verifies that exception from StepListener.afterStep() will cause the step and the job to fail, but the step's
-     * exit status has already been set by batchelt and should not be affected.
+     * exit status has already been set by batchlet and should not be affected.
      * @throws Exception
      */
     @Test
@@ -165,6 +167,44 @@ public class SleepBatchletTest {
         jobExecution.awaitTermination(1, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         Assert.assertEquals("beforeJob beforeStep afterStep afterJob", jobExecution.getExitStatus());
+
+        final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
+        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+                stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
+        Assert.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED.name(), stepExecution.getExitStatus());
+    }
+
+    @Test
+    public void transitionAfterFailedStep() throws Exception {
+        final Properties params = new Properties();
+        final long jobExecutionId = operator.start(transitionJobName, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) operator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(1, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+
+        StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
+        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+                stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
+        Assert.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED.name(), stepExecution.getExitStatus());
+
+        stepExecution = jobExecution.getStepExecutions().get(1);
+        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+                stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution.getBatchStatus());
+        Assert.assertEquals(SleepBatchlet.SLEPT, stepExecution.getExitStatus());
+    }
+
+    @Test
+    public void transitionAttrAfterFailedStep() throws Exception {
+        final Properties params = new Properties();
+        final long jobExecutionId = operator.start(transitionAttrJobName, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) operator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(1, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
         System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
