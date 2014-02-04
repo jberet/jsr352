@@ -154,12 +154,10 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     private static volatile JdbcRepository instance;
-    private Properties configProperties;
+    private final Properties configProperties;
     private String dataSourceName;
     private DataSource dataSource;
     private String dbUrl;
-    private String dbUser;
-    private String dbPassword;
     private final Properties dbProperties;
     private final Properties sqls = new Properties();
     private boolean isOracle;
@@ -193,7 +191,7 @@ public final class JdbcRepository extends AbstractRepository {
         if (dataSourceName != null && !dataSourceName.isEmpty()) {
             try {
                 dataSource = InitialContext.doLookup(dataSourceName);
-            } catch (NamingException e) {
+            } catch (final NamingException e) {
                 throw BatchMessages.MESSAGES.failToLookupDataSource(e, dataSourceName);
             }
         } else {
@@ -203,11 +201,11 @@ public final class JdbcRepository extends AbstractRepository {
             if (dbUrl == null || dbUrl.isEmpty()) {
                 dbUrl = DEFAULT_DB_URL;
             }
-            dbUser = configProperties.getProperty(DB_USER_KEY);
+            final String dbUser = configProperties.getProperty(DB_USER_KEY);
             if (dbUser != null) {
                 dbProperties.setProperty("user", dbUser.trim());
             }
-            dbPassword = configProperties.getProperty(DB_PASSWORD_KEY);
+            final String dbPassword = configProperties.getProperty(DB_PASSWORD_KEY);
             if (dbPassword != null) {
                 dbProperties.setProperty("password", dbPassword.trim());
             }
@@ -235,13 +233,13 @@ public final class JdbcRepository extends AbstractRepository {
                 throw BatchMessages.MESSAGES.failToLoadSqlProperties(null, sqlFile);
             }
             sqls.load(sqlResource);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw BatchMessages.MESSAGES.failToLoadSqlProperties(e, sqlFile);
         } finally {
             if (sqlResource != null) {
                 try {
                     sqlResource.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     BatchLogger.LOGGER.failToClose(e, InputStream.class, sqlResource);
                 }
             }
@@ -259,11 +257,11 @@ public final class JdbcRepository extends AbstractRepository {
         String databaseProductName = "";
         try {
             databaseProductName = connection1.getMetaData().getDatabaseProductName().trim();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             BatchLogger.LOGGER.failToGetDatabaseProductName(e, connection1);
             close(connection1, null, null);
             connection1 = getConnection();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             BatchLogger.LOGGER.failToGetDatabaseProductName(e, connection1);
         }
         if(databaseProductName.startsWith("Oracle")) {
@@ -274,8 +272,8 @@ public final class JdbcRepository extends AbstractRepository {
         try {
             countPartitionExecutionStatement = connection1.prepareStatement(countPartitionExecutions);
             countPartitionExecutionStatement.executeQuery();
-        } catch (SQLException e) {
-            String ddlFile = getDDLLocation(databaseProductName);
+        } catch (final SQLException e) {
+            final String ddlFile = getDDLLocation(databaseProductName);
             ddlResource = this.getClass().getClassLoader().getResourceAsStream(ddlFile);
             if (ddlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
@@ -295,7 +293,7 @@ public final class JdbcRepository extends AbstractRepository {
                 }
                 scanner.close();
                 batchDDLStatement.executeBatch();
-            } catch (Exception e1) {
+            } catch (final Exception e1) {
                 throw BatchMessages.MESSAGES.failToCreateTables(e1, databaseProductName, ddlFile);
             } finally {
                 close(connection2, batchDDLStatement, null);
@@ -307,7 +305,7 @@ public final class JdbcRepository extends AbstractRepository {
                 if (ddlResource != null) {
                     ddlResource.close();
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 BatchLogger.LOGGER.failToClose(e, InputStream.class, ddlResource);
             }
         }
@@ -338,7 +336,7 @@ public final class JdbcRepository extends AbstractRepository {
             resultSet.next();
             jobInstance.setId(resultSet.getLong(1));
             BatchLogger.LOGGER.persisted(jobInstance, jobInstance.getInstanceId());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, insert);
         } finally {
             close(connection, preparedStatement, null);
@@ -375,7 +373,7 @@ public final class JdbcRepository extends AbstractRepository {
                 //this job instance is already in the cache, so get it from the cache
                 result.add(jobInstance1);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -408,7 +406,7 @@ public final class JdbcRepository extends AbstractRepository {
                 }
                 break;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -431,7 +429,7 @@ public final class JdbcRepository extends AbstractRepository {
                 count = rs.getInt(1);
                 break;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -457,7 +455,7 @@ public final class JdbcRepository extends AbstractRepository {
             resultSet.next();
             jobExecution.setId(resultSet.getLong(1));
             BatchLogger.LOGGER.persisted(jobExecution, jobExecution.getExecutionId());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, insert);
         } finally {
             close(connection, preparedStatement, null);
@@ -479,7 +477,7 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setString(5, ((JobExecutionImpl) jobExecution).getRestartPosition());
             preparedStatement.setLong(6, jobExecution.getExecutionId());  //where clause
             preparedStatement.executeUpdate();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, update);
         } finally {
             close(connection, preparedStatement, null);
@@ -503,15 +501,18 @@ public final class JdbcRepository extends AbstractRepository {
                 result = (JobExecutionImpl) jobExecutions.get(jobExecutionId);
                 if(result == null) {
                     final long jobInstanceId = rs.getLong(TableColumn.JOBINSTANCEID);
-                    result = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId), null);
-                    result.setId(jobExecutionId);
-                    result.setBatchStatus(BatchStatus.valueOf(rs.getString(TableColumn.BATCHSTATUS)));
-                    result.setRestartPosition(rs.getString(TableColumn.RESTARTPOSITION));
+                    result = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId),
+                            jobExecutionId,
+                            BatchUtil.stringToProperties(rs.getString(TableColumn.JOBPARAMETERS)),
+                            rs.getTimestamp(TableColumn.CREATETIME), rs.getTimestamp(TableColumn.STARTTIME),
+                            rs.getTimestamp(TableColumn.ENDTIME), rs.getTimestamp(TableColumn.LASTUPDATEDTIME),
+                            rs.getString(TableColumn.BATCHSTATUS), rs.getString(TableColumn.EXITSTATUS),
+                            rs.getString(TableColumn.RESTARTPOSITION));
                     jobExecutions.put(jobExecutionId, result);
                 }
                 break;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -559,7 +560,7 @@ public final class JdbcRepository extends AbstractRepository {
                 // jobExecution1 is either got from the cache, or created, now add it to the result list
                 result.add(jobExecution1);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -584,7 +585,7 @@ public final class JdbcRepository extends AbstractRepository {
             resultSet.next();
             stepExecution.setId(resultSet.getLong(1));
             BatchLogger.LOGGER.persisted(stepExecution, stepExecution.getStepExecutionId());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, insert);
         } finally {
             close(connection, preparedStatement, null);
@@ -618,7 +619,7 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(16, stepExecution.getStepExecutionId());
 
             preparedStatement.executeUpdate();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, update);
         } finally {
             close(connection, preparedStatement, null);
@@ -650,7 +651,7 @@ public final class JdbcRepository extends AbstractRepository {
                 preparedStatement.setLong(8, partitionExecution.getStepExecutionId());
 
                 preparedStatement.executeUpdate();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw BatchMessages.MESSAGES.failToRunQuery(e, update);
             } finally {
                 close(connection, preparedStatement, null);
@@ -662,12 +663,12 @@ public final class JdbcRepository extends AbstractRepository {
         final String select = sqls.getProperty(SELECT_STEP_EXECUTION);
         final Connection connection = getConnection();
         PreparedStatement preparedStatement = null;
-        List<StepExecution> result = new ArrayList<StepExecution>();
+        final List<StepExecution> result = new ArrayList<StepExecution>();
         try {
             preparedStatement = connection.prepareStatement(select);
             preparedStatement.setLong(1, stepExecutionId);
             createStepExecutionsFromResultSet(preparedStatement.executeQuery(), result, false);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -693,7 +694,7 @@ public final class JdbcRepository extends AbstractRepository {
                 preparedStatement.setLong(1, jobExecutionId);
             }
             createStepExecutionsFromResultSet(preparedStatement.executeQuery(), result, false);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -713,7 +714,7 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(2, partitionExecution.getStepExecutionId());
             preparedStatement.setString(3, partitionExecution.getBatchStatus().name());
             preparedStatement.executeUpdate();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, insert);
         } finally {
             close(connection, preparedStatement, null);
@@ -722,7 +723,7 @@ public final class JdbcRepository extends AbstractRepository {
 
     @Override
     public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName, final JobExecutionImpl jobExecutionToRestart) {
-        StepExecutionImpl result = super.findOriginalStepExecutionForRestart(stepName, jobExecutionToRestart);
+        final StepExecutionImpl result = super.findOriginalStepExecutionForRestart(stepName, jobExecutionToRestart);
         if (result != null) {
             return result;
         }
@@ -735,7 +736,7 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(1, jobExecutionToRestart.getJobInstance().getInstanceId());
             preparedStatement.setString(2, stepName);
             createStepExecutionsFromResultSet(preparedStatement.executeQuery(), results, true);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -775,7 +776,7 @@ public final class JdbcRepository extends AbstractRepository {
                     ));
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -828,7 +829,7 @@ public final class JdbcRepository extends AbstractRepository {
                 count = rs.getInt(1);
                 break;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
             close(connection, preparedStatement, null);
@@ -840,13 +841,13 @@ public final class JdbcRepository extends AbstractRepository {
         if (dataSource != null) {
             try {
                 return dataSource.getConnection();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw BatchMessages.MESSAGES.failToObtainConnection(e, dataSource, dataSourceName);
             }
         } else {
             try {
                 return DriverManager.getConnection(dbUrl, dbProperties);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw BatchMessages.MESSAGES.failToObtainConnection(e, dbUrl, dbProperties);
             }
         }
@@ -857,7 +858,7 @@ public final class JdbcRepository extends AbstractRepository {
             if (stmt1 != null) {
                 stmt1.close();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             BatchLogger.LOGGER.failToClose(e, PreparedStatement.class, stmt1);
         }
 
@@ -865,13 +866,13 @@ public final class JdbcRepository extends AbstractRepository {
             if (stmt2 != null) {
                 stmt2.close();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             BatchLogger.LOGGER.failToClose(e, PreparedStatement.class, stmt2);
         }
 
         try {
             conn.close();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             BatchLogger.LOGGER.failToClose(e, Connection.class, conn);
         }
     }
