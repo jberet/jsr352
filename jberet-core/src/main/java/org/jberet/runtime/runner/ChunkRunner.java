@@ -52,6 +52,8 @@ import static org.jberet._private.BatchMessages.MESSAGES;
  * This runner class is responsible for running a chunk-type step (not just a chunk range of a step).  In a partitioned
  * step execution, multiple ChunkRunner instances are created, one for each partition.  The StepContextImpl and
  * StepExecutionImpl associated with each ChunkRunner in a partition are cloned from the original counterparts.
+ *
+ * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 public final class ChunkRunner extends AbstractRunner<StepContextImpl> implements Runnable {
     private final List<Object> allChunkRelatedListeners = new ArrayList<Object>();
@@ -180,11 +182,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             try {
                 itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
                 itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
+                ut.commit();
             } catch (Exception e) {
                 ut.rollback();
+                // An error occurred, safely close the reader and writer
+                safeClose();
                 throw e;
             }
-            ut.commit();
 
             readProcessWriteItems();
 
@@ -192,15 +196,17 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             try {
                 itemReader.close();
                 itemWriter.close();
+                ut.commit();
             } catch (Exception e) {
                 ut.rollback();
+                // An error occurred, safely close the reader and writer
+                safeClose();
                 throw e;
             }
             //collect data at the end of the partition
             if (collector != null) {
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
-            ut.commit();
             //set batch status to indicate that either the main step, or a partition has completed successfully.
             //note that when a chunk range is completed, we should not set batch status as completed.
             //make sure the step has not been set to STOPPED.
@@ -224,6 +230,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
             jobContext.destroyArtifact(itemReader, itemWriter, itemProcessor, collector, checkpointAlgorithm);
             jobContext.destroyArtifact(allChunkRelatedListeners);
+            // Safely close the reader and writer
+            safeClose();
         }
     }
 
@@ -562,10 +570,24 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         processingInfo.failurePoint = itemReader.checkpointInfo();
         ut.rollback();
         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
-        itemReader.close();
-        itemWriter.close();
-        itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
-        itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
+        // Close the reader and writer
+        try {
+            itemReader.close();
+            itemWriter.close();
+        } catch (Exception e) {
+            // An error occurred, safely close the reader and writer
+            safeClose();
+            throw e;
+        }
+        try {
+            // Open the reader and writer
+            itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
+            itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
+        } catch (Exception e) {
+            // An error occurred, safely close the reader and writer
+            safeClose();
+            throw e;
+        }
         processingInfo.chunkState = ChunkState.TO_RETRY;
         processingInfo.itemState = ItemState.RUNNING;
         if (collector != null) {
@@ -662,6 +684,23 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
         }
     }
+
+    /**
+     * Closes the reader and writer swallowing any exceptions
+     */
+    private void safeClose() {
+        try {
+            if (itemReader != null) itemReader.close();
+        } catch (Exception e) {
+            LOGGER.trace("Error closing ItemReader.", e);
+        }
+        try {
+            if (itemWriter != null) itemWriter.close();
+        } catch (Exception e) {
+            LOGGER.trace("Error closing ItemWriter.", e);
+        }
+    }
+
 
     private static final class ProcessingInfo {
         int count;
