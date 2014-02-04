@@ -155,12 +155,12 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
                 final URL url = new URL(resource);
                 inputStream = url.openStream();
             } catch (final MalformedURLException e) {
-                SupportLogger.LOGGER.notUrl(e, resource);
+                SupportLogger.LOGGER.tracef("The resource %s is not a URL, %s%n", resource, e);
                 final File file = new File(resource);
                 if (file.exists()) {
                     inputStream = new FileInputStream(file);
                 } else {
-                    SupportLogger.LOGGER.notFile(resource);
+                    SupportLogger.LOGGER.tracef("The resource %s is not a file %n", resource);
                     inputStream = CsvItemReader.class.getClassLoader().getResourceAsStream(resource);
                 }
             }

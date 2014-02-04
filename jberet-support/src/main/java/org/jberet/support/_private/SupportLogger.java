@@ -12,10 +12,10 @@
 
 package org.jberet.support._private;
 
-import java.io.Serializable;
-import java.util.List;
+import java.io.File;
 import javax.batch.operations.BatchRuntimeException;
 
+import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
@@ -25,7 +25,7 @@ import org.jboss.logging.annotations.ValidIdRange;
 
 @MessageLogger(projectCode = "JBERET")
 @ValidIdRange(min = 60000, max = 60999)
-public interface SupportLogger {
+public interface SupportLogger extends BasicLogger {
     SupportLogger LOGGER = Logger.getMessageLogger(SupportLogger.class, "org.jberet.support");
 
     @Message(id = 60000, value = "Invalid CSV preference value %s for key %s")
@@ -59,31 +59,16 @@ public interface SupportLogger {
     BatchRuntimeException unsupportedCellProcessor(String cellProcessorName, String[] params);
 
     @Message(id = 60010, value = "The target CSV resource already exists: %s")
-    BatchRuntimeException csvResourceAlreadyExists(Object taretCsvResource);
+    BatchRuntimeException csvResourceAlreadyExists(Object targetCsvResource);
 
+    @Message(id = 60011, value = "The target CSV resource is a directory: %s")
+    BatchRuntimeException csvResourceIsDirectory(File file);
 
-    @Message(id = 60011, value = "The resource is not a URL %s")
-    @LogMessage(level = Logger.Level.TRACE)
-    void notUrl(@Cause Throwable throwable, String resource);
+    @Message(id = 60012, value = "The existing transient user data in step is not of type String: %s")
+    BatchRuntimeException cannotAppendToNonStringData(Class<?> dataType);
 
-    @Message(id = 60012, value = "The resource is not a file %s")
-    @LogMessage(level = Logger.Level.TRACE)
-    void notFile(String resource);
-
-    @Message(id = 60013, value = "About to create CSV CellProcessor with %s")
-    @LogMessage(level = Logger.Level.TRACE)
-    void createCellProcessor(List<String> cellProcessorVal);
-
-    @Message(id = 60014, value = "The CellProcessor value may be missing an ending single quote: %s")
+    @Message(id = 60013, value = "The CellProcessor value may be missing an ending single quote: %s")
     @LogMessage(level = Logger.Level.WARN)
     void maybeMissingEndQuote(String line);
-
-    @Message(id = 60015, value = "About to write items, number of items %s, element type %s")
-    @LogMessage(level = Logger.Level.TRACE)
-    void aboutToWriteItems(int itemCount, Class<?> elementType);
-
-    @Message(id = 60016, value = "Open CsvItemWriter with checkpoint %s, which is ignored for CsvItemWriter.")
-    @LogMessage(level = Logger.Level.TRACE)
-    void openCsvItemWriter(Serializable checkpoint);
 
 }

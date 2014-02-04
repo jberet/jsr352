@@ -67,10 +67,11 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
 
     private StringWriter stringWriter;
     protected ICsvWriter delegateWriter;
+    private boolean skipWritingHeader;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
-        SupportLogger.LOGGER.openCsvItemWriter(checkpoint);
+        SupportLogger.LOGGER.tracef("Open CsvItemWriter with checkpoint %s, which is ignored for CsvItemWriter.%n", checkpoint);
         if (beanType == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(null, BEAN_TYPE_KEY);
         } else if (java.util.List.class.isAssignableFrom(beanType)) {
@@ -90,7 +91,9 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
         if (writeComments != null) {
             delegateWriter.writeComment(writeComments);
         }
-        delegateWriter.writeHeader(header);
+        if (!skipWritingHeader) {
+            delegateWriter.writeHeader(header);
+        }
     }
 
     @Override
@@ -102,7 +105,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
                     stepContext.setTransientUserData(stringWriter.toString());
                 } else {
                     stepContext.setTransientUserData(transientUserData + getCsvPreference().getEndOfLineSymbols() +
-                    stringWriter.toString());
+                            stringWriter.toString());
                 }
                 stringWriter = null;
             }
@@ -113,7 +116,10 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
 
     @Override
     public void writeItems(final List<Object> items) throws Exception {
-        SupportLogger.LOGGER.aboutToWriteItems(items.size(), items.get(0).getClass());
+        if (SupportLogger.LOGGER.isTraceEnabled()) {
+            SupportLogger.LOGGER.tracef("About to write items, number of items %s, element type %s%n",
+                    items.size(), items.get(0).getClass());
+        }
         if (delegateWriter instanceof ICsvBeanWriter) {
             final ICsvBeanWriter writer = (ICsvBeanWriter) delegateWriter;
             if (cellProcessorInstances.length == 0) {
@@ -161,11 +167,21 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
             throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
         }
         if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
-            if (writeMode == null || writeMode.equalsIgnoreCase(APPEND) || writeMode.equalsIgnoreCase(OVERWRITE)) {
+            if (writeMode.equalsIgnoreCase(OVERWRITE)) {
+                return stringWriter = new StringWriter();
+            }
+            final Object transientUserData = stepContext.getTransientUserData();
+            if (writeMode == null || writeMode.equalsIgnoreCase(APPEND)) {
+                if (transientUserData != null) {
+                    if (transientUserData instanceof String) {
+                        skipWritingHeader = true;
+                    } else {
+                        throw SupportLogger.LOGGER.cannotAppendToNonStringData(transientUserData.getClass());
+                    }
+                }
                 return stringWriter = new StringWriter();
             }
             if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
-                final Object transientUserData = stepContext.getTransientUserData();
                 if (transientUserData != null) {
                     throw SupportLogger.LOGGER.csvResourceAlreadyExists(transientUserData);
                 }
@@ -175,14 +191,21 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
         }
         try {
             final File file = new File(resource);
+            final boolean exists = file.exists();
+            if (exists && file.isDirectory()) {
+                throw SupportLogger.LOGGER.csvResourceIsDirectory(file);
+            }
             if (writeMode == null || writeMode.equalsIgnoreCase(APPEND)) {
+                if (file.length() > 0) {
+                    skipWritingHeader = true;
+                }
                 return new FileWriter(file, true);
             }
             if (writeMode.equalsIgnoreCase(OVERWRITE)) {
                 return new FileWriter(file);
             }
             if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
-                if(file.exists()) {
+                if (exists) {
                     throw SupportLogger.LOGGER.csvResourceAlreadyExists(file.getPath());
                 }
                 return new FileWriter(resource);

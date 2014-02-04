@@ -14,6 +14,7 @@ package org.jberet.support.io;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
@@ -83,7 +84,7 @@ public class CsvItemReaderWriterTest {
     @Test
     public void testBeanType() throws Exception {
         //override the default quote char ", which is used in feetInches cell
-        testReadWrite0(personResource, "testBeanTypeTab.out", org.jberet.support.io.Person.class.getName(), null, null, "|");
+        testReadWrite0(personResource, "testBeanType.out", org.jberet.support.io.Person.class.getName(), null, null, "|");
     }
 
     @Test
@@ -141,6 +142,27 @@ public class CsvItemReaderWriterTest {
     @Test
     public void testMapType() throws Exception {
         testReadWrite0(personResource, "testMapType.out", java.util.Map.class.getName(), null, null, "|");
+    }
+
+    /**
+     * Specify a directory (java.io.tmpdir) as the target CSV resource to write to, and expect the job execution to fail.
+     * @throws Exception
+     */
+    @Test
+    public void testInvalidWriteResource() throws Exception {
+        final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, List.class.getName());
+        params.setProperty(CsvProperties.RESOURCE_KEY, personResource);
+        params.setProperty(CsvProperties.QUOTE_CHAR_KEY, "|");
+        String writeResourceFullPath = (new File(tmpdir)).getPath();
+        params.setProperty("writeResource", writeResourceFullPath);
+        params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
+        params.setProperty(CsvProperties.HEADER_KEY, nameMapping);
+        System.out.printf("CSV resource to read: %n%s, %nto write: %n%s%n", personResource, writeResourceFullPath);
+
+        final long jobExecutionId = jobOperator.start(jobName, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test @Ignore("restore it if needed")

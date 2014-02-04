@@ -223,7 +223,7 @@ final class CellProcessorConfig {
             previous = current;
             current = null;
             final List<String> oneProcessorValue = processorValuesInThisLine.get(x);
-            SupportLogger.LOGGER.createCellProcessor(oneProcessorValue);
+            SupportLogger.LOGGER.tracef("About to create CSV CellProcessor from %s%n", oneProcessorValue);
             final String name = oneProcessorValue.get(0);
             final String[] params;
             if (oneProcessorValue.size() == 1) {

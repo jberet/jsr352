@@ -32,7 +32,11 @@
             <writer ref="csvItemWriter">
                 <properties>
                     <property name="resource" value="#{jobParameters['writeResource']}"/>
-                    <property name="overwrite" value="true"/>
+                    <!--
+                    <property name="writeMode" value="#{jobParameters['writeMode']}?:append;"/>
+                    <property name="writeMode" value="#{jobParameters['writeMode']}?:overwrite;"/>
+                    <property name="writeMode" value="#{jobParameters['writeMode']}?:failIfExists;"/>
+                    -->
                     <property name="preference" value="#{jobParameters['preference']}"/>
                     <property name="delimiterChar" value="#{jobParameters['delimiterChar']}"/>
                     <property name="quoteChar" value="#{jobParameters['quoteChar']}"/>
