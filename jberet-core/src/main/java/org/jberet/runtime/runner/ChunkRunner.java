@@ -35,7 +35,7 @@ import javax.batch.api.partition.PartitionCollector;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.transaction.Status;
-import javax.transaction.UserTransaction;
+import javax.transaction.TransactionManager;
 
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.ExceptionClassFilter;
@@ -96,7 +96,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private Object itemRead;
     private final List<Object> outputList = new ArrayList<Object>();
 
-    private final UserTransaction ut;
+    private final TransactionManager tm;
 
     public ChunkRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner, final StepExecutionRunner stepRunner, final Chunk chunk) {
         super(stepContext, enclosingRunner);
@@ -160,7 +160,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         skippableExceptionClasses = chunk.getSkippableExceptionClasses();
         retryableExceptionClasses = chunk.getRetryableExceptionClasses();
         noRollbackExceptionClasses = chunk.getNoRollbackExceptionClasses();
-        this.ut = stepRunner.ut;
+        this.tm = stepRunner.tm;
         createChunkRelatedListeners();
     }
 
@@ -177,14 +177,14 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     globalTimeout = Integer.valueOf(globalTimeoutProp);
                 }
             }
-            ut.setTransactionTimeout(globalTimeout);
-            ut.begin();
+            tm.setTransactionTimeout(globalTimeout);
+            tm.begin();
             try {
                 itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
                 itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
-                ut.commit();
+                tm.commit();
             } catch (Exception e) {
-                ut.rollback();
+                tm.rollback();
                 // An error occurred, safely close the reader and writer
                 safeClose();
                 throw e;
@@ -192,13 +192,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
             readProcessWriteItems();
 
-            ut.begin();
+            tm.begin();
             try {
                 itemReader.close();
                 itemWriter.close();
-                ut.commit();
+                tm.commit();
             } catch (Exception e) {
-                ut.rollback();
+                tm.rollback();
                 // An error occurred, safely close the reader and writer
                 safeClose();
                 throw e;
@@ -275,11 +275,11 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         processingInfo.reset();
                     }
                     //if during Chunk RETRYING, and an item is skipped, the ut is still active so no need to begin a new one
-                    if (ut.getStatus() != Status.STATUS_ACTIVE) {
+                    if (tm.getStatus() != Status.STATUS_ACTIVE) {
                         if (checkpointAlgorithm != null) {
-                            ut.setTransactionTimeout(checkpointAlgorithm.checkpointTimeout());
+                            tm.setTransactionTimeout(checkpointAlgorithm.checkpointTimeout());
                         }
-                        ut.begin();
+                        tm.begin();
                     }
                     for (final ChunkListener l : chunkListeners) {
                         l.beforeChunk();
@@ -316,19 +316,19 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                             l.afterChunk();
                         }
                     } catch (Exception e) {
-                        ut.rollback();
+                        tm.rollback();
                         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
                         throw e;
                     }
-                    ut.commit();
+                    tm.commit();
                     stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
                 }
             } catch (Exception e) {
-                final int txStatus = ut.getStatus();
+                final int txStatus = tm.getStatus();
                 if (txStatus == Status.STATUS_ACTIVE || txStatus == Status.STATUS_MARKED_ROLLBACK ||
                         txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
                         txStatus == Status.STATUS_COMMITTING || txStatus == Status.STATUS_ROLLING_BACK) {
-                    ut.rollback();
+                    tm.rollback();
                 }
                 for (final ChunkListener l : chunkListeners) {
                     l.onError(e);
@@ -568,7 +568,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private void rollbackCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         outputList.clear();
         processingInfo.failurePoint = itemReader.checkpointInfo();
-        ut.rollback();
+        tm.rollback();
         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
         // Close the reader and writer
         try {
