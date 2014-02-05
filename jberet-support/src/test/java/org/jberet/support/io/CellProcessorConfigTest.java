@@ -28,7 +28,7 @@ public class CellProcessorConfigTest {
     @Test
     public void testParseCellProcessors1() throws Exception {
         final String val = "StrMinMax(1, 20)";
-        final CellProcessor[] cellProcessors = CellProcessorConfig.parseCellProcessors(val, createHeader(1));
+        final CellProcessor[] cellProcessors = CellProcessorConfig.parseCellProcessors(val);
         System.out.printf("Resolved cell processors: %s%n", Arrays.toString(cellProcessors));
         Assert.assertEquals(1, cellProcessors.length);
         Assert.assertEquals(StrMinMax.class, cellProcessors[0].getClass());
@@ -43,7 +43,7 @@ public class CellProcessorConfigTest {
                 + "ParseDate( 'dd/MM/yyyy' );"
                 + "StrMinMax(1, 20);"
                 + "Optional, StrMinMax(1, 20), ParseDate('dd/MM/yyyy')";
-        final CellProcessor[] cellProcessors = CellProcessorConfig.parseCellProcessors(val, createHeader(7));
+        final CellProcessor[] cellProcessors = CellProcessorConfig.parseCellProcessors(val);
         System.out.printf("Resolved cell processors: %s%n", Arrays.toString(cellProcessors));
         Assert.assertEquals(7, cellProcessors.length);
         Assert.assertEquals(null, cellProcessors[0]);
@@ -53,13 +53,5 @@ public class CellProcessorConfigTest {
         Assert.assertEquals(ParseDate.class, cellProcessors[4].getClass());
         Assert.assertEquals(StrMinMax.class, cellProcessors[5].getClass());
         Assert.assertEquals(Optional.class, cellProcessors[6].getClass());
-    }
-
-    private static String[] createHeader(final int count) {
-        final String[] header = new String[count];
-        for (int i = 0; i < count; i++) {
-            header[i] = "H";
-        }
-        return header;
     }
 }

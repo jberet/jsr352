@@ -81,15 +81,11 @@ final class CellProcessorConfig {
      *               StrMinMax(1, 20)
      *               Optional, StrMinMax(1, 20), ParseDate('dd/MM/yyyy')
      *               "
-     * @param header the headers for the CSV
      * @return an array of {@code CellProcessor}, one for each line in the raw property value
      */
-    static CellProcessor[] parseCellProcessors(final String val, final String[] header) {
+    static CellProcessor[] parseCellProcessors(final String val) {
         //final String[] parts = val.split("\\r?\\n");  //new line
         final String[] parts = val.split(";");
-        if (parts.length != header.length) {
-            throw SupportLogger.LOGGER.numberOfCellProcessorsAndHeaderDiff(parts.length, header.length);
-        }
         final CellProcessor[] result = new CellProcessor[parts.length];
 
         for (int x = 0; x < parts.length; x++) { // start parsing all lines

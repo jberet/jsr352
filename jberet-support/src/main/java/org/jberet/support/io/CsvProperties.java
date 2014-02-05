@@ -225,6 +225,12 @@ public final class CsvProperties {
     public static final String NAME_MAPPING_KEY = "nameMapping";
 
     /**
+     * The property key to indicate that the input CSV resource does not contain header.
+     * Only used in {@code CsvItemReader}. Valid values are true or false, and the default is false.
+     */
+    public static final String HEADERLESS_KEY = "headerless";
+
+    /**
      * The property key to specify the CSV header for write out. Only used in {@code CsvItemWriter}.
      */
     public static final String HEADER_KEY = "header";

@@ -154,11 +154,11 @@ public abstract class CsvItemReaderWriterBase {
      *
      * @return an array of cell processors
      */
-    protected CellProcessor[] getCellProcessors(final String[] header) {
+    protected CellProcessor[] getCellProcessors() {
         if (this.cellProcessors == null) {
             return CsvItemReaderWriterBase.noCellProcessors;
         }
-        return CellProcessorConfig.parseCellProcessors(this.cellProcessors.trim(), header);
+        return CellProcessorConfig.parseCellProcessors(this.cellProcessors.trim());
     }
 
     /**

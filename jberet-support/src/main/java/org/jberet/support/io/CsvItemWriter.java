@@ -87,7 +87,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
         if (this.nameMapping == null) {
             this.nameMapping = header;
         }
-        this.cellProcessorInstances = getCellProcessors(header);
+        this.cellProcessorInstances = getCellProcessors();
         if (writeComments != null) {
             delegateWriter.writeComment(writeComments);
         }

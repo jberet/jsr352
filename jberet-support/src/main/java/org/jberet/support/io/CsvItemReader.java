@@ -53,6 +53,10 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
     @BatchProperty
     protected int end;
 
+    @Inject
+    @BatchProperty
+    protected boolean headerless;
+
     protected ICsvReader delegateReader;
 
     @Override
@@ -80,22 +84,21 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
             delegateReader = new FastForwardCsvBeanReader(getInputReader(), getCsvPreference(), startRowNumber);
         }
 
-        final String[] header;
-        try {
-            header = delegateReader.getHeader(true);//first line check true
+        if (!headerless) {
+            final String[] header;
+            try {
+                header = delegateReader.getHeader(true);    //first line check true
+            } catch (final IOException e) {
+                throw SupportLogger.LOGGER.failToReadCsvHeader(e, resource);
+            }
             if (this.nameMapping == null) {
                 this.nameMapping = header;
             }
-        } catch (final IOException e) {
-            throw SupportLogger.LOGGER.failToReadCsvHeader(e, resource);
         }
         if (this.end == 0) {
             this.end = Integer.MAX_VALUE;
         }
-        if (nameMapping == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(null, NAME_MAPPING_KEY);
-        }
-        this.cellProcessorInstances = getCellProcessors(header);
+        this.cellProcessorInstances = getCellProcessors();
     }
 
     @Override
