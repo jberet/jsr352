@@ -18,10 +18,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
 
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.job.model.Job;
@@ -34,6 +38,39 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class JobRepositoryTest {
+    static final Transaction NO_OP_TRANSACTION = new Transaction() {
+        @Override
+        public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException, SecurityException, SystemException {
+        }
+
+        @Override
+        public void rollback() throws IllegalStateException, SystemException {
+        }
+
+        @Override
+        public void setRollbackOnly() throws IllegalStateException, SystemException {
+        }
+
+        @Override
+        public int getStatus() throws SystemException {
+            return 0;
+        }
+
+        @Override
+        public boolean enlistResource(final XAResource xaRes) throws RollbackException, IllegalStateException, SystemException {
+            return false;
+        }
+
+        @Override
+        public boolean delistResource(final XAResource xaRes, final int flag) throws IllegalStateException, SystemException {
+            return false;
+        }
+
+        @Override
+        public void registerSynchronization(final Synchronization sync) throws RollbackException, IllegalStateException, SystemException {
+        }
+    };
+
     private static JobRepository repo;
 
     @BeforeClass
@@ -65,8 +102,8 @@ public class JobRepositoryTest {
             }
 
             @Override
-            public UserTransaction getUserTransaction() {
-                return new UserTransaction() {
+            public TransactionManager getTransactionManager() {
+                return new TransactionManager() {
                     @Override
                     public void begin() throws NotSupportedException, SystemException {
                     }
@@ -89,7 +126,21 @@ public class JobRepositoryTest {
                     }
 
                     @Override
+                    public Transaction getTransaction() throws SystemException {
+                        return NO_OP_TRANSACTION;
+                    }
+
+                    @Override
                     public void setTransactionTimeout(final int seconds) throws SystemException {
+                    }
+
+                    @Override
+                    public Transaction suspend() throws SystemException {
+                        return NO_OP_TRANSACTION;
+                    }
+
+                    @Override
+                    public void resume(final Transaction tobj) throws InvalidTransactionException, IllegalStateException, SystemException {
                     }
                 };
             }

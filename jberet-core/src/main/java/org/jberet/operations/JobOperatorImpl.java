@@ -36,6 +36,10 @@ import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
 
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactFactoryWrapper;
@@ -71,8 +75,19 @@ public class JobOperatorImpl implements JobOperator {
         final ClassLoader classLoader = batchEnvironment.getClassLoader();
         final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, Job.class, classLoader);
         repository.addJob(jobDefined);
-        final JobInstanceImpl jobInstance = repository.createJobInstance(jobDefined, getApplicationName(), classLoader);
-        return startJobExecution(jobInstance, jobParameters, null);
+        try {
+            return invokeTransaction(new TransactionInvocation<Long>() {
+                @Override
+                public Long invoke() throws JobStartException, JobSecurityException {
+                    final JobInstanceImpl jobInstance = repository.createJobInstance(jobDefined, getApplicationName(), classLoader);
+                    return startJobExecution(jobInstance, jobParameters, null);
+                }
+            });
+        } catch (InvalidTransactionException e) {
+            throw new JobStartException(e);
+        } catch (SystemException e) {
+            throw new JobStartException(e);
+        }
     }
 
     @Override
@@ -194,7 +209,12 @@ public class JobOperatorImpl implements JobOperator {
                 jobInstance.setUnsubstitutedJob(repository.getJob(jobName));
             }
             try {
-                newExecutionId = startJobExecution(jobInstance, restartParameters, originalToRestart);
+                newExecutionId = invokeTransaction(new TransactionInvocation<Long>() {
+                    @Override
+                    public Long invoke() throws JobStartException, JobSecurityException {
+                        return startJobExecution(jobInstance, restartParameters, originalToRestart);
+                    }
+                });
             } catch (Exception e) {
                 throw new JobRestartException(e);
             }
@@ -259,5 +279,24 @@ public class JobOperatorImpl implements JobOperator {
         } catch (NamingException e) {
             return null;
         }
+    }
+
+    private <T> T invokeTransaction(final TransactionInvocation<T> transactionInvocation) throws SystemException, InvalidTransactionException {
+        final TransactionManager tm = batchEnvironment.getTransactionManager();
+        final Transaction tx = tm.suspend();
+        if (tx != null) {
+            try {
+                return transactionInvocation.invoke();
+            } finally {
+                tm.resume(tx);
+            }
+        }
+        // No transaction in process
+        return transactionInvocation.invoke();
+    }
+
+    private static interface TransactionInvocation<T> {
+
+        T invoke() throws JobStartException, JobSecurityException;
     }
 }

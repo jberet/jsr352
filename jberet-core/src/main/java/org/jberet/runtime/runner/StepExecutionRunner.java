@@ -36,7 +36,7 @@ import javax.batch.api.partition.PartitionMapper;
 import javax.batch.api.partition.PartitionReducer;
 import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.BatchStatus;
-import javax.transaction.UserTransaction;
+import javax.transaction.TransactionManager;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Chunk;
@@ -75,14 +75,14 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     BlockingQueue<Serializable> collectorDataQueue;
     BlockingQueue<Boolean> completedPartitionThreads;
 
-    final UserTransaction ut;
+    final TransactionManager tm;
     final StepExecutionImpl stepExecution;
 
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
         this.stepExecution = (StepExecutionImpl) stepContext.getStepExecution();
-        ut = jobContext.getBatchEnvironment().getUserTransaction();
+        tm = jobContext.getBatchEnvironment().getTransactionManager();
         createStepListeners();
         initPartitionConfig();
     }
@@ -291,7 +291,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
         final List<PartitionExecutionImpl> fromAllPartitions = new ArrayList<PartitionExecutionImpl>();
-        ut.begin();
+        tm.begin();
         try {
             while (fromAllPartitions.size() < numOfPartitions) {
                 final Serializable data = collectorDataQueue.take();
@@ -325,12 +325,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
 
             if (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED) {
-                ut.rollback();
+                tm.rollback();
             } else {
                 if (reducer != null) {
                     reducer.beforePartitionedStepCompletion();
                 }
-                ut.commit();
+                tm.commit();
             }
             if (reducer != null) {
                 if (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED) {
@@ -344,7 +344,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             consolidatedBatchStatus = BatchStatus.FAILED;
             if (reducer != null) {
                 reducer.rollbackPartitionedStep();
-                ut.rollback();
+                tm.rollback();
                 reducer.afterPartitionedStepCompletion(PartitionReducer.PartitionStatus.ROLLBACK);
             }
         }
