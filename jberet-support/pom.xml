@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.0.0.Final</version>
+        <version>1.0.1.Beta-SNAPSHOT</version>
     </parent>
 
     <artifactId>jberet-support</artifactId>

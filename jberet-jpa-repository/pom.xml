@@ -6,7 +6,7 @@
     <parent>
         <artifactId>jberet-parent</artifactId>
         <groupId>org.jberet</groupId>
-        <version>1.0.0.Final</version>
+        <version>1.0.1.Beta-SNAPSHOT</version>
     </parent>
 
     <artifactId>jberet-jpa-repository</artifactId>
