@@ -26,7 +26,15 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.transaction.UserTransaction;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
 
 import org.jberet.se._private.SEBatchLogger;
 import org.jberet.spi.ArtifactFactory;
@@ -41,8 +49,6 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     public static final String CONFIG_FILE_NAME = "jberet.properties";
 
     private final Properties configProperties;
-
-    private final UserTransaction ut;
 
     static final String THREAD_POOL_TYPE = "thread-pool-type";
     static final String THREAD_POOL_TYPE_CACHED = "Cached";
@@ -72,7 +78,6 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         }
 
         createThreadPoolExecutor();
-        this.ut = BatchSETransaction.getInstance();
     }
 
     @Override
@@ -105,8 +110,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     }
 
     @Override
-    public UserTransaction getUserTransaction() {
-        return this.ut;
+    public TransactionManager getTransactionManager() {
+        return LocalTransactionManager.INSTANCE;
     }
 
     @Override
@@ -211,5 +216,61 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         }
 
         throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_TYPE, threadPoolType, null);
+    }
+
+    private static class LocalTransactionManager implements TransactionManager {
+        static final LocalTransactionManager INSTANCE = new LocalTransactionManager();
+
+        private final ThreadLocal<Integer> status = new ThreadLocal<Integer>(){
+            @Override
+            protected Integer initialValue() {
+                return Status.STATUS_NO_TRANSACTION;
+            }
+        };
+
+        @Override
+        public void begin() throws NotSupportedException, SystemException {
+            status.set(Status.STATUS_ACTIVE);
+        }
+
+        @Override
+        public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException, SecurityException, IllegalStateException, SystemException {
+            status.set(Status.STATUS_COMMITTED);
+        }
+
+        @Override
+        public void rollback() throws IllegalStateException, SecurityException, SystemException {
+            status.set(Status.STATUS_ROLLEDBACK);
+        }
+
+        @Override
+        public void setRollbackOnly() throws IllegalStateException, SystemException {
+            status.set(Status.STATUS_MARKED_ROLLBACK);
+        }
+
+        @Override
+        public int getStatus() throws SystemException {
+            return status.get();
+        }
+
+        @Override
+        public Transaction getTransaction() throws SystemException {
+            return null;
+        }
+
+        @Override
+        public void setTransactionTimeout(final int seconds) throws SystemException {
+            SEBatchLogger.LOGGER.methodDoesNothing(getClass().getName(), "setTransactionTimeout");
+        }
+
+        @Override
+        public Transaction suspend() throws SystemException {
+            return null;
+        }
+
+        @Override
+        public void resume(final Transaction tobj) throws InvalidTransactionException, IllegalStateException, SystemException {
+            SEBatchLogger.LOGGER.methodDoesNothing(getClass().getName(), "resume");
+        }
     }
 }

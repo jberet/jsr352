@@ -14,6 +14,7 @@ package org.jberet.spi;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import javax.transaction.TransactionManager;
 
 public interface BatchEnvironment {
     /**
@@ -70,10 +71,11 @@ public interface BatchEnvironment {
     <T> Future<T> submitTask(Callable<T> task);
 
     /**
-     * Gets the UserTransaction
-     * @return UserTransaction
+     * Returns a transaction manager to be used for executions that require a transaction.
+     *
+     * @return a transaction manager for the environment
      */
-    javax.transaction.UserTransaction getUserTransaction();
+    TransactionManager getTransactionManager();
 
     /**
      * Gets configuration data for batch container.
