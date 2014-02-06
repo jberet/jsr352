@@ -17,7 +17,7 @@ package org.jberet.support.io;
  */
 public final class CsvProperties {
     /**
-     * The property key to specify the start position in the data set
+     * The property key to specify the start position (a positive integer starting from 1) in the data set.
      */
     public static final String START_KEY = "start";
 

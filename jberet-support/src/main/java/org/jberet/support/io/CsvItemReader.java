@@ -65,15 +65,18 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
          * The row number to start reading.  It may be different from the injected field start. During a restart,
          * we would start reading from where it ended during the last run.
          */
-        final int startRowNumber;
-        if (checkpoint == null) {
-            startRowNumber = this.start;
-        } else {
-            startRowNumber = (Integer) checkpoint;
+        if (this.end == 0) {
+            this.end = Integer.MAX_VALUE;
         }
-        if (startRowNumber < this.start || startRowNumber > this.end) {
+        int startRowNumber = checkpoint == null ? this.start : (Integer) checkpoint;
+        if (startRowNumber < this.start || startRowNumber > this.end || startRowNumber < 0) {
             throw SupportLogger.LOGGER.invalidStartPosition(startRowNumber, this.start, this.end);
         }
+        if (headerless) {
+            startRowNumber--;
+            this.end--;
+        }
+
         if (beanType == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(null, BEAN_TYPE_KEY);
         } else if (java.util.List.class.isAssignableFrom(beanType)) {
@@ -94,9 +97,6 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
             if (this.nameMapping == null) {
                 this.nameMapping = header;
             }
-        }
-        if (this.end == 0) {
-            this.end = Integer.MAX_VALUE;
         }
         this.cellProcessorInstances = getCellProcessors();
     }

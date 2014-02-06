@@ -81,23 +81,42 @@ public class CsvItemReaderWriterTest {
                     "DMinMax(-99999, 99999); " +       //Latitude  convert to double and enforce range
                     "ParseDouble";          //Longitude
 
+    //some content from row 7-9, which is configured in job xml
+    static final String personResourceExpect =
+            "Cynthia,I,Crowley,3792 Green Hill Road,Fayetteville,AR,72701,US,United States,CynthiaICrowley@dayrep.com," +
+            "Barry,M,Sparks,553 Timbercrest Road,Sparrevohn A.F.S.,AK,99506,US,United States,BarryMSparks@cuvox.de," +
+            "Joe,K,Davis,1342 Java Lane,Bishopville,SC,29010,US,United States,JoeKDavis@dayrep.com";
+
+    //content from row 6 & 10
+    static final String personResourceForbid = "MarthaEValentine@dayrep.com, CindyNKeyes@jourrapide.com";
+
     @Test
     public void testBeanType() throws Exception {
         //override the default quote char ", which is used in feetInches cell
-        testReadWrite0(personResource, "testBeanType.out", org.jberet.support.io.Person.class.getName(), null, null, "|");
+        testReadWrite0(personResource, "testBeanType.out", org.jberet.support.io.Person.class.getName(),
+                null, null, "|", null, null);
+    }
+
+    @Test
+    public void testBeanTypeStepContext() throws Exception {
+        //override the default quote char ", which is used in feetInches cell
+        testReadWrite0(personResource, CsvProperties.RESOURCE_STEP_CONTEXT, org.jberet.support.io.Person.class.getName(),
+                null, null, "|", personResourceExpect, personResourceForbid);
     }
 
     @Test
     public void testBeanTypeTab() throws Exception {
         //override the default quote char ", which is used in feetInches cell
-        testReadWrite0(personTabResource, "testBeanTypeTab.out", org.jberet.support.io.Person.class.getName(), CsvProperties.TAB_PREFERENCE, null, "|");
+        testReadWrite0(personTabResource, "testBeanTypeTab.out", org.jberet.support.io.Person.class.getName(),
+                CsvProperties.TAB_PREFERENCE, null, "|", null, null);
     }
 
     @Test
     public void testBeanTypePipe() throws Exception {
         //override the default quote char ", which is used in feetInches cell. | is already used as the delimiterChar
         //so cannot be used as quoteChar again.
-        testReadWrite0(personPipeResource, "testBeanTypePipe.out", org.jberet.support.io.Person.class.getName(), null, "|", "^");
+        testReadWrite0(personPipeResource, "testBeanTypePipe.out", org.jberet.support.io.Person.class.getName(),
+                null, "|", "^", null, null);
     }
 
     //test will print out the path of output file from CsvItemWriter, which can then be verified.
@@ -107,7 +126,8 @@ public class CsvItemReaderWriterTest {
     //        /var/folders/s3/2m3bc7_n0550tp44h4bcgwtm0000gn/T/testMapType.out
     private void testReadWrite0(final String resource, final String writeResource,
                                 final String beanType, final String preference,
-                                final String delimiterChar, final String quoteChar) throws Exception {
+                                final String delimiterChar, final String quoteChar,
+                                final String expect, final String forbid) throws Exception {
         final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, beanType);
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
 
@@ -122,10 +142,23 @@ public class CsvItemReaderWriterTest {
         }
         params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
 
-        final String writeResourceFullPath = new File(tmpdir, writeResource).getPath();
+        final String writeResourceFullPath = writeResource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT) ?
+                writeResource : new File(tmpdir, writeResource).getPath();
         params.setProperty("writeResource", writeResourceFullPath);
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
         params.setProperty(CsvProperties.HEADER_KEY, nameMapping);
+
+        if (writeResource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT)) {
+            if (expect != null) {
+                params.setProperty("validate", String.valueOf(true));
+                params.setProperty("expect", expect);
+            }
+            if (forbid != null) {
+                params.setProperty("validate", String.valueOf(true));
+                params.setProperty("forbid", forbid);
+            }
+        }
+
         System.out.printf("CSV resource to read: %n%s, %nto write: %n%s%n", resource, writeResourceFullPath);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
@@ -136,12 +169,12 @@ public class CsvItemReaderWriterTest {
 
     @Test
     public void testListType() throws Exception {
-        testReadWrite0(personResource, "testListType.out", java.util.List.class.getName(), null, null, "|");
+        testReadWrite0(personResource, CsvProperties.RESOURCE_STEP_CONTEXT, java.util.List.class.getName(), null, null, "|", personResourceExpect, personResourceForbid);
     }
 
     @Test
     public void testMapType() throws Exception {
-        testReadWrite0(personResource, "testMapType.out", java.util.Map.class.getName(), null, null, "|");
+        testReadWrite0(personResource, CsvProperties.RESOURCE_STEP_CONTEXT, java.util.Map.class.getName(), null, null, "|", personResourceExpect, personResourceForbid);
     }
 
     /**

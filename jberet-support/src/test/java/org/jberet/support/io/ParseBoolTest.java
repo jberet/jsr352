@@ -99,7 +99,11 @@ public class ParseBoolTest {
         final String header = "boolTrueFalse,bool10,boolyn,booltf";
         final String data = header + BatchUtil.NL +
                 "true,      1,     y,     t" + BatchUtil.NL +
-                "false,     0,     n,     f";
+                "false,     0,     n,     f" + BatchUtil.NL +
+                "true,      0,     y,     f" + BatchUtil.NL +
+                "false,     1,     n,     t" + BatchUtil.NL +
+                "true,      1,     n,     f" + BatchUtil.NL +
+                "false,     0,     y,     t";
 
         final String readerCellProcessors =
                         "Optional, ParseBool('true', 'false');" +

@@ -167,7 +167,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
             throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
         }
         if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
-            if (writeMode.equalsIgnoreCase(OVERWRITE)) {
+            if (OVERWRITE.equalsIgnoreCase(writeMode)) {
                 return stringWriter = new StringWriter();
             }
             final Object transientUserData = stepContext.getTransientUserData();

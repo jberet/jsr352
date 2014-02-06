@@ -57,7 +57,11 @@ final public class ValidatingStepListener implements StepListener {
         }
         if (transientUserData instanceof String) {
             final String data = (String) transientUserData;
-            System.out.printf("transientUserData:%n%s%n", data);
+            if (data.length() <= 1000) {
+                System.out.printf("transientUserData:%n%s%n", data);
+            } else {
+                System.out.printf("transientUserData too long, truncated: %n%s%n", data.substring(0, 1000));
+            }
             if (expect != null) {
                 for (final String s : expect) {
                     if (data.contains(s)) {

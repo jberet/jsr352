@@ -14,6 +14,15 @@
 
 <job id="org.jberet.support.io.CsvReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="org.jberet.support.io.CsvReaderTest.step1">
+        <listeners>
+            <listener ref="validatingStepListener">
+                <properties>
+                    <property name="validate" value="#{jobParameters['validate']}"/>
+                    <property name="expect" value="#{jobParameters['expect']}"/>
+                    <property name="forbid" value="#{jobParameters['forbid']}"/>
+                </properties>
+            </listener>
+        </listeners>
         <chunk item-count="3">
             <reader ref="csvItemReader">
                 <properties>
