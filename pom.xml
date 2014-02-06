@@ -24,7 +24,7 @@
 
     <groupId>org.jberet</groupId>
     <artifactId>jberet-parent</artifactId>
-    <version>1.0.0.CR3-SNAPSHOT</version>
+    <version>1.0.0.Final</version>
 
     <name>jberet-parent</name>
     <description>Impl of JSR 352: Batch Applications for the Java Platform</description>
@@ -44,7 +44,7 @@
         <version.junit>4.11</version.junit>
         <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
         <version.org.jboss.logging.jboss-logging>3.1.3.GA</version.org.jboss.logging.jboss-logging>
-        <version.org.jboss.logging.jboss-logging-tools>1.2.0.Beta1</version.org.jboss.logging.jboss-logging-tools>
+        <version.org.jboss.logging.jboss-logging-tools>1.2.0.Final</version.org.jboss.logging.jboss-logging-tools>
         <version.org.jboss.marshalling>1.4.2.Final</version.org.jboss.marshalling>
         <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final
         </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
