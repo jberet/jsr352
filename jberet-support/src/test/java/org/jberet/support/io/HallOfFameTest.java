@@ -46,7 +46,7 @@ public final class HallOfFameTest {
                     "Optional; " +     //needed
                     "Optional, DMinMax(0, 1000);" +      //votes, parse to double and enforce range
                     "Optional, ParseBool; " +      //inducted, boolean
-                    "Optional, StrMinMax(1, 20); ";      //category
+                    "Optional, ParseEnum(org.jberet.support.io.HallOfFame$Category); ";      //category, enum
 
     static final String expectFull = "aaronha01h,1982,BBWAA,415,312,406.0," +
             "harrile01h,2011,BBWAA,581,436";

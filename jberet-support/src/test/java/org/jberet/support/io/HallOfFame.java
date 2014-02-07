@@ -16,6 +16,25 @@ package org.jberet.support.io;
  * A bean type represents record in HallOfFame.txt, data from http://www.baseball-databank.org/
  */
 public final class HallOfFame {
+    public static enum Category {
+        PLAYER("Player"),
+        MANAGER("Manager"),
+        UMPIRE("Umpire"),
+        EXECUTIVE("Executive"),
+        PIONEER_EXECUTIVE("Pioneer/Executive");
+
+        private final String cat;
+
+        Category(final String cat) {
+            this.cat = cat;
+        }
+
+        @Override
+        public String toString() {
+            return this.cat;
+        }
+    }
+
     private String hofID;
     private int yearID;
     private String votedBy;
@@ -23,7 +42,7 @@ public final class HallOfFame {
     private String needed;
     private double votes;
     private boolean inducted;
-    private String category;
+    private Category category;
 
     public String getHofID() {
         return hofID;
@@ -81,11 +100,11 @@ public final class HallOfFame {
         this.inducted = inducted;
     }
 
-    public String getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(final String category) {
+    public void setCategory(final Category category) {
         this.category = category;
     }
 

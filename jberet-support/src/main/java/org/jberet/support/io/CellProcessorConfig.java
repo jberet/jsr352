@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.jberet.support._private.SupportLogger;
+import org.supercsv.cellprocessor.CellProcessorAdaptor;
 import org.supercsv.cellprocessor.ConvertNullTo;
 import org.supercsv.cellprocessor.FmtBool;
 import org.supercsv.cellprocessor.FmtDate;
@@ -58,6 +59,8 @@ import org.supercsv.cellprocessor.ift.DateCellProcessor;
 import org.supercsv.cellprocessor.ift.DoubleCellProcessor;
 import org.supercsv.cellprocessor.ift.LongCellProcessor;
 import org.supercsv.cellprocessor.ift.StringCellProcessor;
+import org.supercsv.exception.SuperCsvCellProcessorException;
+import org.supercsv.util.CsvContext;
 
 /**
  * This class is responsible for parsing the cellProcessors configuration property value into an array of
@@ -457,6 +460,12 @@ final class CellProcessorConfig {
                 } else {
                     throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
                 }
+            } else if (name.equalsIgnoreCase("ParseEnum")) {
+                if (params.length == 1) {
+                    current = previous == null ? new ParseEnum(params[0]) : new ParseEnum(params[0], previous);
+                } else {
+                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                }
             } else if (name.equalsIgnoreCase("Collector") || name.equalsIgnoreCase("HashMapper")) {
                 throw SupportLogger.LOGGER.unsupportedCellProcessor(name, params);
             } else {  //custom cell processor
@@ -507,5 +516,52 @@ final class CellProcessorConfig {
             throw SupportLogger.LOGGER.failToLoadOrCreateCustomType(e, oneProcessorValue.toString());
         }
         return result;
+    }
+
+    /**
+     * A custom cell processor that parses the cell data to enum.
+     */
+    static final class ParseEnum extends CellProcessorAdaptor {
+        private final String enumType;
+
+        /**
+         * Creates {@code ParseEnum} cell processor with a fully-qualified name of the enum type. For inner class enum,
+         * use $ to separate outer class and inner type.
+         * @param enumType the fully-qualified name of the enum type, e.g., org.jberet.support.io.HallOfFame$Category
+         */
+        ParseEnum(final String enumType) {
+            super();
+            this.enumType = enumType;
+        }
+
+        /**
+         * Creates {@code ParseEnum} cell processor with a fully-qualified name of the enum type, and next cell processor.
+         * For inner class enum, use $ to separate outer class and inner type.
+         * @param enumType the fully-qualified name of the enum type, e.g., org.jberet.support.io.HallOfFame$Category
+         * @param next next cell processor in the chain
+         */
+        ParseEnum(final String enumType, final CellProcessor next) {
+            super(next);
+            this.enumType = enumType;
+        }
+
+        @Override
+        public Object execute(final Object value, final CsvContext context) {
+            validateInputNotNull(value, context);
+            try {
+                final Class<?> aClass = this.getClass().getClassLoader().loadClass(enumType);
+                if (aClass.isEnum()) {
+                    final Object[] enumConstants = aClass.getEnumConstants();
+                    for (final Object e : enumConstants) {
+                        if (value.equals(e.toString())) {
+                            return next.execute(e, context);
+                        }
+                    }
+                }
+            } catch (final Exception e) {
+                throw SupportLogger.LOGGER.failToParseEnum(e, value, enumType, context, this);
+            }
+            throw SupportLogger.LOGGER.failToParseEnum(null, value, enumType, context, this);
+        }
     }
 }

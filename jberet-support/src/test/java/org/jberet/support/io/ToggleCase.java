@@ -43,8 +43,8 @@ public final class ToggleCase extends CellProcessorAdaptor {
         validateInputNotNull(value, context);
         final String s = (String) value;
         if (whichCase.equals(lower)) {
-            return s.toLowerCase();
+            return next.execute(s.toLowerCase(), context);
         }
-        return s.toUpperCase();
+        return next.execute(s.toUpperCase(), context);
     }
 }
