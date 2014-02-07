@@ -14,6 +14,7 @@
 
     <properties>
         <version.net.sf.supercsv>2.1.0</version.net.sf.supercsv>
+        <version.com.fasterxml.jackson>2.3.1</version.com.fasterxml.jackson>
     </properties>
 
     <dependencyManagement>
@@ -22,6 +23,11 @@
                 <groupId>net.sf.supercsv</groupId>
                 <artifactId>super-csv</artifactId>
                 <version>${version.net.sf.supercsv}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
             </dependency>
             <dependency>
                 <groupId>org.jberet</groupId>
@@ -54,6 +60,10 @@
         <dependency>
             <groupId>net.sf.supercsv</groupId>
             <artifactId>super-csv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jberet</groupId>
