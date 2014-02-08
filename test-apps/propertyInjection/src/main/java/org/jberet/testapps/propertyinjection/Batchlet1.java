@@ -127,6 +127,9 @@ public class Batchlet1 extends BatchletNoNamed {
     @Inject @BatchProperty(name = "class")
     Class[] clss;
 
+    @Inject @BatchProperty(name = "stringArrayClass")
+    Class stringArrayClass;
+
     @Inject @BatchProperty(name = "inet4.address")
     Inet4Address inet4Address;
 

@@ -314,7 +314,7 @@ public final class ValueConverter {
         }
         if (t == Class.class) {
             try {
-                return classLoader.loadClass(v);
+                return Class.forName(v, false, classLoader);
             } catch (ClassNotFoundException e) {
                 throw MESSAGES.failToInjectProperty(e, v, f);
             }

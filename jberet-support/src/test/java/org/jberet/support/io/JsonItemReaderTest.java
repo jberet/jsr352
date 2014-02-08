@@ -12,7 +12,6 @@
 
 package org.jberet.support.io;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -25,15 +24,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * A test class that reads CSV resource from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv
+ * A test class that reads json resource.
  */
-public final class MovieTest {
-    static final String jobName = "org.jberet.support.io.MovieTest";
+public final class JsonItemReaderTest {
+    static final String jobName = "org.jberet.support.io.JsonItemReaderTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
-    static final String header = "rank,tit,grs,opn";
-
-    static final String cellProcessors =
-            "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate(YYYY-MM-dd)";
 
     static final String expectFull = "Marvel's The Avengers," +
             "Dark Knight Rises," +
@@ -46,13 +41,8 @@ public final class MovieTest {
                 "Hunger Games," +
                 "Skyfall";
         final String forbid = "Marvel's The Avengers, " +
-                "Hobbit Unexpected Journey";
+                "An Unexpected Journey";
         testReadWrite0("2", "4", Movie.class, expect, forbid);
-    }
-
-    @Test
-    public void testListTypeFull() throws Exception {
-        testReadWrite0(null, null, List.class, expectFull, null);
     }
 
     @Test
@@ -77,7 +67,6 @@ public final class MovieTest {
                                 final String expect, final String forbid) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
         params.setProperty("writeResource", CsvProperties.RESOURCE_STEP_CONTEXT);
-        params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
 
         if (expect != null) {
             params.setProperty("validate", String.valueOf(true));
@@ -95,7 +84,7 @@ public final class MovieTest {
             params.setProperty(CsvProperties.END_KEY, end);
         }
 
-        params.setProperty(CsvProperties.HEADER_KEY, header);
+        params.setProperty(CsvProperties.HEADER_KEY, MovieTest.header);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);

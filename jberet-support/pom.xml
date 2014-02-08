@@ -30,6 +30,11 @@
                 <version>${version.com.fasterxml.jackson}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jberet</groupId>
                 <artifactId>jberet-core</artifactId>
                 <version>${project.version}</version>
@@ -64,6 +69,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jberet</groupId>

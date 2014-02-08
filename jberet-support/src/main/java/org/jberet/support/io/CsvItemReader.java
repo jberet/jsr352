@@ -12,15 +12,8 @@
 
 package org.jberet.support.io;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.inject.Inject;
@@ -33,8 +26,6 @@ import org.supercsv.io.ICsvMapReader;
 import org.supercsv.io.ICsvReader;
 
 import static org.jberet.support.io.CsvProperties.BEAN_TYPE_KEY;
-import static org.jberet.support.io.CsvProperties.NAME_MAPPING_KEY;
-import static org.jberet.support.io.CsvProperties.RESOURCE_KEY;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads from a CSV resource into a user-defined
@@ -80,11 +71,11 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
         if (beanType == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(null, BEAN_TYPE_KEY);
         } else if (java.util.List.class.isAssignableFrom(beanType)) {
-            delegateReader = new FastForwardCsvListReader(getInputReader(), getCsvPreference(), startRowNumber);
+            delegateReader = new FastForwardCsvListReader(ReaderWriterUtil.getInputReader(resource, true), getCsvPreference(), startRowNumber);
         } else if (java.util.Map.class.isAssignableFrom(beanType)) {
-            delegateReader = new FastForwardCsvMapReader(getInputReader(), getCsvPreference(), startRowNumber);
+            delegateReader = new FastForwardCsvMapReader(ReaderWriterUtil.getInputReader(resource, true), getCsvPreference(), startRowNumber);
         } else {
-            delegateReader = new FastForwardCsvBeanReader(getInputReader(), getCsvPreference(), startRowNumber);
+            delegateReader = new FastForwardCsvBeanReader(ReaderWriterUtil.getInputReader(resource, true), getCsvPreference(), startRowNumber);
         }
 
         if (!headerless) {
@@ -140,38 +131,5 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
     @Override
     public Integer checkpointInfo() throws Exception {
         return delegateReader.getRowNumber();
-    }
-
-    /**
-     * Gets an instance of {@code java.io.Reader} that represents the CSV resource.
-     *
-     * @return {@code java.io.Reader} that represents the CSV resource
-     */
-    protected Reader getInputReader() {
-        if (resource == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
-        }
-        final UnicodeBOMInputStream bomin;
-        try {
-            InputStream inputStream;
-            try {
-                final URL url = new URL(resource);
-                inputStream = url.openStream();
-            } catch (final MalformedURLException e) {
-                SupportLogger.LOGGER.tracef("The resource %s is not a URL, %s%n", resource, e);
-                final File file = new File(resource);
-                if (file.exists()) {
-                    inputStream = new FileInputStream(file);
-                } else {
-                    SupportLogger.LOGGER.tracef("The resource %s is not a file %n", resource);
-                    inputStream = CsvItemReader.class.getClassLoader().getResourceAsStream(resource);
-                }
-            }
-            bomin = new UnicodeBOMInputStream(inputStream);
-            bomin.skipBOM();
-        } catch (final IOException e) {
-            throw SupportLogger.LOGGER.failToOpenStream(e, resource);
-        }
-        return new InputStreamReader(bomin);
     }
 }

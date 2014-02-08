@@ -17,6 +17,7 @@
         <batchlet ref="batchlet1">
             <properties>
                 <property name="class" value="org.jberet.testapps.propertyinjection.Batchlet1"/>
+                <property name="stringArrayClass" value="[Ljava.lang.String;"/>
                 <property name="color" value="RED"/>
                 <property name="file" value="/tmp"/>
                 <property name="jar.file" value="#{systemProperties['java.home']}/lib/jce.jar"/>
