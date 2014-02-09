@@ -12,12 +12,7 @@
 
 package org.jberet.support.io;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import javax.batch.api.BatchProperty;
@@ -35,14 +30,10 @@ import org.supercsv.io.ICsvListWriter;
 import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.io.ICsvWriter;
 
-import static org.jberet.support.io.CsvProperties.APPEND;
 import static org.jberet.support.io.CsvProperties.BEAN_TYPE_KEY;
-import static org.jberet.support.io.CsvProperties.FAIL_IF_EXISTS;
 import static org.jberet.support.io.CsvProperties.HEADER_KEY;
 import static org.jberet.support.io.CsvProperties.OVERWRITE;
-import static org.jberet.support.io.CsvProperties.RESOURCE_KEY;
 import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
-import static org.jberet.support.io.CsvProperties.WRITE_MODE_KEY;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes data to CSV file or resource.
@@ -65,9 +56,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
     @BatchProperty
     protected String writeMode;
 
-    private StringWriter stringWriter;
     protected ICsvWriter delegateWriter;
-    private boolean skipWritingHeader;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
@@ -75,11 +64,11 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
         if (beanType == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(null, BEAN_TYPE_KEY);
         } else if (java.util.List.class.isAssignableFrom(beanType)) {
-            delegateWriter = new CsvListWriter(getOutputWriter(), getCsvPreference());
+            delegateWriter = new CsvListWriter(getOutputWriter(writeMode, stepContext), getCsvPreference());
         } else if (java.util.Map.class.isAssignableFrom(beanType)) {
-            delegateWriter = new CsvMapWriter(getOutputWriter(), getCsvPreference());
+            delegateWriter = new CsvMapWriter(getOutputWriter(writeMode, stepContext), getCsvPreference());
         } else {
-            delegateWriter = new CsvBeanWriter(getOutputWriter(), getCsvPreference());
+            delegateWriter = new CsvBeanWriter(getOutputWriter(writeMode, stepContext), getCsvPreference());
         }
         if (header == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(null, HEADER_KEY);
@@ -160,59 +149,5 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
     @Override
     public Serializable checkpointInfo() throws Exception {
         return delegateWriter.getRowNumber();
-    }
-
-    protected Writer getOutputWriter() {
-        if (resource == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
-        }
-        if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
-            if (OVERWRITE.equalsIgnoreCase(writeMode)) {
-                return stringWriter = new StringWriter();
-            }
-            final Object transientUserData = stepContext.getTransientUserData();
-            if (writeMode == null || writeMode.equalsIgnoreCase(APPEND)) {
-                if (transientUserData != null) {
-                    if (transientUserData instanceof String) {
-                        skipWritingHeader = true;
-                    } else {
-                        throw SupportLogger.LOGGER.cannotAppendToNonStringData(transientUserData.getClass());
-                    }
-                }
-                return stringWriter = new StringWriter();
-            }
-            if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
-                if (transientUserData != null) {
-                    throw SupportLogger.LOGGER.csvResourceAlreadyExists(transientUserData);
-                }
-                return stringWriter = new StringWriter();
-            }
-            throw SupportLogger.LOGGER.invalidCsvPreference(writeMode, WRITE_MODE_KEY);
-        }
-        try {
-            final File file = new File(resource);
-            final boolean exists = file.exists();
-            if (exists && file.isDirectory()) {
-                throw SupportLogger.LOGGER.csvResourceIsDirectory(file);
-            }
-            if (writeMode == null || writeMode.equalsIgnoreCase(APPEND)) {
-                if (file.length() > 0) {
-                    skipWritingHeader = true;
-                }
-                return new FileWriter(file, true);
-            }
-            if (writeMode.equalsIgnoreCase(OVERWRITE)) {
-                return new FileWriter(file);
-            }
-            if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
-                if (exists) {
-                    throw SupportLogger.LOGGER.csvResourceAlreadyExists(file.getPath());
-                }
-                return new FileWriter(resource);
-            }
-            throw SupportLogger.LOGGER.invalidCsvPreference(writeMode, WRITE_MODE_KEY);
-        } catch (final IOException e) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
-        }
     }
 }

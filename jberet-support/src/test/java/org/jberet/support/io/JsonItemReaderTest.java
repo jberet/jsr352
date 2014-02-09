@@ -30,37 +30,24 @@ public final class JsonItemReaderTest {
     static final String jobName = "org.jberet.support.io.JsonItemReaderTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
-    static final String expectFull = "Marvel's The Avengers," +
-            "Dark Knight Rises," +
-            "Chimpanzee," +
-            "Five-Year Engagement";
-
     @Test
     public void testBeanType2_4() throws Exception {
-        final String expect = "Dark Knight Rises, " +
-                "Hunger Games," +
-                "Skyfall";
-        final String forbid = "Marvel's The Avengers, " +
-                "An Unexpected Journey";
-        testReadWrite0("2", "4", Movie.class, expect, forbid);
+        testReadWrite0("2", "4", Movie.class, MovieTest.expect2_4, MovieTest.forbid2_4);
     }
 
     @Test
     public void testBeanTypeFull() throws Exception {
-        testReadWrite0(null, null, Movie.class, expectFull, null);
+        testReadWrite0(null, null, Movie.class, MovieTest.expectFull, null);
     }
 
     @Test
     public void testMapTypeFull1_100() throws Exception {
-        testReadWrite0("1", "100", Map.class, expectFull, null);
+        testReadWrite0("1", "100", Map.class, MovieTest.expectFull, null);
     }
 
     @Test
     public void testMapType1_2() throws Exception {
-        final String expect = "Marvel's The Avengers," +
-                "Dark Knight Rises";
-        final String forbid = "Hunger Games";
-        testReadWrite0("1", "2", Map.class, expect, forbid);
+        testReadWrite0("1", "2", Map.class, MovieTest.expect1_2, MovieTest.forbid1_2);
     }
 
     private void testReadWrite0(final String start, final String end, final Class<?> beanType,

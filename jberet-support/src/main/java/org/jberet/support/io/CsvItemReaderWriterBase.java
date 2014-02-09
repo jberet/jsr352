@@ -44,17 +44,13 @@ import static org.jberet.support.io.CsvProperties.STARTS_WITH_FUZZY;
 import static org.jberet.support.io.CsvProperties.STARTS_WITH_FUZZY2;
 import static org.jberet.support.io.CsvProperties.TAB_PREFERENCE;
 
-public abstract class CsvItemReaderWriterBase {
+public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
     static final Class[] stringParameterTypes = {String.class};
     static final CellProcessor[] noCellProcessors = new CellProcessor[0];
 
     @Inject
     @BatchProperty
     protected String[] nameMapping;
-
-    @Inject
-    @BatchProperty
-    protected String resource;
 
     @Inject
     @BatchProperty

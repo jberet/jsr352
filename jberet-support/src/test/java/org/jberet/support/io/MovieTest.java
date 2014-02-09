@@ -36,18 +36,22 @@ public final class MovieTest {
             "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate(YYYY-MM-dd)";
 
     static final String expectFull = "Marvel's The Avengers," +
-            "Dark Knight Rises," +
+            "The Dark Knight Rises," +
             "Chimpanzee," +
-            "Five-Year Engagement";
+            "The Five-Year Engagement";
+    static final String expect2_4 = "The Dark Knight Rises, " +
+            "The Hunger Games," +
+            "Skyfall";
+    static final String forbid2_4 = "Marvel's The Avengers, " +
+            "The Hobbit: An Unexpected Journey";
+
+    static final String expect1_2 = "Marvel's The Avengers," +
+            "The Dark Knight Rises";
+    static final String forbid1_2 = "Hunger Games";
 
     @Test
     public void testBeanType2_4() throws Exception {
-        final String expect = "Dark Knight Rises, " +
-                "Hunger Games," +
-                "Skyfall";
-        final String forbid = "Marvel's The Avengers, " +
-                "Hobbit Unexpected Journey";
-        testReadWrite0("2", "4", Movie.class, expect, forbid);
+        testReadWrite0("2", "4", Movie.class, expect2_4, forbid2_4);
     }
 
     @Test
@@ -67,10 +71,7 @@ public final class MovieTest {
 
     @Test
     public void testMapType1_2() throws Exception {
-        final String expect = "Marvel's The Avengers," +
-                "Dark Knight Rises";
-        final String forbid = "Hunger Games";
-        testReadWrite0("1", "2", Map.class, expect, forbid);
+        testReadWrite0("1", "2", Map.class, expect1_2, forbid1_2);
     }
 
     private void testReadWrite0(final String start, final String end, final Class<?> beanType,

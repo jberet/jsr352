@@ -71,11 +71,11 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
         if (beanType == null) {
             throw SupportLogger.LOGGER.invalidCsvPreference(null, BEAN_TYPE_KEY);
         } else if (java.util.List.class.isAssignableFrom(beanType)) {
-            delegateReader = new FastForwardCsvListReader(ReaderWriterUtil.getInputReader(resource, true), getCsvPreference(), startRowNumber);
+            delegateReader = new FastForwardCsvListReader(getInputReader(true), getCsvPreference(), startRowNumber);
         } else if (java.util.Map.class.isAssignableFrom(beanType)) {
-            delegateReader = new FastForwardCsvMapReader(ReaderWriterUtil.getInputReader(resource, true), getCsvPreference(), startRowNumber);
+            delegateReader = new FastForwardCsvMapReader(getInputReader(true), getCsvPreference(), startRowNumber);
         } else {
-            delegateReader = new FastForwardCsvBeanReader(ReaderWriterUtil.getInputReader(resource, true), getCsvPreference(), startRowNumber);
+            delegateReader = new FastForwardCsvBeanReader(getInputReader(true), getCsvPreference(), startRowNumber);
         }
 
         if (!headerless) {

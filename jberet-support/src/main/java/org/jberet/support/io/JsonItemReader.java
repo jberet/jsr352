@@ -18,19 +18,13 @@ import javax.batch.api.chunk.ItemReader;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jberet.support._private.SupportLogger;
 
 @Named
-public class JsonItemReader implements ItemReader {
-    @Inject
-    @BatchProperty
-    protected String resource;
-
+public class JsonItemReader extends JsonItemReaderWriterBase implements ItemReader {
     @Inject
     @BatchProperty
     protected int start;
@@ -39,13 +33,7 @@ public class JsonItemReader implements ItemReader {
     @BatchProperty
     protected int end;
 
-    @Inject
-    @BatchProperty
-    protected Class beanType;
-
-    private JsonFactory jsonFactory;
     private JsonParser jsonParser;
-    private ObjectMapper objectMapper;
     private JsonToken token;
     private int rowNumber;
 
@@ -63,13 +51,7 @@ public class JsonItemReader implements ItemReader {
 
         jsonFactory = new MappingJsonFactory();
         jsonFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true);
-        jsonParser = jsonFactory.createParser(ReaderWriterUtil.getInputReader(resource, false));
-        objectMapper = new ObjectMapper(jsonFactory);
-        if (checkpoint == null) {
-            //token = jsonParser.nextToken();
-        } else {
-
-        }
+        jsonParser = jsonFactory.createParser(getInputReader(false));
     }
 
     @Override
@@ -91,7 +73,6 @@ public class JsonItemReader implements ItemReader {
         } while (true);
 
         final Object result = jsonParser.readValueAs(beanType);
-        System.out.printf("token: %s, row %s%n%s%n", token, rowNumber, result);
         return result;
     }
 
@@ -104,6 +85,7 @@ public class JsonItemReader implements ItemReader {
     public void close() throws Exception {
         if (jsonParser != null) {
             jsonParser.close();
+            jsonParser = null;
         }
     }
 }

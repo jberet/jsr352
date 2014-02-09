@@ -32,11 +32,10 @@
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                 </properties>
             </reader>
-            <writer ref="csvItemWriter">
+            <writer ref="jsonItemWriter">
                 <properties>
                     <property name="resource" value="#{jobParameters['writeResource']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
-                    <property name="header" value="#{jobParameters['header']}"/>
                 </properties>
             </writer>
         </chunk>
