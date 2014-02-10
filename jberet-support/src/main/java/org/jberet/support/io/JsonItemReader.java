@@ -71,9 +71,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 }
             }
         } while (true);
-
-        final Object result = jsonParser.readValueAs(beanType);
-        return result;
+        return jsonParser.readValueAs(beanType);
     }
 
     @Override

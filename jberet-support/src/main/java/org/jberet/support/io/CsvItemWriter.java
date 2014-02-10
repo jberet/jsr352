@@ -62,7 +62,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
     public void open(final Serializable checkpoint) throws Exception {
         SupportLogger.LOGGER.tracef("Open CsvItemWriter with checkpoint %s, which is ignored for CsvItemWriter.%n", checkpoint);
         if (beanType == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(null, BEAN_TYPE_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, BEAN_TYPE_KEY);
         } else if (java.util.List.class.isAssignableFrom(beanType)) {
             delegateWriter = new CsvListWriter(getOutputWriter(writeMode, stepContext), getCsvPreference());
         } else if (java.util.Map.class.isAssignableFrom(beanType)) {
@@ -71,7 +71,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
             delegateWriter = new CsvBeanWriter(getOutputWriter(writeMode, stepContext), getCsvPreference());
         }
         if (header == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(null, HEADER_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, HEADER_KEY);
         }
         if (this.nameMapping == null) {
             this.nameMapping = header;

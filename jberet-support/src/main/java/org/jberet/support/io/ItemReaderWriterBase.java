@@ -45,15 +45,15 @@ public abstract class ItemReaderWriterBase {
     StringWriter stringWriter;
 
     /**
-     * Gets an instance of {@code java.io.Reader} that represents the CSV resource.
+     * Gets an instance of {@code java.io.Reader} that represents the reader resource.
      *
      * @param detectBOM if need to detect byte-order mark (BOM). If true, the {@code InputStream} is wrapped inside
      *                  {@code UnicodeBOMInputStream}
-     * @return {@code java.io.Reader} that represents the CSV resource
+     * @return {@code java.io.Reader} that represents the reader resource
      */
     protected Reader getInputReader(final boolean detectBOM) {
         if (resource == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(resource, RESOURCE_KEY);
         }
         final InputStreamReader result;
         try {
@@ -68,7 +68,7 @@ public abstract class ItemReaderWriterBase {
                     inputStream = new FileInputStream(file);
                 } else {
                     SupportLogger.LOGGER.tracef("The resource %s is not a file %n", resource);
-                    inputStream = CsvItemReader.class.getClassLoader().getResourceAsStream(resource);
+                    inputStream = ItemReaderWriterBase.class.getClassLoader().getResourceAsStream(resource);
                 }
             }
             if (detectBOM) {
@@ -86,7 +86,7 @@ public abstract class ItemReaderWriterBase {
 
     protected Writer getOutputWriter(final String writeMode, final StepContext stepContext) {
         if (resource == null) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(resource, RESOURCE_KEY);
         }
         if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
             if (OVERWRITE.equalsIgnoreCase(writeMode)) {
@@ -105,36 +105,38 @@ public abstract class ItemReaderWriterBase {
             }
             if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
                 if (transientUserData != null) {
-                    throw SupportLogger.LOGGER.csvResourceAlreadyExists(transientUserData);
+                    throw SupportLogger.LOGGER.writerResourceAlreadyExists(transientUserData);
                 }
                 return stringWriter = new StringWriter();
             }
-            throw SupportLogger.LOGGER.invalidCsvPreference(writeMode, WRITE_MODE_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(writeMode, WRITE_MODE_KEY);
         }
         try {
             final File file = new File(resource);
             final boolean exists = file.exists();
             if (exists && file.isDirectory()) {
-                throw SupportLogger.LOGGER.csvResourceIsDirectory(file);
+                throw SupportLogger.LOGGER.writerResourceIsDirectory(file);
             }
             if (writeMode == null || writeMode.equalsIgnoreCase(APPEND)) {
+                final FileWriter fw = new FileWriter(file, true);
                 if (file.length() > 0) {
                     skipWritingHeader = true;
+                    fw.write("\n\n");
                 }
-                return new FileWriter(file, true);
+                return fw;
             }
             if (writeMode.equalsIgnoreCase(OVERWRITE)) {
                 return new FileWriter(file);
             }
             if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
                 if (exists) {
-                    throw SupportLogger.LOGGER.csvResourceAlreadyExists(file.getPath());
+                    throw SupportLogger.LOGGER.writerResourceAlreadyExists(file.getPath());
                 }
                 return new FileWriter(resource);
             }
-            throw SupportLogger.LOGGER.invalidCsvPreference(writeMode, WRITE_MODE_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(writeMode, WRITE_MODE_KEY);
         } catch (final IOException e) {
-            throw SupportLogger.LOGGER.invalidCsvPreference(resource, RESOURCE_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(resource, RESOURCE_KEY);
         }
     }
 

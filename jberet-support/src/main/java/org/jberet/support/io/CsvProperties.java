@@ -55,6 +55,9 @@ public final class CsvProperties {
     /**
      * The property key to specify a fully-qualified class or interface name that maps to a row of the source CSV file.
      * For example, java.util.List, java.util.Map, org.jberet.support.io.Person, my.own.BeanType, etc.
+     * This property can also be used in {@code JsonItemReader}, and in that case the valid values are
+     * java.util.Map, com.fasterxml.jackson.databind.JsonNode, or any user-defined bean type (e.g.,
+     * org.jberet.support.io.Movie).
      */
     public static final String BEAN_TYPE_KEY = "beanType";
 

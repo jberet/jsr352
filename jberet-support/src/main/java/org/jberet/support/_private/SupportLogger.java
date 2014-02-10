@@ -30,8 +30,8 @@ import org.supercsv.util.CsvContext;
 public interface SupportLogger extends BasicLogger {
     SupportLogger LOGGER = Logger.getMessageLogger(SupportLogger.class, "org.jberet.support");
 
-    @Message(id = 60000, value = "Invalid CSV preference value %s for key %s")
-    BatchRuntimeException invalidCsvPreference(String csvPref, String key);
+    @Message(id = 60000, value = "Invalid reader or writer property value %s for key %s")
+    BatchRuntimeException invalidReaderWriterProperty(String val, String key);
 
     @Message(id = 60001, value = "Failed to read header from CSV resource %s")
     BatchRuntimeException failToReadCsvHeader(@Cause Throwable th, String csvResource);
@@ -60,11 +60,11 @@ public interface SupportLogger extends BasicLogger {
     @Message(id = 60009, value = "Unsupported CellProcessor: %s %s")
     BatchRuntimeException unsupportedCellProcessor(String cellProcessorName, String[] params);
 
-    @Message(id = 60010, value = "The target CSV resource already exists: %s")
-    BatchRuntimeException csvResourceAlreadyExists(Object targetCsvResource);
+    @Message(id = 60010, value = "The target writer resource already exists: %s")
+    BatchRuntimeException writerResourceAlreadyExists(Object writerResource);
 
-    @Message(id = 60011, value = "The target CSV resource is a directory: %s")
-    BatchRuntimeException csvResourceIsDirectory(File file);
+    @Message(id = 60011, value = "The target writer resource is a directory: %s")
+    BatchRuntimeException writerResourceIsDirectory(File file);
 
     @Message(id = 60012, value = "The existing transient user data in step is not of type String: %s")
     BatchRuntimeException cannotAppendToNonStringData(Class<?> dataType);

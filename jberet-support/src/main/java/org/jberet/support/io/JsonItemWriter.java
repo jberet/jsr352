@@ -9,7 +9,7 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.support.io;
 
 import java.io.Serializable;
@@ -46,9 +46,8 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
         jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT, true);
         jsonGenerator = jsonFactory.createGenerator(getOutputWriter(writeMode, stepContext));
         jsonGenerator.useDefaultPrettyPrinter();
-        if (!skipWritingHeader) {
-            jsonGenerator.writeStartArray();
-        }
+        //write { regardless of the value of skipWritingHeader, since any existing content already ends with }
+        jsonGenerator.writeStartArray();
     }
 
     @Override
@@ -67,20 +66,18 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
     @Override
     public void close() throws Exception {
         if (jsonGenerator != null) {
-            jsonGenerator.writeEndArray();
-            jsonGenerator.flush();
+            jsonGenerator.close();
+            jsonGenerator = null;
             if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
                 final Object transientUserData = stepContext.getTransientUserData();
                 if (OVERWRITE.equalsIgnoreCase(writeMode) || transientUserData == null) {
                     stepContext.setTransientUserData(stringWriter.toString());
                 } else {
-                    stepContext.setTransientUserData(transientUserData  +
+                    stepContext.setTransientUserData(transientUserData +
                             stringWriter.toString());
                 }
                 stringWriter = null;
             }
-            jsonGenerator.close();
-            jsonGenerator = null;
         }
     }
 }
