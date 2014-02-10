@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,7 +24,6 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.util.BatchUtil;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ParseBoolTest {

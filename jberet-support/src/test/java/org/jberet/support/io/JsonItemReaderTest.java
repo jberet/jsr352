@@ -42,9 +42,13 @@ public final class JsonItemReaderTest {
             "36, \"style\", \"bold\", \"text1\", \"onMouseUp\", " +
             "\"sun1.opacity = (sun1.opacity / 100) * 90;\"";
 
+    private String QUOTE_FIELD_NAMES;
+
     @Test
     public void testBeanType2_4() throws Exception {
-        testReadWrite0(movieJson, RESOURCE_STEP_CONTEXT, "2", "4", Movie.class, MovieTest.expect2_4, MovieTest.forbid2_4);
+        QUOTE_FIELD_NAMES = "false";
+        final String forbid = MovieTest.forbid2_4 + ", \"rank\", \"tit\", \"grs\", \"opn\"";
+        testReadWrite0(movieJson, RESOURCE_STEP_CONTEXT, "2", "4", Movie.class, MovieTest.expect2_4, forbid);
     }
 
     @Test
@@ -111,6 +115,9 @@ public final class JsonItemReaderTest {
         }
         if (end != null) {
             params.setProperty(CsvProperties.END_KEY, end);
+        }
+        if (QUOTE_FIELD_NAMES != null) {
+            params.setProperty("QUOTE_FIELD_NAMES", QUOTE_FIELD_NAMES);
         }
 
         params.setProperty(CsvProperties.HEADER_KEY, MovieTest.header);

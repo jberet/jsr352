@@ -35,6 +35,7 @@
             <writer ref="jsonItemWriter">
                 <properties>
                     <property name="resource" value="#{jobParameters['writeResource']}"/>
+                    <property name="QUOTE_FIELD_NAMES" value="#{jobParameters['QUOTE_FIELD_NAMES']}"/>
                 </properties>
             </writer>
         </chunk>

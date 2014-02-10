@@ -14,21 +14,29 @@ package org.jberet.support.io;
 
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
-import javax.batch.api.chunk.ItemReader;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jberet.support._private.SupportLogger;
 
 public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
     @Inject
     @BatchProperty
-    protected Class beanType;
+    protected String CANONICALIZE_FIELD_NAMES;
+
+    @Inject
+    @BatchProperty
+    protected String INTERN_FIELD_NAMES;
 
     protected JsonFactory jsonFactory;
+
+    protected void open(final Serializable checkpoint) throws Exception {
+        jsonFactory = new MappingJsonFactory();
+        if ("false".equals(CANONICALIZE_FIELD_NAMES)) {
+            jsonFactory.configure(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES, false);
+        }
+        if ("false".equals(INTERN_FIELD_NAMES)) {
+            jsonFactory.configure(JsonFactory.Feature.INTERN_FIELD_NAMES, false);
+        }
+    }
 }
