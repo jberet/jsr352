@@ -49,6 +49,16 @@ public final class MovieTest {
             "The Dark Knight Rises";
     static final String forbid1_2 = "Hunger Games";
 
+    private String partialNameMapping;
+
+    //test partial reading (certain columns are not read by include null in nameMapping for these columns).
+    //for bean type reading only.
+    @Test
+    public void testBeanTypeNoDate2_4() throws Exception {
+        this.partialNameMapping = "rank,tit,grs,null";
+        testReadWrite0("2", "4", Movie.class, expect2_4, forbid2_4 + ", 2012");
+    }
+
     @Test
     public void testBeanType2_4() throws Exception {
         testReadWrite0("2", "4", Movie.class, expect2_4, forbid2_4);
@@ -95,7 +105,9 @@ public final class MovieTest {
         if (end != null) {
             params.setProperty(CsvProperties.END_KEY, end);
         }
-
+        if (this.partialNameMapping != null) {
+            params.setProperty(CsvProperties.NAME_MAPPING_KEY, partialNameMapping);
+        }
         params.setProperty(CsvProperties.HEADER_KEY, header);
 
         final long jobExecutionId = jobOperator.start(jobName, params);

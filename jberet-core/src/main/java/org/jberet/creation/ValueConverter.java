@@ -414,7 +414,7 @@ public final class ValueConverter {
         while (st.hasMoreTokens()) {
             final String s = st.nextToken().trim();
             if (elementValueType.isAssignableFrom(String.class)) {
-                l.add(s);
+                l.add(s.equals("null") ? null : s);
             } else {
                 l.add(convertSingleValue(s, elementValueType, f, classLoader));
             }
