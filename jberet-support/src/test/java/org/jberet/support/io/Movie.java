@@ -18,10 +18,13 @@ import java.util.Date;
  * A bean that represents the movie data from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv
  */
 public final class Movie {
+    public enum Rating {G, PG, PG13, R}
+
     private int rank;
     private String tit;
     private double grs;
     private Date opn;
+    private Rating rating;
 
     public int getRank() {
         return rank;
@@ -55,6 +58,14 @@ public final class Movie {
         this.opn = opn;
     }
 
+    public Rating getRating() {
+        return rating;
+    }
+
+    public void setRating(final Rating rating) {
+        this.rating = rating;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Movie{");
@@ -62,6 +73,7 @@ public final class Movie {
         sb.append(", tit='").append(tit).append('\'');
         sb.append(", grs=").append(grs);
         sb.append(", opn=").append(opn);
+        sb.append(", rating=").append(rating);
         sb.append('}');
         return sb.toString();
     }

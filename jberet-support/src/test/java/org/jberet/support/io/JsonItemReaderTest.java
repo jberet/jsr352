@@ -47,7 +47,9 @@ public final class JsonItemReaderTest {
     @Test
     public void testBeanType2_4() throws Exception {
         jsonGeneratorFeatures = " QUOTE_FIELD_NAMES = false , STRICT_DUPLICATE_DETECTION = false";
-        final String forbid = MovieTest.forbid2_4 + ", \"rank\", \"tit\", \"grs\", \"opn\"";
+
+        //rating enum is written out as index, as configured in job xml serializationFeatures property
+        final String forbid = MovieTest.forbid2_4 + ", \"rank\", \"tit\", \"grs\", \"opn\", PG13";
         testReadWrite0(movieJson, RESOURCE_STEP_CONTEXT, "2", "4", Movie.class, MovieTest.expect2_4, forbid);
     }
 

@@ -21,9 +21,10 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.jberet.support._private.SupportLogger;
 
 import static org.jberet.support.io.CsvProperties.OVERWRITE;
@@ -44,6 +45,10 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
 
     @Inject
     @BatchProperty
+    protected Map<String, String> serializationFeatures;
+
+    @Inject
+    @BatchProperty
     protected Class prettyPrinter;
 
     protected JsonGenerator jsonGenerator;
@@ -52,7 +57,38 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
     public void open(final Serializable checkpoint) throws Exception {
         SupportLogger.LOGGER.tracef("Open JsonItemWriter with checkpoint %s, which is ignored for JsonItemWriter.%n", checkpoint);
         super.initJsonFactory();
+
+        if (serializationFeatures != null) {
+            if (objectMapper == null) {
+                objectMapper = new ObjectMapper(jsonFactory);
+            }
+            for (final Map.Entry<String, String> e : serializationFeatures.entrySet()) {
+                final String key = e.getKey();
+                final String value = e.getValue();
+                final SerializationFeature feature;
+                try {
+                    feature = SerializationFeature.valueOf(key);
+                } catch (final Exception e1) {
+                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                }
+                if ("true".equals(value)) {
+                    if (!feature.enabledByDefault()) {
+                        objectMapper.configure(feature, true);
+                    }
+                } else if ("false".equals(value)) {
+                    if (feature.enabledByDefault()) {
+                        objectMapper.configure(feature, false);
+                    }
+                } else {
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                }
+            }
+        }
+
         jsonGenerator = jsonFactory.createGenerator(getOutputWriter(writeMode, stepContext));
+        if (objectMapper != null) {
+            jsonGenerator.setCodec(objectMapper);
+        }
 
         if (jsonGeneratorFeatures != null) {
             for (final Map.Entry<String, String> e : jsonGeneratorFeatures.entrySet()) {
@@ -83,6 +119,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
         } else {
             jsonGenerator.setPrettyPrinter((PrettyPrinter) prettyPrinter.newInstance());
         }
+
         //write { regardless of the value of skipWritingHeader, since any existing content already ends with }
         jsonGenerator.writeStartArray();
     }

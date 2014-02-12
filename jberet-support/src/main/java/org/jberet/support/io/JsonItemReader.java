@@ -21,6 +21,7 @@ import javax.inject.Named;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jberet.support._private.SupportLogger;
 
@@ -42,6 +43,10 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
     @BatchProperty
     protected Map<String, String> jsonParserFeatures;
 
+    @Inject
+    @BatchProperty
+    protected Map<String, String> deserializationFeatures;
+
     private JsonParser jsonParser;
     private JsonToken token;
     private int rowNumber;
@@ -58,7 +63,38 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
             throw SupportLogger.LOGGER.invalidStartPosition((Integer) checkpoint, start, end);
         }
         super.initJsonFactory();
+
+        if (deserializationFeatures != null) {
+            if (objectMapper == null) {
+                objectMapper = new ObjectMapper(jsonFactory);
+            }
+            for (final Map.Entry<String, String> e : deserializationFeatures.entrySet()) {
+                final String key = e.getKey();
+                final String value = e.getValue();
+                final DeserializationFeature feature;
+                try {
+                    feature = DeserializationFeature.valueOf(key);
+                } catch (final Exception e1) {
+                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                }
+                if ("true".equals(value)) {
+                    if (!feature.enabledByDefault()) {
+                        objectMapper.configure(feature, true);
+                    }
+                } else if ("false".equals(value)) {
+                    if (feature.enabledByDefault()) {
+                        objectMapper.configure(feature, false);
+                    }
+                } else {
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                }
+            }
+        }
+
         jsonParser = jsonFactory.createParser(getInputReader(false));
+        if (objectMapper != null) {
+            jsonParser.setCodec(objectMapper);
+        }
 
         if (jsonParserFeatures != null) {
             for (final Map.Entry<String, String> e : jsonParserFeatures.entrySet()) {
@@ -102,8 +138,6 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 }
             }
         } while (true);
-        final ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
-        //objectMapper.configure()
         return jsonParser.readValueAs(beanType);
     }
 

@@ -3,19 +3,22 @@
     "rank": 1,
     "tit": "Marvel's The Avengers",
     "grs": 623357910.00,
-    "opn": "2012-05-04"
+    "opn": "2012-05-04",
+    "rating": "PG13"
   },
   {
     "rank": 2,
     "tit": "The Dark Knight Rises",
     "grs": 448139099.00,
-    "opn": "2012-07-20"
+    "opn": "2012-07-20",
+    "rating": "PG13"
   },
   {
     "rank": 3,
     "tit": "The Hunger Games",
     "grs": 408010692.00,
-    "opn": "2012-03-23"
+    "opn": "2012-03-23",
+    "rating": "PG"
   },
   {
     "rank": 4,

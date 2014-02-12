@@ -17,7 +17,9 @@ import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jberet.support._private.SupportLogger;
 
 public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
@@ -26,7 +28,12 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
     @BatchProperty
     protected Map<String, String> jsonFactoryFeatures;
 
+    @Inject
+    @BatchProperty
+    protected Map<String, String> mapperFeatures;
+
     protected JsonFactory jsonFactory;
+    protected ObjectMapper objectMapper;
 
     /**
      * Initializes {@code jsonFactory} field, which may be instantiated or obtained from other part of the application.
@@ -51,6 +58,30 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
                 } else if ("false".equals(value)) {
                     if (feature.enabledByDefault()) {
                         jsonFactory.configure(feature, false);
+                    }
+                } else {
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                }
+            }
+        }
+        if (mapperFeatures != null) {
+            objectMapper = new ObjectMapper(jsonFactory);
+            for (final Map.Entry<String, String> e : mapperFeatures.entrySet()) {
+                final String key = e.getKey();
+                final String value = e.getValue();
+                final MapperFeature feature;
+                try {
+                    feature = MapperFeature.valueOf(key);
+                } catch (final Exception e1) {
+                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                }
+                if ("true".equals(value)) {
+                    if (!feature.enabledByDefault()) {
+                        objectMapper.configure(feature, true);
+                    }
+                } else if ("false".equals(value)) {
+                    if (feature.enabledByDefault()) {
+                        objectMapper.configure(feature, false);
                     }
                 } else {
                     throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);

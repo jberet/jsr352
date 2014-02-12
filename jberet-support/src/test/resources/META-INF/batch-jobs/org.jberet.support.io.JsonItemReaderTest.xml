@@ -36,7 +36,8 @@
                 <properties>
                     <property name="resource" value="#{jobParameters['writeResource']}"/>
                     <property name="jsonGeneratorFeatures" value="#{jobParameters['jsonGeneratorFeatures']}"/>
-                    <property name="prettyPrinter" value="com.fasterxml.jackson.core.util.MinimalPrettyPrinter"/>
+                    <property name="serializationFeatures" value="WRITE_ENUMS_USING_INDEX=true"/>
+                    <!--<property name="prettyPrinter" value="com.fasterxml.jackson.core.util.MinimalPrettyPrinter"/>-->
                 </properties>
             </writer>
         </chunk>
