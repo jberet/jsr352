@@ -76,4 +76,8 @@ public interface SupportLogger extends BasicLogger {
     @Message(id = 60014, value = "Failed to parse string %s to enum %s in CsvContext %s for CellProcessor %s")
     BatchRuntimeException failToParseEnum(@Cause Throwable throwable, Object val, String enumType, CsvContext context, CellProcessor cellProcessor);
 
+    @Message(id = 60015, value = "Unrecognized reader or writer property %s = %s")
+    BatchRuntimeException unrecognizedReaderWriterProperty(String key, String value);
+
+
 }

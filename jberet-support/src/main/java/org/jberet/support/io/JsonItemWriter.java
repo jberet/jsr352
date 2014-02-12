@@ -14,13 +14,16 @@ package org.jberet.support.io;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.PrettyPrinter;
 import org.jberet.support._private.SupportLogger;
 
 import static org.jberet.support.io.CsvProperties.OVERWRITE;
@@ -37,77 +40,49 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
 
     @Inject
     @BatchProperty
-    protected String AUTO_CLOSE_TARGET;
+    protected Map<String, String> jsonGeneratorFeatures;
 
     @Inject
     @BatchProperty
-    protected String AUTO_CLOSE_JSON_CONTENT;
-
-    @Inject
-    @BatchProperty
-    protected String QUOTE_FIELD_NAMES;
-
-    @Inject
-    @BatchProperty
-    protected String QUOTE_NON_NUMERIC_NUMBERS;
-
-    @Inject
-    @BatchProperty
-    protected String WRITE_NUMBERS_AS_STRINGS;
-
-    @Inject
-    @BatchProperty
-    protected String WRITE_BIGDECIMAL_AS_PLAIN;
-
-    @Inject
-    @BatchProperty
-    protected String FLUSH_PASSED_TO_STREAM;
-
-    @Inject
-    @BatchProperty
-    protected String ESCAPE_NON_ASCII;
-
-    @Inject
-    @BatchProperty
-    protected String STRICT_DUPLICATE_DETECTION;
+    protected Class prettyPrinter;
 
     protected JsonGenerator jsonGenerator;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         SupportLogger.LOGGER.tracef("Open JsonItemWriter with checkpoint %s, which is ignored for JsonItemWriter.%n", checkpoint);
-        super.open(checkpoint);
+        super.initJsonFactory();
         jsonGenerator = jsonFactory.createGenerator(getOutputWriter(writeMode, stepContext));
 
-        if ("false".equals(AUTO_CLOSE_TARGET)) {
-            jsonGenerator.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
-        }
-        if ("false".equals(AUTO_CLOSE_JSON_CONTENT)) {
-            jsonGenerator.configure(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT, false);
-        }
-        if ("false".equals(QUOTE_FIELD_NAMES)) {
-            jsonGenerator.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, false);
-        }
-        if ("false".equals(QUOTE_NON_NUMERIC_NUMBERS)) {
-            jsonGenerator.configure(JsonGenerator.Feature.QUOTE_NON_NUMERIC_NUMBERS, false);
-        }
-        if ("true".equals(WRITE_NUMBERS_AS_STRINGS)) {
-            jsonGenerator.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        }
-        if ("true".equals(WRITE_BIGDECIMAL_AS_PLAIN)) {
-            jsonGenerator.configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
-        }
-        if ("false".equals(FLUSH_PASSED_TO_STREAM)) {
-            jsonGenerator.configure(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM, false);
-        }
-        if ("true".equals(ESCAPE_NON_ASCII)) {
-            jsonGenerator.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
-        }
-        if ("true".equals(STRICT_DUPLICATE_DETECTION)) {
-            jsonGenerator.configure(JsonGenerator.Feature.STRICT_DUPLICATE_DETECTION, true);
+        if (jsonGeneratorFeatures != null) {
+            for (final Map.Entry<String, String> e : jsonGeneratorFeatures.entrySet()) {
+                final String key = e.getKey();
+                final String value = e.getValue();
+                final JsonGenerator.Feature feature;
+                try {
+                    feature = JsonGenerator.Feature.valueOf(key);
+                } catch (final Exception e1) {
+                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                }
+                if ("true".equals(value)) {
+                    if (!feature.enabledByDefault()) {
+                        jsonGenerator.configure(feature, true);
+                    }
+                } else if ("false".equals(value)) {
+                    if (feature.enabledByDefault()) {
+                        jsonGenerator.configure(feature, false);
+                    }
+                } else {
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                }
+            }
         }
 
-        jsonGenerator.useDefaultPrettyPrinter();
+        if (prettyPrinter == null) {
+            jsonGenerator.useDefaultPrettyPrinter();
+        } else {
+            jsonGenerator.setPrettyPrinter((PrettyPrinter) prettyPrinter.newInstance());
+        }
         //write { regardless of the value of skipWritingHeader, since any existing content already ends with }
         jsonGenerator.writeStartArray();
     }

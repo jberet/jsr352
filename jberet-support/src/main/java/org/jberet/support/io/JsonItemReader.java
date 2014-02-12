@@ -13,6 +13,7 @@
 package org.jberet.support.io;
 
 import java.io.Serializable;
+import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.inject.Inject;
@@ -20,6 +21,7 @@ import javax.inject.Named;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jberet.support._private.SupportLogger;
 
 @Named
@@ -38,43 +40,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
 
     @Inject
     @BatchProperty
-    protected String AUTO_CLOSE_SOURCE;
-
-    @Inject
-    @BatchProperty
-    protected String ALLOW_COMMENTS;
-
-    @Inject
-    @BatchProperty
-    protected String ALLOW_YAML_COMMENTS;
-
-    @Inject
-    @BatchProperty
-    protected String ALLOW_UNQUOTED_FIELD_NAMES;
-
-    @Inject
-    @BatchProperty
-    protected String ALLOW_SINGLE_QUOTES;
-
-    @Inject
-    @BatchProperty
-    protected String ALLOW_UNQUOTED_CONTROL_CHARS;
-
-    @Inject
-    @BatchProperty
-    protected String ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER;
-
-    @Inject
-    @BatchProperty
-    protected String ALLOW_NUMERIC_LEADING_ZEROS;
-
-    @Inject
-    @BatchProperty
-    protected String ALLOW_NON_NUMERIC_NUMBERS;
-
-    @Inject
-    @BatchProperty
-    protected String STRICT_DUPLICATE_DETECTION;
+    protected Map<String, String> jsonParserFeatures;
 
     private JsonParser jsonParser;
     private JsonToken token;
@@ -91,38 +57,31 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         if (start > end) {
             throw SupportLogger.LOGGER.invalidStartPosition((Integer) checkpoint, start, end);
         }
-        super.open(checkpoint);
+        super.initJsonFactory();
         jsonParser = jsonFactory.createParser(getInputReader(false));
 
-        if ("false".equals(AUTO_CLOSE_SOURCE)) {
-            jsonParser.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
-        }
-        if ("true".equals(ALLOW_COMMENTS)) {
-            jsonParser.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        }
-        if ("true".equals(ALLOW_YAML_COMMENTS)) {
-            jsonParser.configure(JsonParser.Feature.ALLOW_YAML_COMMENTS, true);
-        }
-        if ("true".equals(ALLOW_UNQUOTED_FIELD_NAMES)) {
-            jsonParser.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        }
-        if ("true".equals(ALLOW_SINGLE_QUOTES)) {
-            jsonParser.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        }
-        if ("true".equals(ALLOW_UNQUOTED_CONTROL_CHARS)) {
-            jsonParser.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
-        }
-        if ("true".equals(ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)) {
-            jsonParser.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
-        }
-        if ("true".equals(ALLOW_NUMERIC_LEADING_ZEROS)) {
-            jsonParser.configure(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS, true);
-        }
-        if ("true".equals(ALLOW_NON_NUMERIC_NUMBERS)) {
-            jsonParser.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
-        }
-        if ("true".equals(STRICT_DUPLICATE_DETECTION)) {
-            jsonParser.configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true);
+        if (jsonParserFeatures != null) {
+            for (final Map.Entry<String, String> e : jsonParserFeatures.entrySet()) {
+                final String key = e.getKey();
+                final String value = e.getValue();
+                final JsonParser.Feature feature;
+                try {
+                    feature = JsonParser.Feature.valueOf(key);
+                } catch (final Exception e1) {
+                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                }
+                if ("true".equals(value)) {
+                    if (!feature.enabledByDefault()) {
+                        jsonParser.configure(feature, true);
+                    }
+                } else if ("false".equals(value)) {
+                    if (feature.enabledByDefault()) {
+                        jsonParser.configure(feature, false);
+                    }
+                } else {
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                }
+            }
         }
     }
 
@@ -143,6 +102,8 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 }
             }
         } while (true);
+        final ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+        //objectMapper.configure()
         return jsonParser.readValueAs(beanType);
     }
 
