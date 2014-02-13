@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -26,10 +27,16 @@ import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.InputDecorator;
 import com.fasterxml.jackson.core.io.OutputDecorator;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Test;
@@ -170,6 +177,30 @@ public final class JsonItemReaderTest {
         public Writer decorate(final IOContext ctxt, final Writer w) throws IOException {
             System.out.printf("In decorate method of %s%n", this);
             return w;
+        }
+    }
+
+    public static final class JsonSerializer<Exception> extends com.fasterxml.jackson.databind.JsonSerializer<Exception> {
+        @Override
+        public void serialize(final Exception value, final JsonGenerator jgen, final SerializerProvider provider) throws IOException, JsonProcessingException {
+            jgen.writeObject(value);
+        }
+    }
+
+    public static final class JsonDeserializer<Exception> extends com.fasterxml.jackson.databind.JsonDeserializer<Exception> {
+        @Override
+        public Exception deserialize(final JsonParser jp, final DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            return jp.readValueAs(new TypeReference<Exception>() {
+                @Override
+                public Type getType() {
+                    return super.getType();
+                }
+
+                @Override
+                public int compareTo(final TypeReference<Exception> o) {
+                    return super.compareTo(o);
+                }
+            });
         }
     }
 }

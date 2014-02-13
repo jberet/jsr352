@@ -24,8 +24,10 @@ import javax.inject.Named;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.io.OutputDecorator;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
 
 import static org.jberet.support.io.CsvProperties.OVERWRITE;
@@ -55,6 +57,10 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
     @Inject
     @BatchProperty
     protected Class outputDecorator;
+
+    @Inject
+    @BatchProperty
+    protected Class[] customSerializers;
 
     protected JsonGenerator jsonGenerator;
 
@@ -93,6 +99,8 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
                 }
             }
         }
+
+        registerModule();
 
         jsonGenerator = jsonFactory.createGenerator(getOutputWriter(writeMode, stepContext));
         if (objectMapper != null) {
@@ -161,6 +169,20 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
                 }
                 stringWriter = null;
             }
+        }
+    }
+
+    @Override
+    protected void registerModule() throws Exception {
+        if (customSerializers != null) {
+            if (objectMapper == null) {
+                objectMapper = new ObjectMapper(jsonFactory);
+            }
+            final SimpleModule simpleModule = new SimpleModule("customSerializer-module");
+            for (final Class aClass : customSerializers) {
+                simpleModule.addSerializer(aClass, (JsonSerializer) aClass.newInstance());
+            }
+            objectMapper.registerModule(simpleModule);
         }
     }
 }

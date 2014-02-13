@@ -31,6 +31,7 @@
                     <property name="end" value="#{jobParameters['end']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property  name="inputDecorator" value="org.jberet.support.io.JsonItemReaderTest$NoopInputDecorator"/>
+                    <property name="customDeserializers" value="org.jberet.support.io.JsonItemReaderTest$JsonDeserializer"/>
                 </properties>
             </reader>
             <writer ref="jsonItemWriter">
@@ -39,6 +40,7 @@
                     <property name="jsonGeneratorFeatures" value="#{jobParameters['jsonGeneratorFeatures']}"/>
                     <property name="serializationFeatures" value="WRITE_ENUMS_USING_INDEX=true"/>
                     <property name="outputDecorator" value="org.jberet.support.io.JsonItemReaderTest$NoopOutputDecorator"/>
+                    <property name="customSerializers" value="org.jberet.support.io.JsonItemReaderTest$JsonSerializer"/>
                     <!--<property name="prettyPrinter" value="com.fasterxml.jackson.core.util.MinimalPrettyPrinter"/>-->
                 </properties>
             </writer>

@@ -36,6 +36,12 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
     protected ObjectMapper objectMapper;
 
     /**
+     * Registers any {@code com.fasterxml.jackson.databind.module.SimpleModule} to the {@link #objectMapper}. Any number
+     * of custom serializers or deserializers can be added to the module.
+     */
+    protected abstract void registerModule() throws Exception;
+
+    /**
      * Initializes {@code jsonFactory} field, which may be instantiated or obtained from other part of the application.
      * This method also configures the {@code jsonFactory} properly.
      */

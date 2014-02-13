@@ -23,7 +23,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.io.InputDecorator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
 
 @Named
@@ -51,6 +53,10 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
     @Inject
     @BatchProperty
     protected Class inputDecorator;
+
+    @Inject
+    @BatchProperty
+    protected Class[] customDeserializers;
 
     private JsonParser jsonParser;
     private JsonToken token;
@@ -98,6 +104,8 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 }
             }
         }
+
+        registerModule();
 
         jsonParser = jsonFactory.createParser(getInputReader(false));
         if (objectMapper != null) {
@@ -159,6 +167,20 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         if (jsonParser != null) {
             jsonParser.close();
             jsonParser = null;
+        }
+    }
+
+    @Override
+    protected void registerModule() throws Exception {
+        if (customDeserializers != null) {
+            if (objectMapper == null) {
+                objectMapper = new ObjectMapper(jsonFactory);
+            }
+            final SimpleModule simpleModule = new SimpleModule("customDeserializer-module");
+            for (final Class aClass : customDeserializers) {
+                simpleModule.addDeserializer(aClass, (JsonDeserializer) aClass.newInstance());
+            }
+            objectMapper.registerModule(simpleModule);
         }
     }
 }
