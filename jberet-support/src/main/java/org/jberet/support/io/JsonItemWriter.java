@@ -23,6 +23,7 @@ import javax.inject.Named;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.io.OutputDecorator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.jberet.support._private.SupportLogger;
@@ -51,12 +52,20 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
     @BatchProperty
     protected Class prettyPrinter;
 
+    @Inject
+    @BatchProperty
+    protected Class outputDecorator;
+
     protected JsonGenerator jsonGenerator;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         SupportLogger.LOGGER.tracef("Open JsonItemWriter with checkpoint %s, which is ignored for JsonItemWriter.%n", checkpoint);
         super.initJsonFactory();
+
+        if (outputDecorator != null) {
+            jsonFactory.setOutputDecorator((OutputDecorator) outputDecorator.newInstance());
+        }
 
         if (serializationFeatures != null) {
             if (objectMapper == null) {

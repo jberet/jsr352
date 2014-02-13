@@ -21,6 +21,7 @@ import javax.inject.Named;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.io.InputDecorator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jberet.support._private.SupportLogger;
@@ -47,6 +48,10 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
     @BatchProperty
     protected Map<String, String> deserializationFeatures;
 
+    @Inject
+    @BatchProperty
+    protected Class inputDecorator;
+
     private JsonParser jsonParser;
     private JsonToken token;
     private int rowNumber;
@@ -63,6 +68,9 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
             throw SupportLogger.LOGGER.invalidStartPosition((Integer) checkpoint, start, end);
         }
         super.initJsonFactory();
+        if (inputDecorator != null) {
+            jsonFactory.setInputDecorator((InputDecorator) inputDecorator.newInstance());
+        }
 
         if (deserializationFeatures != null) {
             if (objectMapper == null) {

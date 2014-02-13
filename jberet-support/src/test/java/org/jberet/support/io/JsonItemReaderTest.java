@@ -12,7 +12,13 @@
 
 package org.jberet.support.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +26,9 @@ import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.io.InputDecorator;
+import com.fasterxml.jackson.core.io.OutputDecorator;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
@@ -128,5 +137,39 @@ public final class JsonItemReaderTest {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    public static final class NoopInputDecorator extends InputDecorator {
+        @Override
+        public InputStream decorate(final IOContext ctxt, final InputStream in) throws IOException {
+            System.out.printf("In decorate method of %s%n", this);
+            return in;
+        }
+
+        @Override
+        public InputStream decorate(final IOContext ctxt, final byte[] src, final int offset, final int length) throws IOException {
+            System.out.printf("In decorate method of %s%n", this);
+            return new ByteArrayInputStream(src, offset, length);
+        }
+
+        @Override
+        public Reader decorate(final IOContext ctxt, final Reader src) throws IOException {
+            System.out.printf("In decorate method of %s%n", this);
+            return src;
+        }
+    }
+
+    public static final class NoopOutputDecorator extends OutputDecorator {
+        @Override
+        public OutputStream decorate(final IOContext ctxt, final OutputStream out) throws IOException {
+            System.out.printf("In decorate method of %s%n", this);
+            return out;
+        }
+
+        @Override
+        public Writer decorate(final IOContext ctxt, final Writer w) throws IOException {
+            System.out.printf("In decorate method of %s%n", this);
+            return w;
+        }
     }
 }
