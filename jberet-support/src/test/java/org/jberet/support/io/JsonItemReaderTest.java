@@ -51,14 +51,39 @@ public final class JsonItemReaderTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String movieJson = "movies-2012.json";
     static final String widgetJson = "widget.json";
-    static final String widgetExpect = "\"widget\", \"debug\", \"window\", \"title\", " +
+    static final String githubJson = "https://api.github.com/users/chengfang/repos";
+
+    static final String widgetExpect1 = "\"widget\", \"debug\", \"window\", \"title\", " +
             "\"Sample Konfabulator Widget\", \"name\", \"main_window\", \"width\"," +
             "500, \"height\", \"image\", \"src\", \"Images/Sun.png\", \"sun1\", \"hOffset\", 250," +
             "\"vOffset\", \"alignment\", \"center\", \"text\", \"data\", \"Click Here\", \"size\"," +
             "36, \"style\", \"bold\", \"text1\", \"onMouseUp\", " +
             "\"sun1.opacity = (sun1.opacity / 100) * 90;\"";
+    static final String widgetExpect2 = "\"Two Widget\", \"two_window\", \"Images/Two.png\"";
+    static final String widgetExpect3 = "\"Three Widget\", \"three_window\", \"Images/Three.png\"";
+    static final String widgetForbidFrom1 = "Sample Konfabulator Widget, main_window, Images/Sun.png";
 
     private String jsonGeneratorFeatures;
+
+    @Test
+    public void testBeanTypeGithubJson1_999() throws Exception {
+        testReadWrite0(githubJson, "testBeanTypeGithubJson1_999.out", "1", "999", GithubData.class, null, null);
+    }
+
+    @Test
+    public void testBeanTypeGithubJson1() throws Exception {
+        testReadWrite0(githubJson, "testBeanTypeGithubJson1.out", "1", "1", GithubData.class, null, null);
+    }
+
+    @Test
+    public void testBeanTypeGithubJson2_3() throws Exception {
+        testReadWrite0(githubJson, "testBeanTypeGithubJson2_3.out", "2", "3", GithubData.class, null, null);
+    }
+
+    @Test
+    public void testNodeTypeGithubJson() throws Exception {
+        testReadWrite0(githubJson, "testNodeTypeGithubJson.out", null, null, JsonNode.class, null, null);
+    }
 
     @Test
     public void testBeanType2_4() throws Exception {
@@ -93,16 +118,24 @@ public final class JsonItemReaderTest {
     }
 
     @Test
-    public void testJsonNodeTypeWidget() throws Exception {
-        //write json output to file
-        testReadWrite0(widgetJson, widgetJson + ".out", null, null, JsonNode.class, null, null);
+    public void testJsonNodeTypeWidget1() throws Exception {
         //save json output to StepContext transient user data
-        testReadWrite0(widgetJson, RESOURCE_STEP_CONTEXT, null, null, JsonNode.class, widgetExpect, MovieTest.expectFull);
+        testReadWrite0(widgetJson, RESOURCE_STEP_CONTEXT, "1", "1", JsonNode.class, widgetExpect1, widgetExpect2);
     }
 
     @Test
-    public void testMapTypeWidget() throws Exception {
-        testReadWrite0(widgetJson, RESOURCE_STEP_CONTEXT, null, null, Map.class, widgetExpect, MovieTest.expectFull);
+    public void testJsonNodeTypeWidget1_3() throws Exception {
+        //write json output to file
+        testReadWrite0(widgetJson, widgetJson + ".out", null, null, JsonNode.class, null, null);
+        //save json output to StepContext transient user data
+        testReadWrite0(widgetJson, RESOURCE_STEP_CONTEXT, "1", "3", JsonNode.class,
+                widgetExpect1 + ", " + widgetExpect2 + ", " + widgetExpect3, null);
+    }
+
+    @Test
+    public void testMapTypeWidget2_3() throws Exception {
+        testReadWrite0(widgetJson, RESOURCE_STEP_CONTEXT, "2", "3", Map.class,
+                widgetExpect2 + ", " + widgetExpect3, widgetForbidFrom1);
     }
 
     private void testReadWrite0(final String resource, final String writeResource,

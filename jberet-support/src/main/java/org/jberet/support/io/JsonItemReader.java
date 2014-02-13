@@ -142,16 +142,23 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         if (rowNumber >= end) {
             return null;
         }
-
+        int nestedObjectLevel = 0;
         do {
             token = jsonParser.nextToken();
             if (token == null) {
                 return null;
             } else if (token == JsonToken.START_OBJECT) {
-                rowNumber++;
+                nestedObjectLevel++;
+                if (nestedObjectLevel == 1) {
+                    rowNumber++;
+                } else if (nestedObjectLevel < 1) {
+                    SupportLogger.LOGGER.unexpectedJsonContent(jsonParser.getCurrentLocation());
+                }
                 if (rowNumber >= start) {
                     break;
                 }
+            } else if (token == JsonToken.END_OBJECT) {
+                nestedObjectLevel--;
             }
         } while (true);
         return jsonParser.readValueAs(beanType);

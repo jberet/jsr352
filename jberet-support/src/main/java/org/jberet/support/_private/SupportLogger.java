@@ -15,6 +15,7 @@ package org.jberet.support._private;
 import java.io.File;
 import javax.batch.operations.BatchRuntimeException;
 
+import com.fasterxml.jackson.core.JsonLocation;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
@@ -78,6 +79,9 @@ public interface SupportLogger extends BasicLogger {
 
     @Message(id = 60015, value = "Unrecognized reader or writer property %s = %s")
     BatchRuntimeException unrecognizedReaderWriterProperty(String key, String value);
+
+    @Message(id = 60016, value = "Unexpected Json content near %s")
+    BatchRuntimeException unexpectedJsonContent(JsonLocation jsonLocation);
 
 
 }
