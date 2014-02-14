@@ -92,4 +92,16 @@ public class ChunkStopIT extends AbstractIT {
         Assert.assertEquals(20, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
         Assert.assertEquals(3, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
     }
+
+    @Test
+    public void skippableExceptions() throws Exception {
+        params.setProperty("data.count", "1");
+        params.setProperty("throwException", "true");
+        startJobAndWait(jobXml);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(1, stepExecutions.size());
+        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED.name(), stepExecution0.getExitStatus());
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.PROCESS_SKIP_COUNT));
+    }
 }

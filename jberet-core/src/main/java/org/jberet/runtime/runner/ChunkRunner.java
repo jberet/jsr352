@@ -149,13 +149,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         }
 
         attrVal = chunk.getSkipLimit();
-        if (attrVal != null) {
-            skipLimit = Integer.parseInt(attrVal);
-        }
+        skipLimit = attrVal == null ? -1 : Integer.parseInt(attrVal);
+
         attrVal = chunk.getRetryLimit();
-        if (attrVal != null) {
-            retryLimit = Integer.parseInt(attrVal);
-        }
+        retryLimit = attrVal == null ? -1 : Integer.parseInt(attrVal);
 
         skippableExceptionClasses = chunk.getSkippableExceptionClasses();
         retryableExceptionClasses = chunk.getRetryableExceptionClasses();

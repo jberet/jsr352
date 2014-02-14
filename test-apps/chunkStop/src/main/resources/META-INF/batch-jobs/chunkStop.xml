@@ -21,6 +21,11 @@
                     <property name="reader.fail.at" value="#{jobParameters['reader.fail.at']}" />
                 </properties>
             </reader>
+            <processor ref="chunkStopProcessor">
+                <properties>
+                    <property name="throwException" value="#{jobParameters['throwException']}"/>
+                </properties>
+            </processor>
             <writer ref="integerArrayWriter">
                 <properties>
                     <property name="data.count" value="#{jobParameters['data.count']}" />
@@ -28,6 +33,9 @@
                     <property name="writer.sleep.time" value="#{jobParameters['writer.sleep.time']}" />
                 </properties>
             </writer>
+            <skippable-exception-classes>
+                <include class="org.jberet.testapps.chunkstop.ChunkStopProcessor$ChunkStopProcessorException" />
+            </skippable-exception-classes>
         </chunk>
     </step>
 </job>
