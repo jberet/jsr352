@@ -77,6 +77,7 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
         } else {
             delegateReader = new FastForwardCsvBeanReader(getInputReader(true), getCsvPreference(), startRowNumber);
         }
+        SupportLogger.LOGGER.openingResource(resource, this.getClass());
 
         if (!headerless) {
             final String[] header;
@@ -95,6 +96,7 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
     @Override
     public void close() throws Exception {
         if (delegateReader != null) {
+            SupportLogger.LOGGER.closingResource(resource, this.getClass());
             delegateReader.close();
             delegateReader = null;
         }

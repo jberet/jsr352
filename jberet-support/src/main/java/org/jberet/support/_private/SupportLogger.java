@@ -83,5 +83,12 @@ public interface SupportLogger extends BasicLogger {
     @Message(id = 60016, value = "Unexpected Json content near %s")
     BatchRuntimeException unexpectedJsonContent(JsonLocation jsonLocation);
 
+    @Message(id = 60017, value = "Opening resource %s in %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void openingResource(String resource, Class<?> cls);
+
+    @Message(id = 60018, value = "Closing resource %s in %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void closingResource(String resource, Class<?> cls);
 
 }

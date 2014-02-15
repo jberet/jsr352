@@ -76,6 +76,8 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
         if (this.nameMapping == null) {
             this.nameMapping = header;
         }
+        SupportLogger.LOGGER.openingResource(resource, this.getClass());
+
         this.cellProcessorInstances = getCellProcessors();
         if (writeComments != null) {
             delegateWriter.writeComment(writeComments);
@@ -98,6 +100,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
                 }
                 stringWriter = null;
             }
+            SupportLogger.LOGGER.closingResource(resource, this.getClass());
             delegateWriter.close();
             delegateWriter = null;
         }

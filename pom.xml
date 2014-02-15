@@ -32,6 +32,8 @@
     <packaging>pom</packaging>
 
     <properties>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <!-- the inherited version does not support forkCount or reuseForks, so override with newer version -->
         <version.surefire.plugin>2.16</version.surefire.plugin>
         <version.dependency.plugin>2.8</version.dependency.plugin>
@@ -78,11 +80,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <org.jberet.job.execution.timeout.seconds>300</org.jberet.job.execution.timeout.seconds>
-                    </systemPropertyVariables>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>

@@ -159,8 +159,6 @@ public class CsvItemReaderWriterTest {
             }
         }
 
-        System.out.printf("CSV resource to read: %n%s, %nto write: %n%s%n", resource, writeResourceFullPath);
-
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
@@ -190,7 +188,6 @@ public class CsvItemReaderWriterTest {
         params.setProperty("writeResource", writeResourceFullPath);
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
         params.setProperty(CsvProperties.HEADER_KEY, nameMapping);
-        System.out.printf("CSV resource to read: %n%s, %nto write: %n%s%n", personResource, writeResourceFullPath);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);

@@ -127,7 +127,6 @@ public final class HallOfFameTest {
 
         params.setProperty(CsvProperties.HEADER_KEY, nameMapping);
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
-        System.out.printf("CSV resource to read: %n%s, %nto write: %n%s%n", resource, writeResourceFullPath);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);

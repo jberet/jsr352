@@ -111,6 +111,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         if (objectMapper != null) {
             jsonParser.setCodec(objectMapper);
         }
+        SupportLogger.LOGGER.openingResource(resource, this.getClass());
 
         if (jsonParserFeatures != null) {
             for (final Map.Entry<String, String> e : jsonParserFeatures.entrySet()) {
@@ -172,6 +173,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
     @Override
     public void close() throws Exception {
         if (jsonParser != null) {
+            SupportLogger.LOGGER.closingResource(resource, this.getClass());
             jsonParser.close();
             jsonParser = null;
         }

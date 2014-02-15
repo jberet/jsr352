@@ -106,6 +106,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
         if (objectMapper != null) {
             jsonGenerator.setCodec(objectMapper);
         }
+        SupportLogger.LOGGER.openingResource(resource, this.getClass());
 
         if (jsonGeneratorFeatures != null) {
             for (final Map.Entry<String, String> e : jsonGeneratorFeatures.entrySet()) {
@@ -157,6 +158,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
     @Override
     public void close() throws Exception {
         if (jsonGenerator != null) {
+            SupportLogger.LOGGER.closingResource(resource, this.getClass());
             jsonGenerator.close();
             jsonGenerator = null;
             if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {

@@ -149,7 +149,6 @@ public final class JsonItemReaderTest {
         } else {
             final String path = (new File(CsvItemReaderWriterTest.tmpdir, writeResource)).getPath();
             params.setProperty("writeResource", path);
-            System.out.printf("Json resource to read: %n%s, %nto write: %n%s%n", resource, path);
         }
 
         if (expect != null) {

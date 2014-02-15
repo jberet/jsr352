@@ -168,8 +168,6 @@ public class ParseBoolTest {
             params.setProperty("forbid", forbid);
         }
 
-        System.out.printf("CSV resource to read: %n%s, to write: %n%s%n", resource, writeResource);
-
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
