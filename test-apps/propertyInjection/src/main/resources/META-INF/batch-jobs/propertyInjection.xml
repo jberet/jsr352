@@ -14,9 +14,9 @@
 
 <job id="propertyInjection" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="step1">
-        <batchlet ref="batchlet1">
+        <batchlet ref="propertyInjectionBatchlet">
             <properties>
-                <property name="class" value="org.jberet.testapps.propertyinjection.Batchlet1"/>
+                <property name="class" value="org.jberet.testapps.propertyinjection.PropertyInjectionBatchlet"/>
                 <property name="stringArrayClass" value="[Ljava.lang.String;"/>
                 <property name="color" value="RED"/>
                 <property name="file" value="/tmp"/>
