@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job id="batchproperty" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="batchproperty.step1">
+        <batchlet ref="batchPropertyBatchlet">
+            <properties>
+                <property name="class" value="org.samples.wildfly.jberet.batchproperty.BatchPropertyBatchlet"/>
+                <property name="file" value="/tmp"/>
+                <property name="jar.files"
+                          value="#{systemProperties['java.home']}/lib/jce.jar, #{systemProperties['java.home']}/lib/management-agent.jar"/>
+                <property name="int" value="9"/>
+                <property name="booleans" value="true, true"/>
+                <property name="big.integer" value="999"/>
+                <property name="big.decimal" value="999.99"/>
+                <property name="inet4.address" value="127.0.0.1"/>
+                <property name="inet6.address" value="0:0:0:0:0:0:0:1"/>
+                <property name="url" value="http://jboss.org"/>
+                <property name="uri" value="http://jboss.org"/>
+
+                <property name="list" value=" 1, 2, 3"/>
+                <property name="list.date" value="12/31/2012, 01/01/2013"/>
+
+                <property name="map" value="b=2, a = 1"/>
+                <property name="set" value="2.0, 1.0, 2.0, 1.0, 1.0"/>
+                <property name="logger" value="org.jberet"/>
+                <property name="pattern" value="a*b"/>
+                <property name="object.name" value="d:type=Foo,name=Bar"/>
+                <property name="string" value="    a b c    "/>
+            </properties>
+        </batchlet>
+    </step>
+</job>
