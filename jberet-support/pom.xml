@@ -23,16 +23,19 @@
                 <groupId>net.sf.supercsv</groupId>
                 <artifactId>super-csv</artifactId>
                 <version>${version.net.sf.supercsv}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>${version.com.fasterxml.jackson}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${version.com.fasterxml.jackson}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>org.jberet</groupId>
