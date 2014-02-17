@@ -19,12 +19,15 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- CSV Dependencies -->
             <dependency>
                 <groupId>net.sf.supercsv</groupId>
                 <artifactId>super-csv</artifactId>
                 <version>${version.net.sf.supercsv}</version>
                 <optional>true</optional>
             </dependency>
+
+            <!-- Jackson Dependencies -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
@@ -37,6 +40,30 @@
                 <version>${version.com.fasterxml.jackson}</version>
                 <optional>true</optional>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <optional>true</optional>
+            </dependency>
+
+            <!-- Jackson XML Dependencies -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <optional>true</optional>
+            </dependency>
+
+            <!--  Include this dependency if JAXB annotation introspector is needed -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <optional>true</optional>
+            </dependency>
+
+            <!-- Test Dependencies -->
             <dependency>
                 <groupId>org.jberet</groupId>
                 <artifactId>jberet-core</artifactId>
@@ -77,6 +104,20 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jaxb-annotations</artifactId>
+        </dependency>
+
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-core</artifactId>
