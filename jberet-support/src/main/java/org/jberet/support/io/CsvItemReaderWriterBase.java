@@ -44,6 +44,10 @@ import static org.jberet.support.io.CsvProperties.STARTS_WITH_FUZZY;
 import static org.jberet.support.io.CsvProperties.STARTS_WITH_FUZZY2;
 import static org.jberet.support.io.CsvProperties.TAB_PREFERENCE;
 
+/**
+ * The base class for {@link org.jberet.support.io.CsvItemReader} and {@link org.jberet.support.io.CsvItemWriter}.
+ * This class also holds common CSV-related batch artifact properties.
+ */
 public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
     static final Class[] stringParameterTypes = {String.class};
     static final CellProcessor[] noCellProcessors = new CellProcessor[0];

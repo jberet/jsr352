@@ -22,6 +22,10 @@ import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jberet.support._private.SupportLogger;
 
+/**
+ * Base class for {@link org.jberet.support.io.JsonItemReader} and {@link org.jberet.support.io.JsonItemWriter}.
+ * It also holds Json-related common batch properties for customizing Json processing.
+ */
 public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
 
     @Inject

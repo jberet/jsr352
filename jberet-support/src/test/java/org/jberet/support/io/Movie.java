@@ -13,10 +13,14 @@
 package org.jberet.support.io;
 
 import java.util.Date;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * A bean that represents the movie data from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv
+ * A bean that represents the movie data from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv,
+ * or http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=xml
  */
+
+@XmlRootElement(name = "t")
 public final class Movie {
     public enum Rating {G, PG, PG13, R}
 

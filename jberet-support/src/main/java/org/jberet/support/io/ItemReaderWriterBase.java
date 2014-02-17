@@ -36,6 +36,10 @@ import static org.jberet.support.io.CsvProperties.RESOURCE_KEY;
 import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
 import static org.jberet.support.io.CsvProperties.WRITE_MODE_KEY;
 
+/**
+ * The base class for all implementations of {@code javax.batch.api.chunk.ItemReader} and
+ * {@code javax.batch.api.chunk.ItemWriter}. It also holds batch artifact properties common to all subclasses.
+ */
 public abstract class ItemReaderWriterBase {
     @Inject
     @BatchProperty

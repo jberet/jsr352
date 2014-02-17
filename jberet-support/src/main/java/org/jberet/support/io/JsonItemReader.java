@@ -28,6 +28,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
 
+/**
+ * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads from Json resource that consists of a
+ * collection of same-typed data items. Its {@link #readItem()} method reads one item at a time, and binds it to a
+ * user-provided bean type that represents individual data item in the source Json resource. The data item may also
+ * be bound to {@code java.util.Map} or {@code com.fasterxml.jackson.databind.JsonNode} for applications that do not
+ * need application bean type.
+ */
 @Named
 public class JsonItemReader extends JsonItemReaderWriterBase implements ItemReader {
     @Inject

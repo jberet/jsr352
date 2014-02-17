@@ -33,6 +33,10 @@ import org.jberet.support._private.SupportLogger;
 import static org.jberet.support.io.CsvProperties.OVERWRITE;
 import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
 
+/**
+ * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes a list of same-typed objects to Json resource.
+ * Each object is written as part of the root Json array.
+ */
 @Named
 public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWriter {
     @Inject
