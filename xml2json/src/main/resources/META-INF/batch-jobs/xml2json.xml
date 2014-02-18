@@ -3,16 +3,15 @@
 <job id="csv2json" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="csv2json.step1">
         <chunk>
-            <reader ref="csvItemReader">
+            <reader ref="xmlItemReader">
                 <properties>
-                    <property name="resource" value="http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&amp;format=csv"/>
+                    <property name="resource" value="http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&amp;format=xml"/>
                     <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>
-                    <property name="cellProcessors" value= "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate(YYYY-MM-dd)"/>
                 </properties>
             </reader>
             <writer ref="jsonItemWriter">
                 <properties>
-                    <property name="resource" value="#{systemProperties['java.io.tmpdir']}/movies.csv.json"/>
+                    <property name="resource" value="#{systemProperties['java.io.tmpdir']}/movies.xml.json"/>
                     <property name="writeMode" value="overwrite"/>
                 </properties>
             </writer>

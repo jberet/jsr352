@@ -8,6 +8,7 @@
         <module>jberet-samples-common</module>
         <module>batchproperty</module>
         <module>csv2json</module>
+        <module>xml2json</module>
     </modules>
     <parent>
         <artifactId>wildfly</artifactId>
