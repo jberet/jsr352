@@ -5,8 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>batchproperty</module>
         <module>jberet-samples-common</module>
+        <module>batchproperty</module>
+        <module>csv2json</module>
     </modules>
     <parent>
         <artifactId>wildfly</artifactId>
@@ -22,6 +23,7 @@
 
         <version.com.fasterxml.aalto-xml>0.9.9</version.com.fasterxml.aalto-xml>
         <version.com.fasterxml.jackson>2.3.1</version.com.fasterxml.jackson>
+        <version.javax.enterprise>1.1</version.javax.enterprise>
         <version.javax.inject>1</version.javax.inject>
         <version.javax.servlet-api>3.1.0</version.javax.servlet-api>
         <version.junit>4.11</version.junit>
@@ -53,6 +55,18 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>javax.inject</groupId>
+                <artifactId>javax.inject</artifactId>
+                <scope>provided</scope>
+                <version>${version.javax.inject}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.enterprise</groupId>
+                <artifactId>cdi-api</artifactId>
+                <scope>provided</scope>
+                <version>${version.javax.enterprise}</version>
+            </dependency>
+            <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <scope>provided</scope>
@@ -75,6 +89,20 @@
                 <artifactId>jberet-support</artifactId>
                 <optional>true</optional>
                 <version>${version.org.jberet.jberet-support}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.h2database</groupId>
+                        <artifactId>h2</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml</groupId>
