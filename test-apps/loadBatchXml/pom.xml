@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.jberet.test-apps</groupId>
         <artifactId>test-apps</artifactId>
-        <version>1.0.1.Beta-SNAPSHOT</version>
+        <version>1.0.1.Beta</version>
     </parent>
 
     <artifactId>loadBatchXml</artifactId>
