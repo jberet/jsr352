@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
 import javax.batch.runtime.context.StepContext;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -38,6 +39,7 @@ import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
  * Each object is written as part of the root Json array.
  */
 @Named
+@Dependent
 public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWriter {
     @Inject
     protected StepContext stepContext;

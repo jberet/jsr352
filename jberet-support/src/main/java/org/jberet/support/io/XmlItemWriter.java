@@ -17,6 +17,7 @@ import java.util.List;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
 import javax.batch.runtime.context.StepContext;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.stream.XMLStreamWriter;
@@ -38,6 +39,7 @@ import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
  * {@link #rootElementPrefix}.
  */
 @Named
+@Dependent
 public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter {
     protected static final String NEW_LINE = System.getProperty("line.separator");
 

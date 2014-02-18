@@ -15,6 +15,7 @@ package org.jberet.support.io;
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -30,6 +31,7 @@ import org.jberet.support._private.SupportLogger;
  * {@link #readItem()} method reads one item at a time and binds it to the provided bean type.
  */
 @Named
+@Dependent
 public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader {
     @Inject
     @BatchProperty

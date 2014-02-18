@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -36,6 +37,7 @@ import org.jberet.support._private.SupportLogger;
  * need application bean type.
  */
 @Named
+@Dependent
 public class JsonItemReader extends JsonItemReaderWriterBase implements ItemReader {
     @Inject
     @BatchProperty

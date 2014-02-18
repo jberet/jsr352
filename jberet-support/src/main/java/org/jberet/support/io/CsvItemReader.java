@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -35,6 +36,7 @@ import static org.jberet.support.io.CsvProperties.BEAN_TYPE_KEY;
  * This class is not designed to be thread-safe and its instance should not be shared between threads.
  */
 @Named
+@Dependent
 public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader {
     @Inject
     @BatchProperty

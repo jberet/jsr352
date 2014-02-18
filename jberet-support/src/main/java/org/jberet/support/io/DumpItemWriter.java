@@ -15,6 +15,7 @@ package org.jberet.support.io;
 import java.io.Serializable;
 import java.util.List;
 import javax.batch.api.chunk.ItemWriter;
+import javax.enterprise.context.Dependent;
 import javax.inject.Named;
 
 /**
@@ -22,6 +23,7 @@ import javax.inject.Named;
  * {@code toString()} method.
  */
 @Named
+@Dependent
 public final class DumpItemWriter implements ItemWriter {
     @Override
     public void open(final Serializable checkpoint) throws Exception {

@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
 import javax.batch.runtime.context.StepContext;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -40,6 +41,7 @@ import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
  * This class is not designed to be thread-safe and its instance should not be shared between threads.
  */
 @Named
+@Dependent
 public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter {
     @Inject
     protected StepContext stepContext;
