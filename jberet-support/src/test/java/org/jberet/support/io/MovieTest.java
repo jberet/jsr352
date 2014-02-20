@@ -58,6 +58,7 @@ public final class MovieTest {
     public void testBeanTypeNoDate2_4() throws Exception {
         this.partialNameMapping = "rank,tit,grs,null";
         testReadWrite0("testBeanTypeNoDate2_4.out", "2", "4", Movie.class, expect2_4, forbid2_4 + ", 2012");
+        this.partialNameMapping = null;
     }
 
     @Test

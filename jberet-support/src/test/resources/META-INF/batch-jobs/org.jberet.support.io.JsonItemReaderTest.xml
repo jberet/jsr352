@@ -23,6 +23,8 @@
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property  name="inputDecorator" value="org.jberet.support.io.JsonItemReaderTest$NoopInputDecorator"/>
                     <property name="customDeserializers" value="org.jberet.support.io.JsonItemReaderTest$JsonDeserializer"/>
+                    <property name="deserializationProblemHandlers"
+                              value="#{jobParameters['deserializationProblemHandlers']}"/>
                 </properties>
             </reader>
             <writer ref="jsonItemWriter">

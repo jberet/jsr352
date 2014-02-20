@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.io.InputDecorator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
 
@@ -58,6 +59,10 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
     @Inject
     @BatchProperty
     protected Map<String, String> deserializationFeatures;
+
+    @Inject
+    @BatchProperty
+    protected Class[] deserializationProblemHandlers;
 
     @Inject
     @BatchProperty
@@ -117,6 +122,14 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         registerModule();
 
         jsonParser = jsonFactory.createParser(getInputStream(false));
+        if (deserializationProblemHandlers != null) {
+            if (objectMapper == null) {
+                objectMapper = new ObjectMapper(jsonFactory);
+            }
+            for (final Class c : deserializationProblemHandlers) {
+                objectMapper.addHandler((DeserializationProblemHandler) c.newInstance());
+            }
+        }
         if (objectMapper != null) {
             jsonParser.setCodec(objectMapper);
         }
@@ -183,6 +196,9 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
     public void close() throws Exception {
         if (jsonParser != null) {
             SupportLogger.LOGGER.closingResource(resource, this.getClass());
+            if (deserializationProblemHandlers != null) {
+                objectMapper.clearProblemHandlers();
+            }
             jsonParser.close();
             jsonParser = null;
         }

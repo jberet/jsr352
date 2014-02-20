@@ -35,8 +35,10 @@ import com.fasterxml.jackson.core.io.InputDecorator;
 import com.fasterxml.jackson.core.io.OutputDecorator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,6 +50,7 @@ public final class JsonItemReaderTest {
     static final String jobName = "org.jberet.support.io.JsonItemReaderTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String movieJson = "movies-2012.json";
+    static final String movieJsonUnknownProperty = "movies-2012-unknown-properties.json";
     static final String widgetJson = "widget.json";
     static final String githubJson = "https://api.github.com/users/chengfang/repos";
 
@@ -62,25 +65,26 @@ public final class JsonItemReaderTest {
     static final String widgetForbidFrom1 = "Sample Konfabulator Widget, main_window, Images/Sun.png";
 
     private String jsonGeneratorFeatures;
+    private String deserializationProblemHandlers;
 
     @Test
     public void testBeanTypeGithubJson1_999() throws Exception {
-        testReadWrite0(githubJson, "testBeanTypeGithubJson1_999.out", "1", "999", GithubData.class, null, null);
+        testReadWrite0(githubJson, "testBeanTypeGithubJson1_999.out", "1", "999", GithubData.class, null, null, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testBeanTypeGithubJson1() throws Exception {
-        testReadWrite0(githubJson, "testBeanTypeGithubJson1.out", "1", "1", GithubData.class, null, null);
+        testReadWrite0(githubJson, "testBeanTypeGithubJson1.out", "1", "1", GithubData.class, null, null, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testBeanTypeGithubJson2_3() throws Exception {
-        testReadWrite0(githubJson, "testBeanTypeGithubJson2_3.out", "2", "3", GithubData.class, null, null);
+        testReadWrite0(githubJson, "testBeanTypeGithubJson2_3.out", "2", "3", GithubData.class, null, null, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testNodeTypeGithubJson() throws Exception {
-        testReadWrite0(githubJson, "testNodeTypeGithubJson.out", null, null, JsonNode.class, null, null);
+        testReadWrite0(githubJson, "testNodeTypeGithubJson.out", null, null, JsonNode.class, null, null, BatchStatus.COMPLETED);
     }
 
     @Test
@@ -90,52 +94,80 @@ public final class JsonItemReaderTest {
         //rating enum is written out as index, as configured in job xml serializationFeatures property
         //final String forbid = MovieTest.forbid2_4 + ", \"rank\", \"tit\", \"grs\", \"opn\", PG13";
         final String forbid = MovieTest.forbid2_4 + ", PG13";
-        testReadWrite0(movieJson, "testBeanType2_4.out", "2", "4", Movie.class, MovieTest.expect2_4, forbid);
+        testReadWrite0(movieJson, "testBeanType2_4.out", "2", "4", Movie.class, MovieTest.expect2_4, forbid, BatchStatus.COMPLETED);
+        jsonGeneratorFeatures = null;
     }
 
     @Test
     public void testJsonNodeType2_4() throws Exception {
-        testReadWrite0(movieJson, "testJsonNodeType2_4.out", "2", "4", JsonNode.class, MovieTest.expect2_4, MovieTest.forbid2_4);
+        testReadWrite0(movieJson, "testJsonNodeType2_4.out", "2", "4", JsonNode.class, MovieTest.expect2_4, MovieTest.forbid2_4, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testBeanTypeFull() throws Exception {
-        testReadWrite0(movieJson, "testBeanTypeFull.out", null, null, Movie.class, MovieTest.expectFull, null);
+        testReadWrite0(movieJson, "testBeanTypeFull.out", null, null, Movie.class, MovieTest.expectFull, null, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testMapTypeFull1_100() throws Exception {
-        testReadWrite0(movieJson, "testMapTypeFull1_100.out", "1", "100", Map.class, MovieTest.expectFull, null);
+        testReadWrite0(movieJson, "testMapTypeFull1_100.out", "1", "100", Map.class, MovieTest.expectFull, null, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testJsonMapType1_2() throws Exception {
-        testReadWrite0(movieJson, "testJsonMapType1_2.out", "1", "2", Map.class, MovieTest.expect1_2, MovieTest.forbid1_2);
+        testReadWrite0(movieJson, "testJsonMapType1_2.out", "1", "2", Map.class, MovieTest.expect1_2, MovieTest.forbid1_2, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testJsonNodeTypeWidget1() throws Exception {
-        testReadWrite0(widgetJson, "testJsonNodeTypeWidget1.out", "1", "1", JsonNode.class, widgetExpect1, widgetExpect2);
+        testReadWrite0(widgetJson, "testJsonNodeTypeWidget1.out", "1", "1", JsonNode.class, widgetExpect1, widgetExpect2, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testJsonNodeTypeWidget1_3() throws Exception {
         testReadWrite0(widgetJson, "testJsonNodeTypeWidget1_3.out", "1", "3", JsonNode.class,
-                widgetExpect1 + ", " + widgetExpect2 + ", " + widgetExpect3, null);
+                widgetExpect1 + ", " + widgetExpect2 + ", " + widgetExpect3, null, BatchStatus.COMPLETED);
 
         testReadWrite0(widgetJson, "testJsonNodeTypeWidget1_3.out", null, null, JsonNode.class,
-                widgetExpect1 + ", " + widgetExpect2 + ", " + widgetExpect3, null);
+                widgetExpect1 + ", " + widgetExpect2 + ", " + widgetExpect3, null, BatchStatus.COMPLETED);
     }
 
     @Test
     public void testMapTypeWidget2_3() throws Exception {
         testReadWrite0(widgetJson, "testMapTypeWidget2_3.out", "2", "3", Map.class,
-                widgetExpect2 + ", " + widgetExpect3, widgetForbidFrom1);
+                widgetExpect2 + ", " + widgetExpect3, widgetForbidFrom1, BatchStatus.COMPLETED);
+    }
+
+    //2 unknown properties in json file will cause the read to fail
+    @Test
+    public void testUnknownJsonPropertyFail1_2() throws Exception {
+        testReadWrite0(movieJsonUnknownProperty, "testUnknownJsonPropertyFail1_2.out","1", "2", Movie.class,
+                MovieTest.expect1_2, MovieTest.forbid1_2, BatchStatus.FAILED);
+    }
+
+    //configured 1 problem handler for unknow property 1, not for unknown property 2, so will still fail
+    @Test
+    public void testUnknownJsonPropertyFail2_4() throws Exception {
+        this.deserializationProblemHandlers = "org.jberet.support.io.JsonItemReaderTest$UnknownHandler";
+        testReadWrite0(movieJsonUnknownProperty, "testUnknownJsonPropertyFail2_4.out", "2", "4", Movie.class,
+                MovieTest.expect2_4, MovieTest.forbid2_4, BatchStatus.FAILED);
+        this.deserializationProblemHandlers = null;
+    }
+
+    //configured 2 problem handlers for both unknown properties, so the unknow properties are properly handled and the
+    //job should complete.
+    @Test
+    public void testUnknownJsonProperty2_4() throws Exception {
+        this.deserializationProblemHandlers =
+                "org.jberet.support.io.JsonItemReaderTest$UnknownHandler, org.jberet.support.io.JsonItemReaderTest$Unknown2Handler";
+        testReadWrite0(movieJsonUnknownProperty, "testUnknownJsonProperty2_4.out", "2", "4", Movie.class,
+                MovieTest.expect2_4, MovieTest.forbid2_4, BatchStatus.COMPLETED);
+        this.deserializationProblemHandlers=null;
     }
 
     private void testReadWrite0(final String resource, final String writeResource,
                                 final String start, final String end, final Class<?> beanType,
-                                final String expect, final String forbid) throws Exception {
+                                final String expect, final String forbid, final BatchStatus jobStatus) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
 
@@ -151,6 +183,9 @@ public final class JsonItemReaderTest {
         if (jsonGeneratorFeatures != null) {
             params.setProperty("jsonGeneratorFeatures", jsonGeneratorFeatures);
         }
+        if (deserializationProblemHandlers != null) {
+            params.setProperty("deserializationProblemHandlers", deserializationProblemHandlers);
+        }
 
         params.setProperty(CsvProperties.HEADER_KEY, MovieTest.header);
         CsvItemReaderWriterTest.setRandomWriteMode(params);
@@ -158,9 +193,11 @@ public final class JsonItemReaderTest {
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(jobStatus, jobExecution.getBatchStatus());
 
-        CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
+        if (jobStatus == BatchStatus.COMPLETED) {
+            CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
+        }
     }
 
     public static final class NoopInputDecorator extends InputDecorator {
@@ -218,6 +255,36 @@ public final class JsonItemReaderTest {
                     return super.compareTo(o);
                 }
             });
+        }
+    }
+
+    public static final class UnknownHandler extends DeserializationProblemHandler {
+        @Override
+        public boolean handleUnknownProperty(final DeserializationContext ctxt,
+                                             final JsonParser jp,
+                                             final com.fasterxml.jackson.databind.JsonDeserializer<?> deserializer,
+                                             final Object beanOrClass,
+                                             final String propertyName) throws IOException, JsonProcessingException {
+            if (propertyName.equals("unknown")) {
+                jp.skipChildren();
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public static final class Unknown2Handler extends DeserializationProblemHandler {
+        @Override
+        public boolean handleUnknownProperty(final DeserializationContext ctxt,
+                                             final JsonParser jp,
+                                             final com.fasterxml.jackson.databind.JsonDeserializer<?> deserializer,
+                                             final Object beanOrClass,
+                                             final String propertyName) throws IOException, JsonProcessingException {
+            if (propertyName.equals("unknown2")) {
+                jp.skipChildren();
+                return true;
+            }
+            return false;
         }
     }
 }
