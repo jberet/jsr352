@@ -32,7 +32,7 @@
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="header" value="#{jobParameters['header']}"/>
                     <property name="writeComments" value="#{jobParameters['writeComments']}"/>
-                    <property name="writeMode" value="#{jobParameters['writeMode']}?:overwrite;"/>
+                    <property name="writeMode" value="#{jobParameters['writeMode']}"/>
                 </properties>
             </writer>
         </chunk>

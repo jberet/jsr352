@@ -109,8 +109,8 @@ public final class JsonItemReaderTest {
     }
 
     @Test
-    public void testMapType1_2() throws Exception {
-        testReadWrite0(movieJson, "testMapType1_2.out", "1", "2", Map.class, MovieTest.expect1_2, MovieTest.forbid1_2);
+    public void testJsonMapType1_2() throws Exception {
+        testReadWrite0(movieJson, "testJsonMapType1_2.out", "1", "2", Map.class, MovieTest.expect1_2, MovieTest.forbid1_2);
     }
 
     @Test
