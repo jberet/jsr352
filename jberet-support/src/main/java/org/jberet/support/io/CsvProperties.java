@@ -63,17 +63,9 @@ public final class CsvProperties {
 
     /**
      * The property key to specify the location of the CSV file.  For reader, the value can be file path, URL,
-     * or any resource that can be loaded with application class loader. For writer, the value can be a file location,
-     * or {@code StepContext}, which indicates that data will be saved as transient user data in the current
-     * {@code StepContext}. Saving CSV data to {@code StepContext} should be used with caution, and is mostly used
-     * for testing small amount of data.  Any existing {@code StepContext} transient user data will be overwritten.
+     * or any resource that can be loaded with application class loader. For writer, the value can be a file path.
      */
     public static final String RESOURCE_KEY = "resource";
-
-    /**
-     * The property value to specify writing CSV data to {@code StepContext} as transient user data.
-     */
-    public static final String RESOURCE_STEP_CONTEXT = "StepContext";
 
     /**
      * The property key to instruct {@code org.jberet.support.io.CsvItemWriter}, when the target CSV resource already

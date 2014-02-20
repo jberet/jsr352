@@ -109,14 +109,14 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                         objectMapper.configure(feature, false);
                     }
                 } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
                 }
             }
         }
 
         registerModule();
 
-        jsonParser = jsonFactory.createParser(getInputReader(false));
+        jsonParser = jsonFactory.createParser(getInputStream(false));
         if (objectMapper != null) {
             jsonParser.setCodec(objectMapper);
         }
@@ -141,7 +141,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                         jsonParser.configure(feature, false);
                     }
                 } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
                 }
             }
         }

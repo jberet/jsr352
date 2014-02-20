@@ -29,7 +29,6 @@ import org.junit.Test;
 public class ParseBoolTest {
     static final String jobName = "org.jberet.support.io.ParseBoolTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
-    static final int waitTimeoutMinutes = 0;
     public final String commentMatcher = "matches '\\(,.*,\\)'";
 
     @Test
@@ -49,8 +48,9 @@ public class ParseBoolTest {
                         "Optional, ParseBool;" +
                         "Optional, ParseBool;" +
                         "ConvertNullTo('This row contains booleans parsed from strings, (e.g., \'true\', 1, y, t).')";
-        testParseBool0("testParseBoolDefault", data, readerCellProcessors, null, header,
-                CsvItemReaderWriterTest.writeComments, false, CsvProperties.APPEND, null, null, BatchStatus.COMPLETED);
+        testParseBool0("testParseBoolDefault", data, readerCellProcessors, null,
+                header, CsvItemReaderWriterTest.writeComments, null,
+                null, null, BatchStatus.COMPLETED);
     }
 
     @Test
@@ -69,8 +69,10 @@ public class ParseBoolTest {
                         "Optional, Trim, ParseBool('t', 'f'); " +
                         "Optional, Trim, ParseBool('yes', 'no');" +
                         "Optional, Trim, ParseBool('on', 'off')";
-        testParseBool0("testParseBoolSingleCustomValue", data, readerCellProcessors, null, header,
-                CsvItemReaderWriterTest.writeComments, false, CsvProperties.OVERWRITE, null, null, BatchStatus.COMPLETED);
+        testParseBool0("testParseBoolSingleCustomValue", data,
+                readerCellProcessors, null,
+                header, CsvItemReaderWriterTest.writeComments, null,
+                null, null, BatchStatus.COMPLETED);
     }
 
     @Test
@@ -89,12 +91,14 @@ public class ParseBoolTest {
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off'); " +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off');" +
                         "Trim, ParseBool('true, 1, y, t, yes, on', 'false, 0, n, f, no, off')";
-        testParseBool0("testParseBoolMultipleCustomValues", data, readerCellProcessors, null, header,
-                CsvItemReaderWriterTest.writeComments, false, CsvProperties.OVERWRITE, null, null, BatchStatus.COMPLETED);
+        testParseBool0("testParseBoolMultipleCustomValues", data,
+                readerCellProcessors, null,
+                header, CsvItemReaderWriterTest.writeComments, null,
+                null, null, BatchStatus.COMPLETED);
     }
 
     @Test
-    public void testFmtBoolAndWriteToStepContext() throws Exception {
+    public void testFmtBool() throws Exception {
         final String header = "boolTrueFalse,bool10,boolyn,booltf";
         final String data = header + BatchUtil.NL +
                 "true,      1,     y,     t" + BatchUtil.NL +
@@ -117,8 +121,10 @@ public class ParseBoolTest {
         //forbid true, false, since FmtBool formats true to 1 and false to 0
         final String forbid = "true, false";
 
-        testParseBool0("testFmtBoolAndWriteToStepContext", data, readerCellProcessors, writerCellProcessors, header,
-                CsvItemReaderWriterTest.writeComments, true, CsvProperties.FAIL_IF_EXISTS, expect, forbid, BatchStatus.COMPLETED);
+        testParseBool0("testFmtBool", data,
+                readerCellProcessors, writerCellProcessors,
+                header, CsvItemReaderWriterTest.writeComments, CsvProperties.FAIL_IF_EXISTS,
+                expect, forbid, BatchStatus.COMPLETED);
     }
 
     @Test
@@ -128,50 +134,49 @@ public class ParseBoolTest {
         final String invalidWriteMode = "invalidWriteMode";
 
         //write to file, invalid writeMode, will fail
-        testParseBool0("testInvalidWriteMode", data, null, null, header,
-                CsvItemReaderWriterTest.writeComments, false, invalidWriteMode, null, null, BatchStatus.FAILED);
-
-        //write to StepContext, invalid writeMode, will fail
-        testParseBool0("testInvalidWriteMode", data, null, null, header,
-                CsvItemReaderWriterTest.writeComments, true, invalidWriteMode, null, null, BatchStatus.FAILED);
+        testParseBool0("testInvalidWriteMode", data, null, null,
+                header, CsvItemReaderWriterTest.writeComments, invalidWriteMode,
+                null, null, BatchStatus.FAILED);
     }
 
     private void testParseBool0(final String fileName, final String data,
                                 final String readerCellProcessors, final String writerCellProcessors,
-                                final String header, final String writeComments,
-                                final boolean writeToStepContext, final String writeMode,
+                                final String header, final String writeComments, final String writeMode,
                                 final String expect, final String forbid,
                                 final BatchStatus jobStatus) throws Exception {
         final String resource = saveFileToTmpdir(fileName, data).getPath();
-        final String writeResource = writeToStepContext ? CsvProperties.RESOURCE_STEP_CONTEXT : resource + ".out";
+        final File writeResourceFile = new File(CsvItemReaderWriterTest.tmpdir, fileName + ".out");
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, BooleansBean.class.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
-        params.setProperty("writeResource", writeResource);
+        params.setProperty("writeResource", writeResourceFile.getPath());
 
+        if (writeMode != null) {
+            params.setProperty(CsvProperties.WRITE_MODE_KEY, writeMode);
+        } else {
+            CsvItemReaderWriterTest.setRandomWriteMode(params);
+        }
         if (readerCellProcessors != null) {
             params.setProperty("readerCellProcessors", readerCellProcessors);
         }
         if (writerCellProcessors != null) {
             params.setProperty("writerCellProcessors", writerCellProcessors);
         }
-        if (writeMode != null) {
-            params.setProperty(CsvProperties.WRITE_MODE_KEY, writeMode);
-        }
         params.setProperty(CsvProperties.COMMENT_MATCHER_KEY, commentMatcher);
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
         params.setProperty(CsvProperties.HEADER_KEY, header);
-        params.setProperty("validate", String.valueOf(writeToStepContext));
-        if (expect != null) {
-            params.setProperty("expect", expect);
-        }
-        if (forbid != null) {
-            params.setProperty("forbid", forbid);
+
+        if (jobStatus == BatchStatus.COMPLETED && CsvProperties.FAIL_IF_EXISTS.equals(writeMode)) {
+            writeResourceFile.delete();
         }
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
+        jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(jobStatus, jobExecution.getBatchStatus());
+
+        if (jobStatus == BatchStatus.COMPLETED) {
+            CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
+        }
     }
 
     static File saveFileToTmpdir(final String fileName, final String content) throws Exception {

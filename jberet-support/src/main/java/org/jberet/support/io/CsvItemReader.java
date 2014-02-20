@@ -13,6 +13,7 @@
 package org.jberet.support.io;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
@@ -71,13 +72,15 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
         }
 
         if (beanType == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, BEAN_TYPE_KEY);
-        } else if (java.util.List.class.isAssignableFrom(beanType)) {
-            delegateReader = new FastForwardCsvListReader(getInputReader(true), getCsvPreference(), startRowNumber);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, BEAN_TYPE_KEY);
+        }
+        final InputStreamReader r = new InputStreamReader(getInputStream(true));
+        if (java.util.List.class.isAssignableFrom(beanType)) {
+            delegateReader = new FastForwardCsvListReader(r, getCsvPreference(), startRowNumber);
         } else if (java.util.Map.class.isAssignableFrom(beanType)) {
-            delegateReader = new FastForwardCsvMapReader(getInputReader(true), getCsvPreference(), startRowNumber);
+            delegateReader = new FastForwardCsvMapReader(r, getCsvPreference(), startRowNumber);
         } else {
-            delegateReader = new FastForwardCsvBeanReader(getInputReader(true), getCsvPreference(), startRowNumber);
+            delegateReader = new FastForwardCsvBeanReader(r, getCsvPreference(), startRowNumber);
         }
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
 

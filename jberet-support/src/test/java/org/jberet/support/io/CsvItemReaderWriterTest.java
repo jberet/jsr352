@@ -13,9 +13,12 @@
 package org.jberet.support.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
@@ -32,7 +35,7 @@ public class CsvItemReaderWriterTest {
     static final String personPipeResource = "person-pipe.txt";
     static final String personTabResource = "person-tab.txt";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
-    static final int waitTimeoutMinutes = 0;
+    static final int waitTimeoutMinutes = 5;
     static final String writeComments = "# Comments written by csv writer.";
     static final String tmpdir = System.getProperty("java.io.tmpdir");
 
@@ -94,13 +97,6 @@ public class CsvItemReaderWriterTest {
     public void testBeanType() throws Exception {
         //override the default quote char ", which is used in feetInches cell
         testReadWrite0(personResource, "testBeanType.out", org.jberet.support.io.Person.class.getName(),
-                null, null, "|", null, null);
-    }
-
-    @Test
-    public void testBeanTypeStepContext() throws Exception {
-        //override the default quote char ", which is used in feetInches cell
-        testReadWrite0(personResource, CsvProperties.RESOURCE_STEP_CONTEXT, org.jberet.support.io.Person.class.getName(),
                 null, null, "|", personResourceExpect, personResourceForbid);
     }
 
@@ -142,37 +138,27 @@ public class CsvItemReaderWriterTest {
         }
         params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
 
-        final String writeResourceFullPath = writeResource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT) ?
-                writeResource : new File(tmpdir, writeResource).getPath();
-        params.setProperty("writeResource", writeResourceFullPath);
+        final File writeResourceFile = new File(tmpdir, writeResource);
+        params.setProperty("writeResource", writeResourceFile.getPath());
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
         params.setProperty(CsvProperties.HEADER_KEY, nameMapping);
-
-        if (writeResource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT)) {
-            if (expect != null) {
-                params.setProperty("validate", String.valueOf(true));
-                params.setProperty("expect", expect);
-            }
-            if (forbid != null) {
-                params.setProperty("validate", String.valueOf(true));
-                params.setProperty("forbid", forbid);
-            }
-        }
+        CsvItemReaderWriterTest.setRandomWriteMode(params);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        validate(writeResourceFile, expect, forbid);
     }
 
     @Test
     public void testListType() throws Exception {
-        testReadWrite0(personResource, CsvProperties.RESOURCE_STEP_CONTEXT, java.util.List.class.getName(), null, null, "|", personResourceExpect, personResourceForbid);
+        testReadWrite0(personResource, "testListType.out", java.util.List.class.getName(), null, null, "|", personResourceExpect, personResourceForbid);
     }
 
     @Test
     public void testMapType() throws Exception {
-        testReadWrite0(personResource, CsvProperties.RESOURCE_STEP_CONTEXT, java.util.Map.class.getName(), null, null, "|", personResourceExpect, personResourceForbid);
+        testReadWrite0(personResource, "testMapType.out", java.util.Map.class.getName(), null, null, "|", personResourceExpect, personResourceForbid);
     }
 
     /**
@@ -184,7 +170,7 @@ public class CsvItemReaderWriterTest {
         final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, List.class.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, personResource);
         params.setProperty(CsvProperties.QUOTE_CHAR_KEY, "|");
-        String writeResourceFullPath = (new File(tmpdir)).getPath();
+        final String writeResourceFullPath = (new File(tmpdir)).getPath();
         params.setProperty("writeResource", writeResourceFullPath);
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
         params.setProperty(CsvProperties.HEADER_KEY, nameMapping);
@@ -233,4 +219,70 @@ public class CsvItemReaderWriterTest {
         return params;
     }
 
+    static String getFileContent(final File file) throws FileNotFoundException {
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(file);
+            return scanner.useDelimiter("\\Z").next();
+        } finally {
+            try {
+                if (scanner != null) {
+                    scanner.close();
+                }
+            } catch (final Exception e) {
+                //ignore
+            }
+        }
+    }
+
+    static void validate(final File file, final String expect, final String forbid) throws Exception {
+        final String content = getFileContent(file);
+        if (expect != null && !expect.isEmpty()) {
+            for (String s : expect.split(",")) {
+                s = s.trim();
+                if (!content.contains(s)) {
+                    throw new IllegalStateException("Expected string " + s + " not found");
+                } else {
+                    System.out.printf("Found expected string %s%n", s);
+                }
+            }
+        }
+        if (forbid != null && !forbid.isEmpty()) {
+            for (String s : forbid.split(",")) {
+                s = s.trim();
+                if (!content.contains(s)) {
+                    System.out.printf("Forbidden string %s not found%n", s);
+                } else {
+                    throw new IllegalStateException("Found forbidden string " + s);
+                }
+            }
+        }
+        final int length = content.length();
+        System.out.printf("%nResult file content%s:%n%s%n%n", length < 1000 ? "" : " first 1000 characters",
+                length < 1000 ? content : content.substring(0, 1000));
+    }
+
+    /**
+     * Randomizes writeMode to return null, CsvProperties.APPEND or CsvProperties.OVERWRITE, and add it to params.
+     * @param params job params to which the generated writeMode will be added
+     */
+    static void setRandomWriteMode(final Properties params) {
+        final int i = (new Random()).nextInt() + 3;
+        final int m = i % 3;
+        final String writeMode;
+        switch (m) {
+            case 1:
+                writeMode = CsvProperties.OVERWRITE;
+                params.setProperty(CsvProperties.WRITE_MODE_KEY, writeMode);
+                break;
+            case 2:
+                writeMode = CsvProperties.APPEND;
+                params.setProperty(CsvProperties.WRITE_MODE_KEY, writeMode);
+                break;
+            default:
+                writeMode = null;
+                //java.util.Properties does not take null value
+        }
+        System.out.printf("Use randomly picked writeMode %s%n", writeMode);
+    }
 }

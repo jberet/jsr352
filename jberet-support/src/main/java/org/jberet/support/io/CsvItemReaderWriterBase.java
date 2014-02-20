@@ -114,7 +114,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
         } else if (TAB_PREFERENCE.equals(preference)) {
             csvPreference = CsvPreference.TAB_PREFERENCE;
         } else {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(preference, PREFERENCE_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, preference, PREFERENCE_KEY);
         }
 
         //do not trim quoteChar or delimiterChar. They can be tab (\t) and after trim, it will be just empty
@@ -210,7 +210,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
                     return new ColumnQuoteMode(convertToBooleanParams(parts));
                 }
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(val, ENCODER_KEY);
+                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, val, ENCODER_KEY);
             }
         }
     }
@@ -251,7 +251,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
                     return new SelectiveCsvEncoder(convertToBooleanParams(parts));
                 }
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(val, ENCODER_KEY);
+                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, val, ENCODER_KEY);
             }
         }
     }
@@ -301,7 +301,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
         } else if (matcherName.equalsIgnoreCase(MATCHES) || matcherName.equalsIgnoreCase(MATCHES_FUZZY)) {
             commentMatcher = new CommentMatches(matcherParam);
         } else {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(val, COMMENT_MATCHER_KEY);
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, val, COMMENT_MATCHER_KEY);
         }
 
         return commentMatcher;

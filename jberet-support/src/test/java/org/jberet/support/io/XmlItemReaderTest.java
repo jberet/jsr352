@@ -23,8 +23,6 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
-
 /**
  * A test class that reads xml resource into java object and write out to xml format.
  */
@@ -35,12 +33,12 @@ public final class XmlItemReaderTest {
 
     @Test
     public void testXmlMovieBeanType1_2() throws Exception {
-        testReadWrite0(movieXml, RESOURCE_STEP_CONTEXT, "1", "2", Movie.class, MovieTest.expect1_2, MovieTest.forbid1_2);
+        testReadWrite0(movieXml, "testXmlMovieBeanType1_2.out", "1", "2", Movie.class, MovieTest.expect1_2, MovieTest.forbid1_2);
     }
 
     @Test
     public void testXmlMovieBeanType2_4() throws Exception {
-        testReadWrite0(movieXml, RESOURCE_STEP_CONTEXT, "2", "4", Movie.class, MovieTest.expect2_4, MovieTest.forbid2_4);
+        testReadWrite0(movieXml, "testXmlMovieBeanType2_4.out", "2", "4", Movie.class, MovieTest.expect2_4, MovieTest.forbid2_4);
     }
 
     @Test
@@ -50,7 +48,7 @@ public final class XmlItemReaderTest {
 
     @Test
     public void testXmlMovieBeanTypeFull1_100() throws Exception {
-        testReadWrite0(movieXml, RESOURCE_STEP_CONTEXT, "1", "100", Movie.class, MovieTest.expectFull, null);
+        testReadWrite0(movieXml, "testXmlMovieBeanTypeFull1_100.out", "1", "100", Movie.class, MovieTest.expectFull, null);
     }
 
     private void testReadWrite0(final String resource, final String writeResource,
@@ -59,21 +57,8 @@ public final class XmlItemReaderTest {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
 
-        if (writeResource == null || writeResource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
-            params.setProperty("writeResource", RESOURCE_STEP_CONTEXT);
-        } else {
-            final String path = (new File(CsvItemReaderWriterTest.tmpdir, writeResource)).getPath();
-            params.setProperty("writeResource", path);
-        }
-
-        if (expect != null) {
-            params.setProperty("validate", String.valueOf(true));
-            params.setProperty("expect", expect);
-        }
-        if (forbid != null) {
-            params.setProperty("validate", String.valueOf(true));
-            params.setProperty("forbid", forbid);
-        }
+        final File file = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
+        params.setProperty("writeResource", file.getPath());
 
         if (start != null) {
             params.setProperty(CsvProperties.START_KEY, start);
@@ -81,10 +66,13 @@ public final class XmlItemReaderTest {
         if (end != null) {
             params.setProperty(CsvProperties.END_KEY, end);
         }
+        CsvItemReaderWriterTest.setRandomWriteMode(params);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+
+        CsvItemReaderWriterTest.validate(file, expect, forbid);
     }
 }

@@ -14,15 +14,6 @@
 
 <job id="org.jberet.support.io.XmlItemReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="org.jberet.support.io.XmlItemReaderTest.step1">
-        <listeners>
-            <listener ref="validatingStepListener">
-                <properties>
-                    <property name="validate" value="#{jobParameters['validate']}"/>
-                    <property name="expect" value="#{jobParameters['expect']}"/>
-                    <property name="forbid" value="#{jobParameters['forbid']}"/>
-                </properties>
-            </listener>
-        </listeners>
         <chunk>
             <reader ref="xmlItemReader">
                 <properties>
@@ -36,7 +27,7 @@
                 <properties>
                     <property name="resource" value="#{jobParameters['writeResource']}"/>
                     <property name="rootElementName" value="movies"/>
-                    <property name="writeMode" value="overwrite"/>
+                    <property name="writeMode" value="#{jobParameters['writeMode']}?:overwrite;"/>
                     <!--<property name="prettyPrinter" value="com.fasterxml.jackson.core.util.MinimalPrettyPrinter"/>-->
                 </properties>
             </writer>

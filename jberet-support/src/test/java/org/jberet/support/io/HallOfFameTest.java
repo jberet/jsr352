@@ -58,22 +58,22 @@ public final class HallOfFameTest {
                 "adamsba01h, 1938, 262, 197, 11.0";
         final String forbid = "aaronha01h, 1982, 415, 312, 406.0, " +
                 "1939, 274, 206";
-        testReadWrite0(hallOfFameResource, "2", "4", CsvProperties.RESOURCE_STEP_CONTEXT, HallOfFame.class, expect, forbid);
+        testReadWrite0(hallOfFameResource, "2", "4", "testBeanType.out", HallOfFame.class, expect, forbid);
     }
 
     @Test
     public void testListTypeFull() throws Exception {
-        testReadWrite0(hallOfFameResource, null, null, CsvProperties.RESOURCE_STEP_CONTEXT, List.class, expectFull, null);
+        testReadWrite0(hallOfFameResource, null, null, "testListTypeFull.out", List.class, expectFull, null);
     }
 
     @Test
     public void testBeanTypeFull() throws Exception {
-        testReadWrite0(hallOfFameResource, null, null, CsvProperties.RESOURCE_STEP_CONTEXT, HallOfFame.class, expectFull, null);
+        testReadWrite0(hallOfFameResource, null, null, "testBeanTypeFull.out", HallOfFame.class, expectFull, null);
     }
 
     @Test
     public void testMapTypeFull() throws Exception {
-        testReadWrite0(hallOfFameResource, "1", "9999999", CsvProperties.RESOURCE_STEP_CONTEXT, Map.class, expectFull, null);
+        testReadWrite0(hallOfFameResource, "1", "9999999", "testMapTypeFull.out", Map.class, expectFull, null);
     }
 
     @Test
@@ -83,14 +83,9 @@ public final class HallOfFameTest {
                 "adamsba01h, 1937, 201, 151, 8.0, " +
                 "adamsba01h, 1938, 262, 197, 11.0";
         final String forbid = "1939, 274, 206";
-        testReadWrite0(hallOfFameResource, "1", "4", CsvProperties.RESOURCE_STEP_CONTEXT, java.util.Map.class, expect, forbid);
+        testReadWrite0(hallOfFameResource, "1", "4", "testMapType.out", java.util.Map.class, expect, forbid);
     }
 
-    //test will print out the path of output file from CsvItemWriter, which can then be verified.
-    //e.g., CSV resource to read:
-    //person.csv,
-    //to write:
-    //        /var/folders/s3/2m3bc7_n0550tp44h4bcgwtm0000gn/T/testMapType.out
     private void testReadWrite0(final String resource, final String start, final String end,
                                 final String writeResource, final Class<?> beanType,
                                 final String expect, final String forbid) throws Exception {
@@ -98,24 +93,12 @@ public final class HallOfFameTest {
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
         params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, cellProcessors);
 
-        final String writeResourceFullPath = writeResource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT) ?
-                writeResource : new File(CsvItemReaderWriterTest.tmpdir, writeResource).getPath();
-        params.setProperty("writeResource", writeResourceFullPath);
+        final File writeResourceFile = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
+        params.setProperty("writeResource", writeResourceFile.getPath());
 
         if (beanType != List.class) {
             //nameMapping is not required for list type reader
             params.setProperty(CsvProperties.NAME_MAPPING_KEY, nameMapping);
-        }
-
-        if (writeResource.equalsIgnoreCase(CsvProperties.RESOURCE_STEP_CONTEXT)) {
-            if (expect != null) {
-                params.setProperty("validate", String.valueOf(true));
-                params.setProperty("expect", expect);
-            }
-            if (forbid != null) {
-                params.setProperty("validate", String.valueOf(true));
-                params.setProperty("forbid", forbid);
-            }
         }
 
         if (start != null) {
@@ -127,10 +110,13 @@ public final class HallOfFameTest {
 
         params.setProperty(CsvProperties.HEADER_KEY, nameMapping);
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
+        CsvItemReaderWriterTest.setRandomWriteMode(params);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+
+        CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
     }
 }

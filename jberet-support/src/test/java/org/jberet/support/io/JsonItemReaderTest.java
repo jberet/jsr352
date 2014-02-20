@@ -41,8 +41,6 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
-
 /**
  * A test class that reads json resource into java object and write out to json format.
  */
@@ -90,51 +88,48 @@ public final class JsonItemReaderTest {
         jsonGeneratorFeatures = " QUOTE_FIELD_NAMES = false , STRICT_DUPLICATE_DETECTION = false";
 
         //rating enum is written out as index, as configured in job xml serializationFeatures property
-        final String forbid = MovieTest.forbid2_4 + ", \"rank\", \"tit\", \"grs\", \"opn\", PG13";
-        testReadWrite0(movieJson, RESOURCE_STEP_CONTEXT, "2", "4", Movie.class, MovieTest.expect2_4, forbid);
+        //final String forbid = MovieTest.forbid2_4 + ", \"rank\", \"tit\", \"grs\", \"opn\", PG13";
+        final String forbid = MovieTest.forbid2_4 + ", PG13";
+        testReadWrite0(movieJson, "testBeanType2_4.out", "2", "4", Movie.class, MovieTest.expect2_4, forbid);
     }
 
     @Test
     public void testJsonNodeType2_4() throws Exception {
-        testReadWrite0(movieJson, RESOURCE_STEP_CONTEXT, "2", "4", JsonNode.class, MovieTest.expect2_4, MovieTest.forbid2_4);
+        testReadWrite0(movieJson, "testJsonNodeType2_4.out", "2", "4", JsonNode.class, MovieTest.expect2_4, MovieTest.forbid2_4);
     }
 
     @Test
     public void testBeanTypeFull() throws Exception {
-        testReadWrite0(movieJson, RESOURCE_STEP_CONTEXT, null, null, Movie.class, MovieTest.expectFull, null);
+        testReadWrite0(movieJson, "testBeanTypeFull.out", null, null, Movie.class, MovieTest.expectFull, null);
     }
 
     @Test
     public void testMapTypeFull1_100() throws Exception {
-        testReadWrite0(movieJson, RESOURCE_STEP_CONTEXT, "1", "100", Map.class, MovieTest.expectFull, null);
+        testReadWrite0(movieJson, "testMapTypeFull1_100.out", "1", "100", Map.class, MovieTest.expectFull, null);
     }
 
     @Test
     public void testMapType1_2() throws Exception {
-        //write json output to file
-        testReadWrite0(movieJson, movieJson + "1_2.out", "1", "2", Map.class, null, null);
-        //save json output to StepContext transient user data
-        testReadWrite0(movieJson, RESOURCE_STEP_CONTEXT, "1", "2", Map.class, MovieTest.expect1_2, MovieTest.forbid1_2);
+        testReadWrite0(movieJson, "testMapType1_2.out", "1", "2", Map.class, MovieTest.expect1_2, MovieTest.forbid1_2);
     }
 
     @Test
     public void testJsonNodeTypeWidget1() throws Exception {
-        //save json output to StepContext transient user data
-        testReadWrite0(widgetJson, RESOURCE_STEP_CONTEXT, "1", "1", JsonNode.class, widgetExpect1, widgetExpect2);
+        testReadWrite0(widgetJson, "testJsonNodeTypeWidget1.out", "1", "1", JsonNode.class, widgetExpect1, widgetExpect2);
     }
 
     @Test
     public void testJsonNodeTypeWidget1_3() throws Exception {
-        //write json output to file
-        testReadWrite0(widgetJson, widgetJson + ".out", null, null, JsonNode.class, null, null);
-        //save json output to StepContext transient user data
-        testReadWrite0(widgetJson, RESOURCE_STEP_CONTEXT, "1", "3", JsonNode.class,
+        testReadWrite0(widgetJson, "testJsonNodeTypeWidget1_3.out", "1", "3", JsonNode.class,
+                widgetExpect1 + ", " + widgetExpect2 + ", " + widgetExpect3, null);
+
+        testReadWrite0(widgetJson, "testJsonNodeTypeWidget1_3.out", null, null, JsonNode.class,
                 widgetExpect1 + ", " + widgetExpect2 + ", " + widgetExpect3, null);
     }
 
     @Test
     public void testMapTypeWidget2_3() throws Exception {
-        testReadWrite0(widgetJson, RESOURCE_STEP_CONTEXT, "2", "3", Map.class,
+        testReadWrite0(widgetJson, "testMapTypeWidget2_3.out", "2", "3", Map.class,
                 widgetExpect2 + ", " + widgetExpect3, widgetForbidFrom1);
     }
 
@@ -144,21 +139,8 @@ public final class JsonItemReaderTest {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
 
-        if (writeResource == null || writeResource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
-            params.setProperty("writeResource", RESOURCE_STEP_CONTEXT);
-        } else {
-            final String path = (new File(CsvItemReaderWriterTest.tmpdir, writeResource)).getPath();
-            params.setProperty("writeResource", path);
-        }
-
-        if (expect != null) {
-            params.setProperty("validate", String.valueOf(true));
-            params.setProperty("expect", expect);
-        }
-        if (forbid != null) {
-            params.setProperty("validate", String.valueOf(true));
-            params.setProperty("forbid", forbid);
-        }
+        final File writeResourceFile = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
+        params.setProperty("writeResource", writeResourceFile.getPath());
 
         if (start != null) {
             params.setProperty(CsvProperties.START_KEY, start);
@@ -171,11 +153,14 @@ public final class JsonItemReaderTest {
         }
 
         params.setProperty(CsvProperties.HEADER_KEY, MovieTest.header);
+        CsvItemReaderWriterTest.setRandomWriteMode(params);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+
+        CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
     }
 
     public static final class NoopInputDecorator extends InputDecorator {

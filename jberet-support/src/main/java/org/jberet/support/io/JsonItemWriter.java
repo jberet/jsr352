@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
-import javax.batch.runtime.context.StepContext;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,9 +30,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
 
-import static org.jberet.support.io.CsvProperties.OVERWRITE;
-import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
-
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes a list of same-typed objects to Json resource.
  * Each object is written as part of the root Json array.
@@ -41,9 +37,6 @@ import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
 @Named
 @Dependent
 public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWriter {
-    @Inject
-    protected StepContext stepContext;
-
     @Inject
     @BatchProperty
     protected String writeMode;
@@ -101,14 +94,14 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
                         objectMapper.configure(feature, false);
                     }
                 } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
                 }
             }
         }
 
         registerModule();
 
-        jsonGenerator = jsonFactory.createGenerator(getOutputWriter(writeMode, stepContext));
+        jsonGenerator = jsonFactory.createGenerator(getOutputStream(writeMode));
         if (objectMapper != null) {
             jsonGenerator.setCodec(objectMapper);
         }
@@ -133,7 +126,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
                         jsonGenerator.configure(feature, false);
                     }
                 } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
                 }
             }
         }
@@ -167,16 +160,6 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
             SupportLogger.LOGGER.closingResource(resource, this.getClass());
             jsonGenerator.close();
             jsonGenerator = null;
-            if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
-                final Object transientUserData = stepContext.getTransientUserData();
-                if (OVERWRITE.equalsIgnoreCase(writeMode) || transientUserData == null) {
-                    stepContext.setTransientUserData(stringWriter.toString());
-                } else {
-                    stepContext.setTransientUserData(transientUserData +
-                            stringWriter.toString());
-                }
-                stringWriter = null;
-            }
         }
     }
 

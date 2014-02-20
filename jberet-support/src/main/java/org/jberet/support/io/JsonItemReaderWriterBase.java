@@ -70,7 +70,7 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
                         jsonFactory.configure(feature, false);
                     }
                 } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
                 }
             }
         }
@@ -94,7 +94,7 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
                         objectMapper.configure(feature, false);
                     }
                 } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(value, key);
+                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
                 }
             }
         }

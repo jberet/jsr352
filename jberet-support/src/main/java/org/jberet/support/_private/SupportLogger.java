@@ -32,7 +32,7 @@ public interface SupportLogger extends BasicLogger {
     SupportLogger LOGGER = Logger.getMessageLogger(SupportLogger.class, "org.jberet.support");
 
     @Message(id = 60000, value = "Invalid reader or writer property value %s for key %s")
-    BatchRuntimeException invalidReaderWriterProperty(String val, String key);
+    BatchRuntimeException invalidReaderWriterProperty(@Cause Throwable th, String val, String key);
 
     @Message(id = 60001, value = "Failed to read header from CSV resource %s")
     BatchRuntimeException failToReadCsvHeader(@Cause Throwable th, String csvResource);
@@ -49,9 +49,6 @@ public interface SupportLogger extends BasicLogger {
     @Message(id = 60005, value = "Invalid position %s to start reading, the configured range is between %s and %s")
     BatchRuntimeException invalidStartPosition(int startPosition, int start, int end);
 
-    @Message(id = 60006, value = "The number of CellProcessor %s and the number of headers %s are different.")
-    BatchRuntimeException numberOfCellProcessorsAndHeaderDiff(int cellProcessorCount, int headerCount);
-
     @Message(id = 60007, value = "Unexpected character %s at position %s in character array %s")
     BatchRuntimeException unexpectedChar(char ch, int position, String chars);
 
@@ -66,9 +63,6 @@ public interface SupportLogger extends BasicLogger {
 
     @Message(id = 60011, value = "The target writer resource is a directory: %s")
     BatchRuntimeException writerResourceIsDirectory(File file);
-
-    @Message(id = 60012, value = "The existing transient user data in step is not of type String: %s")
-    BatchRuntimeException cannotAppendToNonStringData(Class<?> dataType);
 
     @Message(id = 60013, value = "The CellProcessor value may be missing an ending single quote: %s")
     @LogMessage(level = Logger.Level.WARN)

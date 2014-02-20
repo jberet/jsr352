@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.util.List;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
-import javax.batch.runtime.context.StepContext;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,9 +28,6 @@ import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.jberet.support._private.SupportLogger;
 
-import static org.jberet.support.io.CsvProperties.OVERWRITE;
-import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
-
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes a list of same-typed objects to XML resource.
  * Each object is written as a sub-element of the target XML resource. The XML root element is specified with the
@@ -41,11 +37,6 @@ import static org.jberet.support.io.CsvProperties.RESOURCE_STEP_CONTEXT;
 @Named
 @Dependent
 public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter {
-    protected static final String NEW_LINE = System.getProperty("line.separator");
-
-    @Inject
-    protected StepContext stepContext;
-
     @Inject
     @BatchProperty
     protected String writeMode;
@@ -87,7 +78,7 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
         }
         xmlMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
 
-        toXmlGenerator = xmlFactory.createGenerator(getOutputWriter(writeMode, stepContext));
+        toXmlGenerator = xmlFactory.createGenerator(getOutputStream(writeMode));
         toXmlGenerator.setCodec(xmlMapper);
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
 
@@ -101,7 +92,7 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
         staxWriter.writeStartDocument();
         staxWriter.writeCharacters(NEW_LINE);
         if (rootElementName == null || rootElementName.isEmpty()) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(rootElementName, "rootElementName");
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, rootElementName, "rootElementName");
         }
         if (rootElementPrefix == null || rootElementPrefix.isEmpty()) {
             if (rootElementNamespaceURI == null || rootElementNamespaceURI.isEmpty()) {
@@ -111,7 +102,7 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
             }
         } else {
             if (rootElementNamespaceURI == null || rootElementNamespaceURI.isEmpty()) {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(rootElementNamespaceURI, "rootElementNamespaceURI");
+                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, rootElementNamespaceURI, "rootElementNamespaceURI");
             } else {
                 staxWriter.writeStartElement(rootElementPrefix, rootElementName, rootElementNamespaceURI);
             }
@@ -141,16 +132,6 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
             staxWriter.writeEndDocument();
             toXmlGenerator.close();
             toXmlGenerator = null;
-            if (resource.equalsIgnoreCase(RESOURCE_STEP_CONTEXT)) {
-                final Object transientUserData = stepContext.getTransientUserData();
-                if (OVERWRITE.equalsIgnoreCase(writeMode) || transientUserData == null) {
-                    stepContext.setTransientUserData(stringWriter.toString());
-                } else {
-                    stepContext.setTransientUserData(transientUserData +
-                            stringWriter.toString());
-                }
-                stringWriter = null;
-            }
         }
     }
 
@@ -163,7 +144,7 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
             } else if (defaultUseWrapper.equals("true")) {
                 //default value is already true, so nothing to do
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(defaultUseWrapper, "defaultUseWrapper");
+                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, defaultUseWrapper, "defaultUseWrapper");
             }
         }
     }
