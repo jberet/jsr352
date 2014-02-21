@@ -22,7 +22,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JacksonXmlRootElement(localName = "node")
-@JsonIgnoreProperties(ignoreUnknown = false)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OsmNode {
 
     @JacksonXmlProperty(isAttribute = true)

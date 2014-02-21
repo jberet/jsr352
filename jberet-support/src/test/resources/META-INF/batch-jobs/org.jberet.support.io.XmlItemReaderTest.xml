@@ -14,7 +14,7 @@
 
 <job id="org.jberet.support.io.XmlItemReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="org.jberet.support.io.XmlItemReaderTest.step1">
-        <chunk item-count="10000">
+        <chunk item-count="1000000">
             <reader ref="xmlItemReader">
                 <properties>
                     <property name="resource" value="#{jobParameters['resource']}"/>
