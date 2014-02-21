@@ -12,7 +12,6 @@
 
 package org.jberet.support._private;
 
-import java.io.File;
 import javax.batch.operations.BatchRuntimeException;
 
 import com.fasterxml.jackson.core.JsonLocation;
@@ -60,9 +59,6 @@ public interface SupportLogger extends BasicLogger {
 
     @Message(id = 60010, value = "The target writer resource already exists: %s")
     BatchRuntimeException writerResourceAlreadyExists(Object writerResource);
-
-    @Message(id = 60011, value = "The target writer resource is a directory: %s")
-    BatchRuntimeException writerResourceIsDirectory(File file);
 
     @Message(id = 60013, value = "The CellProcessor value may be missing an ending single quote: %s")
     @LogMessage(level = Logger.Level.WARN)

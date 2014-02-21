@@ -89,9 +89,10 @@ public abstract class ItemReaderWriterBase {
         try {
             final File file = new File(resource);
             final boolean exists = file.exists();
-            if (exists && file.isDirectory()) {
-                throw SupportLogger.LOGGER.writerResourceIsDirectory(file);
-            }
+            // isDirectory check is done in FileOutputStream constructor, no need to do here
+            //if (exists && file.isDirectory()) {
+            //    throw SupportLogger.LOGGER.writerResourceIsDirectory(file);
+            //}
             if (writeMode == null || writeMode.equalsIgnoreCase(APPEND)) {
                 final FileOutputStream fos = new FileOutputStream(file, true);
                 if (file.length() > 0) {

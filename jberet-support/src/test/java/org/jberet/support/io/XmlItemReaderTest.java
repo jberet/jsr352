@@ -21,6 +21,7 @@ import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -30,6 +31,12 @@ public final class XmlItemReaderTest {
     static final String jobName = "org.jberet.support.io.XmlItemReaderTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String movieXml = "http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=xml";
+
+    // openstreammap file, 265M in size, make sure XmlItemReader and XmlItemWriter can handle large file
+    static final String osmXml = "/Users/cfang/tmp/luxembourg-20140218_173810.osm";
+
+    static final String movieRootElementName = "movies";
+    static final String osmRootElementName = "osm";
 
     @Test
     public void testXmlMovieBeanType1_2() throws Exception {
@@ -51,6 +58,15 @@ public final class XmlItemReaderTest {
         testReadWrite0(movieXml, "testXmlMovieBeanTypeFull1_100.out", "1", "100", Movie.class, MovieTest.expectFull, null);
     }
 
+    @Test
+    @Ignore("takes too long")
+    public void testXmlOsmBeanTypeFull() throws Exception {
+        final String writeResource = "testXmlOsmBeanTypeFull.out";
+        final File file = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
+        file.delete();
+        testReadWrite0(osmXml, writeResource, null, null, OsmNode.class, null, null);
+    }
+
     private void testReadWrite0(final String resource, final String writeResource,
                                 final String start, final String end, final Class<?> beanType,
                                 final String expect, final String forbid) throws Exception {
@@ -59,6 +75,13 @@ public final class XmlItemReaderTest {
 
         final File file = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
         params.setProperty("writeResource", file.getPath());
+        if (resource.equals(movieXml)) {
+            params.setProperty("rootElementName", movieRootElementName);
+        } else if (resource.equals(osmXml)) {
+            params.setProperty("rootElementName", osmRootElementName);
+        } else {
+            throw new IllegalStateException("Unknown resource: " + resource);
+        }
 
         if (start != null) {
             params.setProperty(CsvProperties.START_KEY, start);
@@ -70,7 +93,7 @@ public final class XmlItemReaderTest {
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
+        jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes*100, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
 
         CsvItemReaderWriterTest.validate(file, expect, forbid);

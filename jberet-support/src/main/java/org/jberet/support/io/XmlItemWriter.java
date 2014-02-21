@@ -89,7 +89,9 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
         }
 
         staxWriter = toXmlGenerator.getStaxWriter();
-        staxWriter.writeStartDocument();
+        if (!this.skipWritingHeader) {
+            staxWriter.writeStartDocument();
+        }
         staxWriter.writeCharacters(NEW_LINE);
         if (rootElementName == null || rootElementName.isEmpty()) {
             throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, rootElementName, "rootElementName");
