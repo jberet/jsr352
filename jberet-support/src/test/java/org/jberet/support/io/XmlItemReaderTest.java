@@ -32,7 +32,8 @@ public final class XmlItemReaderTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String movieXml = "http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=xml";
 
-    // openstreammap file, 265M in size, make sure XmlItemReader and XmlItemWriter can handle large file
+    // openstreammap file, 265M in size, make sure XmlItemReader and XmlItemWriter can handle large file, with
+    // xml attributes, and sub-elements that are serialized unwrapped.
     static final String osmXml = "/Users/cfang/tmp/luxembourg-20140218_173810.osm";
 
     static final String movieRootElementName = "movies";
@@ -59,12 +60,12 @@ public final class XmlItemReaderTest {
     }
 
     @Test
-    @Ignore("takes too long")
-    public void testXmlOsmBeanTypeFull() throws Exception {
-        final String writeResource = "testXmlOsmBeanTypeFull.out";
+    @Ignore("takes too long, 100 thousand")
+    public void testXmlOsmBeanType1_100000() throws Exception {
+        final String writeResource = "testXmlOsmBeanType1_100000.out";
         final File file = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
         file.delete();
-        testReadWrite0(osmXml, writeResource, null, null, OsmNode.class, null, null);
+        testReadWrite0(osmXml, writeResource, "1", "100000", OsmNode.class, null, null);
     }
 
     private void testReadWrite0(final String resource, final String writeResource,

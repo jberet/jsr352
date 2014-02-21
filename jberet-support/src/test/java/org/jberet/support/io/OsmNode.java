@@ -22,7 +22,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JacksonXmlRootElement(localName = "node")
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class OsmNode {
 
     @JacksonXmlProperty(isAttribute = true)
@@ -49,96 +49,85 @@ public class OsmNode {
     @JacksonXmlProperty(isAttribute = true)
     private double lon;
 
-    //@JacksonXmlElementWrapper(useWrapping = false)
-    //private List<Tag> tags = new ArrayList<Tag>();
+    @JacksonXmlProperty(localName = "tag")
+    @JacksonXmlElementWrapper(useWrapping = false, localName = "tag")
+    private List<Tag> tags = new ArrayList<Tag>();
 
-    @JacksonXmlProperty(isAttribute = true)
     public String getId() {
         return id;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public void setId(final String id) {
         this.id = id;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public String getVersion() {
         return version;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public void setVersion(final String version) {
         this.version = version;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public Date getTimestamp() {
         return timestamp;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public void setTimestamp(final Date timestamp) {
         this.timestamp = timestamp;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public String getUid() {
         return uid;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public void setUid(final String uid) {
         this.uid = uid;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public String getUser() {
         return user;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public void setUser(final String user) {
         this.user = user;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public String getChangeset() {
         return changeset;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public void setChangeset(final String changeset) {
         this.changeset = changeset;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public double getLat() {
         return lat;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public void setLat(final double lat) {
         this.lat = lat;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public double getLon() {
         return lon;
     }
 
-    @JacksonXmlProperty(isAttribute = true)
     public void setLon(final double lon) {
         this.lon = lon;
     }
 
-    //public List<Tag> getTags() {
-    //    return tags;
-    //}
-    //
-    //public void setTags(final List<Tag> tags) {
-    //    this.tags = tags;
-    //}
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void addTag(final Tag tag) {
+        this.tags.add(tag);
+    }
+
+    public void setTags(final List<Tag> tags) {
+        this.tags = tags;
+    }
 
     @Override
     public boolean equals(final Object o) {
@@ -168,7 +157,7 @@ public class OsmNode {
         sb.append(", changeset='").append(changeset).append('\'');
         sb.append(", lat=").append(lat);
         sb.append(", lon=").append(lon);
-        //sb.append(", tags=").append(tags);
+        sb.append(", tags=").append(tags);
         sb.append('}');
         return sb.toString();
     }
@@ -181,22 +170,18 @@ public class OsmNode {
         @JacksonXmlProperty(isAttribute = true)
         private String v;
 
-        @JacksonXmlProperty(isAttribute = true)
         public String getK() {
             return k;
         }
 
-        @JacksonXmlProperty(isAttribute = true)
         public void setK(final String k) {
             this.k = k;
         }
 
-        @JacksonXmlProperty(isAttribute = true)
         public String getV() {
             return v;
         }
 
-        @JacksonXmlProperty(isAttribute = true)
         public void setV(final String v) {
             this.v = v;
         }

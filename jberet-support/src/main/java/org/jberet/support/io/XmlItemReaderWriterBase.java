@@ -35,7 +35,7 @@ public abstract class XmlItemReaderWriterBase extends ItemReaderWriterBase {
     protected void initXmlFactory() {
         initXmlModule();
         xmlFactory = new XmlFactory();
-        xmlMapper = new XmlMapper(xmlFactory, xmlModule);
+        xmlMapper = xmlModule == null ? new XmlMapper(xmlFactory) : new XmlMapper(xmlFactory, xmlModule);
         xmlFactory.setCodec(xmlMapper);
     }
 }

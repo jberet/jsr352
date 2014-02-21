@@ -13,21 +13,32 @@
 package org.jberet.support.io;
 
 import java.util.Date;
-import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * A bean that represents the movie data from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv,
  * or http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=xml
  */
 
-@XmlRootElement(name = "t")
+@JacksonXmlRootElement(localName = "t")
 public final class Movie {
     public enum Rating {G, PG, PG13, R}
 
+    @JacksonXmlProperty(isAttribute = true)
     private int rank;
+
+    @JacksonXmlProperty(isAttribute = true)
     private String tit;
+
+    @JacksonXmlProperty(isAttribute = true)
     private double grs;
+
+    @JacksonXmlProperty(isAttribute = true)
     private Date opn;
+
+    @JacksonXmlProperty(isAttribute = true)
     private Rating rating;
 
     public int getRank() {

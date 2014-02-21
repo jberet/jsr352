@@ -94,7 +94,7 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
                 if (nestedObjectLevel == 1) {
                     rowNumber++;
                 } else if (nestedObjectLevel < 1) {
-                    SupportLogger.LOGGER.unexpectedJsonContent(fromXmlParser.getCurrentLocation());
+                    throw SupportLogger.LOGGER.unexpectedJsonContent(fromXmlParser.getCurrentLocation());
                 }
                 if (rowNumber >= start) {
                     break;
@@ -103,7 +103,7 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
                 nestedObjectLevel--;
             }
         } while (true);
-        return fromXmlParser.readValueAs(beanType);
+        return xmlMapper.readValue(fromXmlParser, beanType);
     }
 
     @Override

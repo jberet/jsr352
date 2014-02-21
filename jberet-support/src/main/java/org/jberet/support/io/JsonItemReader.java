@@ -175,7 +175,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 if (nestedObjectLevel == 1) {
                     rowNumber++;
                 } else if (nestedObjectLevel < 1) {
-                    SupportLogger.LOGGER.unexpectedJsonContent(jsonParser.getCurrentLocation());
+                    throw SupportLogger.LOGGER.unexpectedJsonContent(jsonParser.getCurrentLocation());
                 }
                 if (rowNumber >= start) {
                     break;
@@ -184,7 +184,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 nestedObjectLevel--;
             }
         } while (true);
-        return jsonParser.readValueAs(beanType);
+        return objectMapper.readValue(jsonParser, beanType);
     }
 
     @Override

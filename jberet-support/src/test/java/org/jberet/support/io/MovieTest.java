@@ -36,17 +36,18 @@ public final class MovieTest {
     static final String cellProcessors =
             "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate(YYYY-MM-dd)";
 
-    static final String expectFull = "Marvel's The Avengers," +
+    //in xml output, ' in Marvel's will be escaped so we cannot match it verbatim
+    static final String expectFull = "The Avengers," +
             "The Dark Knight Rises," +
             "Chimpanzee," +
             "The Five-Year Engagement";
     static final String expect2_4 = "The Dark Knight Rises, " +
             "The Hunger Games," +
             "Skyfall";
-    static final String forbid2_4 = "Marvel's The Avengers, " +
+    static final String forbid2_4 = "The Avengers, " +
             "The Hobbit: An Unexpected Journey";
 
-    static final String expect1_2 = "Marvel's The Avengers," +
+    static final String expect1_2 = "The Avengers," +
             "The Dark Knight Rises";
     static final String forbid1_2 = "Hunger Games";
 
