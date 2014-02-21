@@ -13,23 +13,34 @@
 package org.samples.wildfly.jberet.common;
 
 import java.util.Date;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * A bean that represents the movie data from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv,
  * or http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=xml
  *
- * Copied from https://github.com/jberet/jsr352/tree/master/jberet-support/src/test/java/org/jberet/support/io
+ * Copied from https://github.com/jberet/jsr352/tree/master/jberet-support/src/test/java/org/jberet/support/io, except
+ * that this class uses jaxb annotations instead of jackson annotations.
  */
 
 @XmlRootElement(name = "t")
 public final class Movie {
     public enum Rating {G, PG, PG13, R}
 
+    @XmlAttribute
     private int rank;
+
+    @XmlAttribute
     private String tit;
+
+    @XmlAttribute
     private double grs;
+
+    @XmlAttribute
     private Date opn;
+
+    @XmlAttribute
     private Rating rating;
 
     public int getRank() {
