@@ -34,7 +34,10 @@ public final class XmlItemReaderTest {
 
     // openstreammap file, 265M in size, make sure XmlItemReader and XmlItemWriter can handle large file, with
     // xml attributes, and sub-elements that are serialized unwrapped.
-    static final String osmXml = "luxembourg-20140218_173810.osm";
+    // the osm was downloaded from http://osm.kewl.lu/luxembourg.osm/
+    // jberet-support can read resource from a url, but given the size of this file, it will take about 30 minutes to
+    // just download the file.  So it's best to download this file beforehand and have the test access the local copy.
+    static final String osmXml = "/Users/cfang/tmp/luxembourg-20140218_173810.osm";
 
     static final String movieRootElementName = "movies";
     static final String osmRootElementName = "osm";
@@ -60,6 +63,7 @@ public final class XmlItemReaderTest {
     }
 
     @Test
+    @Ignore
     //takes about 20 seconds
     public void testXmlOsmBeanTypeFull() throws Exception {
         final String writeResource = "testXmlOsmBeanTypeFull.out";
