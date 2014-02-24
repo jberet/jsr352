@@ -26,6 +26,9 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public final class Movie {
     public enum Rating {G, PG, PG13, R}
 
+    @javax.persistence.Id
+    private String id;
+
     @JacksonXmlProperty(isAttribute = true)
     private int rank;
 
@@ -40,6 +43,14 @@ public final class Movie {
 
     @JacksonXmlProperty(isAttribute = true)
     private Rating rating;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(final String id) {
+        this.id = id;
+    }
 
     public int getRank() {
         return rank;
@@ -84,7 +95,8 @@ public final class Movie {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Movie{");
-        sb.append("rank=").append(rank);
+        sb.append("id='").append(id).append('\'');
+        sb.append(", rank=").append(rank);
         sb.append(", tit='").append(tit).append('\'');
         sb.append(", grs=").append(grs);
         sb.append(", opn=").append(opn);

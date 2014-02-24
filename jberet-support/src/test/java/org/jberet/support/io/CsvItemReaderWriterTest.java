@@ -13,7 +13,9 @@
 package org.jberet.support.io;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -219,10 +221,10 @@ public class CsvItemReaderWriterTest {
         return params;
     }
 
-    static String getFileContent(final File file) throws FileNotFoundException {
+    static String getStreamContent(final InputStream inputStream) throws FileNotFoundException {
         Scanner scanner = null;
         try {
-            scanner = new Scanner(file);
+            scanner = new Scanner(inputStream);
             return scanner.useDelimiter("\\Z").next();
         } finally {
             try {
@@ -236,7 +238,7 @@ public class CsvItemReaderWriterTest {
     }
 
     static void validate(final File file, final String expect, final String forbid) throws Exception {
-        final String content = getFileContent(file);
+        final String content = getStreamContent(new FileInputStream(file));
         if (expect != null && !expect.isEmpty()) {
             for (String s : expect.split(",")) {
                 s = s.trim();

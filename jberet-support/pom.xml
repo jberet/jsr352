@@ -15,10 +15,26 @@
     <properties>
         <version.net.sf.supercsv>2.1.0</version.net.sf.supercsv>
         <version.com.fasterxml.jackson>2.3.1</version.com.fasterxml.jackson>
+        <version.org.mongodb>2.12.0-rc0</version.org.mongodb>
+        <version.org.mongojack>2.0.0</version.org.mongojack>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- MongoDB Dependencies -->
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongo-java-driver</artifactId>
+                <version>${version.org.mongodb}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.mongojack</groupId>
+                <artifactId>mongojack</artifactId>
+                <version>${version.org.mongojack}</version>
+                <optional>true</optional>
+            </dependency>
+
             <!-- CSV Dependencies -->
             <dependency>
                 <groupId>net.sf.supercsv</groupId>
@@ -80,6 +96,19 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mongojack</groupId>
+            <artifactId>mongojack</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.fasterxml</groupId>
             <artifactId>aalto-xml</artifactId>
