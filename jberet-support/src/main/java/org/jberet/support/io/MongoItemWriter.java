@@ -14,28 +14,17 @@ package org.jberet.support.io;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
-import javax.inject.Inject;
 import javax.inject.Named;
-
-import com.mongodb.WriteConcern;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes to a collection in a MongoDB database.
  */
 @Named
 public class MongoItemWriter extends MongoItemReaderWriterBase implements ItemWriter {
-    @Inject
-    @BatchProperty
-    protected String writeConcern;
-
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         super.init();
-        if (writeConcern != null) {
-            mongoClient.setWriteConcern(new WriteConcern(writeConcern));
-        }
     }
 
     @Override
@@ -45,10 +34,6 @@ public class MongoItemWriter extends MongoItemReaderWriterBase implements ItemWr
 
     @Override
     public void close() throws Exception {
-        if (mongoClient != null) {
-            mongoClient.close();
-            mongoClient = null;
-        }
     }
 
     @Override

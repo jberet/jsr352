@@ -89,10 +89,6 @@ public class MongoItemReader extends MongoItemReaderWriterBase implements ItemRe
             cursor.close();
             cursor = null;
         }
-        if (mongoClient != null) {
-            mongoClient.close();
-            mongoClient = null;
-        }
     }
 
     @Override
