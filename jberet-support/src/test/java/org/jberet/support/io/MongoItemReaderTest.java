@@ -32,10 +32,11 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.util.JSON;
 import org.jberet.runtime.JobExecutionImpl;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -51,21 +52,14 @@ public final class MongoItemReaderTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
     static final String databaseName = "testData";
+    static final String mongoClientUri = "mongodb://localhost/" + databaseName;
     static final String readCollection = "movies";
     static final String writeCollection = "movies.out";
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        mongoClient = new MongoClient("localhost");
+        mongoClient = (MongoClient) Mongo.Holder.singleton().connect(new MongoClientURI(mongoClientUri));
         db = mongoClient.getDB(databaseName);
-    }
-
-    @AfterClass
-    public static void afterClass() throws Exception {
-        if (mongoClient != null) {
-            mongoClient.close();
-            mongoClient = null;
-        }
     }
 
     @Before
@@ -139,36 +133,41 @@ public final class MongoItemReaderTest {
     static void validate(final int size, final String expect, final String forbid) {
         final DBCollection collection = db.getCollection(writeCollection);
         final DBCursor cursor = collection.find();
-        Assert.assertEquals(size, cursor.size());
-        final List<String> expects = new ArrayList<String>();
-        String[] forbids = CellProcessorConfig.EMPTY_STRING_ARRAY;
-        if (expect != null && !expect.isEmpty()) {
-            Collections.addAll(expects, expect.split(","));
-        }
-        if (forbid != null && !forbid.isEmpty()) {
-            forbids = forbid.split(",");
-        }
-        if (expects.size() == 0 && forbids.length == 0) {
-            return;
-        }
-        while (cursor.hasNext()) {
-            final DBObject next = cursor.next();
-            final String stringValue = next.toString();
-            for (final String s : forbids) {
-                if (stringValue.contains(s.trim())) {
-                    throw new IllegalStateException("Forbidden string found: " + s);
+
+        try {
+            Assert.assertEquals(size, cursor.size());
+            final List<String> expects = new ArrayList<String>();
+            String[] forbids = CellProcessorConfig.EMPTY_STRING_ARRAY;
+            if (expect != null && !expect.isEmpty()) {
+                Collections.addAll(expects, expect.split(","));
+            }
+            if (forbid != null && !forbid.isEmpty()) {
+                forbids = forbid.split(",");
+            }
+            if (expects.size() == 0 && forbids.length == 0) {
+                return;
+            }
+            while (cursor.hasNext()) {
+                final DBObject next = cursor.next();
+                final String stringValue = next.toString();
+                for (final String s : forbids) {
+                    if (stringValue.contains(s.trim())) {
+                        throw new IllegalStateException("Forbidden string found: " + s);
+                    }
+                }
+                for (final Iterator<String> it = expects.iterator(); it.hasNext(); ) {
+                    final String s = it.next();
+                    if (stringValue.contains(s.trim())) {
+                        System.out.printf("Found expected string: %s%n", s);
+                        it.remove();
+                    }
                 }
             }
-            for (final Iterator<String> it = expects.iterator(); it.hasNext(); ) {
-                final String s = it.next();
-                if (stringValue.contains(s.trim())) {
-                    System.out.printf("Found expected string: %s%n", s);
-                    it.remove();
-                }
+            if (expects.size() > 0) {
+                throw new IllegalStateException("Some expected strings are still not found: " + expects);
             }
-        }
-        if (expects.size() > 0) {
-            throw new IllegalStateException("Some expected strings are still not found: " + expects);
+        } finally {
+            cursor.close();
         }
     }
 }
