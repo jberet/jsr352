@@ -46,11 +46,13 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
     protected abstract void registerModule() throws Exception;
 
     /**
-     * Initializes {@code jsonFactory} field, which may be instantiated or obtained from other part of the application.
-     * This method also configures the {@code jsonFactory} properly.
+     * Initializes {@link #jsonFactory} and {@link #objectMapper} fields, which may be instantiated or obtained from
+     * other part of the application. This method also configures the {@link #jsonFactory} and {@link #objectMapper}
+     * properly based on the current batch artifact properties.
      */
-    protected void initJsonFactory() {
+    protected void initJsonFactoryAndObjectMapper() {
         jsonFactory = new MappingJsonFactory();
+        objectMapper = (ObjectMapper) jsonFactory.getCodec();
         if (jsonFactoryFeatures != null) {
             for (final Map.Entry<String, String> e : jsonFactoryFeatures.entrySet()) {
                 final String key = e.getKey();
@@ -75,7 +77,6 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
             }
         }
         if (mapperFeatures != null) {
-            objectMapper = new ObjectMapper(jsonFactory);
             for (final Map.Entry<String, String> e : mapperFeatures.entrySet()) {
                 final String key = e.getKey();
                 final String value = e.getValue();

@@ -79,7 +79,6 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
         xmlMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
 
         toXmlGenerator = xmlFactory.createGenerator(getOutputStream(writeMode));
-        toXmlGenerator.setCodec(xmlMapper);
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
 
         if (prettyPrinter == null) {

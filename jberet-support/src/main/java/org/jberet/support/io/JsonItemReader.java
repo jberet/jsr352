@@ -25,7 +25,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.io.InputDecorator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
@@ -87,15 +86,12 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         if (start > end) {
             throw SupportLogger.LOGGER.invalidStartPosition((Integer) checkpoint, start, end);
         }
-        super.initJsonFactory();
+        super.initJsonFactoryAndObjectMapper();
         if (inputDecorator != null) {
             jsonFactory.setInputDecorator((InputDecorator) inputDecorator.newInstance());
         }
 
         if (deserializationFeatures != null) {
-            if (objectMapper == null) {
-                objectMapper = new ObjectMapper(jsonFactory);
-            }
             for (final Map.Entry<String, String> e : deserializationFeatures.entrySet()) {
                 final String key = e.getKey();
                 final String value = e.getValue();
@@ -123,15 +119,9 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
 
         jsonParser = jsonFactory.createParser(getInputStream(false));
         if (deserializationProblemHandlers != null) {
-            if (objectMapper == null) {
-                objectMapper = new ObjectMapper(jsonFactory);
-            }
             for (final Class c : deserializationProblemHandlers) {
                 objectMapper.addHandler((DeserializationProblemHandler) c.newInstance());
             }
-        }
-        if (objectMapper != null) {
-            jsonParser.setCodec(objectMapper);
         }
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
 
@@ -207,9 +197,6 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
     @Override
     protected void registerModule() throws Exception {
         if (customDeserializers != null) {
-            if (objectMapper == null) {
-                objectMapper = new ObjectMapper(jsonFactory);
-            }
             final SimpleModule simpleModule = new SimpleModule("customDeserializer-module");
             for (final Class aClass : customDeserializers) {
                 simpleModule.addDeserializer(aClass, (JsonDeserializer) aClass.newInstance());

@@ -74,7 +74,6 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
         }
 
         fromXmlParser = (FromXmlParser) xmlFactory.createParser(getInputStream(false));
-        fromXmlParser.setCodec(xmlMapper);
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
         token = fromXmlParser.nextToken();
     }

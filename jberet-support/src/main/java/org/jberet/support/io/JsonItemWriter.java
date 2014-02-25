@@ -25,7 +25,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.io.OutputDecorator;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
@@ -66,16 +65,13 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         SupportLogger.LOGGER.tracef("Open JsonItemWriter with checkpoint %s, which is ignored for JsonItemWriter.%n", checkpoint);
-        super.initJsonFactory();
+        super.initJsonFactoryAndObjectMapper();
 
         if (outputDecorator != null) {
             jsonFactory.setOutputDecorator((OutputDecorator) outputDecorator.newInstance());
         }
 
         if (serializationFeatures != null) {
-            if (objectMapper == null) {
-                objectMapper = new ObjectMapper(jsonFactory);
-            }
             for (final Map.Entry<String, String> e : serializationFeatures.entrySet()) {
                 final String key = e.getKey();
                 final String value = e.getValue();
@@ -102,9 +98,6 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
         registerModule();
 
         jsonGenerator = jsonFactory.createGenerator(getOutputStream(writeMode));
-        if (objectMapper != null) {
-            jsonGenerator.setCodec(objectMapper);
-        }
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
 
         if (jsonGeneratorFeatures != null) {
@@ -166,9 +159,6 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
     @Override
     protected void registerModule() throws Exception {
         if (customSerializers != null) {
-            if (objectMapper == null) {
-                objectMapper = new ObjectMapper(jsonFactory);
-            }
             final SimpleModule simpleModule = new SimpleModule("customSerializer-module");
             for (final Class aClass : customSerializers) {
                 simpleModule.addSerializer(aClass, (JsonSerializer) aClass.newInstance());
