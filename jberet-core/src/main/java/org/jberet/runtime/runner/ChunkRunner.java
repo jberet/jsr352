@@ -497,65 +497,67 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private void doCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         final int outputSize = outputList.size();
-        if (outputSize > 0) {
-            try {
-                for (final ItemWriteListener l : itemWriteListeners) {
-                    l.beforeWrite(outputList);
-                }
-                itemWriter.writeItems(outputList);
-                stepMetrics.increment(Metric.MetricType.WRITE_COUNT, outputSize);
-                for (final ItemWriteListener l : itemWriteListeners) {
-                    l.afterWrite(outputList);
-                }
-                stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
-                stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
-                batchContext.savePersistentData();
+        if (outputSize == 0 && processingInfo.chunkState == ChunkState.DEPLETED) {
+            return;
+        }
+        try {
+            for (final ItemWriteListener l : itemWriteListeners) {
+                l.beforeWrite(outputList);
+            }
+            itemWriter.writeItems(outputList);
+            stepMetrics.increment(Metric.MetricType.WRITE_COUNT, outputSize);
+            for (final ItemWriteListener l : itemWriteListeners) {
+                l.afterWrite(outputList);
+            }
+            stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
+            stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
+            batchContext.savePersistentData();
 
-                outputList.clear();
-                if (!checkpointPolicy.equals("item")) {
-                    checkpointAlgorithm.endCheckpoint();
-                }
+            outputList.clear();
+            if (!checkpointPolicy.equals("item")) {
+                checkpointAlgorithm.endCheckpoint();
+            }
+            if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
+                processingInfo.chunkState = ChunkState.JOB_STOPPED;
+                batchContext.setBatchStatus(BatchStatus.STOPPED);
+            } else if (processingInfo.chunkState != ChunkState.DEPLETED && processingInfo.chunkState != ChunkState.RETRYING) {
+                processingInfo.chunkState = ChunkState.TO_START_NEW;
+            }
+            if (collector != null) {
+                stepRunner.collectorDataQueue.put(collector.collectPartitionData());
+            }
+        } catch (final Exception e) {
+            for (final ItemWriteListener l : itemWriteListeners) {
+                l.onWriteError(outputList, e);
+            }
+            toSkipOrRetry(e, processingInfo);
+            if (processingInfo.itemState == ItemState.TO_SKIP) {
+                //if requested to stop the job, do not skip to the next item
                 if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
                     processingInfo.chunkState = ChunkState.JOB_STOPPED;
                     batchContext.setBatchStatus(BatchStatus.STOPPED);
-                } else if (processingInfo.chunkState != ChunkState.DEPLETED && processingInfo.chunkState != ChunkState.RETRYING) {
-                    processingInfo.chunkState = ChunkState.TO_START_NEW;
-                }
-                if (collector != null) {
-                    stepRunner.collectorDataQueue.put(collector.collectPartitionData());
-                }
-            } catch (Exception e) {
-                for (final ItemWriteListener l : itemWriteListeners) {
-                    l.onWriteError(outputList, e);
-                }
-                toSkipOrRetry(e, processingInfo);
-                if (processingInfo.itemState == ItemState.TO_SKIP) {
-                    //if requested to stop the job, do not skip to the next item
-                    if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
-                        processingInfo.chunkState = ChunkState.JOB_STOPPED;
-                        batchContext.setBatchStatus(BatchStatus.STOPPED);
-                    } else if (processingInfo.chunkState != ChunkState.JOB_STOPPED) {
-                        for (final SkipWriteListener l : skipWriteListeners) {
-                            l.onSkipWriteItem(outputList, e);
-                        }
-                        stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
-                        skipCount += outputSize;
+                } else if (processingInfo.chunkState != ChunkState.JOB_STOPPED) {
+                    for (final SkipWriteListener l : skipWriteListeners) {
+                        l.onSkipWriteItem(outputList, e);
                     }
-                } else if (processingInfo.itemState == ItemState.TO_RETRY) {
-                    for (final RetryWriteListener l : retryWriteListeners) {
-                        l.onRetryWriteException(outputList, e);
-                    }
-                    retryCount++;
-                    if (needRollbackBeforeRetry(e)) {
-                        rollbackCheckpoint(processingInfo);
-                    } else {
-                        processingInfo.itemState = ItemState.TO_RETRY_WRITE;
-                    }
+                    stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
+                    skipCount += outputSize;
+                }
+            } else if (processingInfo.itemState == ItemState.TO_RETRY) {
+                for (final RetryWriteListener l : retryWriteListeners) {
+                    l.onRetryWriteException(outputList, e);
+                }
+                retryCount++;
+                if (needRollbackBeforeRetry(e)) {
+                    rollbackCheckpoint(processingInfo);
                 } else {
-                    throw e;
+                    processingInfo.itemState = ItemState.TO_RETRY_WRITE;
                 }
+            } else {
+                throw e;
             }
         }
+
         checkIfEndRetry(processingInfo, itemReader.checkpointInfo());
         if (processingInfo.itemState == ItemState.RETRYING_WRITE) {
             processingInfo.itemState = ItemState.RUNNING;

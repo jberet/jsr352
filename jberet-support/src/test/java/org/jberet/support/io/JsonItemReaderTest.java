@@ -46,7 +46,7 @@ import org.junit.Test;
  * A test class that reads json resource into java object and write out to json format.
  */
 public final class JsonItemReaderTest {
-    static final String jobName = "org.jberet.support.io.JsonItemReaderTest";
+    static final String jobName =  "org.jberet.support.io.JsonItemReaderTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String movieJson = "movies-2012.json";
     static final String movieJsonUnknownProperty = "movies-2012-unknown-properties.json";
@@ -65,6 +65,18 @@ public final class JsonItemReaderTest {
 
     private String jsonGeneratorFeatures;
     private String deserializationProblemHandlers;
+
+    //https://issues.jboss.org/browse/JBERET-44
+    //no transaction started after a chunk where no data is written.
+    //the ItemProcessor in this test is configured to filter out all items so there is always no data to write out.
+    //when a new chunk is started, TransactionManager should also begin a new tx.
+    @Test
+    public void testMovieFilterProcessor() throws Exception {
+        final String filtering = "filtering";
+        System.setProperty(filtering, "true");
+        testReadWrite0(movieJson, "testMovieFilterProcessor.out", "1", "15", Movie.class, null, null, BatchStatus.COMPLETED);
+        System.clearProperty(filtering);
+    }
 
     @Test
     public void testBeanTypeGithubJson1_999() throws Exception {
