@@ -17,20 +17,21 @@
         <chunk>
             <reader ref="mongoItemReader">
                 <properties>
-                    <property name="beanType" value="org.jberet.support.io.Movie"/>
+                    <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="host" value="localhost"/>
                     <property name="database" value="testData"/>
-                    <property name="collection" value="movies"/>
+                    <property name="collection" value="#{jobParameters['collection']}"/>
                     <property name="skip" value="#{jobParameters['skip']}"/>
                     <property name="limit" value="#{jobParameters['limit']}"/>
+                    <property name="projection" value="#{jobParameters['projection']"/>
                 </properties>
             </reader>
             <writer ref="mongoItemWriter">
                 <properties>
-                    <property name="beanType" value="org.jberet.support.io.Movie"/>
+                    <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="host" value="localhost"/>
                     <property name="database" value="testData"/>
-                    <property name="collection" value="movies.out"/>
+                    <property name="collection" value="#{jobParameters['collection.out']}"/>
                 </properties>
             </writer>
         </chunk>

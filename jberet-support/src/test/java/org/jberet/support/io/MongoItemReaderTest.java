@@ -13,6 +13,8 @@
 package org.jberet.support.io;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -53,8 +55,10 @@ public final class MongoItemReaderTest {
 
     static final String databaseName = "testData";
     static final String mongoClientUri = "mongodb://localhost/" + databaseName;
-    static final String readCollection = "movies";
-    static final String writeCollection = "movies.out";
+    static final String movieCollection = "movies";
+    static final String movieOutCollection = "movies.out";
+    static final String githubDataCollection = "githubData";
+    static final String githubDataOutCollection = "githubData.out";
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -64,27 +68,54 @@ public final class MongoItemReaderTest {
 
     @Before
     public void before() throws Exception {
-        dropCollection(writeCollection);
-        addTestData(JsonItemReaderTest.movieJson);
+        dropCollection(movieOutCollection);
+        addTestData(JsonItemReaderTest.movieJson, movieCollection, 100);
+    }
+
+    @Test
+    public void testMongoGithubData() throws Exception {
+        dropCollection(githubDataOutCollection);
+        addTestData(JsonItemReaderTest.githubJson, githubDataCollection, 5);
+        testReadWrite0(null, null, -1,
+                GithubData.class, "{_id : 0}",
+                githubDataCollection, githubDataOutCollection,
+                null, null);
     }
 
     @Test
     public void testMongoMovieBeanTypeLimit2() throws Exception {
-        testReadWrite0(null, "2", 2, MovieTest.expect1_2, MovieTest.forbid1_2);
+        testReadWrite0(null, "2", 2,
+                Movie.class, null,
+                movieCollection, movieOutCollection,
+                MovieTest.expect1_2, MovieTest.forbid1_2);
     }
 
     @Test
     public void testMongoMovieBeanTypeLimit3Skip1() throws Exception {
-        testReadWrite0("1", "3", 3, MovieTest.expect2_4, MovieTest.forbid2_4);
+        testReadWrite0("1", "3", 3,
+                Movie.class, null,
+                movieCollection, movieOutCollection,
+                MovieTest.expect2_4, MovieTest.forbid2_4);
     }
 
     @Test
     public void testMongoMovieBeanTypeFull() throws Exception {
-        testReadWrite0(null, null, 100, MovieTest.expectFull, null);
+        testReadWrite0(null, null, 100,
+                Movie.class, null,
+                movieCollection, movieOutCollection,
+                MovieTest.expectFull, null);
     }
 
-    private void testReadWrite0(final String skip, final String limit, final int size, final String expect, final String forbid) throws Exception {
-        final Properties params = new Properties();
+    private void testReadWrite0(final String skip, final String limit, final int size,
+                                final Class<?> beanType, final String projection,
+                                final String collection, final String collectionOut,
+                                final String expect, final String forbid) throws Exception {
+        final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
+        params.setProperty("collection", collection);
+        params.setProperty("collection.out", collectionOut);
+        if (projection != null) {
+            params.setProperty("projection", projection);
+        }
         if (skip != null) {
             params.setProperty("skip", skip);
         }
@@ -105,14 +136,22 @@ public final class MongoItemReaderTest {
         collection.drop();
     }
 
-    static void addTestData(final String dataResource) throws Exception {
-        final DBCollection collection = db.getCollection(readCollection);
-        if (collection.find().count() == 100) {
-            System.out.printf("The readCollection %s already contains 100 items, skip adding test data.%n", readCollection);
+    static void addTestData(final String dataResource, final String mongoCollection, final int minSizeIfExists) throws Exception {
+        final DBCollection collection = db.getCollection(mongoCollection);
+        if (collection.find().count() >= minSizeIfExists) {
+            System.out.printf("The readCollection %s already contains 100 items, skip adding test data.%n", mongoCollection);
             return;
         }
 
-        final InputStream inputStream = MongoItemReaderTest.class.getClassLoader().getResourceAsStream(dataResource);
+        InputStream inputStream = MongoItemReaderTest.class.getClassLoader().getResourceAsStream(dataResource);
+        if (inputStream == null) {
+            try {
+                final URL url = new URI(dataResource).toURL();
+                inputStream = url.openStream();
+            } catch (final Exception e) {
+                System.out.printf("Failed to convert dataResource %s to URL: %s%n", dataResource, e);
+            }
+        }
         if (inputStream == null) {
             throw new IllegalStateException("The inputStream for the test data is null");
         }
@@ -131,11 +170,14 @@ public final class MongoItemReaderTest {
     }
 
     static void validate(final int size, final String expect, final String forbid) {
-        final DBCollection collection = db.getCollection(writeCollection);
+        final DBCollection collection = db.getCollection(movieOutCollection);
         final DBCursor cursor = collection.find();
 
         try {
-            Assert.assertEquals(size, cursor.size());
+            //if size is negative number, it means the size is unknown and so skip the size check.
+            if (size >= 0) {
+                Assert.assertEquals(size, cursor.size());
+            }
             final List<String> expects = new ArrayList<String>();
             String[] forbids = CellProcessorConfig.EMPTY_STRING_ARRAY;
             if (expect != null && !expect.isEmpty()) {
