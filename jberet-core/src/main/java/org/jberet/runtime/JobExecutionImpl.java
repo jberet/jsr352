@@ -51,8 +51,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
      */
     private String restartPosition;
 
-    private CountDownLatch jobTerminationLatch = new CountDownLatch(1);
-    private CountDownLatch jobStopLatch = new CountDownLatch(1);
+    private transient CountDownLatch jobTerminationLatch = new CountDownLatch(1);
+    private transient CountDownLatch jobStopLatch = new CountDownLatch(1);
 
     public JobExecutionImpl(final JobInstanceImpl jobInstance, final Properties jobParameters) throws JobStartException {
         this.jobInstance = jobInstance;

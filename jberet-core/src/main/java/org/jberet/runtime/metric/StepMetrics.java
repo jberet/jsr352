@@ -12,6 +12,7 @@
 
 package org.jberet.runtime.metric;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import javax.batch.runtime.Metric;
@@ -19,8 +20,9 @@ import javax.batch.runtime.Metric;
 /**
  * Maintains execution metrics for a single step.
  */
-final public class StepMetrics {
+final public class StepMetrics implements Serializable {
 
+    private static final long serialVersionUID = -4854359401644105419L;
     private final Map<Metric.MetricType, MetricImpl> metricsMapping = new HashMap<Metric.MetricType, MetricImpl>();
 
     public StepMetrics() {
