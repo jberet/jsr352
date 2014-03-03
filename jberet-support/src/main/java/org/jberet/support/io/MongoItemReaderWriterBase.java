@@ -64,35 +64,22 @@ public abstract class MongoItemReaderWriterBase {
     protected JacksonDBCollection<Object, String> jacksonCollection;
 
     protected void init() throws Exception {
+        if (beanType == null) {
+            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "beanType");
+        }
+        final MongoClientURI clientURI;
         if (uri != null) {
-            mongoClient = (MongoClient) Mongo.Holder.singleton().connect(new MongoClientURI(uri));
-        } else {
-            if (host == null) {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "host");
-            }
-            if (beanType == null) {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "beanType");
-            }
+            clientURI = new MongoClientURI(uri);
             if (database == null) {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "database");
+                database = clientURI.getDatabase();
             }
             if (collection == null) {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "collection");
+                collection = clientURI.getCollection();
             }
-
-            //The format of the URI is:
-            //mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database[.collection]][?options]]
-            final StringBuilder uriVal = new StringBuilder("mongodb://");
-            if (user != null) {
-                uriVal.append(user).append(':').append(password == null ? "" : password).append('@');
-            }
-            uriVal.append(host).append('/').append(database);
-
-            if (options != null && !options.isEmpty()) {
-                uriVal.append('?').append(options);
-            }
-            mongoClient = (MongoClient) Mongo.Holder.singleton().connect(new MongoClientURI(uriVal.toString()));
+        } else {
+            clientURI = MongoClientObjectFactory.createMongoClientURI(host, database, collection, options, user, password);
         }
+        mongoClient = (MongoClient) Mongo.Holder.singleton().connect(clientURI);
         db = mongoClient.getDB(database);
         jacksonCollection = JacksonDBCollection.wrap(db.getCollection(collection), beanType, String.class);
     }

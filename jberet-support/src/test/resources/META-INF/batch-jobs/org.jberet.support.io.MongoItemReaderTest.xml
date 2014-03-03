@@ -17,6 +17,7 @@
         <chunk>
             <reader ref="mongoItemReader">
                 <properties>
+                    <property name="uri" value="#{jobParameters['uri']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="host" value="localhost"/>
                     <property name="database" value="testData"/>
@@ -28,6 +29,7 @@
             </reader>
             <writer ref="mongoItemWriter">
                 <properties>
+                    <property name="uri" value="#{jobParameters['uri']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="host" value="localhost"/>
                     <property name="database" value="testData"/>

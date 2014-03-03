@@ -76,7 +76,7 @@ public final class MongoItemReaderTest {
     public void testMongoGithubData() throws Exception {
         dropCollection(githubDataOutCollection);
         addTestData(JsonItemReaderTest.githubJson, githubDataCollection, 5);
-        testReadWrite0(null, null, -1,
+        testReadWrite0(mongoClientUri, null, null, -1,
                 GithubData.class, "{_id : 0}",
                 githubDataCollection, githubDataOutCollection,
                 null, null);
@@ -84,7 +84,7 @@ public final class MongoItemReaderTest {
 
     @Test
     public void testMongoMovieBeanTypeLimit2() throws Exception {
-        testReadWrite0(null, "2", 2,
+        testReadWrite0(mongoClientUri, null, "2", 2,
                 Movie.class, null,
                 movieCollection, movieOutCollection,
                 MovieTest.expect1_2, MovieTest.forbid1_2);
@@ -92,7 +92,7 @@ public final class MongoItemReaderTest {
 
     @Test
     public void testMongoMovieBeanTypeLimit3Skip1() throws Exception {
-        testReadWrite0("1", "3", 3,
+        testReadWrite0(null, "1", "3", 3,
                 Movie.class, null,
                 movieCollection, movieOutCollection,
                 MovieTest.expect2_4, MovieTest.forbid2_4);
@@ -100,19 +100,22 @@ public final class MongoItemReaderTest {
 
     @Test
     public void testMongoMovieBeanTypeFull() throws Exception {
-        testReadWrite0(null, null, 100,
+        testReadWrite0(null, null, null, 100,
                 Movie.class, null,
                 movieCollection, movieOutCollection,
                 MovieTest.expectFull, null);
     }
 
-    private void testReadWrite0(final String skip, final String limit, final int size,
+    private void testReadWrite0(final String uri, final String skip, final String limit, final int size,
                                 final Class<?> beanType, final String projection,
                                 final String collection, final String collectionOut,
                                 final String expect, final String forbid) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
         params.setProperty("collection", collection);
         params.setProperty("collection.out", collectionOut);
+        if (uri != null) {
+            params.setProperty("uri", uri);
+        }
         if (projection != null) {
             params.setProperty("projection", projection);
         }
