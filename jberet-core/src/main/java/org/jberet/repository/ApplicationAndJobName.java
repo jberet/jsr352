@@ -9,14 +9,18 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.repository;
+
+import java.io.Serializable;
 
 /**
  * Used as a key to uniquely identify a job with both the name of the job and the name of the application that
  * containing the job definition.
  */
-public final class ApplicationAndJobName {
+public final class ApplicationAndJobName implements Serializable {
+
+    private static final long serialVersionUID = -2560203183829105420L;
     public final String appName;
     public final String jobName;
 

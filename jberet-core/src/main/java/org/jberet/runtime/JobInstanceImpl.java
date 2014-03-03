@@ -12,6 +12,7 @@
 
 package org.jberet.runtime;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,10 @@ import javax.batch.runtime.JobInstance;
 import org.jberet.job.model.Job;
 import org.jberet.repository.ApplicationAndJobName;
 
-public final class JobInstanceImpl implements JobInstance {
+public final class JobInstanceImpl implements JobInstance, Serializable {
+
+    private static final long serialVersionUID = -933284750735124427L;
+
     private long id;
     private long version;
     private String jobName;
