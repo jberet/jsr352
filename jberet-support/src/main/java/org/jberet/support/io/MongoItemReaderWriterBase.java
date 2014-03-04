@@ -14,6 +14,7 @@ package org.jberet.support.io;
 
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
@@ -30,6 +31,10 @@ public abstract class MongoItemReaderWriterBase {
     @Inject
     @BatchProperty
     protected Class beanType;
+
+    @Inject
+    @BatchProperty
+    protected String mongoClientLookup;
 
     @Inject
     @BatchProperty
@@ -67,19 +72,24 @@ public abstract class MongoItemReaderWriterBase {
         if (beanType == null) {
             throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "beanType");
         }
-        final MongoClientURI clientURI;
-        if (uri != null) {
-            clientURI = new MongoClientURI(uri);
-            if (database == null) {
-                database = clientURI.getDatabase();
+        if (mongoClientLookup == null) {
+            final MongoClientURI clientURI;
+            if (uri != null) {
+                clientURI = new MongoClientURI(uri);
+                if (database == null) {
+                    database = clientURI.getDatabase();
+                }
+                if (collection == null) {
+                    collection = clientURI.getCollection();
+                }
+            } else {
+                clientURI = MongoClientObjectFactory.createMongoClientURI(host, database, collection, options, user, password);
             }
-            if (collection == null) {
-                collection = clientURI.getCollection();
-            }
+            mongoClient = (MongoClient) Mongo.Holder.singleton().connect(clientURI);
         } else {
-            clientURI = MongoClientObjectFactory.createMongoClientURI(host, database, collection, options, user, password);
+            mongoClient = InitialContext.doLookup(mongoClientLookup);
         }
-        mongoClient = (MongoClient) Mongo.Holder.singleton().connect(clientURI);
+
         db = mongoClient.getDB(database);
         jacksonCollection = JacksonDBCollection.wrap(db.getCollection(collection), beanType, String.class);
     }

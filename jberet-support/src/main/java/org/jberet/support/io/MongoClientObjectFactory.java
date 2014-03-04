@@ -23,13 +23,25 @@ import com.mongodb.MongoClientURI;
 import org.jberet.support._private.SupportLogger;
 
 /**
- * An implementation of {@code javax.naming.spi.ObjectFactory} that produces instance for {@code com.mongodb.MongoClient}.
+ * An implementation of {@code javax.naming.spi.ObjectFactory} that produces instance of {@code com.mongodb.MongoClient}.
  * This class can be used to create a custom JNDI resource in an application server.
  * See wildfly.home/docs/schema/jboss-as-naming_2_0.xsd for more details.
  */
 public final class MongoClientObjectFactory implements ObjectFactory {
     /**
      * Gets an instance of {@code com.mongodb.MongoClient} based on the resource configuration in the application server.
+     * The parameter {@code environment} contains MongoDB client connection properties, and accept the following property:
+     * <ul>
+     * <li>uri: uri to connect to MongoDB instance</li>
+     * <li>host: single host and port, or multiple host and port specification in the format
+     * host1[:port1][,host2[:port2],...[,hostN[:portN]]]</li>
+     * <li>database: MongoDB database name, e.g., testData</li>
+     * <li>collection: MongoDB collection name, e.g., movies</li>
+     * <li>options: MongoDB client options, e.g., safe=true&wtimeout=1000</li>
+     * <li>user: MongoDB username</li>
+     * <li>password: MongoDB password</li>
+     * </ul>
+     * See also <a href="http://api.mongodb.org/java/2.12/com/mongodb/MongoClientURI.html">MongoClientURI javadoc.</a>
      *
      * @param obj         the JNDI name of {@code com.mongodb.MongoClient} resource
      * @param name        always null
