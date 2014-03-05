@@ -23,10 +23,7 @@ import javax.inject.Named;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.io.InputDecorator;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
 
 /**
@@ -57,11 +54,11 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
 
     @Inject
     @BatchProperty
-    protected Map<String, String> deserializationFeatures;
+    protected String deserializationFeatures;
 
     @Inject
     @BatchProperty
-    protected Class[] deserializationProblemHandlers;
+    protected String deserializationProblemHandlers;
 
     @Inject
     @BatchProperty
@@ -69,7 +66,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
 
     @Inject
     @BatchProperty
-    protected Class[] customDeserializers;
+    protected String customDeserializers;
 
     private JsonParser jsonParser;
     private JsonToken token;
@@ -92,36 +89,15 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         }
 
         if (deserializationFeatures != null) {
-            for (final Map.Entry<String, String> e : deserializationFeatures.entrySet()) {
-                final String key = e.getKey();
-                final String value = e.getValue();
-                final DeserializationFeature feature;
-                try {
-                    feature = DeserializationFeature.valueOf(key);
-                } catch (final Exception e1) {
-                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
-                }
-                if ("true".equals(value)) {
-                    if (!feature.enabledByDefault()) {
-                        objectMapper.configure(feature, true);
-                    }
-                } else if ("false".equals(value)) {
-                    if (feature.enabledByDefault()) {
-                        objectMapper.configure(feature, false);
-                    }
-                } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
-                }
-            }
+            MappingJsonFactoryObjectFactory.configureDeserializationFeatures(objectMapper, deserializationFeatures);
         }
 
         registerModule();
-
         jsonParser = jsonFactory.createParser(getInputStream(false));
+
         if (deserializationProblemHandlers != null) {
-            for (final Class c : deserializationProblemHandlers) {
-                objectMapper.addHandler((DeserializationProblemHandler) c.newInstance());
-            }
+            MappingJsonFactoryObjectFactory.configureDeserializationProblemHandlers(
+                    objectMapper, deserializationProblemHandlers, getClass().getClassLoader());
         }
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
 
@@ -196,12 +172,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
 
     @Override
     protected void registerModule() throws Exception {
-        if (customDeserializers != null) {
-            final SimpleModule simpleModule = new SimpleModule("customDeserializer-module");
-            for (final Class aClass : customDeserializers) {
-                simpleModule.addDeserializer(aClass, (JsonDeserializer) aClass.newInstance());
-            }
-            objectMapper.registerModule(simpleModule);
-        }
+        MappingJsonFactoryObjectFactory.configureCustomSerializersAndDeserializers(
+                objectMapper, null, customDeserializers, getClass().getClassLoader());
     }
 }

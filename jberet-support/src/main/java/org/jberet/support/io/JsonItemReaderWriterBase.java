@@ -12,15 +12,12 @@
 
 package org.jberet.support.io;
 
-import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jberet.support._private.SupportLogger;
 
 /**
  * Base class for {@link org.jberet.support.io.JsonItemReader} and {@link org.jberet.support.io.JsonItemWriter}.
@@ -30,11 +27,11 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
 
     @Inject
     @BatchProperty
-    protected Map<String, String> jsonFactoryFeatures;
+    protected String jsonFactoryFeatures;
 
     @Inject
     @BatchProperty
-    protected Map<String, String> mapperFeatures;
+    protected String mapperFeatures;
 
     protected JsonFactory jsonFactory;
     protected ObjectMapper objectMapper;
@@ -54,50 +51,10 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
         jsonFactory = new MappingJsonFactory();
         objectMapper = (ObjectMapper) jsonFactory.getCodec();
         if (jsonFactoryFeatures != null) {
-            for (final Map.Entry<String, String> e : jsonFactoryFeatures.entrySet()) {
-                final String key = e.getKey();
-                final String value = e.getValue();
-                final JsonFactory.Feature feature;
-                try {
-                    feature = JsonFactory.Feature.valueOf(key);
-                } catch (final Exception e1) {
-                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
-                }
-                if ("true".equals(value)) {
-                    if (!feature.enabledByDefault()) {
-                        jsonFactory.configure(feature, true);
-                    }
-                } else if ("false".equals(value)) {
-                    if (feature.enabledByDefault()) {
-                        jsonFactory.configure(feature, false);
-                    }
-                } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
-                }
-            }
+            JsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, jsonFactoryFeatures);
         }
         if (mapperFeatures != null) {
-            for (final Map.Entry<String, String> e : mapperFeatures.entrySet()) {
-                final String key = e.getKey();
-                final String value = e.getValue();
-                final MapperFeature feature;
-                try {
-                    feature = MapperFeature.valueOf(key);
-                } catch (final Exception e1) {
-                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
-                }
-                if ("true".equals(value)) {
-                    if (!feature.enabledByDefault()) {
-                        objectMapper.configure(feature, true);
-                    }
-                } else if ("false".equals(value)) {
-                    if (feature.enabledByDefault()) {
-                        objectMapper.configure(feature, false);
-                    }
-                } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
-                }
-            }
+            MappingJsonFactoryObjectFactory.configureMapperFeatures(objectMapper, mapperFeatures);
         }
     }
 }

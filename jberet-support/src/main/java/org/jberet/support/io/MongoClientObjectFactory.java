@@ -30,7 +30,7 @@ import org.jberet.support._private.SupportLogger;
 public final class MongoClientObjectFactory implements ObjectFactory {
     /**
      * Gets an instance of {@code com.mongodb.MongoClient} based on the resource configuration in the application server.
-     * The parameter {@code environment} contains MongoDB client connection properties, and accept the following property:
+     * The parameter {@code environment} contains MongoDB client connection properties, and accepts the following property:
      * <ul>
      * <li>uri: uri to connect to MongoDB instance</li>
      * <li>host: single host and port, or multiple host and port specification in the format

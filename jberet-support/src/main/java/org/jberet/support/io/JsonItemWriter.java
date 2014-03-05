@@ -25,7 +25,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.io.OutputDecorator;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
 
@@ -46,7 +45,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
 
     @Inject
     @BatchProperty
-    protected Map<String, String> serializationFeatures;
+    protected String serializationFeatures;
 
     @Inject
     @BatchProperty
@@ -58,7 +57,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
 
     @Inject
     @BatchProperty
-    protected Class[] customSerializers;
+    protected String customSerializers;
 
     protected JsonGenerator jsonGenerator;
 
@@ -72,27 +71,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
         }
 
         if (serializationFeatures != null) {
-            for (final Map.Entry<String, String> e : serializationFeatures.entrySet()) {
-                final String key = e.getKey();
-                final String value = e.getValue();
-                final SerializationFeature feature;
-                try {
-                    feature = SerializationFeature.valueOf(key);
-                } catch (final Exception e1) {
-                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
-                }
-                if ("true".equals(value)) {
-                    if (!feature.enabledByDefault()) {
-                        objectMapper.configure(feature, true);
-                    }
-                } else if ("false".equals(value)) {
-                    if (feature.enabledByDefault()) {
-                        objectMapper.configure(feature, false);
-                    }
-                } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
-                }
-            }
+            MappingJsonFactoryObjectFactory.configureSerializationFeatures(objectMapper, serializationFeatures);
         }
 
         registerModule();
@@ -158,12 +137,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
 
     @Override
     protected void registerModule() throws Exception {
-        if (customSerializers != null) {
-            final SimpleModule simpleModule = new SimpleModule("customSerializer-module");
-            for (final Class aClass : customSerializers) {
-                simpleModule.addSerializer(aClass, (JsonSerializer) aClass.newInstance());
-            }
-            objectMapper.registerModule(simpleModule);
-        }
+        MappingJsonFactoryObjectFactory.configureCustomSerializersAndDeserializers(
+                objectMapper, customSerializers, null, getClass().getClassLoader());
     }
 }
