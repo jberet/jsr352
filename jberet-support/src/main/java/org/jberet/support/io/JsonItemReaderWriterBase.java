@@ -14,6 +14,8 @@ package org.jberet.support.io;
 
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
@@ -33,6 +35,10 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
     @BatchProperty
     protected String mapperFeatures;
 
+    @Inject
+    @BatchProperty
+    protected String jsonFactoryLookup;
+
     protected JsonFactory jsonFactory;
     protected ObjectMapper objectMapper;
 
@@ -47,8 +53,12 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
      * other part of the application. This method also configures the {@link #jsonFactory} and {@link #objectMapper}
      * properly based on the current batch artifact properties.
      */
-    protected void initJsonFactoryAndObjectMapper() {
-        jsonFactory = new MappingJsonFactory();
+    protected void initJsonFactoryAndObjectMapper() throws NamingException {
+        if (jsonFactoryLookup != null) {
+            jsonFactory = InitialContext.doLookup(jsonFactoryLookup);
+        } else {
+            jsonFactory = new MappingJsonFactory();
+        }
         objectMapper = (ObjectMapper) jsonFactory.getCodec();
         if (jsonFactoryFeatures != null) {
             JsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, jsonFactoryFeatures);

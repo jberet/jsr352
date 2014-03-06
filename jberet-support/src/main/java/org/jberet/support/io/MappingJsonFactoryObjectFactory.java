@@ -18,7 +18,6 @@ import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -36,6 +35,8 @@ import org.jberet.support._private.SupportLogger;
  * in an application server. See wildfly.home/docs/schema/jboss-as-naming_2_0.xsd for more details.
  */
 public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
+    private volatile MappingJsonFactory jsonFactoryCached;
+
     /**
      * Gets an instance of {@code com.fasterxml.jackson.databind.MappingJsonFactory} based on the resource configuration
      * in the application server. The parameter {@code environment} contains MappingJsonFactory configuration properties,
@@ -64,38 +65,47 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
                                     final Name name,
                                     final Context nameCtx,
                                     final Hashtable<?, ?> environment) throws Exception {
-        final ClassLoader classLoader = MappingJsonFactoryObjectFactory.class.getClassLoader();
-        final JsonFactory jsonFactory = new MappingJsonFactory();
-        final ObjectMapper objectMapper = (ObjectMapper) jsonFactory.getCodec();
+        MappingJsonFactory jsonFactory = jsonFactoryCached;
+        if (jsonFactory == null) {
+            synchronized (this) {
+                jsonFactory = jsonFactoryCached;
+                if (jsonFactory == null) {
+                    jsonFactoryCached = jsonFactory = new MappingJsonFactory();
+                }
 
-        final Object jsonFactoryFeatures = environment.get("jsonFactoryFeatures");
-        if (jsonFactoryFeatures != null) {
-            JsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, (String) jsonFactoryFeatures);
+                final ClassLoader classLoader = MappingJsonFactoryObjectFactory.class.getClassLoader();
+                final ObjectMapper objectMapper = jsonFactory.getCodec();
+
+                final Object jsonFactoryFeatures = environment.get("jsonFactoryFeatures");
+                if (jsonFactoryFeatures != null) {
+                    JsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, (String) jsonFactoryFeatures);
+                }
+
+                final Object mapperFeatures = environment.get("mapperFeatures");
+                if (mapperFeatures != null) {
+                    configureMapperFeatures(objectMapper, (String) mapperFeatures);
+                }
+
+                final Object deserializationFeatures = environment.get("deserializationFeatures");
+                if (deserializationFeatures != null) {
+                    configureDeserializationFeatures(objectMapper, (String) deserializationFeatures);
+                }
+
+                final Object serializationFeatures = environment.get("serializationFeatures");
+                if (serializationFeatures != null) {
+                    configureSerializationFeatures(objectMapper, (String) serializationFeatures);
+                }
+
+                final Object deserializationProblemHandlers = environment.get("deserializationProblemHandlers");
+                if (deserializationProblemHandlers != null) {
+                    configureDeserializationProblemHandlers(objectMapper, (String) deserializationProblemHandlers, classLoader);
+                }
+
+                configureCustomSerializersAndDeserializers(objectMapper, (String) environment.get("customSerializers"),
+                        (String) environment.get("customDeserializers"), classLoader);
+                JsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(jsonFactory, environment);
+            }
         }
-
-        final Object mapperFeatures = environment.get("mapperFeatures");
-        if (mapperFeatures != null) {
-            configureMapperFeatures(objectMapper, (String) mapperFeatures);
-        }
-
-        final Object deserializationFeatures = environment.get("deserializationFeatures");
-        if (deserializationFeatures != null) {
-            configureDeserializationFeatures(objectMapper, (String) deserializationFeatures);
-        }
-
-        final Object serializationFeatures = environment.get("serializationFeatures");
-        if (serializationFeatures != null) {
-            configureSerializationFeatures(objectMapper, (String) serializationFeatures);
-        }
-
-        final Object deserializationProblemHandlers = environment.get("deserializationProblemHandlers");
-        if (deserializationProblemHandlers != null) {
-            configureDeserializationProblemHandlers(objectMapper, (String) deserializationProblemHandlers, classLoader);
-        }
-
-        configureCustomSerializersAndDeserializers(objectMapper, (String) environment.get("customSerializers"),
-                (String) environment.get("customDeserializers"), classLoader);
-        JsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(jsonFactory, environment);
         return jsonFactory;
     }
 

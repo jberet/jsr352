@@ -28,6 +28,8 @@ import org.jberet.support._private.SupportLogger;
  * in an application server. See wildfly.home/docs/schema/jboss-as-naming_2_0.xsd for more details.
  */
 public final class XmlFactoryObjectFactory implements ObjectFactory {
+    private volatile XmlFactory xmlFactoryCached;
+
     /**
      * Gets an instance of {@code com.fasterxml.jackson.dataformat.xml.XmlFactory} based on the resource configuration in the
      * application server. The parameter {@code environment} contains XmlFactory configuration properties, and accepts
@@ -51,32 +53,41 @@ public final class XmlFactoryObjectFactory implements ObjectFactory {
                                     final Name name,
                                     final Context nameCtx,
                                     final Hashtable<?, ?> environment) throws Exception {
-        final XmlFactory xmlFactory = new XmlFactory();
-        JacksonXmlModule xmlModule = null;
-        JsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(xmlFactory, environment);
-
-        final Object xmlTextElementName = environment.get("xmlTextElementName");
-        if (xmlTextElementName != null) {
-            xmlModule = new JacksonXmlModule();
-            xmlModule.setXMLTextElementName((String) xmlTextElementName);
-        }
-
-        final Object defaultUseWrapper = environment.get("defaultUseWrapper");
-        if (defaultUseWrapper != null) {
-            if (defaultUseWrapper.equals("false")) {
-                if (xmlModule == null) {
-                    xmlModule = new JacksonXmlModule();
+        XmlFactory xmlFactory = xmlFactoryCached;
+        if (xmlFactory == null) {
+            synchronized (this) {
+                xmlFactory = xmlFactoryCached;
+                if (xmlFactory == null) {
+                    xmlFactoryCached = xmlFactory = new XmlFactory();
                 }
-                xmlModule.setDefaultUseWrapper(false);
-            } else if (defaultUseWrapper.equals("true")) {
-                //default value is already true, so nothing to do
-            } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, (String) defaultUseWrapper, "defaultUseWrapper");
+
+                JacksonXmlModule xmlModule = null;
+                JsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(xmlFactory, environment);
+
+                final Object xmlTextElementName = environment.get("xmlTextElementName");
+                if (xmlTextElementName != null) {
+                    xmlModule = new JacksonXmlModule();
+                    xmlModule.setXMLTextElementName((String) xmlTextElementName);
+                }
+
+                final Object defaultUseWrapper = environment.get("defaultUseWrapper");
+                if (defaultUseWrapper != null) {
+                    if (defaultUseWrapper.equals("false")) {
+                        if (xmlModule == null) {
+                            xmlModule = new JacksonXmlModule();
+                        }
+                        xmlModule.setDefaultUseWrapper(false);
+                    } else if (defaultUseWrapper.equals("true")) {
+                        //default value is already true, so nothing to do
+                    } else {
+                        throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, (String) defaultUseWrapper, "defaultUseWrapper");
+                    }
+                }
+
+                final XmlMapper xmlMapper = xmlModule == null ? new XmlMapper(xmlFactory) : new XmlMapper(xmlFactory, xmlModule);
+                xmlFactory.setCodec(xmlMapper);
             }
         }
-
-        final XmlMapper xmlMapper = xmlModule == null ? new XmlMapper(xmlFactory) : new XmlMapper(xmlFactory, xmlModule);
-        xmlFactory.setCodec(xmlMapper);
         return xmlFactory;
     }
 }

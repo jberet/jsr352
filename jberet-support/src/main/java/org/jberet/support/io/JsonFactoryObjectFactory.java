@@ -29,6 +29,8 @@ import org.jberet.support._private.SupportLogger;
  * in an application server. See wildfly.home/docs/schema/jboss-as-naming_2_0.xsd for more details.
  */
 public final class JsonFactoryObjectFactory implements ObjectFactory {
+    private volatile JsonFactory jsonFactoryCached;
+
     /**
      * Gets an instance of {@code com.fasterxml.jackson.core.JsonFactory} based on the resource configuration in the
      * application server. The parameter {@code environment} contains JsonFactory configuration properties, and accepts
@@ -51,12 +53,21 @@ public final class JsonFactoryObjectFactory implements ObjectFactory {
                                     final Name name,
                                     final Context nameCtx,
                                     final Hashtable<?, ?> environment) throws Exception {
-        final JsonFactory jsonFactory = new JsonFactory();
-        final Object jsonFactoryFeatures = environment.get("jsonFactoryFeatures");
-        if (jsonFactoryFeatures != null) {
-            configureJsonFactoryFeatures(jsonFactory, (String) jsonFactoryFeatures);
+        JsonFactory jsonFactory = jsonFactoryCached;
+        if (jsonFactory == null) {
+            synchronized (this) {
+                jsonFactory = jsonFactoryCached;
+                if (jsonFactory == null) {
+                    jsonFactoryCached = jsonFactory = new JsonFactory();
+                }
+
+                final Object jsonFactoryFeatures = environment.get("jsonFactoryFeatures");
+                if (jsonFactoryFeatures != null) {
+                    configureJsonFactoryFeatures(jsonFactory, (String) jsonFactoryFeatures);
+                }
+                configureInputDecoratorAndOutputDecorator(jsonFactory, environment);
+            }
         }
-        configureInputDecoratorAndOutputDecorator(jsonFactory, environment);
         return jsonFactory;
     }
 

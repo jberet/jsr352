@@ -12,6 +12,11 @@
 
 package org.jberet.support.io;
 
+import javax.batch.api.BatchProperty;
+import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -20,6 +25,10 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  * Base class for {@link org.jberet.support.io.XmlItemReader} and {@link org.jberet.support.io.XmlItemWriter}.
  */
 public abstract class XmlItemReaderWriterBase extends ItemReaderWriterBase {
+    @Inject
+    @BatchProperty
+    protected String xmlFactoryLookup;
+
     protected JacksonXmlModule xmlModule;
     protected XmlFactory xmlFactory;
     protected XmlMapper xmlMapper;
@@ -32,10 +41,15 @@ public abstract class XmlItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * Initializes {@link #xmlFactory} field, which may be instantiated or obtained from other part of the application.
      */
-    protected void initXmlFactory() {
-        initXmlModule();
-        xmlFactory = new XmlFactory();
-        xmlMapper = xmlModule == null ? new XmlMapper(xmlFactory) : new XmlMapper(xmlFactory, xmlModule);
-        xmlFactory.setCodec(xmlMapper);
+    protected void initXmlFactory() throws NamingException {
+        if (xmlFactoryLookup != null) {
+            xmlFactory = InitialContext.doLookup(xmlFactoryLookup);
+            xmlMapper = (XmlMapper) xmlFactory.getCodec();
+        } else {
+            initXmlModule();
+            xmlFactory = new XmlFactory();
+            xmlMapper = xmlModule == null ? new XmlMapper(xmlFactory) : new XmlMapper(xmlFactory, xmlModule);
+            xmlFactory.setCodec(xmlMapper);
+        }
     }
 }

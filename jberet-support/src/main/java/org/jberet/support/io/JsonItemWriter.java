@@ -24,8 +24,6 @@ import javax.inject.Named;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.io.OutputDecorator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jberet.support._private.SupportLogger;
 
 /**
