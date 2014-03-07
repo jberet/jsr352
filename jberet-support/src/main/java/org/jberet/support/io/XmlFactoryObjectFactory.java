@@ -62,7 +62,7 @@ public final class XmlFactoryObjectFactory implements ObjectFactory {
                 }
 
                 JacksonXmlModule xmlModule = null;
-                NonmappingJsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(xmlFactory, environment);
+                NoMappingJsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(xmlFactory, environment);
 
                 final Object xmlTextElementName = environment.get("xmlTextElementName");
                 if (xmlTextElementName != null) {

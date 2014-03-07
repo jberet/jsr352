@@ -61,7 +61,7 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
         }
         objectMapper = (ObjectMapper) jsonFactory.getCodec();
         if (jsonFactoryFeatures != null) {
-            NonmappingJsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, jsonFactoryFeatures);
+            NoMappingJsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, jsonFactoryFeatures);
         }
         if (mapperFeatures != null) {
             MappingJsonFactoryObjectFactory.configureMapperFeatures(objectMapper, mapperFeatures);
