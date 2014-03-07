@@ -14,7 +14,6 @@
             <writer ref="mongoItemWriter">
                 <properties>
                     <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>
-                    <property name="host" value="localhost"/>
                     <property name="database" value="testData"/>
                     <property name="collection" value="movies.out"/>
                     <property name="mongoClientLookup" value="java:global/env/MongoClient"/>
