@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<job id="csv2json" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="csv2json.step1">
+<job id="csv2jsonLookup" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="csv2jsonLookup.step1">
         <chunk>
             <reader ref="xmlItemReader">
                 <properties>
