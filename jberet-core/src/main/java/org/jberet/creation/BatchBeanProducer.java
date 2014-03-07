@@ -371,24 +371,22 @@ public class BatchBeanProducer {
     private <T> T getProperty(final InjectionPoint injectionPoint) {
         final BatchProperty batchProperty = injectionPoint.getAnnotated().getAnnotation(BatchProperty.class);
         String propName = batchProperty.name();
-        Field field = (Field) injectionPoint.getMember();
+        final Field field = (Field) injectionPoint.getMember();
 
         if (propName.length() == 0) {
             propName = field.getName();
         }
-        final Properties properties = ArtifactCreationContext.getCurrentArtifactCreationContext().properties;
+        final ArtifactCreationContext ac = ArtifactCreationContext.getCurrentArtifactCreationContext();
+        final Properties properties = ac.properties;
         if (properties != null) {
-            String rawVal = properties.get(propName);
+            final String rawVal = properties.get(propName);
             if (rawVal == null || rawVal.isEmpty()) {
                 return null;
             }
-            Class<?> fieldType = field.getType();
+            final Class<?> fieldType = field.getType();
             return fieldType.isAssignableFrom(String.class) ? (T) rawVal :
-                    (T) ValueConverter.convertFieldValue(rawVal, fieldType, field, injectionPoint.getBean().getBeanClass().getClassLoader());
+                    (T) ValueConverter.convertFieldValue(rawVal, fieldType, field, ac.jobContext.getClassLoader());
         }
         return null;
     }
-
-
-
 }

@@ -28,7 +28,7 @@ import org.jberet.support._private.SupportLogger;
  * {@code com.fasterxml.jackson.core.JsonFactory}. This class can be used to create a custom JNDI resource
  * in an application server. See wildfly.home/docs/schema/jboss-as-naming_2_0.xsd for more details.
  */
-public final class JsonFactoryObjectFactory implements ObjectFactory {
+public final class NonmappingJsonFactoryObjectFactory implements ObjectFactory {
     private volatile JsonFactory jsonFactoryCached;
 
     /**
@@ -75,13 +75,13 @@ public final class JsonFactoryObjectFactory implements ObjectFactory {
             throws Exception {
         final Object inputDecorator = environment.get("inputDecorator");
         if (inputDecorator != null) {
-            final Class<?> inputDecoratorClass = JsonFactoryObjectFactory.class.getClassLoader().loadClass((String) inputDecorator);
+            final Class<?> inputDecoratorClass = NonmappingJsonFactoryObjectFactory.class.getClassLoader().loadClass((String) inputDecorator);
             jsonFactory.setInputDecorator((InputDecorator) inputDecoratorClass.newInstance());
         }
 
         final Object outputDecorator = environment.get("outputDecorator");
         if (outputDecorator != null) {
-            final Class<?> outputDecoratorClass = JsonFactoryObjectFactory.class.getClassLoader().loadClass((String) outputDecorator);
+            final Class<?> outputDecoratorClass = NonmappingJsonFactoryObjectFactory.class.getClassLoader().loadClass((String) outputDecorator);
             jsonFactory.setOutputDecorator((OutputDecorator) outputDecoratorClass.newInstance());
         }
     }

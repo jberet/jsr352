@@ -78,7 +78,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
 
                 final Object jsonFactoryFeatures = environment.get("jsonFactoryFeatures");
                 if (jsonFactoryFeatures != null) {
-                    JsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, (String) jsonFactoryFeatures);
+                    NonmappingJsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, (String) jsonFactoryFeatures);
                 }
 
                 final Object mapperFeatures = environment.get("mapperFeatures");
@@ -103,7 +103,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
 
                 configureCustomSerializersAndDeserializers(objectMapper, (String) environment.get("customSerializers"),
                         (String) environment.get("customDeserializers"), classLoader);
-                JsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(jsonFactory, environment);
+                NonmappingJsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(jsonFactory, environment);
             }
         }
         return jsonFactory;
@@ -148,7 +148,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
     static void configureMapperFeatures(final ObjectMapper objectMapper, final String features) {
         final StringTokenizer st = new StringTokenizer(features, ",");
         while (st.hasMoreTokens()) {
-            final String[] pair = JsonFactoryObjectFactory.parseSingleFeatureValue(st.nextToken().trim());
+            final String[] pair = NonmappingJsonFactoryObjectFactory.parseSingleFeatureValue(st.nextToken().trim());
             final String key = pair[0];
             final String value = pair[1];
 
@@ -175,7 +175,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
     static void configureSerializationFeatures(final ObjectMapper objectMapper, final String features) {
         final StringTokenizer st = new StringTokenizer(features, ",");
         while (st.hasMoreTokens()) {
-            final String[] pair = JsonFactoryObjectFactory.parseSingleFeatureValue(st.nextToken().trim());
+            final String[] pair = NonmappingJsonFactoryObjectFactory.parseSingleFeatureValue(st.nextToken().trim());
             final String key = pair[0];
             final String value = pair[1];
 
@@ -202,7 +202,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
     static void configureDeserializationFeatures(final ObjectMapper objectMapper, final String features) {
         final StringTokenizer st = new StringTokenizer(features, ",");
         while (st.hasMoreTokens()) {
-            final String[] pair = JsonFactoryObjectFactory.parseSingleFeatureValue(st.nextToken().trim());
+            final String[] pair = NonmappingJsonFactoryObjectFactory.parseSingleFeatureValue(st.nextToken().trim());
             final String key = pair[0];
             final String value = pair[1];
 
