@@ -7,6 +7,7 @@
                 <properties>
                     <property name="resource" value="http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&amp;format=csv"/>
                     <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>
+                    <property name="nameMapping" value="rank,tit,grs,opn"/>
                     <property name="cellProcessors" value= "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate(YYYY-MM-dd)"/>
                 </properties>
             </reader>
