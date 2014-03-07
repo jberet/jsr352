@@ -1,6 +1,7 @@
 This sample webapp starts a batch job that reads XML data from online source, binds each data record to
 POJO (Movie bean), and serializes them to JSON output file. The job is configured to look up Jackson
-JsonFactory and XmlFactory from WildFly JNDI. See https://issues.jboss.org/browse/JBERET-47
+JsonFactory and XmlFactory from WildFly JNDI. jberet-support module and its dependencies are installed in
+WildFly and referenced by this webapp via WEB-INF/jboss-deployment-structure.xml. See https://issues.jboss.org/browse/JBERET-47
 
 While in wildfly-samples/jberet directory, to build:
 
