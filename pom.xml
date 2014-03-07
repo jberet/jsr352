@@ -54,9 +54,12 @@
         </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
         <version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>1.0.0.Final
         </version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>
-        <version.org.jboss.weld.weld-api>2.1.Final</version.org.jboss.weld.weld-api>
         <version.org.jboss.weld.weld>2.1.1.Final</version.org.jboss.weld.weld>
         <version.org.jboss.weld.weld-se>2.1.1.Final</version.org.jboss.weld.weld-se>
+        <version.net.sf.supercsv>2.1.0</version.net.sf.supercsv>
+        <version.com.fasterxml.jackson>2.3.1</version.com.fasterxml.jackson>
+        <version.org.mongodb>2.12.0-rc0</version.org.mongodb>
+        <version.org.mongojack>2.0.0</version.org.mongojack>
     </properties>
 
     <modules>
@@ -125,37 +128,50 @@
                 <groupId>org.jboss.spec.javax.batch</groupId>
                 <artifactId>jboss-batch-api_1.0_spec</artifactId>
                 <version>${version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>${version.javax.inject}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>javax.enterprise</groupId>
                 <artifactId>cdi-api</artifactId>
                 <version>${version.javax.enterprise}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.el</groupId>
+                        <artifactId>el-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.spec.javax.interceptor</groupId>
+                        <artifactId>jboss-interceptors-api_1.1_spec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>jsr250-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.javax.persistence</groupId>
                 <artifactId>hibernate-jpa-2.1-api</artifactId>
                 <version>${version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
                 <version>${version.org.jboss.logging.jboss-logging}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging-processor</artifactId>
                 <version>${version.org.jboss.logging.jboss-logging-tools}</version>
-                <optional>true</optional>
                 <!-- Only needed during build time for the annotation processor -->
                 <scope>provided</scope>
             </dependency>
@@ -163,57 +179,125 @@
                 <groupId>org.jboss.marshalling</groupId>
                 <artifactId>jboss-marshalling</artifactId>
                 <version>${version.org.jboss.marshalling}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.spec.javax.transaction</groupId>
                 <artifactId>jboss-transaction-api_1.2_spec</artifactId>
                 <version>${version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec}</version>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.weld</groupId>
-                <artifactId>weld-api</artifactId>
-                <version>${version.org.jboss.weld.weld-api}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-core</artifactId>
                 <version>${version.org.jboss.weld.weld}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.weld</groupId>
+                        <artifactId>weld-core-impl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.weld</groupId>
+                        <artifactId>weld-core-jsf</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld.se</groupId>
                 <artifactId>weld-se</artifactId>
                 <version>${version.org.jboss.weld.weld-se}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${version.com.h2database}</version>
-                <scope>runtime</scope>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${version.com.google.guava}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml</groupId>
                 <artifactId>aalto-xml</artifactId>
                 <version>${version.com.fasterxml.aalto-xml}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.woodstox</groupId>
                 <artifactId>stax2-api</artifactId>
                 <version>${version.org.codehaus.woodstox.stax2-api}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
+
+            <!-- MongoDB Dependencies -->
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongo-java-driver</artifactId>
+                <version>${version.org.mongodb}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mongojack</groupId>
+                <artifactId>mongojack</artifactId>
+                <version>${version.org.mongojack}</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.persistence</groupId>
+                        <artifactId>persistence-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!-- CSV Dependencies -->
+            <dependency>
+                <groupId>net.sf.supercsv</groupId>
+                <artifactId>super-csv</artifactId>
+                <version>${version.net.sf.supercsv}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Jackson Dependencies -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Jackson XML Dependencies -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!--  Include this dependency if JAXB annotation introspector is needed -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>

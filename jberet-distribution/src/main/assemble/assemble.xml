@@ -26,22 +26,6 @@
             <unpack>false</unpack>
             <scope>runtime</scope>
             <outputDirectory>lib</outputDirectory>
-            <excludes>
-                <exclude>org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:jar:1.0.0.Beta1</exclude>
-                <exclude>javax.annotation:jsr250-api</exclude>
-                <exclude>org.jboss.logging:jboss-logging-processor</exclude>
-                <exclude>org.jboss.logging:jboss-logging-annotations</exclude>
-                <exclude>org.jboss.jdeparser:jdeparser</exclude>
-                <exclude>org.hornetq:hornetq-commons</exclude>
-                <exclude>org.hornetq:hornetq-core</exclude>
-                <exclude>org.hornetq:hornetq-journal:jar</exclude>
-                <exclude>org.jboss.byteman:byteman</exclude>
-                <exclude>org.jboss.byteman:byteman-submit</exclude>
-                <exclude>jfree:jfreechart</exclude>
-                <exclude>jfree:jcommon</exclude>
-                <exclude>org.jboss.weld:weld-core-jsf</exclude>
-                <exclude>javax.el:el-api</exclude>
-            </excludes>
         </dependencySet>
     </dependencySets>
 

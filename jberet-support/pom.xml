@@ -12,95 +12,6 @@
 
     <artifactId>jberet-support</artifactId>
 
-    <properties>
-        <version.net.sf.supercsv>2.1.0</version.net.sf.supercsv>
-        <version.com.fasterxml.jackson>2.3.1</version.com.fasterxml.jackson>
-        <version.org.mongodb>2.12.0-rc0</version.org.mongodb>
-        <version.org.mongojack>2.0.0</version.org.mongojack>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- MongoDB Dependencies -->
-            <dependency>
-                <groupId>org.mongodb</groupId>
-                <artifactId>mongo-java-driver</artifactId>
-                <version>${version.org.mongodb}</version>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
-                <groupId>org.mongojack</groupId>
-                <artifactId>mongojack</artifactId>
-                <version>${version.org.mongojack}</version>
-                <optional>true</optional>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.persistence</groupId>
-                        <artifactId>persistence-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- CSV Dependencies -->
-            <dependency>
-                <groupId>net.sf.supercsv</groupId>
-                <artifactId>super-csv</artifactId>
-                <version>${version.net.sf.supercsv}</version>
-                <optional>true</optional>
-            </dependency>
-
-            <!-- Jackson Dependencies -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
-                <optional>true</optional>
-            </dependency>
-
-            <!-- Jackson XML Dependencies -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-xml</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
-                <optional>true</optional>
-            </dependency>
-
-            <!--  Include this dependency if JAXB annotation introspector is needed -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-jaxb-annotations</artifactId>
-                <version>${version.com.fasterxml.jackson}</version>
-                <optional>true</optional>
-            </dependency>
-
-            <!-- Test Dependencies -->
-            <dependency>
-                <groupId>org.jberet</groupId>
-                <artifactId>jberet-core</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jberet</groupId>
-                <artifactId>jberet-se</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -153,10 +64,14 @@
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-core</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-se</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.weld</groupId>
@@ -166,6 +81,16 @@
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.transaction</groupId>
+            <artifactId>jboss-transaction-api_1.2_spec</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.marshalling</groupId>
+            <artifactId>jboss-marshalling</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
