@@ -9,6 +9,7 @@
         <module>batchproperty</module>
         <module>csv2json</module>
         <module>xml2json</module>
+        <module>xml2jsonLookup</module>
     </modules>
     <parent>
         <artifactId>wildfly</artifactId>

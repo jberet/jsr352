@@ -56,7 +56,7 @@ public class BatchJobServlet extends HttpServlet {
         final long jobExecutionId = jobOperator.start(jobName, jobParams);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         try {
-            jobExecution.awaitTermination(0, TimeUnit.MINUTES);
+            jobExecution.awaitTermination(5, TimeUnit.MINUTES);
         } catch (final InterruptedException e) {
             throw new ServletException(e);
         }
