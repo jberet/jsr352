@@ -10,6 +10,7 @@
         <module>csv2json</module>
         <module>xml2json</module>
         <module>xml2jsonLookup</module>
+        <module>csv2mongoLookup</module>
     </modules>
     <parent>
         <artifactId>wildfly</artifactId>
