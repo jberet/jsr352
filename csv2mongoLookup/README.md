@@ -1,5 +1,4 @@
 This sample webapp demonstrates the following features in jberet and jberet-support
-
 (https://issues.jboss.org/browse/JBERET-48?jql=project%20%3D%20JBERET):
 
 * reads CSV data from online source, and binds record to POJO with org.jberet.support.io.CsvItemReader
@@ -13,6 +12,16 @@ This sample webapp demonstrates the following features in jberet and jberet-supp
 While in wildfly-samples/jberet directory, to build:
 
     mvn clean install -pl csv2mongoLookup
+
+To start MongoDB instance and drop collection (movies.out) to avoid data conflict during insertion:
+
+    cd $MONGO_HOME/bin
+    ./mongod
+    [open another termional to start mongo shell]
+    ./mongo
+    use testData
+    show collections
+    db.movies.out.drop()
 
 To deploy to WildFly:
 
