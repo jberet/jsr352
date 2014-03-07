@@ -4,14 +4,15 @@ JsonFactory and XmlFactory from WildFly JNDI. See https://issues.jboss.org/brows
 
 While in wildfly-samples/jberet directory, to build:
 
-mvn clean install -pl xml2jsonLookup
+    mvn clean install -pl xml2jsonLookup
 
 To deploy to WildFly:
 
-$JBOSS_HOME/bin/jboss-cli.sh -c "deploy --force xml2jsonLookup/target/xml2jsonLookup.war"
+    $JBOSS_HOME/bin/jboss-cli.sh -c "deploy --force xml2jsonLookup/target/xml2jsonLookup.war"
 
 To run the webapp and start the batch job:
-curl http://localhost:8080/xml2jsonLookup/\?jobName=xml2jsonLookup
+
+    curl http://localhost:8080/xml2jsonLookup/\?jobName=xml2jsonLookup
 
 (xml2jsonLookup after 8080/ is the context path, which is the war file name without .war extension.
 xml2jsonLookup after jobName= is the job name, which is the base name of META-INF/batch-jobs/xml2jsonLookup.xml)
