@@ -1,13 +1,13 @@
 This sample webapp demonstrates the following features in jberet and jberet-support
 (https://issues.jboss.org/browse/JBERET-48?jql=project%20%3D%20JBERET):
 
-* reads CSV data from online source, and binds record to POJO with org.jberet.support.io.CsvItemReader
+* reads CSV data from online source, and binds record to POJO with `org.jberet.support.io.CsvItemReader`
 
-* writes POJO beans to MongoDB with org.jberet.support.io.MongoItemWriter
+* writes POJO beans to MongoDB with `org.jberet.support.io.MongoItemWriter`
 
-* MongoClient resource is configured in WildFly server and obtained via JNDI
+* `MongoClient` resource is configured in WildFly server and obtained via JNDI
 
-* jberet-support and its dependencies are installed in WildFly server, and referenced by webapp via MANIFEST.MF
+* jberet-support and its dependencies are installed in WildFly server, and referenced by webapp via `MANIFEST.MF`
 
 While in wildfly-samples/jberet directory, to build:
 
@@ -32,6 +32,6 @@ To run the webapp and start the batch job:
     curl http://localhost:8080/csv2mongoLookup/\?jobName=csv2mongoLookup
 
 (csv2mongoLookup after 8080/ is the context path, which is the war file name without .war extension.
-csv2mongoLookup after jobName= is the job name, which is the base name of META-INF/batch-jobs/csv2mongoLookup.xml)
+csv2mongoLookup after jobName= is the job name, which is the base name of `META-INF/batch-jobs/csv2mongoLookup.xml`)
 
 See WildFly server log for more details.
