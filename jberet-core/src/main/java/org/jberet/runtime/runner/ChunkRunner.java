@@ -317,7 +317,15 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
                         throw e;
                     }
-                    tm.commit();
+
+                    if (checkpointAlgorithm == null) {
+                        tm.commit();
+                    } else {
+                        checkpointAlgorithm.beginCheckpoint();
+                        tm.commit();
+                        checkpointAlgorithm.endCheckpoint();
+                    }
+
                     stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
                 }
             } catch (Exception e) {
@@ -462,8 +470,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     }
                 }, timeLimit * 1000);
             }
-        } else {
-            checkpointAlgorithm.beginCheckpoint();
         }
         //if chunk is already RETRYING, do not change it to RUNNING
         if (processingInfo.chunkState == ChunkState.TO_RETRY) {
@@ -512,11 +518,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
             stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
             batchContext.savePersistentData();
-
             outputList.clear();
-            if (!checkpointPolicy.equals("item")) {
-                checkpointAlgorithm.endCheckpoint();
-            }
+
             if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
                 processingInfo.chunkState = ChunkState.JOB_STOPPED;
                 batchContext.setBatchStatus(BatchStatus.STOPPED);
