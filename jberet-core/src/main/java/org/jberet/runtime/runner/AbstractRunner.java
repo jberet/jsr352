@@ -21,6 +21,7 @@ import org.jberet.job.model.Transition.Fail;
 import org.jberet.job.model.Transition.Next;
 import org.jberet.job.model.Transition.Stop;
 import org.jberet.runtime.context.AbstractContext;
+import org.jberet.runtime.context.FlowContextImpl;
 import org.jberet.runtime.context.JobContextImpl;
 
 public abstract class AbstractRunner<C extends AbstractContext> implements Runnable {
@@ -79,7 +80,13 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
             } else if (e instanceof End) {
                 final End end = (End) e;
                 if (matches(exitStatus, end.getOn())) {
-                    setOuterContextStatus(batchContext.getOuterContexts(), BatchStatus.COMPLETED,
+                    final AbstractContext[] outerContexts = batchContext.getOuterContexts();
+                    for (final AbstractContext abc :outerContexts) {
+                        if (abc instanceof FlowContextImpl) {
+                            ((FlowContextImpl) abc).getFlowExecution().setEnded(true);
+                        }
+                    }
+                    setOuterContextStatus(outerContexts, BatchStatus.COMPLETED,
                             exitStatus, end.getExitStatus(), partOfDecision);
                     return null;
                 }

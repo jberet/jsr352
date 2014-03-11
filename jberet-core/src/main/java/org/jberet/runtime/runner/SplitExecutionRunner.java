@@ -44,6 +44,7 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
         batchContext.setBatchStatus(BatchStatus.STARTED);
         final List<Flow> flows = split.getFlows();
         final CountDownLatch latch = new CountDownLatch(flows.size());
+        boolean terminateSplit = false;
         try {
             for (final Flow f : flows) {
                 runFlow(f, latch);
@@ -52,26 +53,60 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
 
             //check FlowResults from each flow
             final List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
+            FlowExecutionImpl failedFlow = null;
+            FlowExecutionImpl stoppedFlow = null;
+            FlowExecutionImpl endedFlow = null;
             for (int i = 0; i < fes.size(); i++) {
-                if (fes.get(i).getBatchStatus().equals(BatchStatus.FAILED)) {
-                    batchContext.setBatchStatus(BatchStatus.FAILED);
-                    for (final AbstractContext c : batchContext.getOuterContexts()) {
-                        c.setBatchStatus(BatchStatus.FAILED);
-                    }
+                final FlowExecutionImpl flowExecution = fes.get(i);
+                if (flowExecution.getBatchStatus() == BatchStatus.FAILED) {
+                    failedFlow = flowExecution;
                     break;
+                } else if (flowExecution.getBatchStatus() == BatchStatus.STOPPED) {
+                    stoppedFlow = flowExecution;
+                } else if (flowExecution.getBatchStatus() == BatchStatus.COMPLETED) {
+                    if (flowExecution.isEnded()) {
+                        endedFlow = flowExecution;
+                    }
                 }
             }
-            if (batchContext.getBatchStatus().equals(BatchStatus.STARTED)) {
+
+            if (failedFlow != null || stoppedFlow != null || endedFlow != null) {
+                terminateSplit = true;
+                final BatchStatus splitBatchStatus;
+                final String splitExitStatus;
+                if (failedFlow != null) {
+                    splitBatchStatus = failedFlow.getBatchStatus();
+                    splitExitStatus = failedFlow.getExitStatus();
+                } else if (stoppedFlow != null) {
+                    splitBatchStatus = stoppedFlow.getBatchStatus();
+                    splitExitStatus = stoppedFlow.getExitStatus();
+                } else {
+                    splitBatchStatus = endedFlow.getBatchStatus();
+                    splitExitStatus = endedFlow.getExitStatus();
+                }
+
+                batchContext.setBatchStatus(splitBatchStatus);
+                if (splitExitStatus != null) {
+                    batchContext.setExitStatus(splitExitStatus);
+                }
+                for (final AbstractContext c : batchContext.getOuterContexts()) {
+                    c.setBatchStatus(splitBatchStatus);
+                    if (splitExitStatus != null) {
+                        c.setExitStatus(splitExitStatus);
+                    }
+                }
+            } else if (batchContext.getBatchStatus().equals(BatchStatus.STARTED)) {
                 batchContext.setBatchStatus(BatchStatus.COMPLETED);
             }
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
+            terminateSplit = true;
             LOGGER.failToRunJob(e, jobContext.getJobName(), split.getId(), split);
             for (final AbstractContext c : batchContext.getOuterContexts()) {
                 c.setBatchStatus(BatchStatus.FAILED);
             }
         }
 
-        if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
+        if (!terminateSplit && batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             final String next = split.getAttributeNext();  //split has no transition elements
             if (next != null) {
                 //the last StepExecution of each flow is needed if the next element after this split is a decision

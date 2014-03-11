@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="splitTerminationStatus" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <split id="splitTerminationStatus.split1" next="splitTerminationStatus.step2">
+        <flow id="splitTerminationStatus.split1.flow1">
+            <step id="splitTerminationStatus.split1.flow1.step1">
+                <batchlet ref="batchlet2">
+                    <properties>
+                        <property name="fail" value="#{jobParameters['fail']}"/>
+                        <property name="stepExitStatus" value="#{jobParameters['stepExitStatus']}"/>
+                        <property name="sleepSeconds" value="#{jobParameters['sleepSeconds']}"/>
+                    </properties>
+                </batchlet>
+                <stop on="stop" exit-status="stop"/>
+                <fail on="fail"/>
+                <end on="#{jobParameters['endCondition']}"/>
+            </step>
+        </flow>
+    </split>
+
+    <step id="splitTerminationStatus.step2">
+        <batchlet ref="batchlet2">
+            <properties>
+                <property name="fail" value="true"/>
+            </properties>
+        </batchlet>
+    </step>
+</job>

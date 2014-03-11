@@ -15,7 +15,16 @@ package org.jberet.runtime;
 import javax.batch.runtime.StepExecution;
 
 public final class FlowExecutionImpl extends AbstractExecution {
+    private static final long serialVersionUID = 1426640914765713066L;
     private final String flowId;
+
+    /**
+     * indicates the current flow and the entire job execution is ended via transition element, as opposed to natural
+     * completion.  In both cases, the batch status is COMPLETED. If the flow is part of a split, the flow can only
+     * access a cloned {@link org.jberet.runtime.context.JobContextImpl}, so we need a way to record the fact that
+     * this flow and the job are terminated via transition elements.
+     */
+    private boolean ended;
 
     /**
      * The last StepExecution of the current flow.  Needed if the next element after the current flow is a decison, or
@@ -39,4 +48,11 @@ public final class FlowExecutionImpl extends AbstractExecution {
         this.lastStepExecution = lastStepExecution;
     }
 
+    public boolean isEnded() {
+        return ended;
+    }
+
+    public void setEnded(final boolean ended) {
+        this.ended = ended;
+    }
 }

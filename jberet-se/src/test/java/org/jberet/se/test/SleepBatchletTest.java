@@ -30,6 +30,7 @@ public class SleepBatchletTest {
     private static final String jobName = "org.jberet.se.test.sleepBatchlet.xml";
     private static final String listenerJobName = "org.jberet.se.test.sleepBatchletListeners";
     private static final String transitionJobName = "org.jberet.se.test.sleepBatchletTransition";
+    private static final String transitionEndJobName = "org.jberet.se.test.sleepBatchletTransitionEnd";
     private static final String transitionAttrJobName = "org.jberet.se.test.sleepBatchletTransitionAttr";
 
     @Test
@@ -211,5 +212,23 @@ public class SleepBatchletTest {
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assert.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.FAILED.name(), stepExecution.getExitStatus());
+    }
+
+    // verifies a step ended with transition element <end> should not transition to the next step. The entire job should terminate.
+    @Test
+    public void transitionEnd() throws Exception {
+        final Properties params = new Properties();
+        final long jobExecutionId = operator.start(transitionEndJobName, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) operator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(1, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+
+        final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
+        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+                stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution.getBatchStatus());
+        Assert.assertEquals(SleepBatchlet.SLEPT, stepExecution.getExitStatus());
+        Assert.assertEquals(1, jobExecution.getStepExecutions().size());
     }
 }
