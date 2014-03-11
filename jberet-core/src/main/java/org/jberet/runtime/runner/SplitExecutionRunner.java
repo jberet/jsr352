@@ -14,7 +14,6 @@ package org.jberet.runtime.runner;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 
@@ -28,7 +27,6 @@ import org.jberet.runtime.context.SplitContextImpl;
 import static org.jberet._private.BatchLogger.LOGGER;
 
 public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitContextImpl> implements Runnable {
-    private static final long SPLIT_FLOW_TIMEOUT_SECONDS = 300;
     private final Split split;
 
     public SplitExecutionRunner(final SplitContextImpl splitContext, final CompositeExecutionRunner enclosingRunner) {
@@ -50,7 +48,7 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
             for (final Flow f : flows) {
                 runFlow(f, latch);
             }
-            latch.await(SPLIT_FLOW_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            latch.await();
 
             //check FlowResults from each flow
             final List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
