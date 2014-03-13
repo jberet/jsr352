@@ -18,3 +18,35 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
   - <https://github.com/chengfang/wildfly-samples/tree/master/jberet>
   - <https://github.com/jberet/jsr352/tree/master/jberet-support/src/test>
   - <https://github.com/jberet/jsr352/tree/master/test-apps>
+* Download from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
+* More JBeret project info on [ohloh.net](https://www.ohloh.net/p/jberet)
+
+####How to reference org.jberet artifacts in maven pom.xml
+    <repositories>
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+    ...
+    <dependencies>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-core</artifactId>
+            <version>1.0.1.CR1</version> <!-- replace it with the desired version -->
+        </dependency>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-support</artifactId>
+            <version>1.0.1.CR1</version> <!-- replace it with the desired version -->
+        </dependency>
