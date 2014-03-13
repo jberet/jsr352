@@ -3,7 +3,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 ####It includes the following sub-modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
-* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch artifacts for batch applications, and JNDI support
+* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, Json, XML, Mongo) for batch applications, and JNDI support
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
@@ -18,7 +18,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
   - <https://github.com/chengfang/wildfly-samples/tree/master/jberet>
   - <https://github.com/jberet/jsr352/tree/master/jberet-support/src/test>
   - <https://github.com/jberet/jsr352/tree/master/test-apps>
-* Download from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
+* Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
 * More JBeret project info on [ohloh.net](https://www.ohloh.net/p/jberet)
 
 ####How to reference org.jberet artifacts in maven pom.xml
