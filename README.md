@@ -5,12 +5,12 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
 * [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, Json, XML, Mongo) for batch applications, and JNDI support
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
-* [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA
+* [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
 * [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [JSR 352 TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
 
 ####Project Resources:
-* [JBeret Issues](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET)
+* [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET)
 * [WildFly Forum](https://community.jboss.org/en/wildfly?view=discussions)
 * [JBeret Forum](https://community.jboss.org/en/jberet/)
 * [JSR 352 Expert Group Discussion](https://java.net/projects/jbatch/lists/public/archive)
@@ -19,7 +19,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
   - <https://github.com/jberet/jsr352/tree/master/jberet-support/src/test>
   - <https://github.com/jberet/jsr352/tree/master/test-apps>
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
-* More JBeret project info on [ohloh.net](https://www.ohloh.net/p/jberet)
+* Additional JBeret project info on [ohloh.net](https://www.ohloh.net/p/jberet)
 
 ####How to reference org.jberet artifacts in maven pom.xml
     <repositories>
