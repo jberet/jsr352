@@ -3,7 +3,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 ####It includes the following sub-modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
-* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, Json, XML, Mongo) for batch applications, and JNDI support
+* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, Json, XML, Mongo, etc) for batch applications, and JNDI support
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
@@ -14,12 +14,23 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 * [WildFly Forum](https://community.jboss.org/en/wildfly?view=discussions)
 * [JBeret Forum](https://community.jboss.org/en/jberet/)
 * [JSR 352 Expert Group Discussion](https://java.net/projects/jbatch/lists/public/archive)
-* Batch sample applications:
-  - <https://github.com/chengfang/wildfly-samples/tree/master/jberet>
-  - <https://github.com/jberet/jsr352/tree/master/jberet-support/src/test>
-  - <https://github.com/jberet/jsr352/tree/master/test-apps>
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
 * Additional JBeret project info on [ohloh.net](https://www.ohloh.net/p/jberet)
+
+####Batch sample & test applications:
+  - <https://github.com/chengfang/wildfly-samples/tree/master/jberet>, web apps that demonstrate the following:
+    + JsonItemReader, JsonItemWriter
+    + CsvItemReader, CsvItemWriter
+    + XmlItemReader, XmlItemWriter
+    + MongoItemReader, MongoItemWriter
+    + JNDI lookup of Jackson JsonFactory, MappingJsonFactory & XmlFactory in WildFly for batch reader and writer
+    + JNDI lookup of MongoClient in WildFly
+    + job xml files showing the use of various reader/writer configuration properties
+    + jberet-support module can be installed in WildFly and referenced by multiple apps via either MANIFEST.MF or jboss-deployment-structure.xml
+  - <https://github.com/jberet/jsr352/tree/master/jberet-support/src/test>
+    + comprehensive tests for implemented batch readers and writers
+  - <https://github.com/jberet/jsr352/tree/master/test-apps>
+    + test apps running in Java SE environment to verify core batch requirements
 
 ####How to reference org.jberet artifacts in maven pom.xml
     <repositories>
