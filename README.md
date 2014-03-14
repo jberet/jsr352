@@ -41,6 +41,11 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
     ...
     <dependencies>
         <dependency>
+                <groupId>org.jboss.spec.javax.batch</groupId>
+                <artifactId>jboss-batch-api_1.0_spec</artifactId>
+                <version>1.0.0.Final</version>
+            </dependency>
+        <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-core</artifactId>
             <version>1.0.1.CR1</version> <!-- replace it with the desired version -->
