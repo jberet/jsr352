@@ -14,6 +14,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 * [WildFly Forum](https://community.jboss.org/en/wildfly?view=discussions)
 * [JBeret Forum](https://community.jboss.org/en/jberet/)
 * [JSR 352 Expert Group Discussion](https://java.net/projects/jbatch/lists/public/archive)
+* [JBoss Batch API project](https://github.com/jboss/jboss-batch-api_spec)
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
 * Additional JBeret project info on [ohloh.net](https://www.ohloh.net/p/jberet)
 
