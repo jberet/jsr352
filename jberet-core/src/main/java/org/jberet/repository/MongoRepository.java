@@ -402,9 +402,10 @@ public final class MongoRepository extends AbstractRepository {
         final DBObject inClause = new BasicDBObject("$in", basicDBList);
         final DBObject query = new BasicDBObject(TableColumns.JOBEXECUTIONID, inClause);
         query.put(TableColumns.STEPNAME, stepName);
-        final DBObject dbObject = db.getCollection(TableColumns.STEP_EXECUTION).findOne(query);
+        final DBCursor cursor1 = db.getCollection(TableColumns.STEP_EXECUTION).find(query).sort(
+                new BasicDBObject(TableColumns.STEPEXECUTIONID, -1));
 
-        return createStepExecutionFromDBObject(dbObject);
+        return createStepExecutionFromDBObject(cursor1.one());
     }
 
     @Override
