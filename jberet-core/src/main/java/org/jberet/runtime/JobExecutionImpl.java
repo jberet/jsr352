@@ -12,7 +12,6 @@
 
 package org.jberet.runtime;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -65,10 +64,10 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     public JobExecutionImpl(final JobInstanceImpl jobInstance,
                             final long id,
                             final Properties jobParameters,
-                            final Timestamp createTime,
-                            final Timestamp startTime,
-                            final Timestamp endTime,
-                            final Timestamp lastUpdatedTime,
+                            final Date createTime,
+                            final Date startTime,
+                            final Date endTime,
+                            final Date lastUpdatedTime,
                             final String batchStatus,
                             final String exitStatus,
                             final String restartPosition) {

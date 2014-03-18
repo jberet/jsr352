@@ -57,8 +57,8 @@ public final class JobExecutionWaiterImpl implements JobExecutionWaiter {
             final StepExecutionImpl e2 = (StepExecutionImpl) e;
             final Exception exception = e2.getException();
             final String exceptionString = exception == null ? null : Throwables.getStackTraceAsString(exception);
-            System.out.printf("StepExecution %s, batch status %s, exit status %s, exception %s%n",
-                    e2, e2.getBatchStatus(), e2.getExitStatus(), exceptionString);
+            System.out.printf("StepExecution %s, step name %s, batch status %s, exit status %s, exception %s%n",
+                    e2, e2.getStepName(), e2.getBatchStatus(), e2.getExitStatus(), exceptionString);
         }
 
         return jobExecution;

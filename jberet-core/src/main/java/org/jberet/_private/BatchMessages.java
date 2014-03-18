@@ -124,4 +124,7 @@ public interface BatchMessages {
 
     @Message(id = 632, value = "The specified job with the name %s does not exist.")
     NoSuchJobException noSuchJobException(String jobName);
+
+    @Message(id = 633, value = "Invalid JBeret configuration property %s = %s.")
+    BatchRuntimeException invalidConfigProperty(@Cause Throwable throwable, String key, String value);
 }

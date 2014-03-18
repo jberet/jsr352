@@ -13,8 +13,8 @@
 package org.jberet.runtime;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
@@ -56,8 +56,8 @@ public final class StepExecutionImpl extends AbstractStepExecution {
      */
     public StepExecutionImpl(final long id,
                              final String stepName,
-                             final Timestamp startTime,
-                             final Timestamp endTime,
+                             final Date startTime,
+                             final Date endTime,
                              final String batchStatus,
                              final String exitStatus,
                              final Serializable persistentUserData,

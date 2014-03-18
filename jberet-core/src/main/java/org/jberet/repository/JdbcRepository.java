@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,7 +33,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import com.google.common.base.Throwables;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.runtime.AbstractStepExecution;
@@ -66,8 +65,8 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String SELECT_ALL_JOB_INSTANCES = "select-all-job-instances";
     private static final String COUNT_JOB_INSTANCES_BY_JOB_NAME = "count-job-instances-by-job-name";
     private static final String SELECT_JOB_INSTANCES_BY_JOB_NAME = "select-job-instances-by-job-name";
-    private static final String SELECT_JOB_INSTANCE  = "select-job-instance";
-    private static final String INSERT_JOB_INSTANCE  = "insert-job-instance";
+    private static final String SELECT_JOB_INSTANCE = "select-job-instance";
+    private static final String INSERT_JOB_INSTANCE = "insert-job-instance";
 
     private static final String SELECT_ALL_JOB_EXECUTIONS = "select-all-job-executions";
     private static final String SELECT_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID = "select-job-executions-by-job-instance-id";
@@ -90,69 +89,6 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String INSERT_PARTITION_EXECUTION = "insert-partition-execution";
     private static final String UPDATE_PARTITION_EXECUTION = "update-partition-execution";
 
-    /**
-     * A class to hold all table names and column names.  Commented-out column names are already defined in other tables,
-     * and are kept there as comment line for completeness.
-     */
-    private static class TableColumn {
-        /**
-         * Size of EXECUTIONEXCEPTION column in STEP_EXECUTION and PARTITION_EXECUTION table.  Values will be truncated
-         * to fit this size before saving to database.
-         */
-        private static final int EXECUTION_EXCEPTION_LENGTH_LIMIT = 2048;
-
-        //table name
-        private static final String JOB_INSTANCE = "JOB_INSTANCE";
-        //column names
-        //private static final String JOBINSTANCEID = "JOBINSTANCEID";
-        private static final String JOBNAME = "JOBNAME";
-        private static final String APPLICATIONNAME = "APPLICATIONNAME";
-
-        //table name
-        private static final String JOB_EXECUTION = "JOB_EXECUTION";
-        //column names
-        //private static final String JOBEXECUTIONID = "JOBEXECUTIONID";
-        private static final String JOBINSTANCEID = "JOBINSTANCEID";
-        private static final String CREATETIME = "CREATETIME";
-        //private static final String STARTTIME = "STARTTIME";
-        //private static final String ENDTIME = "ENDTIME";
-        private static final String LASTUPDATEDTIME = "LASTUPDATEDTIME";
-        //private static final String BATCHSTATUS = "BATCHSTATUS";
-        //private static final String EXITSTATUS = "EXITSTATUS";
-        private static final String JOBPARAMETERS = "JOBPARAMETERS";
-        private static final String RESTARTPOSITION = "RESTARTPOSITION";
-
-        //table name
-        private static final String STEP_EXECUTION = "STEP_EXECUTION";
-        //column names
-        private static final String STEPEXECUTIONID = "STEPEXECUTIONID";
-        private static final String JOBEXECUTIONID = "JOBEXECUTIONID";
-        private static final String STEPNAME = "STEPNAME";
-        private static final String STARTTIME = "STARTTIME";
-        private static final String ENDTIME = "ENDTIME";
-        private static final String BATCHSTATUS = "BATCHSTATUS";
-        private static final String EXITSTATUS = "EXITSTATUS";
-        //private static final String EXECUTIONEXCEPTION = "EXECUTIONEXCEPTION";
-        private static final String PERSISTENTUSERDATA = "PERSISTENTUSERDATA";
-        private static final String READCOUNT = "READCOUNT";
-        private static final String WRITECOUNT = "WRITECOUNT";
-        private static final String COMMITCOUNT = "COMMITCOUNT";
-        private static final String ROLLBACKCOUNT = "ROLLBACKCOUNT";
-        private static final String READSKIPCOUNT = "READSKIPCOUNT";
-        private static final String PROCESSSKIPCOUNT = "PROCESSSKIPCOUNT";
-        private static final String FILTERCOUNT = "FILTERCOUNT";
-        private static final String WRITESKIPCOUNT = "WRITESKIPCOUNT";
-        private static final String READERCHECKPOINTINFO = "READERCHECKPOINTINFO";
-        private static final String WRITERCHECKPOINTINFO = "WRITERCHECKPOINTINFO";
-
-        //table name
-        //private static final String PARTITION_EXECUTION = "PARTITION_EXECUTION";
-        //column names.  Other column names are already declared in other tables
-        private static final String PARTITIONEXECUTIONID = "PARTITIONEXECUTIONID";
-
-        private TableColumn() {}
-    }
-
     private static volatile JdbcRepository instance;
     private final Properties configProperties;
     private String dataSourceName;
@@ -165,10 +101,10 @@ public final class JdbcRepository extends AbstractRepository {
 
     static JdbcRepository getInstance(final BatchEnvironment batchEnvironment) {
         JdbcRepository result = instance;
-        if(result == null) {
+        if (result == null) {
             synchronized (JdbcRepository.class) {
                 result = instance;
-                if(result == null) {
+                if (result == null) {
                     instance = result = new JdbcRepository(batchEnvironment);
                 }
             }
@@ -264,9 +200,9 @@ public final class JdbcRepository extends AbstractRepository {
         } catch (final Exception e) {
             BatchLogger.LOGGER.failToGetDatabaseProductName(e, connection1);
         }
-        if(databaseProductName.startsWith("Oracle")) {
+        if (databaseProductName.startsWith("Oracle")) {
             isOracle = true;
-            idIndexInOracle = new int[] {1};
+            idIndexInOracle = new int[]{1};
         }
 
         try {
@@ -357,12 +293,12 @@ public final class JdbcRepository extends AbstractRepository {
             }
             final ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                final long i = rs.getLong(TableColumn.JOBINSTANCEID);
+                final long i = rs.getLong(TableColumns.JOBINSTANCEID);
                 JobInstanceImpl jobInstance1 = (JobInstanceImpl) jobInstances.get(i);
                 if (jobInstance1 == null) {
-                    final String appName = rs.getString(TableColumn.APPLICATIONNAME);
+                    final String appName = rs.getString(TableColumns.APPLICATIONNAME);
                     if (jobName == null) {
-                        final String goodJobName = rs.getString(TableColumn.JOBNAME);
+                        final String goodJobName = rs.getString(TableColumns.JOBNAME);
                         jobInstance1 = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
                     } else {
                         jobInstance1 = new JobInstanceImpl(getJob(jobName), new ApplicationAndJobName(appName, jobName));
@@ -398,8 +334,8 @@ public final class JdbcRepository extends AbstractRepository {
             while (rs.next()) {
                 result = jobInstances.get(jobInstanceId);
                 if (result == null) {
-                    final String appName = rs.getString(TableColumn.APPLICATIONNAME);
-                    final String goodJobName = rs.getString(TableColumn.JOBNAME);
+                    final String appName = rs.getString(TableColumns.APPLICATIONNAME);
+                    final String goodJobName = rs.getString(TableColumns.JOBNAME);
                     result = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
                     ((JobInstanceImpl) result).setId(jobInstanceId);
                     jobInstances.put(jobInstanceId, result);
@@ -499,15 +435,18 @@ public final class JdbcRepository extends AbstractRepository {
             final ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 result = (JobExecutionImpl) jobExecutions.get(jobExecutionId);
-                if(result == null) {
-                    final long jobInstanceId = rs.getLong(TableColumn.JOBINSTANCEID);
+                if (result == null) {
+                    final long jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
                     result = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId),
                             jobExecutionId,
-                            BatchUtil.stringToProperties(rs.getString(TableColumn.JOBPARAMETERS)),
-                            rs.getTimestamp(TableColumn.CREATETIME), rs.getTimestamp(TableColumn.STARTTIME),
-                            rs.getTimestamp(TableColumn.ENDTIME), rs.getTimestamp(TableColumn.LASTUPDATEDTIME),
-                            rs.getString(TableColumn.BATCHSTATUS), rs.getString(TableColumn.EXITSTATUS),
-                            rs.getString(TableColumn.RESTARTPOSITION));
+                            BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS)),
+                            rs.getTimestamp(TableColumns.CREATETIME),
+                            rs.getTimestamp(TableColumns.STARTTIME),
+                            rs.getTimestamp(TableColumns.ENDTIME),
+                            rs.getTimestamp(TableColumns.LASTUPDATEDTIME),
+                            rs.getString(TableColumns.BATCHSTATUS),
+                            rs.getString(TableColumns.EXITSTATUS),
+                            rs.getString(TableColumns.RESTARTPOSITION));
                     jobExecutions.put(jobExecutionId, result);
                 }
                 break;
@@ -541,19 +480,19 @@ public final class JdbcRepository extends AbstractRepository {
             }
             final ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                final long i = rs.getLong(TableColumn.JOBEXECUTIONID);
+                final long i = rs.getLong(TableColumns.JOBEXECUTIONID);
                 JobExecution jobExecution1 = jobExecutions.get(i);
                 if (jobExecution1 == null) {
                     if (jobInstanceId == 0) {
-                        jobInstanceId = rs.getLong(TableColumn.JOBINSTANCEID);
+                        jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
                     }
-                    final Properties jobParameters1 = BatchUtil.stringToProperties(rs.getString(TableColumn.JOBPARAMETERS));
+                    final Properties jobParameters1 = BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS));
                     jobExecution1 =
                             new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId), i, jobParameters1,
-                                    rs.getTimestamp(TableColumn.CREATETIME), rs.getTimestamp(TableColumn.STARTTIME),
-                                    rs.getTimestamp(TableColumn.ENDTIME), rs.getTimestamp(TableColumn.LASTUPDATEDTIME),
-                                    rs.getString(TableColumn.BATCHSTATUS), rs.getString(TableColumn.EXITSTATUS),
-                                    rs.getString(TableColumn.RESTARTPOSITION));
+                                    rs.getTimestamp(TableColumns.CREATETIME), rs.getTimestamp(TableColumns.STARTTIME),
+                                    rs.getTimestamp(TableColumns.ENDTIME), rs.getTimestamp(TableColumns.LASTUPDATEDTIME),
+                                    rs.getString(TableColumns.BATCHSTATUS), rs.getString(TableColumns.EXITSTATUS),
+                                    rs.getString(TableColumns.RESTARTPOSITION));
 
                     jobExecutions.put(i, jobExecution1);
                 }
@@ -603,7 +542,7 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setTimestamp(1, new Timestamp(stepExecution.getEndTime().getTime()));
             preparedStatement.setString(2, stepExecution.getBatchStatus().name());
             preparedStatement.setString(3, stepExecution.getExitStatus());
-            preparedStatement.setString(4, formatException(stepExecutionImpl.getException()));
+            preparedStatement.setString(4, TableColumns.formatException(stepExecutionImpl.getException()));
             preparedStatement.setBytes(5, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
             preparedStatement.setLong(6, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
             preparedStatement.setLong(7, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
@@ -643,7 +582,7 @@ public final class JdbcRepository extends AbstractRepository {
                 preparedStatement = connection.prepareStatement(update);
                 preparedStatement.setString(1, partitionExecution.getBatchStatus().name());
                 preparedStatement.setString(2, partitionExecution.getExitStatus());
-                preparedStatement.setString(3, formatException(partitionExecution.getException()));
+                preparedStatement.setString(3, TableColumns.formatException(partitionExecution.getException()));
                 preparedStatement.setBytes(4, BatchUtil.objectToBytes(partitionExecution.getPersistentUserData()));
                 preparedStatement.setBytes(5, BatchUtil.objectToBytes(partitionExecution.getReaderCheckpointInfo()));
                 preparedStatement.setBytes(6, BatchUtil.objectToBytes(partitionExecution.getWriterCheckpointInfo()));
@@ -679,7 +618,8 @@ public final class JdbcRepository extends AbstractRepository {
     /**
      * Retrieves a list of StepExecution from database by JobExecution id.  This method does not check the cache, so it
      * should only be called after the cache has been searched without a match.
-     * @param jobExecutionId    if null, retrieves all StepExecutions; otherwise, retrieves all StepExecutions belongs to the JobExecution id
+     *
+     * @param jobExecutionId if null, retrieves all StepExecutions; otherwise, retrieves all StepExecutions belongs to the JobExecution id
      * @return a list of StepExecutions
      */
     List<StepExecution> selectStepExecutions(final Long jobExecutionId) {
@@ -761,18 +701,18 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(1, stepExecutionId);
             final ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                final String batchStatusValue = rs.getString(TableColumn.BATCHSTATUS);
+                final String batchStatusValue = rs.getString(TableColumns.BATCHSTATUS);
                 if (!notCompletedOnly ||
-                    !BatchStatus.COMPLETED.name().equals(batchStatusValue)) {
+                        !BatchStatus.COMPLETED.name().equals(batchStatusValue)) {
                     result.add(new PartitionExecutionImpl(
-                            rs.getInt(TableColumn.PARTITIONEXECUTIONID),
-                            rs.getLong(TableColumn.STEPEXECUTIONID),
+                            rs.getInt(TableColumns.PARTITIONEXECUTIONID),
+                            rs.getLong(TableColumns.STEPEXECUTIONID),
                             stepExecution.getStepName(),
                             BatchStatus.valueOf(batchStatusValue),
-                            rs.getString(TableColumn.EXITSTATUS),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.READERCHECKPOINTINFO)),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.WRITERCHECKPOINTINFO))
+                            rs.getString(TableColumns.EXITSTATUS),
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.PERSISTENTUSERDATA)),
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.READERCHECKPOINTINFO)),
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.WRITERCHECKPOINTINFO))
                     ));
                 }
             }
@@ -788,23 +728,23 @@ public final class JdbcRepository extends AbstractRepository {
             throws SQLException, ClassNotFoundException, IOException {
         while (rs.next()) {
             final StepExecutionImpl e = new StepExecutionImpl(
-                    rs.getLong(TableColumn.STEPEXECUTIONID),
-                    rs.getString(TableColumn.STEPNAME),
-                    rs.getTimestamp(TableColumn.STARTTIME),
-                    rs.getTimestamp(TableColumn.ENDTIME),
-                    rs.getString(TableColumn.BATCHSTATUS),
-                    rs.getString(TableColumn.EXITSTATUS),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.PERSISTENTUSERDATA)),
-                    rs.getInt(TableColumn.READCOUNT),
-                    rs.getInt(TableColumn.WRITECOUNT),
-                    rs.getInt(TableColumn.COMMITCOUNT),
-                    rs.getInt(TableColumn.ROLLBACKCOUNT),
-                    rs.getInt(TableColumn.READSKIPCOUNT),
-                    rs.getInt(TableColumn.PROCESSSKIPCOUNT),
-                    rs.getInt(TableColumn.FILTERCOUNT),
-                    rs.getInt(TableColumn.WRITESKIPCOUNT),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.READERCHECKPOINTINFO)),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumn.WRITERCHECKPOINTINFO))
+                    rs.getLong(TableColumns.STEPEXECUTIONID),
+                    rs.getString(TableColumns.STEPNAME),
+                    rs.getTimestamp(TableColumns.STARTTIME),
+                    rs.getTimestamp(TableColumns.ENDTIME),
+                    rs.getString(TableColumns.BATCHSTATUS),
+                    rs.getString(TableColumns.EXITSTATUS),
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.PERSISTENTUSERDATA)),
+                    rs.getInt(TableColumns.READCOUNT),
+                    rs.getInt(TableColumns.WRITECOUNT),
+                    rs.getInt(TableColumns.COMMITCOUNT),
+                    rs.getInt(TableColumns.ROLLBACKCOUNT),
+                    rs.getInt(TableColumns.READSKIPCOUNT),
+                    rs.getInt(TableColumns.PROCESSSKIPCOUNT),
+                    rs.getInt(TableColumns.FILTERCOUNT),
+                    rs.getInt(TableColumns.WRITESKIPCOUNT),
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.READERCHECKPOINTINFO)),
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.WRITERCHECKPOINTINFO))
             );
             result.add(e);
             if (top1) {
@@ -881,6 +821,7 @@ public final class JdbcRepository extends AbstractRepository {
      * If {@value #DDL_FILE_NAME_KEY} property is explicitly set, use it;
      * else determine the appropriate ddl file location based on {@code databaseProductName};
      * if no match, then return the default value {@value #DEFAULT_DDL_FILE}.
+     *
      * @param databaseProductName a valid database product name, or "".  Must not be null
      * @return location of ddl file resource, e.g., sql/jberet.ddl
      */
@@ -915,17 +856,5 @@ public final class JdbcRepository extends AbstractRepository {
         }
         BatchLogger.LOGGER.ddlFileAndDatabaseProductName(ddlFile, databaseProductName);
         return ddlFile;
-    }
-
-    private static String formatException(final Exception exception) {
-        if (exception == null) {
-            return null;
-        }
-        String asString = Throwables.getStackTraceAsString(exception);
-        if (asString.length() <= TableColumn.EXECUTION_EXCEPTION_LENGTH_LIMIT) {
-            return asString;
-        }
-        asString = exception + BatchUtil.NL + Throwables.getRootCause(exception);
-        return asString.substring(0, Math.min(TableColumn.EXECUTION_EXCEPTION_LENGTH_LIMIT, asString.length()));
     }
 }
