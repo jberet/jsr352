@@ -82,14 +82,16 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             for (final JobElement e : getJobElements()) {
                 if (e instanceof Step) {
                     final Step step = (Step) e;
-//                if (Boolean.parseBoolean(step.getAbstract())) {
-//                    continue;
-//                }
+                    if (step.isAbstract()) {
+                        continue;
+                    }
                     runStep(step);
                     break;
                 } else if (e instanceof Flow) {
                     final Flow flow = (Flow) e;
-                    //A flow cannot be abstract or have parent, so run the flow
+                    if (flow.isAbstract()) {
+                        continue;
+                    }
                     runFlow(flow, null);
                     break;
                 } else if (e instanceof Split) {

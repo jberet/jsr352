@@ -23,22 +23,32 @@ import org.junit.Test;
 public class JobMergerTest {
     @Test
     public void stepInheritanceCycle() throws Exception {
-        jobStartException("step-inheritance-cycle.xml", "Expecting exceptioin from cyclic inheritance, but got no exception.");
+        jobStartException("step-inheritance-cycle.xml", "Expecting JobStartException from cyclic inheritance");
     }
 
     @Test
     public void stepInheritanceSelf() throws Exception {
-        jobStartException("step-inheritance-self.xml", "Expecting exceptioin from self inheritance, but got no exception.");
+        jobStartException("step-inheritance-self.xml", "Expecting JobStartException from self inheritance");
     }
 
     @Test
     public void jobInheritanceSelf() throws Exception {
-        jobStartException("job-inheritance-self.xml", "Expecting exception from cyclic inheritance, but got no exceptioin");
+        jobStartException("job-inheritance-self.xml", "Expecting JobStartException from cyclic inheritance");
     }
 
     @Test
     public void jobInheritanceCycle() throws Exception {
-        jobStartException("job-inheritance-cycle-child.xml", "Expecting exception from cyclic inheritance, but got no exceptioin");
+        jobStartException("job-inheritance-cycle-child.xml", "Expecting JobStartException from cyclic inheritance");
+    }
+
+    @Test
+    public void jobWithNonexistentParent() throws Exception {
+        jobStartException("job-with-nonexistent-parent.xml", "Expecting JobStartException for nonexistent parent");
+    }
+
+    @Test
+    public void stepWithNonexistentParent() throws Exception {
+        jobStartException("step-with-nonexistent-parent.xml", "Expecting JobStartException for nonexistent parent");
     }
 
     /**
@@ -52,7 +62,10 @@ public class JobMergerTest {
             loadJob(jobName);
             Assert.fail(failureMessage);
         } catch (final JobStartException e) {
+            e.printStackTrace();
             System.out.printf("Got expected %s%n", e);
+        } catch (final Exception e) {
+            Assert.fail(failureMessage + ", but got " + e);
         }
     }
 

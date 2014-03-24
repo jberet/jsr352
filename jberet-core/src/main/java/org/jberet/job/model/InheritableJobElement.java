@@ -24,7 +24,7 @@ public abstract class InheritableJobElement extends AbstractJobElement {
         super(id);
     }
 
-    boolean isAbstract() {
+    public boolean isAbstract() {
         return abstractAttribute;
     }
 

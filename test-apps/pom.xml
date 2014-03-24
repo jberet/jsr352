@@ -27,6 +27,7 @@
         <module>chunkClose</module>
         <module>propertyInjection</module>
         <module>postConstruct</module>
+        <module>inheritance</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
