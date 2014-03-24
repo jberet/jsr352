@@ -39,6 +39,7 @@ import javax.transaction.TransactionManager;
 
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.ExceptionClassFilter;
+import org.jberet.job.model.Listeners;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.AbstractStepExecution;
@@ -643,10 +644,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private void createChunkRelatedListeners() {
-        final List<RefArtifact> listeners = batchContext.getStep().getListeners();
+        final Listeners listeners = batchContext.getStep().getListeners();
+        if (listeners == null) {
+            return;
+        }
         String ref;
         Object o;
-        for (final RefArtifact l : listeners) {
+        for (final RefArtifact l : listeners.getListeners()) {
             ref = l.getRef();
             Class<?> cls = null;
             if (stepRunner.chunkRelatedListeners != null) {

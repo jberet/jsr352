@@ -12,6 +12,7 @@
 
 package org.jberet.test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -157,7 +158,7 @@ public class JobRepositoryTest {
 
     @Test
     public void addRemoveJob() throws Exception {
-        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class, this.getClass().getClassLoader());
+        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", this.getClass().getClassLoader(), new ArrayList<Job>());
         repo.removeJob(job.getId());
         final Collection<Job> jobs = repo.getJobs();
         final int existingJobsCount = jobs.size();

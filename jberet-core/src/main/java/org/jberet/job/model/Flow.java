@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,12 +15,12 @@ package org.jberet.job.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Flow extends AbstractJobElement {
+public final class Flow extends InheritableJobElement {
     private static final long serialVersionUID = 6569569970633169427L;
 
-    private String next;
+    String next;
 
-    private final List<JobElement> jobElements = new ArrayList<JobElement>();
+    List<JobElement> jobElements = new ArrayList<JobElement>();
 
     Flow(final String id) {
         super(id);
@@ -30,15 +30,27 @@ public final class Flow extends AbstractJobElement {
         return next;
     }
 
-    void setAttributeNext(final String next) {
-        this.next = next;
-    }
-
     public List<JobElement> getJobElements() {
         return jobElements;
     }
 
-    void addJobElement(final JobElement jobElement) {
-        jobElements.add(jobElement);
+    @Override
+    public Listeners getListeners() {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void setListeners(final Listeners listeners) {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public Properties getProperties() {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void setProperties(final Properties properties) {
+        throw new IllegalStateException();
     }
 }

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="flow-child" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <flow id="flow1" abstract="true" next="xxx">
+        <step id="flow1-step1">
+            <batchlet ref="B1"/>
+        </step>
+
+        <step id="flow1-step2">
+            <batchlet ref="B1"/>
+        </step>
+        <decision id="flow1-decision1" ref="D1">
+            <end on="END"/>
+        </decision>
+
+        <end on="END"/>
+    </flow>
+
+    <flow id="flow2" parent="flow1" next="step3">
+        <step id="flow2-step1">
+            <batchlet ref="B2"/>
+        </step>
+        <step id="flow2-step2">
+            <batchlet ref="B2"/>
+        </step>
+        <step id="flow2-step3">
+            <batchlet ref="B2"/>
+        </step>
+        <decision id="flow2-decision1" ref="D2">
+            <end on="END"/>
+        </decision>
+
+        <fail on="FAIL"/>
+        <stop on="STOP"/>
+    </flow>
+
+    <step id = "step3">
+        <batchlet ref="B3"/>
+    </step>
+
+    <!-- ========================================= -->
+    <flow id="flow3" parent="flow-parent-flow1" next="step4" jsl-name="flow-parent">
+        <step id="flow3-step1">
+            <batchlet ref="B3"/>
+        </step>
+        <step id="flow3-step2">
+            <batchlet ref="B3"/>
+        </step>
+        <step id="flow3-step3">
+            <batchlet ref="B3"/>
+        </step>
+        <decision id="flow3-decision1" ref="D3">
+            <end on="END"/>
+        </decision>
+
+        <stop on="STOP"/>
+        <fail on="FAIL"/>
+    </flow>
+
+    <step id = "step4">
+        <batchlet ref="B4"/>
+    </step>
+</job>

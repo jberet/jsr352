@@ -127,4 +127,7 @@ public interface BatchMessages {
 
     @Message(id = 633, value = "Invalid JBeret configuration property %s = %s.")
     BatchRuntimeException invalidConfigProperty(@Cause Throwable throwable, String key, String value);
+
+    @Message(id = 634, value = "Cycles detected in job element inheritance: %s")
+    JobStartException cycleInheritance(String inheritingElements);
 }

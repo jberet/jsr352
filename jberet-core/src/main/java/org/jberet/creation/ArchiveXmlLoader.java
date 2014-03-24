@@ -19,9 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.List;
 import javax.batch.operations.JobStartException;
 
 import org.jberet.job.model.BatchArtifacts;
+import org.jberet.job.model.Job;
+import org.jberet.job.model.JobMerger;
 import org.jberet.job.model.JobParser;
 
 import static org.jberet._private.BatchMessages.MESSAGES;
@@ -64,36 +67,45 @@ public class ArchiveXmlLoader {
     }
 
     /**
-     * Gets the root element, either of type Job or Step, for a given job or step name.
+     * Gets the job root element for a given job name.
      *
-     * @param jobName  base name of the job xml document
-     * @param rootType Job.class or Step.class
-     * @param <T>      Job or Step
-     * @return the job or step root element
+     * @param jobName base name of the job xml document
+     * @return the job root element
      */
-    public static <T> T loadJobXml(final String jobName, final Class<T> rootType, final ClassLoader classLoader) throws JobStartException {
-        Object jobOrStep = null;
+    public static Job loadJobXml(final String jobName, final ClassLoader classLoader, final List<Job> loadedJobs)
+            throws JobStartException {
+        for (final Job j : loadedJobs) {
+            if (jobName.equals(j.getId())) {
+                return j;
+            }
+        }
+
+        Job job = null;
         final InputStream is;
         try {
             is = getJobXml(jobName, classLoader);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw MESSAGES.failToGetJobXml(e, jobName);
         }
 
         try {
-            jobOrStep = JobParser.parseJob(is);
-        } catch (Exception e) {
+            job = JobParser.parseJob(is, classLoader);
+            loadedJobs.add(job);
+            if (!job.getInheritingJobElements().isEmpty()) {
+                JobMerger.resolveInheritance(job, classLoader, loadedJobs);
+            }
+        } catch (final Exception e) {
             throw MESSAGES.failToParseJobXml(e, jobName);
         } finally {
             if (is != null) {
                 try {
                     is.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     //ignore
                 }
             }
         }
-        return (T) jobOrStep;
+        return job;
     }
 
     private static InputStream getJobXml(String jobXml, final ClassLoader classLoader) throws IOException {

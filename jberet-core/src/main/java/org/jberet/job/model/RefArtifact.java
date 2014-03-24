@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,11 +13,12 @@
 package org.jberet.job.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Represents a batch artifact with a ref and properties.  It may be extended to form more complex artifact types.
  */
-public class RefArtifact implements Serializable {
+public class RefArtifact implements Serializable, Cloneable, PropertiesHolder {
     private static final long serialVersionUID = -3101663828339367848L;
 
     private String ref;
@@ -39,7 +40,16 @@ public class RefArtifact implements Serializable {
         return properties;
     }
 
-    void setProperties(final Properties properties) {
+    public void setProperties(final Properties properties) {
         this.properties = properties;
+    }
+
+    @Override
+    protected RefArtifact clone() {
+        final RefArtifact c = new RefArtifact(this.ref);
+        if (properties != null) {
+            c.setProperties(properties.clone());
+        }
+        return c;
     }
 }

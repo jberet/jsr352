@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class PartitionPlan implements Serializable {
+public final class PartitionPlan implements Serializable, Cloneable {
     private static final long serialVersionUID = -7038781842409368148L;
     private static final int DEFAULT_PARTITIONS = 1;
 
@@ -78,5 +78,21 @@ public final class PartitionPlan implements Serializable {
         if (threads != null) {
             this.threads = threads;
         }
+    }
+
+    @Override
+    protected PartitionPlan clone() {
+        final PartitionPlan c = new PartitionPlan();
+        if (this.partitions != null) {
+            c.partitions = this.partitions;
+        }
+        if (this.threads != null) {
+            c.threads = this.threads;
+        }
+        for (final Properties p : this.propertiesList) {
+            c.propertiesList.add(p.clone());
+        }
+
+        return c;
     }
 }

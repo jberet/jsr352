@@ -40,6 +40,7 @@ import javax.transaction.TransactionManager;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Chunk;
+import org.jberet.job.model.Listeners;
 import org.jberet.job.model.Partition;
 import org.jberet.job.model.PartitionPlan;
 import org.jberet.job.model.Properties;
@@ -373,9 +374,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     }
 
     private void createStepListeners() {
-        final List<RefArtifact> listeners = step.getListeners();
+        final Listeners listeners = step.getListeners();
+        if (listeners == null) {
+            return;
+        }
         String ref;
-        for (final RefArtifact listener : listeners) {
+        for (final RefArtifact listener : listeners.getListeners()) {
             ref = listener.getRef();
             final Class<?> cls = jobContext.getArtifactClass(ref);
 

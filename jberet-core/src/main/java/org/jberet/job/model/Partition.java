@@ -14,7 +14,7 @@ package org.jberet.job.model;
 
 import java.io.Serializable;
 
-public final class Partition implements Serializable {
+public final class Partition implements Serializable, Cloneable {
     private static final long serialVersionUID = 1535154712638288876L;
 
     private RefArtifact mapper;
@@ -64,5 +64,26 @@ public final class Partition implements Serializable {
 
     void setReducer(final RefArtifact reducer) {
         this.reducer = reducer;
+    }
+
+    @Override
+    protected Partition clone() {
+        final Partition c = new Partition();
+        if (this.mapper != null) {
+            c.mapper = this.mapper.clone();
+        }
+        if (this.plan != null) {
+            c.plan = this.plan.clone();
+        }
+        if (this.collector != null) {
+            c.collector = this.collector.clone();
+        }
+        if (this.analyzer != null) {
+            c.analyzer = this.analyzer.clone();
+        }
+        if (this.reducer != null) {
+            c.reducer = this.reducer.clone();
+        }
+        return c;
     }
 }

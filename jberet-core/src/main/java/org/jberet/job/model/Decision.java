@@ -12,11 +12,10 @@
 
 package org.jberet.job.model;
 
-public final class Decision extends AbstractJobElement {
+public final class Decision extends AbstractJobElement implements PropertiesHolder {
     private static final long serialVersionUID = -7022222093403964947L;
 
     private String ref;
-    private Properties properties;
 
     Decision(final String id, final String ref) {
         super(id);
@@ -29,13 +28,5 @@ public final class Decision extends AbstractJobElement {
 
     void setRef(final String ref) {
         this.ref = ref;
-    }
-
-    public Properties getProperties() {
-        return properties;
-    }
-
-    void setProperties(final Properties properties) {
-        this.properties = properties;
     }
 }

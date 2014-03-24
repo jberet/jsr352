@@ -16,16 +16,27 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ExceptionClassFilter implements Serializable {
+public final class ExceptionClassFilter implements Serializable, Cloneable {
     private static final long serialVersionUID = -6174512038188933722L;
 
     final List<String> include = new ArrayList<String>();
     final List<String> exclude = new ArrayList<String>();
+    private boolean merge = true;
 
     static void addExceptionClassTo(final String exceptionClass, final List<String> includeOrExcludeList) {
         final String trimmed = exceptionClass.trim();
         if (!trimmed.isEmpty()) {
             includeOrExcludeList.add(trimmed);
+        }
+    }
+
+    boolean isMerge() {
+        return merge;
+    }
+
+    void setMerge(final String mergeVal) {
+        if (mergeVal != null && !mergeVal.toLowerCase().equals("true")) {
+            this.merge = false;
         }
     }
 
@@ -91,5 +102,13 @@ public final class ExceptionClassFilter implements Serializable {
             }
         }
         return result;
+    }
+
+    @Override
+    protected ExceptionClassFilter clone() {
+        final ExceptionClassFilter c = new ExceptionClassFilter();
+        c.include.addAll(this.include);
+        c.exclude.addAll(this.exclude);
+        return c;
     }
 }

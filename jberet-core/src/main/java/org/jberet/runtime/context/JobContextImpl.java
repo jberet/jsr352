@@ -26,6 +26,7 @@ import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactCreationContext;
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Job;
+import org.jberet.job.model.Listeners;
 import org.jberet.job.model.PropertyResolver;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.job.model.Step;
@@ -223,12 +224,17 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
     }
 
     private void createJobListeners() {
-        final List<RefArtifact> listeners = jobExecution.getSubstitutedJob().getListeners();
-        final int count = listeners.size();
-        this.jobListeners = new JobListener[count];
-        for (int i = 0; i < count; i++) {
-            final RefArtifact listener = listeners.get(i);
-            this.jobListeners[i] = createArtifact(listener.getRef(), null, listener.getProperties());
+        final Listeners listeners = jobExecution.getSubstitutedJob().getListeners();
+        if (listeners != null) {
+            final List<RefArtifact> listenerList = listeners.getListeners();
+            final int count = listenerList.size();
+            this.jobListeners = new JobListener[count];
+            for (int i = 0; i < count; i++) {
+                final RefArtifact listener = listenerList.get(i);
+                this.jobListeners[i] = createArtifact(listener.getRef(), null, listener.getProperties());
+            }
+        } else {
+            this.jobListeners = new JobListener[0];
         }
     }
 }

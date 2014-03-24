@@ -173,7 +173,7 @@ public final class JobParserTest {
         Job job = null;
         final InputStream is = getClass().getClassLoader().getResourceAsStream(SAMPLE_JOB_XML);
         try {
-            job = JobParser.parseJob(is);
+            job = JobParser.parseJob(is, getClass().getClassLoader());
         } finally {
             is.close();
         }
@@ -221,7 +221,7 @@ public final class JobParserTest {
         InputStream is = null;
         try {
             is = new ByteArrayInputStream(xmlContent.getBytes());
-            JobParser.parseJob(is);
+            JobParser.parseJob(is, getClass().getClassLoader());
             Assert.fail("Exception should already have been thrown.");
         } catch (XMLStreamException e) {
             System.out.printf("Got expected exception %s%n", e);
@@ -243,12 +243,13 @@ public final class JobParserTest {
         Assert.assertNull(properties.get(""));
     }
 
-    private void checkListeners(final List<RefArtifact> listeners) throws Exception {
-        Assert.assertEquals(2, listeners.size());
-        Assert.assertEquals("ref1", listeners.get(0).getRef());
-        checkProperties(listeners.get(0).getProperties());
-        Assert.assertEquals("ref2", listeners.get(1).getRef());
-        checkProperties(listeners.get(1).getProperties());
+    private void checkListeners(final Listeners listeners) throws Exception {
+        final List<RefArtifact> listenerList = listeners.getListeners();
+        Assert.assertEquals(2, listenerList.size());
+        Assert.assertEquals("ref1", listenerList.get(0).getRef());
+        checkProperties(listenerList.get(0).getProperties());
+        Assert.assertEquals("ref2", listenerList.get(1).getRef());
+        checkProperties(listenerList.get(1).getProperties());
     }
 
     private void checkDecision(final Decision decision, final String parentId) throws Exception {
@@ -271,7 +272,7 @@ public final class JobParserTest {
 //        Assert.assertEquals("next1", flow.getAttributeNext());    defer this check to checkTransitionElements
         checkTransitionElements(flow.getTransitionElements(), flow.getAttributeNext());
 
-        for (final JobElement e : flow.getJobElements()) {
+        for (final JobElement e : flow.jobElements) {
             if (e instanceof Decision) {
                 checkDecision((Decision) e, flowId);
             } else if (e instanceof Step) {

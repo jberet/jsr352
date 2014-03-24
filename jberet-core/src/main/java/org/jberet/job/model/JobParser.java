@@ -13,7 +13,6 @@
 package org.jberet.job.model;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -34,10 +33,11 @@ public final class JobParser {
      * Parses a job xml file, which defines a batch job.
      *
      * @param inputStream the source of the job xml definition
+     * @param classLoader the current application class loader
      * @return a Job object
      * @throws XMLStreamException
      */
-    public static Job parseJob(final InputStream inputStream) throws XMLStreamException {
+    public static Job parseJob(final InputStream inputStream, final ClassLoader classLoader) throws XMLStreamException {
         final XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
         Job job = null;
         try {
@@ -53,15 +53,22 @@ public final class JobParser {
                             case JOB:
                                 job = new Job(getAttributeValue(reader, XmlAttribute.ID, true));
                                 job.setRestartable(getAttributeValue(reader, XmlAttribute.RESTARTABLE, false));
+                                job.setAbstract(getAttributeValue(reader, XmlAttribute.ABSTRACT, false));
+
+                                final String parentVal = getAttributeValue(reader, XmlAttribute.PARENT, false);
+                                if (parentVal != null) {
+                                    job.setParentAndJslName(parentVal, null);
+                                    job.inheritingJobElements.add(job);
+                                }
                                 break;
                             case STEP:
-                                job.addJobElement(parseStep(reader));
+                                job.addJobElement(parseStep(reader, job));
                                 break;
                             case FLOW:
-                                job.addJobElement(parseFlow(reader));
+                                job.addJobElement(parseFlow(reader, job));
                                 break;
                             case SPLIT:
-                                job.addJobElement(parseSplit(reader));
+                                job.addJobElement(parseSplit(reader, job));
                                 break;
                             case DECISION:
                                 job.addJobElement(parseDecision(reader));
@@ -70,7 +77,7 @@ public final class JobParser {
                                 job.setProperties(parseProperties(reader));
                                 break;
                             case LISTENERS:
-                                job.addListeners(parseListeners(reader));
+                                job.setListeners(parseListeners(reader));
                                 break;
                             default:
                                 throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
@@ -130,11 +137,18 @@ public final class JobParser {
         return batchArtifacts;
     }
 
-    private static Step parseStep(final XMLStreamReader reader) throws XMLStreamException {
+    private static Step parseStep(final XMLStreamReader reader, final Job job) throws XMLStreamException {
         final Step step = new Step(getAttributeValue(reader, XmlAttribute.ID, true));
         step.setStartLimit(getAttributeValue(reader, XmlAttribute.START_LIMIT, false));
         step.setAllowStartIfComplete(getAttributeValue(reader, XmlAttribute.ALLOW_START_IF_COMPLETE, false));
         step.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT, false));
+        step.setAbstract(getAttributeValue(reader, XmlAttribute.ABSTRACT, false));
+
+        final String parentVal = getAttributeValue(reader, XmlAttribute.PARENT, false);
+        if (parentVal != null) {
+            step.setParentAndJslName(parentVal, getAttributeValue(reader, XmlAttribute.JSL_NAME, false));
+            job.inheritingJobElements.add(step);
+        }
 
         while (reader.hasNext()) {
             final int eventType = reader.next();
@@ -149,7 +163,7 @@ public final class JobParser {
                             step.setProperties(parseProperties(reader));
                             break;
                         case LISTENERS:
-                            step.addListeners(parseListeners(reader));
+                            step.setListeners(parseListeners(reader));
                             break;
                         case BATCHLET:
                             step.setBatchlet(parseRefArtifact(reader, XmlElement.BATCHLET));
@@ -241,9 +255,17 @@ public final class JobParser {
         throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
-    private static Flow parseFlow(final XMLStreamReader reader) throws XMLStreamException {
+    private static Flow parseFlow(final XMLStreamReader reader, final Job job) throws XMLStreamException {
         final Flow flow = new Flow(getAttributeValue(reader, XmlAttribute.ID, true));
-        flow.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT, false));
+        flow.next = getAttributeValue(reader, XmlAttribute.NEXT, false);
+        flow.setAbstract(getAttributeValue(reader, XmlAttribute.ABSTRACT, false));
+
+        final String parentVal = getAttributeValue(reader, XmlAttribute.PARENT, false);
+        if (parentVal != null) {
+            flow.setParentAndJslName(parentVal, getAttributeValue(reader, XmlAttribute.JSL_NAME, false));
+            job.inheritingJobElements.add(flow);
+        }
+
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -254,16 +276,16 @@ public final class JobParser {
                 case START_ELEMENT:
                     switch (element) {
                         case DECISION:
-                            flow.addJobElement(parseDecision(reader));
+                            flow.jobElements.add(parseDecision(reader));
                             break;
                         case FLOW:
-                            flow.addJobElement(parseFlow(reader));
+                            flow.jobElements.add(parseFlow(reader, job));
                             break;
                         case SPLIT:
-                            flow.addJobElement(parseSplit(reader));
+                            flow.jobElements.add(parseSplit(reader, job));
                             break;
                         case STEP:
-                            flow.addJobElement(parseStep(reader));
+                            flow.jobElements.add(parseStep(reader, job));
                             break;
                         case NEXT:
                             if (flow.getAttributeNext() != null) {
@@ -296,7 +318,7 @@ public final class JobParser {
         throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
-    private static Split parseSplit(final XMLStreamReader reader) throws XMLStreamException {
+    private static Split parseSplit(final XMLStreamReader reader, final Job job) throws XMLStreamException {
         final Split split = new Split(getAttributeValue(reader, XmlAttribute.ID, true));
         split.setAttributeNext(getAttributeValue(reader, XmlAttribute.NEXT, false));
         while (reader.hasNext()) {
@@ -308,7 +330,7 @@ public final class JobParser {
             switch (eventType) {
                 case START_ELEMENT:
                     if (element == XmlElement.FLOW) {
-                        split.addFlow(parseFlow(reader));
+                        split.addFlow(parseFlow(reader, job));
                     } else {
                         throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
@@ -327,6 +349,8 @@ public final class JobParser {
     private static Properties parseProperties(final XMLStreamReader reader) throws XMLStreamException {
         final Properties properties = new Properties();
         properties.setPartition(getAttributeValue(reader, XmlAttribute.PARTITION, false));
+        properties.setMerge(getAttributeValue(reader, XmlAttribute.MERGE, false));
+
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -352,8 +376,11 @@ public final class JobParser {
         throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
 
-    private static List<RefArtifact> parseListeners(final XMLStreamReader reader) throws XMLStreamException {
-        final List<RefArtifact> listeners = new ArrayList<RefArtifact>();
+    private static Listeners parseListeners(final XMLStreamReader reader) throws XMLStreamException {
+        final Listeners listeners = new Listeners();
+        final List<RefArtifact> listenerList = listeners.getListeners();
+        listeners.setMerge(getAttributeValue(reader, XmlAttribute.MERGE, false));
+
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -363,7 +390,7 @@ public final class JobParser {
             switch (eventType) {
                 case START_ELEMENT:
                     if (element == XmlElement.LISTENER) {
-                        listeners.add(parseRefArtifact(reader, element));
+                        listenerList.add(parseRefArtifact(reader, element));
                     } else {
                         throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
@@ -574,6 +601,8 @@ public final class JobParser {
 
     private static ExceptionClassFilter parseExceptionClassFilter(final XMLStreamReader reader, final XmlElement artifactElementType) throws XMLStreamException {
         final ExceptionClassFilter filter = new ExceptionClassFilter();
+        filter.setMerge(getAttributeValue(reader, XmlAttribute.MERGE, false));
+
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {

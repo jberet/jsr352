@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,21 +16,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Job implements Serializable {
+public final class Job extends InheritableJobElement implements Serializable, PropertiesHolder {
     private static final long serialVersionUID = -3566969844084046522L;
 
-    private final String id;
     private String restartable;
-    private Properties properties;
-    private final List<RefArtifact> listeners = new ArrayList<RefArtifact>();
     private final List<JobElement> jobElements = new ArrayList<JobElement>();
 
-    Job(final String id) {
-        this.id = id;
-    }
+    /**
+     * Steps and Flows that inherit from a parent (i.e., has a non-null parent attribute). They can be top-level
+     * job elements or nested under other job elements.
+     */
+    final List<InheritableJobElement> inheritingJobElements = new ArrayList<InheritableJobElement>();
 
-    public String getId() {
-        return id;
+    Job(final String id) {
+        super(id);
     }
 
     public String getRestartable() {
@@ -45,22 +44,6 @@ public final class Job implements Serializable {
         if (restartable != null) {
             this.restartable = restartable;
         }
-    }
-
-    public Properties getProperties() {
-        return properties;
-    }
-
-    void setProperties(final Properties properties) {
-        this.properties = properties;
-    }
-
-    public List<RefArtifact> getListeners() {
-        return listeners;
-    }
-
-    void addListeners(final List<RefArtifact> ls) {
-        listeners.addAll(ls);
     }
 
     public List<JobElement> getJobElements() {
@@ -86,5 +69,19 @@ public final class Job implements Serializable {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    @Override
+    public List<Transition> getTransitionElements() {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void addTransitionElement(final Transition transition) {
+        throw new IllegalStateException();
+    }
+
+    public List<InheritableJobElement> getInheritingJobElements() {
+        return inheritingJobElements;
     }
 }

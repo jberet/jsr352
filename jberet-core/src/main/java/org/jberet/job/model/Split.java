@@ -40,4 +40,14 @@ public final class Split extends AbstractJobElement {
     void addFlow(final Flow flow) {
         flows.add(flow);
     }
+
+    @Override
+    public Properties getProperties() {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void setProperties(final Properties properties) {
+        throw new IllegalStateException();
+    }
 }

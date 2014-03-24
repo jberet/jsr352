@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,10 +12,7 @@
 
 package org.jberet.job.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public final class Step extends AbstractJobElement {
+public final class Step extends InheritableJobElement implements PropertiesHolder {
     private static final long serialVersionUID = 7699066774192733641L;
     private static final int DEFAULT_START_LIMIT = 0;
 
@@ -23,8 +20,6 @@ public final class Step extends AbstractJobElement {
     private String allowStartIfComplete;  //default false
     private String next;
 
-    private Properties properties;
-    private final List<RefArtifact> listeners = new ArrayList<RefArtifact>();
     private RefArtifact batchlet;
     private Chunk chunk;
     private Partition partition;
@@ -70,26 +65,6 @@ public final class Step extends AbstractJobElement {
 
     void setAttributeNext(final String next) {
         this.next = next;
-    }
-
-    public Properties getProperties() {
-        return properties;
-    }
-
-    void setProperties(final Properties properties) {
-        this.properties = properties;
-    }
-
-    public List<RefArtifact> getListeners() {
-        return listeners;
-    }
-
-    void addListener(final RefArtifact listener) {
-        listeners.add(listener);
-    }
-
-    void addListeners(final List<RefArtifact> ls) {
-        listeners.addAll(ls);
     }
 
     public RefArtifact getBatchlet() {

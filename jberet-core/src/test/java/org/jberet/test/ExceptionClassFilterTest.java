@@ -15,6 +15,7 @@ package org.jberet.test;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.AlreadyConnectedException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jberet.creation.ArchiveXmlLoader;
@@ -30,7 +31,7 @@ public class ExceptionClassFilterTest {
     @Test
     public void exceptionClassFilter2() throws Exception {
         final ClassLoader cl = this.getClass().getClassLoader();
-        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", Job.class, cl);
+        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", cl, new ArrayList<Job>());
         Chunk chunk = getChunk(job, "exception-class-filter-step");
 
         ExceptionClassFilter filter = chunk.getSkippableExceptionClasses();

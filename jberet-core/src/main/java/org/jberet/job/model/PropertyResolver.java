@@ -359,11 +359,11 @@ public final class PropertyResolver {
         if (oldVal != null) {
             final String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
-                flow.setAttributeNext(newVal);
+                flow.next = newVal;
             }
         }
         resolveTransitionElements(flow.getTransitionElements());
-        resolveJobElements(flow.getJobElements());
+        resolveJobElements(flow.jobElements);
     }
 
     private void resolve(final org.jberet.job.model.Properties props, final boolean popProps) {
@@ -408,11 +408,11 @@ public final class PropertyResolver {
         }
     }
 
-    private void resolve(final List<RefArtifact> listeners) {
+    private void resolve(final Listeners listeners) {
         if (listeners == null) {
             return;
         }
-        for (final RefArtifact l : listeners) {
+        for (final RefArtifact l : listeners.getListeners()) {
             final String oldVal = l.getRef();
             final String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {

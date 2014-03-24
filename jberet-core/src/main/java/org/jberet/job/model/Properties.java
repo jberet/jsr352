@@ -16,11 +16,12 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class Properties implements Serializable {
+public final class Properties implements Serializable, Cloneable {
     private static final long serialVersionUID = 7115483407256741761L;
 
     private String partition;
     private final Map<String, String> nameValues = new LinkedHashMap<String, String>();
+    private boolean merge = true;
 
     Properties() {
     }
@@ -29,12 +30,28 @@ public final class Properties implements Serializable {
         nameValues.put(name, value);
     }
 
+    void addIfAbsent(final String name, final String value) {
+        if (!nameValues.containsKey(name)) {
+            nameValues.put(name, value);
+        }
+    }
+
     void remove(final String name) {
         nameValues.remove(name);
     }
 
     public String get(final String name) {
         return nameValues.get(name);
+    }
+
+    boolean isMerge() {
+        return merge;
+    }
+
+    void setMerge(final String mergeVal) {
+        if (mergeVal != null && !mergeVal.toLowerCase().equals("true")) {
+            this.merge = false;
+        }
     }
 
     public String getPartition() {
@@ -61,5 +78,16 @@ public final class Properties implements Serializable {
             }
         }
         return props;
+    }
+
+    @Override
+    protected Properties clone() {
+        final Properties c = new Properties();
+        //merge attribute is not copied over
+        c.setPartition(this.partition);
+        for (final Map.Entry<String, String> e : this.nameValues.entrySet()) {
+            c.add(e.getKey(), e.getValue());
+        }
+        return c;
     }
 }

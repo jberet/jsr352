@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="step-same-file-parent-child" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <!-- parent has its own parent -->
+    <step id="step-same-file-child-child" parent="step-same-file-child-1">
+        <properties>
+            <property name="child-child" value="child-child"></property>
+            <property name="parent" value="parent"></property>  <!-- make sure dups are not added twice -->
+        </properties>
+        <listeners>
+            <listener ref="child-child-listener"></listener>
+        </listeners>
+        <batchlet ref="child-child-batchlet">
+        </batchlet>
+    </step>
+
+    <step id="step-same-file-child-1" parent="step-same-file-parent">
+        <properties>
+            <property name="child" value="child"></property>
+            <property name="parent" value="parent"></property>  <!-- make sure dups are not added twice -->
+        </properties>
+        <listeners>
+            <listener ref="child-listener"></listener>
+        </listeners>
+        <batchlet ref="child-batchlet">
+        </batchlet>
+    </step>
+
+    <step id="step-same-file-child-2" parent="step-same-file-parent">
+        <properties>
+            <property name="child" value="child"></property>
+        </properties>
+
+        <listeners>
+            <listener ref="child-listener"></listener>
+        </listeners>
+        <batchlet ref="child-batchlet">
+        </batchlet>
+    </step>
+
+    <step id="step-same-file-parent" abstract="true">
+        <properties>
+            <property name="parent" value="parent"></property>
+            <property name="child" value="parent"></property>  <!-- make sure dups are not added twice, and value is overridden by child -->
+        </properties>
+
+        <listeners>
+            <listener ref="parent-listener"></listener>
+            <listener ref="child-listener"></listener>  <!-- listeners are not required to be unique, dups ok -->
+        </listeners>
+    </step>
+
+    <!-- ======================================================== -->
+
+    <step id="inheriting-empty-parent" parent="empty-parent">
+        <properties>
+            <property name="child" value="child"></property>
+        </properties>
+
+        <listeners>
+            <listener ref="child-listener"></listener>
+        </listeners>
+        <batchlet ref="child-batchlet"></batchlet>
+    </step>
+
+    <step id="empty-parent" abstract="true"></step>
+
+    <!-- ======================================================== -->
+
+    <step id="inherited-by-empty-child">
+        <properties>
+            <property name="child" value="child"></property>
+        </properties>
+
+        <listeners>
+            <listener ref="child-listener"></listener>
+        </listeners>
+        <batchlet ref="child-batchlet"></batchlet>
+    </step>
+
+    <step id="empty-child" parent="inherited-by-empty-child"></step>
+
+
+</job>
