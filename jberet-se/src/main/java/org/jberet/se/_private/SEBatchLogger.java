@@ -28,8 +28,4 @@ public interface SEBatchLogger {
 
     @Message(id = 50002, value = "Failed to get a valid value for configuration property %s; current value is %s.")
     BatchRuntimeException failToGetConfigProperty(String propName, String value, @Cause Throwable throwable);
-
-    @Message(id = 50003, value = "Invoking %s.%s does nothing")
-    @LogMessage(level = Logger.Level.TRACE)
-    void methodDoesNothing(String className, String methodName);
 }
