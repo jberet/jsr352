@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -276,6 +276,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     if (tm.getStatus() != Status.STATUS_ACTIVE) {
                         if (checkpointAlgorithm != null) {
                             tm.setTransactionTimeout(checkpointAlgorithm.checkpointTimeout());
+                            checkpointAlgorithm.beginCheckpoint();
                         }
                         tm.begin();
                     }
@@ -313,23 +314,20 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         for (final ChunkListener l : chunkListeners) {
                             l.afterChunk();
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         tm.rollback();
                         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
                         throw e;
                     }
 
-                    if (checkpointAlgorithm == null) {
-                        tm.commit();
-                    } else {
-                        checkpointAlgorithm.beginCheckpoint();
-                        tm.commit();
+                    tm.commit();
+                    if (checkpointAlgorithm != null) {
                         checkpointAlgorithm.endCheckpoint();
                     }
 
                     stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 final int txStatus = tm.getStatus();
                 if (txStatus == Status.STATUS_ACTIVE || txStatus == Status.STATUS_MARKED_ROLLBACK ||
                         txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
