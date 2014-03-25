@@ -50,7 +50,10 @@ import org.jberet.job.model.Step;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
+import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
+import org.jberet.spi.PropertyKey;
+import org.jberet.tx.LocalTransactionManager;
 import org.jberet.util.BatchUtil;
 
 import static org.jberet._private.BatchLogger.LOGGER;
@@ -83,7 +86,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
         this.stepExecution = (StepExecutionImpl) stepContext.getStepExecution();
-        tm = jobContext.getBatchEnvironment().getTransactionManager();
+        // Determine which TransactionManager to use,
+        if (useLocalTx(jobContext, step)) {
+            tm = LocalTransactionManager.getInstance();
+        } else {
+            tm = jobContext.getBatchEnvironment().getTransactionManager();
+        }
         createStepListeners();
         initPartitionConfig();
     }
@@ -401,5 +409,31 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 chunkRelatedListeners.put(ref, cls);
             }
         }
+    }
+
+    private static boolean useLocalTx(final JobContextImpl jobContext, final Step step) {
+        // Jobs parameters passed to the start should always be preferred
+        if (jobContext.getJobExecution().getJobParameters() != null) {
+            final String value = jobContext.getJobExecution().getJobParameters().getProperty(PropertyKey.LOCAL_TX);
+            if (value != null) {
+                return "true".equalsIgnoreCase(value);
+            }
+        }
+        // Next any step parameters should take precedence
+        if (step.getProperties() != null) {
+            final String value = step.getProperties().get(PropertyKey.LOCAL_TX);
+            if (value != null) {
+                return "true".equalsIgnoreCase(value);
+            }
+        }
+        // Finally job parameters set in the job.xml
+        if (jobContext.getJob().getProperties() != null) {
+            final String value = jobContext.getJob().getProperties().get(PropertyKey.LOCAL_TX);
+            if (value != null) {
+                return "true".equalsIgnoreCase(value);
+            }
+        }
+        // Not found use the standard TransactionManager
+        return false;
     }
 }

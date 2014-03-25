@@ -111,4 +111,8 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     void ddlFileAndDatabaseProductName(String ddlFile, String databaseProductName);
 
+    @Message(id = 22, value = "%s is not implemented for local transactions")
+    @LogMessage(level = Logger.Level.TRACE)
+    void notImplementedOnLocalTx(String methodName);
+
 }

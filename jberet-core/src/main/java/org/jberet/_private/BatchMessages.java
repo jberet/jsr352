@@ -130,4 +130,8 @@ public interface BatchMessages {
 
     @Message(id = 634, value = "Cycles detected in job element inheritance: %s")
     JobStartException cycleInheritance(String inheritingElements);
+
+    @Message(id = 635, value = "Could not find implementation of %s")
+    IllegalStateException implementationNotFound(Class<?> c);
+
 }
