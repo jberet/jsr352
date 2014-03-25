@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <job id="csv2mongoLookup" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="csv2mongoLookup.step1">
+    <step id="csv2mongoLookup.step1" parent="csvItemReaderStep" jsl-name="csvItemReader">
         <chunk>
-            <reader ref="csvItemReader">
-                <properties>
-                    <property name="resource" value="http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&amp;format=csv"/>
-                    <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>
-                    <property name="nameMapping" value="rank,tit,grs,opn"/>
-                    <property name="cellProcessors" value= "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate(YYYY-MM-dd)"/>
-                </properties>
-            </reader>
             <writer ref="mongoItemWriter">
                 <properties>
                     <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>

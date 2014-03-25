@@ -1,22 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<job id="csv2jsonLookup" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="csv2jsonLookup.step1">
-        <chunk>
-            <reader ref="xmlItemReader">
-                <properties>
-                    <property name="resource" value="http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&amp;format=xml"/>
-                    <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>
-                    <property name="xmlFactoryLookup" value="java:global/env/XmlFactory"/>
-                </properties>
-            </reader>
-            <writer ref="jsonItemWriter">
-                <properties>
-                    <property name="resource" value="#{systemProperties['java.io.tmpdir']}/movies.xml.json"/>
-                    <property name="writeMode" value="overwrite"/>
-                    <property name="jsonFactoryLookup" value="java:global/env/MappingJsonFactory"/>
-                </properties>
-            </writer>
-        </chunk>
+<job id="xml2jsonLookup" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="csv2jsonLookup.step1" parent="xmlItemReader-jsonItemWriter-step" jsl-name="xmlItemReader-jsonItemWriter">
+        <properties>
+            <property name="xmlFactoryLookup" value="java:global/env/XmlFactory"/>
+            <property name="jsonFactoryLookup" value="java:global/env/MappingJsonFactory"/>
+        </properties>
     </step>
 </job>
