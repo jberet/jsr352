@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,10 @@
         <property name="job-prop-2" value="job-prop-2"></property>
     </properties>
 
+    <step id="batchlet1-step" abstract="true">
+        <batchlet ref="batchlet1"/>
+    </step>
+
     <split id="split1" next="decision1">
         <flow id="flow1">
             <step id="step11" next="step12">
@@ -31,20 +35,15 @@
                 </batchlet>
             </step>
 
-            <step id="step12">
-                <batchlet ref="batchlet1"/>
-            </step>
+            <step id="step12" parent="batchlet1-step"/>
         </flow>
 
         <flow id="flow2">
-            <step id="step21">
-                <batchlet ref="batchlet1"/>
+            <step id="step21" parent="batchlet1-step">
                 <next on="*" to="step22"/>
             </step>
 
-            <step id="step22">
-                <batchlet ref="batchlet1"/>
-            </step>
+            <step id="step22" parent="batchlet1-step"/>
         </flow>
     </split>
 
@@ -53,7 +52,5 @@
         <next on="next" to="step3"/>
     </decision>
 
-    <step id="step3">
-        <batchlet ref="batchlet1"/>
-    </step>
+    <step id="step3" parent="batchlet1-step"/>
 </job>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
@@ -13,105 +13,94 @@
 -->
 
 <job id="org.jberet.test.chunkPartitionMetricsCombined" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="org.jberet.test.chunkPartitionMetricsCombined.step1">
-        <chunk item-count="3">
-            <reader ref="integerArrayReader">
-                <properties>
-                    <property name="data.count" value="200"/>
-                    <property name="partition.start" value="#{partitionPlan['partition.start']}"/>
-                    <property name="partition.end" value="#{partitionPlan['partition.end']}"/>
-                </properties>
-            </reader>
-            <writer ref="integerArrayWriter">
-                <properties>
-                    <property name="data.count" value="200"/>
-                    <property name="partition.start" value="#{partitionPlan['partition.start']}"/>
-                    <property name="partition.end" value="#{partitionPlan['partition.end']}"/>
-                </properties>
-            </writer>
-        </chunk>
+    <step id="org.jberet.test.chunkPartitionMetricsCombined.step1"
+          parent="org.jberet.test.chunkPartition.step0" jsl-name="org.jberet.test.chunkPartitionFailComplete">
+        <properties>
+            <property name="data.count" value="200"/>
+        </properties>
+
         <partition>
             <plan partitions="20">
                 <properties partition="0">
                     <property name="partition.start" value="0"/>
-                    <property name="partition.end"   value="9"/>
+                    <property name="partition.end" value="9"/>
                 </properties>
                 <properties partition="1">
                     <property name="partition.start" value="10"/>
-                    <property name="partition.end"   value="19"/>
+                    <property name="partition.end" value="19"/>
                 </properties>
                 <properties partition="2">
                     <property name="partition.start" value="20"/>
-                    <property name="partition.end"   value="29"/>
+                    <property name="partition.end" value="29"/>
                 </properties>
                 <properties partition="3">
                     <property name="partition.start" value="30"/>
-                    <property name="partition.end"   value="39"/>
+                    <property name="partition.end" value="39"/>
                 </properties>
                 <properties partition="4">
                     <property name="partition.start" value="40"/>
-                    <property name="partition.end"   value="49"/>
+                    <property name="partition.end" value="49"/>
                 </properties>
                 <properties partition="5">
                     <property name="partition.start" value="50"/>
-                    <property name="partition.end"   value="59"/>
+                    <property name="partition.end" value="59"/>
                 </properties>
                 <properties partition="6">
                     <property name="partition.start" value="60"/>
-                    <property name="partition.end"   value="69"/>
+                    <property name="partition.end" value="69"/>
                 </properties>
                 <properties partition="7">
                     <property name="partition.start" value="70"/>
-                    <property name="partition.end"   value="79"/>
+                    <property name="partition.end" value="79"/>
                 </properties>
                 <properties partition="8">
                     <property name="partition.start" value="80"/>
-                    <property name="partition.end"   value="89"/>
+                    <property name="partition.end" value="89"/>
                 </properties>
                 <properties partition="9">
                     <property name="partition.start" value="90"/>
-                    <property name="partition.end"   value="99"/>
+                    <property name="partition.end" value="99"/>
                 </properties>
 
                 <properties partition="10">
                     <property name="partition.start" value="100"/>
-                    <property name="partition.end"   value="109"/>
+                    <property name="partition.end" value="109"/>
                 </properties>
                 <properties partition="11">
                     <property name="partition.start" value="110"/>
-                    <property name="partition.end"   value="119"/>
+                    <property name="partition.end" value="119"/>
                 </properties>
                 <properties partition="12">
                     <property name="partition.start" value="120"/>
-                    <property name="partition.end"   value="129"/>
+                    <property name="partition.end" value="129"/>
                 </properties>
                 <properties partition="13">
                     <property name="partition.start" value="130"/>
-                    <property name="partition.end"   value="139"/>
+                    <property name="partition.end" value="139"/>
                 </properties>
                 <properties partition="14">
                     <property name="partition.start" value="140"/>
-                    <property name="partition.end"   value="149"/>
+                    <property name="partition.end" value="149"/>
                 </properties>
                 <properties partition="15">
                     <property name="partition.start" value="150"/>
-                    <property name="partition.end"   value="159"/>
+                    <property name="partition.end" value="159"/>
                 </properties>
                 <properties partition="16">
                     <property name="partition.start" value="160"/>
-                    <property name="partition.end"   value="169"/>
+                    <property name="partition.end" value="169"/>
                 </properties>
                 <properties partition="17">
                     <property name="partition.start" value="170"/>
-                    <property name="partition.end"   value="179"/>
+                    <property name="partition.end" value="179"/>
                 </properties>
                 <properties partition="18">
                     <property name="partition.start" value="180"/>
-                    <property name="partition.end"   value="189"/>
+                    <property name="partition.end" value="189"/>
                 </properties>
                 <properties partition="19">
                     <property name="partition.start" value="190"/>
-                    <property name="partition.end"   value="199"/>
+                    <property name="partition.end" value="199"/>
                 </properties>
             </plan>
         </partition>
