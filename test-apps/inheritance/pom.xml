@@ -19,7 +19,7 @@
     <parent>
         <artifactId>test-apps</artifactId>
         <groupId>org.jberet.test-apps</groupId>
-        <version>1.0.1.CR2</version>
+        <version>1.0.1.Final-SNAPSHOT</version>
     </parent>
 
     <artifactId>inheritance</artifactId>
