@@ -24,7 +24,7 @@
 
     <groupId>org.jberet</groupId>
     <artifactId>jberet-parent</artifactId>
-    <version>1.0.1.Final</version>
+    <version>1.0.2.Alpha-SNAPSHOT</version>
 
     <name>jberet-parent</name>
     <description>Impl of JSR 352: Batch Applications for the Java Platform</description>
