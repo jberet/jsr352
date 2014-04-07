@@ -15,6 +15,9 @@ package org.jberet.runtime;
 /**
  * An interface to be implemented by classes that wish to be notified when its job is requested to stop.
  */
-public interface JobStopNotifier {
+public interface JobStopNotificationListener {
+    /**
+     * Invoked when the current job is requested to stop.
+     */
     void stopRequested();
 }

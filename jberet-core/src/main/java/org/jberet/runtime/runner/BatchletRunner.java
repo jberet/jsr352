@@ -17,12 +17,12 @@ import javax.batch.runtime.BatchStatus;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.job.model.RefArtifact;
-import org.jberet.runtime.JobStopNotifier;
+import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.context.StepContextImpl;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
-public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Runnable, JobStopNotifier {
+public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Runnable, JobStopNotificationListener {
     private final RefArtifact batchlet;
     private final StepExecutionRunner stepRunner;
     private PartitionCollector collector;
