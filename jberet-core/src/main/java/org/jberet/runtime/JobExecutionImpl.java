@@ -52,6 +52,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private transient CountDownLatch jobTerminationLatch = new CountDownLatch(1);
     private transient CountDownLatch jobStopLatch = new CountDownLatch(1);
+    private transient final List<JobStopNotifier> jobStopNotifiers = new ArrayList<JobStopNotifier>();
 
     public JobExecutionImpl(final JobInstanceImpl jobInstance, final Properties jobParameters) throws JobStartException {
         this.jobInstance = jobInstance;
@@ -191,6 +192,17 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     public void stop() {
         jobStopLatch.countDown();
+        for (final JobStopNotifier n : this.jobStopNotifiers) {
+            n.stopRequested();
+        }
+    }
+
+    public synchronized void registerJobStopNotifier(final JobStopNotifier notifier) {
+        this.jobStopNotifiers.add(notifier);
+    }
+
+    public synchronized void unregisterJobStopNotifier(final JobStopNotifier notifier) {
+        this.jobStopNotifiers.remove(notifier);
     }
 
     public void setEndTime(final long endTime) {

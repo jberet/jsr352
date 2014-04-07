@@ -16,13 +16,13 @@ import javax.batch.api.AbstractBatchlet;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.Batchlet;
 import javax.batch.operations.BatchRuntimeException;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.context.JobContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named
 public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
-    static final String INTERRUPTED = "Interrupted";
     static final String SLEPT = "Slept";
 
     @Inject
@@ -45,7 +45,7 @@ public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
         try {
             Thread.sleep(sleepMinutes * 60 * 1000);
         } catch (final InterruptedException e) {
-            return INTERRUPTED;
+            return BatchStatus.STOPPED.name();
         }
         return SLEPT;
     }

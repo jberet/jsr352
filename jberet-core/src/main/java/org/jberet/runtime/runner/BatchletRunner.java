@@ -15,12 +15,14 @@ package org.jberet.runtime.runner;
 import javax.batch.api.partition.PartitionCollector;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet._private.BatchLogger;
 import org.jberet.job.model.RefArtifact;
+import org.jberet.runtime.JobStopNotifier;
 import org.jberet.runtime.context.StepContextImpl;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
-public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Runnable {
+public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Runnable, JobStopNotifier {
     private final RefArtifact batchlet;
     private final StepExecutionRunner stepRunner;
     private PartitionCollector collector;
@@ -30,6 +32,20 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
         this.batchlet = batchlet;
+    }
+
+    @Override
+    public void stopRequested() {
+        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
+            batchContext.setBatchStatus(BatchStatus.STOPPING);
+            if (batchletObj != null) {
+                try {
+                    batchletObj.stop();
+                } catch (final Exception e) {
+                    BatchLogger.LOGGER.failToStopJob(e, jobContext.getJobName(), batchContext.getStepName(), batchletObj);
+                }
+            }
+        }
     }
 
     @Override
@@ -43,22 +59,14 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
                 }
             }
             batchletObj = jobContext.createArtifact(batchlet.getRef(), null, batchlet.getProperties(), batchContext);
-            jobContext.getBatchEnvironment().submitTask(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        jobContext.getJobExecution().awaitStop();
-                        if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
-                            batchContext.setBatchStatus(BatchStatus.STOPPING);
-                            batchletObj.stop();
-                        }
-                    } catch (Exception e) {
-                        LOGGER.failToStopJob(e, jobContext.getJobName(), batchContext.getStepName(), batchletObj);
-                    }
-                }
-            });
-
-            final String exitStatus = batchletObj.process();
+            String exitStatus = null;
+            if (jobContext.getJobExecution().isStopRequested()) {
+                batchContext.setBatchStatus(BatchStatus.STOPPING);
+            } else {
+                jobContext.getJobExecution().registerJobStopNotifier(this);
+                exitStatus = batchletObj.process();
+                jobContext.getJobExecution().unregisterJobStopNotifier(this);
+            }
 
             //set batch status to indicate that either the main step, or a partition has completed successfully.
             //make sure the step has not been set to STOPPED. The same in ChunkRunner.run().

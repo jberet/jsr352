@@ -68,7 +68,7 @@ public class SleepBatchletTest {
         System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assert.assertEquals(BatchStatus.STOPPED, stepExecution.getBatchStatus());
-        Assert.assertEquals(SleepBatchlet.INTERRUPTED, stepExecution.getExitStatus());
+        Assert.assertEquals(BatchStatus.STOPPED.name(), stepExecution.getExitStatus());
     }
 
     /**
