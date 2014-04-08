@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.batch.operations.JobStartException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
@@ -51,7 +52,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     private String restartPosition;
 
     private transient CountDownLatch jobTerminationLatch = new CountDownLatch(1);
-    private transient CountDownLatch jobStopLatch = new CountDownLatch(1);
+    private final AtomicBoolean stopRequested = new AtomicBoolean();
     private transient final List<JobStopNotificationListener> jobStopNotificationListeners = new ArrayList<JobStopNotificationListener>();
 
     public JobExecutionImpl(final JobInstanceImpl jobInstance, final Properties jobParameters) throws JobStartException {
@@ -119,13 +120,6 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         }
     }
 
-    //It's possible the (fast) job is already terminated and the latch nulled when this method is called.
-    public void awaitStop() throws InterruptedException {
-        if (jobStopLatch != null) {
-            jobStopLatch.await();
-        }
-    }
-
     public Job getSubstitutedJob() {
         return substitutedJob;
     }
@@ -187,12 +181,11 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     public boolean isStopRequested() {
-        return jobStopLatch.getCount() == 0;
+        return stopRequested.get();
     }
 
     public void stop() {
-        jobStopLatch.countDown();
-
+        stopRequested.set(true);
         final JobStopNotificationListener[] ls;
         synchronized (jobStopNotificationListeners) {
             ls = jobStopNotificationListeners.toArray(new JobStopNotificationListener[jobStopNotificationListeners.size()]);
@@ -222,8 +215,6 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     public void cleanUp() {
         substitutedJob = null;
         ArtifactCreationContext.removeCurrentArtifactCreationContext();
-        jobStopLatch.countDown();
-        jobStopLatch = null;
         jobTerminationLatch.countDown();
         jobTerminationLatch = null;
     }
