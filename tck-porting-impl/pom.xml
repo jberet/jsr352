@@ -18,7 +18,7 @@
     <parent>
         <artifactId>jberet-parent</artifactId>
         <groupId>org.jberet</groupId>
-        <version>1.0.2.Alpha-SNAPSHOT</version>
+        <version>1.0.2.Final</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
