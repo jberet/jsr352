@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.0.2.Final</version>
+        <version>1.0.3.Alpha-SNAPSHOT</version>
     </parent>
 
     <artifactId>jberet-support</artifactId>
