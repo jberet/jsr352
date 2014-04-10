@@ -14,8 +14,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import javax.batch.runtime.JobInstance;
 
 import org.jberet.testapps.common.AbstractIT;
@@ -68,15 +68,17 @@ public class SerializationTests extends AbstractIT {
         // Get all the fields
         final Field[] fields = one.getClass().getDeclaredFields();
         for (Field field : fields) {
-            if (!field.isAccessible()) field.setAccessible(true);
-            final Class<?> fieldType = field.getType();
-            final Object valueOne = field.get(one);
-            final Object valueTwo = field.get(two);
-            // Only recursively check non-jdk objects
-            if (recursive && !(fieldType.isPrimitive() || fieldType.getName().startsWith("java"))) {
-                reflectiveEquals(valueOne, valueTwo, false);
+            if (!Modifier.isTransient(field.getModifiers())) {
+                if (!field.isAccessible()) field.setAccessible(true);
+                final Class<?> fieldType = field.getType();
+                final Object valueOne = field.get(one);
+                final Object valueTwo = field.get(two);
+                // Only recursively check non-jdk objects
+                if (recursive && !(fieldType.isPrimitive() || fieldType.getName().startsWith("java"))) {
+                    reflectiveEquals(valueOne, valueTwo, false);
+                }
+                Assert.assertEquals(String.format("Value %s not equal to %s for field %s in class %s", valueOne, valueTwo, field, type), valueOne, valueTwo);
             }
-            Assert.assertEquals(String.format("Value %s not equal to %s for field %s in class %s", valueOne, valueTwo, field, type), valueOne, valueTwo);
         }
     }
 }

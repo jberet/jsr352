@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,14 +20,10 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import javax.batch.operations.JobStartException;
 
-import org.jberet.job.model.Flow;
-import org.jberet.job.model.Job;
-import org.jberet.job.model.Step;
 import org.jboss.marshalling.cloner.ClonerConfiguration;
 import org.jboss.marshalling.cloner.ObjectCloner;
 import org.jboss.marshalling.cloner.ObjectClonerFactory;
@@ -107,28 +103,6 @@ public class BatchUtil {
                 //ignore
             }
         }
-    }
-
-    /**
-     * Produces a StringBuilder containing concatenated id of elements.
-     *
-     * @param elements step, job, or flow elements, and all elements are of the same type.  Either all elements are job,
-     *                 or all elements are step, or all elements are flow
-     * @return a StringBuilder whose string value is in the form: a -> b -> c ->
-     */
-    public static StringBuilder toElementSequence(final List<?> elements) {
-        final StringBuilder sb = new StringBuilder();
-        for (final Object e : elements) {
-            if (e instanceof Step) {
-                sb.append(((Step) e).getId());
-            } else if (e instanceof Job) {
-                sb.append(((Job) e).getId());
-            } else if (e instanceof Flow) {
-                sb.append(((Flow) e).getId());
-            }
-            sb.append(" -> ");
-        }
-        return sb;
     }
 
     public static <T> T clone(final T original) throws JobStartException {

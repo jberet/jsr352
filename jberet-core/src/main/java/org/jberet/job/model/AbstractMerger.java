@@ -20,7 +20,7 @@ import javax.batch.operations.JobStartException;
 import org.jberet._private.BatchMessages;
 import org.jberet.util.BatchUtil;
 
-abstract class AbstractMerger<T> {
+abstract class AbstractMerger<T extends AbstractJobElement> {
      T parent;
      T child;
 
@@ -49,7 +49,10 @@ abstract class AbstractMerger<T> {
      */
     void checkInheritingElements(final T element, final String elementId) throws JobStartException {
         if (inheritingElements != null && inheritingElements.contains(element)) {
-            final StringBuilder sb = BatchUtil.toElementSequence(inheritingElements);
+            final StringBuilder sb = new StringBuilder();
+            for (final AbstractJobElement e : inheritingElements) {
+                sb.append(e.id).append(" -> ");
+            }
             sb.append(elementId);
             throw BatchMessages.MESSAGES.cycleInheritance(sb.toString());
         }

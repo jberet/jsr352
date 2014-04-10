@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,7 +40,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private Job substitutedJob;
 
-    private final List<StepExecution> stepExecutions = new ArrayList<StepExecution>();
+    private final List<StepExecution> stepExecutions = new CopyOnWriteArrayList<StepExecution>();
 
     private final Properties jobParameters;
 
@@ -160,15 +161,11 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     public List<StepExecution> getStepExecutions() {
-        synchronized (stepExecutions) {
-            return Collections.unmodifiableList(stepExecutions);
-        }
+        return stepExecutions;
     }
 
     public void addStepExecution(final StepExecution stepExecution) {
-        synchronized (stepExecutions) {
-            this.stepExecutions.add(stepExecution);
-        }
+        this.stepExecutions.add(stepExecution);
         lastUpdatedTime = System.currentTimeMillis();
     }
 

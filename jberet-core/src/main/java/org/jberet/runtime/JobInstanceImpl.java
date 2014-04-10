@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,9 +13,8 @@
 package org.jberet.runtime;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
@@ -30,9 +29,9 @@ public final class JobInstanceImpl implements JobInstance, Serializable {
     private long version;
     private String jobName;
     private String applicationName;
-    Job unsubstitutedJob;
+    transient Job unsubstitutedJob;
 
-    private final List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
+    private final List<JobExecution> jobExecutions = new CopyOnWriteArrayList<JobExecution>();
 
     public JobInstanceImpl(final Job unsubstitutedJob, final ApplicationAndJobName applicationAndJobName) {
         this.jobName = applicationAndJobName.jobName;
@@ -59,7 +58,7 @@ public final class JobInstanceImpl implements JobInstance, Serializable {
     }
 
     public List<JobExecution> getJobExecutions() {
-        return Collections.unmodifiableList(this.jobExecutions);
+        return jobExecutions;
     }
 
     public void addJobExecution(final JobExecution jobExecution) {

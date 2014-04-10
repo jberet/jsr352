@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,7 +45,7 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
     private JobListener[] jobListeners;
 
     //to track the executed steps to detect loopback, may be accessed sub-threads (e.g., flows in split executions)
-    private List<Step> executedSteps = Collections.synchronizedList(new ArrayList<Step>());
+    private List<String> executedStepIds = Collections.synchronizedList(new ArrayList<String>());
 
     JobExecutionImpl originalToRestart;
     final BatchEnvironment batchEnvironment;
@@ -91,8 +91,8 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         return originalToRestart != null;
     }
 
-    public List<Step> getExecutedSteps() {
-        return executedSteps;
+    public List<String> getExecutedStepIds() {
+        return executedStepIds;
     }
 
     public ArtifactFactory getArtifactFactory() {

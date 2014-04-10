@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -101,11 +101,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         final Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
         if (allowStartIfComplete != Boolean.FALSE) {
             try {
-                final List<Step> executedSteps = jobContext.getExecutedSteps();
-                if (executedSteps.contains(step)) {
-                    final StringBuilder stepIds = BatchUtil.toElementSequence(executedSteps);
-                    stepIds.append(step.getId());
-                    throw MESSAGES.loopbackStep(step.getId(), stepIds.toString());
+                final List<String> executedStepIds = jobContext.getExecutedStepIds();
+                if (executedStepIds.contains(step.getId())) {
+                    throw MESSAGES.loopbackStep(step.getId(), executedStepIds.toString());
                 }
 
                 final int startLimit = step.getStartLimitInt();
@@ -140,7 +138,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 runBatchletOrChunk(batchlet, chunk);
 
                 //record the fact this step has been executed
-                executedSteps.add(step);
+                executedStepIds.add(step.getId());
 
                 for (final StepListener l : stepListeners) {
                     try {
@@ -188,14 +186,8 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             //transition elements can direct to the next job element even after the current step failed
             final String next = resolveTransitionElements(step.getTransitionElements(), null, false);
             if (next != null) {
-                boolean mayLoopBack = false;
-                for (final Step step1 : jobContext.getExecutedSteps()) {
-                    if (step1.getId().equalsIgnoreCase(next)) {
-                        mayLoopBack = true;
-                        break;
-                    }
-                }
-                if (!mayLoopBack) {
+                //check for possible loopback step
+                if (!jobContext.getExecutedStepIds().contains(next)) {
                     for (final AbstractContext e : batchContext.getOuterContexts()) {
                         e.setBatchStatus(BatchStatus.STARTED);
                     }
