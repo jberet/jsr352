@@ -32,8 +32,24 @@ import org.jboss.marshalling.cloner.ObjectCloners;
 public class BatchUtil {
     public static final String NL = getSystemProperty("line.separator");
     private static final String keyValDelimiter = " = ";
-    private static final ObjectClonerFactory clonerFactory = ObjectCloners.getSerializingObjectClonerFactory();
-    private static final ObjectCloner cloner = clonerFactory.createCloner(new ClonerConfiguration());
+    private static final ObjectClonerFactory clonerFactory;
+    private static final ObjectCloner cloner;
+
+
+    static {
+        clonerFactory = AccessController.doPrivileged(new PrivilegedAction<ObjectClonerFactory>() {
+            @Override
+            public ObjectClonerFactory run() {
+                return ObjectCloners.getSerializingObjectClonerFactory();
+            }
+        });
+        cloner = AccessController.doPrivileged(new PrivilegedAction<ObjectCloner>() {
+            @Override
+            public ObjectCloner run() {
+                return clonerFactory.createCloner(new ClonerConfiguration());
+            }
+        });
+    }
 
     public static String propertiesToString(final Properties properties) {
         if (properties == null) {
