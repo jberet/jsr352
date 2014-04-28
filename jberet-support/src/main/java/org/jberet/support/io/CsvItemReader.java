@@ -74,7 +74,7 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
         if (beanType == null) {
             throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, BEAN_TYPE_KEY);
         }
-        final InputStreamReader r = new InputStreamReader(getInputStream(true));
+        final InputStreamReader r = new InputStreamReader(getInputStream(resource, true));
         if (java.util.List.class.isAssignableFrom(beanType)) {
             delegateReader = new FastForwardCsvListReader(r, getCsvPreference(), startRowNumber);
         } else if (java.util.Map.class.isAssignableFrom(beanType)) {

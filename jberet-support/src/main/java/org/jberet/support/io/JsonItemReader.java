@@ -92,7 +92,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         }
 
         registerModule();
-        jsonParser = jsonFactory.createParser(getInputStream(false));
+        jsonParser = jsonFactory.createParser(getInputStream(resource, false));
 
         if (deserializationProblemHandlers != null) {
             MappingJsonFactoryObjectFactory.configureDeserializationProblemHandlers(

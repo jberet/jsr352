@@ -73,6 +73,16 @@
             <artifactId>jackson-module-jaxb-annotations</artifactId>
         </dependency>
 
+        <!-- beanio dependencies -->
+        <dependency>
+            <groupId>org.beanio</groupId>
+            <artifactId>beanio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.jberet</groupId>

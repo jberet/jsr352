@@ -1,0 +1,19 @@
+<beanio xmlns="http://www.beanio.org/2012/03"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd">
+    <stream name="star-entities" format="fixedlength">
+        <record name="star-entity" class="org.jberet.support.io.CaliforniaStarEntity">
+            <field name="countyCode" length="2"/>
+            <field name="districtCode" length="5"/>
+            <field name="schoolCode" length="7"/>
+            <field name="charterNumber" length="4"/>
+            <field name="testYear" length="4"/>
+            <field name="typeId" length="2"/>
+            <field name="countyName" length="50" />
+            <field name="districtName" length="50"/>
+            <field name="schoolName" length="50"/>
+            <field name="${zipCodeFieldName}" type="${zipCodeFieldType}" length="5"/>
+        </record>
+    </stream>
+
+</beanio>

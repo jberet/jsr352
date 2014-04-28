@@ -73,7 +73,7 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
             xmlFactory.setInputDecorator((InputDecorator) inputDecorator.newInstance());
         }
 
-        fromXmlParser = (FromXmlParser) xmlFactory.createParser(getInputStream(false));
+        fromXmlParser = (FromXmlParser) xmlFactory.createParser(getInputStream(resource, false));
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
         token = fromXmlParser.nextToken();
     }

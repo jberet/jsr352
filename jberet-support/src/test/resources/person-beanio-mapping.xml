@@ -1,0 +1,97 @@
+<beanio xmlns="http://www.beanio.org/2012/03"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd">
+    
+    <stream name="persons" format="delimited">
+        <parser>
+            <property name="delimiter" value="|"/>
+        </parser>
+<!--
+        <record name="header" occurs="1" order="1" class="map">
+            <field name="h1" default="number" rid="true" literal="number" ignore="true"/>
+            <field name="h2" default="gender" ignore="true"/>
+            <field name="h3" default="title" ignore="true"/>
+            <field name="h4" default="givenName" ignore="true"/>
+            <field name="h5" default="middleInitial" ignore="true"/>
+            <field name="h6" default="surname" ignore="true"/>
+            <field name="h7" default="streetAddress" ignore="true"/>
+            <field name="h8" default="city" ignore="true"/>
+            <field name="h9" default="state" ignore="true"/>
+            <field name="h10" default="zipCode" ignore="true"/>
+            <field name="h11" default="country" ignore="true"/>
+            <field name="h12" default="countryFull" ignore="true"/>
+            <field name="h13" default="emailAddress" ignore="true"/>
+            <field name="h14" default="username" ignore="true"/>
+            <field name="h15" default="password" ignore="true"/>
+            <field name="h16" default="telephoneNumber" ignore="true"/>
+            <field name="h17" default="mothersMaiden" ignore="true"/>
+            <field name="h18" default="birthday" ignore="true"/>
+            <field name="h19" default="CCType" ignore="true"/>
+            <field name="h20" default="CCNumber" ignore="true"/>
+            <field name="h21" default="CVV2" ignore="true"/>
+            <field name="h22" default="CCExpires" ignore="true"/>
+            <field name="h23" default="nationalID" ignore="true"/>
+            <field name="h24" default="UPS" ignore="true"/>
+            <field name="h25" default="color" ignore="true"/>
+            <field name="h26" default="occupation" ignore="true"/>
+            <field name="h27" default="company" ignore="true"/>
+            <field name="h28" default="vehicle" ignore="true"/>
+            <field name="h29" default="domain" ignore="true"/>
+            <field name="h30" default="bloodType" ignore="true"/>
+            <field name="h31" default="pounds" ignore="true"/>
+            <field name="h32" default="kilograms" ignore="true"/>
+            <field name="h33" default="feetInches" ignore="true"/>
+            <field name="h34" default="centimeters" ignore="true"/>
+            <field name="h35" default="GUID" ignore="true"/>
+            <field name="h36" default="latitude" ignore="true"/>
+            <field name="h37" default="longitude" ignore="true"/>
+        </record>
+-->
+        <record name="person" class="org.jberet.support.io.Person" occurs="0+">
+            <field name="number"/>
+            <field name="gender" />
+            <field name="title" />
+            <field name="givenName" />
+            <field name="middleInitial" />
+            <field name="surname" />
+            <field name="streetAddress" />
+            <field name="city" />
+            <field name="state" />
+            <field name="zipCode" />
+            <field name="country" />
+            <field name="countryFull" />
+            <field name="emailAddress" />
+            <field name="username" />
+            <field name="password" />
+            <field name="telephoneNumber" />
+            <field name="mothersMaiden" />
+            <field name="birthday" format="M/d/YYYY"/>
+            <field name="CCType" />
+            <field name="CCNumber" />
+            <field name="CVV2" />
+            <field name="CCExpires" />
+            <field name="nationalID" />
+            <field name="UPS" />
+            <field name="color" />
+            <field name="occupation" />
+            <field name="company" />
+            <field name="vehicle" />
+            <field name="domain" />
+            <field name="bloodType" />
+            <field name="pounds" />
+            <field name="kilograms" />
+            <field name="feetInches" />
+            <field name="centimeters" />
+            <field name="GUID" />
+            <field name="latitude" />
+            <field name="longitude" />
+        </record>
+
+<!--
+        <record name="comment" occurs="0+">
+            <field name="comment" rid="true" regex="#.*" ignore="true"/>
+        </record>
+       -->
+    </stream>
+
+</beanio>

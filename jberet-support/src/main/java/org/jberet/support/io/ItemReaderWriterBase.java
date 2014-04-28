@@ -48,27 +48,32 @@ public abstract class ItemReaderWriterBase {
     /**
      * Gets an instance of {@code java.io.InputStream} that represents the reader resource.
      *
+     * @param inputResource the location of the input resource
      * @param detectBOM if need to detect byte-order mark (BOM). If true, the {@code InputStream} is wrapped inside
      *                  {@code UnicodeBOMInputStream}
      * @return {@code java.io.InputStream} that represents the reader resource
      */
-    protected InputStream getInputStream(final boolean detectBOM) {
-        if (resource == null) {
+    protected static InputStream getInputStream(final String inputResource, final boolean detectBOM) {
+        if (inputResource == null) {
             throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, RESOURCE_KEY);
         }
         InputStream inputStream;
         try {
             try {
-                final URL url = new URL(resource);
+                final URL url = new URL(inputResource);
                 inputStream = url.openStream();
             } catch (final MalformedURLException e) {
-                SupportLogger.LOGGER.tracef("The resource %s is not a URL, %s%n", resource, e);
-                final File file = new File(resource);
+                SupportLogger.LOGGER.tracef("The resource %s is not a URL, %s%n", inputResource, e);
+                final File file = new File(inputResource);
                 if (file.exists()) {
                     inputStream = new FileInputStream(file);
                 } else {
-                    SupportLogger.LOGGER.tracef("The resource %s is not a file %n", resource);
-                    inputStream = ItemReaderWriterBase.class.getClassLoader().getResourceAsStream(resource);
+                    SupportLogger.LOGGER.tracef("The resource %s is not a file %n", inputResource);
+                    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                    if (cl == null) {
+                        cl = ItemReaderWriterBase.class.getClassLoader();
+                    }
+                    inputStream = cl.getResourceAsStream(inputResource);
                 }
             }
             if (detectBOM) {
@@ -77,7 +82,7 @@ public abstract class ItemReaderWriterBase {
                 return bomin;
             }
         } catch (final IOException e) {
-            throw SupportLogger.LOGGER.failToOpenStream(e, resource);
+            throw SupportLogger.LOGGER.failToOpenStream(e, inputResource);
         }
         return inputStream;
     }

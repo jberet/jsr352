@@ -173,5 +173,15 @@
             <artifactId>jackson-module-jaxb-annotations</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.beanio</groupId>
+            <artifactId>beanio</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 </project>
