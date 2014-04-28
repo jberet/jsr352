@@ -77,6 +77,8 @@ public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
     @Inject
     protected JobContext jobContext;
 
+    StreamFactoryKey mappingFileKey;
+
     private static final WeakHashMap<StreamFactoryKey, StreamFactory> beanIOMappings =
             new WeakHashMap<StreamFactoryKey, StreamFactory>();
 

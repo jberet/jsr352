@@ -59,7 +59,6 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
     @BatchProperty
     protected Class errorHandler;
 
-    private StreamFactoryKey mappingFileKey;
     private BeanReader beanReader;
     protected int currentPosition;
 
@@ -104,7 +103,7 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
 
     @Override
     public Serializable checkpointInfo() throws Exception {
-        return beanReader.getRecordCount();
+        return currentPosition;
     }
 
     @Override
@@ -112,6 +111,7 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
         if (beanReader != null) {
             beanReader.close();
             beanReader = null;
+            mappingFileKey = null;
         }
     }
 }

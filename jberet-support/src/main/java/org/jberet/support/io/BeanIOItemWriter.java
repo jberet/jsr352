@@ -33,7 +33,6 @@ import org.beanio.StreamFactory;
 @Named
 @Dependent
 public class BeanIOItemWriter extends BeanIOItemReaderWriterBase implements ItemWriter {
-    private StreamFactoryKey mappingFileKey;
     private BeanWriter beanWriter;
 
     @Override
@@ -61,6 +60,7 @@ public class BeanIOItemWriter extends BeanIOItemReaderWriterBase implements Item
         if (beanWriter != null) {
             beanWriter.close();
             beanWriter = null;
+            mappingFileKey = null;
         }
     }
 }

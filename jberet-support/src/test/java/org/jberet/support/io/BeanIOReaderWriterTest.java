@@ -27,6 +27,7 @@ public final class BeanIOReaderWriterTest {
     static final String jobName = "org.jberet.support.io.BeanIOReaderWriterTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
+    // from http://star.cde.ca.gov/star2013/research_fixfileformat.aspx
     static final String starEntityData = "ca2013entities_ascii.txt";
     static final String starMapping = "star-entity-beanio-mapping.xml";
     static final String starEntitiesStream = "star-entities";
