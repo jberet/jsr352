@@ -12,6 +12,8 @@
 
 package org.jberet.support.io;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
@@ -39,8 +41,10 @@ public class BeanIOItemWriter extends BeanIOItemReaderWriterBase implements Item
     public void open(final Serializable checkpoint) throws Exception {
         mappingFileKey = new StreamFactoryKey(jobContext, streamMapping);
         final StreamFactory streamFactory = getStreamFactory(streamFactoryLookup, mappingFileKey, mappingProperties);
-        final Writer outputWriter = new OutputStreamWriter(getOutputStream(CsvProperties.OVERWRITE));
-        beanWriter = streamFactory.createWriter(streamName, outputWriter);
+        final OutputStream outputStream = getOutputStream(CsvProperties.OVERWRITE);
+        final Writer outputWriter = charset == null ? new OutputStreamWriter(outputStream) :
+                new OutputStreamWriter(outputStream, charset);
+        beanWriter = streamFactory.createWriter(streamName, new BufferedWriter(outputWriter));
     }
 
     @Override

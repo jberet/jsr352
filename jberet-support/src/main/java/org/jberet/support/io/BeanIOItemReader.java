@@ -12,9 +12,12 @@
 
 package org.jberet.support.io;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
+import java.util.Locale;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
@@ -59,6 +62,10 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
     @BatchProperty
     protected Class errorHandler;
 
+    @Inject
+    @BatchProperty
+    protected String locale;
+
     private BeanReader beanReader;
     protected int currentPosition;
 
@@ -81,8 +88,10 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
 
         mappingFileKey = new StreamFactoryKey(jobContext, streamMapping);
         final StreamFactory streamFactory = getStreamFactory(streamFactoryLookup, mappingFileKey, mappingProperties);
-        final Reader inputReader = new InputStreamReader(getInputStream(resource, false));
-        beanReader = streamFactory.createReader(streamName, inputReader);
+        final InputStream inputStream = getInputStream(resource, false);
+        final Reader inputReader = charset == null ? new InputStreamReader(inputStream) :
+                new InputStreamReader(inputStream, charset);
+        beanReader = streamFactory.createReader(streamName, new BufferedReader(inputReader), getLocale());
 
         if (errorHandler != null) {
             beanReader.setErrorHandler((BeanReaderErrorHandler) errorHandler.newInstance());
@@ -113,5 +122,18 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
             beanReader = null;
             mappingFileKey = null;
         }
+    }
+
+    private Locale getLocale() {
+        if (locale == null) {
+            return Locale.getDefault();
+        }
+        final String[] parts = locale.split("_", -1);
+        if (parts.length == 1) {
+            return new Locale(parts[0]);
+        } else if (parts.length == 2 || (parts.length == 3 && parts[2].startsWith("#"))) {
+            return new Locale(parts[0], parts[1]);
+        }
+        return new Locale(parts[0], parts[1], parts[2]);
     }
 }

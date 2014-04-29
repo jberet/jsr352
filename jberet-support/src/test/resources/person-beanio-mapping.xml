@@ -5,6 +5,7 @@
     <stream name="persons" format="delimited">
         <parser>
             <property name="delimiter" value="|"/>
+            <property name="comments" value="#"/>
         </parser>
 <!--
         <record name="header" occurs="1" order="1" class="map">
@@ -86,12 +87,6 @@
             <field name="latitude" />
             <field name="longitude" />
         </record>
-
-<!--
-        <record name="comment" occurs="0+">
-            <field name="comment" rid="true" regex="#.*" ignore="true"/>
-        </record>
-       -->
     </stream>
 
 </beanio>

@@ -12,6 +12,7 @@
 
 package org.jberet.support.io;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
@@ -22,6 +23,7 @@ import javax.inject.Inject;
 import javax.naming.InitialContext;
 
 import org.beanio.StreamFactory;
+import org.jberet.support._private.SupportLogger;
 
 /**
  * The base class of BeanIO-based reader and writer classes: {@link org.jberet.support.io.BeanIOItemReader} and
@@ -75,6 +77,10 @@ public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
     protected Map mappingProperties;
 
     @Inject
+    @BatchProperty
+    protected String charset;
+
+    @Inject
     protected JobContext jobContext;
 
     StreamFactoryKey mappingFileKey;
@@ -94,14 +100,26 @@ public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
                 return streamFactory;
             }
             final InputStream mappingInputStream = getInputStream(key.mappingFile, false);
+            if (mappingInputStream == null) {
+                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "streamMapping");
+            }
             streamFactory = StreamFactory.newInstance();
 
-            if (mappingProperties == null) {
-                streamFactory.load(mappingInputStream);
-            } else {
-                final Properties p = new Properties();
-                p.putAll(mappingProperties);
-                streamFactory.load(mappingInputStream, p);
+            try {
+                if (mappingProperties == null) {
+                    streamFactory.load(mappingInputStream);
+                } else {
+                    final Properties p = new Properties();
+                    p.putAll(mappingProperties);
+                    streamFactory.load(mappingInputStream, p);
+                }
+            } finally {
+                try {
+                    mappingInputStream.close();
+                } catch (final IOException ioe) {
+                    SupportLogger.LOGGER.tracef(ioe,
+                            "exception while closing BeanIO mapping InputStream, mappingFile: %s", key.mappingFile);
+                }
             }
 
             beanIOMappings.put(key, streamFactory);
@@ -110,8 +128,8 @@ public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
     }
 
     static class StreamFactoryKey {
-        private JobContext jobContext;
-        private String mappingFile;
+        private final JobContext jobContext;
+        private final String mappingFile;
 
         StreamFactoryKey(final JobContext jobContext, final String mappingFile) {
             this.jobContext = jobContext;
