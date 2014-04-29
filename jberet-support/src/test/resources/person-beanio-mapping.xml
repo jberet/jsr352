@@ -2,7 +2,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd">
     
-    <stream name="persons" format="delimited">
+    <stream name="persons" format="delimited" ignoreUnidentifiedRecords="true">
         <parser>
             <property name="delimiter" value="|"/>
             <property name="comments" value="#"/>

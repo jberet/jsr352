@@ -30,7 +30,10 @@ import org.beanio.StreamFactory;
  * data formats that are supported by BeanIO, e.g., fixed length file, CSV file, XML, etc. It also supports
  * dynamic BeanIO mapping properties, which are specified in job xml, injected into this class, and can be referenced
  * in BeanIO mapping file. {@link org.jberet.support.io.BeanIOItemWriter} configurations are specified as
- * reader properties in job xml.
+ * reader properties in job xml, and BeanIO mapping xml file.
+ *
+ * @since 1.0.3
+ * @see BeanIOItemReader
  */
 @Named
 @Dependent

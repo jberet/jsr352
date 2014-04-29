@@ -28,6 +28,10 @@ import org.jberet.support._private.SupportLogger;
 /**
  * The base class of BeanIO-based reader and writer classes: {@link org.jberet.support.io.BeanIOItemReader} and
  * {@link org.jberet.support.io.BeanIOItemWriter}.
+ *
+ * @since 1.0.3
+ * @see BeanIOItemReader
+ * @see BeanIOItemWriter
  */
 public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
     /**
@@ -76,6 +80,10 @@ public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
     @BatchProperty
     protected Map mappingProperties;
 
+    /**
+     * The name of the character set to be used for reading and writing data, e.g., UTF-8. This property is optional,
+     * and if not set, the platform default charset is used.
+     */
     @Inject
     @BatchProperty
     protected String charset;

@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
-import java.util.Locale;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
@@ -27,13 +26,17 @@ import javax.inject.Named;
 import org.beanio.BeanReader;
 import org.beanio.BeanReaderErrorHandler;
 import org.beanio.StreamFactory;
+import org.beanio.internal.util.LocaleUtil;
 import org.jberet.support._private.SupportLogger;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} based on BeanIO. This reader class handles all
  * data formats that are supported by BeanIO, e.g., fixed length file, CSV file, XML, etc. It supports restart,
  * ranged reading, custom error handler, and dynamic BeanIO mapping properties. {@link org.jberet.support.io.BeanIOItemReader}
- * configurations are specified as reader properties in job xml.
+ * configurations are specified as reader properties in job xml, and BeanIO mapping xml file.
+ *
+ * @since 1.0.3
+ * @see BeanIOItemWriter
  */
 @Named
 @Dependent
@@ -62,6 +65,9 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
     @BatchProperty
     protected Class errorHandler;
 
+    /**
+     * The locale name for this {@code BeanIOItemReader}
+     */
     @Inject
     @BatchProperty
     protected String locale;
@@ -91,7 +97,7 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
         final InputStream inputStream = getInputStream(resource, false);
         final Reader inputReader = charset == null ? new InputStreamReader(inputStream) :
                 new InputStreamReader(inputStream, charset);
-        beanReader = streamFactory.createReader(streamName, new BufferedReader(inputReader), getLocale());
+        beanReader = streamFactory.createReader(streamName, new BufferedReader(inputReader), LocaleUtil.parseLocale(locale));
 
         if (errorHandler != null) {
             beanReader.setErrorHandler((BeanReaderErrorHandler) errorHandler.newInstance());
@@ -122,18 +128,5 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
             beanReader = null;
             mappingFileKey = null;
         }
-    }
-
-    private Locale getLocale() {
-        if (locale == null) {
-            return Locale.getDefault();
-        }
-        final String[] parts = locale.split("_", -1);
-        if (parts.length == 1) {
-            return new Locale(parts[0]);
-        } else if (parts.length == 2 || (parts.length == 3 && parts[2].startsWith("#"))) {
-            return new Locale(parts[0], parts[1]);
-        }
-        return new Locale(parts[0], parts[1], parts[2]);
     }
 }

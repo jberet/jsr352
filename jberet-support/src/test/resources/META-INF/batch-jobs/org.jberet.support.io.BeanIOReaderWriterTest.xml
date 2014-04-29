@@ -24,7 +24,7 @@
                     <property name="streamMapping" value="#{jobParameters['streamMapping']}"/>
                     <property name="mappingProperties" value="#{jobParameters['mappingProperties']}"/>
                     <property name="errorHandler" value="#{jobParameters['errorHandler']}"/>
-                    <property name="locale" value="en_US"/>
+                    <!--<property name="locale" value="en_US"/>-->
                     <property name="charset" value="UTF-8"/>
                 </properties>
             </reader>
