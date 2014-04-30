@@ -12,6 +12,7 @@
 
 package org.jberet.support.io;
 
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.List;
@@ -62,7 +63,9 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
             throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, BEAN_TYPE_KEY);
         }
 
-        final OutputStreamWriter writer = new OutputStreamWriter(getOutputStream(writeMode));
+        final OutputStream outputStream = getOutputStream(writeMode);
+        final OutputStreamWriter writer = charset == null ? new OutputStreamWriter(outputStream) :
+                new OutputStreamWriter(outputStream, charset);
         if (java.util.List.class.isAssignableFrom(beanType)) {
             delegateWriter = new CsvListWriter(writer, getCsvPreference());
         } else if (java.util.Map.class.isAssignableFrom(beanType)) {

@@ -13,6 +13,7 @@
 package org.jberet.support.io;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
@@ -54,7 +55,7 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
     protected ICsvReader delegateReader;
 
     @Override
-    public void open(final Serializable checkpoint) {
+    public void open(final Serializable checkpoint) throws Exception {
         /**
          * The row number to start reading.  It may be different from the injected field start. During a restart,
          * we would start reading from where it ended during the last run.
@@ -74,7 +75,9 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
         if (beanType == null) {
             throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, BEAN_TYPE_KEY);
         }
-        final InputStreamReader r = new InputStreamReader(getInputStream(resource, true));
+        final InputStream inputStream = getInputStream(resource, true);
+        final InputStreamReader r = charset == null ? new InputStreamReader(inputStream) :
+                new InputStreamReader(inputStream, charset);
         if (java.util.List.class.isAssignableFrom(beanType)) {
             delegateReader = new FastForwardCsvListReader(r, getCsvPreference(), startRowNumber);
         } else if (java.util.Map.class.isAssignableFrom(beanType)) {

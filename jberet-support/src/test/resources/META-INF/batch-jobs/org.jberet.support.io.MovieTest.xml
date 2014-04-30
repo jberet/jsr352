@@ -25,6 +25,7 @@
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="cellProcessors" value= "#{jobParameters['cellProcessors']}"/>
                     <property name="nameMapping" value="#{jobParameters['nameMapping']}"/>
+                    <property name="charset" value="UTF-8"/>
                 </properties>
             </reader>
             <writer ref="csvItemWriter">
@@ -33,6 +34,7 @@
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="header" value="#{jobParameters['header']}"/>
                     <property name="writeMode" value="#{jobParameters['writeMode']}"/>
+                    <property name="charset" value="UTF-8"/>
                 </properties>
             </writer>
         </chunk>

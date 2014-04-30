@@ -96,6 +96,14 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
     @BatchProperty
     protected String cellProcessors;
 
+    /**
+     * The name of the character set to be used for reading and writing data, e.g., UTF-8. This property is optional,
+     * and if not set, the platform default charset is used.
+     */
+    @Inject
+    @BatchProperty
+    protected String charset;
+
     protected CellProcessor[] cellProcessorInstances;
 
     /**
