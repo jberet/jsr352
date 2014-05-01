@@ -20,6 +20,8 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.jberet._private.BatchMessages;
 
+import static javax.xml.stream.XMLStreamConstants.CDATA;
+import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
@@ -407,7 +409,7 @@ public final class JobParser {
     }
 
     private static RefArtifact parseRefArtifact(final XMLStreamReader reader, final XmlElement artifactElementType) throws XMLStreamException {
-        final RefArtifact refArtifact = new RefArtifact(getAttributeValue(reader, XmlAttribute.REF, true));
+        final RefArtifact refArtifact = new RefArtifact(getAttributeValue(reader, XmlAttribute.REF, false));
         while (reader.hasNext()) {
             final int eventType = reader.next();
             if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
@@ -418,6 +420,8 @@ public final class JobParser {
                 case START_ELEMENT:
                     if (element == XmlElement.PROPERTIES) {
                         refArtifact.setProperties(parseProperties(reader));
+                    } else if(element == XmlElement.SCRIPT) {
+                        refArtifact.setScript(parseScript(reader));
                     } else {
                         throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
                     }
@@ -432,6 +436,35 @@ public final class JobParser {
         }
         throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
     }
+
+    private static Script parseScript(final XMLStreamReader reader) throws XMLStreamException {
+        final Script script = new Script(getAttributeValue(reader, XmlAttribute.TYPE, false),
+                getAttributeValue(reader, XmlAttribute.SRC, false));
+        String characters = "";
+        while (reader.hasNext()) {
+            final int eventType = reader.next();
+            switch (eventType) {
+                case CHARACTERS:
+                    characters = reader.getText();
+                    break;
+                case CDATA:
+                    script.content = reader.getText();
+                    break;
+                case END_ELEMENT:
+                    if (XmlElement.forName(reader.getLocalName()) == XmlElement.SCRIPT) {
+                        if (script.content == null) {
+                            script.content = characters;
+                        }
+                        return script;
+                    } else {
+                        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+                    }
+            }
+        }
+        throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+    }
+
+
 
     private static Chunk parseChunk(final XMLStreamReader reader) throws XMLStreamException {
         final Chunk chunk = new Chunk();

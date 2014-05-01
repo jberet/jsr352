@@ -15,6 +15,8 @@ package org.jberet.job.model;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.jberet._private.BatchMessages;
+
 /**
  * Represents a batch artifact with a ref and properties.  It may be extended to form more complex artifact types.
  */
@@ -23,9 +25,10 @@ public class RefArtifact implements Serializable, Cloneable, PropertiesHolder {
 
     private String ref;
     private Properties properties;
+    private Script script;
 
     RefArtifact(final String ref) {
-        this.ref = ref;
+        this.ref = ref == null ? "" : ref;
     }
 
     public String getRef() {
@@ -44,11 +47,26 @@ public class RefArtifact implements Serializable, Cloneable, PropertiesHolder {
         this.properties = properties;
     }
 
+    public Script getScript() {
+        return script;
+    }
+
+    void setScript(final Script script) {
+        if (this.ref.isEmpty()) {
+            this.script = script;
+        } else {
+            throw BatchMessages.MESSAGES.cannotHaveBothScriptAndRef(this.ref);
+        }
+    }
+
     @Override
     protected RefArtifact clone() {
         final RefArtifact c = new RefArtifact(this.ref);
         if (properties != null) {
             c.setProperties(properties.clone());
+        }
+        if (this.script != null) {
+            c.script = this.script.clone();
         }
         return c;
     }

@@ -39,10 +39,12 @@ public enum XmlAttribute {
     RESTARTABLE("restartable"),
     RETRY_LIMIT("retry-limit"),
     SKIP_LIMIT("skip-limit"),
+    SRC("src"),
     START_LIMIT("start-limit"),
     THREADS("threads"),
     TIME_LIMIT("time-limit"),
     TO("to"),
+    TYPE("type"),
     VALUE("value");
 
     private final String name;

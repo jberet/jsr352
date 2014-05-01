@@ -44,6 +44,7 @@ public enum XmlElement {
     READER("reader"),
     REDUCER("reducer"),
     RETRYABLE_EXCEPTION_CLASSES("retryable-exception-classes"),
+    SCRIPT("script"),
     SKIPPABLE_EXCEPTION_CLASSES("skippable-exception-classes"),
     SPLIT("split"),
     STEP("step"),

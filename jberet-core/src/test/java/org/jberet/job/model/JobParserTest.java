@@ -20,6 +20,7 @@ import javax.batch.operations.BatchRuntimeException;
 import javax.xml.stream.XMLStreamException;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.jberet.util.BatchUtil.NL;
@@ -127,6 +128,7 @@ public final class JobParserTest {
     }
 
     @Test
+    @Ignore
     public void testJobXmlWrongAttribute() throws Exception {
         final String batchXml =
         "<job id=\"job1\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version=\"1.0\">" + NL +

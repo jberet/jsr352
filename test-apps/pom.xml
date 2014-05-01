@@ -28,6 +28,7 @@
         <module>propertyInjection</module>
         <module>postConstruct</module>
         <module>inheritance</module>
+        <module>scripting</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
@@ -70,6 +71,14 @@
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>aalto-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>stax2-api</artifactId>
         </dependency>
     </dependencies>
 
