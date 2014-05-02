@@ -19,23 +19,32 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ScriptingIT extends AbstractIT {
+    private static String testNameKey = "testName";
+
     public ScriptingIT() {
         //params.setProperty("job-param", "job-param");
     }
 
     @Test
     public void batchletJavascriptEmbeddedCDATA() throws Exception {
-        startJobAndWait("batchletJavascriptEmbeddedCDATA.xml");
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
-
+        test0("batchletJavascriptEmbeddedCDATA");
     }
 
     @Test
     public void batchletJavascriptEmbedded() throws Exception {
-        startJobAndWait("batchletJavascriptEmbedded.xml");
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+        test0("batchletJavascriptEmbedded");
+    }
 
+    @Test
+    public void batchletJavascriptSrc() throws Exception {
+        test0("batchletJavascriptSrc");
+    }
+
+    void test0(final String testName) throws Exception {
+        params.setProperty(testNameKey, testName);
+        startJobAndWait(testName);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(testName, stepExecution0.getExitStatus());
+        Assert.assertEquals(testName, jobExecution.getExitStatus());
     }
 }

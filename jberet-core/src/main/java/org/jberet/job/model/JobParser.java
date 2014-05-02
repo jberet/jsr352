@@ -453,7 +453,10 @@ public final class JobParser {
                 case END_ELEMENT:
                     if (XmlElement.forName(reader.getLocalName()) == XmlElement.SCRIPT) {
                         if (script.content == null) {
-                            script.content = characters;
+                            characters = characters.trim();
+                            if(!characters.isEmpty()) {
+                                script.content = characters;
+                            }
                         }
                         return script;
                     } else {

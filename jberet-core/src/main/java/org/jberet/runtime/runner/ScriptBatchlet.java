@@ -74,11 +74,6 @@ class ScriptBatchlet implements Batchlet {
 
     @Override
     public void stop() throws Exception {
-        if (compiledScript == null) {
-            engine.eval(scriptContent);
-        } else {
-            compiledScript.eval();
-        }
         if (engine instanceof Invocable) {
             try {
                 ((Invocable) engine).invokeFunction("stop");

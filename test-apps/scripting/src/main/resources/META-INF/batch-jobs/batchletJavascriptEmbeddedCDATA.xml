@@ -16,20 +16,25 @@
     <step id="batchletJavascriptEmbeddedCDATA.step1">
         <batchlet>
             <properties>
-                <property name="message" value="Message from batchletJavascriptEmbeddedCDATA"/>
+                <property name="testName" value="#{jobParameters['testName']}"/>
             </properties>
             <script type="javascript">
                 <![CDATA[
-                        function stop() {
-                            println("In stop function");
-                        }
+                    function stop() {
+                        println('In stop function');
+                    }
 
-                        //access built-in variables: jobContext, stepContext and batchProperties
-                        function process() {
-                            println('jobName: ' + jobContext.getJobName());
-                            println('stepName: ' + stepContext.getStepName());
-                            println('message: ' + batchProperties.get('message'));
-                        }
+                    //access built-in variables: jobContext, stepContext and batchProperties,
+                    //set job exit status to the value of testName property, and
+                    //return the value of testName property as step exit status,
+                    //
+                    function process() {
+                        println('jobName: ' + jobContext.getJobName());
+                        println('stepName: ' + stepContext.getStepName());
+                        var testName = batchProperties.get('testName');
+                        jobContext.setExitStatus(testName);
+                        return testName;
+                    }
                 ]]>
             </script>
         </batchlet>
