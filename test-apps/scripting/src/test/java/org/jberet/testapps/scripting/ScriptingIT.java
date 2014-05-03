@@ -26,19 +26,30 @@ public class ScriptingIT extends AbstractIT {
     }
 
     @Test
-    public void batchletJavascriptEmbeddedCDATA() throws Exception {
-        test0("batchletJavascriptEmbeddedCDATA");
+    public void batchletJavascriptInlineCDATA() throws Exception {
+        test0("batchletJavascriptInlineCDATA");
     }
 
     @Test
-    public void batchletJavascriptEmbedded() throws Exception {
-        test0("batchletJavascriptEmbedded");
+    public void batchletJavascriptInline() throws Exception {
+        test0("batchletJavascriptInline");
     }
 
     @Test
     public void batchletJavascriptSrc() throws Exception {
         test0("batchletJavascriptSrc");
     }
+
+    @Test
+    public void batchletGroovyInline() throws Exception {
+        test0("batchletGroovyInline");
+    }
+
+    @Test
+    public void batchletGroovySrc() throws Exception {
+        test0("batchletGroovySrc");
+    }
+
 
     void test0(final String testName) throws Exception {
         params.setProperty(testNameKey, testName);

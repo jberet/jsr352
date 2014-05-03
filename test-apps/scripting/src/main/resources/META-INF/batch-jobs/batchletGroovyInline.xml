@@ -12,14 +12,14 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="batchletJavascriptEmbedded" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="batchletJavascriptEmbedded.step1">
+<job id="batchletGroovyInline" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="batchletGroovyInline.step1">
         <batchlet>
             <properties>
                 <property name="testName" value="#{jobParameters['testName']}"/>
             </properties>
-            <script type="javascript">
-                function stop() {
+            <script type="groovy">
+                def stop() {
                     println('In stop function');
                 }
 
@@ -27,10 +27,10 @@
                 //set job exit status to the value of testName property, and
                 //return the value of testName property as step exit status,
                 //
-                function process() {
+                def process() {
                     println('jobName: ' + jobContext.getJobName());
                     println('stepName: ' + stepContext.getStepName());
-                    var testName = batchProperties.get('testName');
+                    testName = batchProperties.get('testName');
                     jobContext.setExitStatus(testName);
                     return testName;
                 }

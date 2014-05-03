@@ -100,7 +100,6 @@ public class Script implements Serializable, Cloneable {
         }
 
         ScriptEngine engine = null;
-
         if (type != null) {
             engine = type.indexOf('/') > 0 ? mgr.getEngineByMimeType(type) : mgr.getEngineByName(type);
         } else if (src != null) {

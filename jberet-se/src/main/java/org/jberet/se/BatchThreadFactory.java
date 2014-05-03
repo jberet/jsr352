@@ -19,10 +19,12 @@ public class BatchThreadFactory implements ThreadFactory {
     final AtomicInteger threadNumber = new AtomicInteger(1);
     final String namePrefix = "jberet-";
 
+    @Override
     public Thread newThread(final Runnable r) {
         final Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
         t.setDaemon(true);
-        t.setContextClassLoader(null);
+        //some libs rely on TCCL
+        //t.setContextClassLoader(null);
         return t;
     }
 }

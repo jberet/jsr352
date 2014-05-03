@@ -12,8 +12,8 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="batchletJavascriptEmbeddedCDATA" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="batchletJavascriptEmbeddedCDATA.step1">
+<job id="batchletJavascriptInlineCDATA" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="batchletJavascriptInlineCDATA.step1">
         <batchlet>
             <properties>
                 <property name="testName" value="#{jobParameters['testName']}"/>
