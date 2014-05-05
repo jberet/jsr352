@@ -137,8 +137,8 @@ public interface BatchMessages {
     @Message(id = 636, value = "Cannot have both script element and ref attribute: %s")
     BatchRuntimeException cannotHaveBothScriptAndRef(String ref);
 
-    @Message(id = 637, value = "Script type is not specified, or script src does not have file extension: %s, %s")
-    BatchRuntimeException invalidScriptTypeOrFileExtension(String scriptType, String scriptSrc);
+    @Message(id = 637, value = "Invalid script attributes: type = %s, src = %s")
+    BatchRuntimeException invalidScriptAttributes(String scriptType, String scriptSrc);
 
     @Message(id = 638, value = "Failed to get the script content from %s")
     BatchRuntimeException failToGetScriptContent(@Cause Throwable th, String scriptSrc);

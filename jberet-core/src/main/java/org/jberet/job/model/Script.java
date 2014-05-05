@@ -18,7 +18,10 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
 import org.jberet._private.BatchLogger;
@@ -99,22 +102,28 @@ public class Script implements Serializable, Cloneable {
             }
         }
 
+        //final List<ScriptEngineFactory> engineFactories = mgr.getEngineFactories();
+        //System.out.printf("## engineFactories: %s%n", engineFactories);
+
         ScriptEngine engine = null;
         if (type != null) {
             engine = type.indexOf('/') > 0 ? mgr.getEngineByMimeType(type) : mgr.getEngineByName(type);
         } else if (src != null) {
             final int fileExtensionDot = src.lastIndexOf('.');
             if (fileExtensionDot < 0) {
-                throw BatchMessages.MESSAGES.invalidScriptTypeOrFileExtension(type, src);
+                throw BatchMessages.MESSAGES.invalidScriptAttributes(type, src);
             }
             final String ext = src.substring(fileExtensionDot + 1);
             engine = mgr.getEngineByExtension(ext);
         }
 
         if (engine != null) {
+            if (engine.getClass().getSimpleName().indexOf("Groovy") > -1) {
+                engine.getContext().setAttribute("#jsr223.groovy.engine.keep.globals", "weak", ScriptContext.ENGINE_SCOPE);
+            }
             return engine;
         }
-        throw BatchMessages.MESSAGES.invalidScriptTypeOrFileExtension(type, src);
+        throw BatchMessages.MESSAGES.invalidScriptAttributes(type, src);
     }
 
     @Override

@@ -62,6 +62,7 @@
         <version.org.beanio>2.1.0.M2</version.org.beanio>
         <version.org.ow2.asm>5.0.2</version.org.ow2.asm>
         <version.org.codehaus.groovy>2.2.2</version.org.codehaus.groovy>
+        <version.org.jruby.jruby>1.7.12</version.org.jruby.jruby>
     </properties>
 
     <modules>
@@ -326,6 +327,11 @@
                 <artifactId>groovy</artifactId>
                 <version>${version.org.codehaus.groovy}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jruby</groupId>
+                <artifactId>jruby</artifactId>
+                <version>${version.org.jruby.jruby}</version>
             </dependency>
 
             <dependency>

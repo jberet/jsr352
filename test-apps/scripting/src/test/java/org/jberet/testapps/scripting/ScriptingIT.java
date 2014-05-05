@@ -50,6 +50,15 @@ public class ScriptingIT extends AbstractIT {
         test0("batchletGroovySrc");
     }
 
+    @Test
+    public void batchletRubySrc() throws Exception {
+        test0("batchletRubySrc");
+    }
+
+    @Test
+    public void batchletRubyInline() throws Exception {
+        test0("batchletRubyInline");
+    }
 
     void test0(final String testName) throws Exception {
         params.setProperty(testNameKey, testName);
