@@ -63,6 +63,7 @@
         <version.org.ow2.asm>5.0.2</version.org.ow2.asm>
         <version.org.codehaus.groovy>2.2.2</version.org.codehaus.groovy>
         <version.org.jruby.jruby>1.7.12</version.org.jruby.jruby>
+        <version.org.python.jython>2.7-b1</version.org.python.jython>
     </properties>
 
     <modules>
@@ -332,6 +333,13 @@
                 <groupId>org.jruby</groupId>
                 <artifactId>jruby</artifactId>
                 <version>${version.org.jruby.jruby}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.python</groupId>
+                <artifactId>jython</artifactId>
+                <version>${version.org.python.jython}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>

@@ -60,6 +60,16 @@ public class ScriptingIT extends AbstractIT {
         test0("batchletRubyInline");
     }
 
+    @Test
+    public void batchletPythonSrc() throws Exception {
+        test0("batchletPythonSrc");
+    }
+
+    @Test
+    public void batchletPythonInline() throws Exception {
+        test0("batchletPythonInline");
+    }
+
     void test0(final String testName) throws Exception {
         params.setProperty(testNameKey, testName);
         startJobAndWait(testName);
