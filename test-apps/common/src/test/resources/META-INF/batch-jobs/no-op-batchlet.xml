@@ -14,7 +14,12 @@
 
 <job id="batchlet-test" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="only">
-        <batchlet ref="noOpBatchlet">
+        <batchlet>
+            <script type="javascript">
+                function process() {
+                    return "Processed";
+                }
+            </script>
         </batchlet>
     </step>
 </job>
