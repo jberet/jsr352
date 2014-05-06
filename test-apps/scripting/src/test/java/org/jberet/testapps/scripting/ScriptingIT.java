@@ -70,6 +70,19 @@ public class ScriptingIT extends AbstractIT {
         test0("batchletPythonInline");
     }
 
+    @Test
+    public void batchletScalaSrc() throws Exception {
+        System.setProperty("scala.usejavacp", "true");
+        test0("batchletScalaSrc");
+    }
+
+    @Test
+    public void batchletScalaInline() throws Exception {
+        System.setProperty("scala.usejavacp", "true");
+        test0("batchletScalaInline");
+    }
+
+
     void test0(final String testName) throws Exception {
         params.setProperty(testNameKey, testName);
         startJobAndWait(testName);

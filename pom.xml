@@ -64,6 +64,7 @@
         <version.org.codehaus.groovy>2.2.2</version.org.codehaus.groovy>
         <version.org.jruby.jruby>1.7.12</version.org.jruby.jruby>
         <version.org.python.jython>2.7-b1</version.org.python.jython>
+        <version.org.scala-lang.scala-dist>2.11.0</version.org.scala-lang.scala-dist>
     </properties>
 
     <modules>
@@ -339,6 +340,12 @@
                 <groupId>org.python</groupId>
                 <artifactId>jython</artifactId>
                 <version>${version.org.python.jython}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-compiler</artifactId>
+                <version>${version.org.scala-lang.scala-dist}</version>
                 <scope>test</scope>
             </dependency>
 
