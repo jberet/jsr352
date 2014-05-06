@@ -65,6 +65,8 @@
         <version.org.jruby.jruby>1.7.12</version.org.jruby.jruby>
         <version.org.python.jython>2.7-b1</version.org.python.jython>
         <version.org.scala-lang.scala-dist>2.11.0</version.org.scala-lang.scala-dist>
+        <version.com.caucho.resin-quercus>3.2.1</version.com.caucho.resin-quercus>
+        <version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>1.0.0.Final</version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>
     </properties>
 
     <modules>
@@ -317,7 +319,7 @@
                 <scope>provided</scope>
             </dependency>
 
-            <!-- Scripting dependency -->
+            <!-- Scripting testing dependency -->
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-jsr223</artifactId>
@@ -346,6 +348,18 @@
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-compiler</artifactId>
                 <version>${version.org.scala-lang.scala-dist}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>resin-quercus</artifactId>
+                <version>${version.com.caucho.resin-quercus}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.spec.javax.servlet</groupId>
+                <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+                <version>${version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec}</version>
                 <scope>test</scope>
             </dependency>
 

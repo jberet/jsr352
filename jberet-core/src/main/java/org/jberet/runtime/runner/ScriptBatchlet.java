@@ -32,7 +32,6 @@ class ScriptBatchlet implements Batchlet {
     private final Properties artifactProperties;
     private final StepContextImpl stepContext;
 
-
     private final ScriptEngine engine;
     private CompiledScript compiledScript;
     private final String scriptContent;
@@ -45,12 +44,7 @@ class ScriptBatchlet implements Batchlet {
         final ClassLoader classLoader = stepContext.getClassLoader();
         scriptContent = script.getContent(classLoader);
         this.engine = script.getEngine(classLoader);
-
-        final ScriptContext scriptContext = this.engine.getContext();
-        scriptContext.setAttribute("jobContext", stepContext.getJobContext(), ScriptContext.ENGINE_SCOPE);
-        scriptContext.setAttribute("stepContext", stepContext, ScriptContext.ENGINE_SCOPE);
-        scriptContext.setAttribute("batchProperties", Properties.toJavaUtilProperties(artifactProperties), ScriptContext.ENGINE_SCOPE);
-
+        setEngineScopeAttributes();
         if (engine instanceof Compilable) {
             compiledScript = ((Compilable) engine).compile(scriptContent);
         }
@@ -81,5 +75,13 @@ class ScriptBatchlet implements Batchlet {
                 //ignore
             }
         }
+    }
+
+    private void setEngineScopeAttributes() {
+        final ScriptContext scriptContext = this.engine.getContext();
+        scriptContext.setAttribute("jobContext", stepContext.getJobContext(), ScriptContext.ENGINE_SCOPE);
+        scriptContext.setAttribute("stepContext", stepContext, ScriptContext.ENGINE_SCOPE);
+        scriptContext.setAttribute("batchProperties", Properties.toJavaUtilProperties(artifactProperties), ScriptContext.ENGINE_SCOPE);
+
     }
 }

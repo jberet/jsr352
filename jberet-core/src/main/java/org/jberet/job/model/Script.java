@@ -18,10 +18,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
-import java.util.List;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
 import org.jberet._private.BatchLogger;
@@ -101,9 +99,6 @@ public class Script implements Serializable, Cloneable {
                 }
             }
         }
-
-        //final List<ScriptEngineFactory> engineFactories = mgr.getEngineFactories();
-        //System.out.printf("## engineFactories: %s%n", engineFactories);
 
         ScriptEngine engine = null;
         if (type != null) {

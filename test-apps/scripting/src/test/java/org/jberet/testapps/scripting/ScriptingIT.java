@@ -16,6 +16,7 @@ import javax.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ScriptingIT extends AbstractIT {
@@ -82,12 +83,22 @@ public class ScriptingIT extends AbstractIT {
         test0("batchletScalaInline");
     }
 
+    @Test
+    public void batchletPhpInlineCDATA() throws Exception {
+        test0("batchletPhpInlineCDATA");
+    }
+
+    @Test
+    public void batchletPhpSrc() throws Exception {
+        test0("batchletPhpSrc");
+    }
+
 
     void test0(final String testName) throws Exception {
         params.setProperty(testNameKey, testName);
         startJobAndWait(testName);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(testName, stepExecution0.getExitStatus());
         Assert.assertEquals(testName, jobExecution.getExitStatus());
+        Assert.assertEquals(testName, stepExecution0.getExitStatus());
     }
 }
