@@ -3,7 +3,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 ####Sub-modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
-* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, Json, XML, Mongo, etc) for batch applications, and JNDI support
+* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Json, XML, Mongo, etc) for batch applications, and JNDI support
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
@@ -32,6 +32,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
     + comprehensive tests for implemented batch readers and writers
   - <https://github.com/jberet/jsr352/tree/master/test-apps>
     + test apps running in Java SE environment to verify core batch requirements
+    + test apps running in Java SE environment to verify additional JBeret features (inheritance, scripting support, etc)
 
 ####How to reference org.jberet artifacts in maven pom.xml
     <repositories>
@@ -39,15 +40,6 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
             <id>jboss-public-repository-group</id>
             <name>JBoss Public Repository Group</name>
             <url>http://repository.jboss.org/nexus/content/groups/public/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
         </repository>
     </repositories>
     ...
@@ -60,10 +52,10 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-core</artifactId>
-            <version>1.0.1.CR1</version> <!-- replace it with the desired version -->
+            <version>1.0.2.Final</version> <!-- replace it with the desired version -->
         </dependency>
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-support</artifactId>
-            <version>1.0.1.CR1</version> <!-- replace it with the desired version -->
+            <version>1.0.2.Final</version> <!-- replace it with the desired version -->
         </dependency>
