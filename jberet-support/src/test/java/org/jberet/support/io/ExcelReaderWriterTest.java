@@ -13,6 +13,7 @@
 package org.jberet.support.io;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
@@ -33,6 +34,41 @@ public final class ExcelReaderWriterTest {
         testReadWrite0("testBeanTypeFull.out", "1", null,
                 Movie.class, "Sheet2", "0",
                 MovieTest.expectFull, null);
+    }
+
+    @Test
+    public void testMapTypeFull() throws Exception {
+        testReadWrite0("testMapTypeFull.out", "1", null,
+                Map.class, "Sheet2", "0",
+                MovieTest.expectFull, null);
+    }
+
+    @Test
+    public void testBeanType2_4() throws Exception {
+        testReadWrite0("testBeanType2_4.out", "2", "4",
+                Movie.class, "Sheet2", "0",
+                MovieTest.expect2_4, MovieTest.forbid2_4);
+    }
+
+    @Test
+    public void testMapType2_4() throws Exception {
+        testReadWrite0("testMapType2_4.out", "2", "4",
+                Map.class, "Sheet2", "0",
+                MovieTest.expect2_4, MovieTest.forbid2_4);
+    }
+
+    @Test
+    public void testBeanType1_2() throws Exception {
+        testReadWrite0("testBeanType1_2.out", "1", "2",
+                Movie.class, "Sheet2", "0",
+                MovieTest.expect1_2, MovieTest.forbid1_2);
+    }
+
+    @Test
+    public void testMapType1_2() throws Exception {
+        testReadWrite0("testMapType1_2.out", "1", "2",
+                Map.class, "Sheet2", "0",
+                MovieTest.expect1_2, MovieTest.forbid1_2);
     }
 
     private void testReadWrite0(final String writeResource, final String start, final String end,
@@ -56,8 +92,6 @@ public final class ExcelReaderWriterTest {
         if (end != null) {
             params.setProperty(CsvProperties.END_KEY, end);
         }
-
-        CsvItemReaderWriterTest.setRandomWriteMode(params);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);

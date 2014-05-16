@@ -26,7 +26,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -120,13 +119,14 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
         if (this.end == 0) {
             this.end = Integer.MAX_VALUE;
         }
-        int startRowNumber = checkpoint == null ? this.start : (Integer) checkpoint;
-        if (startRowNumber < this.start || startRowNumber > this.end || startRowNumber < 0) {
-            throw SupportLogger.LOGGER.invalidStartPosition(startRowNumber, this.start, this.end);
-        }
-
         if (start == headerRow) {
             start += 1;
+        }
+
+        int startRowNumber = checkpoint == null ? this.start : (Integer) checkpoint;
+        if (startRowNumber < this.start || startRowNumber > this.end
+                || startRowNumber < 0 || startRowNumber <= headerRow) {
+            throw SupportLogger.LOGGER.invalidStartPosition(startRowNumber, this.start, this.end);
         }
 
         if (resource.endsWith("xls")) {
@@ -141,24 +141,27 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
         if (sheet == null) {
             sheet = workbook.getSheetAt(sheetIndex);
         }
-        startRowNumber = Math.min(startRowNumber, sheet.getFirstRowNum());
+        startRowNumber = Math.max(startRowNumber, sheet.getFirstRowNum());
         rowIterator = sheet.rowIterator();
 
-        while (rowIterator.hasNext()) {
-            mostRecentRow = rowIterator.next();
-            final int rowNum = mostRecentRow.getRowNum();
-            if (header == null && headerRow == rowNum) {
-                final short firstCellNum = mostRecentRow.getFirstCellNum();
-                final short lastCellNum = mostRecentRow.getLastCellNum();
-                header = new String[lastCellNum - firstCellNum];
-                for (int i = 0; i < header.length; ++i) {
-                    header[i] = mostRecentRow.getCell(i).getStringCellValue();
+        if (startRowNumber > 0) {
+            while (rowIterator.hasNext()) {
+                mostRecentRow = rowIterator.next();
+                final int rowNum = mostRecentRow.getRowNum();
+                if (header == null && headerRow == rowNum) {
+                    final short firstCellNum = mostRecentRow.getFirstCellNum();
+                    final short lastCellNum = mostRecentRow.getLastCellNum();
+                    header = new String[lastCellNum - firstCellNum];
+                    for (int i = 0; i < header.length; ++i) {
+                        header[i] = mostRecentRow.getCell(i).getStringCellValue();
+                    }
+                }
+                if (rowNum >= startRowNumber - 1) {
+                    break;
                 }
             }
-            if (rowNum >= startRowNumber - 1) {
-                break;
-            }
         }
+
         if (header != null) {
             minColumnCount = header.length;
         } else if (fieldMapping != null) {
@@ -236,7 +239,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
     }
 
     protected Object getCellValue(final Cell c, final int cellType) {
-        Object cellValue;
+        final Object cellValue;
         switch (cellType) {
             case Cell.CELL_TYPE_STRING:
                 cellValue = c.getStringCellValue();

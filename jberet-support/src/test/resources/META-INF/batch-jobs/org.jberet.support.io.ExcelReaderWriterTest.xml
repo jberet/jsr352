@@ -28,6 +28,7 @@
             <writer ref="jsonItemWriter">
                 <properties>
                     <property name="resource" value="#{jobParameters['writeResource']}"/>
+                    <property name="writeMode" value="overwrite"/>
                 </properties>
             </writer>
         </chunk>
