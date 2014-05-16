@@ -15,9 +15,18 @@ package org.jberet.support.io;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 /**
  * A bean class for person.csv.
  */
+
+//let jackson directly access property fields so it always gets the correct property names without any uppercase or
+// lowercase changes.  When jackson accesses properties with getter/setter, it forcifully decapitalize property names.
+// Noticed this problem in org.jberet.support.io.ExcelReaderWriterTest.testPersonBeanType1_5()
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Person {
     private long number;
     private String gender;

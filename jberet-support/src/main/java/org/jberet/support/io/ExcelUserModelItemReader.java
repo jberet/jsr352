@@ -119,6 +119,9 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
         if (this.end == 0) {
             this.end = Integer.MAX_VALUE;
         }
+        if (headerRow == null) {
+            headerRow = -1;
+        }
         if (start == headerRow) {
             start += 1;
         }

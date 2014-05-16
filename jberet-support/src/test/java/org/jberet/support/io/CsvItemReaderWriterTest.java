@@ -92,6 +92,9 @@ public class CsvItemReaderWriterTest {
             "Barry,M,Sparks,553 Timbercrest Road,Sparrevohn A.F.S.,AK,99506,US,United States,BarryMSparks@cuvox.de," +
             "Joe,K,Davis,1342 Java Lane,Bishopville,SC,29010,US,United States,JoeKDavis@dayrep.com";
 
+    static final String personResourceExpect1_5 =
+            "Martin,T,Mejia, Debbie,P,Judson, Margie,J,Chaney, Jerry,K,Smith, Gloria,K,Lewis";
+
     //content from row 6 & 10
     static final String personResourceForbid = "MarthaEValentine@dayrep.com, CindyNKeyes@jourrapide.com";
 
