@@ -12,9 +12,9 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="org.jberet.support.io.ExcelReaderWriterTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="org.jberet.support.io.ExcelReaderWriterTest.step1">
-        <chunk item-count="1000000">
+<job id="org.jberet.support.io.ExcelReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="org.jberet.support.io.ExcelReaderTest.step1">
+        <chunk item-count="100">
             <reader ref="excelUserModelItemReader">
                 <properties>
                     <property name="resource" value="#{jobParameters['resource']}"/>
@@ -23,7 +23,7 @@
                     <property name="start" value="#{jobParameters['start']}"/>
                     <property name="end" value="#{jobParameters['end']}"/>
                     <property name="headerRow" value="#{jobParameters['headerRow']}"/>
-                    <property name="fieldMapping" value="#{jobParameters['fieldMapping']}"/>
+                    <property name="header" value="#{jobParameters['header']}"/>
                 </properties>
             </reader>
             <writer ref="jsonItemWriter">

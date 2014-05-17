@@ -30,8 +30,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jberet.support._private.SupportLogger;
 
@@ -39,7 +37,7 @@ import org.jberet.support._private.SupportLogger;
  * An implementation of {@code javax.batch.api.chunk.ItemReader} for reading Excel files. Current implementation is
  * based on Apache POI user model API.
  *
- * @see ExcelItemWriter
+ * @see ExcelUserModelItemWriter
  * @since 1.0.3
  */
 @Named
@@ -69,45 +67,15 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
     protected int sheetIndex;
 
     /**
-     * The name of the target sheet. It is optional, and when specified, it has higher precedence over {@link #sheetIndex}
-     */
-    @Inject
-    @BatchProperty
-    protected String sheetName;
-
-    /**
      * The physical row number of the header.
      */
     @Inject
     @BatchProperty
     protected Integer headerRow;
 
-    /**
-     * An ordered string array specifying how to map columns to fields of target Java bean class as specified in
-     * {@link #beanType}. For example,
-     * <p/>
-     * "id, name, age" specifies first column maps to id field in Java bean class, 2nd column to name field, 2rd
-     * column to age field, etc.
-     * <p/>
-     * If this property is not specified, it is considered the same as {@link #header}. If either is present and
-     * {@link #beanType} is not list, an exception is thrown.
-     */
-    @Inject
-    @BatchProperty
-    protected String[] fieldMapping;
-
-    /**
-     * The optional header as a string array.
-     */
-    protected String[] header;
-
     protected InputStream inputStream;
-    protected String excelFormat = "xlsx";
-    protected Workbook workbook;
     protected FormulaEvaluator formulaEvaluator;
-    protected Sheet sheet;
     protected Iterator<Row> rowIterator;
-    protected Row mostRecentRow;
     protected int minColumnCount;
 
     @Override
@@ -120,6 +88,9 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
             this.end = Integer.MAX_VALUE;
         }
         if (headerRow == null) {
+            if (header == null) {
+                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "header | headerRow");
+            }
             headerRow = -1;
         }
         if (start == headerRow) {
@@ -130,10 +101,6 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
         if (startRowNumber < this.start || startRowNumber > this.end
                 || startRowNumber < 0 || startRowNumber <= headerRow) {
             throw SupportLogger.LOGGER.invalidStartPosition(startRowNumber, this.start, this.end);
-        }
-
-        if (resource.endsWith("xls")) {
-            excelFormat = "xls";
         }
 
         inputStream = getInputStream(resource, false);
@@ -165,19 +132,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
             }
         }
 
-        if (header != null) {
-            minColumnCount = header.length;
-        } else if (fieldMapping != null) {
-            minColumnCount = fieldMapping.length;
-            header = fieldMapping;
-        }
-        if (fieldMapping == null && header != null) {
-            fieldMapping = header;
-        }
-
-        if (header == null && fieldMapping == null && !List.class.isAssignableFrom(beanType)) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "headerRow | fieldMapping");
-        }
+        minColumnCount = header.length;
         initJsonFactoryAndObjectMapper();
     }
 

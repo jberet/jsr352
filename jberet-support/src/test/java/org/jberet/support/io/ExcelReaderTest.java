@@ -24,17 +24,17 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
-public final class ExcelReaderWriterTest {
+public final class ExcelReaderTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
-    static final String jobName = "org.jberet.support.io.ExcelReaderWriterTest";
+    static final String jobName = "org.jberet.support.io.ExcelReaderTest";
     static final String personMoviesResource = "person-movies.xlsx";
     static final String moviesSheetName = "Sheet2";
     static final String personSheetName = "Sheet1";
     static final String capeResource = "ie_data.xls";
     static final String capeSheetName = "Data";
-    static final String capeFieldMapping =
-    "date, sp, dividend, earnings, cpi, dateFraction, longInterestRate, realPrice, realDividend, realEarnings, cape";
+    static final String capeHeader =
+            "date, sp, dividend, earnings, cpi, dateFraction, longInterestRate, realPrice, realDividend, realEarnings, cape";
     static final String capeFullExpected = "1871.01, 1871.02, 1871.03, 1950.01, 1950.02, 1950.03, 2014.01, 2014.02, 2014.03, 2014.04";
 
     @Test
@@ -98,13 +98,13 @@ public final class ExcelReaderWriterTest {
     @Test
     public void testCapeBeanTypeFull() throws Exception {
         testReadWrite0(capeResource, "testCapeBeanTypeFull.out",
-                "8", "1727", capeFieldMapping,
+                "8", "1727", capeHeader,
                 Cape.class, capeSheetName, null,
                 capeFullExpected, null);
     }
 
     private void testReadWrite0(final String resource, final String writeResource,
-                                final String start, final String end, final String fieldMapping,
+                                final String start, final String end, final String header,
                                 final Class<?> beanType, final String sheetName, final String headerRow,
                                 final String expect, final String forbid) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
@@ -112,8 +112,8 @@ public final class ExcelReaderWriterTest {
         params.setProperty("writeResource", writeResourceFile.getPath());
         params.setProperty("resource", resource);
 
-        if (fieldMapping != null) {
-            params.setProperty("fieldMapping", fieldMapping);
+        if (header != null) {
+            params.setProperty("header", header);
         }
         if (sheetName != null) {
             params.setProperty("sheetName", sheetName);
