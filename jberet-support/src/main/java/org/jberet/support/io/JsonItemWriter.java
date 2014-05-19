@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.io.OutputDecorator;
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes a list of same-typed objects to Json resource.
@@ -85,7 +86,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
                 try {
                     feature = JsonGenerator.Feature.valueOf(key);
                 } catch (final Exception e1) {
-                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                    throw SupportMessages.MESSAGES.unrecognizedReaderWriterProperty(key, value);
                 }
                 if ("true".equals(value)) {
                     if (!feature.enabledByDefault()) {
@@ -96,7 +97,7 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
                         jsonGenerator.configure(feature, false);
                     }
                 } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, value, key);
                 }
             }
         }

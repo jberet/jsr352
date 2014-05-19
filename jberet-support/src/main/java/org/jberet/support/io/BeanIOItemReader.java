@@ -27,7 +27,7 @@ import org.beanio.BeanReader;
 import org.beanio.BeanReaderErrorHandler;
 import org.beanio.StreamFactory;
 import org.beanio.internal.util.LocaleUtil;
-import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} based on BeanIO. This reader class handles all
@@ -89,7 +89,7 @@ public class BeanIOItemReader extends BeanIOItemReaderWriterBase implements Item
         }
         final int startRowNumber = checkpoint == null ? this.start : (Integer) checkpoint;
         if (startRowNumber < this.start || startRowNumber > this.end || startRowNumber < 0) {
-            throw SupportLogger.LOGGER.invalidStartPosition(startRowNumber, this.start, this.end);
+            throw SupportMessages.MESSAGES.invalidStartPosition(startRowNumber, this.start, this.end);
         }
 
         mappingFileKey = new StreamFactoryKey(jobContext, streamMapping);

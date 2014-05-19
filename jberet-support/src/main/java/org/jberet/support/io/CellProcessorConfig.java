@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 import org.supercsv.cellprocessor.CellProcessorAdaptor;
 import org.supercsv.cellprocessor.ConvertNullTo;
 import org.supercsv.cellprocessor.FmtBool;
@@ -116,7 +117,7 @@ final class CellProcessorConfig {
                                 }
                                 paramStartPosition = i + 1;
                             } else {
-                                throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
+                                throw SupportMessages.MESSAGES.unexpectedChar(ch, i, line);
                             }
                         }
                         break;
@@ -131,7 +132,7 @@ final class CellProcessorConfig {
                                 processorStartPosition = i + 1;
                                 oneProcessorValue = new ArrayList<String>();
                             } else {
-                                throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
+                                throw SupportMessages.MESSAGES.unexpectedChar(ch, i, line);
                             }
                         }
                         break;
@@ -141,7 +142,7 @@ final class CellProcessorConfig {
                         } else if (insideQuote == 1) {
                             insideQuote--;
                         } else {
-                            throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
+                            throw SupportMessages.MESSAGES.unexpectedChar(ch, i, line);
                         }
                         break;
                     case ',':
@@ -156,7 +157,7 @@ final class CellProcessorConfig {
                                 addParam(line, paramStartPosition, i, oneProcessorValue);
                                 paramStartPosition = i + 1;
                             } else {
-                                throw SupportLogger.LOGGER.unexpectedChar(ch, i, line);
+                                throw SupportMessages.MESSAGES.unexpectedChar(ch, i, line);
                             }
                         }
                         break;
@@ -240,12 +241,12 @@ final class CellProcessorConfig {
                 break;
             } else if (name.equalsIgnoreCase("NotNull")) {
                 if (params.length > 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
                 current = previous == null ? new NotNull() : new NotNull(previous);
             } else if (name.equalsIgnoreCase("Optional")) {
                 if (params.length > 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
                 current = previous == null ? new Optional() : new Optional(previous);
             } else if (name.equalsIgnoreCase("ParseBool")) {
@@ -259,11 +260,11 @@ final class CellProcessorConfig {
                     current = previous == null ? new ParseBool(trueValues, falseValues) :
                             new ParseBool(trueValues, falseValues, (BoolCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("ParseChar")) {
                 if (params.length > 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
                 current = previous == null ? new ParseChar() : new ParseChar((DoubleCellProcessor) previous);
             } else if (name.equalsIgnoreCase("ParseDate")) {
@@ -276,25 +277,25 @@ final class CellProcessorConfig {
                     current = previous == null ? new ParseDate(params[0], Boolean.parseBoolean(params[1]), new Locale(params[2])) :
                             new ParseDate(params[0], Boolean.parseBoolean(params[1]), new Locale(params[2]), (DateCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("ParseDouble")) {
                 if (params.length == 0) {
                     current = previous == null ? new ParseDouble() : new ParseDouble((DoubleCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("ParseInt")) {
                 if (params.length == 0) {
                     current = previous == null ? new ParseInt() : new ParseInt((LongCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("ParseLong")) {
                 if (params.length == 0) {
                     current = previous == null ? new ParseLong() : new ParseLong((LongCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("ParseBigDecimal")) {
                 if (params.length == 0) {
@@ -303,7 +304,7 @@ final class CellProcessorConfig {
                     current = previous == null ? new ParseBigDecimal(new DecimalFormatSymbols(new Locale(params[0]))) :
                             new ParseBigDecimal(new DecimalFormatSymbols(new Locale(params[0])), previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("Truncate")) {
                 if (params.length == 1) {  //max length
@@ -313,61 +314,61 @@ final class CellProcessorConfig {
                     current = previous == null ? new Truncate(Integer.parseInt(params[0]), params[1]) :
                             new Truncate(Integer.parseInt(params[0]), params[1], (StringCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("Trim")) {
                 if (params.length == 0) {
                     current = previous == null ? new Trim() : new Trim((StringCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("Token")) {
                 if (params.length == 2) {  //token, replacement
                     current = previous == null ? new Token(params[0], params[1]) :
                             new Token(params[0], params[1], previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("StrReplace")) {
                 if (params.length == 2) {  //regex, replacement
                     current = previous == null ? new StrReplace(params[0], params[1]) :
                             new StrReplace(params[0], params[1], (StringCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("ConvertNullTo")) {
                 if (params.length == 1) {
                     current = previous == null ? new ConvertNullTo(params[0]) : new ConvertNullTo(params[0], previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("FmtNumber")) {
                 if (params.length == 1) {  //decimalFormat
                     current = previous == null ? new FmtNumber(params[0]) :
                             new FmtNumber(params[0], (StringCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("FmtDate")) {
                 if (params.length == 1) {  //dateFormat
                     current = previous == null ? new FmtDate(params[0]) :
                             new FmtDate(params[0], (StringCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("FmtBool")) {
                 if (params.length == 2) {  //trueValue, falseValue
                     current = previous == null ? new FmtBool(params[0], params[1]) :
                             new FmtBool(params[0], params[1], (StringCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("DMinMax")) {
                 if (params.length == 2) {  //min, max
                     current = previous == null ? new DMinMax(Double.parseDouble(params[0]), Double.parseDouble(params[1])) :
                             new DMinMax(Double.parseDouble(params[0]), Double.parseDouble(params[1]), (DoubleCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("Equals")) {
                 if (params.length == 0) {  //all input date equal to each other
@@ -377,19 +378,19 @@ final class CellProcessorConfig {
                 }
             } else if (name.equalsIgnoreCase("ForbidSubStr")) {
                 if (params.length == 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
                 current = previous == null ? new ForbidSubStr(params) : new ForbidSubStr(params, previous);
             } else if (name.equalsIgnoreCase("IsElementOf")) {
                 if (params.length == 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
                 final Collection<Object> coll = new ArrayList<Object>();
                 Collections.addAll(coll, params);
                 current = previous == null ? new IsElementOf(coll) : new IsElementOf(coll, previous);
             } else if (name.equalsIgnoreCase("IsIncludedIn")) {
                 if (params.length == 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
                 current = previous == null ? new IsIncludedIn(params) : new IsIncludedIn(params, previous);
             } else if (name.equalsIgnoreCase("LMinMax")) {
@@ -397,11 +398,11 @@ final class CellProcessorConfig {
                     current = previous == null ? new LMinMax(Long.parseLong(params[0]), Long.parseLong(params[1])) :
                             new LMinMax(Long.parseLong(params[0]), Long.parseLong(params[1]), (LongCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("RequireHashCode")) {
                 if (params.length == 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 } else if (params.length == 1) {
                     current = previous == null ? new RequireHashCode(Integer.parseInt(params[0])) :
                             new RequireHashCode(Integer.parseInt(params[0]), previous);
@@ -411,7 +412,7 @@ final class CellProcessorConfig {
                 }
             } else if (name.equalsIgnoreCase("RequireSubStr")) {
                 if (params.length == 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
                 if (params.length == 1) {
                     current = previous == null ? new RequireSubStr(params[0]) : new RequireSubStr(params[0], previous);
@@ -420,7 +421,7 @@ final class CellProcessorConfig {
                 }
             } else if (name.equalsIgnoreCase("Strlen")) {
                 if (params.length == 0) {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
                 if (params.length == 1) {
                     current = previous == null ? new Strlen(Integer.parseInt(params[0])) : new Strlen(Integer.parseInt(params[0]), previous);
@@ -433,40 +434,40 @@ final class CellProcessorConfig {
                     current = previous == null ? new StrMinMax(Long.parseLong(params[0]), Long.parseLong(params[1])) :
                             new StrMinMax(Long.parseLong(params[0]), Long.parseLong(params[1]), previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("StrNotNullOrEmpty")) {
                 if (params.length == 0) {
                     current = previous == null ? new StrNotNullOrEmpty() : new StrNotNullOrEmpty(previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("StrRegEx")) {
                 if (params.length == 1) {
                     current = previous == null ? new StrRegEx(params[0]) : new StrRegEx(params[0], (StringCellProcessor) previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("Unique")) {
                 if (params.length == 0) {
                     current = previous == null ? new Unique() : new Unique(previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("UniqueHashCode")) {
                 if (params.length == 0) {
                     current = previous == null ? new UniqueHashCode() : new UniqueHashCode(previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("ParseEnum")) {
                 if (params.length == 1) {
                     current = previous == null ? new ParseEnum(params[0]) : new ParseEnum(params[0], previous);
                 } else {
-                    throw SupportLogger.LOGGER.invalidParamsForCellProcessor(name, params);
+                    throw SupportMessages.MESSAGES.invalidParamsForCellProcessor(name, params);
                 }
             } else if (name.equalsIgnoreCase("Collector") || name.equalsIgnoreCase("HashMapper")) {
-                throw SupportLogger.LOGGER.unsupportedCellProcessor(name, params);
+                throw SupportMessages.MESSAGES.unsupportedCellProcessor(name, params);
             } else {  //custom cell processor
                 current = createCustomCellProcessor(name, params, oneProcessorValue, previous);
             }
@@ -512,7 +513,7 @@ final class CellProcessorConfig {
                 }
             }
         } catch (final Exception e) {
-            throw SupportLogger.LOGGER.failToLoadOrCreateCustomType(e, oneProcessorValue.toString());
+            throw SupportMessages.MESSAGES.failToLoadOrCreateCustomType(e, oneProcessorValue.toString());
         }
         return result;
     }
@@ -558,9 +559,9 @@ final class CellProcessorConfig {
                     }
                 }
             } catch (final Exception e) {
-                throw SupportLogger.LOGGER.failToParseEnum(e, value, enumType, context, this);
+                throw SupportMessages.MESSAGES.failToParseEnum(e, value, enumType, context, this);
             }
-            throw SupportLogger.LOGGER.failToParseEnum(null, value, enumType, context, this);
+            throw SupportMessages.MESSAGES.failToParseEnum(null, value, enumType, context, this);
         }
     }
 }

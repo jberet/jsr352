@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.io.CsvMapWriter;
@@ -60,7 +61,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
     public void open(final Serializable checkpoint) throws Exception {
         SupportLogger.LOGGER.tracef("Open CsvItemWriter with checkpoint %s, which is ignored for CsvItemWriter.%n", checkpoint);
         if (beanType == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, BEAN_TYPE_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, BEAN_TYPE_KEY);
         }
 
         final OutputStream outputStream = getOutputStream(writeMode);
@@ -74,7 +75,7 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
             delegateWriter = new CsvBeanWriter(writer, getCsvPreference());
         }
         if (header == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, HEADER_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, HEADER_KEY);
         }
         if (this.nameMapping == null) {
             this.nameMapping = header;

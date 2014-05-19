@@ -32,6 +32,7 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} for reading Excel files. Current implementation is
@@ -89,7 +90,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
         }
         if (headerRow == null) {
             if (header == null) {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "header | headerRow");
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "header | headerRow");
             }
             headerRow = -1;
         }
@@ -100,7 +101,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
         int startRowNumber = checkpoint == null ? this.start : (Integer) checkpoint;
         if (startRowNumber < this.start || startRowNumber > this.end
                 || startRowNumber < 0 || startRowNumber <= headerRow) {
-            throw SupportLogger.LOGGER.invalidStartPosition(startRowNumber, this.start, this.end);
+            throw SupportMessages.MESSAGES.invalidStartPosition(startRowNumber, this.start, this.end);
         }
 
         inputStream = getInputStream(resource, false);

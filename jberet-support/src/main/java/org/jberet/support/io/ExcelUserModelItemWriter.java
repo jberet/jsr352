@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} for Excel files.
@@ -56,7 +57,7 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
                 workbook.createSheet(WorkbookUtil.createSafeSheetName(sheetName));
 
         if (header == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "header");
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "header");
         }
         //write header row
         final Row headerRow = sheet.createRow(0);

@@ -20,7 +20,7 @@ import javax.naming.spi.ObjectFactory;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.naming.spi.ObjectFactory} that produces instance of
@@ -80,7 +80,7 @@ public final class XmlFactoryObjectFactory implements ObjectFactory {
                     } else if (defaultUseWrapper.equals("true")) {
                         //default value is already true, so nothing to do
                     } else {
-                        throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, (String) defaultUseWrapper, "defaultUseWrapper");
+                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, (String) defaultUseWrapper, "defaultUseWrapper");
                     }
                 }
 

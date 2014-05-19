@@ -21,6 +21,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.naming.spi.ObjectFactory} that produces instance of {@code com.mongodb.MongoClient}.
@@ -94,7 +95,7 @@ public final class MongoClientObjectFactory implements ObjectFactory {
                                                final String user,
                                                final String password) throws Exception {
         if (host == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "host");
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "host");
         }
 
         //The format of the URI is:

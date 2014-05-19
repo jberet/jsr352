@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes a list of same-typed objects to XML resource.
@@ -93,7 +94,7 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
         }
         staxWriter.writeCharacters(NEW_LINE);
         if (rootElementName == null || rootElementName.isEmpty()) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, rootElementName, "rootElementName");
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, rootElementName, "rootElementName");
         }
         if (rootElementPrefix == null || rootElementPrefix.isEmpty()) {
             if (rootElementNamespaceURI == null || rootElementNamespaceURI.isEmpty()) {
@@ -103,7 +104,7 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
             }
         } else {
             if (rootElementNamespaceURI == null || rootElementNamespaceURI.isEmpty()) {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, rootElementNamespaceURI, "rootElementNamespaceURI");
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, rootElementNamespaceURI, "rootElementNamespaceURI");
             } else {
                 staxWriter.writeStartElement(rootElementPrefix, rootElementName, rootElementNamespaceURI);
             }
@@ -145,7 +146,7 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
             } else if (defaultUseWrapper.equals("true")) {
                 //default value is already true, so nothing to do
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, defaultUseWrapper, "defaultUseWrapper");
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, defaultUseWrapper, "defaultUseWrapper");
             }
         }
     }

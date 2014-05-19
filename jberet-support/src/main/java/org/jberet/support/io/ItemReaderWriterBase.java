@@ -24,6 +24,7 @@ import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 import static org.jberet.support.io.CsvProperties.APPEND;
 import static org.jberet.support.io.CsvProperties.FAIL_IF_EXISTS;
@@ -55,7 +56,7 @@ public abstract class ItemReaderWriterBase {
      */
     protected static InputStream getInputStream(final String inputResource, final boolean detectBOM) {
         if (inputResource == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, RESOURCE_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, RESOURCE_KEY);
         }
         InputStream inputStream;
         try {
@@ -82,14 +83,14 @@ public abstract class ItemReaderWriterBase {
                 return bomin;
             }
         } catch (final IOException e) {
-            throw SupportLogger.LOGGER.failToOpenStream(e, inputResource);
+            throw SupportMessages.MESSAGES.failToOpenStream(e, inputResource);
         }
         return inputStream;
     }
 
     protected OutputStream getOutputStream(final String writeMode) {
         if (resource == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, RESOURCE_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, RESOURCE_KEY);
         }
         try {
             final File file = new File(resource);
@@ -111,13 +112,13 @@ public abstract class ItemReaderWriterBase {
             }
             if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
                 if (exists) {
-                    throw SupportLogger.LOGGER.writerResourceAlreadyExists(file.getPath());
+                    throw SupportMessages.MESSAGES.writerResourceAlreadyExists(file.getPath());
                 }
                 return new FileOutputStream(file);
             }
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, writeMode, WRITE_MODE_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, writeMode, WRITE_MODE_KEY);
         } catch (final IOException e) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(e, resource, RESOURCE_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(e, resource, RESOURCE_KEY);
         }
     }
 

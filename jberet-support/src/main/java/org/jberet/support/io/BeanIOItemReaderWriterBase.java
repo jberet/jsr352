@@ -24,6 +24,7 @@ import javax.naming.InitialContext;
 
 import org.beanio.StreamFactory;
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * The base class of BeanIO-based reader and writer classes: {@link org.jberet.support.io.BeanIOItemReader} and
@@ -109,7 +110,7 @@ public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
             }
             final InputStream mappingInputStream = getInputStream(key.mappingFile, false);
             if (mappingInputStream == null) {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "streamMapping");
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "streamMapping");
             }
             streamFactory = StreamFactory.newInstance();
 

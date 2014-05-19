@@ -16,7 +16,7 @@ import java.lang.reflect.Constructor;
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 
-import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.comment.CommentMatcher;
 import org.supercsv.comment.CommentMatches;
@@ -122,7 +122,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
         } else if (TAB_PREFERENCE.equals(preference)) {
             csvPreference = CsvPreference.TAB_PREFERENCE;
         } else {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, preference, PREFERENCE_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, preference, PREFERENCE_KEY);
         }
 
         //do not trim quoteChar or delimiterChar. They can be tab (\t) and after trim, it will be just empty
@@ -218,7 +218,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
                     return new ColumnQuoteMode(convertToBooleanParams(parts));
                 }
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, val, ENCODER_KEY);
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, val, ENCODER_KEY);
             }
         }
     }
@@ -259,7 +259,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
                     return new SelectiveCsvEncoder(convertToBooleanParams(parts));
                 }
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, val, ENCODER_KEY);
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, val, ENCODER_KEY);
             }
         }
     }
@@ -292,7 +292,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
                 matcherName = parts[0];
                 matcherParam = parts[1];
             } else {
-                throw SupportLogger.LOGGER.missingQuote(val);
+                throw SupportMessages.MESSAGES.missingQuote(val);
             }
         }
         if (matcherName == null) {
@@ -309,7 +309,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
         } else if (matcherName.equalsIgnoreCase(MATCHES) || matcherName.equalsIgnoreCase(MATCHES_FUZZY)) {
             commentMatcher = new CommentMatches(matcherParam);
         } else {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, val, COMMENT_MATCHER_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, val, COMMENT_MATCHER_KEY);
         }
 
         return commentMatcher;
@@ -325,7 +325,7 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
                 return (T) constructor.newInstance(param);
             }
         } catch (final Exception e) {
-            throw SupportLogger.LOGGER.failToLoadOrCreateCustomType(e, contextVal);
+            throw SupportMessages.MESSAGES.failToLoadOrCreateCustomType(e, contextVal);
         }
     }
 

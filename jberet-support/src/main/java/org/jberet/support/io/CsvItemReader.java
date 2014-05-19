@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 import org.supercsv.io.ICsvBeanReader;
 import org.supercsv.io.ICsvListReader;
 import org.supercsv.io.ICsvMapReader;
@@ -65,7 +66,7 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
         }
         int startRowNumber = checkpoint == null ? this.start : (Integer) checkpoint;
         if (startRowNumber < this.start || startRowNumber > this.end || startRowNumber < 0) {
-            throw SupportLogger.LOGGER.invalidStartPosition(startRowNumber, this.start, this.end);
+            throw SupportMessages.MESSAGES.invalidStartPosition(startRowNumber, this.start, this.end);
         }
         if (headerless) {
             startRowNumber--;
@@ -73,7 +74,7 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
         }
 
         if (beanType == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, BEAN_TYPE_KEY);
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, BEAN_TYPE_KEY);
         }
         final InputStream inputStream = getInputStream(resource, true);
         final InputStreamReader r = charset == null ? new InputStreamReader(inputStream) :
@@ -92,7 +93,7 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
             try {
                 header = delegateReader.getHeader(true);    //first line check true
             } catch (final IOException e) {
-                throw SupportLogger.LOGGER.failToReadCsvHeader(e, resource);
+                throw SupportMessages.MESSAGES.failToReadCsvHeader(e, resource);
             }
             if (this.nameMapping == null) {
                 this.nameMapping = header;

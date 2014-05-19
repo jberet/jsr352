@@ -20,7 +20,7 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 import org.mongojack.JacksonDBCollection;
 
 /**
@@ -70,7 +70,7 @@ public abstract class MongoItemReaderWriterBase {
 
     protected void init() throws Exception {
         if (beanType == null) {
-            throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, null, "beanType");
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "beanType");
         }
         if (mongoClientLookup == null) {
             final MongoClientURI clientURI;

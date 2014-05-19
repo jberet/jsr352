@@ -21,7 +21,7 @@ import javax.naming.spi.ObjectFactory;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.io.InputDecorator;
 import com.fasterxml.jackson.core.io.OutputDecorator;
-import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.naming.spi.ObjectFactory} that produces instance of
@@ -96,7 +96,7 @@ public final class NoMappingJsonFactoryObjectFactory implements ObjectFactory {
             try {
                 feature = JsonFactory.Feature.valueOf(key);
             } catch (final Exception e1) {
-                throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                throw SupportMessages.MESSAGES.unrecognizedReaderWriterProperty(key, value);
             }
             if ("true".equals(value)) {
                 if (!feature.enabledByDefault()) {
@@ -107,7 +107,7 @@ public final class NoMappingJsonFactoryObjectFactory implements ObjectFactory {
                     jsonFactory.configure(feature, false);
                 }
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, value, key);
             }
         }
     }

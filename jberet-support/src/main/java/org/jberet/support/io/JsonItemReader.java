@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.io.InputDecorator;
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads from Json resource that consists of a
@@ -80,7 +81,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
             start = (Integer) checkpoint;
         }
         if (start > end) {
-            throw SupportLogger.LOGGER.invalidStartPosition((Integer) checkpoint, start, end);
+            throw SupportMessages.MESSAGES.invalidStartPosition((Integer) checkpoint, start, end);
         }
         super.initJsonFactoryAndObjectMapper();
         if (inputDecorator != null) {
@@ -108,7 +109,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 try {
                     feature = JsonParser.Feature.valueOf(key);
                 } catch (final Exception e1) {
-                    throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                    throw SupportMessages.MESSAGES.unrecognizedReaderWriterProperty(key, value);
                 }
                 if ("true".equals(value)) {
                     if (!feature.enabledByDefault()) {
@@ -119,7 +120,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                         jsonParser.configure(feature, false);
                     }
                 } else {
-                    throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, value, key);
                 }
             }
         }
@@ -140,7 +141,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 if (nestedObjectLevel == 1) {
                     rowNumber++;
                 } else if (nestedObjectLevel < 1) {
-                    throw SupportLogger.LOGGER.unexpectedJsonContent(jsonParser.getCurrentLocation());
+                    throw SupportMessages.MESSAGES.unexpectedJsonContent(jsonParser.getCurrentLocation());
                 }
                 if (rowNumber >= start) {
                     break;

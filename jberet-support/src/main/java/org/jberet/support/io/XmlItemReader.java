@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.io.InputDecorator;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads a collection of data from XML resource.
@@ -66,7 +67,7 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
             start = (Integer) checkpoint;
         }
         if (start > end) {
-            throw SupportLogger.LOGGER.invalidStartPosition((Integer) checkpoint, start, end);
+            throw SupportMessages.MESSAGES.invalidStartPosition((Integer) checkpoint, start, end);
         }
         super.initXmlFactory();
         if (inputDecorator != null) {
@@ -93,7 +94,7 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
                 if (nestedObjectLevel == 1) {
                     rowNumber++;
                 } else if (nestedObjectLevel < 1) {
-                    throw SupportLogger.LOGGER.unexpectedJsonContent(fromXmlParser.getCurrentLocation());
+                    throw SupportMessages.MESSAGES.unexpectedJsonContent(fromXmlParser.getCurrentLocation());
                 }
                 if (rowNumber >= start) {
                     break;

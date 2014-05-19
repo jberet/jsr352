@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.naming.spi.ObjectFactory} that produces instance of
@@ -156,7 +156,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
             try {
                 feature = MapperFeature.valueOf(key);
             } catch (final Exception e1) {
-                throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                throw SupportMessages.MESSAGES.unrecognizedReaderWriterProperty(key, value);
             }
             if ("true".equals(value)) {
                 if (!feature.enabledByDefault()) {
@@ -167,7 +167,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
                     objectMapper.configure(feature, false);
                 }
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, value, key);
             }
         }
     }
@@ -183,7 +183,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
             try {
                 feature = SerializationFeature.valueOf(key);
             } catch (final Exception e1) {
-                throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                throw SupportMessages.MESSAGES.unrecognizedReaderWriterProperty(key, value);
             }
             if ("true".equals(value)) {
                 if (!feature.enabledByDefault()) {
@@ -194,7 +194,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
                     objectMapper.configure(feature, false);
                 }
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, value, key);
             }
         }
     }
@@ -210,7 +210,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
             try {
                 feature = DeserializationFeature.valueOf(key);
             } catch (final Exception e1) {
-                throw SupportLogger.LOGGER.unrecognizedReaderWriterProperty(key, value);
+                throw SupportMessages.MESSAGES.unrecognizedReaderWriterProperty(key, value);
             }
             if ("true".equals(value)) {
                 if (!feature.enabledByDefault()) {
@@ -221,7 +221,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
                     objectMapper.configure(feature, false);
                 }
             } else {
-                throw SupportLogger.LOGGER.invalidReaderWriterProperty(null, value, key);
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, value, key);
             }
         }
     }
