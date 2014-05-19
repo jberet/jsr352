@@ -94,6 +94,15 @@ public final class ExcelReaderTest {
                 CsvItemReaderWriterTest.personResourceExpect1_5, CsvItemReaderWriterTest.personResourceForbid);
     }
 
+    //the blank row should be skipped without causing any error.
+    @Test
+    public void testPersonBeanTypeFull() throws Exception {
+        testReadWrite0(personMoviesResource, "testPersonBeanTypeFull.out",
+                "1", null, null,
+                Person.class, personSheetName, "0",
+                CsvItemReaderWriterTest.personResourceExpect, null);
+    }
+
     //verify .xls excel format, use fieldMapping in lieu of header, handling of formula cells
     @Test
     public void testCapeBeanTypeFull() throws Exception {
