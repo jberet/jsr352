@@ -53,6 +53,7 @@ public abstract class ExcelItemReaderWriterBase extends JsonItemReaderWriterBase
     @Inject
     @BatchProperty
     protected String sheetName;
+
     protected Workbook workbook;
     protected Sheet sheet;
     protected Row mostRecentRow;
@@ -60,5 +61,22 @@ public abstract class ExcelItemReaderWriterBase extends JsonItemReaderWriterBase
     @Override
     protected void registerModule() throws Exception {
         //noop
+    }
+
+    /**
+     * Saves string values to a string array for all non-blank cells in the row passed in. Useful when trying to get
+     * header values.
+     *
+     * @param row the source row to get values from
+     * @return a String array containing values from all non-blank cells in the row
+     */
+    protected static String[] getCellStringValues(final Row row) {
+        final short firstCellNum = row.getFirstCellNum();
+        final short lastCellNum = row.getLastCellNum();
+        final String[] values = new String[lastCellNum - firstCellNum];
+        for (int i = 0; i < values.length; ++i) {
+            values[i] = row.getCell(i).getStringCellValue();
+        }
+        return values;
     }
 }

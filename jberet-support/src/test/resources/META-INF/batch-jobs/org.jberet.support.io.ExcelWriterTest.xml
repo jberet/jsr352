@@ -30,6 +30,9 @@
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="sheetName" value="#{jobParameters['sheetName']}"/>
                     <property name="header" value="#{jobParameters['header']}"/>
+                    <property name="templateResource" value="#{jobParameters['templateResource']}"/>
+                    <property name="templateSheetName" value="#{jobParameters['templateSheetName']}"/>
+                    <property name="templateHeaderRow" value="#{jobParameters['templateHeaderRow']}"/>
                 </properties>
             </writer>
         </chunk>

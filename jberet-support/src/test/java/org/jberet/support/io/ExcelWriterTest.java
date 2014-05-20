@@ -28,15 +28,37 @@ public final class ExcelWriterTest {
     static final String jobName = "org.jberet.support.io.ExcelWriterTest";
     static final String moviesSheetName = "Movies 2012";
 
+    static final String moviesTemplateResource = "person-movies.xltx";
+    static final String moviesTemplateSheetName = "Movies";
+    static final String moviesTemplateHeaderRow = "0";
+
     @Test
     public void testMoviesBeanTypeFull() throws Exception {
-        testReadWrite0(JsonItemReaderTest.movieJson, "testMoviesBeanTypeFull.xlsx",
-                null, null, MovieTest.header,
+        testReadWrite0(JsonItemReaderTest.movieJson, "testMoviesBeanTypeFull.xlsx", MovieTest.header,
+                null, null, null,
                 Movie.class, moviesSheetName);
     }
 
-    private void testReadWrite0(final String resource, final String writeResource,
-                                final String start, final String end, final String header,
+    //verifies an existing excel file can be used as a template for populating data into a new excel file.
+    //the template contains format (set font color to blue) that should be applied to the generated output excel file.
+    //the header is also configured in template file, so no need to explicitly specify header property in job.xml.
+    @Test
+    public void testMoviesBeanTypeFullTemplate() throws Exception {
+        testReadWrite0(JsonItemReaderTest.movieJson, "testMoviesBeanTypeFullTemplate.xlsx", null,
+                moviesTemplateResource, moviesTemplateSheetName, moviesTemplateHeaderRow,
+                Movie.class, moviesSheetName);
+    }
+
+    //similar to the above test, but passing in external header
+    @Test
+    public void testMoviesBeanTypeFullTemplateHeader() throws Exception {
+        testReadWrite0(JsonItemReaderTest.movieJson, "testMoviesBeanTypeFullTemplateHeader.xlsx", MovieTest.header,
+                moviesTemplateResource, moviesTemplateSheetName, null,
+                Movie.class, moviesSheetName);
+    }
+
+    private void testReadWrite0(final String resource, final String writeResource, final String header,
+                                final String templateResource, final String templateSheetName, final String templateHeaderRow,
                                 final Class<?> beanType, final String sheetName) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
         final File writeResourceFile = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
@@ -50,11 +72,14 @@ public final class ExcelWriterTest {
             params.setProperty("sheetName", sheetName);
         }
 
-        if (start != null) {
-            params.setProperty(CsvProperties.START_KEY, start);
+        if (templateResource != null) {
+            params.setProperty("templateResource", templateResource);
         }
-        if (end != null) {
-            params.setProperty(CsvProperties.END_KEY, end);
+        if (templateSheetName != null) {
+            params.setProperty("templateSheetName", templateSheetName);
+        }
+        if (templateHeaderRow != null) {
+            params.setProperty("templateHeaderRow", templateHeaderRow);
         }
 
         final long jobExecutionId = jobOperator.start(jobName, params);

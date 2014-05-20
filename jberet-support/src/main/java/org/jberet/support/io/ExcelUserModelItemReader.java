@@ -120,12 +120,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
                 mostRecentRow = rowIterator.next();
                 final int rowNum = mostRecentRow.getRowNum();
                 if (header == null && headerRow == rowNum) {
-                    final short firstCellNum = mostRecentRow.getFirstCellNum();
-                    final short lastCellNum = mostRecentRow.getLastCellNum();
-                    header = new String[lastCellNum - firstCellNum];
-                    for (int i = 0; i < header.length; ++i) {
-                        header[i] = mostRecentRow.getCell(i).getStringCellValue();
-                    }
+                    header = getCellStringValues(mostRecentRow);
                 }
                 if (rowNum >= startRowNumber - 1) {
                     break;
@@ -134,7 +129,6 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
         }
 
         minColumnCount = header.length;
-        initJsonFactoryAndObjectMapper();
     }
 
     @Override
@@ -171,6 +165,9 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
                 if (java.util.Map.class.isAssignableFrom(beanType)) {
                     return resultMap;
                 } else {
+                    if (objectMapper == null) {
+                        initJsonFactoryAndObjectMapper();
+                    }
                     return objectMapper.convertValue(resultMap, beanType);
                 }
 

@@ -13,6 +13,7 @@
 package org.jberet.support.io;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
@@ -26,6 +27,7 @@ import javax.inject.Named;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jberet.support._private.SupportLogger;
@@ -47,25 +49,87 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
     @BatchProperty
     protected String writeMode;
 
+    /**
+     * The resource of an existing Excel file or template file to be used as a base for generating output Excel. Its
+     * format is similar to {@link #resource}.
+     */
+    @Inject
+    @BatchProperty
+    protected String templateResource;
+
+    /**
+     * The sheet name in the template file to be used for generating output Excel. If {@link #templateResource} is
+     * specified but this property is not specified, {@link #templateSheetIndex} is used instead.
+     */
+    @Inject
+    @BatchProperty
+    protected String templateSheetName;
+
+    /**
+     * The sheet index (0-based) in the template file to be used for generating output Excel.
+     */
+    @Inject
+    @BatchProperty
+    protected int templateSheetIndex;
+
+    /**
+     * The row number (0-based) of the header in the template sheet. If {@link #header} property is provided in
+     * job xml file, then this property is ignored. Otherwise, it is used to retrieve header values.
+     */
+    @Inject
+    @BatchProperty
+    protected Integer templateHeaderRow;
+
     protected OutputStream outputStream;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
-        outputStream = getOutputStream(writeMode);
-        workbook = resource.endsWith("xls") ? new HSSFWorkbook() : new XSSFWorkbook();
-        sheet = sheetName == null ? workbook.createSheet() :
-                workbook.createSheet(WorkbookUtil.createSafeSheetName(sheetName));
+        //if template is used, create workbook based on template resource, and try to get header from template
+        if (templateResource != null) {
+            InputStream templateInputStream = null;
+            try {
+                templateInputStream = getInputStream(templateResource, false);
+                workbook = WorkbookFactory.create(templateInputStream);
+                if (templateSheetName != null) {
+                    sheet = workbook.getSheet(templateSheetName);
+                }
+                if (sheet == null) {
+                    sheet = workbook.getSheetAt(templateSheetIndex);
+                }
+                //if header property is already injected from job.xml, use it and no need to check templateHeaderRow
+                if (header == null) {
+                    if (templateHeaderRow == null) {
+                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "templateHeaderRow");
+                    }
+                    header = getCellStringValues(sheet.getRow(templateHeaderRow));
+                }
+                mostRecentRow = sheet.getRow(sheet.getLastRowNum());
+            } finally {
+                if (templateInputStream != null) {
+                    try {
+                        templateInputStream.close();
+                    } catch (final Exception e) {
+                        SupportLogger.LOGGER.tracef(e, "Failed to close template InputStream %s for template resource %s%n",
+                                templateInputStream, templateResource);
+                    }
+                }
+            }
+        } else {
+            workbook = resource.endsWith("xls") ? new HSSFWorkbook() : new XSSFWorkbook();
+            sheet = sheetName == null ? workbook.createSheet() :
+                    workbook.createSheet(WorkbookUtil.createSafeSheetName(sheetName));
 
-        if (header == null) {
-            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "header");
+            if (header == null) {
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "header");
+            }
+            //write header row
+            final Row headerRow = sheet.createRow(0);
+            for (int i = 0, j = header.length; i < j; ++i) {
+                headerRow.createCell(i, Cell.CELL_TYPE_STRING).setCellValue(header[i]);
+            }
+            mostRecentRow = headerRow;
         }
-        //write header row
-        final Row headerRow = sheet.createRow(0);
-        for (int i = 0, j = header.length; i < j; ++i) {
-            headerRow.createCell(i, Cell.CELL_TYPE_STRING).setCellValue(header[i]);
-        }
-        mostRecentRow = headerRow;
-        initJsonFactoryAndObjectMapper();
+        outputStream = getOutputStream(writeMode);
     }
 
     @Override
@@ -74,6 +138,7 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
         Row row = null;
         if (List.class.isAssignableFrom(beanType)) {
             for (int i = 0, j = items.size(); i < j; ++i, ++nextRowNum) {
+                @SuppressWarnings("unchecked")
                 final List<Object> item = (List<Object>) items.get(i);
                 row = sheet.createRow(nextRowNum);
                 for (int x = 0, y = item.size(); x < y; ++x) {
@@ -82,6 +147,7 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
             }
         } else if (Map.class.isAssignableFrom(beanType)) {
             for (int i = 0, j = items.size(); i < j; ++i, ++nextRowNum) {
+                @SuppressWarnings("unchecked")
                 final Map<String, Object> item = (Map<String, Object>) items.get(i);
                 row = sheet.createRow(nextRowNum);
                 for (int x = 0, y = header.length; x < y; ++x) {
@@ -89,6 +155,9 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
                 }
             }
         } else {
+            if (objectMapper == null) {
+                initJsonFactoryAndObjectMapper();
+            }
             for (int i = 0, j = items.size(); i < j; ++i, ++nextRowNum) {
                 final Object item = items.get(i);
 
@@ -129,8 +198,7 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
             cell.setCellValue((String) val);
         } else if (val instanceof Number) {
             cell = row.createCell(columnIndex, Cell.CELL_TYPE_NUMERIC);
-            Number number = (Number) val;
-            cell.setCellValue(number.doubleValue());
+            cell.setCellValue(((Number) val).doubleValue());
         } else if (val instanceof Boolean) {
             cell = row.createCell(columnIndex, Cell.CELL_TYPE_BOOLEAN);
             cell.setCellValue((Boolean) val);
@@ -138,7 +206,7 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
             cell = row.createCell(columnIndex, Cell.CELL_TYPE_STRING);
             cell.setCellValue(val.toString());
         } else if (val == null) {
-            cell = row.createCell(columnIndex, Cell.CELL_TYPE_BLANK);
+            row.createCell(columnIndex, Cell.CELL_TYPE_BLANK);
         } else {
             cell = row.createCell(columnIndex, Cell.CELL_TYPE_STRING);
             cell.setCellValue(val.toString());
