@@ -23,6 +23,10 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
+//these tests do not verify expected or forbidden data in the resulting excel files.
+//open the generated excel files to manually verify.  For example,
+//  cd $TMPDIR
+//  open testMoviesBeanTypeFullTemplateHeader.xlsx
 public final class ExcelWriterTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String jobName = "org.jberet.support.io.ExcelWriterTest";
@@ -31,6 +35,7 @@ public final class ExcelWriterTest {
     static final String moviesTemplateResource = "person-movies.xltx";
     static final String moviesTemplateSheetName = "Movies";
     static final String moviesTemplateHeaderRow = "0";
+    static final String moviesTemplateNoHeaderSheetName = "Movies No Header";
 
     @Test
     public void testMoviesBeanTypeFull() throws Exception {
@@ -50,10 +55,11 @@ public final class ExcelWriterTest {
     }
 
     //similar to the above test, but passing in external header
+    //the template sheet has no header, and font color for all rows is configured magenta
     @Test
     public void testMoviesBeanTypeFullTemplateHeader() throws Exception {
         testReadWrite0(JsonItemReaderTest.movieJson, "testMoviesBeanTypeFullTemplateHeader.xlsx", MovieTest.header,
-                moviesTemplateResource, moviesTemplateSheetName, null,
+                moviesTemplateResource, moviesTemplateNoHeaderSheetName, null,
                 Movie.class, moviesSheetName);
     }
 

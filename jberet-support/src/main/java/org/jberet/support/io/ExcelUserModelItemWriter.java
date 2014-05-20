@@ -134,7 +134,7 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
 
     @Override
     public void writeItems(final List<Object> items) throws Exception {
-        int nextRowNum = mostRecentRow.getRowNum() + 1;
+        int nextRowNum = mostRecentRow == null ? 0 : mostRecentRow.getRowNum() + 1;
         Row row = null;
         if (List.class.isAssignableFrom(beanType)) {
             for (int i = 0, j = items.size(); i < j; ++i, ++nextRowNum) {
