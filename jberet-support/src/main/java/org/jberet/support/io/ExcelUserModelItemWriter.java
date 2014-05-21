@@ -123,6 +123,7 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
                 if (workbook != templateWorkbook) {
                     sheet = workbook.getSheet(sheet.getSheetName());
                 }
+                workbook.setActiveSheet(workbook.getSheetIndex(sheet));
             } finally {
                 if (templateInputStream != null) {
                     try {

@@ -29,7 +29,9 @@ import org.jberet.support._private.SupportMessages;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} for Excel 2007 OOXML (.xlsx) file format.
  * This implementation is currently based on Apache POI SXSSF (buffered streaming) API, and is suitable for handling
- * large data set.
+ * large data set. Note that different versions of Excel have different limits for row number and column numbers.
+ * As of Excel 2010, the row number limit is 1048576. For more details, see
+ * http://office.microsoft.com/en-us/excel-help/excel-specifications-and-limits-HP010342495.aspx
  *
  * @since 1.0.3
  * @see ExcelUserModelItemWriter

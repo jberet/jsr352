@@ -22,6 +22,7 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 //these tests do not verify expected or forbidden data in the resulting excel files.
@@ -53,6 +54,13 @@ public final class ExcelWriterTest {
             "null;" +
             "null;" +
             "null";
+
+    static final String ibmStockTradeCsv = "IBM_unadjusted.txt";
+    static final String ibmStockTradeSheetName = "IBM Stock Minute Date (1998 - 2014)";
+    static final String ibmStockTradeNameMapping = "date,time,open,high,low,close,volume";
+    static final String ibmStockTradeHeader = "Date,Time,Open,High,Low,Close,Volume";
+    static final String ibmStockTradeCellProcessors = "ParseDate('MM/dd/yyyy');" +
+            "null; ParseDouble; ParseDouble; ParseDouble; ParseDouble; ParseDouble";
 
     private String csvNameMapping;
     private String csvCellProcessors;
@@ -116,7 +124,7 @@ public final class ExcelWriterTest {
     }
 
 
-
+    //verifies reading large csv data set and writing excel with ExcelStreamingItemWriter.
     @Test
     public void testCompanyListBeanTypeFullStreaming() throws Exception {
         this.csvCellProcessors = companyListCsvCellProcessors;
@@ -124,6 +132,19 @@ public final class ExcelWriterTest {
         testReadWrite0(streamingWriterTestJobName, companyListCsv, "testCompanyListBeanTypeFullStreaming.xlsx", null,
                 templateResource, companyListTemplateSheetName, companyListTemplateHeaderRow,
                 Company.class, companyListTemplateSheetName);
+    }
+
+    //verifies reading very large csv data set (IBM_unadjusted.txt, 51,058,469) and writing excel (size 34,232,654).
+    //when running with ExcelUserModelItemWriter, failed with java.lang.OutOfMemoryError: GC overhead limit exceeded
+    //when running with ExcelStreamingItemWriter, passed after ~15 minutes.
+    @Test
+    @Ignore("Takes 15 minutes")
+    public void testIBMStockTradeBeanTypeFullStreaming() throws Exception {
+        this.csvCellProcessors = ibmStockTradeCellProcessors;
+        this.csvNameMapping = ibmStockTradeNameMapping;
+        testReadWrite0(streamingWriterTestJobName, ibmStockTradeCsv, "testIBMStockTradeBeanTypeFullStreaming.xlsx", ibmStockTradeHeader,
+                null, null, null,
+                StockTrade.class, ibmStockTradeSheetName);
     }
 
 
@@ -161,7 +182,7 @@ public final class ExcelWriterTest {
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
+        jobExecution.awaitTermination(60, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 }
