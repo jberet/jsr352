@@ -20,6 +20,7 @@ import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,41 +30,104 @@ import org.junit.Test;
 //  open testMoviesBeanTypeFullTemplateHeader.xlsx
 public final class ExcelWriterTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
-    static final String jobName = "org.jberet.support.io.ExcelWriterTest";
+    static final String writerTestJobName = "org.jberet.support.io.ExcelWriterTest";
     static final String moviesSheetName = "Movies 2012";
 
-    static final String moviesTemplateResource = "person-movies.xltx";
+    static final String templateResource = "person-movies-company.xltx";
     static final String moviesTemplateSheetName = "Movies";
     static final String moviesTemplateHeaderRow = "0";
     static final String moviesTemplateNoHeaderSheetName = "Movies No Header";
 
+    static final String streamingWriterTestJobName = "org.jberet.support.io.ExcelStreamingWriterTest.xml";
+    static final String companyListCsv = "companylist.csv";
+    static final String companyListTemplateSheetName = "Company List";
+    static final String companyListTemplateHeaderRow = "0";
+    static final String companyListCsvNameMapping = "symbol, name, lastSale, marketCap, address, ipoYear, sector, industry, summaryQuote, null";
+    static final String companyListCsvCellProcessors = "null;" +
+            "null;" +
+            "StrReplace('n/a', '0'), ParseDouble;" +
+            "StrReplace('n/a', '0'), ParseDouble;" +
+            "null;" +
+            "null;" +
+            "null;" +
+            "null;" +
+            "null;" +
+            "null";
+
+    private String csvNameMapping;
+    private String csvCellProcessors;
+
+    @After
+    public void after() {
+        this.csvCellProcessors = null;
+        this.csvNameMapping = null;
+    }
+
     @Test
     public void testMoviesBeanTypeFull() throws Exception {
-        testReadWrite0(JsonItemReaderTest.movieJson, "testMoviesBeanTypeFull.xlsx", MovieTest.header,
+        testReadWrite0(writerTestJobName, JsonItemReaderTest.movieJson, "testMoviesBeanTypeFull.xlsx", MovieTest.header,
                 null, null, null,
                 Movie.class, moviesSheetName);
     }
+
+    @Test
+    public void testMoviesBeanTypeFullStreaming() throws Exception {
+        this.csvCellProcessors = MovieTest.cellProcessors;
+        testReadWrite0(streamingWriterTestJobName, MovieTest.moviesCsv, "testMoviesBeanTypeFullStreaming.xlsx", MovieTest.header,
+                null, null, null,
+                Movie.class, moviesSheetName);
+    }
+
 
     //verifies an existing excel file can be used as a template for populating data into a new excel file.
     //the template contains format (set font color to blue) that should be applied to the generated output excel file.
     //the header is also configured in template file, so no need to explicitly specify header property in job.xml.
     @Test
     public void testMoviesBeanTypeFullTemplate() throws Exception {
-        testReadWrite0(JsonItemReaderTest.movieJson, "testMoviesBeanTypeFullTemplate.xlsx", null,
-                moviesTemplateResource, moviesTemplateSheetName, moviesTemplateHeaderRow,
+        testReadWrite0(writerTestJobName, JsonItemReaderTest.movieJson, "testMoviesBeanTypeFullTemplate.xlsx", null,
+                templateResource, moviesTemplateSheetName, moviesTemplateHeaderRow,
                 Movie.class, moviesSheetName);
     }
+
+    @Test
+    public void testMoviesBeanTypeFullTemplateStreaming() throws Exception {
+        this.csvCellProcessors = MovieTest.cellProcessors;
+        testReadWrite0(streamingWriterTestJobName, MovieTest.moviesCsv, "testMoviesBeanTypeFullTemplateStreaming.xlsx", null,
+                templateResource, moviesTemplateSheetName, moviesTemplateHeaderRow,
+                Movie.class, moviesSheetName);
+    }
+
 
     //similar to the above test, but passing in external header
     //the template sheet has no header, and font color for all rows is configured magenta
     @Test
     public void testMoviesBeanTypeFullTemplateHeader() throws Exception {
-        testReadWrite0(JsonItemReaderTest.movieJson, "testMoviesBeanTypeFullTemplateHeader.xlsx", MovieTest.header,
-                moviesTemplateResource, moviesTemplateNoHeaderSheetName, null,
+        testReadWrite0(writerTestJobName, JsonItemReaderTest.movieJson, "testMoviesBeanTypeFullTemplateHeader.xlsx", MovieTest.header,
+                templateResource, moviesTemplateNoHeaderSheetName, null,
                 Movie.class, moviesSheetName);
     }
 
-    private void testReadWrite0(final String resource, final String writeResource, final String header,
+    @Test
+    public void testMoviesBeanTypeFullTemplateHeaderStreaming() throws Exception {
+        this.csvCellProcessors = MovieTest.cellProcessors;
+        testReadWrite0(streamingWriterTestJobName, MovieTest.moviesCsv, "testMoviesBeanTypeFullTemplateHeaderStreaming.xlsx", MovieTest.header,
+                templateResource, moviesTemplateNoHeaderSheetName, null,
+                Movie.class, moviesSheetName);
+    }
+
+
+
+    @Test
+    public void testCompanyListBeanTypeFullStreaming() throws Exception {
+        this.csvCellProcessors = companyListCsvCellProcessors;
+        this.csvNameMapping = companyListCsvNameMapping;
+        testReadWrite0(streamingWriterTestJobName, companyListCsv, "testCompanyListBeanTypeFullStreaming.xlsx", null,
+                templateResource, companyListTemplateSheetName, companyListTemplateHeaderRow,
+                Company.class, companyListTemplateSheetName);
+    }
+
+
+    void testReadWrite0(final String jobName, final String resource, final String writeResource, final String header,
                                 final String templateResource, final String templateSheetName, final String templateHeaderRow,
                                 final Class<?> beanType, final String sheetName) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
@@ -86,6 +150,13 @@ public final class ExcelWriterTest {
         }
         if (templateHeaderRow != null) {
             params.setProperty("templateHeaderRow", templateHeaderRow);
+        }
+
+        if (this.csvCellProcessors != null) {
+            params.setProperty(CsvProperties.CELL_PROCESSORS_KEY, this.csvCellProcessors);
+        }
+        if (this.csvNameMapping != null) {
+            params.setProperty(CsvProperties.NAME_MAPPING_KEY, this.csvNameMapping);
         }
 
         final long jobExecutionId = jobOperator.start(jobName, params);

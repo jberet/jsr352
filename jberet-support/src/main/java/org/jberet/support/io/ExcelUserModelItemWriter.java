@@ -25,16 +25,22 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemWriter} for Excel files.
+ * An implementation of {@code javax.batch.api.chunk.ItemWriter} for Excel files. This implementation is currently based
+ * on Apache POI user model API, and in-memory content generation. For large data set that may cause memory issue,
+ * consider using {@link ExcelStreamingItemWriter}.
  *
  * @see ExcelUserModelItemReader
  * @since 1.0.3
@@ -81,6 +87,7 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
     protected Integer templateHeaderRow;
 
     protected OutputStream outputStream;
+    protected int currentRowNum;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
@@ -89,21 +96,33 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
             InputStream templateInputStream = null;
             try {
                 templateInputStream = getInputStream(templateResource, false);
-                workbook = WorkbookFactory.create(templateInputStream);
+
+                //for SXSSF (streaming), the original templateWorkbook is wrapped inside this.workbook, and these 2
+                // workbook instances are different.  For XSSF and HSSF, the two are the same.
+                // SXSSF workbook does not support reading, so we have to use the original templateWorkbook to read
+                // header, and then reassign sheet to that of this.workbook, which is SXSSFWorkbook
+                final Workbook templateWorkbook = createWorkbook(templateInputStream);
                 if (templateSheetName != null) {
-                    sheet = workbook.getSheet(templateSheetName);
+                    sheet = templateWorkbook.getSheet(templateSheetName);
                 }
                 if (sheet == null) {
-                    sheet = workbook.getSheetAt(templateSheetIndex);
+                    sheet = templateWorkbook.getSheetAt(templateSheetIndex);
                 }
                 //if header property is already injected from job.xml, use it and no need to check templateHeaderRow
                 if (header == null) {
                     if (templateHeaderRow == null) {
                         throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "templateHeaderRow");
                     }
-                    header = getCellStringValues(sheet.getRow(templateHeaderRow));
+                    final Row headerRow = sheet.getRow(templateHeaderRow);
+                    if (headerRow == null) {
+                        throw SupportMessages.MESSAGES.failToReadExcelHeader(templateResource, templateSheetName);
+                    }
+                    header = getCellStringValues(headerRow);
                 }
-                mostRecentRow = sheet.getRow(sheet.getLastRowNum());
+                currentRowNum = sheet.getLastRowNum();
+                if (workbook != templateWorkbook) {
+                    sheet = workbook.getSheet(sheet.getSheetName());
+                }
             } finally {
                 if (templateInputStream != null) {
                     try {
@@ -114,8 +133,8 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
                     }
                 }
             }
-        } else {
-            workbook = resource.endsWith("xls") ? new HSSFWorkbook() : new XSSFWorkbook();
+        } else {  // no template is specified
+            createWorkbook(null);
             sheet = sheetName == null ? workbook.createSheet() :
                     workbook.createSheet(WorkbookUtil.createSafeSheetName(sheetName));
 
@@ -127,14 +146,14 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
             for (int i = 0, j = header.length; i < j; ++i) {
                 headerRow.createCell(i, Cell.CELL_TYPE_STRING).setCellValue(header[i]);
             }
-            mostRecentRow = headerRow;
+            currentRowNum = 0;
         }
         outputStream = getOutputStream(writeMode);
     }
 
     @Override
     public void writeItems(final List<Object> items) throws Exception {
-        int nextRowNum = mostRecentRow == null ? 0 : mostRecentRow.getRowNum() + 1;
+        int nextRowNum = currentRowNum + 1;
         Row row = null;
         if (List.class.isAssignableFrom(beanType)) {
             for (int i = 0, j = items.size(); i < j; ++i, ++nextRowNum) {
@@ -170,7 +189,10 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
                 }
             }
         }
-        mostRecentRow = row;
+        currentRowNum = row.getRowNum();
+        if (sheet instanceof SXSSFSheet) {
+            ((SXSSFSheet) sheet).flushRows();
+        }
     }
 
     @Override
@@ -180,15 +202,43 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
 
     @Override
     public void close() throws Exception {
-        if (outputStream != null) {
-            try {
-                workbook.write(outputStream);
-                outputStream.close();
-            } catch (final IOException e) {
-                SupportLogger.LOGGER.tracef(e, "Failed to close OutputStream %s for resource %s%n", outputStream, resource);
+        if (workbook != null) {
+            if (outputStream != null) {
+                try {
+                    workbook.write(outputStream);
+                } catch (final IOException e) {
+                    SupportLogger.LOGGER.failToWriteWorkbook(e, workbook.toString(), resource);
+                }
+
+                try {
+                    outputStream.close();
+                } catch (final IOException e) {
+                    SupportLogger.LOGGER.tracef(e, "Failed to close OutputStream %s for resource %s%n", outputStream, resource);
+                }
+                outputStream = null;
             }
+
+            if (workbook instanceof SXSSFWorkbook) {
+                ((SXSSFWorkbook) workbook).dispose();
+            }
+            workbook = null;
         }
-        outputStream = null;
+    }
+
+    /**
+     * Creates the workbook for this writer.
+     * @param templateInputStream    java.io.InputStream for the template excel file, if any
+     * @return    the template workbook if a template is specified; otherwise null
+     * @throws IOException
+     * @throws InvalidFormatException
+     */
+    protected Workbook createWorkbook(final InputStream templateInputStream) throws IOException, InvalidFormatException {
+        if (templateInputStream != null) {
+            return workbook = WorkbookFactory.create(templateInputStream);
+        } else {
+            workbook = resource.endsWith("xls") ? new HSSFWorkbook() : new XSSFWorkbook();
+            return null;
+        }
     }
 
     protected void createCell(final Row row, final int columnIndex, final Object val) throws Exception {

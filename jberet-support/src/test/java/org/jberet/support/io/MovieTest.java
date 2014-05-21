@@ -30,6 +30,7 @@ import org.junit.Test;
  */
 public final class MovieTest {
     static final String jobName = "org.jberet.support.io.MovieTest";
+    static final String moviesCsv = "movies-2012.csv";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String header = "rank,tit,grs,opn";
 

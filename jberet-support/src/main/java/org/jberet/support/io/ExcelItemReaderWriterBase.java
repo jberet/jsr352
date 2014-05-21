@@ -20,8 +20,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
- * The base class of Excel reader and writer classes: {@link ExcelUserModelItemReader} and
- * {@link ExcelUserModelItemWriter}.
+ * The base class of Excel reader and writer classes: {@link ExcelUserModelItemReader},
+ * {@link ExcelUserModelItemWriter}, {@link ExcelStreamingItemWriter}.
  *
  * @see ExcelUserModelItemReader
  * @see ExcelUserModelItemWriter
@@ -56,7 +56,6 @@ public abstract class ExcelItemReaderWriterBase extends JsonItemReaderWriterBase
 
     protected Workbook workbook;
     protected Sheet sheet;
-    protected Row mostRecentRow;
 
     @Override
     protected void registerModule() throws Exception {

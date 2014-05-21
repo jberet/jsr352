@@ -78,6 +78,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
     protected FormulaEvaluator formulaEvaluator;
     protected Iterator<Row> rowIterator;
     protected int minColumnCount;
+    protected Row mostRecentRow;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {

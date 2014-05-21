@@ -18,12 +18,12 @@ import com.fasterxml.jackson.core.JsonLocation;
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
-import org.jboss.logging.annotations.MessageLogger;
+import org.jboss.logging.annotations.MessageBundle;
 import org.jboss.logging.annotations.ValidIdRange;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.util.CsvContext;
 
-@MessageLogger(projectCode = "JBERET")
+@MessageBundle(projectCode = "JBERET")
 @ValidIdRange(min = 60000, max = 60499)
 public interface SupportMessages {
     SupportMessages MESSAGES = Messages.getBundle(SupportMessages.class);
@@ -67,6 +67,12 @@ public interface SupportMessages {
 
     @Message(id = 60016, value = "Unexpected Json content near %s")
     BatchRuntimeException unexpectedJsonContent(JsonLocation jsonLocation);
+
+    @Message(id = 60017, value = "Incompatible Excel file format: %s where *.xlsx format is required")
+    BatchRuntimeException incompatibleExcelFileFormat(String resource);
+
+    @Message(id = 60018, value = "Failed to read Excel header from resource %s, sheet %s")
+    BatchRuntimeException failToReadExcelHeader(String resource, String sheet);
 
 
 }
