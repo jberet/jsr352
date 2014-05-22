@@ -39,33 +39,20 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchUtil;
 
 public final class MongoRepository extends AbstractRepository {
-    private static volatile MongoRepository instance;
-    private final Properties configProperties;
     private String dataSourceName;
     private String dbUrl;
     private MongoClient mongoClient;
     private DB db;
     private DBCollection seqCollection;
 
-    public static MongoRepository getInstance(final BatchEnvironment batchEnvironment) {
-        MongoRepository result = instance;
-        if (result == null) {
-            synchronized (MongoRepository.class) {
-                result = instance;
-                if (result == null) {
-                    instance = result = new MongoRepository(batchEnvironment);
-                }
-            }
-        }
-        return result;
+    public static MongoRepository create(final Properties configProperties) {
+        return new MongoRepository(configProperties);
     }
 
-    private MongoRepository(final BatchEnvironment batchEnvironment) {
-        configProperties = batchEnvironment.getBatchConfigurationProperties();
+    public MongoRepository(final Properties configProperties) {
         dataSourceName = configProperties.getProperty(JdbcRepository.DATASOURCE_JNDI_KEY);
         dbUrl = configProperties.getProperty(JdbcRepository.DB_URL_KEY);
 

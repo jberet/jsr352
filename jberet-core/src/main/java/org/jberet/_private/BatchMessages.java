@@ -86,8 +86,8 @@ public interface BatchMessages {
     @Message(id = 619, value = "Failed to inject value %s into field %s")
     BatchRuntimeException failToInjectProperty(@Cause Throwable th, String v, Field f);
 
-    @Message(id = 620, value = "Unrecognized job repository type %s")
-    BatchRuntimeException unrecognizedJobRepositoryType(String v);
+    // @Message(id = 620, value = "Unrecognized job repository type %s")
+    // BatchRuntimeException unrecognizedJobRepositoryType(String v);
 
     @Message(id = 621, value = "Failed to look up datasource by jndi name %s.")
     BatchRuntimeException failToLookupDataSource(@Cause Throwable cause, String dataSourceName);
@@ -142,6 +142,9 @@ public interface BatchMessages {
 
     @Message(id = 638, value = "Failed to get the script content from %s")
     BatchRuntimeException failToGetScriptContent(@Cause Throwable th, String scriptSrc);
+
+    @Message(id = 639, value = "A job repository is required")
+    BatchRuntimeException jobRepositoryRequired();
 
 
 }

@@ -40,7 +40,6 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchUtil;
 
 public final class JdbcRepository extends AbstractRepository {
@@ -89,7 +88,6 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String INSERT_PARTITION_EXECUTION = "insert-partition-execution";
     private static final String UPDATE_PARTITION_EXECUTION = "update-partition-execution";
 
-    private static volatile JdbcRepository instance;
     private final Properties configProperties;
     private String dataSourceName;
     private DataSource dataSource;
@@ -99,21 +97,12 @@ public final class JdbcRepository extends AbstractRepository {
     private boolean isOracle;
     private int[] idIndexInOracle;
 
-    static JdbcRepository getInstance(final BatchEnvironment batchEnvironment) {
-        JdbcRepository result = instance;
-        if (result == null) {
-            synchronized (JdbcRepository.class) {
-                result = instance;
-                if (result == null) {
-                    instance = result = new JdbcRepository(batchEnvironment);
-                }
-            }
-        }
-        return result;
+    public static JdbcRepository create(final Properties configProperties) {
+        return new JdbcRepository(configProperties);
     }
 
-    private JdbcRepository(final BatchEnvironment batchEnvironment) {
-        configProperties = batchEnvironment.getBatchConfigurationProperties();
+    public JdbcRepository(final Properties configProperties) {
+        this.configProperties = configProperties;
         dataSourceName = configProperties.getProperty(DATASOURCE_JNDI_KEY);
         dbUrl = configProperties.getProperty(DB_URL_KEY);
         dbProperties = new Properties();
