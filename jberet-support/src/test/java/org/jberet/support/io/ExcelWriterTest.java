@@ -22,7 +22,6 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 //these tests do not verify expected or forbidden data in the resulting excel files.
@@ -136,9 +135,8 @@ public final class ExcelWriterTest {
 
     //verifies reading very large csv data set (IBM_unadjusted.txt, 51,058,469) and writing excel (size 34,232,654).
     //when running with ExcelUserModelItemWriter, failed with java.lang.OutOfMemoryError: GC overhead limit exceeded
-    //when running with ExcelStreamingItemWriter, passed after ~15 minutes.
+    //when running with ExcelStreamingItemWriter, passed after 19 seconds
     @Test
-    @Ignore("Takes 15 minutes")
     public void testIBMStockTradeBeanTypeFullStreaming() throws Exception {
         this.csvCellProcessors = ibmStockTradeCellProcessors;
         this.csvNameMapping = ibmStockTradeNameMapping;
@@ -182,7 +180,7 @@ public final class ExcelWriterTest {
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(60, TimeUnit.MINUTES);
+        jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 }

@@ -25,7 +25,7 @@ import org.apache.poi.ss.usermodel.Workbook;
  *
  * @see ExcelUserModelItemReader
  * @see ExcelUserModelItemWriter
- * @since 1.0.3
+ * @since 1.1.0
  */
 public abstract class ExcelItemReaderWriterBase extends JsonItemReaderWriterBase {
 
@@ -56,6 +56,7 @@ public abstract class ExcelItemReaderWriterBase extends JsonItemReaderWriterBase
 
     protected Workbook workbook;
     protected Sheet sheet;
+    protected int currentRowNum;
 
     @Override
     protected void registerModule() throws Exception {

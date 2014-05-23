@@ -43,7 +43,7 @@ import org.jberet.support._private.SupportMessages;
  * consider using {@link ExcelStreamingItemWriter}.
  *
  * @see ExcelUserModelItemReader
- * @since 1.0.3
+ * @since 1.1.0
  */
 @Named
 @Dependent
@@ -87,7 +87,6 @@ public class ExcelUserModelItemWriter extends ExcelItemReaderWriterBase implemen
     protected Integer templateHeaderRow;
 
     protected OutputStream outputStream;
-    protected int currentRowNum;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {

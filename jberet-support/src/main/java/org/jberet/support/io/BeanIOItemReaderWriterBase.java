@@ -30,7 +30,7 @@ import org.jberet.support._private.SupportMessages;
  * The base class of BeanIO-based reader and writer classes: {@link org.jberet.support.io.BeanIOItemReader} and
  * {@link org.jberet.support.io.BeanIOItemWriter}.
  *
- * @since 1.0.3
+ * @since 1.1.0
  * @see BeanIOItemReader
  * @see BeanIOItemWriter
  */

@@ -32,7 +32,7 @@ import org.beanio.StreamFactory;
  * in BeanIO mapping file. {@link org.jberet.support.io.BeanIOItemWriter} configurations are specified as
  * reader properties in job xml, and BeanIO mapping xml file.
  *
- * @since 1.0.3
+ * @since 1.1.0
  * @see BeanIOItemReader
  */
 @Named

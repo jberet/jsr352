@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +40,7 @@ import org.jberet.support._private.SupportMessages;
  * based on Apache POI user model API.
  *
  * @see ExcelUserModelItemWriter
- * @since 1.0.3
+ * @since 1.1.0
  */
 @Named
 @Dependent
@@ -78,7 +79,6 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
     protected FormulaEvaluator formulaEvaluator;
     protected Iterator<Row> rowIterator;
     protected int minColumnCount;
-    protected Row mostRecentRow;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
@@ -118,28 +118,33 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
 
         if (startRowNumber > 0) {
             while (rowIterator.hasNext()) {
-                mostRecentRow = rowIterator.next();
-                final int rowNum = mostRecentRow.getRowNum();
-                if (header == null && headerRow == rowNum) {
-                    header = getCellStringValues(mostRecentRow);
+                final Row row = rowIterator.next();
+                currentRowNum = row.getRowNum();
+                if (header == null && headerRow == currentRowNum) {
+                    header = getCellStringValues(row);
                 }
-                if (rowNum >= startRowNumber - 1) {
+                if (currentRowNum >= startRowNumber - 1) {
                     break;
                 }
             }
         }
-
-        minColumnCount = header.length;
+        if (header != null) {
+            minColumnCount = header.length;
+        } else {
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, Arrays.toString(header), "header | headerRow");
+        }
     }
 
     @Override
     public Object readItem() throws Exception {
-        if (mostRecentRow.getRowNum() == this.end) {
+        if (currentRowNum == this.end) {
             return null;
         }
+        Row row;
         while (rowIterator.hasNext()) {
-            mostRecentRow = rowIterator.next();
-            final short lastCellNum = mostRecentRow.getLastCellNum();
+            row = rowIterator.next();
+            currentRowNum = row.getRowNum();
+            final short lastCellNum = row.getLastCellNum();
             if (lastCellNum == -1) {  // no cell in the current row
                 continue;
             }
@@ -147,7 +152,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
             if (java.util.List.class.isAssignableFrom(beanType)) {
                 final List<Object> resultList = new ArrayList<Object>();
                 for (int cn = 0; cn < lastColumn; cn++) {
-                    final Cell c = mostRecentRow.getCell(cn, Row.RETURN_BLANK_AS_NULL);
+                    final Cell c = row.getCell(cn, Row.RETURN_BLANK_AS_NULL);
                     if (c == null) {   // The spreadsheet is empty in this cell
                         resultList.add(null);
                     } else {
@@ -158,7 +163,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
             } else {
                 final Map<String, Object> resultMap = new HashMap<String, Object>();
                 for (int cn = 0; cn < header.length; cn++) {
-                    final Cell c = mostRecentRow.getCell(cn, Row.RETURN_BLANK_AS_NULL);
+                    final Cell c = row.getCell(cn, Row.RETURN_BLANK_AS_NULL);
                     if (c != null) {
                         resultMap.put(header[cn], getCellValue(c, c.getCellType()));
                     }
@@ -171,7 +176,6 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
                     }
                     return objectMapper.convertValue(resultMap, beanType);
                 }
-
             }
         }
 
@@ -180,7 +184,7 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
 
     @Override
     public Serializable checkpointInfo() throws Exception {
-        return mostRecentRow.getRowNum();
+        return currentRowNum;
     }
 
     @Override
