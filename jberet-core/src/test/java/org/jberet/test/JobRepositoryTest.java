@@ -30,8 +30,8 @@ import javax.transaction.xa.XAResource;
 
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.job.model.Job;
+import org.jberet.repository.InMemoryRepository;
 import org.jberet.repository.JobRepository;
-import org.jberet.repository.JobRepositoryFactory;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 import org.junit.Assert;
@@ -147,13 +147,18 @@ public class JobRepositoryTest {
             }
 
             @Override
+            public JobRepository getJobRepository() {
+                return InMemoryRepository.getInstance();
+            }
+
+            @Override
             public Properties getBatchConfigurationProperties() {
                 final Properties props = new Properties();
                 //props.setProperty(JobRepositoryFactory.JOB_REPOSITORY_TYPE_KEY, JobRepositoryFactory.REPOSITORY_TYPE_JDBC);
                 return props;
             }
         };
-        repo = JobRepositoryFactory.getJobRepository(batchEnvironment);
+        repo = batchEnvironment.getJobRepository();
     }
 
     @Test

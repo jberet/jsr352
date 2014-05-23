@@ -28,6 +28,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.transaction.TransactionManager;
 
+import org.jberet.repository.JobRepository;
 import org.jberet.se._private.SEBatchLogger;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
@@ -37,9 +38,14 @@ import org.jberet.tx.LocalTransactionManager;
  * Represents the Java SE batch runtime environment and its services.
  */
 public final class BatchSEEnvironment implements BatchEnvironment {
+
     ExecutorService executorService;
 
     public static final String CONFIG_FILE_NAME = "jberet.properties";
+    public static final String JOB_REPOSITORY_TYPE_KEY = "job-repository-type";
+    public static final String REPOSITORY_TYPE_IN_MEMORY = "in-memory";
+    public static final String REPOSITORY_TYPE_JDBC = "jdbc";
+    public static final String REPOSITORY_TYPE_MONGODB = "mongodb";
 
     private final Properties configProperties;
     private final TransactionManager tm;
@@ -107,6 +113,11 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     @Override
     public TransactionManager getTransactionManager() {
         return tm;
+    }
+
+    @Override
+    public JobRepository getJobRepository() {
+        return JobRepositoryFactory.getJobRepository(configProperties);
     }
 
     @Override

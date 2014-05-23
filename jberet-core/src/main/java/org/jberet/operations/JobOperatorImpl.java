@@ -41,11 +41,11 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactFactoryWrapper;
 import org.jberet.job.model.Job;
 import org.jberet.repository.JobRepository;
-import org.jberet.repository.JobRepositoryFactory;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.context.JobContextImpl;
@@ -67,7 +67,10 @@ public class JobOperatorImpl implements JobOperator {
             break;
         }
         artifactFactory = new ArtifactFactoryWrapper(batchEnvironment.getArtifactFactory());
-        repository = JobRepositoryFactory.getJobRepository(batchEnvironment);
+        repository = batchEnvironment.getJobRepository();
+        if (repository == null) {
+            throw BatchMessages.MESSAGES.jobRepositoryRequired();
+        }
     }
 
     @Override

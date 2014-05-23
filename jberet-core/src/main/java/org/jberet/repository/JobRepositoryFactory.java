@@ -12,46 +12,21 @@
 
 package org.jberet.repository;
 
-import java.lang.reflect.Method;
-import java.util.Properties;
-
-import org.jberet._private.BatchMessages;
 import org.jberet.spi.BatchEnvironment;
 
+/**
+ * @deprecated use the {@link org.jberet.spi.BatchEnvironment#getJobRepository()}
+ */
+@Deprecated
 public final class JobRepositoryFactory {
     public static final String JOB_REPOSITORY_TYPE_KEY = "job-repository-type";
     public static final String REPOSITORY_TYPE_IN_MEMORY = "in-memory";
     public static final String REPOSITORY_TYPE_JDBC = "jdbc";
     public static final String REPOSITORY_TYPE_MONGODB = "mongodb";
-
     private JobRepositoryFactory() {
     }
 
     public static JobRepository getJobRepository(final BatchEnvironment batchEnvironment) {
-        String repositoryType = null;
-        if (batchEnvironment != null) {
-            final Properties configProperties = batchEnvironment.getBatchConfigurationProperties();
-            repositoryType = configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY);
-            if (repositoryType != null) {
-                repositoryType = repositoryType.trim();
-            }
-        }
-        if (repositoryType == null || repositoryType.isEmpty() || repositoryType.equalsIgnoreCase(REPOSITORY_TYPE_JDBC)) {
-            return JdbcRepository.getInstance(batchEnvironment);
-        } else if (repositoryType.equalsIgnoreCase(REPOSITORY_TYPE_IN_MEMORY)) {
-            return InMemoryRepository.getInstance(batchEnvironment);
-        } else if (repositoryType.equalsIgnoreCase(REPOSITORY_TYPE_MONGODB)) {
-            final String className = "org.jberet.repository.MongoRepository";
-            try {
-                final Class c = batchEnvironment.getClassLoader().loadClass(className);
-                final Method getInstanceMethod = c.getMethod("getInstance", new Class[]{BatchEnvironment.class});
-                final Object mongoRepository = getInstanceMethod.invoke(null, batchEnvironment);
-                return (JobRepository) mongoRepository;
-            } catch (final Exception e) {
-                throw BatchMessages.MESSAGES.failToCreateArtifact(e, className);
-            }
-        } else {
-            throw BatchMessages.MESSAGES.unrecognizedJobRepositoryType(repositoryType);
-        }
+        return batchEnvironment.getJobRepository();
     }
 }

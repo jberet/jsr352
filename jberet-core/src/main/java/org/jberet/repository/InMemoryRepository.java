@@ -19,22 +19,37 @@ import javax.batch.runtime.StepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.jberet.spi.BatchEnvironment;
 
 public final class InMemoryRepository extends AbstractRepository {
     private final AtomicLong jobInstanceIdSequence = new AtomicLong();
     private final AtomicLong jobExecutionIdSequence = new AtomicLong();
     private final AtomicLong stepExecutionIdSequence = new AtomicLong();
 
-    private InMemoryRepository() {
+    public InMemoryRepository() {
     }
 
     private static class Holder {
         private static final InMemoryRepository instance = new InMemoryRepository();
     }
 
-    static InMemoryRepository getInstance(final BatchEnvironment batchEnvironment) {
+    /**
+     * Gets a singleton instance of an in-memory job repository.
+     *
+     * @return an in-memory job repository
+     */
+    public static InMemoryRepository getInstance() {
         return Holder.instance;
+    }
+
+    /**
+     * Creates a new in-memory job repository.
+     * <p/>
+     * Use where multiple in-memory job repositories may be needed.
+     *
+     * @return a new in-memory job repository
+     */
+    public static InMemoryRepository create() {
+        return new InMemoryRepository();
     }
 
     @Override

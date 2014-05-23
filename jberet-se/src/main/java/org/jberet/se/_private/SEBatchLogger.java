@@ -28,4 +28,7 @@ public interface SEBatchLogger {
 
     @Message(id = 50002, value = "Failed to get a valid value for configuration property %s; current value is %s.")
     BatchRuntimeException failToGetConfigProperty(String propName, String value, @Cause Throwable throwable);
+
+    @Message(id = 50003, value = "Unrecognized job repository type %s")
+    BatchRuntimeException unrecognizedJobRepositoryType(String v);
 }

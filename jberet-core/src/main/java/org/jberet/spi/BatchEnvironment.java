@@ -16,6 +16,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.transaction.TransactionManager;
 
+import org.jberet.repository.JobRepository;
+
+/**
+ * Represents the environment for the batch runtime.
+ *
+ * @author Cheng Fang
+ * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
+ */
 public interface BatchEnvironment {
     /**
      * Gets the class loader suitable for loading application classes and batch artifacts.
@@ -76,6 +84,13 @@ public interface BatchEnvironment {
      * @return a transaction manager for the environment
      */
     TransactionManager getTransactionManager();
+
+    /**
+     * Returns the job repository used for this environment.
+     *
+     * @return the job repository
+     */
+    JobRepository getJobRepository();
 
     /**
      * Gets configuration data for batch container.
