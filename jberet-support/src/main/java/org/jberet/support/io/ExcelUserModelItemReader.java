@@ -99,35 +99,15 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
             start += 1;
         }
 
-        int startRowNumber = checkpoint == null ? this.start : (Integer) checkpoint;
+        final int startRowNumber = checkpoint == null ? this.start : (Integer) checkpoint;
         if (startRowNumber < this.start || startRowNumber > this.end
                 || startRowNumber < 0 || startRowNumber <= headerRow) {
             throw SupportMessages.MESSAGES.invalidStartPosition(startRowNumber, this.start, this.end);
         }
 
         inputStream = getInputStream(resource, false);
-        workbook = WorkbookFactory.create(inputStream);
-        if (sheetName != null) {
-            sheet = workbook.getSheet(sheetName);
-        }
-        if (sheet == null) {
-            sheet = workbook.getSheetAt(sheetIndex);
-        }
-        startRowNumber = Math.max(startRowNumber, sheet.getFirstRowNum());
-        rowIterator = sheet.rowIterator();
+        initWorkbookAndSheet(startRowNumber);
 
-        if (startRowNumber > 0) {
-            while (rowIterator.hasNext()) {
-                final Row row = rowIterator.next();
-                currentRowNum = row.getRowNum();
-                if (header == null && headerRow == currentRowNum) {
-                    header = getCellStringValues(row);
-                }
-                if (currentRowNum >= startRowNumber - 1) {
-                    break;
-                }
-            }
-        }
         if (header != null) {
             minColumnCount = header.length;
         } else {
@@ -226,5 +206,30 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
                 break;
         }
         return cellValue;
+    }
+
+    protected void initWorkbookAndSheet(int startRowNumber) throws Exception {
+        workbook = WorkbookFactory.create(inputStream);
+        if (sheetName != null) {
+            sheet = workbook.getSheet(sheetName);
+        }
+        if (sheet == null) {
+            sheet = workbook.getSheetAt(sheetIndex);
+        }
+        startRowNumber = Math.max(startRowNumber, sheet.getFirstRowNum());
+        rowIterator = sheet.rowIterator();
+
+        if (startRowNumber > 0) {
+            while (rowIterator.hasNext()) {
+                final Row row = rowIterator.next();
+                currentRowNum = row.getRowNum();
+                if (header == null && headerRow == currentRowNum) {
+                    header = getCellStringValues(row);
+                }
+                if (currentRowNum >= startRowNumber - 1) {
+                    break;
+                }
+            }
+        }
     }
 }

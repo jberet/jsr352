@@ -15,7 +15,7 @@
 <job id="org.jberet.support.io.ExcelReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="org.jberet.support.io.ExcelReaderTest.step1">
         <chunk item-count="100">
-            <reader ref="excelUserModelItemReader">
+            <reader ref="#{jobParameters['reader']}">
                 <properties>
                     <property name="resource" value="#{jobParameters['resource']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>

@@ -26,6 +26,8 @@ import org.junit.Test;
 
 public final class ExcelReaderTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
+    static final String excelUserModelItemReader = "excelUserModelItemReader";
+    static final String excelStreamingItemReader = "excelStreamingItemReader";
 
     static final String jobName = "org.jberet.support.io.ExcelReaderTest";
     static final String personMoviesResource = "person-movies.xlsx";
@@ -39,7 +41,15 @@ public final class ExcelReaderTest {
 
     @Test
     public void testMoviesBeanTypeFull() throws Exception {
-        testReadWrite0(personMoviesResource, "testMoviesBeanTypeFull.out",
+        testReadWrite0(excelUserModelItemReader, personMoviesResource, "testMoviesBeanTypeFull.out",
+                "1", null, null,
+                Movie.class, moviesSheetName, "0",
+                MovieTest.expectFull, null);
+    }
+
+    @Test
+    public void testMoviesBeanTypeFullStreaming() throws Exception {
+        testReadWrite0(excelStreamingItemReader, personMoviesResource, "testMoviesBeanTypeFullStreaming.out",
                 "1", null, null,
                 Movie.class, moviesSheetName, "0",
                 MovieTest.expectFull, null);
@@ -47,7 +57,15 @@ public final class ExcelReaderTest {
 
     @Test
     public void testMoviesMapTypeFull() throws Exception {
-        testReadWrite0(personMoviesResource, "testMoviesMapTypeFull.out",
+        testReadWrite0(excelUserModelItemReader, personMoviesResource, "testMoviesMapTypeFull.out",
+                "1", null, null,
+                Map.class, moviesSheetName, "0",
+                MovieTest.expectFull, null);
+    }
+
+    @Test
+    public void testMoviesMapTypeFullStreaming() throws Exception {
+        testReadWrite0(excelStreamingItemReader, personMoviesResource, "testMoviesMapTypeFullStreaming.out",
                 "1", null, null,
                 Map.class, moviesSheetName, "0",
                 MovieTest.expectFull, null);
@@ -55,7 +73,15 @@ public final class ExcelReaderTest {
 
     @Test
     public void testMoviesBeanType2_4() throws Exception {
-        testReadWrite0(personMoviesResource, "testMoviesBeanType2_4.out",
+        testReadWrite0(excelUserModelItemReader, personMoviesResource, "testMoviesBeanType2_4.out",
+                "2", "4", null,
+                Movie.class, moviesSheetName, "0",
+                MovieTest.expect2_4, MovieTest.forbid2_4);
+    }
+
+    @Test
+    public void testMoviesBeanTypeStreaming2_4() throws Exception {
+        testReadWrite0(excelStreamingItemReader, personMoviesResource, "testMoviesBeanTypeStreaming2_4.out",
                 "2", "4", null,
                 Movie.class, moviesSheetName, "0",
                 MovieTest.expect2_4, MovieTest.forbid2_4);
@@ -63,7 +89,15 @@ public final class ExcelReaderTest {
 
     @Test
     public void testMoviesMapType2_4() throws Exception {
-        testReadWrite0(personMoviesResource, "testMoviesMapType2_4.out",
+        testReadWrite0(excelUserModelItemReader, personMoviesResource, "testMoviesMapType2_4.out",
+                "2", "4", null,
+                Map.class, moviesSheetName, "0",
+                MovieTest.expect2_4, MovieTest.forbid2_4);
+    }
+
+    @Test
+    public void testMoviesMapTypeStreaming2_4() throws Exception {
+        testReadWrite0(excelStreamingItemReader, personMoviesResource, "testMoviesMapTypeStreaming2_4.out",
                 "2", "4", null,
                 Map.class, moviesSheetName, "0",
                 MovieTest.expect2_4, MovieTest.forbid2_4);
@@ -71,7 +105,15 @@ public final class ExcelReaderTest {
 
     @Test
     public void testMoviesBeanType1_2() throws Exception {
-        testReadWrite0(personMoviesResource, "testMoviesBeanType1_2.out",
+        testReadWrite0(excelUserModelItemReader, personMoviesResource, "testMoviesBeanType1_2.out",
+                "1", "2", null,
+                Movie.class, moviesSheetName, "0",
+                MovieTest.expect1_2, MovieTest.forbid1_2);
+    }
+
+    @Test
+    public void testMoviesBeanTypeStreaming1_2() throws Exception {
+        testReadWrite0(excelStreamingItemReader, personMoviesResource, "testMoviesBeanTypeStreaming1_2.out",
                 "1", "2", null,
                 Movie.class, moviesSheetName, "0",
                 MovieTest.expect1_2, MovieTest.forbid1_2);
@@ -79,7 +121,15 @@ public final class ExcelReaderTest {
 
     @Test
     public void testMoviesMapType1_2() throws Exception {
-        testReadWrite0(personMoviesResource, "testMoviesMapType1_2.out",
+        testReadWrite0(excelUserModelItemReader, personMoviesResource, "testMoviesMapType1_2.out",
+                "1", "2", null,
+                Map.class, moviesSheetName, "0",
+                MovieTest.expect1_2, MovieTest.forbid1_2);
+    }
+
+    @Test
+    public void testMoviesMapTypeStreaming1_2() throws Exception {
+        testReadWrite0(excelStreamingItemReader, personMoviesResource, "testMoviesMapTypeStreaming1_2.out",
                 "1", "2", null,
                 Map.class, moviesSheetName, "0",
                 MovieTest.expect1_2, MovieTest.forbid1_2);
@@ -88,7 +138,15 @@ public final class ExcelReaderTest {
 
     @Test
     public void testPersonBeanType1_5() throws Exception {
-        testReadWrite0(personMoviesResource, "testPersonBeanType1_5.out",
+        testReadWrite0(excelUserModelItemReader, personMoviesResource, "testPersonBeanType1_5.out",
+                "1", "5", null,
+                Person.class, personSheetName, "0",
+                CsvItemReaderWriterTest.personResourceExpect1_5, CsvItemReaderWriterTest.personResourceForbid);
+    }
+
+    @Test
+    public void testPersonBeanTypeStreaming1_5() throws Exception {
+        testReadWrite0(excelStreamingItemReader, personMoviesResource, "testPersonBeanTypeStreaming1_5.out",
                 "1", "5", null,
                 Person.class, personSheetName, "0",
                 CsvItemReaderWriterTest.personResourceExpect1_5, CsvItemReaderWriterTest.personResourceForbid);
@@ -97,22 +155,32 @@ public final class ExcelReaderTest {
     //the blank row should be skipped without causing any error.
     @Test
     public void testPersonBeanTypeFull() throws Exception {
-        testReadWrite0(personMoviesResource, "testPersonBeanTypeFull.out",
+        testReadWrite0(excelUserModelItemReader, personMoviesResource, "testPersonBeanTypeFull.out",
+                "1", null, null,
+                Person.class, personSheetName, "0",
+                CsvItemReaderWriterTest.personResourceExpect, null);
+    }
+
+    @Test
+    public void testPersonBeanTypeFullStreaming() throws Exception {
+        testReadWrite0(excelStreamingItemReader, personMoviesResource, "testPersonBeanTypeFullStreaming.out",
                 "1", null, null,
                 Person.class, personSheetName, "0",
                 CsvItemReaderWriterTest.personResourceExpect, null);
     }
 
     //verify .xls excel format, use fieldMapping in lieu of header, handling of formula cells
+    //capeResource is xls file so cannot read with excelStreamingItemReader.
     @Test
     public void testCapeBeanTypeFull() throws Exception {
-        testReadWrite0(capeResource, "testCapeBeanTypeFull.out",
+        testReadWrite0(excelUserModelItemReader, capeResource, "testCapeBeanTypeFull.out",
                 "8", "1727", capeHeader,
                 Cape.class, capeSheetName, null,
                 capeFullExpected, null);
     }
 
-    private void testReadWrite0(final String resource, final String writeResource,
+
+    private void testReadWrite0(final String reader, final String resource, final String writeResource,
                                 final String start, final String end, final String header,
                                 final Class<?> beanType, final String sheetName, final String headerRow,
                                 final String expect, final String forbid) throws Exception {
@@ -121,6 +189,11 @@ public final class ExcelReaderTest {
         params.setProperty("writeResource", writeResourceFile.getPath());
         params.setProperty("resource", resource);
 
+        if (reader != null) {
+            params.setProperty("reader", reader);
+        } else {
+            throw new IllegalArgumentException("reader parameter is not specified when starting the job");
+        }
         if (header != null) {
             params.setProperty("header", header);
         }
