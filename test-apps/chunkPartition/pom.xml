@@ -35,9 +35,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${version.surefire.plugin}</version>
                 <!-- executes each test class in its own JVM process, one after another -->
                 <configuration>
                     <forkCount>1</forkCount>

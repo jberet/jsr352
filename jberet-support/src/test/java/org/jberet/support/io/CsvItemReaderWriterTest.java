@@ -39,7 +39,7 @@ public class CsvItemReaderWriterTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 5;
     static final String writeComments = "# Comments written by csv writer.";
-    static final String tmpdir = System.getProperty("java.io.tmpdir");
+    static final File tmpdir = new File(System.getProperty("jberet.tmp.dir"));
 
     static final String nameMapping =
     "number, gender, title, givenName, middleInitial, surname, streetAddress, city, state, zipCode, " +
@@ -97,6 +97,12 @@ public class CsvItemReaderWriterTest {
 
     //content from row 6 & 10
     static final String personResourceForbid = "MarthaEValentine@dayrep.com, CindyNKeyes@jourrapide.com";
+
+    static {
+        if (!tmpdir.exists()) {
+            tmpdir.mkdirs();
+        }
+    }
 
     @Test
     public void testBeanType() throws Exception {
@@ -166,16 +172,12 @@ public class CsvItemReaderWriterTest {
         testReadWrite0(personResource, "testMapType.out", java.util.Map.class.getName(), null, null, "|", personResourceExpect, personResourceForbid);
     }
 
-    /**
-     * Specify a directory (java.io.tmpdir) as the target CSV resource to write to, and expect the job execution to fail.
-     * @throws Exception
-     */
     @Test
     public void testInvalidWriteResource() throws Exception {
         final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, List.class.getName());
         params.setProperty(CsvProperties.RESOURCE_KEY, personResource);
         params.setProperty(CsvProperties.QUOTE_CHAR_KEY, "|");
-        final String writeResourceFullPath = (new File(tmpdir)).getPath();
+        final String writeResourceFullPath = tmpdir.getPath();
         params.setProperty("writeResource", writeResourceFullPath);
         params.setProperty(CsvProperties.WRITE_COMMENTS_KEY, writeComments);
         params.setProperty(CsvProperties.HEADER_KEY, nameMapping);

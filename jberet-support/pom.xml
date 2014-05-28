@@ -25,6 +25,11 @@
 
     <artifactId>jberet-support</artifactId>
 
+    <properties>
+        <jvmArgs>-Xms512m -Xms2g</jvmArgs>
+    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -137,17 +142,18 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <configuration>
-                        <argLine>-Xms512m -Xmx2g</argLine>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${jvmArgs}</argLine>
+                    <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
+                    <systemPropertyVariables>
+                        <jberet.tmp.dir>${project.build.directory}${file.separator}tmp</jberet.tmp.dir>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>
@@ -159,7 +165,6 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <excludes>
@@ -180,7 +185,6 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                     </plugin>
                 </plugins>

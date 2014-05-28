@@ -62,13 +62,16 @@ Cheng Fang - Initial API and implementation
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${version.surefire.plugin}</version>
                 <!-- executes each test class in its own JVM process, one after another -->
                 <configuration>
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
+                    <!-- This will work for now as Batlet1Test needs to run before JobDataTest, but this should be reworked -->
+                    <runOrder>alphabetical</runOrder>
+                    <systemPropertyVariables>
+                        <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

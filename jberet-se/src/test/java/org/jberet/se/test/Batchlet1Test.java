@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class Batchlet1Test {
-    static final String tmpdir = System.getProperty("java.io.tmpdir");
+    static final String tmpdir = System.getProperty("jberet.tmp.dir");
     static final String jobName = "org.jberet.se.test.batchlet1";
     static final String jobName2 = "org.jberet.se.test.batchlet2";
     static final String jobName3 = "org.jberet.se.test.batchlet3";

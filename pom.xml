@@ -71,6 +71,9 @@
         <version.org.scala-lang.scala-dist>2.11.0</version.org.scala-lang.scala-dist>
         <version.com.caucho.resin-quercus>3.2.1</version.com.caucho.resin-quercus>
         <version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>1.0.0.Final</version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>
+
+        <!-- Other properties -->
+        <redirectTestOutput>false</redirectTestOutput>
     </properties>
 
     <modules>
@@ -84,6 +87,16 @@
     </modules>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
