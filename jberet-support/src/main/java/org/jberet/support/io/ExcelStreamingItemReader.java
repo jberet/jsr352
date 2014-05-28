@@ -193,6 +193,13 @@ public class ExcelStreamingItemReader extends ExcelUserModelItemReader implement
             </c>
         </row>
 
+        For inlineStr:
+        <c r="A1" t="inlineStr">
+            <is>
+                <t>Date</t>
+            </is>
+        </c>
+
         Note: a blank cell does not show up in xml at all. So for list type beanType, need to detect blank cell and add
         null; for map or custom beanType, need to link to the correct header column by r attribute.
          */
@@ -246,6 +253,8 @@ public class ExcelStreamingItemReader extends ExcelUserModelItemReader implement
                     final int idx = Integer.parseInt(result);
                     result = new XSSFRichTextString(sharedStringsTable.getEntryAt(idx)).toString();
                 }
+            } else if(event == XMLStreamConstants.START_ELEMENT && "t".equals(sheetStreamReader.getLocalName())) {
+                result = sheetStreamReader.getElementText();
             } else if (event == XMLStreamConstants.END_ELEMENT && "c".equals(sheetStreamReader.getLocalName())) {
                 break;
             }
