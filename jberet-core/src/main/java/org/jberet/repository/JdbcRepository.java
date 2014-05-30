@@ -14,6 +14,8 @@ package org.jberet.repository;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -152,7 +154,7 @@ public final class JdbcRepository extends AbstractRepository {
         if (sqlFile == null || sqlFile.isEmpty()) {
             sqlFile = DEFAULT_SQL_FILE;
         }
-        final InputStream sqlResource = this.getClass().getClassLoader().getResourceAsStream(sqlFile);
+        final InputStream sqlResource = getClassLoader().getResourceAsStream(sqlFile);
         try {
             if (sqlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadSqlProperties(null, sqlFile);
@@ -200,7 +202,7 @@ public final class JdbcRepository extends AbstractRepository {
             rs = countPartitionExecutionStatement.executeQuery();
         } catch (final SQLException e) {
             final String ddlFile = getDDLLocation(databaseProductName);
-            ddlResource = this.getClass().getClassLoader().getResourceAsStream(ddlFile);
+            ddlResource = getClassLoader().getResourceAsStream(ddlFile);
             if (ddlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
             }
@@ -870,5 +872,17 @@ public final class JdbcRepository extends AbstractRepository {
         }
         BatchLogger.LOGGER.ddlFileAndDatabaseProductName(ddlFile, databaseProductName);
         return ddlFile;
+    }
+
+    private static ClassLoader getClassLoader() {
+        if (System.getSecurityManager() == null) {
+            return JdbcRepository.class.getClassLoader();
+        }
+        return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+            @Override
+            public ClassLoader run() {
+                return JdbcRepository.class.getClassLoader();
+            }
+        });
     }
 }

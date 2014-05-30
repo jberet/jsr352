@@ -12,6 +12,8 @@
 
 package org.jberet.operations;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.Set;
+import javax.batch.operations.BatchRuntimeException;
 import javax.batch.operations.JobExecutionAlreadyCompleteException;
 import javax.batch.operations.JobExecutionIsRunningException;
 import javax.batch.operations.JobExecutionNotMostRecentException;
@@ -56,16 +59,34 @@ import org.jberet.spi.BatchEnvironment;
 import static org.jberet._private.BatchMessages.MESSAGES;
 
 public class JobOperatorImpl implements JobOperator {
+
+    private static final PrivilegedAction<BatchEnvironment> loaderAction = new PrivilegedAction<BatchEnvironment>() {
+        @Override
+        public BatchEnvironment run() {
+            final ServiceLoader<BatchEnvironment> serviceLoader = ServiceLoader.load(BatchEnvironment.class);
+            if (serviceLoader.iterator().hasNext()) {
+                return serviceLoader.iterator().next();
+            }
+            return null;
+        }
+    };
+
     final JobRepository repository;
-    private BatchEnvironment batchEnvironment;
+    private final BatchEnvironment batchEnvironment;
     private final ArtifactFactory artifactFactory;
 
-    public JobOperatorImpl() {
-        ServiceLoader<BatchEnvironment> serviceLoader = ServiceLoader.load(BatchEnvironment.class);
-        for (Iterator<BatchEnvironment> it = serviceLoader.iterator(); it.hasNext(); ) {
-            batchEnvironment = it.next();
-            break;
+    public JobOperatorImpl() throws BatchRuntimeException {
+        final BatchEnvironment batchEnvironment;
+        if (System.getSecurityManager() == null) {
+            batchEnvironment = loaderAction.run();
+        } else {
+            batchEnvironment = AccessController.doPrivileged(loaderAction);
         }
+
+        if (batchEnvironment == null) {
+            throw BatchMessages.MESSAGES.batchEnvironmentNotFound();
+        }
+        this.batchEnvironment = batchEnvironment;
         artifactFactory = new ArtifactFactoryWrapper(batchEnvironment.getArtifactFactory());
         repository = batchEnvironment.getJobRepository();
         if (repository == null) {
