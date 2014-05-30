@@ -146,5 +146,8 @@ public interface BatchMessages {
     @Message(id = 639, value = "A job repository is required")
     BatchRuntimeException jobRepositoryRequired();
 
+    @Message(id = 640, value = "A BatchEnvironment implementation could not be found. Please ensure the SPI has been implemented and is on the class path")
+    BatchRuntimeException batchEnvironmentNotFound();
+
 
 }
