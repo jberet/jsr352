@@ -43,21 +43,15 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 public class ExcelStreamingItemReader extends ExcelUserModelItemReader implements ItemReader {
     private static final String schemaRelationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 
-    protected InputStream sheetInputStream;
-    protected XMLStreamReader sheetStreamReader;
-    protected SharedStringsTable sharedStringsTable;
-
     /**
      * If set to true, the target sheet uses R1C1-style cell coordinates; if set to false, the target sheet uses the
      * more common A1-style cell coordinates; defaults to null (not set).
      */
     protected Boolean r1c1;
 
-    /**
-     * Mapping between column label -> header name, e.g, {A : name, B: age}, or {1: name, 2: age} for R1C1 notation.
-     * Only applicable when {@link #beanType} is not {@code List}.
-     */
-    protected Map<String, String> headerMapping = new HashMap<String, String>();
+    protected InputStream sheetInputStream;
+    protected XMLStreamReader sheetStreamReader;
+    protected SharedStringsTable sharedStringsTable;
 
     @Override
     public Object readItem() throws Exception {
@@ -204,6 +198,7 @@ public class ExcelStreamingItemReader extends ExcelUserModelItemReader implement
         null; for map or custom beanType, need to link to the correct header column by r attribute.
          */
         if (header == null) {
+            headerMapping = new HashMap<String, String>();
             outerLoop:
             while (sheetStreamReader.hasNext()) {
                 if (sheetStreamReader.next() == XMLStreamConstants.START_ELEMENT && "row".equals(sheetStreamReader.getLocalName())) {
@@ -253,7 +248,7 @@ public class ExcelStreamingItemReader extends ExcelUserModelItemReader implement
                     final int idx = Integer.parseInt(result);
                     result = new XSSFRichTextString(sharedStringsTable.getEntryAt(idx)).toString();
                 }
-            } else if(event == XMLStreamConstants.START_ELEMENT && "t".equals(sheetStreamReader.getLocalName())) {
+            } else if (event == XMLStreamConstants.START_ELEMENT && "t".equals(sheetStreamReader.getLocalName())) {
                 result = sheetStreamReader.getElementText();
             } else if (event == XMLStreamConstants.END_ELEMENT && "c".equals(sheetStreamReader.getLocalName())) {
                 break;

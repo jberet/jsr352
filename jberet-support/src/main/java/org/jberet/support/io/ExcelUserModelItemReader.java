@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,6 +79,13 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
     protected Iterator<Row> rowIterator;
     protected int minColumnCount;
 
+    /**
+     * Mapping between column label -> header name, e.g, {A : name, B: age}, or {1: name, 2: age} for R1C1 notation.
+     * Only applicable when {@link #beanType} is not {@code List}.
+     */
+    protected Map<String, String> headerMapping;
+
+
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         /**
@@ -110,8 +116,6 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
 
         if (header != null) {
             minColumnCount = header.length;
-        } else {
-            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, Arrays.toString(header), "header | headerRow");
         }
     }
 
