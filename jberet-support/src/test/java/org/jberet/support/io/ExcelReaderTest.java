@@ -261,20 +261,20 @@ public final class ExcelReaderTest {
     // with ExcelEventItemReader and output csv file (3,645,979 bytes), which is more compact than json used in other tests here.
     //job xml is different than in above tests.
     @Test
-    public void testIBMStockTradeBinaryMapTypeFull() throws Exception {
+    public void testIBMStockTradeBinaryBeanTypeFull() throws Exception {
         testReadWrite0(ibmStockTradeJobName, excelEventItemReader,
                 ibmStockTradeBinaryResource, "testIBMStockTradeBinaryMapTypeFull.out",
                 "1", null, ExcelWriterTest.ibmStockTradeHeader,
-                Map.class, null, "0",
+                StockTrade.class, null, "0",
                 ibmStockTradeBinaryFullExpected, null);
     }
 
     @Test
-    public void testIBMStockTradeBinaryMapType65520_65525() throws Exception {
+    public void testIBMStockTradeBinaryBeanType65520_65525() throws Exception {
         testReadWrite0(ibmStockTradeJobName, excelEventItemReader,
                 ibmStockTradeBinaryResource, "testIBMStockTradeBinaryMapType65520_65525.out",
                 "65520", "65525", ExcelWriterTest.ibmStockTradeHeader,
-                Map.class, null, "0",
+                StockTrade.class, null, "0",
                 ibmStockTradeExpected65520_65525, ibmStockTradeForbid65520_65525);
     }
 

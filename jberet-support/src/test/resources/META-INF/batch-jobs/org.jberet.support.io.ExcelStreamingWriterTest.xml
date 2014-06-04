@@ -35,6 +35,7 @@
                     <property name="templateResource" value="#{jobParameters['templateResource']}"/>
                     <property name="templateSheetName" value="#{jobParameters['templateSheetName']}"/>
                     <property name="templateHeaderRow" value="#{jobParameters['templateHeaderRow']}"/>
+                    <property name="serializationFeatures" value="WRITE_DATES_AS_TIMESTAMPS=false"/>
                 </properties>
             </writer>
         </chunk>
