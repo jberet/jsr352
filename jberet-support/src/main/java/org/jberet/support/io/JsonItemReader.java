@@ -54,19 +54,11 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
 
     @Inject
     @BatchProperty
-    protected String deserializationFeatures;
-
-    @Inject
-    @BatchProperty
     protected String deserializationProblemHandlers;
 
     @Inject
     @BatchProperty
     protected Class inputDecorator;
-
-    @Inject
-    @BatchProperty
-    protected String customDeserializers;
 
     private JsonParser jsonParser;
     private JsonToken token;
@@ -83,16 +75,11 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
         if (start > end) {
             throw SupportMessages.MESSAGES.invalidStartPosition((Integer) checkpoint, start, end);
         }
-        super.initJsonFactoryAndObjectMapper();
+        initJsonFactoryAndObjectMapper();
         if (inputDecorator != null) {
             jsonFactory.setInputDecorator((InputDecorator) inputDecorator.newInstance());
         }
 
-        if (deserializationFeatures != null) {
-            MappingJsonFactoryObjectFactory.configureDeserializationFeatures(objectMapper, deserializationFeatures);
-        }
-
-        registerModule();
         jsonParser = jsonFactory.createParser(getInputStream(resource, false));
 
         if (deserializationProblemHandlers != null) {
@@ -168,11 +155,5 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
             jsonParser.close();
             jsonParser = null;
         }
-    }
-
-    @Override
-    protected void registerModule() throws Exception {
-        MappingJsonFactoryObjectFactory.configureCustomSerializersAndDeserializers(
-                objectMapper, null, customDeserializers, getClass().getClassLoader());
     }
 }

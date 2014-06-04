@@ -15,7 +15,6 @@ package org.jberet.support.io;
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
@@ -39,6 +38,22 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
     @BatchProperty
     protected String jsonFactoryLookup;
 
+    @Inject
+    @BatchProperty
+    protected String serializationFeatures;
+
+    @Inject
+    @BatchProperty
+    protected String customSerializers;
+
+    @Inject
+    @BatchProperty
+    protected String deserializationFeatures;
+
+    @Inject
+    @BatchProperty
+    protected String customDeserializers;
+
     protected JsonFactory jsonFactory;
     protected ObjectMapper objectMapper;
 
@@ -46,14 +61,18 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
      * Registers any {@code com.fasterxml.jackson.databind.module.SimpleModule} to the {@link #objectMapper}. Any number
      * of custom serializers or deserializers can be added to the module.
      */
-    protected abstract void registerModule() throws Exception;
+    protected void registerModule() throws Exception {
+        MappingJsonFactoryObjectFactory.configureCustomSerializersAndDeserializers(
+                objectMapper, customSerializers, customDeserializers, getClass().getClassLoader());
+    }
 
     /**
      * Initializes {@link #jsonFactory} and {@link #objectMapper} fields, which may be instantiated or obtained from
-     * other part of the application. This method also configures the {@link #jsonFactory} and {@link #objectMapper}
-     * properly based on the current batch artifact properties.
+     * other part of the application. This method also configures the {@link #jsonFactory}, {@link #objectMapper},
+     * {@link #serializationFeatures}, {@link #deserializationFeatures}, {@link #customDeserializers}, and
+     * {@link #customSerializers} properly based on the current batch artifact properties.
      */
-    protected void initJsonFactoryAndObjectMapper() throws NamingException {
+    protected void initJsonFactoryAndObjectMapper() throws Exception {
         if (jsonFactoryLookup != null) {
             jsonFactory = InitialContext.doLookup(jsonFactoryLookup);
         } else {
@@ -66,5 +85,12 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
         if (mapperFeatures != null) {
             MappingJsonFactoryObjectFactory.configureMapperFeatures(objectMapper, mapperFeatures);
         }
+        if (deserializationFeatures != null) {
+            MappingJsonFactoryObjectFactory.configureDeserializationFeatures(objectMapper, deserializationFeatures);
+        }
+        if (serializationFeatures != null) {
+            MappingJsonFactoryObjectFactory.configureSerializationFeatures(objectMapper, serializationFeatures);
+        }
+        registerModule();
     }
 }

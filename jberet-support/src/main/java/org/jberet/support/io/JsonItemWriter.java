@@ -44,36 +44,22 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
 
     @Inject
     @BatchProperty
-    protected String serializationFeatures;
-
-    @Inject
-    @BatchProperty
     protected Class prettyPrinter;
 
     @Inject
     @BatchProperty
     protected Class outputDecorator;
 
-    @Inject
-    @BatchProperty
-    protected String customSerializers;
-
     protected JsonGenerator jsonGenerator;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         SupportLogger.LOGGER.tracef("Open JsonItemWriter with checkpoint %s, which is ignored for JsonItemWriter.%n", checkpoint);
-        super.initJsonFactoryAndObjectMapper();
+        initJsonFactoryAndObjectMapper();
 
         if (outputDecorator != null) {
             jsonFactory.setOutputDecorator((OutputDecorator) outputDecorator.newInstance());
         }
-
-        if (serializationFeatures != null) {
-            MappingJsonFactoryObjectFactory.configureSerializationFeatures(objectMapper, serializationFeatures);
-        }
-
-        registerModule();
 
         jsonGenerator = jsonFactory.createGenerator(getOutputStream(writeMode));
         SupportLogger.LOGGER.openingResource(resource, this.getClass());
@@ -132,11 +118,5 @@ public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWrit
             jsonGenerator.close();
             jsonGenerator = null;
         }
-    }
-
-    @Override
-    protected void registerModule() throws Exception {
-        MappingJsonFactoryObjectFactory.configureCustomSerializersAndDeserializers(
-                objectMapper, customSerializers, null, getClass().getClassLoader());
     }
 }

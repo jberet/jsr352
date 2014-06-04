@@ -118,6 +118,10 @@ public class ExcelEventItemReader extends ExcelUserModelItemReader implements It
         req.addListenerForAllRecords(formatListener);
         final HSSFEventFactory factory = new HSSFEventFactory();
 
+        if (objectMapper == null) {
+            initJsonFactoryAndObjectMapper();
+        }
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -331,7 +335,19 @@ public class ExcelEventItemReader extends ExcelUserModelItemReader implements It
                     itemReader.queue.put(exception);
                     resultMap = new HashMap<String, String>();
                 } else {
-                    itemReader.queue.put(resultMap);
+                    final Object obj;
+                    if (itemReader.beanType == List.class) {
+                        final List<String> resultList = new ArrayList<String>();
+                        for (int i = 0; i < itemReader.header.length; ++i) {
+                            resultList.add(resultMap.get(itemReader.header[i]));
+                        }
+                        obj = resultList;
+                    } else if (itemReader.beanType == Map.class) {
+                        obj = resultMap;
+                    } else {
+                        obj = itemReader.objectMapper.convertValue(resultMap, itemReader.beanType);
+                    }
+                    itemReader.queue.put(obj);
                     resultMap = new HashMap<String, String>();
                 }
             } catch (final InterruptedException e) {

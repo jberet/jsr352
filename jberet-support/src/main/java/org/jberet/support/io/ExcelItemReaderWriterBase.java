@@ -58,11 +58,6 @@ public abstract class ExcelItemReaderWriterBase extends JsonItemReaderWriterBase
     protected Sheet sheet;
     protected int currentRowNum;
 
-    @Override
-    protected void registerModule() throws Exception {
-        //noop
-    }
-
     /**
      * Saves string values to a string array for all non-blank cells in the row passed in. Useful when trying to get
      * header values.
