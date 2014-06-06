@@ -32,7 +32,7 @@
                 <properties>
                     <property name="resource" value="#{jobParameters['writeResource']}"/>
                     <property name="writeMode" value="overwrite"/>
-                    <property name="beanType" value="#{jobParameters['beanType']"/>
+                    <property name="beanType" value="#{jobParameters['beanType']}"/>
 
                     <!-- for csvItemWriter, use the header passed from jobParameters -->
                     <property name="header" value="#{jobParameters['header']}"/>

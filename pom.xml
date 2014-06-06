@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
@@ -64,6 +64,8 @@
 
         <version.org.apache.poi>3.10-FINAL</version.org.apache.poi>
         <version.commons-codec>1.9</version.commons-codec>
+        <version.dom4j>1.6.1</version.dom4j>
+        <version.org.apache.xmlbeans>2.3.0</version.org.apache.xmlbeans>
 
         <version.org.codehaus.groovy>2.2.2</version.org.codehaus.groovy>
         <version.org.jruby.jruby>1.7.12</version.org.jruby.jruby>
@@ -344,16 +346,46 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${version.commons-codec}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>${version.org.apache.poi}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>${version.commons-codec}</version>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-schemas</artifactId>
+                <version>${version.org.apache.poi}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xmlbeans</groupId>
+                <artifactId>xmlbeans</artifactId>
+                <version>${version.org.apache.xmlbeans}</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>stax</groupId>
+                        <artifactId>stax-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>${version.dom4j}</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>xml-apis</groupId>
+                        <artifactId>xml-apis</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Scripting testing dependency -->
