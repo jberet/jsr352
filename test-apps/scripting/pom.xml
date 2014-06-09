@@ -6,7 +6,7 @@
     <parent>
         <artifactId>test-apps</artifactId>
         <groupId>org.jberet.test-apps</groupId>
-        <version>1.1.0.Alpha1-SNAPSHOT</version>
+        <version>1.1.0.Alpha1</version>
     </parent>
 
     <artifactId>scripting</artifactId>

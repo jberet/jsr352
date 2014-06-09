@@ -20,7 +20,7 @@ Cheng Fang - Initial API and implementation
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.1.0.Alpha1-SNAPSHOT</version>
+        <version>1.1.0.Alpha1</version>
     </parent>
 
     <artifactId>jberet-se</artifactId>
@@ -63,6 +63,7 @@ Cheng Fang - Initial API and implementation
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${version.surefire.plugin}</version>
                 <!-- executes each test class in its own JVM process, one after another -->
                 <configuration>
                     <forkCount>1</forkCount>
