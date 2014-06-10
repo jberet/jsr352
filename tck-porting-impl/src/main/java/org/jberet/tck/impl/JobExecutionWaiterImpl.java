@@ -49,8 +49,8 @@ public final class JobExecutionWaiterImpl implements JobExecutionWaiter {
             //unexpected interrupt, ignore.
             e.printStackTrace();
         }
-        System.out.printf("After awaitTermination for jobName %s, jobExecution %s, BatchStatus %s, StepExecutions %s%n",
-                jobExecution.getJobName(), jobExecution.getExecutionId(), jobExecution.getBatchStatus(),
+        System.out.printf("After awaitTermination for jobName %s, jobExecution %s, BatchStatus %s, exitStatus %s, StepExecutions %s%n",
+                jobExecution.getJobName(), jobExecution.getExecutionId(), jobExecution.getBatchStatus(), jobExecution.getExitStatus(),
                 jobExecution.getStepExecutions());
 
         for (final StepExecution e : jobExecution.getStepExecutions()) {

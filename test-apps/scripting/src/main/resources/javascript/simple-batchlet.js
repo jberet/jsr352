@@ -11,7 +11,7 @@
  */
 
 function stop() {
-    println('In stop function');
+    print('In stop function\n');
 }
 
 //access built-in variables: jobContext, stepContext and batchProperties,
@@ -19,8 +19,8 @@ function stop() {
 //return the value of testName property as step exit status,
 //
 function process() {
-    println('jobName: ' + jobContext.getJobName());
-    println('stepName: ' + stepContext.getStepName());
+    print('jobName: ' + jobContext.getJobName() + '\n');
+    print('stepName: ' + stepContext.getStepName() + '\n');
     var testName = batchProperties.get('testName');
     jobContext.setExitStatus(testName);
     return testName;
