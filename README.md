@@ -59,3 +59,82 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
             <artifactId>jberet-support</artifactId>
             <version>1.0.2.Final</version> <!-- replace it with the desired version -->
         </dependency>
+
+####Batch application dependencies
+#####Minimal application dependencies:
+        <dependency>
+            <groupId>org.jboss.spec.javax.batch</groupId>
+            <artifactId>jboss-batch-api_1.0_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.transaction</groupId>
+            <artifactId>jboss-transaction-api_1.2_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.marshalling</groupId>
+            <artifactId>jboss-marshalling</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        
+#####The following is also required for Java SE batch applications (h2 can be omitted when using in-memory batch job repository):
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-se</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld.se</groupId>
+            <artifactId>weld-se</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        
+#####Optional application dependencies:
+        <!-- any JDBC driver jars, e.g., h2, when using jdbc batch job repository -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        
+        <!-- replace Java built-in StAX provider with aalto-xml or woodstox -->
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>aalto-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>stax2-api</artifactId>
+        </dependency>
+        
+        <!-- jberet-support includes common reusable batch ItemReader & ItemWriter classes for
+        various data types such as CSV, XML, JSON, Fixed length, Excel, MongoDB, etc.
+        The application should provide appropriate transitive dependencies from jberet-support,
+        depending on the usage.-->
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-support</artifactId>
+        </dependency>
