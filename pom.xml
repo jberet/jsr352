@@ -11,6 +11,7 @@
         <module>xml2json</module>
         <module>xml2jsonLookup</module>
         <module>csv2mongoLookup</module>
+        <module>excelstream2csv</module>
     </modules>
     <parent>
         <artifactId>wildfly</artifactId>
@@ -19,7 +20,7 @@
     </parent>
 
     <groupId>org.samples.wildfly.jberet</groupId>
-    <artifactId>jberet</artifactId>
+    <artifactId>jberet-samples</artifactId>
 
     <properties>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -34,8 +35,11 @@
         <version.net.sourceforge.htmlunit>2.13</version.net.sourceforge.htmlunit>
         <version.org.codehaus.woodstox.stax2-api>3.1.3</version.org.codehaus.woodstox.stax2-api>
         <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final</version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
-        <version.org.jberet.jberet-core>1.0.1.Final</version.org.jberet.jberet-core>
-        <version.org.jberet.jberet-support>1.0.1.Final</version.org.jberet.jberet-support>
+        <version.org.jberet.jberet-core>1.1.0.Alpha1</version.org.jberet.jberet-core>
+        <version.org.jberet.jberet-support>1.1.0.Alpha1</version.org.jberet.jberet-support>
+
+        <version.org.apache.poi>3.10-FINAL</version.org.apache.poi>
+        <version.commons-codec>1.9</version.commons-codec>
     </properties>
 
     <repositories>
@@ -43,15 +47,6 @@
             <id>jboss-public-repository-group</id>
             <name>JBoss Public Repository Group</name>
             <url>http://repository.jboss.org/nexus/content/groups/public/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
         </repository>
     </repositories>
 
@@ -147,6 +142,20 @@
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-jaxb-annotations</artifactId>
                 <version>${version.com.fasterxml.jackson}</version>
+                <optional>true</optional>
+            </dependency>
+
+            <!-- Excel dependencies -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${version.org.apache.poi}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${version.commons-codec}</version>
                 <optional>true</optional>
             </dependency>
 

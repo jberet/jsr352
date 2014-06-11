@@ -3,13 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <artifactId>jberet-samples</artifactId>
         <groupId>org.samples.wildfly.jberet</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>csv2json</artifactId>
+    <artifactId>excelstream2csv</artifactId>
     <packaging>war</packaging>
 
     <dependencies>
@@ -47,10 +48,20 @@
             <artifactId>jberet-samples-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!-- Excel dependencies -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
-        <finalName>csv2json</finalName>
+        <finalName>excelstream2csv</finalName>
         <plugins>
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
@@ -62,4 +73,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
