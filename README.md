@@ -99,6 +99,10 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
             <artifactId>guava</artifactId>
         </dependency>
         
+A note on webapp or Java EE application packaging: Java EE API jars (batch-api, cdi-api, javax.inject, transaction-api)
+are already available in the appserver, and should not be included in WAR, JAR, or EAR files. Their maven dependency
+scope should be set to `provided`.
+        
 #####The following is also required for Java SE batch applications (h2 can be omitted when using in-memory batch job repository):
         <dependency>
             <groupId>org.jberet</groupId>
@@ -120,7 +124,9 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
             <artifactId>h2</artifactId>
         </dependency>
         
-        <!-- replace Java built-in StAX provider with aalto-xml or woodstox -->
+        <!-- replace Java built-in StAX provider with aalto-xml or woodstox
+             (woodstox dependencies not shown here)
+        -->
         <dependency>
             <groupId>com.fasterxml</groupId>
             <artifactId>aalto-xml</artifactId>
@@ -131,9 +137,10 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
         </dependency>
         
         <!-- jberet-support includes common reusable batch ItemReader & ItemWriter classes for
-        various data types such as CSV, XML, JSON, Fixed length, Excel, MongoDB, etc.
-        The application should provide appropriate transitive dependencies from jberet-support,
-        depending on the usage.-->
+             various data types such as CSV, XML, JSON, Fixed length, Excel, MongoDB, JDBC, etc.
+             The application should further provide appropriate transitive dependencies from 
+             jberet-support, depending on its usage.
+        -->
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-support</artifactId>
