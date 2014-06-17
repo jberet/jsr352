@@ -63,11 +63,13 @@ public final class ExcelWriterTest {
 
     private String csvNameMapping;
     private String csvCellProcessors;
+    private String csvHeaderless;
 
     @After
     public void after() {
         this.csvCellProcessors = null;
         this.csvNameMapping = null;
+        this.csvHeaderless = null;
     }
 
     @Test
@@ -140,6 +142,7 @@ public final class ExcelWriterTest {
     public void testIBMStockTradeBeanTypeFullStreaming() throws Exception {
         this.csvCellProcessors = ibmStockTradeCellProcessors;
         this.csvNameMapping = ibmStockTradeNameMapping;
+        this.csvHeaderless = Boolean.TRUE.toString();
         testReadWrite0(streamingWriterTestJobName, ibmStockTradeCsv, "testIBMStockTradeBeanTypeFullStreaming.xlsx", ibmStockTradeHeader,
                 null, null, null,
                 StockTrade.class, ibmStockTradeSheetName);
@@ -176,6 +179,9 @@ public final class ExcelWriterTest {
         }
         if (this.csvNameMapping != null) {
             params.setProperty(CsvProperties.NAME_MAPPING_KEY, this.csvNameMapping);
+        }
+        if (this.csvHeaderless != null) {
+            params.setProperty(CsvProperties.HEADERLESS_KEY, this.csvHeaderless);
         }
 
         final long jobExecutionId = jobOperator.start(jobName, params);
