@@ -74,5 +74,8 @@ public interface SupportMessages {
     @Message(id = 60018, value = "Failed to read Excel header from resource %s, sheet %s")
     BatchRuntimeException failToReadExcelHeader(String resource, String sheet);
 
+    @Message(id = 60019, value = "Expecting data types: %s, but got %s, %s")
+    BatchRuntimeException unexpectedDataType(String expectedTypes, String actualType, Object val);
+
 
 }
