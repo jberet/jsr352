@@ -18,6 +18,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +30,7 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.support._private.SupportLogger;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,6 +41,7 @@ public class JdbcReaderWriterTest {
     static final File dbDir = new File(CsvItemReaderWriterTest.tmpdir, "JdbcReaderWriterTest");
     static final String url = "jdbc:h2:" + dbDir.getPath();
     static final String dropTable = "drop table STOCK_TRADE";
+    static final String deleteAllRows = "delete from STOCK_TRADE";
     static final String createTable =
                     "create table STOCK_TRADE (" +
                             "TRADEDATE TIMESTAMP, " +
@@ -58,10 +62,29 @@ public class JdbcReaderWriterTest {
         initTable();
     }
 
+    @Before
+    public void before() throws Exception {
+        deleteAllRows();
+    }
+
     @Test
-    public void readIBMStockTradeCsvWriteJdbc() throws Exception {
+    public void readIBMStockTradeCsvWriteJdbcBeanType() throws Exception {
         testReadWrite0(writerTestJobName, StockTrade.class, ExcelWriterTest.ibmStockTradeHeader,
+                "0", "10",
+                writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
+    }
+
+    @Test
+    public void readIBMStockTradeCsvWriteJdbcMapType() throws Exception {
+        testReadWrite0(writerTestJobName, Map.class, ExcelWriterTest.ibmStockTradeHeader,
                 "0", "120",
+                writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
+    }
+
+    @Test
+    public void readIBMStockTradeCsvWriteJdbcListType() throws Exception {
+        testReadWrite0(writerTestJobName, List.class, ExcelWriterTest.ibmStockTradeHeader,
+                "0", "200",
                 writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
     }
 
@@ -111,6 +134,18 @@ public class JdbcReaderWriterTest {
         connection = getConnection();
         preparedStatement = connection.prepareStatement(createTable);
         preparedStatement.execute();
+        close(connection, preparedStatement);
+    }
+
+    static void deleteAllRows() throws Exception {
+        final Connection connection = getConnection();
+        final PreparedStatement preparedStatement = connection.prepareStatement(deleteAllRows);
+        try {
+            preparedStatement.execute();
+        } catch (final SQLException e) {
+            //igore
+        }
+        close(connection, preparedStatement);
     }
 
     static Connection getConnection() throws Exception {
