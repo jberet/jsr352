@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.RowId;
-import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -38,9 +37,14 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
+/**
+ * An implementation of {@code javax.batch.api.chunk.ItemWriter} that inserts data items into the target database.
+ *
+ * @see JdbcItemReader
+ * @since 1.1.0
+ */
 @Named
 @Dependent
 public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWriter {
@@ -99,20 +103,7 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
             }
             preparedStatement.executeBatch();
         } finally {
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (final SQLException e) {
-                    SupportLogger.LOGGER.tracef(e, "Failed to close PreparedStatement");
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (final SQLException e) {
-                    SupportLogger.LOGGER.tracef(e, "Failed to close connection.");
-                }
-            }
+            JdbcItemReaderWriterBase.close(connection, preparedStatement);
         }
     }
 
@@ -260,7 +251,7 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
             preparedStatement.setByte(pos, (val instanceof Byte ? (Byte) val :
                     val == null ? 0 : Byte.parseByte(val.toString())));
         } else if (type.equals("Blob")) {
-            if(val == null) {
+            if (val == null) {
                 preparedStatement.setBlob(pos, (Blob) null);
             } else if (val instanceof Blob) {
                 preparedStatement.setBlob(pos, (Blob) val);
@@ -270,7 +261,7 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
                 throw SupportMessages.MESSAGES.unexpectedDataType("Blob | InputStream", val.getClass().getName(), val);
             }
         } else if (type.equals("Clob")) {
-            if(val == null) {
+            if (val == null) {
                 preparedStatement.setClob(pos, (Clob) null);
             } else if (val instanceof Clob) {
                 preparedStatement.setClob(pos, (Clob) val);
@@ -279,8 +270,8 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
             } else {
                 throw SupportMessages.MESSAGES.unexpectedDataType("Clob | Reader", val.getClass().getName(), val);
             }
-        }  else if (type.equals("NClob")) {
-            if(val == null) {
+        } else if (type.equals("NClob")) {
+            if (val == null) {
                 preparedStatement.setNClob(pos, (NClob) null);
             } else if (val instanceof NClob) {
                 preparedStatement.setNClob(pos, (NClob) val);

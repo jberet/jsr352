@@ -15,6 +15,7 @@ package org.jberet.support.io;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -23,6 +24,8 @@ import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+
+import org.jberet.support._private.SupportLogger;
 
 /**
  * The base class for {@link JdbcItemReader} and {@link JdbcItemWriter}.
@@ -117,6 +120,23 @@ public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase 
             return dataSource.getConnection();
         } else {
             return DriverManager.getConnection(url, dbProperties);
+        }
+    }
+
+    protected static void close(final Connection connection, final PreparedStatement preparedStatement) {
+        if (preparedStatement != null) {
+            try {
+                preparedStatement.close();
+            } catch (final SQLException e) {
+                SupportLogger.LOGGER.tracef(e, "Failed to close PreparedStatement");
+            }
+        }
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (final SQLException e) {
+                SupportLogger.LOGGER.tracef(e, "Failed to close connection.");
+            }
         }
     }
 }
