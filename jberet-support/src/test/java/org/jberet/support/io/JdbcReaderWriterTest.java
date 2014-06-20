@@ -83,7 +83,10 @@ public class JdbcReaderWriterTest {
         // CsvItemReaderWriter uses header "Date, Time, Open, ..."
         // CsvItemReaderWriter has nameMapping "date, time, open, ..." to match java fields in StockTrade. CsvItemReaderWriter
         // does not understand Jackson mapping annotations in POJO.
+
+        //this JdbcItemReader only reads row 1 (start = 1 and end = 1 below)
         testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteJdbcBeanType.out",
+                "1", "1",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
                 readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
     }
@@ -98,7 +101,10 @@ public class JdbcReaderWriterTest {
         //which is typically upper case
         //no nameMapping provided for CsvItemWriter, so the CsvItemWriter header will be used as nameMapping
         //CsvItemWriter header is all in upper case so as to match the data key, which is the database column names.
+
+        //this JdbcItemReader reads all available rows (start = null and end = null below)
         testRead0(readerTestJobName, Map.class, "readIBMStockTradeCsvWriteJdbcMapType.out",
+                null, null,
                 null, ibmStockTradeColumnsUpperCase,
                 //readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
                 readerQuery, null, parameterTypes);
@@ -112,7 +118,10 @@ public class JdbcReaderWriterTest {
 
         //since beanType is List, data fields go by order, so CsvItemWriter does not need to do any mapping,
         //and so CsvItemWriter header is just used for display purpose only.
+
+        //this JdbcItemReader reads row 2, 3, 4, 5 (start = 2 and end = 5 below)
         testRead0(readerTestJobName, List.class, "readIBMStockTradeCsvWriteJdbcListType.out",
+                "2", "5",
                 null, ExcelWriterTest.ibmStockTradeHeader,
                 readerQuery, null, parameterTypes);
     }
@@ -151,6 +160,7 @@ public class JdbcReaderWriterTest {
     }
 
     void testRead0(final String jobName, final Class<?> beanType, final String writeResource,
+                   final String start, final String end,
                    final String csvNameMapping, final String csvHeader,
                     final String sql, final String columnMapping, final String columnTypes) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
@@ -166,6 +176,12 @@ public class JdbcReaderWriterTest {
         }
 
         params.setProperty("url", url);
+        if (start != null) {
+            params.setProperty("start", start);
+        }
+        if (end != null) {
+            params.setProperty("end", end);
+        }
         if (sql != null) {
             params.setProperty("sql", sql);
         }

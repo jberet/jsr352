@@ -22,6 +22,8 @@
                     <property name="url" value="#{jobParameters['url']}"/>
                     <property name="columnMapping" value="#{jobParameters['columnMapping']}"/>
                     <property name="columnTypes" value="#{jobParameters['columnTypes']}"/>
+                    <property name="start" value="#{jobParameters['start']}"/>
+                    <property name="end" value="#{jobParameters['end']}"/>
                 </properties>
             </reader>
             <writer ref="csvItemWriter">

@@ -41,6 +41,19 @@ import org.jberet.support._private.SupportMessages;
 @Dependent
 public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemReader {
     /**
+     * The row number in the {@code ResultSet} to start reading.  It's a positive integer starting from 1.
+     */
+    @Inject
+    @BatchProperty
+    protected int start;
+
+    /**
+     * The row number in the {@code ResultSet} to end reading (inclusive).  It's a positive integer starting from 1.
+     */
+    @Inject
+    @BatchProperty
+    protected int end;
+    /**
      * String keys used in target data structure for database columns. Optional property, and if not specified, it
      * defaults to {@link #columnLabels} . This property should have the same length and order as {@link #columnTypes},
      * if the latter is specified.
@@ -82,6 +95,8 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
 
     protected ResultSet resultSet;
 
+    protected int currentRowNumber;
+
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         init();
@@ -90,22 +105,38 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.HOLD_CURSORS_OVER_COMMIT);
         resultSet = preparedStatement.executeQuery();
 
-        final ResultSetMetaData metaData = resultSet.getMetaData();
-        final int columnCount = metaData.getColumnCount();
-
-        if (columnMapping != null && columnMapping.length != columnCount) {
-            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, Arrays.toString(columnMapping), "columnMapping");
-        }
-        if (columnTypes != null && columnTypes.length != columnCount) {
-            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, Arrays.toString(columnTypes), "columnTypes");
-        }
         if (columnMapping == null) {
+            final ResultSetMetaData metaData = resultSet.getMetaData();
+            final int columnCount = metaData.getColumnCount();
+
+            if (columnTypes != null && columnTypes.length != columnCount) {
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, Arrays.toString(columnTypes), "columnTypes");
+            }
+
             columnLabels = new String[columnCount];
             for (int i = 0; i < columnCount; ++i) {
                 columnLabels[i] = metaData.getColumnLabel(i + 1);
             }
             columnMapping = columnLabels;
         }
+
+        if (start == 0) {
+            start = 1;
+        }
+        if (end == 0) {
+            end = Integer.MAX_VALUE;
+        }
+        if (end < start) {
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, String.valueOf(end), "end");
+        }
+        int rowToStart = start;
+        if (checkpoint != null) {
+            rowToStart = Math.max(start, (Integer) checkpoint);
+        }
+        if (rowToStart > 1) {
+            resultSet.absolute(rowToStart - 1);
+        }
+        currentRowNumber = rowToStart - 1;
     }
 
     @Override
@@ -125,9 +156,11 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
 
     @Override
     public Object readItem() throws Exception {
+        if (currentRowNumber >= end) {
+            return null;
+        }
         Object result = null;
         if (resultSet.next()) {
-
             if (beanType == List.class) {
                 final List<Object> resultList = new ArrayList<Object>();
                 for (int i = 0; i < columnMapping.length; ++i) {
@@ -147,12 +180,19 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
                 }
             }
         }
+        currentRowNumber = resultSet.getRow();
         return result;
     }
 
+    /**
+     * Gets the current row number in the {@code ResultSet} as the checkpoint info.
+     *
+     * @return the current row number in the {@code ResultSet}
+     * @throws Exception any exception raised
+     */
     @Override
     public Serializable checkpointInfo() throws Exception {
-        return null;
+        return currentRowNumber;
     }
 
     private Object getColumnValue(final int i) throws Exception {
