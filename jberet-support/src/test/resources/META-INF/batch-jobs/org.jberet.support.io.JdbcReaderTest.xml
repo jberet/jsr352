@@ -24,6 +24,7 @@
                     <property name="columnTypes" value="#{jobParameters['columnTypes']}"/>
                     <property name="start" value="#{jobParameters['start']}"/>
                     <property name="end" value="#{jobParameters['end']}"/>
+                    <property name="resultSetProperties" value="#{jobParameters['resultSetProperties']}"/>
                 </properties>
             </reader>
             <writer ref="csvItemWriter">

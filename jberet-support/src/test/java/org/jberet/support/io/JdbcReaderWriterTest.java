@@ -59,6 +59,8 @@ public class JdbcReaderWriterTest {
     static final String ibmStockTradeColumnsUpperCase = "TRADEDATE, TRADETIME, OPEN, HIGH, LOW, CLOSE, VOLUMN";
     static final String columnMapping = "date, time, open, high, low, close, volumn";
     static final String columnTypes = "Date, String, Double, Double, Double, Double, Double";
+    static final String resultSetProperties =
+    "fetchSize=1000, resultSetConcurrency=CONCUR_UPDATABLE, fetchDirection=FETCH_REVERSE, resultSetType=TYPE_SCROLL_SENSITIVE, resultSetHoldability=HOLD_CURSORS_OVER_COMMIT";
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -85,10 +87,11 @@ public class JdbcReaderWriterTest {
         // does not understand Jackson mapping annotations in POJO.
 
         //this JdbcItemReader only reads row 1 (start = 1 and end = 1 below)
+        //use custom resultSetProperties
         testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteJdbcBeanType.out",
                 "1", "1",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
-                readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
+                readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes, resultSetProperties);
     }
 
     @Test
@@ -103,11 +106,12 @@ public class JdbcReaderWriterTest {
         //CsvItemWriter header is all in upper case so as to match the data key, which is the database column names.
 
         //this JdbcItemReader reads all available rows (start = null and end = null below)
+        //use default resultSetProperties
         testRead0(readerTestJobName, Map.class, "readIBMStockTradeCsvWriteJdbcMapType.out",
                 null, null,
                 null, ibmStockTradeColumnsUpperCase,
                 //readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
-                readerQuery, null, parameterTypes);
+                readerQuery, null, parameterTypes, null);
     }
 
     @Test
@@ -120,10 +124,11 @@ public class JdbcReaderWriterTest {
         //and so CsvItemWriter header is just used for display purpose only.
 
         //this JdbcItemReader reads row 2, 3, 4, 5 (start = 2 and end = 5 below)
+        //use default resultSetProperties
         testRead0(readerTestJobName, List.class, "readIBMStockTradeCsvWriteJdbcListType.out",
                 "2", "5",
                 null, ExcelWriterTest.ibmStockTradeHeader,
-                readerQuery, null, parameterTypes);
+                readerQuery, null, parameterTypes, null);
     }
 
     void testWrite0(final String jobName, final Class<?> beanType, final String csvNameMapping,
@@ -162,7 +167,7 @@ public class JdbcReaderWriterTest {
     void testRead0(final String jobName, final Class<?> beanType, final String writeResource,
                    final String start, final String end,
                    final String csvNameMapping, final String csvHeader,
-                    final String sql, final String columnMapping, final String columnTypes) throws Exception {
+                   final String sql, final String columnMapping, final String columnTypes, final String resultSetProperties) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
 
         if (writeResource != null) {
@@ -191,6 +196,9 @@ public class JdbcReaderWriterTest {
         }
         if (columnTypes != null) {
             params.setProperty("columnTypes", columnTypes);
+        }
+        if (resultSetProperties != null) {
+            params.setProperty("resultSetProperties", resultSetProperties);
         }
 
         final long jobExecutionId = jobOperator.start(jobName, params);
