@@ -91,7 +91,8 @@ public class JdbcReaderWriterTest {
         testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteJdbcBeanType.out",
                 "1", "1",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
-                readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes, resultSetProperties);
+                readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes, resultSetProperties,
+                "09:30, 67040", "09:31");
     }
 
     @Test
@@ -111,7 +112,8 @@ public class JdbcReaderWriterTest {
                 null, null,
                 null, ibmStockTradeColumnsUpperCase,
                 //readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
-                readerQuery, null, parameterTypes, null);
+                readerQuery, null, parameterTypes, null,
+                "09:30, 67040,  1998-01-02,11:31,5900", "11:32");
     }
 
     @Test
@@ -128,7 +130,8 @@ public class JdbcReaderWriterTest {
         testRead0(readerTestJobName, List.class, "readIBMStockTradeCsvWriteJdbcListType.out",
                 "2", "5",
                 null, ExcelWriterTest.ibmStockTradeHeader,
-                readerQuery, null, parameterTypes, null);
+                readerQuery, null, parameterTypes, null,
+                "09:31, 10810,  09:32, 09:33,  09:34, 4800", "09:35");
     }
 
     void testWrite0(final String jobName, final Class<?> beanType, final String csvNameMapping,
@@ -167,11 +170,16 @@ public class JdbcReaderWriterTest {
     void testRead0(final String jobName, final Class<?> beanType, final String writeResource,
                    final String start, final String end,
                    final String csvNameMapping, final String csvHeader,
-                   final String sql, final String columnMapping, final String columnTypes, final String resultSetProperties) throws Exception {
+                   final String sql, final String columnMapping, final String columnTypes, final String resultSetProperties,
+                   final String expect, final String forbid) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
 
+        final File writeResourceFile;
         if (writeResource != null) {
-            params.setProperty("writeResource", new File(CsvItemReaderWriterTest.tmpdir, writeResource).getPath());
+            writeResourceFile = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
+            params.setProperty("writeResource", writeResourceFile.getPath());
+        } else {
+            throw new RuntimeException("writeResource is null");
         }
         if (csvNameMapping != null) {
             params.setProperty("nameMapping", csvNameMapping);
@@ -205,6 +213,7 @@ public class JdbcReaderWriterTest {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.HOURS);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
     }
 
     static void initTable() throws Exception {
