@@ -24,8 +24,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
@@ -68,18 +71,23 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String SELECT_JOB_INSTANCES_BY_JOB_NAME = "select-job-instances-by-job-name";
     private static final String SELECT_JOB_INSTANCE = "select-job-instance";
     private static final String INSERT_JOB_INSTANCE = "insert-job-instance";
+    private static final String DELETE_JOB_INSTANCE = "delete-job-instance";
+    private static final String DELETE_JOB_INSTANCE_BY_NAME = "delete-job-instance-by-name";
 
     private static final String SELECT_ALL_JOB_EXECUTIONS = "select-all-job-executions";
     private static final String SELECT_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID = "select-job-executions-by-job-instance-id";
     private static final String SELECT_JOB_EXECUTION = "select-job-execution";
     private static final String INSERT_JOB_EXECUTION = "insert-job-execution";
     private static final String UPDATE_JOB_EXECUTION = "update-job-execution";
+    private static final String DELETE_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID = "delete-job-executions-by-job-instance-id";
+    private static final String DELETE_JOB_EXECUTION = "delete-job-execution";
 
     private static final String SELECT_ALL_STEP_EXECUTIONS = "select-all-step-executions";
     private static final String SELECT_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID = "select-step-executions-by-job-execution-id";
     private static final String SELECT_STEP_EXECUTION = "select-step-execution";
     private static final String INSERT_STEP_EXECUTION = "insert-step-execution";
     private static final String UPDATE_STEP_EXECUTION = "update-step-execution";
+    private static final String DELETE_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID = "delete-step-executions-by-job-execution-id";
 
     private static final String FIND_ORIGINAL_STEP_EXECUTION = "find-original-step-execution";
     private static final String COUNT_STEP_EXECUTIONS_BY_JOB_INSTANCE_ID = "count-step-executions-by-job-instance-id";
@@ -89,6 +97,7 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String SELECT_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID = "select-partition-executions-by-step-execution-id";
     private static final String INSERT_PARTITION_EXECUTION = "insert-partition-execution";
     private static final String UPDATE_PARTITION_EXECUTION = "update-partition-execution";
+    private static final String DELETE_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID = "delete-partition-executions-by-step-execution-id";
 
     private final Properties configProperties;
     private String dataSourceName;
@@ -783,6 +792,111 @@ public final class JdbcRepository extends AbstractRepository {
             close(connection, preparedStatement, null, rs);
         }
         return count;
+    }
+
+    @Override
+    public void removeJob(String jobId) {
+        List<JobInstance> jobInstances = getJobInstances(jobId);
+        for (JobInstance jobInstance : jobInstances) {
+            removeJobInstance(jobInstance.getInstanceId());
+        }
+        final String delete = sqls.getProperty(DELETE_JOB_INSTANCE_BY_NAME);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(delete);
+            preparedStatement.setString(1, jobId);
+            preparedStatement.setString(2, getApplicationName());
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, delete);
+        } finally {
+            close(connection, preparedStatement, null, null);
+        }
+        super.removeJob(jobId);
+    }
+
+    @Override
+    public void removeJobInstance(long jobInstanceIdToRemove) {
+        JobInstance jobInstance = getJobInstance(jobInstanceIdToRemove);
+        List<JobExecution> jobExecutions = getJobExecutions(jobInstance);
+        for (JobExecution jobExecution : jobExecutions) {
+            List<StepExecution> stepExecutions = getStepExecutions(jobExecution.getExecutionId());
+            for (StepExecution stepExecution : stepExecutions) {
+                deletePartitionExecutions(stepExecution.getStepExecutionId());
+            }
+            deleteStepExecutions(jobExecution.getExecutionId());
+        }
+        deleteJobExecutions(jobInstanceIdToRemove);
+        deleteJobInstance(jobInstanceIdToRemove);
+        super.removeJobInstance(jobInstanceIdToRemove);
+    }
+
+    private void deleteJobInstance(long jobInstanceId) {
+        final String delete = sqls.getProperty(DELETE_JOB_INSTANCE);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(delete);
+            preparedStatement.setLong(1, jobInstanceId);
+            preparedStatement.executeUpdate();
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, delete);
+        } finally {
+            close(connection, preparedStatement, null, null);
+        }
+    }
+
+    private void deletePartitionExecutions(long stepExecutionId) {
+        final String delete = sqls.getProperty(DELETE_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(delete);
+            preparedStatement.setLong(1, stepExecutionId);
+            preparedStatement.executeUpdate();
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, delete);
+        } finally {
+            close(connection, preparedStatement, null, null);
+        }
+    }
+
+    private void deleteStepExecutions(long jobExecutionId) {
+        final String delete = sqls.getProperty(DELETE_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(delete);
+            preparedStatement.setLong(1, jobExecutionId);
+            preparedStatement.executeUpdate();
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, delete);
+        } finally {
+            close(connection, preparedStatement, null, null);
+        }
+    }
+
+    private void deleteJobExecutions(long jobInstanceId) {
+        final String delete = sqls.getProperty(DELETE_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID);
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(delete);
+            preparedStatement.setLong(1,jobInstanceId);
+            preparedStatement.executeUpdate();
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, delete);
+        } finally {
+            close(connection, preparedStatement, null, null);
+        }
+    }
+
+    private String getApplicationName() {
+        try {
+            return InitialContext.doLookup("java:app/AppName");
+        } catch (NamingException e) {
+            return null;
+        }
     }
 
     private Connection getConnection() {
