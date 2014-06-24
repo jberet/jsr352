@@ -93,6 +93,10 @@ public class JobOperatorImpl implements JobOperator {
             throw BatchMessages.MESSAGES.jobRepositoryRequired();
         }
     }
+ 
+    public BatchEnvironment getBatchEnvironment() {
+        return this.batchEnvironment;
+    }
 
     @Override
     public long start(final String jobXMLName, final Properties jobParameters) throws JobStartException, JobSecurityException {
