@@ -74,6 +74,9 @@
         <version.com.caucho.resin-quercus>3.2.1</version.com.caucho.resin-quercus>
         <version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>1.0.0.Final</version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>
 
+        <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
+        <version.org.hornetq>2.4.1.Final</version.org.hornetq>
+
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
     </properties>
@@ -387,6 +390,15 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <!-- JMS reader & writer dependencies -->
+            <dependency>
+                <groupId>org.jboss.spec.javax.jms</groupId>
+                <artifactId>jboss-jms-api_2.0_spec</artifactId>
+                <version>${version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec}</version>
+                <scope>provided</scope>
+            </dependency>
+
 
             <!-- Scripting testing dependency -->
             <dependency>

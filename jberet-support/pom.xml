@@ -114,6 +114,12 @@
             <artifactId>dom4j</artifactId>
         </dependency>
 
+        <!-- JMS reader & writer dependencies -->
+        <dependency>
+            <groupId>org.jboss.spec.javax.jms</groupId>
+            <artifactId>jboss-jms-api_2.0_spec</artifactId>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.jberet</groupId>
