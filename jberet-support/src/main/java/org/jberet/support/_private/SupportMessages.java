@@ -77,5 +77,9 @@ public interface SupportMessages {
     @Message(id = 60019, value = "Expecting data types: %s, but got %s, %s")
     BatchRuntimeException unexpectedDataType(String expectedTypes, String actualType, Object val);
 
+    @Message(id = 60020, value = "Expecting JMS message types: %s, but got %s, %s")
+    BatchRuntimeException unexpectedJmsMessageType(String expectedTypes, String actualType, Object val);
+
+
 
 }
