@@ -53,5 +53,7 @@ public class JobRepositoryTest {
 		this.jobRepository.removeJobInstance(jobInstanceId);
 		JobExecution jobExecution = this.jobOperator.getJobExecution(executionId);
 		assertNull(jobExecution);
+		assertFalse(this.jobOperator.getJobNames().contains(
+				"org.jberet.se.test.helloWorld"));
 	}
 }
