@@ -28,24 +28,40 @@ import org.jberet.support._private.SupportLogger;
 /**
  * The base class for {@link JmsItemReader} and {@link JmsItemWriter}.
  */
-public abstract class JmsItemReaderWriterBase extends JsonItemReaderWriterBase {
+public abstract class JmsItemReaderWriterBase {
+    /**
+     * This field holds an optional injection of {@code javax.jms.Destination}. When {@link #destinationLookupName}
+     * property is specified in job xml, this property is ignored and {@link #destinationLookupName} is used to look up
+     * JMS destination. The application may implement a {@code javax.enterprise.inject.Produces} method to satisfy
+     * this dependency injection.
+     */
     @Inject
     protected Instance<Destination> destinationInstance;
 
+    /**
+     * This field holds an optional injection of {@code javax.jms.ConnectionFactory}. When {@link #connectionFactoryLookupName}
+     * property is specified in job xml, this property is ignored and {@link #connectionFactoryLookupName} is used to
+     * look up JMS {@code ConnectionFactory}. The application may implement a {@code javax.enterprise.inject.Produces}
+     * method to satisfy this dependency injection.
+     */
     @Inject
     protected Instance<ConnectionFactory> connectionFactoryInstance;
 
+    /**
+     * JNDI lookup name for the JMS {@code Destination}. Optional property and defaults to null. When specified in
+     * job xml, it has higher precedence over {@link #destinationInstance} injection
+     */
     @Inject
     @BatchProperty
     protected String destinationLookupName;
 
+    /**
+     * JNDI lookup name for the JMS {@code ConnectionFactory}. Optional property and defaults to null. When specified in
+     * job xml, it has higher precedence over {@link #connectionFactoryInstance} injection.
+     */
     @Inject
     @BatchProperty
     protected String connectionFactoryLookupName;
-
-    @Inject
-    @BatchProperty
-    protected Class beanType;
 
     protected Destination destination;
     protected ConnectionFactory connectionFactory;

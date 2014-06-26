@@ -19,7 +19,8 @@
                 <properties>
                     <!--<property name="connectionFactoryLookupName" value="/cf"/>-->
                     <!--<property name="destinationLookupName" value="/queue/queue1"/>-->
-                    <property name="beanType" value="#{jobParameters['beanType']}"/>
+                    <!-- wait for 5 seconds for any more messages -->
+                    <property name="receiveTimeout" value="5000"/>
                 </properties>
             </reader>
 

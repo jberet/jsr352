@@ -13,10 +13,8 @@
 package org.jberet.support.io;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
@@ -28,10 +26,31 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.ObjectMessage;
+import javax.jms.TextMessage;
 
 import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
+/**
+ * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from a JMS destination. It can
+ * reads the following JMS message types:
+ * <p/>
+ * <ul>
+ * <li>{@code ObjectMessage}: the object contained in the message is retrieved and returned;</li>
+ * <li>{@code MapMessage}: a new {@code java.util.Map} is created, populated with the data contained in the
+ * incoming {@code MapMessage}, and returned;</li>
+ * <li>{@code TextMessage}: the text contained in the message is retrieved and returned.</li>
+ * </ul>
+ * <p/>
+ * This reader ends when either of the following occurs:
+ * <ul>
+ * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;</li>
+ * <li>any {@code null} content is retrieved from a message, or for no mapping contained in a {@code MapMessage}.</li>
+ * </ul>
+ *
+ * @see JmsItemWriter
+ * @since 1.1.0
+ */
 @Named
 @Dependent
 public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader {
@@ -53,28 +72,29 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
 
     @Override
     public Object readItem() throws Exception {
-        final Object result;
+        Object result = null;
         final Message message = consumer.receive(receiveTimeout);
-        if (beanType == Map.class) {
-            if (message instanceof MapMessage) {
-                final Map<String, Object> mapResult = new HashMap<String, Object>();
-                final MapMessage mapMessage = (MapMessage) message;
-                final Enumeration mapNames = mapMessage.getMapNames();
-                while (mapNames.hasMoreElements()) {
-                    final String k = (String) mapNames.nextElement();
-                    mapResult.put(k, mapMessage.getObject(k));
-                }
-                result = mapResult;
-            } else {
-                throw SupportMessages.MESSAGES.unexpectedJmsMessageType("MapMessage", message.getJMSType(), message.toString());
+        if (message == null) {  //no more messages after receiveTimeout
+            return null;
+        }
+
+        if (message instanceof ObjectMessage) {
+            final ObjectMessage objectMessage = (ObjectMessage) message;
+            result = objectMessage.getObject();
+        } else if (message instanceof MapMessage) {
+            final Map<String, Object> mapResult = new HashMap<String, Object>();
+            final MapMessage mapMessage = (MapMessage) message;
+            final Enumeration mapNames = mapMessage.getMapNames();
+            while (mapNames.hasMoreElements()) {
+                final String k = (String) mapNames.nextElement();
+                mapResult.put(k, mapMessage.getObject(k));
             }
+            result = mapResult.size() == 0 ? null : mapResult;
+        } else if (message instanceof TextMessage) {
+            final TextMessage textMessage = (TextMessage) message;
+            result = textMessage.getText();
         } else {
-            if (message instanceof ObjectMessage) {
-                final ObjectMessage objectMessage = (ObjectMessage) message;
-                result = objectMessage.getObject();
-            } else {
-                throw SupportMessages.MESSAGES.unexpectedJmsMessageType("ObjectMessage", message.getJMSType(), message.toString());
-            }
+            throw SupportMessages.MESSAGES.unexpectedJmsMessageType("ObjectMessage | MapMessage | TextMessage", message.getJMSType(), message.toString());
         }
 
         return result;

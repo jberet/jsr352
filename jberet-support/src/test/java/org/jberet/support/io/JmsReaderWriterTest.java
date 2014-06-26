@@ -14,6 +14,8 @@ package org.jberet.support.io;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
@@ -49,6 +51,12 @@ public class JmsReaderWriterTest {
     static final String connectionFactoryLookupName = "/cf";
 
     protected static EmbeddedJMS jmsServer;
+
+    static final String ibmStockTradeExpected1_10 = "09:30, 67040, 09:31, 10810,    09:39, 2500";
+    static final String ibmStockTradeForbid1_10 = "09:40";
+
+    static final String ibmStockTradeCellProcessorsDateAsString =
+            "null; null; ParseDouble; ParseDouble; ParseDouble; ParseDouble; ParseDouble";
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -99,25 +107,48 @@ public class JmsReaderWriterTest {
 
     @Test
     public void readIBMStockTradeCsvWriteJmsBeanType() throws Exception {
-        testWrite0(writerTestJobName, StockTrade.class, ExcelWriterTest.ibmStockTradeHeader,
-                "0", "10");
+        testWrite0(writerTestJobName, StockTrade.class, ExcelWriterTest.ibmStockTradeHeader, ExcelWriterTest.ibmStockTradeCellProcessors,
+                "1", "10");
 
         // CsvItemReaderWriter uses header "Date, Time, Open, ..."
         // CsvItemReaderWriter has nameMapping "date, time, open, ..." to match java fields in StockTrade. CsvItemReaderWriter
         // does not understand Jackson mapping annotations in POJO.
 
-        //testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteJmsBeanType.out",
-        //        ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
-        //        ExcelReaderTest.ibmStockTradeFullExpected, null);
+        testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteJmsBeanType.out",
+                ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
+                ibmStockTradeExpected1_10, ibmStockTradeForbid1_10);
+    }
+
+    @Test
+    public void readIBMStockTradeCsvWriteJmsMapType() throws Exception {
+        testWrite0(writerTestJobName, Map.class, ExcelWriterTest.ibmStockTradeHeader, ibmStockTradeCellProcessorsDateAsString,
+                "1", "10");
+
+        testRead0(readerTestJobName, Map.class, "readIBMStockTradeCsvWriteJmsMapType.out",
+                ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
+                ibmStockTradeExpected1_10, ibmStockTradeForbid1_10);
+    }
+
+    @Test
+    public void readIBMStockTradeCsvWriteJmsListType() throws Exception {
+        testWrite0(writerTestJobName, List.class, ExcelWriterTest.ibmStockTradeHeader, ExcelWriterTest.ibmStockTradeCellProcessors,
+                "1", "10");
+
+        testRead0(readerTestJobName, List.class, "readIBMStockTradeCsvWriteJmsListType.out",
+                ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
+                ibmStockTradeExpected1_10, ibmStockTradeForbid1_10);
     }
 
 
-    void testWrite0(final String jobName, final Class<?> beanType, final String csvNameMapping,
+    void testWrite0(final String jobName, final Class<?> beanType, final String csvNameMapping, final String cellProcessors,
                     final String start, final String end) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
 
         if (csvNameMapping != null) {
             params.setProperty("nameMapping", csvNameMapping);
+        }
+        if (cellProcessors != null) {
+            params.setProperty("cellProcessors", cellProcessors);
         }
         if (start != null) {
             params.setProperty("start", start);

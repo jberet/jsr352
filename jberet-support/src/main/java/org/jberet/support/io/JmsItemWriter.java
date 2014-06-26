@@ -25,6 +25,22 @@ import javax.jms.MessageProducer;
 
 import org.jberet.support._private.SupportLogger;
 
+/**
+ * An implementation of {@code javax.batch.api.chunk.ItemWriter} that sends data items to a JMS destination. It can
+ * sends the following JMS message types:
+ * <p/>
+ * <ul>
+ * <li>if the data item is of type {@code java.util.Map}, a {@code MapMessage} is created, populated with the data
+ * contained in the data item, and sent;</li>
+ * <li>else if the data item is of type {@code java.lang.String}, a {@code TextMessage} is created with the text content
+ * in the data item, and sent;</li>
+ * <li>else a {@code ObjectMessage} is created with the data item object, and sent.</li>
+ * </ul>
+ * <p/>
+ *
+ * @see JmsItemReader
+ * @since 1.1.0
+ */
 @Named
 @Dependent
 public class JmsItemWriter extends JmsItemReaderWriterBase implements ItemWriter {
@@ -40,13 +56,15 @@ public class JmsItemWriter extends JmsItemReaderWriterBase implements ItemWriter
     public void writeItems(final List<Object> items) throws Exception {
         for (final Object item : items) {
             final Message msg;
-            if (beanType == Map.class) {
-                final Map<String, Object> itemAsMap = (Map<String, Object>) item;
+            if (item instanceof Map) {
+                final Map<?, ?> itemAsMap = (Map) item;
                 final MapMessage mapMessage = session.createMapMessage();
-                for (final Map.Entry<String, Object> e : itemAsMap.entrySet()) {
-                    mapMessage.setObject(e.getKey(), e.getValue());
+                for (final Map.Entry e : itemAsMap.entrySet()) {
+                    mapMessage.setObject(e.getKey().toString(), e.getValue());
                 }
                 msg = mapMessage;
+            } else if (item instanceof String) {
+                msg = session.createTextMessage((String) item);
             } else {
                 msg = session.createObjectMessage((Serializable) item);
             }
