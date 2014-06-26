@@ -104,6 +104,10 @@ public abstract class AbstractRepository implements JobRepository {
                 for (JobExecution jobExecution : jobExecutionsList) {
                     jobExecutions.remove(jobExecution.getExecutionId());
                 }
+                String jobName = jobInstance.getJobName();
+                if (getJobInstanceCount(jobName) == 0) {
+                    jobs.remove(jobName);
+                }
         }
         jobInstances.remove(jobInstanceIdToRemove);
     }
