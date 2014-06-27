@@ -39,13 +39,18 @@ import org.jberet.support._private.SupportMessages;
  * <li>{@code ObjectMessage}: the object contained in the message is retrieved and returned;</li>
  * <li>{@code MapMessage}: a new {@code java.util.Map} is created, populated with the data contained in the
  * incoming {@code MapMessage}, and returned;</li>
- * <li>{@code TextMessage}: the text contained in the message is retrieved and returned.</li>
+ * <li>{@code TextMessage}: the text contained in the message is retrieved and returned;</li>
+ * <li>{@code Message}: but not one of its subtype, null is returned.</li>
  * </ul>
+ * <p/>
+ * If {@link #beanType} is set to {@code javax.jms.Message}, {@link #readItem()} returns the incoming JMS message as is.
+ * Otherwise, {@link #readItem()} method determines the actual data type based on the message type.
  * <p/>
  * This reader ends when either of the following occurs:
  * <ul>
  * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;</li>
- * <li>any {@code null} content is retrieved from a message, or for no mapping contained in a {@code MapMessage}.</li>
+ * <li>any {@code null} body is retrieved from a message;</li>
+ * <li>any message is of type {@code Message}, but not one of its subtype.</li>
  * </ul>
  *
  * @see JmsItemWriter
@@ -63,13 +68,28 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
     protected long receiveTimeout;
 
     /**
-     * only messages with properties matching the message selector expression are delivered. A value of null or an
+     * Only messages with properties matching the message selector expression are delivered. A value of null or an
      * empty string indicates that there is no message selector for the message consumer.
      * See JMS API {@link javax.jms.Session#createConsumer(javax.jms.Destination, java.lang.String)}
      */
     @Inject
     @BatchProperty
     protected String messageSelector;
+
+    /**
+     * The fully-qualified class name of the data item to be returned from {@link #readItem()} method. Optional
+     * property and defaults to null. If it is specified, its valid value is:
+     * <p/>
+     * <ul>
+     *     <li>{@code javax.jms.Message}: an incoming JMS message is returned as is.</li>
+     * </ul>
+     * <p/>
+     * When this property is not specified, {@link #readItem()} method returns an object whose actual type is
+     * determined by the incoming JMS message type.
+     */
+    @Inject
+    @BatchProperty
+    protected Class beanType;
 
     protected MessageConsumer consumer;
 
@@ -82,10 +102,18 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
 
     @Override
     public Object readItem() throws Exception {
-        Object result = null;
+        final Object result;
         final Message message = consumer.receive(receiveTimeout);
         if (message == null) {  //no more messages after receiveTimeout
             return null;
+        }
+
+        if (message.getBody(Object.class) == null) {
+            return null;
+        }
+
+        if (beanType == Message.class) {
+            return message;
         }
 
         if (message instanceof ObjectMessage) {
@@ -99,7 +127,7 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
                 final String k = (String) mapNames.nextElement();
                 mapResult.put(k, mapMessage.getObject(k));
             }
-            result = mapResult.size() == 0 ? null : mapResult;
+            result = mapResult;
         } else if (message instanceof TextMessage) {
             final TextMessage textMessage = (TextMessage) message;
             result = textMessage.getText();

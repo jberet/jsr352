@@ -34,7 +34,8 @@ import org.jberet.support._private.SupportLogger;
  * contained in the data item, and sent;</li>
  * <li>else if the data item is of type {@code java.lang.String}, a {@code TextMessage} is created with the text content
  * in the data item, and sent;</li>
- * <li>else a {@code ObjectMessage} is created with the data item object, and sent.</li>
+ * <li>else if the data is of type {@code javax.jms.Message}, it is sent as is;</li>
+ * <li>else an {@code ObjectMessage} is created with the data item object, and sent.</li>
  * </ul>
  * <p/>
  *
@@ -65,6 +66,8 @@ public class JmsItemWriter extends JmsItemReaderWriterBase implements ItemWriter
                 msg = mapMessage;
             } else if (item instanceof String) {
                 msg = session.createTextMessage((String) item);
+            } else if (item instanceof Message) {
+                msg = (Message) item;
             } else {
                 msg = session.createObjectMessage((Serializable) item);
             }
