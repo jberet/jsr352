@@ -62,12 +62,22 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
     @BatchProperty
     protected long receiveTimeout;
 
+    /**
+     * only messages with properties matching the message selector expression are delivered. A value of null or an
+     * empty string indicates that there is no message selector for the message consumer.
+     * See JMS API {@link javax.jms.Session#createConsumer(javax.jms.Destination, java.lang.String)}
+     */
+    @Inject
+    @BatchProperty
+    protected String messageSelector;
+
     protected MessageConsumer consumer;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         super.open(checkpoint);
-        consumer = session.createConsumer(destination);
+        consumer = session.createConsumer(destination, messageSelector);
+        connection.start();
     }
 
     @Override

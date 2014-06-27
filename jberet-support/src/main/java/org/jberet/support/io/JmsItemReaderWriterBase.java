@@ -24,6 +24,7 @@ import javax.jms.Session;
 import javax.naming.InitialContext;
 
 import org.jberet.support._private.SupportLogger;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * The base class for {@link JmsItemReader} and {@link JmsItemWriter}.
@@ -63,6 +64,22 @@ public abstract class JmsItemReaderWriterBase {
     @BatchProperty
     protected String connectionFactoryLookupName;
 
+    /**
+     * The string name of the sessionMode used to create JMS session from a JMS connection. Optional property, and
+     * defaults to null. When not specified, JMS API {@link javax.jms.Connection#createSession()} is invoked to create
+     * the JMS session. When this property is specified, its value must be either {@code AUTO_ACKNOWLEDGE} or
+     * {@code DUPS_OK_ACKNOWLEDGE}.
+     * <p/>
+     * An example property in job xml:
+     * <p/>
+     * &lt;property name="sessionMode" value="DUPS_OK_ACKNOWLEDGE"/&gt;
+     * <p/>
+     * See JMS API {@link javax.jms.Connection#createSession(int)} for more details.
+     */
+    @Inject
+    @BatchProperty
+    protected String sessionMode;
+
     protected Destination destination;
     protected ConnectionFactory connectionFactory;
     protected Connection connection;
@@ -86,8 +103,20 @@ public abstract class JmsItemReaderWriterBase {
                 connectionFactory = connectionFactoryInstance.get();
             }
             connection = connectionFactory.createConnection();
-            session = connection.createSession();
-            connection.start();
+
+            if (sessionMode != null) {
+                final int sessionModeInt;
+                if (sessionMode.equals("AUTO_ACKNOWLEDGE")) {
+                    sessionModeInt = Session.AUTO_ACKNOWLEDGE;
+                } else if (sessionMode.equals("DUPS_OK_ACKNOWLEDGE")) {
+                    sessionModeInt = Session.DUPS_OK_ACKNOWLEDGE;
+                } else {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, sessionMode, "sessionMode");
+                }
+                session = connection.createSession(sessionModeInt);
+            } else {
+                session = connection.createSession();
+            }
         } finally {
             if (ic != null) {
                 ic.close();
