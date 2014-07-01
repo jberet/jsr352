@@ -11,6 +11,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 
 ####Project Resources:
 * [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET)
+* [JBeret-dev Mailing List](https://lists.jboss.org/mailman/listinfo/jberet-dev)
 * [WildFly Forum](https://community.jboss.org/en/wildfly?view=discussions)
 * [JBeret Forum](https://community.jboss.org/en/jberet/)
 * [JSR 352 Expert Group Discussion](https://java.net/projects/jbatch/lists/public/archive)
@@ -122,6 +123,12 @@ scope should be set to `provided`.
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+        </dependency>
+        
+        <!-- For Weld 2.2.2.Final or later, Jandex is required for annotation processing -->
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jandex</artifactId>
         </dependency>
         
         <!-- replace Java built-in StAX provider with aalto-xml or woodstox
