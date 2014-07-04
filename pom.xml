@@ -12,8 +12,7 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -24,7 +23,7 @@
 
     <groupId>org.jberet</groupId>
     <artifactId>jberet-parent</artifactId>
-    <version>1.1.0.Alpha2-SNAPSHOT</version>
+    <version>1.1.0.Alpha2.r1</version>
 
     <name>jberet-parent</name>
     <description>Impl of JSR 352: Batch Applications for the Java Platform</description>
@@ -99,6 +98,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
+			<argLine>-Xmx1024m</argLine>
                     </configuration>
                 </plugin>
             </plugins>
@@ -563,7 +563,8 @@
         <connection>scm:git:https://github.com/jberet/jsr352.git</connection>
         <url>scm:git:https://github.com/jberet/jsr352.git</url>
         <developerConnection>scm:git:https://github.com/jberet/jsr352.git</developerConnection>
-    </scm>
+      <tag>jberet-parent-1.1.0.Alpha2.r1</tag>
+  </scm>
 
     <issueManagement>
         <system>Jira</system>
