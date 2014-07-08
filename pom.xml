@@ -77,6 +77,7 @@
 
         <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
         <version.org.hornetq>2.4.1.Final</version.org.hornetq>
+        <version.io.netty>4.0.15.Final</version.io.netty>
 
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
@@ -408,6 +409,25 @@
                 <scope>provided</scope>
             </dependency>
 
+            <!-- HornetQ ItemReader & ItemWriter dependencies -->
+            <dependency>
+                <groupId>org.hornetq</groupId>
+                <artifactId>hornetq-core-client</artifactId>
+                <version>${version.org.hornetq}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hornetq</groupId>
+                <artifactId>hornetq-commons</artifactId>
+                <version>${version.org.hornetq}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${version.io.netty}</version>
+                <scope>provided</scope>
+            </dependency>
 
             <!-- Scripting testing dependency -->
             <dependency>

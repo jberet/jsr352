@@ -120,6 +120,20 @@
             <artifactId>jboss-jms-api_2.0_spec</artifactId>
         </dependency>
 
+        <!-- HornetQ ItemReader & ItemWriter dependencies -->
+        <dependency>
+            <groupId>org.hornetq</groupId>
+            <artifactId>hornetq-core-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hornetq</groupId>
+            <artifactId>hornetq-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.jberet</groupId>
