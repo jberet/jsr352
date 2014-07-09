@@ -46,7 +46,7 @@ import org.jberet.support._private.SupportMessages;
  * If {@link #beanType} is set to {@code javax.jms.Message}, {@link #readItem()} returns the incoming JMS message as is.
  * Otherwise, {@link #readItem()} method determines the actual data type based on the message type.
  * <p/>
- * This reader ends when either of the following occurs:
+ * This reader ends when any of the following occurs:
  * <ul>
  * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;</li>
  * <li>any {@code null} body is retrieved from a message;</li>

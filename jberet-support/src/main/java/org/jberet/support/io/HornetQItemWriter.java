@@ -27,8 +27,20 @@ import org.jberet.support._private.SupportLogger;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that sends data items to a HornetQ address.
+ * It can sends the following HornetQ message types:
+ * <p/>
+ * <ul>
+ * <li>if the data item is of type {@code java.lang.String}, a {@code org.hornetq.api.core.client.ClientMessage#TEXT_TYPE}
+ * message is created with the text content in the data item, and sent;</li>
+ * <li>else if the data is of type {@code org.hornetq.api.core.client.ClientMessage}, it is sent as is;</li>
+ * <li>else an {@code org.hornetq.api.core.client.ClientMessage#OBJECT_TYPE} message is created with the data item
+ * object, and sent.</li>
+ * </ul>
+ * <p/>
+ * {@link #durableMessage} property can be configured to send either durable or non-durable (default) messages.
  *
  * @see HornetQItemReader
+ * @see JmsItemWriter
  * @since 1.1.0
  */
 @Named
@@ -65,11 +77,6 @@ public class HornetQItemWriter extends HornetQItemReaderWriterBase implements It
             }
             producer.send(msg);
         }
-    }
-
-    @Override
-    public Serializable checkpointInfo() throws Exception {
-        return null;
     }
 
     @Override

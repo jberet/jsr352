@@ -26,8 +26,26 @@ import org.jberet.support._private.SupportLogger;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from a HornetQ address.
+ * It handles the following types of HornetQ messages:
+ * <p/>
+ * <ul>
+ * <li>if {@link #beanType} is set to {@code org.hornetq.api.core.client.ClientMessage}, the incoming message
+ * is immediately returned as is from {@link #readItem()}</li>
+ * <li>if the message type is {@code org.hornetq.api.core.client.ClientMessage#TEXT_TYPE}, the string text is
+ * returned from {@link #readItem()};</li>
+ * <li>otherwise, a byte array is retrieved from the message body buffer, deserialize to an object, and returned
+ * from {@link #readItem()}</li>
+ * </ul>
+ * <p/>
+ * This reader ends when either of the following occurs:
+ * <p/>
+ * <ul>
+ * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;</li>
+ * <li>the size of the incoming message body is 0;</li>
+ * </ul>
  *
  * @see HornetQItemWriter
+ * @see JmsItemReader
  * @since 1.1.0
  */
 @Named
@@ -92,11 +110,6 @@ public class HornetQItemReader extends HornetQItemReaderWriterBase implements It
         }
 
         return result;
-    }
-
-    @Override
-    public Serializable checkpointInfo() throws Exception {
-        return null;
     }
 
     @Override

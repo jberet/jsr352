@@ -213,6 +213,10 @@ public abstract class HornetQItemReaderWriterBase {
         }
     }
 
+    public Serializable checkpointInfo() throws Exception {
+        return null;
+    }
+
     protected void configureServerLocator() throws Exception {
         for (final Object o : serverLocatorParams.keySet()) {
             final String key = (String) o;
