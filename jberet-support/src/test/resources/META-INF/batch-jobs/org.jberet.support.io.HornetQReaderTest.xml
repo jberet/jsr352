@@ -17,9 +17,6 @@
         <chunk item-count="100">
             <reader ref="hornetQItemReader">
                 <properties>
-                    <!--<property name="connectionFactoryLookupName" value="/cf"/>-->
-                    <!--<property name="destinationLookupName" value="/queue/queue1"/>-->
-                    <!-- wait for 5 seconds for any more messages -->
                     <property name="receiveTimeout" value="2000"/>
                     <property name="queueParams" value="address=example"/>
                 </properties>

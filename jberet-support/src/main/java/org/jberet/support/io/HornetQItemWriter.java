@@ -34,6 +34,10 @@ import org.jberet.support._private.SupportLogger;
 @Named
 @Dependent
 public class HornetQItemWriter extends HornetQItemReaderWriterBase implements ItemWriter {
+    /**
+     * Whether the message to be produced is durable or not. Optional property and defaults to false. Valid values are
+     * true and false.
+     */
     @Inject
     @BatchProperty
     protected boolean durableMessage;

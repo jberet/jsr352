@@ -15,9 +15,11 @@ package org.jberet.support.io;
 import java.util.List;
 import java.util.Map;
 
+import org.hornetq.api.core.Message;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.api.core.client.ClientSession;
 import org.hornetq.api.core.client.HornetQClient;
+import org.hornetq.api.core.client.SendAcknowledgementHandler;
 import org.hornetq.core.config.Configuration;
 import org.hornetq.core.config.impl.ConfigurationImpl;
 import org.hornetq.core.server.HornetQServer;
@@ -61,6 +63,9 @@ public class HornetQReaderWriterTest {
 
         final TransportConfiguration transportConfiguration = new TransportConfiguration(connectorFactoryName);
         MessagingResourceProducer.serverLocator = HornetQClient.createServerLocatorWithoutHA(transportConfiguration);
+        MessagingResourceProducer.serverLocator.setBlockOnAcknowledge(false);
+        MessagingResourceProducer.serverLocator.setConfirmationWindowSize(5);
+
         MessagingResourceProducer.sessionFactory = MessagingResourceProducer.serverLocator.createSessionFactory();
         coreSession = MessagingResourceProducer.sessionFactory.createSession(false, false, false);
         coreSession.createQueue(queueAddress, queueAddress);
@@ -108,5 +113,12 @@ public class HornetQReaderWriterTest {
         testRead0(readerTestJobName, List.class, "readIBMStockTradeCsvWriteHornetQListType.out",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
                 ibmStockTradeExpected1_10, ibmStockTradeForbid1_10);
+    }
+
+    public static class HornetQSendAcknowledgementHandler implements SendAcknowledgementHandler {
+        @Override
+        public void sendAcknowledged(final Message message) {
+            System.out.printf("sendAcknowledged message: %s in %s%n", message, this);
+        }
     }
 }

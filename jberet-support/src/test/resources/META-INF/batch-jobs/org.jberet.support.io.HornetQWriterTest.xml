@@ -32,6 +32,9 @@
             <writer ref="hornetQItemWriter">
                 <properties>
                     <property name="queueParams" value="address=example"/>
+                    <property name="durableMessage" value="false"/>  <!-- default is already false -->
+                    <property name="sendAcknowledgementHandler" value="org.jberet.support.io.HornetQReaderWriterTest$HornetQSendAcknowledgementHandler"/>
+
                 </properties>
             </writer>
         </chunk>

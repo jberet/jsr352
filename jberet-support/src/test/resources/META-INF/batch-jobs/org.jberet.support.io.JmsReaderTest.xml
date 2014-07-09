@@ -19,7 +19,7 @@
                 <properties>
                     <!--<property name="connectionFactoryLookupName" value="/cf"/>-->
                     <!--<property name="destinationLookupName" value="/queue/queue1"/>-->
-                    <!-- wait for 5 seconds for any more messages -->
+                    <!-- wait for 2 seconds for any more messages -->
                     <property name="receiveTimeout" value="2000"/>
                     <property name="messageSelector" value=""/>
                     <property name="sessionMode" value="DUPS_OK_ACKNOWLEDGE"/>
