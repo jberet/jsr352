@@ -18,7 +18,8 @@
             <reader ref="hornetQItemReader">
                 <properties>
                     <property name="receiveTimeout" value="2000"/>
-                    <property name="queueParams" value="address=example"/>
+                    <property name="queueParams" value="address=example, durable=false"/>
+                    <property name="serverLocatorParams" value="HA=false, ConsumerMaxRate=100"/>
                 </properties>
             </reader>
 

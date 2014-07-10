@@ -34,7 +34,7 @@
                     <property name="queueParams" value="address=example"/>
                     <property name="durableMessage" value="false"/>  <!-- default is already false -->
                     <property name="sendAcknowledgementHandler" value="org.jberet.support.io.HornetQReaderWriterTest$HornetQSendAcknowledgementHandler"/>
-
+                    <property name="serverLocatorParams" value="HA=false, ProducerMaxRate=100"/>
                 </properties>
             </writer>
         </chunk>
