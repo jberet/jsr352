@@ -9,6 +9,10 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
 * [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [JSR 352 TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
 
+####3rd-party & Community Extensions:
+* [jberet-eap6](https://github.com/fcorneli/jberet-eap6)
+* [jberetweb, job repository viewer](https://github.com/lbtc-xxx/jberetweb)
+
 ####Project Resources:
 * [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET)
 * [JBeret-dev Mailing List](https://lists.jboss.org/mailman/listinfo/jberet-dev)
