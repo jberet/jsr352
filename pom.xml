@@ -37,6 +37,8 @@
         <!-- the inherited version does not support forkCount or reuseForks, so override with newer version -->
         <version.surefire.plugin>2.16</version.surefire.plugin>
         <version.dependency.plugin>2.8</version.dependency.plugin>
+        <version.javadoc.plugin>2.9.1</version.javadoc.plugin>
+        <version.org.jboss.apiviz>1.3.2.GA</version.org.jboss.apiviz>
 
         <version.com.fasterxml.aalto-xml>0.9.9</version.com.fasterxml.aalto-xml>
         <version.com.google.guava>13.0.1</version.com.google.guava>
@@ -102,8 +104,39 @@
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${version.javadoc.plugin}</version>
+                    <configuration>
+                        <reportOutputDirectory>${project.reporting.outputDirectory}/${project.version}/javadoc/</reportOutputDirectory>
+                        <destDir>${project.name}</destDir>
+                        <additionalJOptions>
+                            <additionalJOption>-Xdoclint:none</additionalJOption>
+                        </additionalJOptions>
+
+                        <doclet>org.jboss.apiviz.APIviz</doclet>
+                        <docletArtifact>
+                            <groupId>org.jboss.apiviz</groupId>
+                            <artifactId>apiviz</artifactId>
+                            <version>${version.org.jboss.apiviz}</version>
+                        </docletArtifact>
+                        <useStandardDocletOptions>true</useStandardDocletOptions>
+                        <charset>UTF-8</charset>
+                        <encoding>UTF-8</encoding>
+                        <docencoding>UTF-8</docencoding>
+                        <breakiterator>true</breakiterator>
+                        <version>true</version>
+                        <author>true</author>
+                        <keywords>true</keywords>
+                        <additionalparam>
+                            -sourceclasspath ${project.build.outputDirectory}
+                        </additionalparam>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -149,6 +182,10 @@
                 <configuration>
                     <skipSource>true</skipSource>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
