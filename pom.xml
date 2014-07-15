@@ -114,6 +114,7 @@
                         <additionalJOptions>
                             <additionalJOption>-Xdoclint:none</additionalJOption>
                         </additionalJOptions>
+                        <excludePackageNames>*._private.*</excludePackageNames>
 
                         <doclet>org.jboss.apiviz.APIviz</doclet>
                         <docletArtifact>
@@ -129,9 +130,7 @@
                         <version>true</version>
                         <author>true</author>
                         <keywords>true</keywords>
-                        <additionalparam>
-                            -sourceclasspath ${project.build.outputDirectory}
-                        </additionalparam>
+                        <additionalparam>-sourceclasspath ${project.build.outputDirectory}</additionalparam>
                     </configuration>
                 </plugin>
             </plugins>
