@@ -12,6 +12,7 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 ####3rd-party & Community Extensions:
 * [jberet-eap6](https://github.com/fcorneli/jberet-eap6)
 * [jberetweb, job repository viewer](https://github.com/lbtc-xxx/jberetweb)
+* [jBatch Suite, Visual Modeling](https://java.net/projects/jbatchsuite)
 
 ####Project Resources:
 * [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET)
