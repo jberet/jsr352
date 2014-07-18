@@ -20,8 +20,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
@@ -43,15 +51,65 @@ public abstract class ItemReaderWriterBase {
     @BatchProperty
     protected String resource;
 
+    /**
+     * Indicates whether the current batch reader will invoke Bean Validation API to validate the incoming data POJO.
+     * Optional property and defaults to false, i.e., the reader will validate data POJO bean where appropriate.
+     */
+    @Inject
+    @BatchProperty
+    protected boolean skipBeanValidation;
+
     boolean skipWritingHeader;
 
+    private static class Holder {
+        private static final Validator validator = getValidator0();
+    }
+
+    /**
+     * Gets a cached {@code javax.validation.Validator}.
+     *
+     * @return {@code javax.validation.Validator}
+     */
+    public static Validator getValidator() {
+        return Holder.validator;
+    }
+
+    /**
+     * Performs Bean Validation on the passed {@code object}. If any constraint validation errors are found,
+     * {@link javax.validation.ConstraintViolationException} is thrown that includes all violation description.
+     *
+     * @param object the object to be validated
+     */
+    public static void validate(final Object object) {
+        if (object != null) {
+            final Set<ConstraintViolation<Object>> violations = getValidator().validate(object);
+            if (violations.size() > 0) {
+                final StringBuilder sb = new StringBuilder();
+                for (final ConstraintViolation<Object> vio : violations) {
+                    sb.append(vio.getMessage()).append(NEW_LINE);
+                }
+                throw new ConstraintViolationException(sb.toString(), violations);
+            }
+        }
+    }
+
+    private static Validator getValidator0() {
+        Validator v;
+        try {
+            v = InitialContext.doLookup("java:comp/Validator");
+        } catch (final NamingException e) {
+            final ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
+            v = vf.getValidator();
+        }
+        return v;
+    }
 
     /**
      * Gets an instance of {@code java.io.InputStream} that represents the reader resource.
      *
      * @param inputResource the location of the input resource
-     * @param detectBOM if need to detect byte-order mark (BOM). If true, the {@code InputStream} is wrapped inside
-     *                  {@code UnicodeBOMInputStream}
+     * @param detectBOM     if need to detect byte-order mark (BOM). If true, the {@code InputStream} is wrapped inside
+     *                      {@code UnicodeBOMInputStream}
      * @return {@code java.io.InputStream} that represents the reader resource
      */
     protected static InputStream getInputStream(final String inputResource, final boolean detectBOM) {

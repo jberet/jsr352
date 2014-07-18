@@ -137,7 +137,11 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
                 nestedObjectLevel--;
             }
         } while (true);
-        return objectMapper.readValue(jsonParser, beanType);
+        final Object readValue = objectMapper.readValue(jsonParser, beanType);
+        if (!skipBeanValidation) {
+            ItemReaderWriterBase.validate(readValue);
+        }
+        return readValue;
     }
 
     @Override

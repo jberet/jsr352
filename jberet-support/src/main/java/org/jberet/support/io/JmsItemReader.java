@@ -81,7 +81,7 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
      * property and defaults to null. If it is specified, its valid value is:
      * <p/>
      * <ul>
-     *     <li>{@code javax.jms.Message}: an incoming JMS message is returned as is.</li>
+     * <li>{@code javax.jms.Message}: an incoming JMS message is returned as is.</li>
      * </ul>
      * <p/>
      * When this property is not specified, {@link #readItem()} method returns an object whose actual type is
@@ -119,6 +119,9 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
         if (message instanceof ObjectMessage) {
             final ObjectMessage objectMessage = (ObjectMessage) message;
             result = objectMessage.getObject();
+            if (!skipBeanValidation) {
+                ItemReaderWriterBase.validate(result);
+            }
         } else if (message instanceof MapMessage) {
             final Map<String, Object> mapResult = new HashMap<String, Object>();
             final MapMessage mapMessage = (MapMessage) message;

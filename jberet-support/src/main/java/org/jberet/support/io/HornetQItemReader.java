@@ -107,6 +107,9 @@ public class HornetQItemReader extends HornetQItemReaderWriterBase implements It
             result = new String(bytes);
         } else {
             result = bytesToSerializableObject(bytes);
+            if (!skipBeanValidation) {
+                ItemReaderWriterBase.validate(result);
+            }
         }
 
         return result;

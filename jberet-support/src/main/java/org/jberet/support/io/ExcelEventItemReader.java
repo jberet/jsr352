@@ -346,6 +346,9 @@ public class ExcelEventItemReader extends ExcelUserModelItemReader implements It
                         obj = resultMap;
                     } else {
                         obj = itemReader.objectMapper.convertValue(resultMap, itemReader.beanType);
+                        if (!itemReader.skipBeanValidation) {
+                            ItemReaderWriterBase.validate(obj);
+                        }
                     }
                     itemReader.queue.put(obj);
                     resultMap = new HashMap<String, String>();

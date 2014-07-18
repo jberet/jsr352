@@ -158,7 +158,11 @@ public class ExcelUserModelItemReader extends ExcelItemReaderWriterBase implemen
                     if (objectMapper == null) {
                         initJsonFactoryAndObjectMapper();
                     }
-                    return objectMapper.convertValue(resultMap, beanType);
+                    final Object readValue = objectMapper.convertValue(resultMap, beanType);
+                    if (!skipBeanValidation) {
+                        ItemReaderWriterBase.validate(readValue);
+                    }
+                    return readValue;
                 }
             }
         }

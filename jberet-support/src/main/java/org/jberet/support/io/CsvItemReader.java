@@ -123,6 +123,9 @@ public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader
             } else {
                 result = ((ICsvBeanReader) delegateReader).read(beanType, getNameMapping(), cellProcessorInstances);
             }
+            if (!skipBeanValidation) {
+                ItemReaderWriterBase.validate(result);
+            }
         } else if (delegateReader instanceof ICsvListReader) {
             if (cellProcessorInstances.length == 0) {
                 result = ((ICsvListReader) delegateReader).read();

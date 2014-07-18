@@ -26,6 +26,9 @@
 
                     <!-- do not take header values; use headerRow (its default value 0) instead -->
                     <!--<property name="header" value="#{jobParameters['header']}"/>-->
+
+                    <!-- example how to skip performing Bean Validation on the data POJO -->
+                    <property name="skipBeanValidation" value="false"/>
                 </properties>
             </reader>
             <writer ref="csvItemWriter">
