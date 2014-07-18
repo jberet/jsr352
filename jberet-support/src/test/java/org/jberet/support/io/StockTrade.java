@@ -14,9 +14,13 @@ package org.jberet.support.io;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -40,14 +44,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class StockTrade implements Serializable {
     private static final long serialVersionUID = -55209987994863611L;
 
+    @NotNull
+    @Past
     @JsonProperty("Date")
     Date date;
 
     @NotNull
     @Size(min = 3, max = 5)
+    @Pattern(regexp = "^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$")
     @JsonProperty("Time")
     String time;
 
+    @NotNull
     @Max(1000)
     @Min(1)
     @JsonProperty("Open")
@@ -68,7 +76,9 @@ public class StockTrade implements Serializable {
     @JsonProperty("Close")
     double close;
 
-    @Min(1)
+    @NotNull
+    @DecimalMin("100")
+    @DecimalMax("9999999999")
     @JsonProperty("Volume")
     double volume;
 

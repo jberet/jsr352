@@ -47,6 +47,11 @@ import static org.jberet.support.io.CsvProperties.WRITE_MODE_KEY;
 public abstract class ItemReaderWriterBase {
     protected static final String NEW_LINE = System.getProperty("line.separator");
 
+    /**
+     * The resource to read from (for batch readers), or write to (for batch writers). Some reader or writer
+     * implementations may choose to ignore this property and instead use other properties that are more appropritate.
+     *
+     */
     @Inject
     @BatchProperty
     protected String resource;
@@ -86,7 +91,12 @@ public abstract class ItemReaderWriterBase {
             if (violations.size() > 0) {
                 final StringBuilder sb = new StringBuilder();
                 for (final ConstraintViolation<Object> vio : violations) {
-                    sb.append(vio.getMessage()).append(NEW_LINE);
+                    sb.append(NEW_LINE).append(vio.getConstraintDescriptor()).append(NEW_LINE).append(NEW_LINE);
+                    sb.append(vio.getRootBean()).append(NEW_LINE);
+                    sb.append(vio.getLeafBean()).append(NEW_LINE);
+                    sb.append(vio.getPropertyPath()).append(NEW_LINE);
+                    sb.append(vio.getInvalidValue()).append(NEW_LINE);
+                    sb.append(vio.getMessage()).append(NEW_LINE).append(NEW_LINE);
                 }
                 throw new ConstraintViolationException(sb.toString(), violations);
             }
