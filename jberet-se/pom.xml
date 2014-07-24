@@ -20,7 +20,7 @@ Cheng Fang - Initial API and implementation
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.1.0.Alpha2</version>
+        <version>1.1.0.Alpha3-SNAPSHOT</version>
     </parent>
 
     <artifactId>jberet-se</artifactId>
