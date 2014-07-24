@@ -16,7 +16,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +31,7 @@ import org.jberet.job.model.Properties;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.ArtifactFactory;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
@@ -132,25 +132,25 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
             Collections.reverse(lifecycleMethods);
         }
         for(final Method m : lifecycleMethods) {
-            if (System.getSecurityManager() == null) {
+            if (WildFlySecurityManager.isChecking()) {
+                WildFlySecurityManager.doUnchecked(new InvokeMethodPrivilegedExceptionAction(m, obj));
+            } else {
                 if (!m.isAccessible()) {
                     m.setAccessible(true);
                 }
                 m.invoke(obj);
-            } else {
-                AccessController.doPrivileged(new InvokeMethodPrivilegedExceptionAction(m, obj));
             }
         }
     }
 
     private void doInjection(final Object obj, final Field field, final Object val) throws Exception {
-        if (System.getSecurityManager() == null) {
+        if (WildFlySecurityManager.isChecking()) {
+            WildFlySecurityManager.doUnchecked(new SetFieldPrivilegedExceptionAction(field, obj, val));
+        } else {
             if (!field.isAccessible()) {
                 field.setAccessible(true);
             }
             field.set(obj, val);
-        } else {
-            AccessController.doPrivileged(new SetFieldPrivilegedExceptionAction(field, obj, val));
         }
     }
 

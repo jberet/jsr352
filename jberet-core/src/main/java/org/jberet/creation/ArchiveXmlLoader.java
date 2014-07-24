@@ -17,8 +17,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.List;
 import javax.batch.operations.JobStartException;
 
@@ -26,6 +24,7 @@ import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobMerger;
 import org.jberet.job.model.JobParser;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 import static org.jberet._private.BatchMessages.MESSAGES;
 
@@ -122,7 +121,7 @@ public class ArchiveXmlLoader {
 
         // javax.jobpath system property. jobpath format?
         File jobFile = null;
-        final String jobpath = getSystemProperty("javax.jobpath");
+        final String jobpath = WildFlySecurityManager.getPropertyPrivileged("javax.jobpath", null);
         if (jobpath != null && !jobpath.isEmpty()) {
             final String[] jobPathElements = jobpath.split(":");
             for (final String p : jobPathElements) {
@@ -135,7 +134,7 @@ public class ArchiveXmlLoader {
 
         // default location: current directory
         if (jobFile == null) {
-            jobFile = new File(getSystemProperty("user.dir"), jobXml);
+            jobFile = new File(WildFlySecurityManager.getPropertyPrivileged("user.dir", "."), jobXml);
             if (!jobFile.exists() || !jobFile.isFile()) {
                 //may be an absolute path to the job file
                 jobFile = new File(jobXml);
@@ -144,17 +143,5 @@ public class ArchiveXmlLoader {
 
         is = new BufferedInputStream(new FileInputStream(jobFile));
         return is;
-    }
-
-    private static String getSystemProperty(final String key) {
-        if (System.getSecurityManager() == null) {
-            return System.getProperty(key);
-        }
-        return AccessController.doPrivileged(new PrivilegedAction<String>() {
-            @Override
-            public String run() {
-                return System.getProperty(key);
-            }
-        });
     }
 }

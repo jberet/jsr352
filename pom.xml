@@ -50,7 +50,7 @@
         <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
         <version.org.jboss.logging.jboss-logging>3.1.3.GA</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-tools>1.2.0.Final</version.org.jboss.logging.jboss-logging-tools>
-        <version.org.jboss.marshalling>1.4.2.Final</version.org.jboss.marshalling>
+        <version.org.jboss.marshalling>1.4.6.Final</version.org.jboss.marshalling>
         <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final
         </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
         <version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>1.0.0.Final
@@ -85,6 +85,8 @@
         <version.org.hibernate.validator>5.1.1.Final</version.org.hibernate.validator>
         <version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>1.0.3.Final</version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>
         <version.org.glassfish.javax.el>3.0.0</version.org.glassfish.javax.el>
+
+        <version.org.wildfly.security.wildfly-security-manager>1.0.0.Final</version.org.wildfly.security.wildfly-security-manager>
 
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
@@ -287,6 +289,12 @@
                 <artifactId>jandex</artifactId>
                 <version>${version.org.jboss.jandex}</version>
                 <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wildfly.security</groupId>
+                <artifactId>wildfly-security-manager</artifactId>
+                <version>${version.org.wildfly.security.wildfly-security-manager}</version>
             </dependency>
 
             <dependency>

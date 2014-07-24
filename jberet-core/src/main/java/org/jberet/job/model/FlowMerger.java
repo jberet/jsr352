@@ -12,11 +12,13 @@
 
 package org.jberet.job.model;
 
+import java.security.PrivilegedAction;
 import java.util.List;
 import javax.batch.operations.JobStartException;
 
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.util.BatchUtil;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class FlowMerger extends AbstractMerger<Flow> {
     public FlowMerger(final Job job, final Flow child, final ClassLoader classLoader, final List<Job> loadedJobs)
@@ -56,7 +58,16 @@ public final class FlowMerger extends AbstractMerger<Flow> {
             child.next= parent.next;
         }
         child.jobElements.clear();
-        child.jobElements = BatchUtil.clone(parent.jobElements);
+        if (WildFlySecurityManager.isChecking()) {
+            child.jobElements = WildFlySecurityManager.doUnchecked(new PrivilegedAction<List<JobElement>>() {
+                @Override
+                public List<JobElement> run() {
+                    return BatchUtil.clone(parent.jobElements);
+                }
+            });
+        } else {
+            child.jobElements = BatchUtil.clone(parent.jobElements);
+        }
 
         child.setParentAndJslName(null, null);
     }
