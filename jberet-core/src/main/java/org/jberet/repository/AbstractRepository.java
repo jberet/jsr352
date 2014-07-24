@@ -13,6 +13,7 @@
 package org.jberet.repository;
 
 import java.io.Serializable;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +38,7 @@ import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 public abstract class AbstractRepository implements JobRepository {
     final ConcurrentMap<String, Job> jobs = new ConcurrentHashMap<String, Job>();
@@ -187,17 +189,17 @@ public abstract class AbstractRepository implements JobRepository {
         Serializable ser = stepOrPartitionExecution.getPersistentUserData();
         Serializable copy;
         if (ser != null) {
-            copy = BatchUtil.clone(ser);
+            copy = clone(ser);
             stepOrPartitionExecution.setPersistentUserData(copy);
         }
         ser = stepOrPartitionExecution.getReaderCheckpointInfo();
         if (ser != null) {
-            copy = BatchUtil.clone(ser);
+            copy = clone(ser);
             stepOrPartitionExecution.setReaderCheckpointInfo(copy);
         }
         ser = stepOrPartitionExecution.getWriterCheckpointInfo();
         if (ser != null) {
-            copy = BatchUtil.clone(ser);
+            copy = clone(ser);
             stepOrPartitionExecution.setWriterCheckpointInfo(copy);
         }
         //save stepExecution partition properties
@@ -260,5 +262,17 @@ public abstract class AbstractRepository implements JobRepository {
             return result;
         }
         return null;
+    }
+
+    private static <T extends Serializable> T clone(final T object) {
+        if (WildFlySecurityManager.isChecking()) {
+            return WildFlySecurityManager.doUnchecked(new PrivilegedAction<T>() {
+                @Override
+                public T run() {
+                    return BatchUtil.clone(object);
+                }
+            });
+        }
+        return BatchUtil.clone(object);
     }
 }

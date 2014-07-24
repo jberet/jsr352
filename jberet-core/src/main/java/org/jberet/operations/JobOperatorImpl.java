@@ -12,11 +12,9 @@
 
 package org.jberet.operations;
 
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -55,6 +53,7 @@ import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 import static org.jberet._private.BatchMessages.MESSAGES;
 
@@ -77,10 +76,10 @@ public class JobOperatorImpl implements JobOperator {
 
     public JobOperatorImpl() throws BatchRuntimeException {
         final BatchEnvironment batchEnvironment;
-        if (System.getSecurityManager() == null) {
-            batchEnvironment = loaderAction.run();
+        if (WildFlySecurityManager.isChecking()) {
+            batchEnvironment = WildFlySecurityManager.doUnchecked(loaderAction);
         } else {
-            batchEnvironment = AccessController.doPrivileged(loaderAction);
+            batchEnvironment = loaderAction.run();
         }
 
         if (batchEnvironment == null) {

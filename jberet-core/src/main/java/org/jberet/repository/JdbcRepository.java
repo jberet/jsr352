@@ -14,7 +14,6 @@ package org.jberet.repository;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -43,6 +42,7 @@ import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class JdbcRepository extends AbstractRepository {
     //keys used in jberet.properties
@@ -875,14 +875,14 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     private static ClassLoader getClassLoader() {
-        if (System.getSecurityManager() == null) {
-            return JdbcRepository.class.getClassLoader();
+        if (WildFlySecurityManager.isChecking()) {
+            return WildFlySecurityManager.doUnchecked(new PrivilegedAction<ClassLoader>() {
+                @Override
+                public ClassLoader run() {
+                    return JdbcRepository.class.getClassLoader();
+                }
+            });
         }
-        return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-            @Override
-            public ClassLoader run() {
-                return JdbcRepository.class.getClassLoader();
-            }
-        });
+        return JdbcRepository.class.getClassLoader();
     }
 }

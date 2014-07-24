@@ -13,6 +13,7 @@
 package org.jberet.runtime.context;
 
 import java.io.Serializable;
+import java.security.PrivilegedAction;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
@@ -25,6 +26,7 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
  * Represents the execution context for either a step execution or partition execution.
@@ -83,7 +85,16 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
             for (int i = 1; i < c.outerContexts.length; i++) {
                 c.outerContexts[i] = outerContexts[i];
             }
-            c.step = BatchUtil.clone(step);
+            if (WildFlySecurityManager.isChecking()) {
+                c.step = WildFlySecurityManager.doUnchecked(new PrivilegedAction<Step>() {
+                    @Override
+                    public Step run() {
+                        return BatchUtil.clone(step);
+                    }
+                });
+            } else {
+                c.step = BatchUtil.clone(step);
+            }
         } catch (CloneNotSupportedException e) {
             BatchLogger.LOGGER.failToClone(e, this, getJobContext().getJobName(), getStepName());
         }

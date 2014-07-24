@@ -12,8 +12,6 @@
 
 package org.jberet.job.model;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -43,13 +41,14 @@ public final class PropertyResolver {
     private static final int shortestTemplateLen = "#{jobProperties['x']}".length();
     private static final int prefixLen = prefix.length();
 
-    private Properties systemProperties = getSystemProperties();
+    private Properties systemProperties = null;
     private Properties jobParameters;
     private Properties partitionPlanProperties;
     private Deque<org.jberet.job.model.Properties> jobPropertiesStack = new ArrayDeque<org.jberet.job.model.Properties>();
 
     private boolean resolvePartitionPlanProperties;
 
+    @Deprecated
     public void setSystemProperties(final Properties systemProperties) {
         this.systemProperties = systemProperties;
     }
@@ -501,8 +500,16 @@ public final class PropertyResolver {
     }
 
 
-
-
+    /**
+     * Resolves an expression from the raw value.
+     *
+     * @param rawVale the raw value
+     *
+     * @return the resolved string or {@code null} if unresolvable
+     *
+     * @throws java.lang.SecurityException if a security manager is installed, {@code systemProperties} is requested
+     *                                     and the system property permission is not set.
+     */
     public String resolve(final String rawVale) {
         if (rawVale.length() < shortestTemplateLen || !rawVale.contains(prefix)) {
             return rawVale;
@@ -642,7 +649,15 @@ public final class PropertyResolver {
                 }
             }
         } else if (propCategory.equals(systemPropertiesToken)) {
-            val = systemProperties.getProperty(variableName);
+            if (systemProperties != null) {
+                val = systemProperties.getProperty(variableName);
+            } else {
+                if (variableName == null || variableName.isEmpty()) {
+                    val = null;
+                } else {
+                    val = System.getProperty(variableName);
+                }
+            }
         } else if (propCategory.equals(partitionPlanToken)) {
             if (partitionPlanProperties != null) {
                 val = partitionPlanProperties.getProperty(variableName);
@@ -651,18 +666,6 @@ public final class PropertyResolver {
             LOGGER.unrecognizedPropertyReference(propCategory, variableName, sb.toString());
         }
         return val;
-    }
-
-    private static Properties getSystemProperties() {
-        if (System.getSecurityManager() == null) {
-            return System.getProperties();
-        }
-        return AccessController.doPrivileged(new PrivilegedAction<Properties>() {
-            @Override
-            public Properties run() {
-                return System.getProperties();
-            }
-        });
     }
 
 }
