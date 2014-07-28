@@ -88,6 +88,8 @@
 
         <version.org.wildfly.security.wildfly-security-manager>1.0.0.Final</version.org.wildfly.security.wildfly-security-manager>
 
+        <version.net.sf.jasperreports>5.6.0</version.net.sf.jasperreports>
+
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
     </properties>
@@ -503,6 +505,15 @@
                 <version>${version.org.glassfish.javax.el}</version>
                 <scope>provided</scope>
             </dependency>
+
+            <!-- JasperReports dependencies -->
+            <dependency>
+                <groupId>net.sf.jasperreports</groupId>
+                <artifactId>jasperreports</artifactId>
+                <version>${version.net.sf.jasperreports}</version>
+                <scope>provided</scope>
+            </dependency>
+
 
             <!-- Scripting testing dependency -->
             <dependency>
