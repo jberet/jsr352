@@ -17,6 +17,9 @@
         <batchlet ref="jasperReportsBatchlet">
             <properties>
                 <property name="resource" value="#{jobParameters['resource']}"/>
+                <property name="useFirstRowAsHeader" value="true"/>
+                <property name="recordDelimiter" value="&#xA;"/>  <!-- \n -->
+
                 <property name="charset" value="#{jobParameters['charset']}"/>
                 <property name="template" value="#{jobParameters['template']}"/>
                 <property name="outputType" value="#{jobParameters['outputType']}"/>
