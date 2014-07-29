@@ -23,7 +23,7 @@
 
     <groupId>org.jberet</groupId>
     <artifactId>jberet-parent</artifactId>
-    <version>1.1.0.Alpha3-SNAPSHOT</version>
+    <version>1.1.0.Alpha3.r1</version>
 
     <name>jberet-parent</name>
     <description>Impl of JSR 352: Batch Applications for the Java Platform</description>
@@ -196,6 +196,15 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
         </plugins>
+
+	<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>2.6</version>
+			</extension>
+		</extensions>
+
     </build>
 
     <dependencyManagement>
