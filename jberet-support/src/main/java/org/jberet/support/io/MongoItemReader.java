@@ -78,7 +78,11 @@ public class MongoItemReader extends MongoItemReaderWriterBase implements ItemRe
     @Override
     public Object readItem() throws Exception {
         if (cursor.hasNext()) {
-            return cursor.next();
+            final Object readValue = cursor.next();
+            if (!skipBeanValidation) {
+                ItemReaderWriterBase.validate(readValue);
+            }
+            return readValue;
         }
         return null;
     }

@@ -12,17 +12,14 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="org.jberet.support.io.JmsReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="org.jberet.support.io.JmsReaderTest.step1">
+<job id="org.jberet.support.io.HornetQReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="org.jberet.support.io.HornetQReaderTest.step1">
         <chunk item-count="100">
-            <reader ref="jmsItemReader">
+            <reader ref="hornetQItemReader">
                 <properties>
-                    <!--<property name="connectionFactoryLookupName" value="/cf"/>-->
-                    <!--<property name="destinationLookupName" value="/queue/queue1"/>-->
-                    <!-- wait for 2 seconds for any more messages -->
                     <property name="receiveTimeout" value="2000"/>
-                    <property name="messageSelector" value=""/>
-                    <property name="sessionMode" value="DUPS_OK_ACKNOWLEDGE"/>
+                    <property name="queueParams" value="address=example, durable=false"/>
+                    <property name="serverLocatorParams" value="HA=false, ConsumerMaxRate=100"/>
                 </properties>
             </reader>
 

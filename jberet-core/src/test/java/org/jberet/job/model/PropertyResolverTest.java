@@ -69,7 +69,6 @@ public class PropertyResolverTest {
         sysProps.setProperty(sysProp1, sysProp1Val);
         sysProps.setProperty(sysProp2, sysProp2Val);
 
-        resolver.setSystemProperties(sysProps);
         resolver.setJobParameters(jobParams);
         resolver.setPartitionPlanProperties(partitionPlan);
         resolver.pushJobProperties(fromJavaUtilProperties(jobProps1));
@@ -152,7 +151,7 @@ public class PropertyResolverTest {
                 String.format("#{%s['%s']}?:in.txt", systemPropertiesToken, sysProp1),
                 String.format("#{%s['%s']}?:in.txt", systemPropertiesToken, sysProp2)
         };
-        
+
         //defaults (expression value) not used
         final String[] raw3 = {
                 String.format("#{%s['%s']}?:#{systemProperties['os.name']};", jobParametersToken, jobParam1),

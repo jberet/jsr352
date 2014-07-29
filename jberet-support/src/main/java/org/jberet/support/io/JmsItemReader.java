@@ -46,7 +46,7 @@ import org.jberet.support._private.SupportMessages;
  * If {@link #beanType} is set to {@code javax.jms.Message}, {@link #readItem()} returns the incoming JMS message as is.
  * Otherwise, {@link #readItem()} method determines the actual data type based on the message type.
  * <p/>
- * This reader ends when either of the following occurs:
+ * This reader ends when any of the following occurs:
  * <ul>
  * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;</li>
  * <li>any {@code null} body is retrieved from a message;</li>
@@ -81,7 +81,7 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
      * property and defaults to null. If it is specified, its valid value is:
      * <p/>
      * <ul>
-     *     <li>{@code javax.jms.Message}: an incoming JMS message is returned as is.</li>
+     * <li>{@code javax.jms.Message}: an incoming JMS message is returned as is.</li>
      * </ul>
      * <p/>
      * When this property is not specified, {@link #readItem()} method returns an object whose actual type is
@@ -119,6 +119,9 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
         if (message instanceof ObjectMessage) {
             final ObjectMessage objectMessage = (ObjectMessage) message;
             result = objectMessage.getObject();
+            if (!skipBeanValidation) {
+                ItemReaderWriterBase.validate(result);
+            }
         } else if (message instanceof MapMessage) {
             final Map<String, Object> mapResult = new HashMap<String, Object>();
             final MapMessage mapMessage = (MapMessage) message;

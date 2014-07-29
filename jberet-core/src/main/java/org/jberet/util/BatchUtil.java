@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -28,22 +27,23 @@ import org.jboss.marshalling.cloner.ClonerConfiguration;
 import org.jboss.marshalling.cloner.ObjectCloner;
 import org.jboss.marshalling.cloner.ObjectClonerFactory;
 import org.jboss.marshalling.cloner.ObjectCloners;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 public class BatchUtil {
-    public static final String NL = getSystemProperty("line.separator");
+    public static final String NL = WildFlySecurityManager.getPropertyPrivileged("line.separator", "\n");
     private static final String keyValDelimiter = " = ";
     private static final ObjectClonerFactory clonerFactory;
     private static final ObjectCloner cloner;
 
 
     static {
-        clonerFactory = AccessController.doPrivileged(new PrivilegedAction<ObjectClonerFactory>() {
+        clonerFactory = WildFlySecurityManager.doUnchecked(new PrivilegedAction<ObjectClonerFactory>() {
             @Override
             public ObjectClonerFactory run() {
                 return ObjectCloners.getSerializingObjectClonerFactory();
             }
         });
-        cloner = AccessController.doPrivileged(new PrivilegedAction<ObjectCloner>() {
+        cloner = WildFlySecurityManager.doUnchecked(new PrivilegedAction<ObjectCloner>() {
             @Override
             public ObjectCloner run() {
                 return clonerFactory.createCloner(new ClonerConfiguration());
@@ -133,17 +133,5 @@ public class BatchUtil {
         } catch (ClassNotFoundException e) {
             throw new JobStartException(e);
         }
-    }
-
-    private static String getSystemProperty(final String key) {
-        if (System.getSecurityManager() == null) {
-            return System.getProperty(key);
-        }
-        return AccessController.doPrivileged(new PrivilegedAction<String>() {
-            @Override
-            public String run() {
-                return System.getProperty(key);
-            }
-        });
     }
 }

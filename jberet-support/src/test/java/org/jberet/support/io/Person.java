@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.hibernate.validator.constraints.Email;
 
 /**
  * A bean class for person.csv.
@@ -40,7 +41,10 @@ public class Person {
     private String zipCode;
     private String country;
     private String countryFull;
+
+    @Email
     private String emailAddress;
+
     private String username;
     private String password;
     private String telephoneNumber;

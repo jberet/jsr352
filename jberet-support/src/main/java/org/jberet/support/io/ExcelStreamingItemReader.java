@@ -89,7 +89,11 @@ public class ExcelStreamingItemReader extends ExcelUserModelItemReader implement
                             return resultList;
                         }
                         initJsonFactoryAndObjectMapper();
-                        return objectMapper.convertValue(resultMap, beanType);
+                        final Object readValue = objectMapper.convertValue(resultMap, beanType);
+                        if (!skipBeanValidation) {
+                            ItemReaderWriterBase.validate(readValue);
+                        }
+                        return readValue;
                     }
                 }
             }

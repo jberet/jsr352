@@ -29,7 +29,7 @@ import org.jberet.support._private.SupportMessages;
 /**
  * The base class for {@link JmsItemReader} and {@link JmsItemWriter}.
  */
-public abstract class JmsItemReaderWriterBase {
+public abstract class JmsItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * This field holds an optional injection of {@code javax.jms.Destination}. When {@link #destinationLookupName}
      * property is specified in job xml, this property is ignored and {@link #destinationLookupName} is used to look up

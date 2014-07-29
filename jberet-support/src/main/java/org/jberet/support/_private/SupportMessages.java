@@ -80,6 +80,4 @@ public interface SupportMessages {
     @Message(id = 60020, value = "Expecting JMS message types: %s, but got %s, %s")
     BatchRuntimeException unexpectedJmsMessageType(String expectedTypes, String actualType, Object val);
 
-
-
 }

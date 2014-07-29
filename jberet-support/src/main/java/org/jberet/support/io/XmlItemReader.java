@@ -103,7 +103,11 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
                 nestedObjectLevel--;
             }
         } while (true);
-        return xmlMapper.readValue(fromXmlParser, beanType);
+        final Object readValue = xmlMapper.readValue(fromXmlParser, beanType);
+        if (!skipBeanValidation) {
+            ItemReaderWriterBase.validate(readValue);
+        }
+        return readValue;
     }
 
     @Override

@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.1.0.Alpha2-SNAPSHOT</version>
+        <version>1.1.0.Alpha3-SNAPSHOT</version>
     </parent>
 
     <artifactId>jberet-core</artifactId>
@@ -36,6 +36,10 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly.security</groupId>
+            <artifactId>wildfly-security-manager</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

@@ -278,7 +278,11 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
                 if (beanType == Map.class) {
                     result = resultMap;
                 } else {
-                    result = objectMapper.convertValue(resultMap, beanType);
+                    final Object readValue = objectMapper.convertValue(resultMap, beanType);
+                    if (!skipBeanValidation) {
+                        ItemReaderWriterBase.validate(readValue);
+                    }
+                    result = readValue;
                 }
             }
         }

@@ -14,6 +14,14 @@ package org.jberet.support.io;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,10 +31,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * The CSV file, IBM_unadjusted.txt, is downloaded from kibot.com free trial data:
  * http://www.kibot.com/buy.aspx
  * http://api.kibot.com/?action=history&symbol=IBM&interval=1&unadjusted=1&bp=1&user=guest
- *
+ * <p/>
  * The data is in standard CSV format with order of fields:
  * Date,Time,Open,High,Low,Close,Volume
- *
+ * <p/>
  * The data file contains no header line.  The data file is truncated to 10/13/2008,12:09 to stay within Excel row
  * number limit (1048576 rows max).
  */
@@ -35,24 +43,42 @@ import com.fasterxml.jackson.annotation.JsonProperty;
         setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class StockTrade implements Serializable {
     private static final long serialVersionUID = -55209987994863611L;
+
+    @NotNull
+    @Past
     @JsonProperty("Date")
     Date date;
 
+    @NotNull
+    @Size(min = 3, max = 5)
+    @Pattern(regexp = "^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$")
     @JsonProperty("Time")
     String time;
 
+    @NotNull
+    @Max(1000)
+    @Min(1)
     @JsonProperty("Open")
     double open;
 
+    @Max(1000)
+    @Min(1)
     @JsonProperty("High")
     double high;
 
+    @Max(1000)
+    @Min(1)
     @JsonProperty("Low")
     double low;
 
+    @Max(1000)
+    @Min(1)
     @JsonProperty("Close")
     double close;
 
+    @NotNull
+    @DecimalMin("100")
+    @DecimalMax("9999999999")
     @JsonProperty("Volume")
     double volume;
 

@@ -43,7 +43,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class JmsReaderWriterTest {
-    private final JobOperator jobOperator = BatchRuntime.getJobOperator();
+    private static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String writerTestJobName = "org.jberet.support.io.JmsWriterTest.xml";
     static final String readerTestJobName = "org.jberet.support.io.JmsReaderTest.xml";
 
@@ -61,28 +61,28 @@ public class JmsReaderWriterTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
         // Step 1. Create HornetQ core configuration, and set the properties accordingly
-        Configuration configuration = new ConfigurationImpl();
+        final Configuration configuration = new ConfigurationImpl();
         configuration.setPersistenceEnabled(false);
         configuration.setJournalDirectory("target/data/journal");
         configuration.setSecurityEnabled(false);
         configuration.getAcceptorConfigurations()
                 .add(new TransportConfiguration(NettyAcceptorFactory.class.getName()));
 
-        TransportConfiguration connectorConfig = new TransportConfiguration(NettyConnectorFactory.class.getName());
+        final TransportConfiguration connectorConfig = new TransportConfiguration(NettyConnectorFactory.class.getName());
 
         configuration.getConnectorConfigurations().put("connector", connectorConfig);
 
         // Step 2. Create the JMS configuration
-        JMSConfiguration jmsConfig = new JMSConfigurationImpl();
+        final JMSConfiguration jmsConfig = new JMSConfigurationImpl();
 
         // Step 3. Configure the JMS ConnectionFactory
-        ArrayList<String> connectorNames = new ArrayList<String>();
+        final ArrayList<String> connectorNames = new ArrayList<String>();
         connectorNames.add("connector");
-        ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl("cf", false, connectorNames, connectionFactoryLookupName);
+        final ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl("cf", false, connectorNames, connectionFactoryLookupName);
         jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
         // Step 4. Configure the JMS Queue
-        JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl("queue1", null, false, destinationLookupName);
+        final JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl("queue1", null, false, destinationLookupName);
         jmsConfig.getQueueConfigurations().add(queueConfig);
 
         // Step 5. Start the JMS Server using the HornetQ core server and the JMS configuration
@@ -93,8 +93,8 @@ public class JmsReaderWriterTest {
         System.out.println("Started Embedded JMS Server");
 
         // Step 6. Lookup JMS resources defined in the configuration
-        JmsResourceProducer.connectionFactory = (ConnectionFactory) jmsServer.lookup(connectionFactoryLookupName);
-        JmsResourceProducer.queue = (Queue) jmsServer.lookup(destinationLookupName);
+        MessagingResourceProducer.connectionFactory = (ConnectionFactory) jmsServer.lookup(connectionFactoryLookupName);
+        MessagingResourceProducer.queue = (Queue) jmsServer.lookup(destinationLookupName);
 
     }
 
@@ -140,7 +140,7 @@ public class JmsReaderWriterTest {
     }
 
 
-    void testWrite0(final String jobName, final Class<?> beanType, final String csvNameMapping, final String cellProcessors,
+    static void testWrite0(final String jobName, final Class<?> beanType, final String csvNameMapping, final String cellProcessors,
                     final String start, final String end) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
 
@@ -166,7 +166,7 @@ public class JmsReaderWriterTest {
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
-    void testRead0(final String jobName, final Class<?> beanType, final String writeResource,
+    static void testRead0(final String jobName, final Class<?> beanType, final String writeResource,
                    final String csvNameMapping, final String csvHeader,
                    final String expect, final String forbid) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());

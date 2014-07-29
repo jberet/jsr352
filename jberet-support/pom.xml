@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.1.0.Alpha2-SNAPSHOT</version>
+        <version>1.1.0.Alpha3-SNAPSHOT</version>
     </parent>
 
     <artifactId>jberet-support</artifactId>
@@ -116,6 +116,44 @@
         <dependency>
             <groupId>org.jboss.spec.javax.jms</groupId>
             <artifactId>jboss-jms-api_2.0_spec</artifactId>
+        </dependency>
+
+        <!-- HornetQ ItemReader & ItemWriter dependencies -->
+        <dependency>
+            <groupId>org.hornetq</groupId>
+            <artifactId>hornetq-core-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hornetq</groupId>
+            <artifactId>hornetq-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+
+        <!-- Bean Validation dependencies -->
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.el</groupId>
+            <artifactId>jboss-el-api_3.0_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
+        </dependency>
+
+        <!-- JasperReports dependencies -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->

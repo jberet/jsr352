@@ -3,21 +3,27 @@ JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platfor
 ####Sub-modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
-* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, etc) for batch applications, and JNDI support
+* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, etc) for batch applications, and JNDI support
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
 * [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [JSR 352 TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
 
+####3rd-party & Community Extensions:
+* [jberet-eap6](https://github.com/fcorneli/jberet-eap6)
+* [jberetweb, job repository viewer](https://github.com/lbtc-xxx/jberetweb)
+* [jBatch Suite, Visual Modeling](https://java.net/projects/jbatchsuite)
+
 ####Project Resources:
 * [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET)
+* [JBeret Documentation](http://docs.jboss.org/jberet/)
 * [JBeret-dev Mailing List](https://lists.jboss.org/mailman/listinfo/jberet-dev)
 * [WildFly Forum](https://community.jboss.org/en/wildfly?view=discussions)
 * [JBeret Forum](https://community.jboss.org/en/jberet/)
 * [JSR 352 Expert Group Discussion](https://java.net/projects/jbatch/lists/public/archive)
 * [JBoss Batch API project](https://github.com/jboss/jboss-batch-api_spec)
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
-* Additional JBeret project info on [ohloh.net](https://www.ohloh.net/p/jberet)
+* Additional JBeret project info on [ohloh Open HUB](https://www.ohloh.net/p/jberet)
 
 ####Batch sample & test applications:
   - <https://github.com/chengfang/wildfly-samples/tree/master/jberet>, web apps that demonstrate the following:
@@ -144,7 +150,7 @@ scope should be set to `provided`.
         </dependency>
         
         <!-- jberet-support includes common reusable batch ItemReader & ItemWriter classes for
-             various data types such as CSV, XML, JSON, Fixed length, Excel, MongoDB, JDBC, JMS, etc.
+             various data types such as CSV, XML, JSON, Fixed length, Excel, MongoDB, JDBC, JMS, HornetQ, etc.
              The application should further provide appropriate transitive dependencies from 
              jberet-support, depending on its usage.
         -->
