@@ -30,7 +30,6 @@ import javax.inject.Named;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperRunManager;
@@ -40,6 +39,8 @@ import net.sf.jasperreports.engine.data.JRXlsxDataSource;
 import net.sf.jasperreports.engine.data.JRXmlDataSource;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.data.XlsDataSource;
+import net.sf.jasperreports.export.Exporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
 import org.jberet.support._private.SupportMessages;
 
 /**
@@ -48,10 +49,17 @@ import org.jberet.support._private.SupportMessages;
  * configured by other parts of the application. Batch properties generally have higher precedence than CDI-injected
  * counterparts.
  * <p></p>
- * Various report output types supported in Jasper Reports are also supported by this class, such as pdf, html, txt,
- * jrprint, rtf, odt, xml, csv, xls, xlsx, etc.
+ * The Jasper Reports data source is configured through either {@link #resource} property, or {@link #jrDataSourceInstance}
+ * injection. Directly passing a {@code java.sql.Connection} instance to this class is not supported. For JDBC
+ * data source, The application should instead inject {@code net.sf.jasperreports.engine.JRResultSetDataSource}
+ * into {@link #jrDataSourceInstance}.
  * <p></p>
  * Report can be saved to a file, or directed to a {@code java.io.OutputStream}.
+ * <p></p>
+ * This class supports all output report formats implemented in Jasper Reports. If {@link #exporterInstance} field is
+ * injected with an instance of {@code net.sf.jasperreports.export.Exporter}, it will be used to export and generate the
+ * final report. Otherwise, if {@link #outputType} batch property is set to pdf, html, or jrprint, a PDF, HTML or
+ * Jasper jrprint report is generated respectively.
  *
  * @since 1.1.0
  */
@@ -64,7 +72,8 @@ public class JasperReportsBatchlet implements Batchlet {
      * The resource that provides the data source for generating report. Optional property, and defaults to null.
      * If specified, it may be a URL, a file path, or any resource path that can be loaded by the current application
      * class loader. If this property is not specified, the application should inject appropriate {@code JRDataSource}
-     * into {@link #jrDataSourceInstance}.
+     * into {@link #jrDataSourceInstance}. If neither {@link #resource} nor {@link #jrDataSourceInstance} is
+     * specified, an {@code net.sf.jasperreports.engine.JREmptyDataSource} is used.
      * <p></p>
      * {@code JRDataSource} injection allows for more flexible instantiation and configuration, such as setting
      * locale, datePattern, numberPattern, timeZone, recordDelimiter, useFirstRowAsHeader, columnNames, fieldDelimiter,
@@ -72,6 +81,7 @@ public class JasperReportsBatchlet implements Batchlet {
      * <p></p>
      * This property has higher precedence than {@link #jrDataSourceInstance} injection.
      * <p></p>
+     *
      * @see #jrDataSourceInstance
      */
     @Inject
@@ -168,16 +178,12 @@ public class JasperReportsBatchlet implements Batchlet {
     /**
      * The format of report output. Optional property and defaults to {@value #DEFAULT_OUTPUT_TYPE}. Valid values are:
      * <ul>
-     *     <li>pdf</li>
-     *     <li>html</li>
-     *     <li>jrprint</li>
-     *     <li>txt</li>
-     *     <li>rtf</li>
-     *     <li>odt</li>
-     *     <li>xml</li>
-     *     <li>csv</li>
-     *     <li>xls</li>
+     * <li>pdf</li>
+     * <li>html</li>
+     * <li>jrprint</li>
      * </ul>
+     * If other formats are desired, the application should inject into {@link #exporterInstance} with a properly
+     * configured instance of {@code net.sf.jasperreports.export.Exporter}.
      */
     @Inject
     @BatchProperty
@@ -191,6 +197,7 @@ public class JasperReportsBatchlet implements Batchlet {
      * <p></p>
      * This property has higher precedence than {@link #outputStreamInstance} injection.
      * <p></p>
+     *
      * @see #outputStreamInstance
      */
     @Inject
@@ -204,6 +211,7 @@ public class JasperReportsBatchlet implements Batchlet {
      * <p></p>
      * This property has higher precedence than {@link #reportParametersInstance} injection.
      * <p></p>
+     *
      * @see #reportParametersInstance
      */
     @Inject
@@ -214,6 +222,7 @@ public class JasperReportsBatchlet implements Batchlet {
      * Optional injection of report output stream, which allows for more control over the output stream creation,
      * sharing, and configuration. The injected {@code OutputStream} is closed at the end of {@link #process()} method.
      * <p></p>
+     *
      * @see #outputFile
      */
     @Inject
@@ -223,6 +232,7 @@ public class JasperReportsBatchlet implements Batchlet {
      * Optional injection of Jasper Reports {@code net.sf.jasperreports.engine.JRDataSource}, which allows for more
      * control over the {@code JRDataSource} creation and configuration.
      * <p></p>
+     *
      * @see #resource
      */
     @Inject
@@ -231,10 +241,37 @@ public class JasperReportsBatchlet implements Batchlet {
     /**
      * Optional injection of Jasper Reports report parameters, which allows for more complex, non-string values.
      * <p></p>
+     *
      * @see #reportParameters
      */
     @Inject
     protected Instance<Map<String, Object>> reportParametersInstance;
+
+    /**
+     * Optional injection of an implementation of Jasper Reports {@code net.sf.jasperreports.export.Exporter}. The
+     * injected instance should have been properly configured, including appropriate
+     * {@code net.sf.jasperreports.export.ExporterOutput}. {@code net.sf.jasperreports.export.ExporterInput} will be
+     * set to a {@code net.sf.jasperreports.engine.JasperPrint} by this class.
+     * <p></p>
+     * Some built-in implementations of {@code net.sf.jasperreports.export.ExporterOutput}:
+     * <ul>
+     * <li>{@code net.sf.jasperreports.engine.export.JRPdfExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.HtmlExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRDocxExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRPptxExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.JRXlsExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.JRTextExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.JRRtfExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.JRXmlExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.JRCsvExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.JsonExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.oasis.JROdsExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.oasis.JROdtExporter}</li>
+     * </ul>
+     */
+    @Inject
+    protected Instance<Exporter> exporterInstance;
 
     private InputStream resourceInputStream;
 
@@ -257,19 +294,23 @@ public class JasperReportsBatchlet implements Batchlet {
             final String ftype = outputType == null ? DEFAULT_OUTPUT_TYPE : outputType.toLowerCase();
             final JRDataSource jrDataSource = getJrDataSource();
             final Map<String, Object> reportParameters1 = getReportParameters();
-            if (ftype.equals("pdf")) {
-                JasperRunManager.runReportToPdfStream(templateInputStream, outputStream, reportParameters1, jrDataSource);
-                outputStream.flush();
-            } else if (ftype.equals("html")) {
-                JasperRunManager.runReportToHtmlFile(getTemplateFilePath(templateInputStream), outputFile, reportParameters1, jrDataSource);
-            } else if (ftype.equals("jrprint")) {
-                JasperFillManager.fillReportToFile(getTemplateFilePath(templateInputStream), outputFile, reportParameters1, jrDataSource);
+            final Exporter exporter = getExporter();
+
+            if (exporter != null) {
+                //injected Exporter instance should already set appropriate ExporterOutput, so pass null to fillAndExportReport(...)
+                fillAndExportReport(templateInputStream, reportParameters1, jrDataSource, exporter);
             } else {
-                final JasperPrint jasperPrint = JasperFillManager.fillReport(templateInputStream, reportParameters1, jrDataSource);
-                // export to common file types: txt, rtf, odt, xml, csv, xls
-
+                if (ftype.equals("pdf")) {
+                    JasperRunManager.runReportToPdfStream(templateInputStream, outputStream, reportParameters1, jrDataSource);
+                    outputStream.flush();
+                } else if (ftype.equals("html")) {
+                    JasperRunManager.runReportToHtmlFile(getTemplateFilePath(templateInputStream), outputFile, reportParameters1, jrDataSource);
+                } else if (ftype.equals("jrprint")) {
+                    JasperFillManager.fillReportToFile(getTemplateFilePath(templateInputStream), outputFile, reportParameters1, jrDataSource);
+                } else {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, outputFile, "outputFile");
+                }
             }
-
             return null;
         } finally {
             if (templateInputStream != null) {
@@ -314,8 +355,8 @@ public class JasperReportsBatchlet implements Batchlet {
         if (outputStreamInstance != null && !outputStreamInstance.isUnsatisfied()) {
             return outputStreamInstance.get();
         }
-
-        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, outputFile, "outputFile");
+        return null;
+        //throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, outputFile, "outputFile");
     }
 
     protected Map<String, Object> getReportParameters() {
@@ -391,6 +432,22 @@ public class JasperReportsBatchlet implements Batchlet {
             }
         }
         return new JREmptyDataSource();
+    }
+
+    protected Exporter getExporter() throws Exception {
+        if (exporterInstance != null && !exporterInstance.isUnsatisfied()) {
+            return exporterInstance.get();
+        }
+        return null;
+    }
+
+    protected void fillAndExportReport(final InputStream templateInputStream,
+                                       final Map<String, Object> reportParameters,
+                                       final JRDataSource jrDataSource,
+                                       final Exporter exporter) throws JRException {
+        final JasperPrint jasperPrint = JasperFillManager.fillReport(templateInputStream, reportParameters, jrDataSource);
+        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+        exporter.exportReport();
     }
 
     private String getTemplateFilePath(final InputStream templateInputStream) throws IOException {
