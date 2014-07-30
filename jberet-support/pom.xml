@@ -26,7 +26,7 @@
     <artifactId>jberet-support</artifactId>
 
     <properties>
-        <jvmArgs>-Xms512m -Xms2g</jvmArgs>
+        <jvmArgs>-Xms512m -Xmx2g</jvmArgs>
     </properties>
 
 
