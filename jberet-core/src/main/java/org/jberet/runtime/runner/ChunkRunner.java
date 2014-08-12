@@ -351,6 +351,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             if (itemRead != null) {  //only count successful read
                 stepMetrics.increment(Metric.MetricType.READ_COUNT, 1);
                 processingInfo.count++;
+                processingInfo.readPosition++;
             } else {
                 processingInfo.chunkState = ChunkState.DEPLETED;
             }
@@ -383,7 +384,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             } else {
                 throw e;
             }
-            checkIfEndRetry(processingInfo, itemReader.checkpointInfo());
+            checkIfEndRetry(processingInfo);
             if (processingInfo.itemState == ItemState.RETRYING_READ) {
                 processingInfo.itemState = ItemState.RUNNING;
             }
@@ -441,18 +442,18 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         if (processingInfo.itemState != ItemState.TO_RETRY_PROCESS) {
             itemRead = null;
         }
-        checkIfEndRetry(processingInfo, itemReader.checkpointInfo());
+        checkIfEndRetry(processingInfo);
         if (processingInfo.itemState == ItemState.RETRYING_PROCESS) {
             processingInfo.itemState=ItemState.RUNNING;
         }
     }
 
-    private void checkIfEndRetry(final ProcessingInfo processingInfo, final Serializable currentPosition) {
+    private void checkIfEndRetry(final ProcessingInfo processingInfo) {
         if (processingInfo.chunkState == ChunkState.RETRYING &&
                 processingInfo.itemState != ItemState.TO_RETRY_READ &&
                 processingInfo.itemState != ItemState.TO_RETRY_PROCESS &&
                 processingInfo.itemState != ItemState.TO_RETRY_WRITE &&
-                processingInfo.failurePoint.equals(currentPosition)) {
+                processingInfo.readPosition == processingInfo.failurePoint) {
             //if failurePoint is null, should fail with NPE
             processingInfo.chunkState = ChunkState.TO_END_RETRY;
         }
@@ -518,6 +519,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
             batchContext.savePersistentData();
             outputList.clear();
+            processingInfo.checkpointPosition = processingInfo.readPosition;
 
             if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
                 processingInfo.chunkState = ChunkState.JOB_STOPPED;
@@ -560,7 +562,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
         }
 
-        checkIfEndRetry(processingInfo, itemReader.checkpointInfo());
+        checkIfEndRetry(processingInfo);
         if (processingInfo.itemState == ItemState.RETRYING_WRITE) {
             processingInfo.itemState = ItemState.RUNNING;
         }
@@ -568,7 +570,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private void rollbackCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         outputList.clear();
-        processingInfo.failurePoint = itemReader.checkpointInfo();
+        processingInfo.failurePoint = processingInfo.readPosition;
         tm.rollback();
         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
         // Close the reader and writer
@@ -583,6 +585,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         try {
             // Open the reader and writer
             itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
+            processingInfo.readPosition = processingInfo.checkpointPosition;
             itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
         } catch (Exception e) {
             // An error occurred, safely close the reader and writer
@@ -707,16 +710,30 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
 
     private static final class ProcessingInfo {
+        /**
+         * Number of items completed in during a checkpoint interval
+         */
         int count;
+
         boolean timerExpired;
         ItemState itemState = ItemState.RUNNING;
         ChunkState chunkState = ChunkState.TO_START_NEW;
 
         /**
+         * Used to remember the last checkpoint position in the reader intput data
+         */
+        int checkpointPosition;
+
+        /**
+         * Current position in the reader input data as 0-based int
+         */
+        int readPosition;
+
+        /**
          * Where the failure occurred that caused the current retry.  The retry should stop after the item at failurePoint
          * has been retried.
          */
-        Serializable failurePoint;
+        Integer failurePoint;
 
         private void reset() {
             count = 0;

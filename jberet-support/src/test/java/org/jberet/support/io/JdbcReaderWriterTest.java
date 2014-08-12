@@ -33,6 +33,7 @@ import org.junit.Test;
 
 public class JdbcReaderWriterTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
+    static final String h2JdbcDriverClassName = "org.h2.Driver";
     static final String writerTestJobName = "org.jberet.support.io.JdbcWriterTest.xml";
     static final String readerTestJobName = "org.jberet.support.io.JdbcReaderTest.xml";
 
@@ -217,6 +218,7 @@ public class JdbcReaderWriterTest {
     }
 
     static void initTable() throws Exception {
+        Class.forName(h2JdbcDriverClassName);
         Connection connection = getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(dropTable);
         try {

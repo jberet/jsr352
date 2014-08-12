@@ -27,11 +27,30 @@ public class JasperReportsTest {
     private static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String testJobName = "org.jberet.support.io.JasperReportsTest.xml";
     static final String moviesTemplate = "movies.jasper";
+    static final String moviesCsvCharset = null;
 
     @Test
     public void csvToPdfFile() throws Exception {
-        testJasperReports(testJobName, moviesTemplate, MovieTest.moviesCsv, null,
+        testJasperReports(testJobName, moviesTemplate, MovieTest.moviesCsv, moviesCsvCharset,
                 "pdf", "csvToPdfFile.pdf", null);
+    }
+
+    @Test
+    public void csvToDefaultFileType() throws Exception {
+        testJasperReports(testJobName, moviesTemplate, MovieTest.moviesCsv, moviesCsvCharset,
+                null, "csvToDefaultFileType.pdf", null);
+    }
+
+    @Test
+    public void csvToHtmlFile() throws Exception {
+        testJasperReports(testJobName, moviesTemplate, MovieTest.moviesCsv, moviesCsvCharset,
+                "html", "csvToHtmlFile.html", null);
+    }
+
+    @Test
+    public void csvToJrprintFile() throws Exception {
+        testJasperReports(testJobName, moviesTemplate, MovieTest.moviesCsv, moviesCsvCharset,
+                "jrprint", "csvToJrprintFile.jrprint", null);
     }
 
     void testJasperReports(final String jobName, final String template, final String resource, final String charset,

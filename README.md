@@ -1,5 +1,28 @@
 JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platform)](https://java.net/projects/jbatch). It is also included in [WildFly, the new and improved JBoss Application Server](http://wildfly.org/) to provide portable batch processing support in Java EE environment. 
 
+####Build JBeret
+To build and run default set of tests:
+    
+    mvn install
+
+Some tests require additional steps and thus are not included in the default run. For instance, MongoDB-related tests
+need to start MongoDB first. To build and run all tests:
+    
+    # start MongoDB database
+    mongod
+    
+    # build JBeret, activate allTests maven profile to run all tests
+    mvn install -DallTests
+    
+Some tests involves very large data set (e.g., over 1 million rows of CSV or Excel data), and may
+cause memory errors in some machines:
+
+    OutOfMemoryError: unable to create new native thread
+
+Increase `ulimit` to avoid such errors. For example,
+
+    ulimit -u 2048
+
 ####Sub-modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
