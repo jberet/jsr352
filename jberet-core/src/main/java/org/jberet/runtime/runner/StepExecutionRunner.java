@@ -220,6 +220,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             isOverride = partitionPlan.getPartitionsOverride();
             numOfPartitions = partitionPlan.getPartitions();
             numOfThreads = partitionPlan.getThreads();
+            numOfThreads = (numOfThreads == 0) ? numOfPartitions : numOfThreads;
             partitionProperties = partitionPlan.getPartitionProperties();
         } else {
             numOfPartitions = plan.getPartitionsInt();
