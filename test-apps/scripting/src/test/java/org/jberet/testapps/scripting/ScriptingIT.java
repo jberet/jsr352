@@ -93,12 +93,16 @@ public class ScriptingIT extends AbstractIT {
         test0("batchletPhpSrc");
     }
 
+    @Test
+    public void chunkJavascript() throws Exception {
+        test0("chunkJavascript");
+    }
 
     void test0(final String testName) throws Exception {
         params.setProperty(testNameKey, testName);
         startJobAndWait(testName);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(testName, jobExecution.getExitStatus());
-        Assert.assertEquals(testName, stepExecution0.getExitStatus());
+        Assert.assertTrue(jobExecution.getExitStatus().equals(testName) || jobExecution.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
+        Assert.assertTrue(stepExecution0.getExitStatus().equals(testName) || stepExecution0.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
     }
 }

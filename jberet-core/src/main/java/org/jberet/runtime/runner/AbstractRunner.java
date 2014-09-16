@@ -16,13 +16,18 @@ import java.util.List;
 import java.util.regex.Pattern;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet._private.BatchMessages;
+import org.jberet.job.model.RefArtifact;
+import org.jberet.job.model.Script;
 import org.jberet.job.model.Transition.End;
 import org.jberet.job.model.Transition.Fail;
 import org.jberet.job.model.Transition.Next;
 import org.jberet.job.model.Transition.Stop;
+import org.jberet.job.model.XmlAttribute;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
 import org.jberet.runtime.context.JobContextImpl;
+import org.jberet.runtime.context.StepContextImpl;
 
 public abstract class AbstractRunner<C extends AbstractContext> implements Runnable {
     /**
@@ -62,11 +67,11 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
      * Resolves a list of next, end, stop and fail elements to determine the next job element.
      *
      * @param transitionElements the group of control elements, i.e., next, end, stop and fail
-     * @param nextAttr the next attribute value
-     * @param partOfDecision if these transition elements are part of a decision element.  If so the current
-     *                       batchContext's status will be updated to the terminating status.  Otherwise, these
-     *                       transition elements are part of a step or flow, and the terminating status has no
-     *                       bearing on the current batchContext.
+     * @param nextAttr           the next attribute value
+     * @param partOfDecision     if these transition elements are part of a decision element.  If so the current
+     *                           batchContext's status will be updated to the terminating status.  Otherwise, these
+     *                           transition elements are part of a step or flow, and the terminating status has no
+     *                           bearing on the current batchContext.
      * @return the ref name of the next execution element
      */
     protected String resolveTransitionElements(final List<?> transitionElements, final String nextAttr, final boolean partOfDecision) {
@@ -81,7 +86,7 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
                 final End end = (End) e;
                 if (matches(exitStatus, end.getOn())) {
                     final AbstractContext[] outerContexts = batchContext.getOuterContexts();
-                    for (final AbstractContext abc :outerContexts) {
+                    for (final AbstractContext abc : outerContexts) {
                         if (abc instanceof FlowContextImpl) {
                             ((FlowContextImpl) abc).getFlowExecution().setEnded(true);
                         }
@@ -111,6 +116,36 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
             }
         }
         return nextAttr;
+    }
+
+    /**
+     * Creates batch artifact from job xml configuration element, e.g, batchlet, reader, processor, writer, etc.
+     * These element may contain a ref attribute indicating the reference name for the artifact, or in absense of ref
+     * attribute, a script sub-element specifies the script to run instead.
+     *
+     * @param refArtifact the job xml configuration element for the artifact to create
+     * @param stepContext the current StepContextImpl
+     * @param aClass the artifact class: org.jberet.runtime.runner.ScriptBatchlet,
+     *                      org.jberet.runtime.runner.ScriptItemReader,
+     *                      org.jberet.runtime.runner.ScriptItemWriter, or
+     *                      org.jberet.runtime.runner.ScriptItemProcessor
+     * @return the created artifact object
+     * @throws Exception
+     */
+    Object createArtifact(final RefArtifact refArtifact, final StepContextImpl stepContext, final Class<?> aClass) throws Exception {
+        final String ref = refArtifact.getRef();
+        if (ref.isEmpty()) {
+            final Script script = refArtifact.getScript();
+            if (script == null) {
+                throw BatchMessages.MESSAGES.failToGetAttribute(XmlAttribute.REF.getLocalName(), null);
+            }
+            return aClass == ScriptItemReader.class ? new ScriptItemReader(script, refArtifact.getProperties(), stepContext) :
+                   aClass == ScriptItemWriter.class ? new ScriptItemWriter(script, refArtifact.getProperties(), stepContext) :
+                   aClass == ScriptItemProcessor.class ? new ScriptItemProcessor(script, refArtifact.getProperties(), stepContext) :
+                   new ScriptBatchlet(script, refArtifact.getProperties(), stepContext);
+        } else {
+            return jobContext.createArtifact(ref, null, refArtifact.getProperties(), stepContext);
+        }
     }
 
     private void setOuterContextStatus(final AbstractContext[] outerContexts, final BatchStatus batchStatus,

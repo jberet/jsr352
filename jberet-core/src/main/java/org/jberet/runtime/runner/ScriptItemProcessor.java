@@ -12,7 +12,7 @@
 
 package org.jberet.runtime.runner;
 
-import javax.batch.api.Batchlet;
+import javax.batch.api.chunk.ItemProcessor;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
@@ -21,38 +21,26 @@ import org.jberet.job.model.Script;
 import org.jberet.runtime.context.StepContextImpl;
 
 /**
- * An implementation of {@code javax.batch.api.Batchlet} whose {@code process} method runs a script.
+ * An implementation of {@code javax.batch.api.chunk.ItemProcessor} whose {@code processItem} method runs a script.
  */
-final class ScriptBatchlet extends ScriptArtifactBase implements Batchlet {
-
-    public ScriptBatchlet(final Script script, final Properties artifactProperties, final StepContextImpl stepContext) throws ScriptException {
+final class ScriptItemProcessor extends ScriptArtifactBase implements ItemProcessor {
+    public ScriptItemProcessor(final Script script, final Properties artifactProperties, final StepContextImpl stepContext) throws ScriptException {
         super(script, artifactProperties, stepContext);
     }
 
     @Override
-    public String process() throws Exception {
+    public Object processItem(final Object item) throws Exception {
         Object result = compiledScript == null ? engine.eval(scriptContent) : compiledScript.eval();
         if (engine instanceof Invocable) {
             final Invocable invocable = (Invocable) engine;
 
             try {
-                result = invocable.invokeFunction("process");
+                result = invocable.invokeFunction("processItem", item);
             } catch (final NoSuchMethodException e) {
                 //ignore
             }
         }
 
-        return result == null ? null : result.toString();
-    }
-
-    @Override
-    public void stop() throws Exception {
-        if (engine instanceof Invocable) {
-            try {
-                ((Invocable) engine).invokeFunction("stop");
-            } catch (final NoSuchMethodException e) {
-                //ignore
-            }
-        }
+        return result;
     }
 }

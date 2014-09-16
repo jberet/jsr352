@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="chunkJavascript" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="chunkJavascript.step1">
+        <chunk item-count="3">
+            <reader>
+                <script type="javascript" src="javascript/item-reader.js"/>
+            </reader>
+            <processor>
+                <script type="javascript">
+                    <![CDATA[
+                    //access built-in variables: jobContext, stepContext and batchProperties,
+                    //set job exit status to the value of testName property, and
+                    //return the value of testName property as step exit status,
+                    //
+                    function processItem(item) {
+                        print('In processItem(), jobName: ' + jobContext.getJobName() + ', stepName: '
+                            + stepContext.getStepName() + ', item: ' + item + '\n');
+                        var testName = batchProperties.get('testName');
+                        jobContext.setExitStatus(testName);
+                        return item;
+                    }
+                ]]>
+                </script>
+            </processor>
+            <writer>
+                <script type="javascript">
+                    <![CDATA[
+                    function open(checkpoint) {
+
+                    }
+
+                    function close() {
+                    }
+
+                    function checkpointInfo() {
+
+                    }
+
+                    //write out items to the console
+                    function writeItems(items) {
+                        print('items to write: ' + items + '\n');
+                    }
+                ]]>
+                </script>
+            </writer>
+        </chunk>
+        <end on="*" exit-status="chunkJavascript"/>
+    </step>
+</job>

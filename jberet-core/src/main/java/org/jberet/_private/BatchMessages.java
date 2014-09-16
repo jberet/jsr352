@@ -149,5 +149,7 @@ public interface BatchMessages {
     @Message(id = 640, value = "A BatchEnvironment implementation could not be found. Please ensure the SPI has been implemented and is on the class path")
     BatchRuntimeException batchEnvironmentNotFound();
 
+    @Message(id = 641, value = "The script is not Invocable: %s")
+    BatchRuntimeException scriptNotInvocable(String scriptContent);
 
 }

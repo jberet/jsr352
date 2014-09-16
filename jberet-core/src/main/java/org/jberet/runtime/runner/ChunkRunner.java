@@ -12,7 +12,6 @@
 
 package org.jberet.runtime.runner;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -99,22 +98,22 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private final TransactionManager tm;
 
-    public ChunkRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner, final StepExecutionRunner stepRunner, final Chunk chunk) {
+    public ChunkRunner(final StepContextImpl stepContext,
+                       final CompositeExecutionRunner enclosingRunner,
+                       final StepExecutionRunner stepRunner,
+                       final Chunk chunk) throws Exception {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
         this.chunk = chunk;
         this.stepOrPartitionExecution = stepContext.getStepExecution();
         this.stepMetrics = this.stepOrPartitionExecution.getStepMetrics();
 
-        final RefArtifact readerElement = chunk.getReader();
-        itemReader = jobContext.createArtifact(readerElement.getRef(), null, readerElement.getProperties(), batchContext);
-
-        final RefArtifact writerElement = chunk.getWriter();
-        itemWriter = jobContext.createArtifact(writerElement.getRef(), null, writerElement.getProperties(), batchContext);
+        itemReader = (ItemReader) createArtifact(chunk.getReader(), batchContext, ScriptItemReader.class);
+        itemWriter = (ItemWriter) createArtifact(chunk.getWriter(), batchContext, ScriptItemWriter.class);
 
         final RefArtifact processorElement = chunk.getProcessor();
         if (processorElement != null) {
-            itemProcessor = jobContext.createArtifact(processorElement.getRef(), null, processorElement.getProperties(), batchContext);
+            itemProcessor = (ItemProcessor) createArtifact(processorElement, batchContext, ScriptItemProcessor.class);
         }
 
         if (stepRunner.collectorDataQueue != null) {
@@ -235,6 +234,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     /**
      * The main read-process-write loop
+     *
      * @throws Exception
      */
     private void readProcessWriteItems() throws Exception {
@@ -243,11 +243,11 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         //if stopped, exit the loop
         while ((processingInfo.chunkState != ChunkState.JOB_STOPPED) &&
 
-               (processingInfo.chunkState != ChunkState.DEPLETED ||
-                processingInfo.itemState == ItemState.TO_RETRY_READ ||
-                processingInfo.itemState == ItemState.TO_RETRY_PROCESS ||
-                processingInfo.itemState == ItemState.TO_RETRY_WRITE)
-               ) {
+                (processingInfo.chunkState != ChunkState.DEPLETED ||
+                        processingInfo.itemState == ItemState.TO_RETRY_READ ||
+                        processingInfo.itemState == ItemState.TO_RETRY_PROCESS ||
+                        processingInfo.itemState == ItemState.TO_RETRY_WRITE)
+                ) {
             try {
                 //reset state for the next iteration
                 switch (processingInfo.itemState) {
@@ -290,7 +290,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     readItem(processingInfo);
                 }
 
-                if (itemRead != null && processingInfo.itemState!= ItemState.RETRYING_WRITE) {
+                if (itemRead != null && processingInfo.itemState != ItemState.RETRYING_WRITE) {
                     processItem(processingInfo);
                 }
 
@@ -444,7 +444,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         }
         checkIfEndRetry(processingInfo);
         if (processingInfo.itemState == ItemState.RETRYING_PROCESS) {
-            processingInfo.itemState=ItemState.RUNNING;
+            processingInfo.itemState = ItemState.RUNNING;
         }
     }
 
@@ -481,7 +481,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private boolean isReadyToCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         if (jobContext.getJobExecution().isStopRequested()) {
-            processingInfo.chunkState=ChunkState.JOB_STOPPING;
+            processingInfo.chunkState = ChunkState.JOB_STOPPING;
             return true;
         }
         if (processingInfo.chunkState == ChunkState.DEPLETED ||
@@ -775,6 +775,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
         JOB_STOPPING,  //the job has been requested to stop
         JOB_STOPPED
-        }
+    }
 
 }

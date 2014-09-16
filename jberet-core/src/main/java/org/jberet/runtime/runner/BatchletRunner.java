@@ -12,14 +12,12 @@
 
 package org.jberet.runtime.runner;
 
+import javax.batch.api.Batchlet;
 import javax.batch.api.partition.PartitionCollector;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet._private.BatchLogger;
-import org.jberet._private.BatchMessages;
 import org.jberet.job.model.RefArtifact;
-import org.jberet.job.model.Script;
-import org.jberet.job.model.XmlAttribute;
 import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.context.StepContextImpl;
 
@@ -62,16 +60,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
                 }
             }
 
-            if (batchlet.getRef().isEmpty()) {
-                final Script script = batchlet.getScript();
-                if (script == null) {
-                    throw BatchMessages.MESSAGES.failToGetAttribute(XmlAttribute.REF.getLocalName(), null);
-                }
-                batchletObj = new ScriptBatchlet(script, batchlet.getProperties(),batchContext);
-            } else {
-                batchletObj = jobContext.createArtifact(batchlet.getRef(), null, batchlet.getProperties(), batchContext);
-            }
-
+            batchletObj = (Batchlet) createArtifact(batchlet, batchContext, ScriptBatchlet.class);
             String exitStatus = null;
             if (jobContext.getJobExecution().isStopRequested()) {
                 batchContext.setBatchStatus(BatchStatus.STOPPING);
