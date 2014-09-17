@@ -30,17 +30,17 @@ final class ScriptItemProcessor extends ScriptArtifactBase implements ItemProces
 
     @Override
     public Object processItem(final Object item) throws Exception {
-        Object result = compiledScript == null ? engine.eval(scriptContent) : compiledScript.eval();
+        final Object result = compiledScript == null ? engine.eval(scriptContent) : compiledScript.eval();
         if (engine instanceof Invocable) {
             final Invocable invocable = (Invocable) engine;
-
             try {
-                result = invocable.invokeFunction("processItem", item);
+                return invocable.invokeFunction("processItem", item);
             } catch (final NoSuchMethodException e) {
-                //ignore
+                //the script does not implement processItem method, so just return the original item as is
+                return item;
             }
+        } else {
+            return result;
         }
-
-        return result;
     }
 }

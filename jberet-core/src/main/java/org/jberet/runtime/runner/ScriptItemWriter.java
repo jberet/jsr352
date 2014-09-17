@@ -45,12 +45,20 @@ final class ScriptItemWriter extends ScriptArtifactBase implements ItemWriter {
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
-        invocable.invokeFunction("open", checkpoint);
+        try {
+            invocable.invokeFunction("open", checkpoint);
+        } catch (final NoSuchMethodException e) {
+            //the script does not implement open method, so just skip it
+        }
     }
 
     @Override
     public void close() throws Exception {
-        invocable.invokeFunction("close");
+        try {
+            invocable.invokeFunction("close");
+        } catch (final NoSuchMethodException e) {
+            //the script does not implement close method, so just skip it
+        }
     }
 
     @Override
@@ -60,6 +68,11 @@ final class ScriptItemWriter extends ScriptArtifactBase implements ItemWriter {
 
     @Override
     public Serializable checkpointInfo() throws Exception {
-        return (Serializable) invocable.invokeFunction("checkpointInfo");
+        try {
+            return (Serializable) invocable.invokeFunction("checkpointInfo");
+        } catch (final NoSuchMethodException e) {
+            //the script does not implement checkpointInfo method, so just return null
+            return null;
+        }
     }
 }

@@ -12,23 +12,26 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="chunkJavascript" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="chunkJavascript.step1">
+<job id="chunkGroovy" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="chunkGroovy.step1">
         <chunk item-count="3">
             <reader>
-                <script type="javascript" src="javascript/item-reader.js"/>
+                <properties>
+                    <property name="resource" value="numbers.csv"/>
+                </properties>
+                <script type="groovy" src="groovy/ItemReader.groovy"/>
             </reader>
             <processor>
-                <script type="javascript">
+                <script type="groovy">
                     <![CDATA[
                     //access built-in variables: jobContext, stepContext and batchProperties,
                     //set job exit status to the value of testName property, and
                     //return the value of testName property as step exit status,
                     //
-                    function processItem(item) {
-                        print('In processItem(), jobName: ' + jobContext.getJobName() + ', stepName: '
+                    def processItem(item) {
+                        println('In processItem(), jobName: ' + jobContext.getJobName() + ', stepName: '
                             + stepContext.getStepName() + ', item: ' + item + '\n');
-                        var testName = batchProperties.get('testName');
+                        testName = batchProperties.get('testName');
                         jobContext.setExitStatus(testName);
                         return item;
                     }
@@ -36,17 +39,15 @@
                 </script>
             </processor>
             <writer>
-                <!-- ItemWriter open, close, checkpointInfo methods are noop in the following script -->
-                <script type="javascript">
+                <script type="groovy">
                     <![CDATA[
-                    //write out items to the console
-                    function writeItems(items) {
-                        print('items to write: ' + items + '\n');
+                    def writeItems(items) {
+                        println('items to write: ' + items + '\n');
                     }
                 ]]>
                 </script>
             </writer>
         </chunk>
-        <end on="*" exit-status="chunkJavascript"/>
+        <end on="*" exit-status="chunkGroovy"/>
     </step>
 </job>

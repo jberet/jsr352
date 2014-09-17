@@ -1,5 +1,5 @@
 var rows;
-var position;
+var position = 1;
 
 function open(checkpoint) {
 
@@ -21,19 +21,23 @@ function open(checkpoint) {
     print('csv content: ' + csv + '\n');
     parsed = Baby.parse( csv );
     rows = parsed.data;
-    position = checkpoint;
+
+    if(checkpoint != null) {
+        position = checkpoint;
+    }
 }
 
-function close() {
-}
+//ItemReader.close() method is noop and not implemented in this script.
 
 function checkpointInfo() {
     return position;
 }
 
 function readItem(items) {
-    position++;
-    return rows[position];
+    if(position >= rows.length) {
+        return null;
+    }
+    return rows[position++];
 }
 
 /*

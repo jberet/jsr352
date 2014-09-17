@@ -98,6 +98,11 @@ public class ScriptingIT extends AbstractIT {
         test0("chunkJavascript");
     }
 
+    @Test
+    public void chunkGroovy() throws Exception {
+        test0("chunkGroovy");
+    }
+
     void test0(final String testName) throws Exception {
         params.setProperty(testNameKey, testName);
         startJobAndWait(testName);
