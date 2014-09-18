@@ -25,8 +25,7 @@
                 <script type="groovy">
                     <![CDATA[
                     //access built-in variables: jobContext, stepContext and batchProperties,
-                    //set job exit status to the value of testName property, and
-                    //return the value of testName property as step exit status,
+                    //set job exit status to the value of testName property.
                     //
                     def processItem(item) {
                         println('In processItem(), jobName: ' + jobContext.getJobName() + ', stepName: '

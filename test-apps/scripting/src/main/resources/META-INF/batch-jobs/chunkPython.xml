@@ -25,7 +25,7 @@
                     The following methodMapping property maps batch API's open method to openBatch function in the
                     src script.
                     -->
-                    <property name="methodMapping" value="open=openBatch"/>
+                    <property name="methodMapping" value="open=openBatchReader, close=closeBatchReader"/>
                 </properties>
                 <script type="python" src="python/item-reader.py"/>
             </reader>
@@ -35,8 +35,7 @@
                 <script type="python">
 <![CDATA[
 #access built-in variables: jobContext, stepContext and batchProperties,
-#set job exit status to the value of testName property, and
-#return the value of testName property as step exit status,
+#set job exit status to the value of testName property.
 #
 def processItem(item):
     print('In processItem(), jobName: ' + jobContext.getJobName() + ', stepName: ' + stepContext.getStepName())
@@ -48,6 +47,9 @@ def processItem(item):
                 </script>
             </processor>
             <writer>
+                <properties>
+                    <property name="methodMapping" value="open=openBatchWriter, close=closeBatchWriter"/>
+                </properties>
                 <script type="python">
 <![CDATA[
 def writeItems(items):

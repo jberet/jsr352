@@ -13,6 +13,7 @@
 package org.jberet.testapps.scripting;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -110,9 +111,19 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void chunkPython() throws Exception {
-        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(numberCsvFilePath);
-        Files.copy(resourceAsStream, new File(System.getProperty("java.io.tmpdir"), numberCsvFilePath).toPath(), StandardCopyOption.REPLACE_EXISTING);
+        copyResourceToTmpdir(numberCsvFilePath, numberCsvFilePath);
         test0("chunkPython");
+    }
+
+    @Test
+    public void chunkRuby() throws Exception {
+        copyResourceToTmpdir(numberCsvFilePath, numberCsvFilePath);
+        test0("chunkRuby");
+    }
+
+    private void copyResourceToTmpdir(final String resourcePath, final String targetFileName) throws IOException {
+        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
+        Files.copy(resourceAsStream, new File(System.getProperty("java.io.tmpdir"), targetFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     void test0(final String testName) throws Exception {

@@ -11,7 +11,7 @@
 rows = []
 position = 0
 
-def openBatch(checkpoint):
+def openBatchReader(checkpoint):
     global rows
     resource = batchProperties.get("resource")
 
