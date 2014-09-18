@@ -12,6 +12,10 @@
 
 package org.jberet.testapps.scripting;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
@@ -21,6 +25,7 @@ import org.junit.Test;
 
 public class ScriptingIT extends AbstractIT {
     private static String testNameKey = "testName";
+    private static String numberCsvFilePath = "numbers.csv";
 
     public ScriptingIT() {
         //params.setProperty("job-param", "job-param");
@@ -101,6 +106,13 @@ public class ScriptingIT extends AbstractIT {
     @Test
     public void chunkGroovy() throws Exception {
         test0("chunkGroovy");
+    }
+
+    @Test
+    public void chunkPython() throws Exception {
+        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(numberCsvFilePath);
+        Files.copy(resourceAsStream, new File(System.getProperty("java.io.tmpdir"), numberCsvFilePath).toPath(), StandardCopyOption.REPLACE_EXISTING);
+        test0("chunkPython");
     }
 
     void test0(final String testName) throws Exception {

@@ -21,8 +21,9 @@ def open(checkpoint) {
     String resourcePath = batchProperties.get("resource");
     InputStream inputFile = this.class.getClassLoader().getResourceAsStream(resourcePath);
 
-    String[] lines = inputFile.text.split('\n')
-    rows = lines.collect { it.split(',') }
+    String[] lines = inputFile.text.split('\n');
+    rows = lines.collect { it.split(',') };
+    inputFile.close();
 
     if (checkpoint != null) {
         position = checkpoint;

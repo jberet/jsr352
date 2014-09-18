@@ -45,7 +45,7 @@ final class ScriptItemReader extends ScriptArtifactBase implements ItemReader {
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         try {
-            invocable.invokeFunction("open", checkpoint);
+            invocable.invokeFunction(getFunctionName("open"), checkpoint);
         } catch (final NoSuchMethodException e) {
             //the script does not implement open method, so just skip it
         }
@@ -54,7 +54,7 @@ final class ScriptItemReader extends ScriptArtifactBase implements ItemReader {
     @Override
     public void close() throws Exception {
         try {
-            invocable.invokeFunction("close");
+            invocable.invokeFunction(getFunctionName("close"));
         } catch (final NoSuchMethodException e) {
             //the script does not implement close method, so just skip it
         }
@@ -62,13 +62,13 @@ final class ScriptItemReader extends ScriptArtifactBase implements ItemReader {
 
     @Override
     public Object readItem() throws Exception {
-        return invocable.invokeFunction("readItem");
+        return invocable.invokeFunction(getFunctionName("readItem"));
     }
 
     @Override
     public Serializable checkpointInfo() throws Exception {
         try {
-            return (Serializable) invocable.invokeFunction("checkpointInfo");
+            return (Serializable) invocable.invokeFunction(getFunctionName("checkpointInfo"));
         } catch (final NoSuchMethodException e) {
             //the script does not implement checkpointInfo method, so just return null
             return null;

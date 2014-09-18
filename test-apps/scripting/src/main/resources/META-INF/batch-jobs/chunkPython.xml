@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="chunkPython" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="chunkPython.step1">
+        <chunk item-count="3">
+            <reader>
+                <properties>
+                    <!--<property name="resource" value="/Users/cfang/dev/jsr352/test-apps/scripting/src/main/resources/numbers.csv"/>-->
+                    <property name="resource" value="#{systemProperties['java.io.tmpdir']}/numbers.csv"/>
+
+                    <!-- open and close are built-in functions in Python, so need to map batch API's open & close
+                    methods to some other names to avoid overriding python built-in functions.
+                    The following methodMapping property maps batch API's open method to openBatch function in the
+                    src script.
+                    -->
+                    <property name="methodMapping" value="open=openBatch"/>
+                </properties>
+                <script type="python" src="python/item-reader.py"/>
+            </reader>
+
+            <!-- Indentation is significant in Python, so left-justify all embedded python script -->
+            <processor>
+                <script type="python">
+<![CDATA[
+#access built-in variables: jobContext, stepContext and batchProperties,
+#set job exit status to the value of testName property, and
+#return the value of testName property as step exit status,
+#
+def processItem(item):
+    print('In processItem(), jobName: ' + jobContext.getJobName() + ', stepName: ' + stepContext.getStepName())
+    print(item)
+    testName = batchProperties.get('testName')
+    jobContext.setExitStatus(testName)
+    return item
+]]>
+                </script>
+            </processor>
+            <writer>
+                <script type="python">
+<![CDATA[
+def writeItems(items):
+    print('items to write: ')
+    print(items)
+]]>
+                </script>
+            </writer>
+        </chunk>
+        <end on="*" exit-status="chunkPython"/>
+    </step>
+</job>

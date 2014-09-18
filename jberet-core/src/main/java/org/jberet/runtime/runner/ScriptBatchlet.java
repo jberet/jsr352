@@ -36,7 +36,7 @@ final class ScriptBatchlet extends ScriptArtifactBase implements Batchlet {
             final Invocable invocable = (Invocable) engine;
 
             try {
-                result = invocable.invokeFunction("process");
+                result = invocable.invokeFunction(getFunctionName("process"));
             } catch (final NoSuchMethodException e) {
                 //ignore
             }
@@ -49,7 +49,7 @@ final class ScriptBatchlet extends ScriptArtifactBase implements Batchlet {
     public void stop() throws Exception {
         if (engine instanceof Invocable) {
             try {
-                ((Invocable) engine).invokeFunction("stop");
+                ((Invocable) engine).invokeFunction(getFunctionName("stop"));
             } catch (final NoSuchMethodException e) {
                 //ignore
             }

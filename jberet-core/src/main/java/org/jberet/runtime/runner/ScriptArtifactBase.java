@@ -12,6 +12,8 @@
 
 package org.jberet.runtime.runner;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptContext;
@@ -34,6 +36,8 @@ abstract class ScriptArtifactBase {
     CompiledScript compiledScript;
     final String scriptContent;
 
+    Map<String, String> methodMapping;
+
     public ScriptArtifactBase(final Script script, final Properties artifactProperties, final StepContextImpl stepContext) throws ScriptException {
         this.script = script;
         this.artifactProperties = artifactProperties;
@@ -46,6 +50,18 @@ abstract class ScriptArtifactBase {
         if (engine instanceof Compilable) {
             compiledScript = ((Compilable) engine).compile(scriptContent);
         }
+
+        if (artifactProperties != null) {
+            final String methodMappingVal = artifactProperties.get("methodMapping");
+            if (methodMappingVal != null) {
+                methodMapping = new HashMap<String, String>();
+                final String[] pairs = methodMappingVal.split(",");
+                for (final String pair : pairs) {
+                    final String[] keyValue = pair.split("=");
+                    methodMapping.put(keyValue[0].trim(), keyValue[1].trim());
+                }
+            }
+        }
     }
 
     void setEngineScopeAttributes() {
@@ -53,5 +69,13 @@ abstract class ScriptArtifactBase {
         scriptContext.setAttribute("jobContext", stepContext.getJobContext(), ScriptContext.ENGINE_SCOPE);
         scriptContext.setAttribute("stepContext", stepContext, ScriptContext.ENGINE_SCOPE);
         scriptContext.setAttribute("batchProperties", Properties.toJavaUtilProperties(artifactProperties), ScriptContext.ENGINE_SCOPE);
+    }
+
+    String getFunctionName(final String batchApiMethodName) {
+        if (methodMapping == null) {
+            return batchApiMethodName;
+        }
+        final String functionName = methodMapping.get(batchApiMethodName);
+        return functionName == null ? batchApiMethodName : functionName;
     }
 }
