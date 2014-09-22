@@ -21,15 +21,20 @@ import javax.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ScriptingIT extends AbstractIT {
-    private static String testNameKey = "testName";
-    private static String numberCsvFilePath = "numbers.csv";
+    private static final String testNameKey = "testName";
+    private static final String numberCsvFilePath = "numbers.csv";
 
     public ScriptingIT() {
         //params.setProperty("job-param", "job-param");
+    }
+
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        copyResourceToTmpdir(numberCsvFilePath, numberCsvFilePath);
     }
 
     @Test
@@ -111,18 +116,16 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void chunkPython() throws Exception {
-        copyResourceToTmpdir(numberCsvFilePath, numberCsvFilePath);
         test0("chunkPython");
     }
 
     @Test
     public void chunkRuby() throws Exception {
-        copyResourceToTmpdir(numberCsvFilePath, numberCsvFilePath);
         test0("chunkRuby");
     }
 
-    private void copyResourceToTmpdir(final String resourcePath, final String targetFileName) throws IOException {
-        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
+    private static void copyResourceToTmpdir(final String resourcePath, final String targetFileName) throws IOException {
+        final InputStream resourceAsStream = ScriptingIT.class.getClassLoader().getResourceAsStream(resourcePath);
         Files.copy(resourceAsStream, new File(System.getProperty("java.io.tmpdir"), targetFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -130,6 +133,7 @@ public class ScriptingIT extends AbstractIT {
         params.setProperty(testNameKey, testName);
         startJobAndWait(testName);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
         Assert.assertTrue(jobExecution.getExitStatus().equals(testName) || jobExecution.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
         Assert.assertTrue(stepExecution0.getExitStatus().equals(testName) || stepExecution0.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
     }

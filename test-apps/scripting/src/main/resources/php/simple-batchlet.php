@@ -11,8 +11,6 @@
  */
 
 <?php
-    import java.util.HashMap;
-
     echo "jobName: " . $jobContext->getJobName() . PHP_EOL;
     echo "stepName: " . $stepContext->getStepName() . PHP_EOL;
 
