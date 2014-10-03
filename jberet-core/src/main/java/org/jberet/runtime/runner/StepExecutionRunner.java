@@ -39,6 +39,7 @@ import javax.batch.runtime.BatchStatus;
 import javax.transaction.TransactionManager;
 
 import org.jberet._private.BatchLogger;
+import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.Listeners;
 import org.jberet.job.model.Partition;
@@ -293,7 +294,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
         final List<PartitionExecutionImpl> fromAllPartitions = new ArrayList<PartitionExecutionImpl>();
-        tm.begin();
+
+        if (analyzer != null) {
+            tm.begin();
+        }
         try {
             while (fromAllPartitions.size() < numOfPartitions) {
                 final Serializable data = collectorDataQueue.take();
@@ -326,13 +330,16 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 }
             }
 
-            if (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED) {
+            if (analyzer != null &&
+               (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED)) {
                 tm.rollback();
             } else {
                 if (reducer != null) {
                     reducer.beforePartitionedStepCompletion();
                 }
-                tm.commit();
+                if (analyzer != null) {
+                    tm.commit();
+                }
             }
             if (reducer != null) {
                 if (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED) {
@@ -343,10 +350,18 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 }
             }
         } catch (final Exception e) {
+            BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), step);
             consolidatedBatchStatus = BatchStatus.FAILED;
+
+            if (analyzer != null) {
+                try {
+                    tm.rollback();
+                } catch (final Exception ee) {
+                    BatchLogger.LOGGER.tracef(ee, "Exception when rolling back transaction.");
+                }
+            }
             if (reducer != null) {
                 reducer.rollbackPartitionedStep();
-                tm.rollback();
                 reducer.afterPartitionedStepCompletion(PartitionReducer.PartitionStatus.ROLLBACK);
             }
         }
