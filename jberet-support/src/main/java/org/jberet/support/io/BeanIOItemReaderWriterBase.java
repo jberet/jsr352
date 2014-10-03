@@ -53,7 +53,7 @@ public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * JNDI name for looking up {@code org.beanio.StreamFactory} when running in application server. When
      * {@code streamFactoryLookup} property is specified in job xml and hence injected here, {@code org.beanio.StreamFactory}
-     * will be looked up with JNDI, and {@link BeanIOItemReaderWriterBase#streamMapping}, and
+     * will be looked up with JNDI, and {@link BeanIOItemReaderWriterBase#streamMapping} and
      * {@link org.jberet.support.io.BeanIOItemReaderWriterBase#mappingProperties}will be ignored.
      */
     @Inject

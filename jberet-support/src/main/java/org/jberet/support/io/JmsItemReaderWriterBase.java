@@ -32,7 +32,7 @@ import org.jberet.support._private.SupportMessages;
 public abstract class JmsItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * This field holds an optional injection of {@code javax.jms.Destination}. When {@link #destinationLookupName}
-     * property is specified in job xml, this property is ignored and {@link #destinationLookupName} is used to look up
+     * property is specified in job xml, this field is ignored and {@link #destinationLookupName} is used to look up
      * JMS destination. The application may implement a {@code javax.enterprise.inject.Produces} method to satisfy
      * this dependency injection.
      */
@@ -41,7 +41,7 @@ public abstract class JmsItemReaderWriterBase extends ItemReaderWriterBase {
 
     /**
      * This field holds an optional injection of {@code javax.jms.ConnectionFactory}. When {@link #connectionFactoryLookupName}
-     * property is specified in job xml, this property is ignored and {@link #connectionFactoryLookupName} is used to
+     * property is specified in job xml, this field is ignored and {@link #connectionFactoryLookupName} is used to
      * look up JMS {@code ConnectionFactory}. The application may implement a {@code javax.enterprise.inject.Produces}
      * method to satisfy this dependency injection.
      */

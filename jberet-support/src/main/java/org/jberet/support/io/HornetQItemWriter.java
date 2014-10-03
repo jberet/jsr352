@@ -27,7 +27,7 @@ import org.jberet.support._private.SupportLogger;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that sends data items to a HornetQ address.
- * It can sends the following HornetQ message types:
+ * It can send the following HornetQ message types:
  * <p/>
  * <ul>
  * <li>if the data item is of type {@code java.lang.String}, a {@code org.hornetq.api.core.client.ClientMessage#TEXT_TYPE}
