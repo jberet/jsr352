@@ -100,6 +100,17 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public void removeJobInstance(final long jobInstanceIdToRemove) {
+        JobInstance jobInstance = jobInstances.get(jobInstanceIdToRemove);
+        if (null != jobInstance) {
+                List<JobExecution> jobExecutionsList = ((JobInstanceImpl) jobInstance).getJobExecutions();
+                for (JobExecution jobExecution : jobExecutionsList) {
+                    jobExecutions.remove(jobExecution.getExecutionId());
+                }
+                String jobName = jobInstance.getJobName();
+                if (getJobInstanceCount(jobName) == 0) {
+                    jobs.remove(jobName);
+                }
+        }
         jobInstances.remove(jobInstanceIdToRemove);
     }
 

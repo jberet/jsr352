@@ -28,7 +28,10 @@ import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
+
 import javax.batch.api.BatchProperty;
+import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.enterprise.inject.Produces;
@@ -36,8 +39,11 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.management.ObjectName;
 
 import org.jberet.job.model.Properties;
+import org.jberet.operations.JobOperatorImpl;
+import org.jberet.repository.JobRepository;
 
 public class BatchBeanProducer {
+
     @Produces
     public JobContext getJobContext() {
         return ArtifactCreationContext.getCurrentArtifactCreationContext().jobContext;
@@ -47,7 +53,14 @@ public class BatchBeanProducer {
     public StepContext getStepContext() {
         return ArtifactCreationContext.getCurrentArtifactCreationContext().stepContext;
     }
-
+ 
+    @Produces
+    public JobRepository getJobRepository() {
+        JobOperator jobOperator = BatchRuntime.getJobOperator();
+        JobOperatorImpl jobOperatorImpl = (JobOperatorImpl) jobOperator;
+        return jobOperatorImpl.getBatchEnvironment().getJobRepository();
+    }
+ 
     @Produces @BatchProperty
     public Integer getInt(final InjectionPoint injectionPoint) {
         Integer i = getProperty(injectionPoint);
