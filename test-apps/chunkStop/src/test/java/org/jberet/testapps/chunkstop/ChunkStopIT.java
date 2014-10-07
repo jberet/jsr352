@@ -56,6 +56,18 @@ public class ChunkStopIT extends AbstractIT {
     }
 
     @Test
+    public void chunkStopAbandon() throws Exception {
+        params.setProperty("writer.sleep.time", "500");
+        startJob(jobXml);
+        jobOperator.stop(jobExecutionId);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
+
+        jobOperator.abandon(jobExecutionId);
+        Assert.assertEquals(BatchStatus.ABANDONED, jobExecution.getBatchStatus());
+    }
+
+    @Test
     public void chunkFailRestart() throws Exception {
         params.setProperty("reader.fail.at", "13");
         startJobAndWait(jobXml);

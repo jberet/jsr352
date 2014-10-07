@@ -258,6 +258,7 @@ public class JobOperatorImpl implements JobOperator {
                 batchStatus == BatchStatus.STOPPED ||
                 batchStatus == BatchStatus.ABANDONED) {
             jobExecution.setBatchStatus(BatchStatus.ABANDONED);
+            repository.updateJobExecution(jobExecution, false);
         } else {
             throw MESSAGES.jobExecutionIsRunningException(executionId);
         }

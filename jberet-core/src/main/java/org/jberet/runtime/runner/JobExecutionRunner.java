@@ -39,6 +39,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         // the job may be stopped right after starting
         if (batchContext.getBatchStatus() != BatchStatus.STOPPING) {
             batchContext.setBatchStatus(BatchStatus.STARTED);
+            batchContext.getJobRepository().updateJobExecution(batchContext.getJobExecution(), false);
         }
         final JobListener[] jobListeners = batchContext.getJobListeners();
         try {
@@ -78,7 +79,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         } else if (batchContext.getBatchStatus() == BatchStatus.STOPPING) {
             batchContext.setBatchStatus(BatchStatus.STOPPED);
         }
-        batchContext.getJobRepository().updateJobExecution(batchContext.getJobExecution());
+        batchContext.getJobRepository().updateJobExecution(batchContext.getJobExecution(), true);
         batchContext.getJobExecution().cleanUp();
     }
 }

@@ -46,7 +46,9 @@ public abstract class AbstractRepository implements JobRepository {
     final ConcurrentMap<Long, JobExecution> jobExecutions = new ConcurrentHashMap<Long, JobExecution>();
 
     abstract void insertJobInstance(JobInstanceImpl jobInstance);
+
     abstract void insertJobExecution(JobExecutionImpl jobExecution);
+
     abstract void insertStepExecution(StepExecutionImpl stepExecution, JobExecutionImpl jobExecution);
 
     @Override
@@ -61,14 +63,14 @@ public abstract class AbstractRepository implements JobRepository {
     public void removeJob(final String jobId) {
         jobs.remove(jobId);
         synchronized (jobInstances) {
-            for (Iterator<Map.Entry<Long, JobInstance>> it = jobInstances.entrySet().iterator(); it.hasNext();) {
+            for (Iterator<Map.Entry<Long, JobInstance>> it = jobInstances.entrySet().iterator(); it.hasNext(); ) {
                 final JobInstance ji = it.next().getValue();
                 if (ji.getJobName().equals(jobId)) {
                     it.remove();
                 }
             }
         }
-        for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
             final JobExecution je = it.next().getValue();
             if (je.getJobName().equals(jobId)) {
                 it.remove();
@@ -206,9 +208,8 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public void updateJobExecution(final JobExecution jobExecution) {
-        final JobExecutionImpl jobExecutionImpl = (JobExecutionImpl) jobExecution;
-        jobExecutionImpl.setEndTime(System.currentTimeMillis());
+    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
+        jobExecution.setEndTime(System.currentTimeMillis());
     }
 
     @Override

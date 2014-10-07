@@ -186,14 +186,16 @@ public final class MongoRepository extends AbstractRepository {
     }
 
     @Override
-    public void updateJobExecution(final JobExecution jobExecution) {
-        super.updateJobExecution(jobExecution);
-
-        final DBObject update = new BasicDBObject(TableColumns.ENDTIME, jobExecution.getEndTime());
-        update.put(TableColumns.LASTUPDATEDTIME, jobExecution.getLastUpdatedTime());
+    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
+        super.updateJobExecution(jobExecution, fullUpdate);
+        final DBObject update = new BasicDBObject(TableColumns.LASTUPDATEDTIME, jobExecution.getLastUpdatedTime());
         update.put(TableColumns.BATCHSTATUS, jobExecution.getBatchStatus().name());
-        update.put(TableColumns.EXITSTATUS, jobExecution.getExitStatus());
-        update.put(TableColumns.RESTARTPOSITION, ((JobExecutionImpl) jobExecution).getRestartPosition());
+
+        if (fullUpdate) {
+            update.put(TableColumns.ENDTIME, jobExecution.getEndTime());
+            update.put(TableColumns.EXITSTATUS, jobExecution.getExitStatus());
+            update.put(TableColumns.RESTARTPOSITION, jobExecution.getRestartPosition());
+        }
 
         db.getCollection(TableColumns.JOB_EXECUTION).update(
                 new BasicDBObject(TableColumns.JOBEXECUTIONID, jobExecution.getExecutionId()),

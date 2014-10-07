@@ -74,6 +74,7 @@ public final class JdbcRepository extends AbstractRepository {
     private static final String SELECT_JOB_EXECUTION = "select-job-execution";
     private static final String INSERT_JOB_EXECUTION = "insert-job-execution";
     private static final String UPDATE_JOB_EXECUTION = "update-job-execution";
+    private static final String UPDATE_JOB_EXECUTION_PARTIAL = "update-job-execution-partial";
 
     private static final String SELECT_ALL_STEP_EXECUTIONS = "select-all-step-executions";
     private static final String SELECT_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID = "select-step-executions-by-job-execution-id";
@@ -396,19 +397,27 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public void updateJobExecution(final JobExecution jobExecution) {
-        super.updateJobExecution(jobExecution);
-        final String update = sqls.getProperty(UPDATE_JOB_EXECUTION);
+    public void updateJobExecution(final JobExecutionImpl jobExecution, boolean fullUpdate) {
+        super.updateJobExecution(jobExecution, fullUpdate);
+        final String update = fullUpdate ? sqls.getProperty(UPDATE_JOB_EXECUTION) : sqls.getProperty(UPDATE_JOB_EXECUTION_PARTIAL);
         final Connection connection = getConnection();
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(update);
-            preparedStatement.setTimestamp(1, new Timestamp(jobExecution.getEndTime().getTime()));
-            preparedStatement.setTimestamp(2, new Timestamp(jobExecution.getLastUpdatedTime().getTime()));
-            preparedStatement.setString(3, jobExecution.getBatchStatus().name());
-            preparedStatement.setString(4, jobExecution.getExitStatus());
-            preparedStatement.setString(5, ((JobExecutionImpl) jobExecution).getRestartPosition());
-            preparedStatement.setLong(6, jobExecution.getExecutionId());  //where clause
+
+            if (fullUpdate) {
+                preparedStatement.setTimestamp(1, new Timestamp(jobExecution.getEndTime().getTime()));
+                preparedStatement.setTimestamp(2, new Timestamp(jobExecution.getLastUpdatedTime().getTime()));
+                preparedStatement.setString(3, jobExecution.getBatchStatus().name());
+                preparedStatement.setString(4, jobExecution.getExitStatus());
+                preparedStatement.setString(5, jobExecution.getRestartPosition());
+                preparedStatement.setLong(6, jobExecution.getExecutionId());  //where clause
+            } else {
+                preparedStatement.setTimestamp(1, new Timestamp(jobExecution.getLastUpdatedTime().getTime()));
+                preparedStatement.setString(2, jobExecution.getBatchStatus().name());
+                preparedStatement.setLong(3, jobExecution.getExecutionId());  //where clause
+            }
+
             preparedStatement.executeUpdate();
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, update);

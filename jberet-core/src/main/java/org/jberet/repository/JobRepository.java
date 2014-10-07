@@ -44,7 +44,7 @@ public interface JobRepository {
     JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters);
     JobExecution getJobExecution(long jobExecutionId);
     List<JobExecution> getJobExecutions(JobInstance jobInstance);
-    void updateJobExecution(JobExecution jobExecution);
+    void updateJobExecution(JobExecutionImpl jobExecution, boolean fullUpdate);
 
     List<StepExecution> getStepExecutions(long jobExecutionId);
     StepExecutionImpl createStepExecution(String stepName);
