@@ -191,8 +191,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
             tm.begin();
             try {
-                itemReader.close();
                 itemWriter.close();
+                itemReader.close();
                 tm.commit();
             } catch (Exception e) {
                 tm.rollback();
@@ -575,8 +575,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
         // Close the reader and writer
         try {
-            itemReader.close();
             itemWriter.close();
+            itemReader.close();
         } catch (Exception e) {
             // An error occurred, safely close the reader and writer
             safeClose();
@@ -697,14 +697,14 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
      */
     private void safeClose() {
         try {
-            if (itemReader != null) itemReader.close();
-        } catch (Exception e) {
-            LOGGER.trace("Error closing ItemReader.", e);
-        }
-        try {
             if (itemWriter != null) itemWriter.close();
         } catch (Exception e) {
             LOGGER.trace("Error closing ItemWriter.", e);
+        }
+        try {
+            if (itemReader != null) itemReader.close();
+        } catch (Exception e) {
+            LOGGER.trace("Error closing ItemReader.", e);
         }
     }
 
