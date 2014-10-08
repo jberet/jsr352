@@ -44,7 +44,7 @@ public class ExcelStreamingItemWriter extends ExcelUserModelItemWriter {
      */
     @Inject
     @BatchProperty
-    Boolean compressTempFiles;
+    protected Boolean compressTempFiles;
 
     @Override
     protected Workbook createWorkbook(final InputStream templateInputStream) throws IOException, InvalidFormatException {

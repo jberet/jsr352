@@ -125,13 +125,18 @@ Increase `ulimit` to avoid such errors. For example,
             <artifactId>weld-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wildfly.security</groupId>
+            <artifactId>wildfly-security-manager</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
         
 A note on webapp or Java EE application packaging: Java EE API jars (batch-api, cdi-api, javax.inject, transaction-api)
 are already available in the appserver, and should not be included in WAR, JAR, or EAR files. Their maven dependency
-scope should be set to `provided`.
+scope should be set to `provided`. In addition, if the application is deployed to JBoss EAP or WildFly, almost all of
+the above dependencies are already available as JBoss modules, and should not be duplicated in application package.
         
 #####The following is also required for Java SE batch applications (h2 can be omitted when using in-memory batch job repository):
         <dependency>
