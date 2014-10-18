@@ -43,14 +43,27 @@ import static org.jberet.support.io.CsvProperties.HEADER_KEY;
 @Named
 @Dependent
 public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter {
+    /**
+     * Specifies the CSV header row to write out.
+     */
     @Inject
     @BatchProperty
     protected String[] header;
 
+    /**
+     * Specifies the complete comment line that can be recognized by any tools or programs intended to read the current
+     * CSV output. The comments should already include the required comment-defining characters or regular expressions.
+     * The value of this property will be written out as a comment line verbatim as the first line.
+     */
     @Inject
     @BatchProperty
     protected String writeComments;
 
+    /**
+     * Instructs {@code org.jberet.support.io.CsvItemWriter}, when the target CSV resource already
+     * exists, whether to append to, or overwrite the existing resource, or fail. Valid values are {@code append},
+     * {@code overwrite}, and {@code failIfExists}. Optional property, and defaults to {@code append}.
+     */
     @Inject
     @BatchProperty
     protected String writeMode;

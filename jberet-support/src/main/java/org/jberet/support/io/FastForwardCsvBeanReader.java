@@ -169,6 +169,18 @@ final class FastForwardCsvBeanReader extends AbstractCsvReader implements ICsvBe
         return null; // EOF
     }
 
+    // reading into existing beans are currently not supported in jberet-support CSV reader and writer.
+    @Override
+    public <T> T read(final T t, final String... strings) throws IOException {
+        return null;
+    }
+
+    @Override
+    public <T> T read(final T t, final String[] strings, final CellProcessor... cellProcessors) throws IOException {
+        return null;
+    }
+
+
     private void fastForwardToStartRow() throws IOException {
         while (getRowNumber() < this.startRowNumber) {
             readRow();

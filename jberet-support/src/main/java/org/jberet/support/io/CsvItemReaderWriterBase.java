@@ -52,46 +52,131 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
     static final Class[] stringParameterTypes = {String.class};
     static final CellProcessor[] noCellProcessors = new CellProcessor[0];
 
+    /**
+     * Specify the bean fields or map keys corresponding to CSV columns. If the CSV columns exactly
+     * match bean fields or map keys, then no need to specify this property.
+     */
     @Inject
     @BatchProperty
     protected String[] nameMapping;
 
+    /**
+     * Specifies a fully-qualified class or interface name that maps to a row of the source CSV file.
+     * For example,
+     * <ul>
+     * <li>{@code java.util.List}</li>
+     * <li>{@code java.util.Map}</li>
+     * <li>{@code org.jberet.support.io.Person}</li>
+     * <li>{@code my.own.BeanType}</li>
+     * </ul>
+     */
     @Inject
     @BatchProperty
     protected Class beanType;
 
+    /**
+     * Specifies one of the 4 predefined CSV preferences:
+     * <ul>
+     * <li>{@code STANDARD_PREFERENCE}</li>
+     * <li>{@code EXCEL_PREFERENCE}</li>
+     * <li>{@code EXCEL_NORTH_EUROPE_PREFERENCE}</li>
+     * <li>{@code TAB_PREFERENCE}</li>
+     * </ul>
+     */
     @Inject
     @BatchProperty
     protected String preference;
 
+    /**
+     * The quote character (used when a cell contains special characters, such as the delimiter char, a quote char,
+     * or spans multiple lines). See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     * The default quoteChar is double quote ("). If " is present in the CSV data cells, specify quoteChar to some
+     * other characters, e.g., |.
+     */
     @Inject
     @BatchProperty
     protected String quoteChar;
 
+    /**
+     * The delimiter character (separates each cell in a row).
+     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     */
     @Inject
     @BatchProperty
     protected String delimiterChar;
 
+    /**
+     * The end of line symbols to use when writing (Windows, Mac and Linux style line breaks are all supported when
+     * reading, so this preference won't be used at all for reading).
+     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     */
     @Inject
     @BatchProperty
     protected String endOfLineSymbols;
 
+    /**
+     * Whether spaces surrounding a cell need quotes in order to be preserved (see below). The default value is
+     * false (quotes aren't required). See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     */
     @Inject
     @BatchProperty
     protected String surroundingSpacesNeedQuotes;
 
+    /**
+     * Specifies a {@code CommentMatcher} for reading CSV resource. The {@code CommentMatcher}
+     * determines whether a line should be considered a comment.
+     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>. For example,
+     * <ul>
+     *     <li>"startsWith #"</li>
+     *     <li>"matches 'regexp'"</li>
+     *     <li>"my.own.CommentMatcherImpl"</li>
+     * </ul>
+     */
     @Inject
     @BatchProperty
     protected String commentMatcher;
 
+    /**
+     * Specifies a custom encoder when writing CSV. See the section on custom encoders below.
+     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     */
     @Inject
     @BatchProperty
     protected String encoder;
 
+    /**
+     * Allows you to enable surrounding quotes for writing (if a column wouldn't normally be quoted because
+     * it doesn't contain special characters). See the section on quote modes below.
+     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     */
     @Inject
     @BatchProperty
     protected String quoteMode;
 
+    /**
+     * Specifies a list of cell processors, one for each column. See
+     * <a href="http://supercsv.sourceforge.net/cell_processors.html">Super CSV docs</a> for supported cell processor
+     * types. The rules and syntax are as follows:
+     * <ul>
+     * <li>The size of the resultant list must equal to the number of CSV columns.</li>
+     * <li>Cell processors appear in the same order as CSV columns.</li>
+     * <li>If no cell processor is needed for a column, enter null.</li>
+     * <li>Each column may have null, 1, 2, or multiple cell processors, separated by comma (,)</li>
+     * <li>Cell processors for different columns must be separated with semi-colon (;).</li>
+     * <li>Cell processors may contain parameters enclosed in parenthesis, and multiple parameters are separated with comma (,).</li>
+     * <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'</li>
+     * </ul>
+     * For example, to specify cell processors for 5-column CSV:
+     * <pre>
+     * value = "
+     *      null;
+     *      Optional, StrMinMax(1, 20);
+     *      ParseLong;
+     *      NotNull;
+     *      Optional, ParseDate('dd/MM/yyyy')
+     * "
+     * </pre>
+     */
     @Inject
     @BatchProperty
     protected String cellProcessors;

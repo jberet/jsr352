@@ -129,9 +129,10 @@ public final class CsvProperties {
     public static final String COMMENT_MATCHER_KEY = "commentMatcher";
 
     /**
-     * The property key to specify the complete comment line for the reader. The comments should already include
-     * the required comment-defining characters or regular expressions. The value of this property will be written
-     * out as a comment line verbatim as the first line.
+     * The property key to Specifies the complete comment line that can be recognized by any tools or programs
+     * intended to read the current CSV output. The comments should already include the required comment-defining
+     * characters or regular expressions. The value of this property will be written out as a comment line verbatim
+     * as the first line.
      */
     public static final String WRITE_COMMENTS_KEY = "writeComments";
 

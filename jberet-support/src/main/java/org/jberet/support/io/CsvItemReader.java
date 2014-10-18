@@ -41,14 +41,26 @@ import static org.jberet.support.io.CsvProperties.BEAN_TYPE_KEY;
 @Named
 @Dependent
 public class CsvItemReader extends CsvItemReaderWriterBase implements ItemReader {
+    /**
+     * Specifies the start position (a positive integer starting from 1) to read the data. If reading from the beginning
+     * of the input CSV, there is no need to specify this property.
+     */
     @Inject
     @BatchProperty
     protected int start;
 
+    /**
+     * Specify the end position in the data set (inclusive). Optional property, and defaults to {@code Integer.MAX_VALUE}.
+     * If reading till the end of the input CSV, there is no need to specify this property.
+     */
     @Inject
     @BatchProperty
     protected int end;
 
+    /**
+     * Indicates that the input CSV resource does not contain header row. Optional property, valid values are
+     * {@code true} or {@code false}, and the default is {@code false}.
+     */
     @Inject
     @BatchProperty
     protected boolean headerless;
