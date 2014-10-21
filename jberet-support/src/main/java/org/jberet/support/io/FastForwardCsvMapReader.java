@@ -20,6 +20,10 @@ import org.supercsv.util.Util;
  *
  * @author Kasper B. Graversen
  * @author James Bassett
+ *
+ * @see     org.jberet.support.io.FastForwardCsvBeanReader
+ * @see     org.jberet.support.io.FastForwardCsvListReader
+ * @since   1.0.0
  */
 final class FastForwardCsvMapReader extends AbstractCsvReader implements ICsvMapReader {
     private final int startRowNumber;

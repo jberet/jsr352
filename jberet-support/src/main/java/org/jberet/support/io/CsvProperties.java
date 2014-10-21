@@ -14,6 +14,8 @@ package org.jberet.support.io;
 
 /**
  * A collection of property keys and values used to configure CSV-related batch artifacts in JSL document.
+ *
+ * @since   1.0.0
  */
 public final class CsvProperties {
     /**

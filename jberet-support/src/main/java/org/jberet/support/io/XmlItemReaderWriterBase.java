@@ -23,6 +23,10 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 /**
  * Base class for {@link org.jberet.support.io.XmlItemReader} and {@link org.jberet.support.io.XmlItemWriter}.
+ *
+ * @see     XmlItemReader
+ * @see     XmlItemWriter
+ * @since   1.0.2
  */
 public abstract class XmlItemReaderWriterBase extends ItemReaderWriterBase {
     @Inject

@@ -30,6 +30,10 @@ import org.jberet.support._private.SupportMessages;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes a list of same-typed objects to Json resource.
  * Each object is written as part of the root Json array.
+ *
+ * @see     JsonItemReader
+ * @see     JsonItemReaderWriterBase
+ * @since   1.0.2
  */
 @Named
 @Dependent

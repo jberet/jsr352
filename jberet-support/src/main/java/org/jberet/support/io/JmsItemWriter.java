@@ -39,8 +39,9 @@ import org.jberet.support._private.SupportLogger;
  * </ul>
  * <p/>
  *
- * @see JmsItemReader
- * @since 1.1.0
+ * @see     JmsItemReader
+ * @see     JmsItemReaderWriterBase
+ * @since   1.1.0
  */
 @Named
 @Dependent

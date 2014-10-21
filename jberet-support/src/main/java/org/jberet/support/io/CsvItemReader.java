@@ -37,6 +37,10 @@ import static org.jberet.support.io.CsvProperties.BEAN_TYPE_KEY;
  * other than comma (e.g., tab, |) are also supported by configuring {@code preference}, {@code delimiterChar},
  * or {@code quoteChar} properties in job xml.
  * This class is not designed to be thread-safe and its instance should not be shared between threads.
+ *
+ * @see     CsvItemReaderWriterBase
+ * @see     CsvItemWriter
+ * @since   1.0.0
  */
 @Named
 @Dependent

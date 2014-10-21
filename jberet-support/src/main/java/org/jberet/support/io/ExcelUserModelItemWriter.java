@@ -42,8 +42,10 @@ import org.jberet.support._private.SupportMessages;
  * on Apache POI user model API, and in-memory content generation. For large data set that may cause memory issue,
  * consider using {@link ExcelStreamingItemWriter}.
  *
- * @see ExcelUserModelItemReader
- * @since 1.1.0
+ * @see     ExcelUserModelItemReader
+ * @see     org.jberet.support.io.ExcelItemReaderWriterBase
+ * @see     org.jberet.support.io.ExcelStreamingItemWriter
+ * @since   1.1.0
  */
 @Named
 @Dependent

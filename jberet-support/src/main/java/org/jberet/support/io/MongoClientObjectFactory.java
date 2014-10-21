@@ -27,6 +27,10 @@ import org.jberet.support._private.SupportMessages;
  * An implementation of {@code javax.naming.spi.ObjectFactory} that produces instance of {@code com.mongodb.MongoClient}.
  * This class can be used to create a custom JNDI resource in an application server.
  * See wildfly.home/docs/schema/jboss-as-naming_2_0.xsd for more details.
+ *
+ * @see     "javax.naming.spi.ObjectFactory"
+ * @see     "wildfly.home/docs/schema/jboss-as-naming_2_0.xsd"
+ * @since   1.0.2
  */
 public final class MongoClientObjectFactory implements ObjectFactory {
     /**

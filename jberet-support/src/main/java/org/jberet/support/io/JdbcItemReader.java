@@ -34,8 +34,9 @@ import org.jberet.support._private.SupportMessages;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from the source database.
  *
- * @see JdbcItemWriter
- * @since 1.1.0
+ * @see     JdbcItemWriter
+ * @see     JdbcItemReaderWriterBase
+ * @since   1.1.0
  */
 @Named
 @Dependent

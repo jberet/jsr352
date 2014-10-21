@@ -52,9 +52,10 @@ import org.jberet.support._private.SupportLogger;
  * Apache POI event model API. Compared to {@link ExcelUserModelItemReader}, this reader implementation has smaller
  * memory footprint and is suitable for reading large binary excel files.
  *
- * @see ExcelUserModelItemReader
- * @see ExcelStreamingItemReader
- * @since 1.1.0
+ * @see     ExcelUserModelItemReader
+ * @see     ExcelStreamingItemReader
+ * @see     ExcelItemReaderWriterBase
+ * @since   1.1.0
  */
 @Named
 @Dependent

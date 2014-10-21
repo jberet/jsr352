@@ -33,9 +33,10 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
  * An implementation of {@code javax.batch.api.chunk.ItemReader} for reading OOXML Excel files, based on Apache POI
  * XSSF streaming reader API, and StAX.
  *
- * @see ExcelUserModelItemReader
- * @see ExcelStreamingItemWriter
- * @since 1.1.0
+ * @see     ExcelStreamingItemWriter
+ * @see     ExcelUserModelItemReader
+ * @see     ExcelItemReaderWriterBase
+ * @since   1.1.0
  */
 
 @Named

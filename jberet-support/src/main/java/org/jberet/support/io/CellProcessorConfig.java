@@ -66,6 +66,8 @@ import org.supercsv.util.CsvContext;
  * This class is responsible for parsing the cellProcessors configuration property value into an array of
  * {@code org.supercsv.cellprocessor.ift.CellProcessor}, which can be consumed by
  * {@code org.jberet.support.io.CsvItemReader}.
+ *
+ * @since   1.0.0
  */
 final class CellProcessorConfig {
     static final String[] EMPTY_STRING_ARRAY = new String[0];

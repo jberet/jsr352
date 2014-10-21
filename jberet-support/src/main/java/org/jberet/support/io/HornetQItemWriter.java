@@ -39,9 +39,10 @@ import org.jberet.support._private.SupportLogger;
  * <p/>
  * {@link #durableMessage} property can be configured to send either durable or non-durable (default) messages.
  *
- * @see HornetQItemReader
- * @see JmsItemWriter
- * @since 1.1.0
+ * @see     HornetQItemReader
+ * @see     HornetQItemReaderWriterBase
+ * @see     JmsItemWriter
+ * @since   1.1.0
  */
 @Named
 @Dependent

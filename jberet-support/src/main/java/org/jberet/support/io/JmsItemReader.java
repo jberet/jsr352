@@ -53,8 +53,9 @@ import org.jberet.support._private.SupportMessages;
  * <li>any message is of type {@code Message}, but not one of its subtype.</li>
  * </ul>
  *
- * @see JmsItemWriter
- * @since 1.1.0
+ * @see     JmsItemWriter
+ * @see     JmsItemReaderWriterBase
+ * @since   1.1.0
  */
 @Named
 @Dependent

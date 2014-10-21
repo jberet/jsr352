@@ -38,9 +38,9 @@ import org.jberet.support._private.SupportMessages;
 /**
  * The base class for {@link org.jberet.support.io.HornetQItemReader} and {@link org.jberet.support.io.HornetQItemWriter}.
  *
- * @see org.jberet.support.io.HornetQItemReader
- * @see org.jberet.support.io.HornetQItemWriter
- * @since 1.1.0
+ * @see     HornetQItemReader
+ * @see     HornetQItemWriter
+ * @since   1.1.0
  */
 public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
     protected static final String QUEUE_NAME_KEY = "name";

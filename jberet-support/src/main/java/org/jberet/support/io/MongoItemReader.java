@@ -15,6 +15,7 @@ package org.jberet.support.io;
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -24,8 +25,13 @@ import com.mongodb.util.JSON;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads from a collection in a MongoDB database.
+ *
+ * @see     MongoItemWriter
+ * @see     MongoItemReaderWriterBase
+ * @since   1.0.2
  */
 @Named
+@Dependent
 public class MongoItemReader extends MongoItemReaderWriterBase implements ItemReader {
     @Inject
     @BatchProperty

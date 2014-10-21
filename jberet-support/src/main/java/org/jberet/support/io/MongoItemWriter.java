@@ -15,12 +15,18 @@ package org.jberet.support.io;
 import java.io.Serializable;
 import java.util.List;
 import javax.batch.api.chunk.ItemWriter;
+import javax.enterprise.context.Dependent;
 import javax.inject.Named;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes to a collection in a MongoDB database.
+ *
+ * @see     MongoItemReaderWriterBase
+ * @see     MongoItemReader
+ * @since   1.0.2
  */
 @Named
+@Dependent
 public class MongoItemWriter extends MongoItemReaderWriterBase implements ItemWriter {
     @Override
     public void open(final Serializable checkpoint) throws Exception {

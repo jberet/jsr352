@@ -26,6 +26,10 @@ import org.mongojack.JacksonDBCollection;
 /**
  * Base class for {@link org.jberet.support.io.MongoItemReader} and {@link org.jberet.support.io.MongoItemWriter}.
  * their common batch artifact properties are declared and injected here.
+ *
+ * @see     MongoItemReader
+ * @see     MongoItemWriter
+ * @since   1.0.2
  */
 public abstract class MongoItemReaderWriterBase extends ItemReaderWriterBase {
     @Inject

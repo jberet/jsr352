@@ -35,8 +35,9 @@ import org.jberet.support._private.SupportMessages;
  * ranged reading, custom error handler, and dynamic BeanIO mapping properties. {@link org.jberet.support.io.BeanIOItemReader}
  * configurations are specified as reader properties in job xml, and BeanIO mapping xml file.
  *
- * @see BeanIOItemWriter
- * @since 1.1.0
+ * @see     BeanIOItemReaderWriterBase
+ * @see     BeanIOItemWriter
+ * @since   1.1.0
  */
 @Named
 @Dependent

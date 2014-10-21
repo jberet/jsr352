@@ -34,6 +34,10 @@ import org.jberet.support._private.SupportMessages;
  * Each object is written as a sub-element of the target XML resource. The XML root element is specified with the
  * injected batch artifact properties {@link #rootElementName}, {@link #rootElementNamespaceURI}, and
  * {@link #rootElementPrefix}.
+ *
+ * @see     XmlItemReader
+ * @see     XmlItemReaderWriterBase
+ * @since   1.0.2
  */
 @Named
 @Dependent

@@ -29,6 +29,10 @@ import org.jberet.support._private.SupportLogger;
 
 /**
  * The base class for {@link JdbcItemReader} and {@link JdbcItemWriter}.
+ *
+ * @see     JdbcItemReader
+ * @see     JdbcItemWriter
+ * @since   1.1.0
  */
 public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase {
     /**

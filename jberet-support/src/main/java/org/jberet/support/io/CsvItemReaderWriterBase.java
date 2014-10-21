@@ -47,6 +47,10 @@ import static org.jberet.support.io.CsvProperties.TAB_PREFERENCE;
 /**
  * The base class for {@link org.jberet.support.io.CsvItemReader} and {@link org.jberet.support.io.CsvItemWriter}.
  * This class also holds common CSV-related batch artifact properties.
+ *
+ * @see     CsvItemReader
+ * @see     CsvItemWriter
+ * @since   1.0.0
  */
 public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
     static final Class[] stringParameterTypes = {String.class};

@@ -35,6 +35,10 @@ import org.supercsv.util.MethodCache;
  *
  * @author Kasper B. Graversen
  * @author James Bassett
+ *
+ * @see     org.jberet.support.io.FastForwardCsvListReader
+ * @see     org.jberet.support.io.FastForwardCsvMapReader
+ * @since   1.0.0
  */
 final class FastForwardCsvBeanReader extends AbstractCsvReader implements ICsvBeanReader {
 

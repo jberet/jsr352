@@ -38,8 +38,11 @@ import org.jberet.support._private.SupportMessages;
  * An implementation of {@code javax.batch.api.chunk.ItemReader} for reading Excel files. Current implementation is
  * based on Apache POI user model API.
  *
- * @see ExcelUserModelItemWriter
- * @since 1.1.0
+ * @see     ExcelUserModelItemWriter
+ * @see     ExcelItemReaderWriterBase
+ * @see     ExcelEventItemReader
+ * @see     ExcelStreamingItemReader
+ * @since   1.1.0
  */
 @Named
 @Dependent

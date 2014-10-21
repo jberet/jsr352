@@ -28,6 +28,10 @@ import org.jberet.support._private.SupportMessages;
 
 /**
  * The base class for {@link JmsItemReader} and {@link JmsItemWriter}.
+ *
+ * @see     JmsItemReader
+ * @see     JmsItemWriter
+ * @since   1.1.0
  */
 public abstract class JmsItemReaderWriterBase extends ItemReaderWriterBase {
     /**

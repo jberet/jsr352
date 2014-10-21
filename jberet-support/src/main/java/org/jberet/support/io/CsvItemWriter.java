@@ -39,6 +39,10 @@ import static org.jberet.support.io.CsvProperties.HEADER_KEY;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes data to CSV file or resource.
  * This class is not designed to be thread-safe and its instance should not be shared between threads.
+ *
+ * @see     CsvItemReaderWriterBase
+ * @see     CsvItemReader
+ * @since   1.0.0
  */
 @Named
 @Dependent

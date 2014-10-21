@@ -43,6 +43,8 @@ import static org.jberet.support.io.CsvProperties.WRITE_MODE_KEY;
 /**
  * The base class for all implementations of {@code javax.batch.api.chunk.ItemReader} and
  * {@code javax.batch.api.chunk.ItemWriter}. It also holds batch artifact properties common to all subclasses.
+ *
+ * @since   1.0.2
  */
 public abstract class ItemReaderWriterBase {
     protected static final String NEW_LINE = System.getProperty("line.separator");

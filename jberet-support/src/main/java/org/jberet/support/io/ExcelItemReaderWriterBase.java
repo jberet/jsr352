@@ -23,9 +23,12 @@ import org.apache.poi.ss.usermodel.Workbook;
  * The base class of Excel reader and writer classes: {@link ExcelUserModelItemReader},
  * {@link ExcelUserModelItemWriter}, {@link ExcelStreamingItemWriter}.
  *
- * @see ExcelUserModelItemReader
- * @see ExcelUserModelItemWriter
- * @since 1.1.0
+ * @see     ExcelUserModelItemReader
+ * @see     ExcelStreamingItemReader
+ * @see     ExcelEventItemReader
+ * @see     ExcelUserModelItemWriter
+ * @see     ExcelStreamingItemWriter
+ * @since   1.1.0
  */
 public abstract class ExcelItemReaderWriterBase extends JsonItemReaderWriterBase {
 

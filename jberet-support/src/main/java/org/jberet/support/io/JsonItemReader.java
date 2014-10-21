@@ -32,6 +32,10 @@ import org.jberet.support._private.SupportMessages;
  * user-provided bean type that represents individual data item in the source Json resource. The data item may also
  * be bound to {@code java.util.Map} or {@code com.fasterxml.jackson.databind.JsonNode} for applications that do not
  * need application bean type.
+ *
+ * @see     JsonItemWriter
+ * @see     JsonItemReaderWriterBase
+ * @since   1.0.2
  */
 @Named
 @Dependent

@@ -44,9 +44,10 @@ import org.jberet.support._private.SupportLogger;
  * <li>the size of the incoming message body is 0;</li>
  * </ul>
  *
- * @see HornetQItemWriter
- * @see JmsItemReader
- * @since 1.1.0
+ * @see     HornetQItemWriter
+ * @see     HornetQItemReaderWriterBase
+ * @see     JmsItemReader
+ * @since   1.1.0
  */
 @Named
 @Dependent

@@ -33,8 +33,9 @@ import org.jberet.support._private.SupportMessages;
  * As of Excel 2010, the row number limit is 1048576. For more details, see
  * http://office.microsoft.com/en-us/excel-help/excel-specifications-and-limits-HP010342495.aspx
  *
- * @since 1.1.0
- * @see ExcelUserModelItemWriter
+ * @see     ExcelUserModelItemWriter
+ * @see     ExcelItemReaderWriterBase
+ * @since   1.1.0
  */
 @Named
 @Dependent
