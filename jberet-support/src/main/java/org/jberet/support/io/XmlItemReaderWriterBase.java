@@ -29,6 +29,13 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  * @since   1.0.2
  */
 public abstract class XmlItemReaderWriterBase extends ItemReaderWriterBase {
+    /**
+     * JNDI lookup name for {@code com.fasterxml.jackson.dataformat.xml.XmlFactory}, which is used for constructing
+     * {@link com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser} in {@link org.jberet.support.io.XmlItemReader} and
+     * {@link com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator} in {@link org.jberet.support.io.XmlItemWriter}.
+     *
+     * @see XmlFactoryObjectFactory
+     */
     @Inject
     @BatchProperty
     protected String xmlFactoryLookup;

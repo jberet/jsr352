@@ -31,29 +31,59 @@ import org.jberet.support._private.SupportMessages;
  * Users of this class should provide a bean class that represents individual data item in the source XML, and the
  * {@link #readItem()} method reads one item at a time and binds it to the provided bean type.
  *
- * @see     XmlItemWriter
- * @see     XmlItemReaderWriterBase
- * @since   1.0.2
+ * @see XmlItemWriter
+ * @see XmlItemReaderWriterBase
+ * @since 1.0.2
  */
 @Named
 @Dependent
 public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader {
+    /**
+     * The bean class that represents individual data item in the {@link #resource} XML, and the {@link #readItem()}
+     * method reads one item at a time and binds it to the provided bean type. Required property. For example,
+     * <ul>
+     * <li>{@code org.jberet.support.io.StockTrade}</li>
+     * <li>{@code org.jberet.support.io.Person}</li>
+     * <li>{@code my.own.custom.ItemBean}</li>
+     * </ul>
+     */
     @Inject
     @BatchProperty
     protected Class beanType;
 
+    /**
+     * Specifies the start position (a positive integer starting from 1) to read the data. If reading from the beginning
+     * of the input XML, there is no need to specify this property.
+     */
     @Inject
     @BatchProperty
     protected int start;
 
+    /**
+     * Specify the end position in the data set (inclusive). Optional property, and defaults to {@code Integer.MAX_VALUE}.
+     * If reading till the end of the input XML, there is no need to specify this property.
+     */
     @Inject
     @BatchProperty
     protected int end;
 
+    /**
+     * Fully-qualified class name of {@code com.fasterxml.jackson.core.io.InputDecorator}, which can be used to
+     * decorate input sources. Optional property, and defaults to null.
+     *
+     * @see "com.fasterxml.jackson.core.io.InputDecorator"
+     * @see "com.fasterxml.jackson.core.JsonFactory#setInputDecorator(com.fasterxml.jackson.core.io.InputDecorator)"
+     */
     @Inject
     @BatchProperty
     protected Class inputDecorator;
 
+    /**
+     * Alternate "virtual name" to use for XML CDATA segments; that is, text values.
+     * Optional property and defaults to null (empty String, "", is used as the virtual name).
+     *
+     * @see "com.fasterxml.jackson.dataformat.xml.JacksonXmlModule#setXMLTextElementName(java.lang.String)"
+     */
     @Inject
     @BatchProperty
     protected String xmlTextElementName;

@@ -42,30 +42,72 @@ import org.jberet.support._private.SupportMessages;
 @Named
 @Dependent
 public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter {
+    /**
+     * Instructs this class, when the target XML resource already
+     * exists, whether to append to, or overwrite the existing resource, or fail. Valid values are {@code append},
+     * {@code overwrite}, and {@code failIfExists}. Optional property, and defaults to {@code append}.
+     */
     @Inject
     @BatchProperty
     protected String writeMode;
 
+    /**
+     * Whether use wrapper for indexed (List, array) properties or not, if there are no explicit annotations.
+     * Optional property, valid values are "true" and "false", and defaults to "true".
+     *
+     * @see "com.fasterxml.jackson.dataformat.xml.JacksonXmlModule#setDefaultUseWrapper(boolean)"
+     * @see "com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper"
+     */
     @Inject
     @BatchProperty
     protected String defaultUseWrapper;
 
+    /**
+     * Local name of the output XML root element. Required property.
+     *
+     * @see "javax.xml.stream.XMLStreamWriter#writeStartElement"
+     */
     @Inject
     @BatchProperty
     protected String rootElementName;
 
+    /**
+     * The prefix of the XML root element tag. Optional property and defaults to null.
+     *
+     * @see "javax.xml.stream.XMLStreamWriter#writeStartElement(java.lang.String, java.lang.String, java.lang.String)"
+     */
     @Inject
     @BatchProperty
     protected String rootElementPrefix;
 
+    /**
+     * The namespaceURI of the prefix to use. Optional property and defaults to null.
+     * @see "javax.xml.stream.XMLStreamWriter#writeStartElement(java.lang.String, java.lang.String, java.lang.String)"
+     * @see "javax.xml.stream.XMLStreamWriter#writeStartElement(java.lang.String, java.lang.String)"
+     */
     @Inject
     @BatchProperty
     protected String rootElementNamespaceURI;
 
+    /**
+     * The fully-qualified class name of {@code com.fasterxml.jackson.core.PrettyPrinter}, which implements
+     * pretty printer functionality, such as indentation. Optional property and defaults to null (default pretty printer
+     * is used).
+     *
+     * @see "com.fasterxml.jackson.core.PrettyPrinter"
+     * @see "com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator#setPrettyPrinter(com.fasterxml.jackson.core.PrettyPrinter)"
+     */
     @Inject
     @BatchProperty
     protected Class prettyPrinter;
 
+    /**
+     * The fully-qualified class name of {@code com.fasterxml.jackson.core.io.OutputDecorator}, which can be used to
+     * decorate output destinations. Optional property and defaults to null.
+     *
+     * @see "com.fasterxml.jackson.core.JsonFactory#setOutputDecorator(com.fasterxml.jackson.core.io.OutputDecorator)"
+     * @see "com.fasterxml.jackson.core.io.OutputDecorator"
+     */
     @Inject
     @BatchProperty
     protected Class outputDecorator;
