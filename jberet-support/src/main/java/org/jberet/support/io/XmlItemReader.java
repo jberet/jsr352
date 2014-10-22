@@ -68,8 +68,8 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
     protected int end;
 
     /**
-     * Fully-qualified class name of {@code com.fasterxml.jackson.core.io.InputDecorator}, which can be used to
-     * decorate input sources. Optional property, and defaults to null.
+     * Fully-qualified name of a class implementing {@code com.fasterxml.jackson.core.io.InputDecorator}, which
+     * can be used to decorate input sources. Optional property, and defaults to null.
      *
      * @see "com.fasterxml.jackson.core.io.InputDecorator"
      * @see "com.fasterxml.jackson.core.JsonFactory#setInputDecorator(com.fasterxml.jackson.core.io.InputDecorator)"

@@ -90,7 +90,7 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
     protected String rootElementNamespaceURI;
 
     /**
-     * The fully-qualified class name of {@code com.fasterxml.jackson.core.PrettyPrinter}, which implements
+     * The fully-qualified name of a class implementing {@code com.fasterxml.jackson.core.PrettyPrinter}, which implements
      * pretty printer functionality, such as indentation. Optional property and defaults to null (default pretty printer
      * is used).
      *
@@ -102,8 +102,8 @@ public class XmlItemWriter extends XmlItemReaderWriterBase implements ItemWriter
     protected Class prettyPrinter;
 
     /**
-     * The fully-qualified class name of {@code com.fasterxml.jackson.core.io.OutputDecorator}, which can be used to
-     * decorate output destinations. Optional property and defaults to null.
+     * The fully-qualified name of a class implementing {@code com.fasterxml.jackson.core.io.OutputDecorator}, which
+     * can be used to decorate output destinations. Optional property and defaults to null.
      *
      * @see "com.fasterxml.jackson.core.JsonFactory#setOutputDecorator(com.fasterxml.jackson.core.io.OutputDecorator)"
      * @see "com.fasterxml.jackson.core.io.OutputDecorator"
