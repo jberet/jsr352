@@ -29,31 +29,112 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @since   1.0.2
  */
 public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
-
+    /**
+     * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.core.JsonFactory.Feature}s.
+     * Optional property and defaults to null. Only keys and values defined in
+     * {@code com.fasterxml.jackson.core.JsonFactory.Feature} are accepted. For example,
+     * <p>
+     * <pre>
+     * INTERN_FIELD_NAMES=false, CANONICALIZE_FIELD_NAMES=false
+     * </pre>
+     *
+     * @see "com.fasterxml.jackson.core.JsonFactory.Feature"
+     * @see NoMappingJsonFactoryObjectFactory#configureJsonFactoryFeatures(com.fasterxml.jackson.core.JsonFactory, java.lang.String)
+     */
     @Inject
     @BatchProperty
     protected String jsonFactoryFeatures;
 
+    /**
+     * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.databind.ObjectMapper}
+     * features. Optional property and defaults to null. Only keys and values defined in
+     * {@code com.fasterxml.jackson.databind.MapperFeature} are accepted. For example,
+     * <p>
+     * <pre>
+     * USE_ANNOTATIONS=false, AUTO_DETECT_FIELDS=false, AUTO_DETECT_GETTERS=true
+     * </pre>
+     *
+     * @see "com.fasterxml.jackson.databind.MapperFeature"
+     * @see MappingJsonFactoryObjectFactory#configureMapperFeatures(com.fasterxml.jackson.databind.ObjectMapper, java.lang.String)
+     */
     @Inject
     @BatchProperty
     protected String mapperFeatures;
 
+    /**
+     * JNDI lookup name for {@code com.fasterxml.jackson.core.JsonFactory}, which is used for constructing
+     * {@link com.fasterxml.jackson.core.JsonParser} in {@link org.jberet.support.io.JsonItemReader} and
+     * {@link com.fasterxml.jackson.core.JsonGenerator} in {@link org.jberet.support.io.JsonItemWriter}.
+     * Optional property and defaults to null. When this property is specified, its value is used to look up an
+     * instance of {@code com.fasterxml.jackson.core.JsonFactory}, which is typically created and
+     * administrated externally (e.g., inside application server). Otherwise, a new instance of
+     * {@code com.fasterxml.jackson.core.JsonFactory} is created instead of lookup.
+     *
+     * @see "com.fasterxml.jackson.core.JsonFactory"
+     */
     @Inject
     @BatchProperty
     protected String jsonFactoryLookup;
 
+    /**
+     * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.databind.SerializationFeature}s.
+     *  Optional property and defaults to null. Only keys and values defined in
+     *  {@code com.fasterxml.jackson.databind.SerializationFeature} are accepted. For example,
+     *  <p>
+     *  <pre>
+     *  WRAP_ROOT_VALUE=true, INDENT_OUTPUT=true, FAIL_ON_EMPTY_BEANS=false
+     *  </pre>
+     *
+     * @see "com.fasterxml.jackson.databind.SerializationFeature"
+     * @see MappingJsonFactoryObjectFactory#configureSerializationFeatures(com.fasterxml.jackson.databind.ObjectMapper, java.lang.String)
+     */
     @Inject
     @BatchProperty
     protected String serializationFeatures;
 
+    /**
+     * A comma-separated list of fully-qualified name of classes that implement
+     * {@code com.fasterxml.jackson.databind.JsonSerializer}, which can serialize Objects of
+     * arbitrary types into JSON. For example,
+     * <p>
+     * <pre>
+     * org.jberet.support.io.JsonItemReaderTest$JsonSerializer, org.jberet.support.io.JsonItemReaderTest$JsonSerializer2
+     * </pre>
+     *
+     * @see "com.fasterxml.jackson.databind.JsonSerializer"
+     * @see MappingJsonFactoryObjectFactory#configureCustomSerializersAndDeserializers(com.fasterxml.jackson.databind.ObjectMapper, java.lang.String, java.lang.String, java.lang.ClassLoader)
+     */
     @Inject
     @BatchProperty
     protected String customSerializers;
 
+    /**
+     * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.databind.DeserializationFeature}s.
+     * Optional property and defaults to null. Only keys and values defined in
+     * {@code com.fasterxml.jackson.databind.DeserializationFeature} are accepted. For example,
+     * <p>
+     * <pre>
+     * USE_BIG_DECIMAL_FOR_FLOATS=true, USE_BIG_INTEGER_FOR_INTS=true, USE_JAVA_ARRAY_FOR_JSON_ARRAY=true
+     * </pre>
+     * @see "com.fasterxml.jackson.databind.DeserializationFeature"
+     * @see MappingJsonFactoryObjectFactory#configureDeserializationFeatures(com.fasterxml.jackson.databind.ObjectMapper, java.lang.String)
+     */
     @Inject
     @BatchProperty
     protected String deserializationFeatures;
 
+    /**
+     * A comma-separated list of fully-qualified name of classes that implement
+     * {@code com.fasterxml.jackson.databind.JsonDeserializer}, which can deserialize Objects of
+     * arbitrary types from JSON. For example,
+     * <p>
+     * <pre>
+     * org.jberet.support.io.JsonItemReaderTest$JsonDeserializer, org.jberet.support.io.JsonItemReaderTest$JsonDeserializer2
+     * </pre>
+     *
+     * @see "com.fasterxml.jackson.databind.JsonDeserializer"
+     * @see MappingJsonFactoryObjectFactory#configureCustomSerializersAndDeserializers(com.fasterxml.jackson.databind.ObjectMapper, java.lang.String, java.lang.String, java.lang.ClassLoader)
+     */
     @Inject
     @BatchProperty
     protected String customDeserializers;

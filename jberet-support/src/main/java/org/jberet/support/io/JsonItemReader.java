@@ -40,26 +40,81 @@ import org.jberet.support._private.SupportMessages;
 @Named
 @Dependent
 public class JsonItemReader extends JsonItemReaderWriterBase implements ItemReader {
+    /**
+     * The bean type that represents individual data item in the source Json {@link #resource}. Required property, and
+     * valid values are:
+     * <p>
+     * <ul>
+     *    <li>any custom bean type, for example {@code org.jberet.support.io.StockTrade}</li>
+     *    <li>{@code java.util.Map}</li>
+     *    <li>{@code com.fasterxml.jackson.databind.JsonNode}</li>
+     * </ul>
+     */
     @Inject
     @BatchProperty
     protected Class beanType;
 
+    /**
+     * Specifies the start position (a positive integer starting from 1) to read the data. If reading from the beginning
+     * of the input Json resource, there is no need to specify this property.
+     */
     @Inject
     @BatchProperty
     protected int start;
 
+    /**
+     * Specify the end position in the data set (inclusive). Optional property, and defaults to {@code Integer.MAX_VALUE}.
+     * If reading till the end of the input Json resource, there is no need to specify this property.
+     */
     @Inject
     @BatchProperty
     protected int end;
 
+    /**
+     * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.core.JsonParser} features.
+     * Optional property and defaults to null. For example,
+     * <p>
+     * <pre>
+     * ALLOW_COMMENTS=true, ALLOW_YAML_COMMENTS=true, ALLOW_NUMERIC_LEADING_ZEROS=true, STRICT_DUPLICATE_DETECTION=true
+     * </pre>
+     * @see "com.fasterxml.jackson.core.JsonParser.Feature"
+     */
     @Inject
     @BatchProperty
     protected Map<String, String> jsonParserFeatures;
 
+    /**
+     * A comma-separated list of fully-qualified names of classes that implement
+     * {@code com.fasterxml.jackson.databind.deser.DeserializationProblemHandler}, which can be registered to get
+     * called when a potentially recoverable problem is encountered during deserialization process.
+     * Handlers can try to resolve the problem, throw an exception or do nothing. Optional property and defaults to null.
+     * For example,
+     * <p>
+     * <pre>
+     * org.jberet.support.io.JsonItemReaderTest$UnknownHandler, org.jberet.support.io.JsonItemReaderTest$UnknownHandler2
+     * </pre>
+     *
+     * @see "com.fasterxml.jackson.databind.deser.DeserializationProblemHandler"
+     * @see "com.fasterxml.jackson.databind.ObjectMapper#addHandler(com.fasterxml.jackson.databind.deser.DeserializationProblemHandler)"
+     * @see MappingJsonFactoryObjectFactory#configureDeserializationProblemHandlers(com.fasterxml.jackson.databind.ObjectMapper, java.lang.String, java.lang.ClassLoader)
+     */
     @Inject
     @BatchProperty
     protected String deserializationProblemHandlers;
 
+    /**
+     * Fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.InputDecorator}, which can be
+     * used to decorate input sources. Typical use is to use a filter abstraction (filtered stream, reader)
+     * around original input source, and apply additional processing during read operations. Optional property and
+     * defaults to null. For example,
+     * <p>
+     * <pre>
+     * org.jberet.support.io.JsonItemReaderTest$NoopInputDecorator
+     * </pre>
+     *
+     * @see "com.fasterxml.jackson.core.JsonFactory#setInputDecorator(com.fasterxml.jackson.core.io.InputDecorator)"
+     * @see "com.fasterxml.jackson.core.io.InputDecorator"
+     */
     @Inject
     @BatchProperty
     protected Class inputDecorator;

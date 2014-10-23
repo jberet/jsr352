@@ -38,18 +38,57 @@ import org.jberet.support._private.SupportMessages;
 @Named
 @Dependent
 public class JsonItemWriter extends JsonItemReaderWriterBase implements ItemWriter {
+    /**
+     * Instructs this class, when the target Json resource already exists, whether to append to, or overwrite
+     * the existing resource, or fail. Valid values are {@code append}, {@code overwrite}, and {@code failIfExists}.
+     * Optional property, and defaults to {@code append}.
+     */
     @Inject
     @BatchProperty
     protected String writeMode;
 
+    /**
+     * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.core.JsonGenerator} features.
+     * Optional property and defaults to null. Keys and values must be defined in
+     * {@code com.fasterxml.jackson.core.JsonGenerator.Feature}. For example,
+     * <p>
+     * <pre>
+     * WRITE_BIGDECIMAL_AS_PLAIN=true, WRITE_NUMBERS_AS_STRINGS=true, QUOTE_NON_NUMERIC_NUMBERS=false
+     * </pre>
+     * @see "com.fasterxml.jackson.core.JsonGenerator.Feature"
+     */
     @Inject
     @BatchProperty
     protected Map<String, String> jsonGeneratorFeatures;
 
+    /**
+     * Fully-qualified name of a class that implements {@code com.fasterxml.jackson.core.PrettyPrinter}, which
+     * implements pretty printer functionality, such as indentation. Optional property and defaults to null (the
+     * system default pretty printer is used). For example,
+     * <p>
+     * <pre>
+     * com.fasterxml.jackson.core.util.MinimalPrettyPrinter
+     * </pre>
+     *
+     * @see "com.fasterxml.jackson.core.PrettyPrinter"
+     * @see "com.fasterxml.jackson.core.JsonGenerator#setPrettyPrinter(com.fasterxml.jackson.core.PrettyPrinter)"
+     */
     @Inject
     @BatchProperty
     protected Class prettyPrinter;
 
+    /**
+     * Fully-qualified name of a class that implements {@code com.fasterxml.jackson.core.io.OutputDecorator}, which
+     * can be used to decorate output destinations. Typical use is to use a filter abstraction (filtered output stream,
+     * writer) around original output destination, and apply additional processing during write operations.
+     * Optional property and defaults to null. For example,
+     * <p>
+     * <pre>
+     * org.jberet.support.io.JsonItemReaderTest$NoopOutputDecorator
+     * </pre>
+     * @see "com.fasterxml.jackson.core.io.OutputDecorator"
+     * @see "com.fasterxml.jackson.core.JsonFactory#setOutputDecorator(com.fasterxml.jackson.core.io.OutputDecorator)"
+     */
     @Inject
     @BatchProperty
     protected Class outputDecorator;
