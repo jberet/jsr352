@@ -33,6 +33,10 @@ public abstract class XmlItemReaderWriterBase extends ItemReaderWriterBase {
      * JNDI lookup name for {@code com.fasterxml.jackson.dataformat.xml.XmlFactory}, which is used for constructing
      * {@link com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser} in {@link org.jberet.support.io.XmlItemReader} and
      * {@link com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator} in {@link org.jberet.support.io.XmlItemWriter}.
+     * Optional property and defaults to null. When this property is specified, its value is used to look up an
+     * instance of {@code com.fasterxml.jackson.dataformat.xml.XmlFactory}, which is typically created and
+     * administrated externally (e.g., inside application server). Otherwise, a new instance of
+     * {@code com.fasterxml.jackson.dataformat.xml.XmlFactory} is created instead of lookup.
      *
      * @see XmlFactoryObjectFactory
      */

@@ -33,26 +33,72 @@ import com.mongodb.util.JSON;
 @Named
 @Dependent
 public class MongoItemReader extends MongoItemReaderWriterBase implements ItemReader {
+    /**
+     * Query criteria or conditions, which identify the documents that MongoDB returns to the client.
+     * Its value is a JSON string. Optional property and defaults to null. For example,
+     * <pre>
+     *  { age: { $gt: 18 } }
+     * </pre>
+     */
     @Inject
     @BatchProperty
     protected String criteria;
 
+    /**
+     * Specifies the fields from the matching documents to return. Its value is a JSON string. Optional property and
+     * defaults to null. For example,
+     * <pre>
+     *     { name: 1, address: 1}
+     * </pre>
+     */
     @Inject
     @BatchProperty
     protected String projection;
 
+    /**
+     * Modifies the query to limit the number of matching documents to return to the client. Optional property and
+     * defaults to null (limit is not set).
+     */
     @Inject
     @BatchProperty
     protected int limit;
 
+    /**
+     * Limits the number of elements returned in one batch. A cursor typically fetches a batch of result objects and
+     * store them locally. If batchSize is positive, it represents the size of each batch of objects retrieved.
+     * It can be adjusted to optimize performance and limit data transfer. If batchSize is negative,
+     * it will limit of number objects returned, that fit within the max batch size limit (usually 4MB),
+     * and cursor will be closed. For example if batchSize is -10, then the server will return a maximum of 10
+     * documents and as many as can fit in 4MB, then close the cursor.
+     * <p>
+     * Note that this feature is different from limit() in that documents must fit within a maximum size,
+     * and it removes the need to send a request to close the cursor server-side. The batch size can be changed
+     * even after a cursor is iterated, in which case the setting will apply on the next batch retrieval.
+     *
+     * @see "com.mongodb.DBCursor#batchSize(int)"
+     */
     @Inject
     @BatchProperty
     protected int batchSize;
 
+    /**
+     * Specifies how to sort the cursor's elements. Optional property and defaults to null. Its value is a JSON string,
+     * for example,
+     * <pre>
+     *     { age: 1 }
+     * </pre>
+     * @see "com.mongodb.DBCursor#sort(com.mongodb.DBObject)"
+     */
     @Inject
     @BatchProperty
     protected String sort;
 
+    /**
+     * Specifies the number of elements to discard at the beginning of the cursor. Optional property and defaults to 0
+     * (do not discard any elements).
+     *
+     * @see "com.mongodb.DBCursor#skip(int)"
+     */
     @Inject
     @BatchProperty
     protected int skip;
