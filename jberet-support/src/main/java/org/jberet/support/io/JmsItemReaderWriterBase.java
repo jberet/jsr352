@@ -73,11 +73,11 @@ public abstract class JmsItemReaderWriterBase extends ItemReaderWriterBase {
      * defaults to null. When not specified, JMS API {@link javax.jms.Connection#createSession()} is invoked to create
      * the JMS session. When this property is specified, its value must be either {@code AUTO_ACKNOWLEDGE} or
      * {@code DUPS_OK_ACKNOWLEDGE}.
-     * <p/>
+     * <p>
      * An example property in job xml:
-     * <p/>
+     * <p>
      * &lt;property name="sessionMode" value="DUPS_OK_ACKNOWLEDGE"/&gt;
-     * <p/>
+     * <p>
      * See JMS API {@link javax.jms.Connection#createSession(int)} for more details.
      */
     @Inject

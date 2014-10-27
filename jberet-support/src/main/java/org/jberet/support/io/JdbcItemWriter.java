@@ -54,20 +54,20 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
      * have the same length and order as SQL insert statement parameters. Optional property and if not set, it is
      * initialized from the columns part of SQL insert statement. This property is not used when {@link #beanType}
      * is {@code java.util.List}, which assumes that incoming data is already in the same order as SQL parameters.
-     * <p/>
+     * <p>
      * If {@link #beanType} is {@code java.util.Map}, and any of its key is different than the target table column
      * names, {@code parameterNames} should be specified. For example, if an incoming data item is:
-     * <p/>
+     * <p>
      * {"name" = "Jon", "address" = "1 Main st", "age" = 30}
-     * <p/>
+     * <p>
      * And {@link #sql} is
-     * <p/>
+     * <p>
      * INSERT INTO PERSON(NAME, ADDRESS, AGE) VALUES(?, ?, ?)
-     * <p/>
+     * <p>
      * then {@code parameterNames} should be specified as follows in job xml:
-     * <p/>
+     * <p>
      * "name, address, age"
-     * <p/>
+     * <p>
      * If {@link #beanType} is custom bean type, custom mapping may be achieved with either {@code parameterNames}, or
      * in bean class with annotations, e.g., JAXB or Jackson annotations. If the bean class does not contain field
      * mapping, or the field mapping is intended for other part of the application (e.g., {@code ItemReader}),
@@ -82,9 +82,9 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
      * It should have the same length and order as SQL insert statement parameters. Optional property, and if not set,
      * this class calls {@link java.sql.PreparedStatement#setObject(int, Object)} for all parameters. For example,
      * this property can be configured as follows in job xml:
-     * <p/>
+     * <p>
      * "String, String, Int"
-     * <p/>
+     * <p>
      * And this class will call {@link java.sql.PreparedStatement#setString(int, String)},
      * {@link java.sql.PreparedStatement#setString(int, String)}, and {@link java.sql.PreparedStatement#setInt(int, int)}.
      */

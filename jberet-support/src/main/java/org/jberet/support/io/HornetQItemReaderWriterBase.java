@@ -76,14 +76,14 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
      * used to create HornetQ {@code ServerLocator}. Optional property and defaults to null. When this property is
      * present, it will be used to create HornetQ {@code ServerLocator}, and the injection fields
      * {@link #serverLocatorInstance} and {@link #sessionFactoryInstance} will be ignored. Valid keys and values are:
-     * <p/>
+     * <p>
      * <ul>
-     *     <li>{@value #FACTORY_CLASS_KEY}, the fully-qualified class name of a HornetQ connector factory, required if this property is present</li>
-     *     <li>any param keys and values appropriate for the above-named HornetQ connector factory class</li>
+     *     <li>{@value #FACTORY_CLASS_KEY}, the fully-qualified class name of a HornetQ connector factory, required if this property is present
+     *     <li>any param keys and values appropriate for the above-named HornetQ connector factory class
      * </ul>
-     * <p/>
+     * <p>
      * An example of this property in job xml:
-     * <p/>
+     * <p>
      *  &lt;property name="connectorFactoryParams"
      *  value="factory-class=org.hornetq.core.remoting.impl.netty.NettyConnectorFactory, host=localhost, port=5445"/&gt;
      */
@@ -94,18 +94,18 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * Key-value pairs to configure HornetQ {@code ServerLocator}. Optional property and defaults to null.
      * Valid keys are:
-     * <p/>
+     * <p>
      * <ul>
-     * <li>HA: true or false (default), true if the {@code ServerLocator} receives topology updates from the cluster</li>
+     * <li>HA: true or false (default), true if the {@code ServerLocator} receives topology updates from the cluster
      * <li>Properties in {@code ServerLocator} class that have corresponding setter method, starting with either
-     * upper or lower case character</li>
+     * upper or lower case character
      * </ul>
-     * <p/>
+     * <p>
      * See the current version of HornetQ {@code ServerLocator} javadoc for supported keys and values, e.g.,
      * <a href="http://docs.jboss.org/hornetq/2.4.0.Final/docs/api/hornetq-client/org/hornetq/api/core/client/ServerLocator.html">ServerLocator</a>
-     * <p/>
+     * <p>
      * An example of this property in job xml:
-     * <p/>
+     * <p>
      * &lt;property name="serverLocatorParams" value="HA=false, AckBatchSize=5, ProducerMaxRate=10, BlockOnAcknowledge=false, ConfirmationWindowSize=5"/&gt;
      */
     @Inject
@@ -114,20 +114,20 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
 
     /**
      * Key-value pairs to identify and configure the target HornetQ queue. Required property.
-     * <p/>
+     * <p>
      * The following keys are supported:
-     * <p/>
+     * <p>
      * <ul>
-     * <li>{@value #QUEUE_ADDRESS_KEY}, required</li>
-     * <li>{@value #QUEUE_DURABLE_KEY}, optional</li>
-     * <li>{@value #QUEUE_FILTER_KEY}, optional</li>
-     * <li>{@value #QUEUE_NAME_KEY}, optional</li>
-     * <li>{@value #QUEUE_SHARED_KEY}, optional</li>
-     * <li>{@value #QUEUE_TEMPORARY_KEY}, optional</li>
+     * <li>{@value #QUEUE_ADDRESS_KEY}, required
+     * <li>{@value #QUEUE_DURABLE_KEY}, optional
+     * <li>{@value #QUEUE_FILTER_KEY}, optional
+     * <li>{@value #QUEUE_NAME_KEY}, optional
+     * <li>{@value #QUEUE_SHARED_KEY}, optional
+     * <li>{@value #QUEUE_TEMPORARY_KEY}, optional
      * </ul>
-     * <p/>
+     * <p>
      * An example of {@code queueParams} property in job xml:
-     * <p/>
+     * <p>
      * &lt;property name="queueParams" value="address=example, durable=false"/&gt;
      */
     @Inject
@@ -139,9 +139,9 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
      * A SendAcknowledgementHandler notifies a client when an message sent asynchronously has been received by the server.
      * See current version of HornetQ documentation for details, e.g.,
      * <a href="https://docs.jboss.org/hornetq/2.4.0.Final/docs/api/hornetq-client/org/hornetq/api/core/client/SendAcknowledgementHandler.html">SendAcknowledgementHandler</a>
-     * <p/>
+     * <p>
      * An example {@code sendAcknowledgementHandler} property in job xml:
-     * <p/>
+     * <p>
      * &lt;property name="sendAcknowledgementHandler" value="org.jberet.support.io.HornetQReaderWriterTest$HornetQSendAcknowledgementHandler"/&gt;
      */
     @Inject

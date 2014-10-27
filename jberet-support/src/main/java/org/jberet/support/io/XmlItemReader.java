@@ -43,9 +43,9 @@ public class XmlItemReader extends XmlItemReaderWriterBase implements ItemReader
      * method reads one item at a time and binds it to the provided bean type. Required property. For example,
      * <p>
      * <ul>
-     * <li>{@code org.jberet.support.io.StockTrade}</li>
-     * <li>{@code org.jberet.support.io.Person}</li>
-     * <li>{@code my.own.custom.ItemBean}</li>
+     * <li>{@code org.jberet.support.io.StockTrade}
+     * <li>{@code org.jberet.support.io.Person}
+     * <li>{@code my.own.custom.ItemBean}
      * </ul>
      */
     @Inject

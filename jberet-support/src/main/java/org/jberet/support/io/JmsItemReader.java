@@ -34,23 +34,23 @@ import org.jberet.support._private.SupportMessages;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from a JMS destination. It can
  * reads the following JMS message types:
- * <p/>
+ * <p>
  * <ul>
- * <li>{@code ObjectMessage}: the object contained in the message is retrieved and returned;</li>
+ * <li>{@code ObjectMessage}: the object contained in the message is retrieved and returned;
  * <li>{@code MapMessage}: a new {@code java.util.Map} is created, populated with the data contained in the
- * incoming {@code MapMessage}, and returned;</li>
- * <li>{@code TextMessage}: the text contained in the message is retrieved and returned;</li>
- * <li>{@code Message}: but not one of its subtype, null is returned.</li>
+ * incoming {@code MapMessage}, and returned;
+ * <li>{@code TextMessage}: the text contained in the message is retrieved and returned;
+ * <li>{@code Message}: but not one of its subtype, null is returned.
  * </ul>
- * <p/>
+ * <p>
  * If {@link #beanType} is set to {@code javax.jms.Message}, {@link #readItem()} returns the incoming JMS message as is.
  * Otherwise, {@link #readItem()} method determines the actual data type based on the message type.
- * <p/>
+ * <p>
  * This reader ends when any of the following occurs:
  * <ul>
- * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;</li>
- * <li>any {@code null} body is retrieved from a message;</li>
- * <li>any message is of type {@code Message}, but not one of its subtype.</li>
+ * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;
+ * <li>any {@code null} body is retrieved from a message;
+ * <li>any message is of type {@code Message}, but not one of its subtype.
  * </ul>
  *
  * @see     JmsItemWriter
@@ -80,11 +80,11 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
     /**
      * The fully-qualified class name of the data item to be returned from {@link #readItem()} method. Optional
      * property and defaults to null. If it is specified, its valid value is:
-     * <p/>
+     * <p>
      * <ul>
-     * <li>{@code javax.jms.Message}: an incoming JMS message is returned as is.</li>
+     * <li>{@code javax.jms.Message}: an incoming JMS message is returned as is.
      * </ul>
-     * <p/>
+     * <p>
      * When this property is not specified, {@link #readItem()} method returns an object whose actual type is
      * determined by the incoming JMS message type.
      */

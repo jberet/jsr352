@@ -63,8 +63,8 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
 
     /**
      * JNDI lookup name for {@code com.fasterxml.jackson.core.JsonFactory}, which is used for constructing
-     * {@link com.fasterxml.jackson.core.JsonParser} in {@link org.jberet.support.io.JsonItemReader} and
-     * {@link com.fasterxml.jackson.core.JsonGenerator} in {@link org.jberet.support.io.JsonItemWriter}.
+     * {@code com.fasterxml.jackson.core.JsonParser} in {@link org.jberet.support.io.JsonItemReader} and
+     * {@code com.fasterxml.jackson.core.JsonGenerator} in {@link org.jberet.support.io.JsonItemWriter}.
      * Optional property and defaults to null. When this property is specified, its value is used to look up an
      * instance of {@code com.fasterxml.jackson.core.JsonFactory}, which is typically created and
      * administrated externally (e.g., inside application server). Otherwise, a new instance of

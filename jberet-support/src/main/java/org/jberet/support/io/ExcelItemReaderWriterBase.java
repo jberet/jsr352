@@ -40,9 +40,9 @@ public abstract class ExcelItemReaderWriterBase extends JsonItemReaderWriterBase
      * Specifies the header as an ordered string array. For reader, header information must be specified with either
      * this property or {@link ExcelUserModelItemReader#headerRow} property. This property is typically specified
      * when there is no header row in the Excel file. For example,
-     * <p/>
+     * <p>
      * "id, name, age" specifies 1st column is id, 2nd column is name and 3rd column is age.
-     * <p/>
+     * <p>
      * This is a required property for writer.
      */
     @Inject

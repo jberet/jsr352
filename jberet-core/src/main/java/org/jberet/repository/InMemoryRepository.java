@@ -43,7 +43,6 @@ public final class InMemoryRepository extends AbstractRepository {
 
     /**
      * Creates a new in-memory job repository.
-     * <p/>
      * Use where multiple in-memory job repositories may be needed.
      *
      * @return a new in-memory job repository

@@ -27,21 +27,21 @@ import org.jberet.support._private.SupportLogger;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from a HornetQ address.
  * It handles the following types of HornetQ messages:
- * <p/>
+ * <p>
  * <ul>
  * <li>if {@link #beanType} is set to {@code org.hornetq.api.core.client.ClientMessage}, the incoming message
- * is immediately returned as is from {@link #readItem()}</li>
+ * is immediately returned as is from {@link #readItem()}
  * <li>if the message type is {@code org.hornetq.api.core.client.ClientMessage#TEXT_TYPE}, the string text is
- * returned from {@link #readItem()};</li>
+ * returned from {@link #readItem()};
  * <li>otherwise, a byte array is retrieved from the message body buffer, deserialize to an object, and returned
- * from {@link #readItem()}</li>
+ * from {@link #readItem()}
  * </ul>
- * <p/>
+ * <p>
  * This reader ends when either of the following occurs:
- * <p/>
+ * <p>
  * <ul>
- * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;</li>
- * <li>the size of the incoming message body is 0;</li>
+ * <li>{@link #receiveTimeout} (in milliseconds) has elapsed when trying to receive a message from the destination;
+ * <li>the size of the incoming message body is 0;
  * </ul>
  *
  * @see     HornetQItemWriter
@@ -63,11 +63,11 @@ public class HornetQItemReader extends HornetQItemReaderWriterBase implements It
     /**
      * The fully-qualified class name of the data item to be returned from {@link #readItem()} method. Optional
      * property and defaults to null. If it is specified, its valid value is:
-     * <p/>
+     * <p>
      * <ul>
-     * <li>{@code org.hornetq.api.core.client.ClientMessage}: an incoming HornetQ message is returned as is.</li>
+     * <li>{@code org.hornetq.api.core.client.ClientMessage}: an incoming HornetQ message is returned as is.
      * </ul>
-     * <p/>
+     * <p>
      * When this property is not specified, {@link #readItem()} method returns an object whose actual type is
      * determined by the incoming HornetQ message type.
      */

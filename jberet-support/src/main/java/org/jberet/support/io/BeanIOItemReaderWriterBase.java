@@ -64,18 +64,18 @@ public abstract class BeanIOItemReaderWriterBase extends ItemReaderWriterBase {
      * User properties that can be used for property substitution in BeanIO mapping file. When used with batch job
      * JSL properties, they provide dynamic BeanIO mapping attributes. For example,
      * <p>
-     *     in batch job client class, set the properties values as comma-separated key-value pairs:<br/>
+     *     in batch job client class, set the properties values as comma-separated key-value pairs:
+     *     <p>
      *     {@code params.setProperty("mappingProperties", "zipCodeFieldName=zipCode, zipCodeFieldType=string");}
-     * </p>
      * <p>
      *     in job xml file, make the properties available for {@link org.jberet.support.io.BeanIOItemReader} or
-     *     {@link org.jberet.support.io.BeanIOItemWriter} via {@code @BatchProperty} injection:<br/>
+     *     {@link org.jberet.support.io.BeanIOItemWriter} via {@code @BatchProperty} injection:
+     *     <p>
      *     {@code <property name="mappingProperties" value="#{jobParameters['mappingProperties']}"/>}
-     * </p>
      * <p>
-     *     in BeanIO mapping file, reference the properties defined above:<br/>
+     *     in BeanIO mapping file, reference the properties defined above:
+     *     <p>
      *     {@code <field name="${zipCodeFieldName}" type="${zipCodeFieldType}" length="5"/>}
-     * </p>
      */
     @Inject
     @BatchProperty

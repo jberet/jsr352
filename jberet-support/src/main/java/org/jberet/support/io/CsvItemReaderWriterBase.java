@@ -59,6 +59,8 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * Specify the bean fields or map keys corresponding to CSV columns. If the CSV columns exactly
      * match bean fields or map keys, then no need to specify this property.
+     *
+     * @see #getNameMapping()
      */
     @Inject
     @BatchProperty
@@ -67,11 +69,12 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * Specifies a fully-qualified class or interface name that maps to a row of the source CSV file.
      * For example,
+     * <p>
      * <ul>
-     * <li>{@code java.util.List}</li>
-     * <li>{@code java.util.Map}</li>
-     * <li>{@code org.jberet.support.io.Person}</li>
-     * <li>{@code my.own.BeanType}</li>
+     * <li>{@code java.util.List}
+     * <li>{@code java.util.Map}
+     * <li>{@code org.jberet.support.io.Person}
+     * <li>{@code my.own.BeanType}
      * </ul>
      */
     @Inject
@@ -80,12 +83,15 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
 
     /**
      * Specifies one of the 4 predefined CSV preferences:
+     * <p>
      * <ul>
-     * <li>{@code STANDARD_PREFERENCE}</li>
-     * <li>{@code EXCEL_PREFERENCE}</li>
-     * <li>{@code EXCEL_NORTH_EUROPE_PREFERENCE}</li>
-     * <li>{@code TAB_PREFERENCE}</li>
+     * <li>{@code STANDARD_PREFERENCE}
+     * <li>{@code EXCEL_PREFERENCE}
+     * <li>{@code EXCEL_NORTH_EUROPE_PREFERENCE}
+     * <li>{@code TAB_PREFERENCE}
      * </ul>
+     *
+     * @see #getCsvPreference()
      */
     @Inject
     @BatchProperty
@@ -103,7 +109,8 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
 
     /**
      * The delimiter character (separates each cell in a row).
-     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     *
+     * @see <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>
      */
     @Inject
     @BatchProperty
@@ -112,7 +119,8 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * The end of line symbols to use when writing (Windows, Mac and Linux style line breaks are all supported when
      * reading, so this preference won't be used at all for reading).
-     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     *
+     * @see <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>
      */
     @Inject
     @BatchProperty
@@ -120,7 +128,9 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
 
     /**
      * Whether spaces surrounding a cell need quotes in order to be preserved (see below). The default value is
-     * false (quotes aren't required). See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     * false (quotes aren't required).
+     *
+     * @see <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>
      */
     @Inject
     @BatchProperty
@@ -128,21 +138,35 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
 
     /**
      * Specifies a {@code CommentMatcher} for reading CSV resource. The {@code CommentMatcher}
-     * determines whether a line should be considered a comment.
-     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>. For example,
+     * determines whether a line should be considered a comment. For example,
+     * <p>
      * <ul>
-     *     <li>"startsWith #"</li>
-     *     <li>"matches 'regexp'"</li>
-     *     <li>"my.own.CommentMatcherImpl"</li>
+     *     <li>"startsWith #"
+     *     <li>"matches 'regexp'"
+     *     <li>"my.own.CommentMatcherImpl"
      * </ul>
+     *
+     * @see <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>
+     * @see #getCommentMatcher(String)
      */
     @Inject
     @BatchProperty
     protected String commentMatcher;
 
     /**
-     * Specifies a custom encoder when writing CSV. See the section on custom encoders below.
-     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     * Specifies a custom encoder when writing CSV. For example,
+     * <p>
+     * <ul>
+     *     <li>default
+     *     <li>select 1, 2, 3
+     *     <li>select true, true, false
+     *     <li>column 1, 2, 3
+     *     <li>column true, true, false
+     *     <li>my.own.MyCsvEncoder
+     * </ul>
+     *
+     * @see <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>
+     * @see #getEncoder(String)
      */
     @Inject
     @BatchProperty
@@ -150,8 +174,20 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
 
     /**
      * Allows you to enable surrounding quotes for writing (if a column wouldn't normally be quoted because
-     * it doesn't contain special characters). See the section on quote modes below.
-     * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>.
+     * it doesn't contain special characters). For example,
+     * <p>
+     * <ul>
+     *     <li>default
+     *     <li>always
+     *     <li>select 1, 2, 3
+     *     <li>select true, true, false
+     *     <li>column 1, 2, 3
+     *     <li>column true, true, false
+     *     <li>my.own.MyQuoteMode
+     * </ul>
+     *
+     * @see <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>
+     * @see #getQuoteMode(String)
      */
     @Inject
     @BatchProperty
@@ -161,15 +197,17 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
      * Specifies a list of cell processors, one for each column. See
      * <a href="http://supercsv.sourceforge.net/cell_processors.html">Super CSV docs</a> for supported cell processor
      * types. The rules and syntax are as follows:
+     * <p>
      * <ul>
-     * <li>The size of the resultant list must equal to the number of CSV columns.</li>
-     * <li>Cell processors appear in the same order as CSV columns.</li>
-     * <li>If no cell processor is needed for a column, enter null.</li>
-     * <li>Each column may have null, 1, 2, or multiple cell processors, separated by comma (,)</li>
-     * <li>Cell processors for different columns must be separated with semi-colon (;).</li>
-     * <li>Cell processors may contain parameters enclosed in parenthesis, and multiple parameters are separated with comma (,).</li>
-     * <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'</li>
+     * <li>The size of the resultant list must equal to the number of CSV columns.
+     * <li>Cell processors appear in the same order as CSV columns.
+     * <li>If no cell processor is needed for a column, enter null.
+     * <li>Each column may have null, 1, 2, or multiple cell processors, separated by comma (,)
+     * <li>Cell processors for different columns must be separated with semi-colon (;).
+     * <li>Cell processors may contain parameters enclosed in parenthesis, and multiple parameters are separated with comma (,).
+     * <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'
      * </ul>
+     * <p>
      * For example, to specify cell processors for 5-column CSV:
      * <pre>
      * value = "
@@ -180,6 +218,9 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
      *      Optional, ParseDate('dd/MM/yyyy')
      * "
      * </pre>
+     *
+     * @see <a href="http://supercsv.sourceforge.net/cell_processors.html">Super CSV docs</a>
+     * @see #getCellProcessors()
      */
     @Inject
     @BatchProperty
@@ -272,14 +313,15 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
      * Gets the configured {@code org.supercsv.quote.QuoteMode}.
      *
      * @param val property value of quoteMode property in this batch artifact. For example,
+     *            <p>
      *            <ul>
-     *            <li>default</li>
-     *            <li>always</li>
-     *            <li>select 1, 2, 3</li>
-     *            <li>select true, true, false</li>
-     *            <li>column 1, 2, 3</li>
-     *            <li>column true, true, false</li>
-     *            <li>my.own.MyQuoteMode</li>
+     *            <li>default
+     *            <li>always
+     *            <li>select 1, 2, 3
+     *            <li>select true, true, false
+     *            <li>column 1, 2, 3
+     *            <li>column true, true, false
+     *            <li>my.own.MyQuoteMode
      *            </ul>
      * @return a QuoteMode
      */
@@ -316,13 +358,14 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
      * Gets the configured {@code org.supercsv.encoder.CsvEncoder}.
      *
      * @param val property value of encoder property in this batch artifact. For example,
+     *            <p>
      *            <ul>
-     *            <li>default</li>
-     *            <li>select 1, 2, 3</li>
-     *            <li>select true, true, false</li>
-     *            <li>column 1, 2, 3</li>
-     *            <li>column true, true, false</li>
-     *            <li>my.own.MyCsvEncoder</li>
+     *            <li>default
+     *            <li>select 1, 2, 3
+     *            <li>select true, true, false
+     *            <li>column 1, 2, 3
+     *            <li>column true, true, false
+     *            <li>my.own.MyCsvEncoder
      *            </ul>
      * @return a {@code CsvEncoder}
      */
@@ -357,12 +400,13 @@ public abstract class CsvItemReaderWriterBase extends ItemReaderWriterBase {
      * Gets the configured {@code org.supercsv.comment.CommentMatcher}.
      *
      * @param val property value of commentMatcher property in this batch artifact. For example,
+     *            <p>
      *            <ul>
-     *            <li>starts with '#'</li>
-     *            <li>startswith  '##'</li>
-     *            <li>startsWith  '##'</li>
-     *            <li>matches '#.*#'</li>
-     *            <li>my.own.MyCommentMatcher</li>
+     *            <li>starts with '#'
+     *            <li>startswith  '##'
+     *            <li>startsWith  '##'
+     *            <li>matches '#.*#'
+     *            <li>my.own.MyCommentMatcher
      *            </ul>
      * @return a {@code CommentMatcher}
      */

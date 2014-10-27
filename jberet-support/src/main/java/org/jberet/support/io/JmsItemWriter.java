@@ -28,16 +28,16 @@ import org.jberet.support._private.SupportLogger;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that sends data items to a JMS destination. It can
  * sends the following JMS message types:
- * <p/>
+ * <p>
  * <ul>
  * <li>if the data item is of type {@code java.util.Map}, a {@code MapMessage} is created, populated with the data
- * contained in the data item, and sent;</li>
+ * contained in the data item, and sent;
  * <li>else if the data item is of type {@code java.lang.String}, a {@code TextMessage} is created with the text content
- * in the data item, and sent;</li>
- * <li>else if the data is of type {@code javax.jms.Message}, it is sent as is;</li>
- * <li>else an {@code ObjectMessage} is created with the data item object, and sent.</li>
+ * in the data item, and sent;
+ * <li>else if the data is of type {@code javax.jms.Message}, it is sent as is;
+ * <li>else an {@code ObjectMessage} is created with the data item object, and sent.
  * </ul>
- * <p/>
+ * <p>
  *
  * @see     JmsItemReader
  * @see     JmsItemReaderWriterBase

@@ -19,7 +19,6 @@ public interface PropertyKey {
     /**
      * A key used to indicate transactions should be kept local and not use the global transaction. The value for this
      * key can be {@code true} or {@code false}.
-     * <p/>
      * This property can be used at the job parameter for users or for implementations of the SPI at the {@link
      * BatchEnvironment#getBatchConfigurationProperties()}  batch environment} level.
      */

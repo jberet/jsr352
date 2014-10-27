@@ -45,9 +45,9 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
      * valid values are:
      * <p>
      * <ul>
-     *    <li>any custom bean type, for example {@code org.jberet.support.io.StockTrade}</li>
-     *    <li>{@code java.util.Map}</li>
-     *    <li>{@code com.fasterxml.jackson.databind.JsonNode}</li>
+     *    <li>any custom bean type, for example {@code org.jberet.support.io.StockTrade}
+     *    <li>{@code java.util.Map}
+     *    <li>{@code com.fasterxml.jackson.databind.JsonNode}
      * </ul>
      */
     @Inject

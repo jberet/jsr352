@@ -58,17 +58,17 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
      * String keys used in target data structure for database columns. Optional property, and if not specified, it
      * defaults to {@link #columnLabels} . This property should have the same length and order as {@link #columnTypes},
      * if the latter is specified.
-     * <p/>
+     * <p>
      * For example, if {@link #sql} is
-     * <p/>
+     * <p>
      * SELECT NAME, ADDRESS, AGE FROM PERSON
-     * <p/>
+     * <p>
      * And you want to map the data to the following form:
-     * <p/>
+     * <p>
      * {"fn" = "Jon", "addr" = "1 Main st", "age" = 30}
-     * <p/>
+     * <p>
      * then {@code columnMapping} should be specified as follows in job xml:
-     * <p/>
+     * <p>
      * "fn, addr, age"
      */
     @Inject
@@ -80,9 +80,9 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
      * It should have the same length and order as {@link #columnMapping}. Optional property, and if not set,
      * this class calls {@link java.sql.ResultSet#getObject(java.lang.String)} for all columns. For example,
      * this property can be configured as follows in job xml:
-     * <p/>
+     * <p>
      * "String, String, Int"
-     * <p/>
+     * <p>
      * And this class will call {@link java.sql.ResultSet#getString(java.lang.String)},
      * {@link java.sql.ResultSet#getString(java.lang.String)}, and {@link java.sql.ResultSet#getInt(java.lang.String)}.
      */
@@ -92,42 +92,46 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
 
     /**
      * The following {@code resultSetProperties} can be optionally configured in job xml:
-     * <p/>
+     * <p>
      * <ul>
-     * <li>fetchSize (use driver default)</li>
-     * <li>fetchDirection
-     * <ul>
-     * <li>FETCH_FORWARD (default)</li>
-     * <li>FETCH_REVERSE</li>
-     * <li>FETCH_UNKNOWN</li>
-     * </ul>
-     * </li>
-     * <li>resultSetType:
-     * <ul>
-     * <li>TYPE_FORWARD_ONLY (default)</li>
-     * <li>TYPE_SCROLL_INSENSITIVE</li>
-     * <li>TYPE_SCROLL_SENSITIVE</li>
-     * </ul>
-     * </li>
-     * <li>
-     * resultSetConcurrency:
-     * <ul>
-     * <li>CONCUR_READ_ONLY (default)</li>
-     * <li>CONCUR_UPDATABLE</li>
-     * </ul>
-     * </li>
-     * <li>
-     * resultSetHoldability:
-     * <ul>
-     * <li>HOLD_CURSORS_OVER_COMMIT (default)</li>
-     * <li>CLOSE_CURSORS_AT_COMMIT</li>
-     * </ul>
-     * </li>
-     * <p/>
+     *  <li>fetchSize (use driver default)</li>
+     *  <p>
+     *  <li>fetchDirection
+     *      <ul>
+     *          <li>FETCH_FORWARD (default)</li>
+     *          <li>FETCH_REVERSE</li>
+     *          <li>FETCH_UNKNOWN</li>
+     *      </ul>
+     *  </li>
+     *  <p>
+     *  <li>resultSetType:
+     *      <ul>
+     *          <li>TYPE_FORWARD_ONLY (default)</li>
+     *          <li>TYPE_SCROLL_INSENSITIVE</li>
+     *          <li>TYPE_SCROLL_SENSITIVE</li>
+     *      </ul>
+     *  </li>
+     *  <p>
+     *  <li>
+     *      resultSetConcurrency:
+     *      <ul>
+     *          <li>CONCUR_READ_ONLY (default)</li>
+     *          <li>CONCUR_UPDATABLE</li>
+     *      </ul>
+     *  </li>
+     *  <p>
+     *  <li>
+     *      resultSetHoldability:
+     *      <ul>
+     *          <li>HOLD_CURSORS_OVER_COMMIT (default)</li>
+     *          <li>CLOSE_CURSORS_AT_COMMIT</li>
+     *      </ul>
+     *  </li>
+     * <p>
      * </ul>
      * For example:
-     * <p/>
-     *&lt;property name="resultSetProperties" value="fetchSize=1000, resultSetConcurrency=CONCUR_UPDATABLE"/&gt;
+     * <p>
+     * &lt;property name="resultSetProperties" value="fetchSize=1000, resultSetConcurrency=CONCUR_UPDATABLE"/&gt;
      */
     @Inject
     @BatchProperty

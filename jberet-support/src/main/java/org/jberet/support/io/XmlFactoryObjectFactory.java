@@ -39,10 +39,10 @@ public final class XmlFactoryObjectFactory implements ObjectFactory {
      * application server. The parameter {@code environment} contains XmlFactory configuration properties, and accepts
      * the following properties:
      * <ul>
-     * <li>inputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.InputDecorator}</li>
-     * <li>outputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.OutputDecorator}</li>
-     * <li>xmlTextElementName: </li>
-     * <li>defaultUseWrapper:</li>
+     * <li>inputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.InputDecorator}
+     * <li>outputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.OutputDecorator}
+     * <li>xmlTextElementName: 
+     * <li>defaultUseWrapper:
      * </ul>
      *
      * @param obj         the JNDI name of {@code com.fasterxml.jackson.dataformat.xml.XmlFactory} resource

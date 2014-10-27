@@ -46,15 +46,15 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
      * in the application server. The parameter {@code environment} contains MappingJsonFactory configuration properties,
      * and accepts the following properties:
      * <ul>
-     * <li>jsonFactoryFeatures: JsonFactory features as defined in com.fasterxml.jackson.core.JsonFactory.Feature</li>
-     * <li>mapperFeatures: ObjectMapper features as defined in com.fasterxml.jackson.databind.MapperFeature</li>
-     * <li>deserializationFeatures:</li>
-     * <li>serializationFeatures:</li>
-     * <li>customDeserializers:</li>
-     * <li>customSerializers:</li>
-     * <li>deserializationProblemHandlers:</li>
-     * <li>inputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.InputDecorator}</li>
-     * <li>outputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.OutputDecorator}</li>
+     * <li>jsonFactoryFeatures: JsonFactory features as defined in com.fasterxml.jackson.core.JsonFactory.Feature
+     * <li>mapperFeatures: ObjectMapper features as defined in com.fasterxml.jackson.databind.MapperFeature
+     * <li>deserializationFeatures:
+     * <li>serializationFeatures:
+     * <li>customDeserializers:
+     * <li>customSerializers:
+     * <li>deserializationProblemHandlers:
+     * <li>inputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.InputDecorator}
+     * <li>outputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.OutputDecorator}
      * </ul>
      *
      * @param obj         the JNDI name of {@code com.fasterxml.jackson.databind.MappingJsonFactory} resource

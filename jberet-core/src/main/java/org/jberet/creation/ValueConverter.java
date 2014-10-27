@@ -59,78 +59,78 @@ import static org.jberet._private.BatchMessages.MESSAGES;
 /**
  * Converts a property string value to the target field type.  Supported field types for batch property injection:
  * <ul>
- *     <li>String</li>
- *     <li>StringBuffer</li>
- *     <li>StringBuilder</li>
- *     <li>Object</li>
- *     <li>Serializable</li>
- *     <li>CharSequence</li>
- *     <li>Comparable&lt;String&gt;</li>
- *     <li>int</li>
- *     <li>Integer</li>
- *     <li>long</li>
- *     <li>Long</li>
- *     <li>double</li>
- *     <li>Double</li>
- *     <li>boolean</li>
- *     <li>Boolean</li>
- *     <li>char</li>
- *     <li>Character</li>
- *     <li>float</li>
- *     <li>Float</li>
- *     <li>byte</li>
- *     <li>Byte</li>
- *     <li>short</li>
- *     <li>Short</li>
- *     <li>BigInteger</li>
- *     <li>BigDecimal</li>
- *     <li>java.util.Date</li>
- *     <li>Class</li>
- *     <li>Class&lt;&#63;&gt;</li>
- *     <li>any Enum</li>
- *     <li>java.io.File</li>
- *     <li>java.util.zip.ZipFile</li>
- *     <li>java.util.jar.JarFile</li>
- *     <li>URL</li>
- *     <li>URI</li>
- *     <li>InetAddress</li>
- *     <li>Inet4Address</li>
- *     <li>Inet6Address</li>
- *     <li>java.util.logging.Logger</li>
- *     <li>java.util.regex.Pattern</li>
- *     <li>javax.management.ObjectName</li>
- *     <br/>
- *     <li>array of any of the above single-valued type, e.g., int[], Object[], Integer[], String[], Date[], TimeUnit[], etc</li>
- *     <br/>
- *     <li>java.util.Collection</li>
- *     <li>List</li>
- *     <li>ArrayList</li>
- *     <li>LinkedList</li>
- *     <li>Vector</li>
- *     <li>Set</li>
- *     <li>HashSet</li>
- *     <li>SortedSet</li>
- *     <li>TreeSet</li>
- *     <li>LinkedHashSet</li>
- *     <li>java.util.Properties</li>
- *     <li>Map</li>
- *     <li>HashMap</li>
- *     <li>Hashtable</li>
- *     <li>IdentityHashMap</li>
- *     <li>LinkedHashMap</li>
- *     <li>SortedMap</li>
- *     <li>TreeMap</li>
- *     <li>WeakHashMap</li>
+ *     <li>String
+ *     <li>StringBuffer
+ *     <li>StringBuilder
+ *     <li>Object
+ *     <li>Serializable
+ *     <li>CharSequence
+ *     <li>Comparable&lt;String&gt;
+ *     <li>int
+ *     <li>Integer
+ *     <li>long
+ *     <li>Long
+ *     <li>double
+ *     <li>Double
+ *     <li>boolean
+ *     <li>Boolean
+ *     <li>char
+ *     <li>Character
+ *     <li>float
+ *     <li>Float
+ *     <li>byte
+ *     <li>Byte
+ *     <li>short
+ *     <li>Short
+ *     <li>BigInteger
+ *     <li>BigDecimal
+ *     <li>java.util.Date
+ *     <li>Class
+ *     <li>Class&lt;&#63;&gt;
+ *     <li>any Enum
+ *     <li>java.io.File
+ *     <li>java.util.zip.ZipFile
+ *     <li>java.util.jar.JarFile
+ *     <li>URL
+ *     <li>URI
+ *     <li>InetAddress
+ *     <li>Inet4Address
+ *     <li>Inet6Address
+ *     <li>java.util.logging.Logger
+ *     <li>java.util.regex.Pattern
+ *     <li>javax.management.ObjectName
+ *     <p>
+ *     <li>array of any of the above single-valued type, e.g., int[], Object[], Integer[], String[], Date[], TimeUnit[], etc
+ *     <p>
+ *     <li>java.util.Collection
+ *     <li>List
+ *     <li>ArrayList
+ *     <li>LinkedList
+ *     <li>Vector
+ *     <li>Set
+ *     <li>HashSet
+ *     <li>SortedSet
+ *     <li>TreeSet
+ *     <li>LinkedHashSet
+ *     <li>java.util.Properties
+ *     <li>Map
+ *     <li>HashMap
+ *     <li>Hashtable
+ *     <li>IdentityHashMap
+ *     <li>LinkedHashMap
+ *     <li>SortedMap
+ *     <li>TreeMap
+ *     <li>WeakHashMap
  * </ul>
- * <br/>
+ * <p>
  * Common generics collections are supported.  Wildcard is treated the same as String.  for example:<ul>
- *     <li>Collection&lt;&#63;&gt;</li>
- *     <li>List&lt;String&gt;</li>
- *     <li>Set&lt;Date&gt;</li>
- *     <li>Map&lt;&#63;, &#63;&gt;</li>
- *     <li>Map&lt;String, &#63;&gt;</li>
- *     <li>LinkedList&lt;TimeUnit&gt;</li>
- *     <li>ArrayList&lt;Integer&gt;</li>
+ *     <li>Collection&lt;&#63;&gt;
+ *     <li>List&lt;String&gt;
+ *     <li>Set&lt;Date&gt;
+ *     <li>Map&lt;&#63;, &#63;&gt;
+ *     <li>Map&lt;String, &#63;&gt;
+ *     <li>LinkedList&lt;TimeUnit&gt;
+ *     <li>ArrayList&lt;Integer&gt;
  * </ul>
  */
 public final class ValueConverter {
@@ -449,29 +449,31 @@ public final class ValueConverter {
 
     /**
      * Supported date formats are based on the pre-defined styles in java.text.DateFormat.
-     * <ul>
-     * <li>FULL date FULL time</li>
-     * <li>LONG date LONG time</li>
-     * <li>MEDIUM date MEDIUM time</li>
-     * <li>SHORT date SHORT time</li>
-     * <li>FULL date</li>
-     * <li>LONG date</li>
-     * <li>MEDIUM date</li>
-     * <li>SHORT date</li>
-     * </ul><br/>
-     * Examples in en_US locale:
-     *<ul>
-     * <li>Saturday, April 12, 1952 7:03:47 AM PDT</li>
-     * <li>June 09, 2013 7:03:47 AM PDT</li>
-     * <li>Jun 09, 2013 7:03:47 AM</li>
-     * <li>05/09/2013 7:03 AM</li>
-     * <li>05/09/13 12:00 AM</li>
-     * <li>Saturday, April 12, 1952</li>
-     * <li>June 09, 2013</li>
-     * <li>Jun 09, 2013</li>
-     * <li>05/09/2013</li>
-     * <li>05/09/13</li>
+     * <p><ul>
+     * <li>FULL date FULL time
+     * <li>LONG date LONG time
+     * <li>MEDIUM date MEDIUM time
+     * <li>SHORT date SHORT time
+     * <li>FULL date
+     * <li>LONG date
+     * <li>MEDIUM date
+     * <li>SHORT date
      * </ul>
+     * <p>
+     * Examples in en_US locale:
+     * <p><ul>
+     * <li>Saturday, April 12, 1952 7:03:47 AM PDT
+     * <li>June 09, 2013 7:03:47 AM PDT
+     * <li>Jun 09, 2013 7:03:47 AM
+     * <li>05/09/2013 7:03 AM
+     * <li>05/09/13 12:00 AM
+     * <li>Saturday, April 12, 1952
+     * <li>June 09, 2013
+     * <li>Jun 09, 2013
+     * <li>05/09/2013
+     * <li>05/09/13
+     * </ul>
+     *
      * @param v input date string
      * @param f the field in the batch artifact (the injection target field)
      * @return a java.util.Date object parsed from the input string v

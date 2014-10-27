@@ -47,12 +47,11 @@ public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase 
      * For {@code ItemReader}, it's the java type that each data item should be converted to; for {@code ItemWriter},
      * it's the java type for each incoming data item. In either case, the valid values are:
      * <p>
-     *     <ul>
-     *         <li>a custom java type that represents data item; </li>
-     *         <li>java.util.Map</li>
-     *         <li>java.util.List</li>
-     *     </ul>
-     * </p>
+     * <ul>
+     *     <li>a custom java type that represents data item;
+     *     <li>java.util.Map
+     *     <li>java.util.List
+     * </ul>
      */
     @Inject
     @BatchProperty

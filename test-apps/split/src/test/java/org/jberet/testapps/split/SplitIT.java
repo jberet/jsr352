@@ -20,7 +20,7 @@ import org.junit.Test;
 
 /**
  * Verifies split properties referencing, job element transition, and decision following split.
- * <p/>
+ * <p>
  * step within a flow within a split can have step-parent, which is a top-level job element;
  */
 public class SplitIT extends AbstractIT {

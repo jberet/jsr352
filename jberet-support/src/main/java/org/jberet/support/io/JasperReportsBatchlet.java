@@ -48,14 +48,14 @@ import org.jberet.support._private.SupportMessages;
  * properties in job xml and {@code @BatchProperty} injections, or through CDI injections of objects created and
  * configured by other parts of the application. Batch properties generally have higher precedence than CDI-injected
  * counterparts.
- * <p></p>
+ * <p>
  * The Jasper Reports data source is configured through either {@link #resource} property, or {@link #jrDataSourceInstance}
  * injection. Directly passing a {@code java.sql.Connection} instance to this class is not supported. For JDBC
  * data source, The application should instead inject {@code net.sf.jasperreports.engine.JRResultSetDataSource}
  * into {@link #jrDataSourceInstance}.
- * <p></p>
+ * <p>
  * Report can be saved to a file, or directed to a {@code java.io.OutputStream}.
- * <p></p>
+ * <p>
  * This class supports all output report formats implemented in Jasper Reports. If {@link #exporterInstance} field is
  * injected with an instance of {@code net.sf.jasperreports.export.Exporter}, it will be used to export and generate the
  * final report. Otherwise, if {@link #outputType} batch property is set to pdf, html, or jrprint, a PDF, HTML or
@@ -74,13 +74,12 @@ public class JasperReportsBatchlet implements Batchlet {
      * class loader. If this property is not specified, the application should inject appropriate {@code JRDataSource}
      * into {@link #jrDataSourceInstance}. If neither {@link #resource} nor {@link #jrDataSourceInstance} is
      * specified, an {@code net.sf.jasperreports.engine.JREmptyDataSource} is used.
-     * <p></p>
+     * <p>
      * {@code JRDataSource} injection allows for more flexible instantiation and configuration, such as setting
      * locale, datePattern, numberPattern, timeZone, recordDelimiter, useFirstRowAsHeader, columnNames, fieldDelimiter,
      * etc, before making the instance available to this class.
-     * <p></p>
+     * <p>
      * This property has higher precedence than {@link #jrDataSourceInstance} injection.
-     * <p></p>
      *
      * @see #jrDataSourceInstance
      */
@@ -178,9 +177,9 @@ public class JasperReportsBatchlet implements Batchlet {
     /**
      * The format of report output. Optional property and defaults to {@value #DEFAULT_OUTPUT_TYPE}. Valid values are:
      * <ul>
-     * <li>pdf</li>
-     * <li>html</li>
-     * <li>jrprint</li>
+     * <li>pdf
+     * <li>html
+     * <li>jrprint
      * </ul>
      * If other formats are desired, the application should inject into {@link #exporterInstance} with a properly
      * configured instance of {@code net.sf.jasperreports.export.Exporter}.
@@ -194,9 +193,8 @@ public class JasperReportsBatchlet implements Batchlet {
      * specified, the application should inject an {@code java.io.OutputStream} into {@link #outputStreamInstance}.
      * For instance, in order to stream the report to servlet response, a {@code javax.servlet.ServletOutputStream}
      * can be injected into {@link #outputStreamInstance}.
-     * <p></p>
+     * <p>
      * This property has higher precedence than {@link #outputStreamInstance} injection.
-     * <p></p>
      *
      * @see #outputStreamInstance
      */
@@ -208,9 +206,8 @@ public class JasperReportsBatchlet implements Batchlet {
      * Report parameters for generating the report. Optional property and defaults to null. This property can be used
      * to specify string-based key-value pairs as report parameters. For more complex report parameters with object
      * types, use injection into {@link #reportParametersInstance}.
-     * <p></p>
+     * <p>
      * This property has higher precedence than {@link #reportParametersInstance} injection.
-     * <p></p>
      *
      * @see #reportParametersInstance
      */
@@ -221,7 +218,6 @@ public class JasperReportsBatchlet implements Batchlet {
     /**
      * Optional injection of report output stream, which allows for more control over the output stream creation,
      * sharing, and configuration. The injected {@code OutputStream} is closed at the end of {@link #process()} method.
-     * <p></p>
      *
      * @see #outputFile
      */
@@ -231,7 +227,6 @@ public class JasperReportsBatchlet implements Batchlet {
     /**
      * Optional injection of Jasper Reports {@code net.sf.jasperreports.engine.JRDataSource}, which allows for more
      * control over the {@code JRDataSource} creation and configuration.
-     * <p></p>
      *
      * @see #resource
      */
@@ -240,7 +235,6 @@ public class JasperReportsBatchlet implements Batchlet {
 
     /**
      * Optional injection of Jasper Reports report parameters, which allows for more complex, non-string values.
-     * <p></p>
      *
      * @see #reportParameters
      */
@@ -252,22 +246,22 @@ public class JasperReportsBatchlet implements Batchlet {
      * injected instance should have been properly configured, including appropriate
      * {@code net.sf.jasperreports.export.ExporterOutput}. {@code net.sf.jasperreports.export.ExporterInput} will be
      * set to a {@code net.sf.jasperreports.engine.JasperPrint} by this class.
-     * <p></p>
+     * <p>
      * Some built-in implementations of {@code net.sf.jasperreports.export.ExporterOutput}:
      * <ul>
-     * <li>{@code net.sf.jasperreports.engine.export.JRPdfExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.HtmlExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRDocxExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRPptxExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.JRXlsExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.JRTextExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.JRRtfExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.JRXmlExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.JRCsvExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.JsonExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.oasis.JROdsExporter}</li>
-     * <li>{@code net.sf.jasperreports.engine.export.oasis.JROdtExporter}</li>
+     * <li>{@code net.sf.jasperreports.engine.export.JRPdfExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.HtmlExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRDocxExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRPptxExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.JRXlsExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.JRTextExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.JRRtfExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.JRXmlExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.JRCsvExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.JsonExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.oasis.JROdsExporter}
+     * <li>{@code net.sf.jasperreports.engine.export.oasis.JROdtExporter}
      * </ul>
      */
     @Inject

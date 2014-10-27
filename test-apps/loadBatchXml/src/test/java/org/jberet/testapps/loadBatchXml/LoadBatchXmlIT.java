@@ -17,7 +17,7 @@ import org.junit.Test;
 
 /**
  * Verifies the following:
- * <p/>
+ * <p>
  * BatchletNoNamed is declared in batch.xml, loaded with portable archive loader;
  * job listener L1 is declared with @Named, loaded with non-portable job loader;
  * JobContext injected with @Inject into batchlet and job listener;

@@ -37,14 +37,14 @@ public final class MongoClientObjectFactory implements ObjectFactory {
      * Gets an instance of {@code com.mongodb.MongoClient} based on the resource configuration in the application server.
      * The parameter {@code environment} contains MongoDB client connection properties, and accepts the following property:
      * <ul>
-     * <li>uri: uri to connect to MongoDB instance</li>
+     * <li>uri: uri to connect to MongoDB instance
      * <li>host: single host and port, or multiple host and port specification in the format
-     * host1[:port1][,host2[:port2],...[,hostN[:portN]]]</li>
-     * <li>database: MongoDB database name, e.g., testData</li>
-     * <li>collection: MongoDB collection name, e.g., movies</li>
-     * <li>options: MongoDB client options, e.g., safe=true&wtimeout=1000</li>
-     * <li>user: MongoDB username</li>
-     * <li>password: MongoDB password</li>
+     * host1[:port1][,host2[:port2],...[,hostN[:portN]]]
+     * <li>database: MongoDB database name, e.g., testData
+     * <li>collection: MongoDB collection name, e.g., movies
+     * <li>options: MongoDB client options, e.g., safe=true&wtimeout=1000
+     * <li>user: MongoDB username
+     * <li>password: MongoDB password
      * </ul>
      * See also <a href="http://api.mongodb.org/java/2.12/com/mongodb/MongoClientURI.html">MongoClientURI javadoc.</a>
      *

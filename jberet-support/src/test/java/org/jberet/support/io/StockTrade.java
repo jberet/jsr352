@@ -31,10 +31,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * The CSV file, IBM_unadjusted.txt, is downloaded from kibot.com free trial data:
  * http://www.kibot.com/buy.aspx
  * http://api.kibot.com/?action=history&symbol=IBM&interval=1&unadjusted=1&bp=1&user=guest
- * <p/>
+ * <p>
  * The data is in standard CSV format with order of fields:
  * Date,Time,Open,High,Low,Close,Volume
- * <p/>
+ * <p>
  * The data file contains no header line.  The data file is truncated to 10/13/2008,12:09 to stay within Excel row
  * number limit (1048576 rows max).
  */

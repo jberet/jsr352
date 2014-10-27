@@ -38,9 +38,9 @@ public abstract class MongoItemReaderWriterBase extends ItemReaderWriterBase {
      * any data-representing bean class, for example,
      * <p>
      * <ul>
-     * <li>{@code org.jberet.support.io.StockTrade}</li>
-     * <li>{@code org.jberet.support.io.Person}</li>
-     * <li>{@code my.own.custom.ItemBean}</li>
+     * <li>{@code org.jberet.support.io.StockTrade}
+     * <li>{@code org.jberet.support.io.Person}
+     * <li>{@code my.own.custom.ItemBean}
      * </ul>
      */
     @Inject

@@ -40,9 +40,9 @@ public final class NoMappingJsonFactoryObjectFactory implements ObjectFactory {
      * application server. The parameter {@code environment} contains JsonFactory configuration properties, and accepts
      * the following properties:
      * <ul>
-     * <li>jsonFactoryFeatures: JsonFactory features as defined in com.fasterxml.jackson.core.JsonFactory.Feature</li>
-     * <li>inputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.InputDecorator}</li>
-     * <li>outputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.OutputDecorator}</li>
+     * <li>jsonFactoryFeatures: JsonFactory features as defined in com.fasterxml.jackson.core.JsonFactory.Feature
+     * <li>inputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.InputDecorator}
+     * <li>outputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.OutputDecorator}
      * </ul>
      *
      * @param obj         the JNDI name of {@code com.fasterxml.jackson.core.JsonFactory} resource

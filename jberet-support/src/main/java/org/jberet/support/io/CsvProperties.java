@@ -123,9 +123,9 @@ public final class CsvProperties {
      * determines whether a line should be considered a comment.
      * See <a href="http://supercsv.sourceforge.net/preferences.html">CSV Preferences</a>. For example,
      * <ul>
-     *     <li>"startsWith #"</li>
-     *     <li>"matches 'regexp'"</li>
-     *     <li>"my.own.CommentMatcherImpl"</li>
+     *     <li>"startsWith #"
+     *     <li>"matches 'regexp'"
+     *     <li>"my.own.CommentMatcherImpl"
      * </ul>
      */
     public static final String COMMENT_MATCHER_KEY = "commentMatcher";
@@ -142,9 +142,9 @@ public final class CsvProperties {
      * The property value to indicate the use of a {@code org.supercsv.comment.CommentStartsWith} comment matcher.
      * For example,
      * <ul>
-     * <li>"startsWith '#'"</li>
-     * <li>"starts with '##'"</li>
-     * <li>"start with '###'"</li>
+     * <li>"startsWith '#'"
+     * <li>"starts with '##'"
+     * <li>"start with '###'"
      * </ul>
      */
     public static final String STARTS_WITH = "startsWith";
@@ -163,8 +163,8 @@ public final class CsvProperties {
      * The property value to indicate the use of a {@code org.supercsv.comment.CommentMatches} comment matcher.
      * For example,
      * <ul>
-     * <li>"matches 'some regexp'"</li>
-     * <li>"match 'some regexp'"</li>
+     * <li>"matches 'some regexp'"
+     * <li>"match 'some regexp'"
      * </ul>
      */
     public static final String MATCHES = "matches";
@@ -201,8 +201,8 @@ public final class CsvProperties {
     /**
      * The property value to indicate selected columns.  For example,
      * <ul>
-     * <li>"select true, true, false, false"</li>
-     * <li>"select 1, 2, 3, 4</li>
+     * <li>"select true, true, false, false"
+     * <li>"select 1, 2, 3, 4
      * </ul>
      */
     public static final String SELECT = "select";
@@ -210,8 +210,8 @@ public final class CsvProperties {
     /**
      * The property value to indicate selected columns.  For example,
      * <ul>
-     * <li>"column true, true, false, false"</li>
-     * <li>"column 1, 2, 3, 4</li>
+     * <li>"column true, true, false, false"
+     * <li>"column 1, 2, 3, 4
      * </ul>
      */
     public static final String COLUMN = "column";
@@ -238,13 +238,13 @@ public final class CsvProperties {
      * <a href="http://supercsv.sourceforge.net/cell_processors.html">Super CSV docs</a> for supported cell processor
      * types. The rules and syntax are as follows:
      * <ul>
-     * <li>The size of the resultant list must equal to the number of CSV columns.</li>
-     * <li>Cell processors appear in the same order as CSV columns.</li>
-     * <li>If no cell processor is needed for a column, enter null.</li>
-     * <li>Each column may have null, 1, 2, or multiple cell processors, separated by comma (,)</li>
-     * <li>Cell processors for different columns must be separated with semi-colon (;).</li>
-     * <li>Cell processors may contain parameters enclosed in parenthesis, and multiple parameters are separated with comma (,).</li>
-     * <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'</li>
+     * <li>The size of the resultant list must equal to the number of CSV columns.
+     * <li>Cell processors appear in the same order as CSV columns.
+     * <li>If no cell processor is needed for a column, enter null.
+     * <li>Each column may have null, 1, 2, or multiple cell processors, separated by comma (,)
+     * <li>Cell processors for different columns must be separated with semi-colon (;).
+     * <li>Cell processors may contain parameters enclosed in parenthesis, and multiple parameters are separated with comma (,).
+     * <li>string literals in cell processor parameters must be enclosed within single quotes, e.g., 'xxx'
      * </ul>
      * For example, to specify cell processors for 5-column CSV:
      * <pre>
