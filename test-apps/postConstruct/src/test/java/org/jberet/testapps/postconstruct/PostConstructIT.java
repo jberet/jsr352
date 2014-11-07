@@ -12,13 +12,25 @@
 
 package org.jberet.testapps.postconstruct;
 
-import javax.batch.runtime.BatchStatus;
-
 import org.jberet.testapps.common.AbstractIT;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.batch.runtime.BatchStatus;
+
 public class PostConstructIT extends AbstractIT {
+    @BeforeClass
+    public static void beforeClass() {
+        switchToUSLocale();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        restoreDefaultLocale();
+    }
+
     @Test
     public void postConstructAndPreDestroy() throws Exception {
         final String expected = "PostConstructPreDestroyBase.ps JobListener1.ps JobListener1.beforeJob PostConstructPreDestroyBase.ps StepListener1.ps StepListener1.beforeStep PostConstructPreDestroyBase.ps Batchlet0.ps Batchlet1.ps Batchlet1.process Batchlet1.pd Batchlet0.pd PostConstructPreDestroyBase.pd StepListener1.afterStep StepListener1.pd PostConstructPreDestroyBase.pd PostConstructPreDestroyBase.ps Decider1.ps Decider1.decide Decider1.pd PostConstructPreDestroyBase.pd JobListener1.afterJob JobListener1.pd PostConstructPreDestroyBase.pd";

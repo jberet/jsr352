@@ -13,10 +13,22 @@
 package org.jberet.testapps.propertyinjection;
 
 import org.jberet.testapps.common.AbstractIT;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class PropertyInjectionIT extends AbstractIT {
+    @BeforeClass
+    public static void beforeClass() {
+        switchToUSLocale();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        restoreDefaultLocale();
+    }
+
     @Test
     public void propertyInjection() throws Exception {
         startJobAndWait("propertyInjection.xml");

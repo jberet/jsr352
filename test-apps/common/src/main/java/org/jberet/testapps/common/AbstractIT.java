@@ -13,6 +13,7 @@
 package org.jberet.testapps.common;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
@@ -23,8 +24,16 @@ import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 abstract public class AbstractIT {
+    /**
+     * Saves the default locale before temporarily switching to {@code Locale.US}. Some tests (e.g., PropertyInjectionIT,
+     * PostConstructIT) uses US date format, so need to switch Locale.US to run these tests.
+     */
+    private static Locale originalLocale;
+
     protected long jobTimeout;
 
     protected Properties params = new Properties();
@@ -68,5 +77,14 @@ abstract public class AbstractIT {
         final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
         final JobExecution originalJobExecution = jobExecutions.get(jobExecutions.size() - 1);
         return originalJobExecution.getExecutionId();
+    }
+
+    protected static void switchToUSLocale() {
+        originalLocale = Locale.getDefault();
+        Locale.setDefault(Locale.US);
+    }
+
+    protected static void restoreDefaultLocale() {
+        Locale.setDefault(originalLocale);
     }
 }
