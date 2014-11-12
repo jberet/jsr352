@@ -27,10 +27,27 @@ final class TableColumns {
      * _id field in MongoDB
      */
     static final String _id = "_id";
+
     /**
      * The name of the sequence collection, and also the name of the sequence field within this collection.
+     * The name of the sequenceCache in infinispan job repository.
      */
     static final String SEQ = "seq";
+
+    /**
+     * Provides the next id (as a long) for JOB_INSTANCE in infinispan job repository.
+     */
+    static final String JOB_INSTANCE_ID_SEQ = "JOB_INSTANCE_ID_SEQ";
+
+    /**
+     * Provides the next id (as a long) for JOB_EXECUTION in infinispan job repository.
+     */
+    static final String JOB_EXECUTION_ID_SEQ = "JOB_EXECUTION_ID_SEQ";
+
+    /**
+     * Provides the next id (as a long) for STEP_EXECUTION in infinispan job repository.
+     */
+    static final String STEP_EXECUTION_ID_SEQ = "STEP_EXECUTION_ID_SEQ";
 
     /**
      * Size of EXECUTIONEXCEPTION column in STEP_EXECUTION and PARTITION_EXECUTION table.  Values will be truncated

@@ -46,6 +46,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     public static final String REPOSITORY_TYPE_IN_MEMORY = "in-memory";
     public static final String REPOSITORY_TYPE_JDBC = "jdbc";
     public static final String REPOSITORY_TYPE_MONGODB = "mongodb";
+    public static final String REPOSITORY_TYPE_INFINISPAN = "infinispan";
 
     private final Properties configProperties;
     private final TransactionManager tm;

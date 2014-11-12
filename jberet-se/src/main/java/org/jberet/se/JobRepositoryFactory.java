@@ -12,6 +12,7 @@ package org.jberet.se;
 import java.util.Properties;
 
 import org.jberet.repository.InMemoryRepository;
+import org.jberet.repository.InfinispanRepository;
 import org.jberet.repository.JdbcRepository;
 import org.jberet.repository.JobRepository;
 import org.jberet.repository.MongoRepository;
@@ -53,6 +54,10 @@ class JobRepositoryFactory {
             } else if (repositoryType.equalsIgnoreCase(BatchSEEnvironment.REPOSITORY_TYPE_MONGODB)) {
                 if (!(jobRepository instanceof MongoRepository)) {
                     jobRepository = INSTANCE.jobRepository = MongoRepository.create(configProperties);
+                }
+            } else if (repositoryType.equalsIgnoreCase(BatchSEEnvironment.REPOSITORY_TYPE_INFINISPAN)) {
+                if (!(jobRepository instanceof InfinispanRepository)) {
+                    jobRepository = INSTANCE.jobRepository = InfinispanRepository.create(configProperties);
                 }
             } else {
                 throw SEBatchLogger.LOGGER.unrecognizedJobRepositoryType(repositoryType);

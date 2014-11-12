@@ -152,4 +152,10 @@ public interface BatchMessages {
     @Message(id = 641, value = "The script is not Invocable: %s")
     BatchRuntimeException scriptNotInvocable(String scriptContent);
 
+    @Message(id = 642, value = "Failed to create cache manager: %s")
+    BatchRuntimeException failToCreateCacheManager(@Cause Throwable th, String description);
+
+    @Message(id = 643, value = "Failed to get next id number: %s")
+    BatchRuntimeException failToGetNextId(@Cause Throwable th, String key);
+
 }

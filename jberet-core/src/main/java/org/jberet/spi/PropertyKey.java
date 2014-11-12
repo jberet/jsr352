@@ -23,4 +23,6 @@ public interface PropertyKey {
      * BatchEnvironment#getBatchConfigurationProperties()}  batch environment} level.
      */
     String LOCAL_TX = "jberet.local-tx";
+
+    String INFINISPAN_XML = "infinispan.xml";
 }
