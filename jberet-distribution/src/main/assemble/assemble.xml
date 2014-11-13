@@ -62,6 +62,7 @@
             <outputDirectory>/bin</outputDirectory>
             <includes>
                 <include>*.properties</include>
+                <include>*.xml</include>
             </includes>
         </fileSet>
     </fileSets>

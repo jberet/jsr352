@@ -258,11 +258,10 @@ public final class InfinispanRepository extends AbstractRepository {
     private void initCaches() {
         sequenceCache = cacheManager.getCache(TableColumns.SEQ, true);
         sequenceCache.getAdvancedCache().withFlags(Flag.SKIP_REMOTE_LOOKUP, Flag.SKIP_CACHE_LOAD);
-        final Map<String, Long> startingIds = new HashMap<String, Long>(8);
-        startingIds.put(TableColumns.JOB_INSTANCE_ID_SEQ, 0L);
-        startingIds.put(TableColumns.JOB_EXECUTION_ID_SEQ, 0L);
-        startingIds.put(TableColumns.STEP_EXECUTION_ID_SEQ, 0L);
-        sequenceCache.putAll(startingIds);
+
+        sequenceCache.putIfAbsent(TableColumns.JOB_INSTANCE_ID_SEQ, 0L);
+        sequenceCache.putIfAbsent(TableColumns.JOB_EXECUTION_ID_SEQ, 0L);
+        sequenceCache.putIfAbsent(TableColumns.STEP_EXECUTION_ID_SEQ, 0L);
 
         jobInstanceCache = cacheManager.getCache(TableColumns.JOB_INSTANCE, true);
         jobInstanceCache.getAdvancedCache().withFlags(Flag.SKIP_REMOTE_LOOKUP, Flag.SKIP_CACHE_LOAD);
