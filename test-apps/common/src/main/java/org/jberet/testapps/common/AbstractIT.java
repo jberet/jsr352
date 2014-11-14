@@ -25,6 +25,7 @@ import javax.batch.runtime.StepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 abstract public class AbstractIT {
@@ -37,11 +38,29 @@ abstract public class AbstractIT {
     protected long jobTimeout;
 
     protected Properties params = new Properties();
-    protected JobOperator jobOperator = BatchRuntime.getJobOperator();
     protected long jobExecutionId;
     protected JobExecutionImpl jobExecution;
     protected List<StepExecution> stepExecutions;
     protected StepExecutionImpl stepExecution0;
+
+    //delay bootstrapping JobOperator, since some tests may need to adjust jberet configuration, such as
+    //infinispanRepository tests.
+    protected JobOperator jobOperator;
+
+    /**
+     * Initializes and bootstraps {@code JobOperator}.
+     * It appears JUnit will not invoke {@code @Before} methods on the superclass if the subclass also defines its own
+     * {@code @Before} method.
+     * Therefore any {@code @Before} method on subclass must first invoke {@code super.before()}.
+     *
+     * @throws Exception
+     */
+    @Before
+    public void before() throws Exception {
+        if (jobOperator == null) {
+            jobOperator = BatchRuntime.getJobOperator();
+        }
+    }
 
     protected long getJobTimeoutSeconds() {
         return jobTimeout;

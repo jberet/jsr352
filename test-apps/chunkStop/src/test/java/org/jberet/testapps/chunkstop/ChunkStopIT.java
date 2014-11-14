@@ -27,7 +27,8 @@ public class ChunkStopIT extends AbstractIT {
     protected static final String jobXml = "chunkStop.xml";
 
     @Before
-    public void before() {
+    public void before() throws Exception {
+        super.before();
         params.setProperty("data.count", String.valueOf(dataCount));
     }
 

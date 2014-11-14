@@ -28,7 +28,9 @@ import javax.batch.runtime.StepExecution;
 import javax.transaction.TransactionManager;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 public final class InfinispanRepository extends AbstractRepository {
     private static final String DEFAULT_INFINISPAN_XML = "infinispan.xml";
@@ -46,13 +48,17 @@ public final class InfinispanRepository extends AbstractRepository {
     }
 
     public static InfinispanRepository create(final Properties configProperties) {
-        final String infinispanXml = configProperties.getProperty(PropertyKey.INFINISPAN_XML, DEFAULT_INFINISPAN_XML);
+        String infinispanXml = configProperties.getProperty(PropertyKey.INFINISPAN_XML);
+        if (infinispanXml == null || infinispanXml.isEmpty()) {
+            infinispanXml = DEFAULT_INFINISPAN_XML;
+        }
         return new InfinispanRepository(infinispanXml);
     }
 
     public InfinispanRepository(final Configuration infinispanConfig) {
         cacheManager = new DefaultCacheManager(infinispanConfig);
         initCaches();
+
     }
 
     public InfinispanRepository(final String infinispanXml) {

@@ -41,6 +41,10 @@
                 <configuration>
                     <systemPropertyVariables>
                         <jberet.infinispan.file.store>${project.build.directory}/jberet-infinispan-file-store</jberet.infinispan.file.store>
+
+                        <!-- propagate project.build.outputDirectory system property to test class, which needs to
+                        copy/move design-time infinispan.xml -->
+                        <project.build.outputDirectory>${project.build.outputDirectory}</project.build.outputDirectory>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

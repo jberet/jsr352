@@ -12,18 +12,18 @@
 
 package org.jberet.testapps.infinispanRepository;
 
-import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.batch.runtime.BatchStatus;
-
-public class InfinispanRepositoryIT extends AbstractIT {
-    static final String jobXml = "org.jberet.test.infinispanRepository";
+public class FileInfinispanRepositoryIT extends InfinispanRepositoryTestBase {
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        moveInfinispanXml("file-infinispan.xml");
+    }
 
     @Test
-    public void partitionWithInfinispanRepository() throws Exception {
-        startJobAndWait(jobXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    public void partitionWithInfinispanFile() throws Exception {
+        partitionWithInfinispan0();
     }
+
 }

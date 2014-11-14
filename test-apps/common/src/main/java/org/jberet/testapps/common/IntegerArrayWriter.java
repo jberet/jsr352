@@ -41,7 +41,7 @@ public final class IntegerArrayWriter extends IntegerArrayReaderWriterBase imple
             data[cursor] = (Integer) o;
             cursor++;
         }
-        System.out.printf("Wrote items: %s%n", String.valueOf(items));
+        System.out.printf("Wrote Chunk (%s Items): %s%n", items.size(), String.valueOf(items));
     }
 
     @Override

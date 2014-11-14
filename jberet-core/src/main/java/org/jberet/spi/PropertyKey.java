@@ -24,5 +24,8 @@ public interface PropertyKey {
      */
     String LOCAL_TX = "jberet.local-tx";
 
-    String INFINISPAN_XML = "infinispan.xml";
+    /**
+     * A key used to specify the resource path to the configuration XML for configuring infinispan job repository.
+     */
+    String INFINISPAN_XML = "infinispan-xml";
 }

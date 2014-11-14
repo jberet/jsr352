@@ -26,7 +26,7 @@ Increase `ulimit` to avoid such errors. For example,
 ####Sub-modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
-* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, etc) for batch applications, and JNDI support
+* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, PDF, etc) for batch applications, and JNDI support
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
@@ -62,9 +62,9 @@ Increase `ulimit` to avoid such errors. For example,
     + comprehensive tests for implemented batch readers and writers
   - <https://github.com/jberet/jsr352/tree/master/test-apps>
     + test apps running in Java SE environment to verify core batch requirements
-    + test apps running in Java SE environment to verify additional JBeret features (inheritance, scripting support, etc)
+    + test apps running in Java SE environment to verify additional JBeret features (inheritance, scripting support, infinispan job repository, etc)
 
-####How to reference org.jberet artifacts in maven pom.xml
+#### org.jberet artifacts may be retrieved from Maven Central or JBoss Public Repository
     <repositories>
         <repository>
             <id>jboss-public-repository-group</id>
@@ -152,13 +152,38 @@ the above dependencies are already available as JBoss modules, and should not be
             <artifactId>h2</artifactId>
         </dependency>
         
-#####Optional application dependencies:
+#####Optional application dependencies depending on application usage:
         <!-- any JDBC driver jars, e.g., h2, when using jdbc batch job repository -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
-        
+
+         <!-- infinispan and jgroups jars, when infinispan job repository is used.
+              Additional infinispan cachestore jars (e.g., infinispan-cachestore-jdbc, infinispan-cachestore-mongodb,
+              nfinispan-cachestore-leveldb, infinispan-cachestore-rest, infinispan-cachestore-cassandra, etc) may be
+              needed if such a cachestore is used. -->
+         <dependency>
+             <groupId>org.infinispan</groupId>
+             <artifactId>infinispan-core</artifactId>
+         </dependency>
+         <dependency>
+             <groupId>org.infinispan</groupId>
+             <artifactId>infinispan-commons</artifactId>
+         </dependency>
+         <dependency>
+             <groupId>org.jgroups</groupId>
+             <artifactId>jgroups</artifactId>
+         </dependency>
+
+         <!-- MongoDB jars, when MongoDB job repository is used -->
+         <dependency>
+             <groupId>org.mongodb</groupId>
+             <artifactId>mongo-java-driver</artifactId>
+             <version>${version.org.mongodb.mongo-java-driver}</version>
+             <scope>provided</scope>
+         </dependency>
+
         <!-- For Weld 2.2.2.Final or later, Jandex is required for annotation processing -->
         <dependency>
             <groupId>org.jboss</groupId>
