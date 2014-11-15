@@ -10,20 +10,19 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.testapps.infinispanRepository;
+package org.jberet.testapps.infinispanRepositoryFile;
 
-import org.junit.BeforeClass;
+import org.jberet.testapps.common.AbstractIT;
+import org.junit.Assert;
 import org.junit.Test;
 
-public class FileInfinispanRepositoryIT extends InfinispanRepositoryTestBase {
-    @BeforeClass
-    public static void beforeClass() throws Exception {
-        moveInfinispanXml("file-infinispan.xml");
-    }
+import javax.batch.runtime.BatchStatus;
 
+public class FileInfinispanRepositoryIT extends AbstractIT {
     @Test
     public void partitionWithInfinispanFile() throws Exception {
-        partitionWithInfinispan0();
+        startJobAndWait(infinispanRepositoryJobXml);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
 }

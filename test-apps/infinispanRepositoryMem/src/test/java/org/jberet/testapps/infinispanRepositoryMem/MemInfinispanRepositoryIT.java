@@ -10,19 +10,18 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.testapps.infinispanRepository;
+package org.jberet.testapps.infinispanRepositoryMem;
 
-import org.junit.BeforeClass;
+import org.jberet.testapps.common.AbstractIT;
+import org.junit.Assert;
 import org.junit.Test;
 
-public class MemoryInfinispanRepositoryIT extends InfinispanRepositoryTestBase {
-    @BeforeClass
-    public static void beforeClass() throws Exception {
-        moveInfinispanXml("memory-infinispan.xml");
-    }
+import javax.batch.runtime.BatchStatus;
 
+public class MemInfinispanRepositoryIT extends AbstractIT {
     @Test
-    public void partitionWithInfinispanMemory() throws Exception {
-        partitionWithInfinispan0();
+    public void partitionWithInfinispanMem() throws Exception {
+        startJobAndWait(infinispanRepositoryJobXml);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 }

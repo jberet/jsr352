@@ -29,7 +29,9 @@
         <module>postConstruct</module>
         <module>inheritance</module>
         <module>scripting</module>
-        <module>infinispanRepository</module>
+        <module>infinispanRepositoryMem</module>
+        <module>infinispanRepositoryFile</module>
+        <module>infinispanRepositoryLevelDB</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>

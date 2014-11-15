@@ -1,4 +1,5 @@
 *.class
+.DS_Store
 
 # Package Files #
 *.jar
@@ -20,7 +21,3 @@ target
 *.ipr
 *.iws
 .idea
-# ignore NetBeans files
-nbactions.xml
-nb-configuration.xml
-catalog.xml

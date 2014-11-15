@@ -30,6 +30,11 @@ import org.junit.BeforeClass;
 
 abstract public class AbstractIT {
     /**
+     * Common job xml for infinispan job repository tests.
+     */
+    protected static final String infinispanRepositoryJobXml = "org.jberet.test.infinispanRepository";
+
+    /**
      * Saves the default locale before temporarily switching to {@code Locale.US}. Some tests (e.g., PropertyInjectionIT,
      * PostConstructIT) uses US date format, so need to switch Locale.US to run these tests.
      */

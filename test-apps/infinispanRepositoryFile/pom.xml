@@ -2,15 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.jberet.test-apps</groupId>
         <artifactId>test-apps</artifactId>
+        <groupId>org.jberet.test-apps</groupId>
         <version>1.1.0.Beta1-SNAPSHOT</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>infinispanRepository</artifactId>
+    <artifactId>infinispanRepositoryFile</artifactId>
 
     <dependencies>
         <dependency>
@@ -32,22 +31,4 @@
             <artifactId>jgroups</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <jberet.infinispan.file.store>${project.build.directory}/jberet-infinispan-file-store</jberet.infinispan.file.store>
-
-                        <!-- propagate project.build.outputDirectory system property to test class, which needs to
-                        copy/move design-time infinispan.xml -->
-                        <project.build.outputDirectory>${project.build.outputDirectory}</project.build.outputDirectory>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

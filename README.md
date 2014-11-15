@@ -161,7 +161,7 @@ the above dependencies are already available as JBoss modules, and should not be
 
          <!-- infinispan and jgroups jars, when infinispan job repository is used.
               Additional infinispan cachestore jars (e.g., infinispan-cachestore-jdbc, infinispan-cachestore-mongodb,
-              nfinispan-cachestore-leveldb, infinispan-cachestore-rest, infinispan-cachestore-cassandra, etc) may be
+              infinispan-cachestore-leveldb, infinispan-cachestore-rest, infinispan-cachestore-cassandra, etc) may be
               needed if such a cachestore is used. -->
          <dependency>
              <groupId>org.infinispan</groupId>
