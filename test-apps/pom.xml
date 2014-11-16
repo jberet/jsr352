@@ -32,6 +32,7 @@
         <module>infinispanRepositoryMem</module>
         <module>infinispanRepositoryFile</module>
         <module>infinispanRepositoryLevelDB</module>
+        <module>infinispanRepositoryJdbc</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>

@@ -27,7 +27,6 @@ import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 import javax.transaction.TransactionManager;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -39,7 +38,7 @@ public final class InfinispanRepository extends AbstractRepository {
     private Cache<Long, JobInstanceImpl> jobInstanceCache;
     private Cache<Long, JobExecutionImpl> jobExecutionCache;
     private Cache<Long, StepExecutionImpl> stepExecutionCache;
-    private Cache<PartitionExecutionId, PartitionExecutionImpl> partitionExecutionCache;
+    private Cache<String, PartitionExecutionImpl> partitionExecutionCache;
 
     private EmbeddedCacheManager cacheManager;
 
@@ -58,7 +57,6 @@ public final class InfinispanRepository extends AbstractRepository {
     public InfinispanRepository(final Configuration infinispanConfig) {
         cacheManager = new DefaultCacheManager(infinispanConfig);
         initCaches();
-
     }
 
     public InfinispanRepository(final String infinispanXml) {
@@ -163,7 +161,7 @@ public final class InfinispanRepository extends AbstractRepository {
         } else {
             final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) stepOrPartitionExecution;
             partitionExecutionCache.put(
-                    new PartitionExecutionId(partitionExecution.getStepExecutionId(), partitionExecution.getPartitionId()),
+                    concatPartitionExecutionId(partitionExecution.getStepExecutionId(), partitionExecution.getPartitionId()),
                     partitionExecution);
         }
     }
@@ -212,7 +210,7 @@ public final class InfinispanRepository extends AbstractRepository {
     public void addPartitionExecution(final StepExecutionImpl enclosingStepExecution, final PartitionExecutionImpl partitionExecution) {
         super.addPartitionExecution(enclosingStepExecution, partitionExecution);
         partitionExecutionCache.put(
-                new PartitionExecutionId(partitionExecution.getStepExecutionId(), partitionExecution.getPartitionId()),
+                concatPartitionExecutionId(partitionExecution.getStepExecutionId(), partitionExecution.getPartitionId()),
                 partitionExecution);
     }
 
@@ -298,42 +296,7 @@ public final class InfinispanRepository extends AbstractRepository {
         }
     }
 
-    private static final class PartitionExecutionId implements Serializable {
-        private static final long serialVersionUID = -1420317829170255008L;
-        long stepExecutionId = -1;
-        int partitionId = -1;
-
-        private PartitionExecutionId(final long stepExecutionId, final int partitionId) {
-            this.stepExecutionId = stepExecutionId;
-            this.partitionId = partitionId;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            PartitionExecutionId that = (PartitionExecutionId) o;
-
-            if (partitionId != that.partitionId) return false;
-            if (stepExecutionId != that.stepExecutionId) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = (int) (stepExecutionId ^ (stepExecutionId >>> 32));
-            result = 31 * result + partitionId;
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return "PartitionExecutionId{" +
-                    "stepExecutionId=" + stepExecutionId +
-                    ", partitionId=" + partitionId +
-                    '}';
-        }
+    private static String concatPartitionExecutionId(final long stepExecutionId, final int partitionId) {
+        return (new StringBuilder(String.valueOf(stepExecutionId)).append('-').append(String.valueOf(partitionId))).toString();
     }
 }

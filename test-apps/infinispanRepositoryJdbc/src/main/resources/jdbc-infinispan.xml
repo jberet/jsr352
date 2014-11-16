@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+
+Contributors:
+Cheng Fang - Initial API and implementation
+-->
+
+<infinispan xmlns="urn:infinispan:config:7.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:infinispan:config:7.0 http://infinispan.org/schemas/infinispan-config-7.0.xsd">
+
+    <cache-container name="jberet" default-cache="JOB_EXECUTION">
+        <transport lock-timeout="60000"/>
+
+        <distributed-cache name="JOB_INSTANCE" mode="ASYNC" l1-lifespan="0">
+            <persistence>
+                <string-keyed-jdbc-store xmlns="urn:infinispan:config:store:jdbc:7.0"
+                                         fetch-state="false" read-only="false" purge="false">
+                    <connection-pool connection-url="jdbc:h2:mem:infinispan_string_based;DB_CLOSE_DELAY=-1"
+                                     username="sa" driver="org.h2.Driver"/>
+                    <string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
+                        <id-column name="ID_COLUMN" type="VARCHAR(255)"/>
+                        <data-column name="DATA_COLUMN" type="BINARY"/>
+                        <timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                    </string-keyed-table>
+                </string-keyed-jdbc-store>
+            </persistence>
+        </distributed-cache>
+
+        <distributed-cache name="JOB_EXECUTION" mode="ASYNC" l1-lifespan="0">
+            <persistence>
+                <string-keyed-jdbc-store xmlns="urn:infinispan:config:store:jdbc:7.0"
+                                         fetch-state="false" read-only="false" purge="false">
+                    <connection-pool connection-url="jdbc:h2:mem:infinispan_string_based;DB_CLOSE_DELAY=-1"
+                                     username="sa" driver="org.h2.Driver"/>
+                    <string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
+                        <id-column name="ID_COLUMN" type="VARCHAR(255)"/>
+                        <data-column name="DATA_COLUMN" type="BINARY"/>
+                        <timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                    </string-keyed-table>
+                </string-keyed-jdbc-store>
+            </persistence>
+        </distributed-cache>
+
+        <distributed-cache name="STEP_EXECUTION" mode="ASYNC" l1-lifespan="0">
+            <persistence>
+                <string-keyed-jdbc-store xmlns="urn:infinispan:config:store:jdbc:7.0"
+                                         fetch-state="false" read-only="false" purge="false">
+                    <connection-pool connection-url="jdbc:h2:mem:infinispan_string_based;DB_CLOSE_DELAY=-1"
+                                     username="sa" driver="org.h2.Driver"/>
+                    <string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
+                        <id-column name="ID_COLUMN" type="VARCHAR(255)"/>
+                        <data-column name="DATA_COLUMN" type="BINARY"/>
+                        <timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                    </string-keyed-table>
+                </string-keyed-jdbc-store>
+            </persistence>
+        </distributed-cache>
+
+        <distributed-cache name="PARTITION_EXECUTION" mode="ASYNC" l1-lifespan="0">
+            <persistence>
+                <string-keyed-jdbc-store xmlns="urn:infinispan:config:store:jdbc:7.0"
+                                         fetch-state="false" read-only="false" purge="false">
+                    <connection-pool connection-url="jdbc:h2:mem:infinispan_string_based;DB_CLOSE_DELAY=-1"
+                                     username="sa" driver="org.h2.Driver"/>
+                    <string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
+                        <id-column name="ID_COLUMN" type="VARCHAR(255)"/>
+                        <data-column name="DATA_COLUMN" type="BINARY"/>
+                        <timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                    </string-keyed-table>
+                </string-keyed-jdbc-store>
+            </persistence>
+        </distributed-cache>
+
+        <distributed-cache name="seq" mode="SYNC" l1-lifespan="0">
+            <transaction mode="BATCH" locking="PESSIMISTIC"/>
+            <persistence>
+                <string-keyed-jdbc-store xmlns="urn:infinispan:config:store:jdbc:7.0"
+                                         fetch-state="false" read-only="false" purge="false">
+                    <connection-pool connection-url="jdbc:h2:mem:infinispan_string_based;DB_CLOSE_DELAY=-1"
+                                     username="sa" driver="org.h2.Driver"/>
+                    <string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
+                        <id-column name="ID_COLUMN" type="VARCHAR(255)"/>
+                        <data-column name="DATA_COLUMN" type="BINARY"/>
+                        <timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                    </string-keyed-table>
+                </string-keyed-jdbc-store>
+            </persistence>
+        </distributed-cache>
+    </cache-container>
+</infinispan>
