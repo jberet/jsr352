@@ -123,7 +123,7 @@ public class SleepBatchletTest {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) operator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(1, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
-        Assert.assertEquals("beforeJob beforeStep afterJob", jobExecution.getExitStatus());
+        Assert.assertEquals("beforeJob beforeStep afterStep afterJob", jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
         System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",

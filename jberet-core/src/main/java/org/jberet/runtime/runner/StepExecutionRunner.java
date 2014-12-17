@@ -39,7 +39,6 @@ import javax.batch.runtime.BatchStatus;
 import javax.transaction.TransactionManager;
 
 import org.jberet._private.BatchLogger;
-import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.Listeners;
 import org.jberet.job.model.Partition;
@@ -55,7 +54,6 @@ import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.PropertyKey;
 import org.jberet.tx.LocalTransactionManager;
-import org.jberet.util.BatchUtil;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
@@ -101,6 +99,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     public void run() {
         final Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
         if (allowStartIfComplete != Boolean.FALSE) {
+            boolean enterBeforeStep = false;
             try {
                 final List<String> executedStepIds = jobContext.getExecutedStepIds();
                 if (executedStepIds.contains(step.getId())) {
@@ -132,24 +131,14 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     return;
                 }
 
+                enterBeforeStep = true;
                 for (final StepListener l : stepListeners) {
                     l.beforeStep();
                 }
-
                 runBatchletOrChunk(batchlet, chunk);
 
                 //record the fact this step has been executed
                 executedStepIds.add(step.getId());
-
-                for (final StepListener l : stepListeners) {
-                    try {
-                        l.afterStep();
-                    } catch (final Throwable e) {
-                        BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), l);
-                        batchContext.setBatchStatus(BatchStatus.FAILED);
-                    }
-                }
-                batchContext.savePersistentData();
             } catch (final Throwable e) {
                 LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), step);
                 if (e instanceof Exception) {
@@ -158,6 +147,21 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     batchContext.setException(new BatchRuntimeException(e));
                 }
                 batchContext.setBatchStatus(BatchStatus.FAILED);
+            } finally {
+                if (enterBeforeStep) {
+                    for (final StepListener l : stepListeners) {
+                        try {
+                            l.afterStep();
+                        } catch (final Throwable e) {
+                            BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), l);
+                            batchContext.setBatchStatus(BatchStatus.FAILED);
+                            if (batchContext.getException() != null) {
+                                batchContext.setException(new BatchRuntimeException(e));
+                            }
+                        }
+                    }
+                    batchContext.savePersistentData();
+                }
             }
 
             jobContext.destroyArtifact(mapper, reducer, analyzer);
@@ -331,7 +335,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
 
             if (analyzer != null &&
-               (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED)) {
+                    (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED)) {
                 tm.rollback();
             } else {
                 if (reducer != null) {

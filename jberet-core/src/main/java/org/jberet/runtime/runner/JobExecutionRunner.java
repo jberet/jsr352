@@ -42,34 +42,25 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             batchContext.getJobRepository().updateJobExecution(batchContext.getJobExecution(), false);
         }
         final JobListener[] jobListeners = batchContext.getJobListeners();
-        try {
-            // run job listeners beforeJob()
-            boolean beforeJobFailed = false;
-            int i = 0;
-            try {
-                for (; i < jobListeners.length; i++) {
-                    jobListeners[i].beforeJob();
-                }
-            } catch (final Throwable e) {
-                beforeJobFailed = true;
-                BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", jobListeners[i]);
-                batchContext.setBatchStatus(BatchStatus.FAILED);
-            }
-            if (!beforeJobFailed) {
-                runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPosition());
-            }
+        int i = 0;
 
-            try {
-                for (i = 0; i < jobListeners.length; i++) {
-                    jobListeners[i].afterJob();
-                }
-            } catch (final Throwable e) {
-                BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", jobListeners[i]);
-                batchContext.setBatchStatus(BatchStatus.FAILED);
+        try {
+            for (; i < jobListeners.length; i++) {
+                jobListeners[i].beforeJob();
             }
+            runFromHeadOrRestartPoint(batchContext.getJobExecution().getRestartPosition());
         } catch (final Throwable e) {
             BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", job);
             batchContext.setBatchStatus(BatchStatus.FAILED);
+        } finally {
+            for (i = 0; i < jobListeners.length; i++) {
+                try {
+                    jobListeners[i].afterJob();
+                } catch (final Throwable e) {
+                    BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", jobListeners[i]);
+                    batchContext.setBatchStatus(BatchStatus.FAILED);
+                }
+            }
         }
 
         batchContext.destroyArtifact(jobListeners);
