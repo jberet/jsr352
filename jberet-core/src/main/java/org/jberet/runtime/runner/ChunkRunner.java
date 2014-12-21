@@ -546,6 +546,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     }
                     stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
                     skipCount += outputSize;
+                    outputList.clear();
                 }
             } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                 for (final RetryWriteListener l : retryWriteListeners) {
