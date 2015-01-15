@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,8 +23,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ChunkPartitionRestartIT extends AbstractIT {
+    /**
+     * Restarts the job execution failed in {@link ChunkPartitionIT#complete2Fail1Partitions()}
+     * @throws Exception
+     */
     @Test
-    public void restart2FailedPartitions() throws Exception {
+    public void restartFailedPartition() throws Exception {
         this.params.setProperty("writer.sleep.time", "0");
         restartAndWait(getOriginalJobExecutionId(ChunkPartitionIT.jobChunkPartitionFailComplete));
 
@@ -32,8 +36,8 @@ public class ChunkPartitionRestartIT extends AbstractIT {
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
         final List<PartitionExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
 
-        //2 should completed
-        Assert.assertEquals(2, partitionExecutions.size());
+        //1 partition should completed
+        Assert.assertEquals(1, partitionExecutions.size());
         for (final PartitionExecutionImpl e : partitionExecutions) {
             final BatchStatus batchStatus = e.getBatchStatus();
             System.out.printf("Partition execution id: %s, status %s, StepExecution id: %s%n",
@@ -43,9 +47,9 @@ public class ChunkPartitionRestartIT extends AbstractIT {
         System.out.printf("StepExecution id: %s, metrics: %s%n", stepExecution0.getStepExecutionId(),
                 java.util.Arrays.toString(stepExecution0.getMetrics()));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(6, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(14, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(14, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(3, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
+        Assert.assertEquals(7, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
+        Assert.assertEquals(7, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.PROCESS_SKIP_COUNT));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_SKIP_COUNT));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_SKIP_COUNT));

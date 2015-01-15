@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,19 +48,21 @@ public class ChunkPartitionIT extends AbstractIT {
     }
 
     @Test
-    public void complete1Fail2Partitions() throws Exception {
+    public void complete2Fail1Partitions() throws Exception {
         this.params = new Properties();
         this.params.setProperty("writer.sleep.time", "0");
 
         //at least 1 chunk (with item count 3) will be committed, so the subsequent restart will not start from scratch.
-        this.params.setProperty("reader.fail.at", String.valueOf(-1));
-        this.params.setProperty("writer.fail.at", String.valueOf(5));
+        this.params.setProperty("reader.fail.on.values", String.valueOf(-1));
+        this.params.setProperty("writer.fail.on.values", String.valueOf(5));
         startJobAndWait(jobChunkPartitionFailComplete);
+
+        //no skippable or retryable exceptions are configured, so this job execution will just fail
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
         final List<PartitionExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
 
-        //1 should completed and 2 should failed, but the order can be random
+        //2 should completed and 1 should failed, but the order can be random
         int completedPartitionCount = 0;
         int failedPartitionCount = 0;
         System.out.printf("StepExecution id: %s, step name: %s%n", stepExecution0.getStepExecutionId(), stepExecution0.getStepName());
@@ -76,14 +78,14 @@ public class ChunkPartitionIT extends AbstractIT {
                 throw new RuntimeException("Unexpected partition execution batch status " + batchStatus);
             }
         }
-        Assert.assertEquals(1, completedPartitionCount);
-        Assert.assertEquals(2, failedPartitionCount);
+        Assert.assertEquals(2, completedPartitionCount);
+        Assert.assertEquals(1, failedPartitionCount);
         System.out.printf("StepExecution id: %s, metrics: %s%n", stepExecution0.getStepExecutionId(),
                 java.util.Arrays.toString(stepExecution0.getMetrics()));
-        Assert.assertEquals(2, MetricImpl.getMetric(stepExecution0, Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(6, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(22, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(16, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.ROLLBACK_COUNT));
+        Assert.assertEquals(9, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
+        Assert.assertEquals(26, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
+        Assert.assertEquals(23, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.PROCESS_SKIP_COUNT));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_SKIP_COUNT));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_SKIP_COUNT));

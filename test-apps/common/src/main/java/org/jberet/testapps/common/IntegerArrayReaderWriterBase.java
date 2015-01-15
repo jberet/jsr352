@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,9 @@
 
 package org.jberet.testapps.common;
 
-import java.io.Serializable;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import javax.batch.api.BatchProperty;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
@@ -21,76 +23,38 @@ public abstract class IntegerArrayReaderWriterBase {
     @Inject
     protected StepContext stepContext;
 
-    @Inject @BatchProperty(name = "data.count")
-    protected Integer dataCount;
-
-    @Inject @BatchProperty(name = "partition.start")
+    @Inject
+    @BatchProperty(name = "partition.start")
     protected int partitionStart;
 
-    @Inject @BatchProperty(name = "partition.end")
+    @Inject
+    @BatchProperty(name = "partition.end")
     protected Integer partitionEnd;
 
     /**
-     * Specifies the position in the input integer array where an {@code ArithmeticException} will be thrown.
-     * It does not apply to retry read.
+     * Specifies the values in the input or output integer array where an {@code ArithmeticException} will be thrown.
+     * It does not apply to retry read. But if {@link #repeatFailure} is true, exception is always thrown upon match.
      */
-    @Inject @BatchProperty(name = "reader.fail.at")
-    protected Integer readerFailAt;
+    @Inject
+    @BatchProperty(name = "fail.on.values")
+    protected Integer[] failOnValues;
 
-    /**
-     * Specifies the position in the output integer array where an {@code ArithmeticException} will be thrown.
-     * It does not apply to retry write.
-     */
-    @Inject @BatchProperty(name = "writer.fail.at")
-    protected Integer writerFailAt;
-
-    @Inject @BatchProperty(name = "writer.sleep.time")
+    @Inject
+    @BatchProperty(name = "writer.sleep.time")
     protected long writerSleepTime;
 
-    @Inject @BatchProperty(name = "repeat.failure")
+    @Inject
+    @BatchProperty(name = "repeat.failure")
     protected boolean repeatFailure;
 
     /**
-     * to remember the previous position the failure occurred. During the subsequent retry, the same position should not
+     * to remember the previous values the failure occurred. During the subsequent retry, the same value should not
      * cause a second failure, unless {@link #repeatFailure} is true.
      */
-    protected int failurePointRemembered = -1;
-
-    protected Integer[] data;
-    protected int cursor;
+    protected Set<Integer> failedValues = new HashSet<Integer>();
 
     protected IntegerArrayReaderWriterBase() {
         System.out.printf("Instantiating %s%n", this);
-    }
-
-    /**
-     * Creates the data array without filling the data.
-     */
-    protected void initData() {
-        if (dataCount == null) {
-            throw new IllegalStateException("data.count property is not injected.");
-        }
-        data = new Integer[dataCount];
-        if (readerFailAt == null) {
-            readerFailAt = -1;
-        }
-        if (writerFailAt == null) {
-            writerFailAt = -1;
-        }
-        if (partitionEnd == null) {
-            partitionEnd = dataCount - 1;
-        }
-    }
-
-    public void open(final Serializable checkpoint) throws Exception {
-        if (data == null) {
-            initData();
-        }
-        cursor = checkpoint == null ? partitionStart : (Integer) checkpoint;
-    }
-
-    public Serializable checkpointInfo() throws Exception {
-        return cursor;
     }
 
     public void close() throws Exception {

@@ -42,7 +42,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
 
     @Test
     public void retryRead() throws Exception {
-        params.setProperty("reader.fail.at", "5");
+        params.setProperty("reader.fail.on.values", "5");
         startJob(chunkRetryXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
@@ -63,7 +63,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
 
     @Test
     public void retryWrite() throws Exception {
-        params.setProperty("writer.fail.at", "5");
+        params.setProperty("writer.fail.on.values", "5");
         startJob(chunkRetryXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
@@ -88,7 +88,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
 
     @Test
     public void skipRead() throws Exception {
-        params.setProperty("reader.fail.at", "5");
+        params.setProperty("reader.fail.on.values", "5");
         startJob(chunkSkipXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
@@ -103,7 +103,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
 
     @Test
     public void skipWrite() throws Exception {
-        params.setProperty("writer.fail.at", "5");
+        params.setProperty("writer.fail.on.values", "5");
         startJob(chunkSkipXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
@@ -118,7 +118,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
 
     @Test
     public void retrySkipRead() throws Exception {
-        params.setProperty("reader.fail.at", "5");
+        params.setProperty("reader.fail.on.values", "5");
         params.setProperty("repeat.failure", "true");
         startJob(chunkSkipRetryXml);
         awaitTermination();
@@ -138,9 +138,9 @@ public class ChunkSkipRetryIT extends AbstractIT {
         checkRecordedData(expected);
     }
 
-    //@Test
+    @Test
     public void retrySkipWrite() throws Exception {
-        params.setProperty("writer.fail.at", "5");
+        params.setProperty("writer.fail.on.values", "5");
         params.setProperty("repeat.failure", "true");
         startJob(chunkSkipRetryXml);
         awaitTermination();

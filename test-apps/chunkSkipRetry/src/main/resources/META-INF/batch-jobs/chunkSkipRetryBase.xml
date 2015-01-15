@@ -18,15 +18,14 @@
             <reader ref="integerArrayReader">
                 <properties>
                     <property name="data.count" value="#{jobParameters['data.count']}?:30;" />
-                    <property name="reader.fail.at" value="#{jobParameters['reader.fail.at']}?:-1;" />
+                    <property name="fail.on.values" value="#{jobParameters['reader.fail.on.values']}" />
                     <property name="repeat.failure" value="#{jobParameters['repeat.failure']}?:false;" />
                 </properties>
             </reader>
 
             <writer ref="integerArrayWriter">
                 <properties>
-                    <property name="data.count" value="#{jobParameters['data.count']}?:30;" />
-                    <property name="writer.fail.at" value="#{jobParameters['writer.fail.at']}?:-1;" />
+                    <property name="fail.on.values" value="#{jobParameters['writer.fail.on.values']}" />
                     <property name="writer.sleep.time" value="#{jobParameters['writer.sleep.time']}" />
                     <property name="repeat.failure" value="#{jobParameters['repeat.failure']}?:false;" />
                 </properties>

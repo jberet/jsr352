@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -70,7 +70,7 @@ public class ChunkStopIT extends AbstractIT {
 
     @Test
     public void chunkFailRestart() throws Exception {
-        params.setProperty("reader.fail.at", "13");
+        params.setProperty("reader.fail.on.values", "13");
         startJobAndWait(jobXml);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
@@ -78,7 +78,7 @@ public class ChunkStopIT extends AbstractIT {
         Assert.assertEquals(10, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
         Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
 
-        params.setProperty("reader.fail.at", "3");
+        params.setProperty("reader.fail.on.values", "3");
         restartAndWait();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
 
@@ -89,7 +89,7 @@ public class ChunkStopIT extends AbstractIT {
 
     @Test
     public void chunkWriterFailRestart() throws Exception {
-        params.setProperty("writer.fail.at", "13");
+        params.setProperty("writer.fail.on.values", "13");
         startJobAndWait(jobXml);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
@@ -97,7 +97,7 @@ public class ChunkStopIT extends AbstractIT {
         Assert.assertEquals(10, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
         Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
 
-        params.setProperty("writer.fail.at", "-1");
+        params.setProperty("writer.fail.on.values", "-1");
         restartAndWait();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
 
