@@ -369,6 +369,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
                 stepMetrics.increment(Metric.MetricType.READ_SKIP_COUNT, 1);
                 skipCount++;
+                processingInfo.readPosition++;
                 itemRead = null;
             } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                 for (final RetryReadListener l : retryReadListeners) {
@@ -453,7 +454,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 processingInfo.itemState != ItemState.TO_RETRY_READ &&
                 processingInfo.itemState != ItemState.TO_RETRY_PROCESS &&
                 processingInfo.itemState != ItemState.TO_RETRY_WRITE &&
-                processingInfo.readPosition == processingInfo.failurePoint) {
+                processingInfo.readPosition - 1 == processingInfo.failurePoint) {
+            //readPosition has already been advanced to the next positioin, so need to compare the last one.
             //if failurePoint is null, should fail with NPE
             processingInfo.chunkState = ChunkState.TO_END_RETRY;
         }
@@ -547,6 +549,14 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
                     skipCount += outputSize;
                     outputList.clear();
+
+                    //during normal processing, upon a skippable exception in writer that is not configured to be
+                    //retryable at the same time (i.e., the exception resolved to skip), skip all items in the chunk,
+                    //and on to a new chunk
+                    if(processingInfo.chunkState == ChunkState.RUNNING) {
+                        //processingInfo.itemState = ItemState.RUNNING;
+                        processingInfo.chunkState = ChunkState.TO_START_NEW;
+                    }
                 }
             } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                 for (final RetryWriteListener l : retryWriteListeners) {

@@ -30,14 +30,31 @@ public abstract class IntegerArrayReaderWriterBase {
     @Inject @BatchProperty(name = "partition.end")
     protected Integer partitionEnd;
 
+    /**
+     * Specifies the position in the input integer array where an {@code ArithmeticException} will be thrown.
+     * It does not apply to retry read.
+     */
     @Inject @BatchProperty(name = "reader.fail.at")
     protected Integer readerFailAt;
 
+    /**
+     * Specifies the position in the output integer array where an {@code ArithmeticException} will be thrown.
+     * It does not apply to retry write.
+     */
     @Inject @BatchProperty(name = "writer.fail.at")
     protected Integer writerFailAt;
 
     @Inject @BatchProperty(name = "writer.sleep.time")
     protected long writerSleepTime;
+
+    @Inject @BatchProperty(name = "repeat.failure")
+    protected boolean repeatFailure;
+
+    /**
+     * to remember the previous position the failure occurred. During the subsequent retry, the same position should not
+     * cause a second failure, unless {@link #repeatFailure} is true.
+     */
+    protected int failurePointRemembered = -1;
 
     protected Integer[] data;
     protected int cursor;

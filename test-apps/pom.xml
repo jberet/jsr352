@@ -33,6 +33,7 @@
         <module>infinispanRepositoryFile</module>
         <module>infinispanRepositoryLevelDB</module>
         <module>infinispanRepositoryJdbc</module>
+        <module>chunkSkipRetry</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>

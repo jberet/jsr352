@@ -22,7 +22,9 @@ public final class IntegerArrayReader extends IntegerArrayReaderWriterBase imple
         if (cursor > partitionEnd || cursor < partitionStart) {
             return null;
         }
-        if (cursor == readerFailAt) {
+        if (cursor == readerFailAt && (repeatFailure || cursor != failurePointRemembered)) {
+            failurePointRemembered = readerFailAt;
+            cursor++;
             throw new ArithmeticException("Failing at reader.fail.at point " + readerFailAt);
         }
         final Integer result = data[cursor];
