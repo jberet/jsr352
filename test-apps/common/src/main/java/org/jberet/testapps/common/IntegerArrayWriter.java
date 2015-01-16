@@ -16,15 +16,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
-import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named("integerArrayWriter")
-public class IntegerArrayWriter extends IntegerArrayReaderWriterBase implements ItemWriter {
+public class IntegerArrayWriter extends IntegerArrayReaderWriterProcessorBase implements ItemWriter {
     @Inject
-    protected StepContext stepContext;
+    @BatchProperty(name = "writer.sleep.time")
+    protected long writerSleepTime;
 
     @Override
     public void writeItems(final List<Object> items) throws Exception {

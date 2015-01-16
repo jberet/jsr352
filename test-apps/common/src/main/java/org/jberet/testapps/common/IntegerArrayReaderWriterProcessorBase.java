@@ -13,13 +13,12 @@
 package org.jberet.testapps.common;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.batch.api.BatchProperty;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
-public abstract class IntegerArrayReaderWriterBase {
+public abstract class IntegerArrayReaderWriterProcessorBase {
     @Inject
     protected StepContext stepContext;
 
@@ -40,10 +39,6 @@ public abstract class IntegerArrayReaderWriterBase {
     protected Integer[] failOnValues;
 
     @Inject
-    @BatchProperty(name = "writer.sleep.time")
-    protected long writerSleepTime;
-
-    @Inject
     @BatchProperty(name = "repeat.failure")
     protected boolean repeatFailure;
 
@@ -53,7 +48,7 @@ public abstract class IntegerArrayReaderWriterBase {
      */
     protected Set<Integer> failedValues = new HashSet<Integer>();
 
-    protected IntegerArrayReaderWriterBase() {
+    protected IntegerArrayReaderWriterProcessorBase() {
         System.out.printf("Instantiating %s%n", this);
     }
 

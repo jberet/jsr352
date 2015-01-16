@@ -17,17 +17,22 @@
         <chunk>
             <reader ref="integerArrayReader">
                 <properties>
-                    <property name="data.count" value="#{jobParameters['data.count']}?:30;" />
-                    <property name="fail.on.values" value="#{jobParameters['reader.fail.on.values']}" />
-                    <property name="repeat.failure" value="#{jobParameters['repeat.failure']}?:false;" />
+                    <property name="data.count" value="#{jobParameters['data.count']}?:30;"/>
+                    <property name="fail.on.values" value="#{jobParameters['reader.fail.on.values']}"/>
+                    <property name="repeat.failure" value="#{jobParameters['repeat.failure']}?:false;"/>
                 </properties>
             </reader>
-
+            <processor ref="integerProcessor">
+                <properties>
+                    <property name="fail.on.values" value="#{jobParameters['processor.fail.on.values']}"/>
+                    <property name="repeat.failure" value="#{jobParameters['repeat.failure']}?:false;"/>
+                </properties>
+            </processor>
             <writer ref="integerArrayWriter">
                 <properties>
-                    <property name="fail.on.values" value="#{jobParameters['writer.fail.on.values']}" />
-                    <property name="writer.sleep.time" value="#{jobParameters['writer.sleep.time']}" />
-                    <property name="repeat.failure" value="#{jobParameters['repeat.failure']}?:false;" />
+                    <property name="fail.on.values" value="#{jobParameters['writer.fail.on.values']}"/>
+                    <property name="writer.sleep.time" value="#{jobParameters['writer.sleep.time']}"/>
+                    <property name="repeat.failure" value="#{jobParameters['repeat.failure']}?:false;"/>
                 </properties>
             </writer>
         </chunk>

@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named("integerArrayReader")
-public class IntegerArrayReader extends IntegerArrayReaderWriterBase implements ItemReader {
+public class IntegerArrayReader extends IntegerArrayReaderWriterProcessorBase implements ItemReader {
     @Inject
     @BatchProperty(name = "data.count")
     protected Integer dataCount;

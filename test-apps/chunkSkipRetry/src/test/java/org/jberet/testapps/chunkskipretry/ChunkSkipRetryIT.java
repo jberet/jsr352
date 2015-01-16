@@ -23,6 +23,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests to verify skip and retry behaviors by configuring {@code ArithmeticException} as skippable-exception,
+ * retryable-exception, and both skippable-exception and retryable-exception.
+ * <p/>
+ * Tests compare the content and structure of written result to an expected values. Note that these comparison may be
+ * too restrictive and may need to change as the jberet-core changes.
+ */
 public class ChunkSkipRetryIT extends AbstractIT {
     protected int dataCount = 30;
     protected static final String chunkRetryXml = "chunkRetry.xml";
@@ -87,6 +94,35 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryProcess() throws Exception {
+        params.setProperty("processor.fail.on.values", "5");
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+        expected.add(Arrays.asList(0));
+        expected.add(Arrays.asList(1));
+        expected.add(Arrays.asList(2));
+        expected.add(Arrays.asList(3));
+        expected.add(Arrays.asList(4));
+        expected.add(Arrays.asList(5));
+        expected.add(Arrays.asList(6));
+        expected.add(Arrays.asList(7, 8, 9, 10, 11, 12, 13, 14, 15, 16));
+        expected.add(Arrays.asList(17, 18, 19, 20, 21, 22, 23, 24, 25, 26));
+        expected.add(Arrays.asList(27, 28, 29));
+
+        //although the processor failed at 5, retry in item processor will retry up to 6 (one extra one-item chunk)
+        //In org.jberet.runtime.runner.ChunkRunner.checkIfEndRetry()
+        //processingInfo.readPosition - 1 == processingInfo.failurePoint
+        //
+        //when failed in item processor, the recorded failurePoint (assigned from current readPosition, which has
+        //already been advanced to the next slot) was 6, instead of 5
+
+        checkRecordedData(expected);
+    }
+
+    @Test
     public void skipRead() throws Exception {
         params.setProperty("reader.fail.on.values", "5");
         startJob(chunkSkipXml);
@@ -110,6 +146,21 @@ public class ChunkSkipRetryIT extends AbstractIT {
 
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
         //skip the chunk where 5 is located (0-9)
+        expected.add(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(Arrays.asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        checkRecordedData(expected);
+    }
+
+    @Test
+    public void skipProcess() throws Exception {
+        params.setProperty("processor.fail.on.values", "5");
+        startJob(chunkSkipXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+        expected.add(Arrays.asList(0, 1, 2, 3, 4, 6, 7, 8, 9));  //skip 5
         expected.add(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
         expected.add(Arrays.asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
@@ -160,6 +211,31 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(Arrays.asList(10));
         expected.add(Arrays.asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
         expected.add(Arrays.asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        //see comments in test retryProcess why [6] is retried in its own one-item chunk
+
+        checkRecordedData(expected);
+    }
+
+    @Test
+    public void retrySkipProcess() throws Exception {
+        params.setProperty("processor.fail.on.values", "5");
+        params.setProperty("repeat.failure", "true");
+        startJob(chunkSkipRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+        expected.add(Arrays.asList(0));
+        expected.add(Arrays.asList(1));
+        expected.add(Arrays.asList(2));
+        expected.add(Arrays.asList(3));
+        expected.add(Arrays.asList(4));
+        //expected.add(Arrays.asList(5));  //failed, re-read and failed and skipped
+        expected.add(Arrays.asList(6));
+        expected.add(Arrays.asList(7, 8, 9, 10, 11, 12, 13, 14, 15, 16));
+        expected.add(Arrays.asList(17, 18, 19, 20, 21, 22, 23, 24, 25, 26));
+        expected.add(Arrays.asList(27, 28, 29));
 
         checkRecordedData(expected);
     }
