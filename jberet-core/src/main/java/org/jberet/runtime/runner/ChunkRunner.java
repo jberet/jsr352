@@ -347,11 +347,11 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             for (final ItemReadListener l : itemReadListeners) {
                 l.beforeRead();
             }
+            processingInfo.readPosition++;
             itemRead = itemReader.readItem();
             if (itemRead != null) {  //only count successful read
                 stepMetrics.increment(Metric.MetricType.READ_COUNT, 1);
                 processingInfo.count++;
-                processingInfo.readPosition++;
             } else {
                 processingInfo.chunkState = ChunkState.DEPLETED;
             }
@@ -369,7 +369,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
                 stepMetrics.increment(Metric.MetricType.READ_SKIP_COUNT, 1);
                 skipCount++;
-                processingInfo.readPosition++;
                 itemRead = null;
             } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                 for (final RetryReadListener l : retryReadListeners) {
@@ -454,8 +453,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 processingInfo.itemState != ItemState.TO_RETRY_READ &&
                 processingInfo.itemState != ItemState.TO_RETRY_PROCESS &&
                 processingInfo.itemState != ItemState.TO_RETRY_WRITE &&
-                processingInfo.readPosition - 1 == processingInfo.failurePoint) {
-            //readPosition has already been advanced to the next positioin, so need to compare the last one.
+                processingInfo.readPosition == processingInfo.failurePoint) {
             //if failurePoint is null, should fail with NPE
             processingInfo.chunkState = ChunkState.TO_END_RETRY;
         }
@@ -485,6 +483,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         if (jobContext.getJobExecution().isStopRequested()) {
             processingInfo.chunkState = ChunkState.JOB_STOPPING;
             return true;
+        }
+        if (processingInfo.chunkState == ChunkState.TO_RETRY) {
+            return false;
         }
         if (processingInfo.chunkState == ChunkState.DEPLETED ||
                 processingInfo.chunkState == ChunkState.RETRYING ||
@@ -733,12 +734,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         /**
          * Used to remember the last checkpoint position in the reader intput data
          */
-        int checkpointPosition;
+        int checkpointPosition = -1;
 
         /**
          * Current position in the reader input data as 0-based int
          */
-        int readPosition;
+        int readPosition = -1;
 
         /**
          * Where the failure occurred that caused the current retry.  The retry should stop after the item at failurePoint
