@@ -158,4 +158,7 @@ public interface BatchMessages {
     @Message(id = 643, value = "Failed to get next id number: %s")
     BatchRuntimeException failToGetNextId(@Cause Throwable th, String key);
 
+    @Message(id = 644, value = "Execution of split %s timed out after %s seconds")
+    BatchRuntimeException splitExecutionTimeout(String splitId, long timeoutSeconds);
+
 }

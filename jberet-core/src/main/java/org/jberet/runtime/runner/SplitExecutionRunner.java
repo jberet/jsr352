@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,15 +14,18 @@ package org.jberet.runtime.runner;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Flow;
 import org.jberet.job.model.JobElement;
 import org.jberet.job.model.Split;
 import org.jberet.runtime.FlowExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.SplitContextImpl;
+import org.jberet.spi.PropertyKey;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
@@ -49,7 +52,16 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
             for (final Flow f : flows) {
                 runFlow(f, latch);
             }
-            latch.await();
+
+            final long splitTimeoutSeconds = getSplitTimeoutSeconds();
+            if (splitTimeoutSeconds > 0) {
+                if (!latch.await(splitTimeoutSeconds, TimeUnit.SECONDS)) {
+                    //timed out, fail this split execution
+                    throw BatchMessages.MESSAGES.splitExecutionTimeout(split.getId(), splitTimeoutSeconds);
+                }
+            } else {
+                latch.await();
+            }
 
             //check FlowResults from each flow
             final List<FlowExecutionImpl> fes = batchContext.getFlowExecutions();
@@ -120,4 +132,22 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
         }
     }
 
+    private long getSplitTimeoutSeconds() {
+        // Job parameters passed to the start should always be preferred
+        if (jobContext.getJobExecution().getJobParameters() != null) {
+            final String value = jobContext.getJobExecution().getJobParameters().getProperty(PropertyKey.SPLIT_TIMEOUT_SECONDS);
+            if (value != null) {
+                return Long.parseLong(value.trim());
+            }
+        }
+        // job properties set in the job.xml
+        if (jobContext.getJob().getProperties() != null) {
+            final String value = jobContext.getJob().getProperties().get(PropertyKey.SPLIT_TIMEOUT_SECONDS);
+            if (value != null) {
+                return Long.parseLong(value.trim());
+            }
+        }
+        // not found, then return the default value 0
+        return 0;
+    }
 }
