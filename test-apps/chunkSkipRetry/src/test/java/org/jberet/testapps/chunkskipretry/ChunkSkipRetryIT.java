@@ -60,6 +60,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
     @Test
     public void retryRead0() throws Exception {
         params.setProperty("reader.fail.on.values", "0");
+        params.setProperty("retry.limit", "1");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
 
         expected.add(asList(0));
@@ -141,6 +142,37 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(29));
 
         runTest(chunkRetryXml, expected);
+    }
+
+    @Test
+    public void retryReadLimit() throws Exception {
+        params.setProperty("reader.fail.on.values", "28, 29");
+        params.setProperty("retry.limit", "2");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20));
+        expected.add(asList(21));
+        expected.add(asList(22));
+        expected.add(asList(23));
+        expected.add(asList(24));
+        expected.add(asList(25));
+        expected.add(asList(26));
+        expected.add(asList(27));
+        expected.add(asList(28));
+        expected.add(asList(29));
+
+        runTest(chunkRetryXml, expected);
+    }
+
+    @Test
+    public void retryReadExceedLimit() throws Exception {
+        params.setProperty("reader.fail.on.values", "27, 28, 29");
+        params.setProperty("retry.limit", "2");
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -249,8 +281,40 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryWriteLimit() throws Exception {
+        params.setProperty("writer.fail.on.values", "28, 29");
+        params.setProperty("retry.limit", "2");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20));
+        expected.add(asList(21));
+        expected.add(asList(22));
+        expected.add(asList(23));
+        expected.add(asList(24));
+        expected.add(asList(25));
+        expected.add(asList(26));
+        expected.add(asList(27));
+        expected.add(asList(28));
+        expected.add(asList(29));
+
+        runTest(chunkRetryXml, expected);
+    }
+
+    @Test
+    public void retryWriteExceedLimit() throws Exception {
+        params.setProperty("writer.fail.on.values", "1, 28, 29");
+        params.setProperty("retry.limit", "2");
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
+    @Test
     public void retryProcess0() throws Exception {
         params.setProperty("processor.fail.on.values", "0");
+        params.setProperty("retry.limit", "1");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
 
         expected.add(asList(0));
@@ -335,8 +399,40 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryProcessLimit() throws Exception {
+        params.setProperty("processor.fail.on.values", "27, 29");
+        params.setProperty("retry.limit", "2");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20));
+        expected.add(asList(21));
+        expected.add(asList(22));
+        expected.add(asList(23));
+        expected.add(asList(24));
+        expected.add(asList(25));
+        expected.add(asList(26));
+        expected.add(asList(27));
+        expected.add(asList(28));
+        expected.add(asList(29));
+
+        runTest(chunkRetryXml, expected);
+    }
+
+    @Test
+    public void retryProcessExceedLimit() throws Exception {
+        params.setProperty("processor.fail.on.values", "0, 27, 29");
+        params.setProperty("retry.limit", "2");
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
+    @Test
     public void skipRead0() throws Exception {
         params.setProperty("reader.fail.on.values", "0");
+        params.setProperty("skip.limit", "1");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
 
         expected.add(asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));  //skip 0
@@ -392,6 +488,28 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28));  //skip 29
 
         runTest(chunkSkipXml, expected);
+    }
+
+    @Test
+    public void skipReadLimit() throws Exception {
+        params.setProperty("reader.fail.on.values", "19, 29");
+        params.setProperty("skip.limit", "2");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 20)); //skip 19
+        expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28));  //skip 29
+
+        runTest(chunkSkipXml, expected);
+    }
+
+    @Test
+    public void skipReadExceedLimit() throws Exception {
+        params.setProperty("reader.fail.on.values", "0, 19, 29");
+        params.setProperty("skip.limit", "2");
+        startJob(chunkSkipXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -455,6 +573,29 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void skipWriteLimit() throws Exception {
+        params.setProperty("writer.fail.on.values", "0, 29");
+        params.setProperty("skip.limit", "20");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        //skip the chunk where 0 is located (20-29)
+        //skip the chunk where 29 is located (20-29)
+        //expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+
+        runTest(chunkSkipXml, expected);
+    }
+
+    @Test
+    public void skipWriteExceedLimit() throws Exception {
+        params.setProperty("writer.fail.on.values", "0, 29");
+        params.setProperty("skip.limit", "2");
+        startJob(chunkSkipXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
+    @Test
     public void skipProcess0() throws Exception {
         params.setProperty("processor.fail.on.values", "0");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -512,6 +653,28 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28));  //skip 29
 
         runTest(chunkSkipXml, expected);
+    }
+
+    @Test
+    public void skipProcessLimit() throws Exception {
+        params.setProperty("processor.fail.on.values", "0, 29");
+        params.setProperty("skip.limit", "2");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(1, 2, 3, 4, 5, 6, 7, 8, 9));  //skip 0
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28));  //skip 29
+
+        runTest(chunkSkipXml, expected);
+    }
+
+    @Test
+    public void skipProcessExceedLimit() throws Exception {
+        params.setProperty("processor.fail.on.values", "0, 1, 2");
+        params.setProperty("skip.limit", "2");
+        startJob(chunkSkipXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test

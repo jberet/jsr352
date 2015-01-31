@@ -14,7 +14,7 @@
 
 <job id="chunkSkip" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="step1" parent="step0" jsl-name="chunkSkipRetryBase">
-        <chunk>
+        <chunk skip-limit="#{jobParameters['skip.limit']}?:-1;">
             <skippable-exception-classes>
                 <include class="java.lang.ArithmeticException"/>
             </skippable-exception-classes>

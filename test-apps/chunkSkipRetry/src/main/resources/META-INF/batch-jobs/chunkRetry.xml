@@ -14,7 +14,7 @@
 
 <job id="chunkRetry" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="step1" parent="step0" jsl-name="chunkSkipRetryBase">
-        <chunk>
+        <chunk retry-limit="#{jobParameters['retry.limit']}?:-1;">
             <retryable-exception-classes>
                 <include class="java.lang.ArithmeticException"/>
             </retryable-exception-classes>
