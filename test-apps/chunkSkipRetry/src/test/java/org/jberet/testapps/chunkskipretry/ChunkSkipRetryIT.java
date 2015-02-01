@@ -575,7 +575,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
     @Test
     public void skipWriteLimit() throws Exception {
         params.setProperty("writer.fail.on.values", "0, 29");
-        params.setProperty("skip.limit", "20");
+        params.setProperty("skip.limit", "2");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
 
         //skip the chunk where 0 is located (20-29)
@@ -588,7 +588,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
 
     @Test
     public void skipWriteExceedLimit() throws Exception {
-        params.setProperty("writer.fail.on.values", "0, 29");
+        params.setProperty("writer.fail.on.values", "0, 15, 29");
         params.setProperty("skip.limit", "2");
         startJob(chunkSkipXml);
         awaitTermination();

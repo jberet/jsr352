@@ -548,7 +548,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         l.onSkipWriteItem(outputList, e);
                     }
                     stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
-                    skipCount += outputSize;
+                    skipCount++;
                     outputList.clear();
 
                     //during normal processing, upon a skippable exception in writer that is not configured to be
