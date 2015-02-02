@@ -20,11 +20,13 @@ import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
+import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -110,5 +112,19 @@ abstract public class AbstractIT {
 
     protected static void restoreDefaultLocale() {
         Locale.setDefault(originalLocale);
+    }
+
+    protected void verifyMetric(final Metric.MetricType metricType, final long value) {
+        boolean metricFound = false;
+        final Metric[] metrics = stepExecution0.getMetrics();
+        for (final Metric m : metrics) {
+            if (m.getType() == metricType) {
+                metricFound = true;
+                Assert.assertEquals(value, m.getValue());
+            }
+        }
+        if (!metricFound) {
+            throw new IllegalStateException("Unmatched MetricType " + metricType);
+        }
     }
 }

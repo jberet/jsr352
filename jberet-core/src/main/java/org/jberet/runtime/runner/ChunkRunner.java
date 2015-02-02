@@ -44,6 +44,7 @@ import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
+import org.jboss.logging.Logger;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
@@ -210,8 +211,11 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
                 batchContext.setBatchStatus(BatchStatus.COMPLETED);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             batchContext.setException(e);
+            LOGGER.log(Logger.Level.ERROR, "item-count=" + itemCount + ", time-limit=" + timeLimit +
+                    ", skip-limit=" + skipLimit + ", skipCount=" + skipCount +
+                    ", retry-limit=" + retryLimit + ", retryCount=" + retryCount);
             LOGGER.failToRunJob(e, jobContext.getJobName(), batchContext.getStepName(), chunk);
             batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
@@ -299,25 +303,19 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
 
                 if (isReadyToCheckpoint(processingInfo)) {
-                    try {
-                        doCheckpoint(processingInfo);
+                    doCheckpoint(processingInfo);
 
-                        //errors may happen during the above doCheckpoint (e.g., in writer.write method).  If so, need
-                        //to skip the remainder of the current loop.  If retry with rollback, chunkState has been set to
-                        //TO_RETRY; if retry with no rollback, itemState has been set to TO_RETRY_WRITE; if skip,
-                        //itemState has been set to TO_SKIP
-                        if (processingInfo.chunkState == ChunkState.TO_RETRY || processingInfo.itemState == ItemState.TO_RETRY_WRITE ||
-                                processingInfo.itemState == ItemState.TO_SKIP) {
-                            continue;
-                        }
+                    //errors may happen during the above doCheckpoint (e.g., in writer.write method).  If so, need
+                    //to skip the remainder of the current loop.  If retry with rollback, chunkState has been set to
+                    //TO_RETRY; if retry with no rollback, itemState has been set to TO_RETRY_WRITE; if skip,
+                    //itemState has been set to TO_SKIP
+                    if (processingInfo.chunkState == ChunkState.TO_RETRY || processingInfo.itemState == ItemState.TO_RETRY_WRITE ||
+                            processingInfo.itemState == ItemState.TO_SKIP) {
+                        continue;
+                    }
 
-                        for (final ChunkListener l : chunkListeners) {
-                            l.afterChunk();
-                        }
-                    } catch (final Exception e) {
-                        tm.rollback();
-                        stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
-                        throw e;
+                    for (final ChunkListener l : chunkListeners) {
+                        l.afterChunk();
                     }
 
                     tm.commit();
@@ -333,10 +331,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
                         txStatus == Status.STATUS_COMMITTING || txStatus == Status.STATUS_ROLLING_BACK) {
                     tm.rollback();
+                    stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
                 }
                 for (final ChunkListener l : chunkListeners) {
                     l.onError(e);
                 }
+                LOGGER.log(Logger.Level.ERROR, processingInfo);
                 throw e;
             }
         }
@@ -554,7 +554,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     //during normal processing, upon a skippable exception in writer that is not configured to be
                     //retryable at the same time (i.e., the exception resolved to skip), skip all items in the chunk,
                     //and on to a new chunk
-                    if(processingInfo.chunkState == ChunkState.RUNNING) {
+                    if (processingInfo.chunkState == ChunkState.RUNNING) {
                         //processingInfo.itemState = ItemState.RUNNING;
                         processingInfo.chunkState = ChunkState.TO_START_NEW;
                     }
@@ -759,6 +759,20 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             return itemState == ItemState.TO_SKIP || itemState == ItemState.TO_RETRY ||
                     itemState == ItemState.TO_RETRY_READ || itemState == ItemState.TO_RETRY_PROCESS ||
                     itemState == ItemState.TO_RETRY_WRITE;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ProcessingInfo{");
+            sb.append("count=").append(count);
+            sb.append(", timerExpired=").append(timerExpired);
+            sb.append(", itemState=").append(itemState);
+            sb.append(", chunkState=").append(chunkState);
+            sb.append(", checkpointPosition=").append(checkpointPosition);
+            sb.append(", readPosition=").append(readPosition);
+            sb.append(", failurePoint=").append(failurePoint);
+            sb.append('}');
+            return sb.toString();
         }
     }
 

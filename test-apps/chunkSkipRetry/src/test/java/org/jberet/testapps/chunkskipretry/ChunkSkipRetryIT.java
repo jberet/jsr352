@@ -15,6 +15,7 @@ package org.jberet.testapps.chunkskipretry;
 import java.util.ArrayList;
 import java.util.List;
 import javax.batch.runtime.BatchStatus;
+import javax.batch.runtime.Metric;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.After;
@@ -69,6 +70,11 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 4);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -87,6 +93,12 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+        verifyMetric(Metric.MetricType.FILTER_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -108,6 +120,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -121,6 +137,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -142,6 +162,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -164,6 +188,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 2);
     }
 
     @Test
@@ -173,6 +201,11 @@ public class ChunkSkipRetryIT extends AbstractIT {
         startJob(chunkRetryXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 3);
     }
 
     @Test
@@ -194,6 +227,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -215,6 +252,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -236,6 +277,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -257,6 +302,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -278,6 +327,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -300,6 +353,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 2);
     }
 
     @Test
@@ -309,6 +366,11 @@ public class ChunkSkipRetryIT extends AbstractIT {
         startJob(chunkRetryXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 3);
     }
 
     @Test
@@ -323,6 +385,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -341,6 +407,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -362,6 +432,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -375,6 +449,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -396,6 +474,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -418,6 +500,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(29));
 
         runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 2);
     }
 
     @Test
@@ -427,6 +513,11 @@ public class ChunkSkipRetryIT extends AbstractIT {
         startJob(chunkRetryXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 3);
     }
 
     @Test
@@ -440,6 +531,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -452,6 +547,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -464,6 +563,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -476,6 +579,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -488,6 +595,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28));  //skip 29
 
         runTest(chunkSkipXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -501,6 +612,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28));  //skip 29
 
         runTest(chunkSkipXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 2);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -510,6 +625,12 @@ public class ChunkSkipRetryIT extends AbstractIT {
         startJob(chunkSkipXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 2);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 2);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -522,6 +643,9 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 1);
     }
 
     @Test
@@ -584,6 +708,9 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
 
         runTest(chunkSkipXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 2);
     }
 
     @Test
@@ -593,6 +720,11 @@ public class ChunkSkipRetryIT extends AbstractIT {
         startJob(chunkSkipXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 2);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -605,6 +737,14 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipXml, expected);
+
+        //Note that commit count will be 4 instead of 3, because there is an empty-chunk at the end.
+        //after the 10-item chunk (a perfect chunk), it doesn't know whether there is more items to read other than
+        //start a new chunk that may just be empty.
+        //verifyMetric(Metric.MetricType.COMMIT_COUNT, 4);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -653,6 +793,11 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28));  //skip 29
 
         runTest(chunkSkipXml, expected);
+
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -666,6 +811,11 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28));  //skip 29
 
         runTest(chunkSkipXml, expected);
+
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 2);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
     }
 
     @Test
@@ -675,6 +825,12 @@ public class ChunkSkipRetryIT extends AbstractIT {
         startJob(chunkSkipXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 0);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 2);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -689,6 +845,11 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -708,6 +869,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -730,6 +895,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -744,6 +913,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -766,6 +939,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         //expected.add(Arrays.asList(29));  //failed, re-read and failed and skipped
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -788,6 +965,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -810,6 +991,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -832,6 +1017,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -854,6 +1043,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -876,6 +1069,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         //expected.add(Arrays.asList(29));  //failed, re-written and failed and skipped
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -890,6 +1087,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -909,6 +1110,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -931,6 +1136,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -945,6 +1154,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -967,6 +1180,10 @@ public class ChunkSkipRetryIT extends AbstractIT {
         //expected.add(Arrays.asList(29));  //failed, re-read and re-processed and failed and skipped
 
         runTest(chunkSkipRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     private void runTest(final String jobXml, final ArrayList<List<Integer>> expected) throws Exception {
