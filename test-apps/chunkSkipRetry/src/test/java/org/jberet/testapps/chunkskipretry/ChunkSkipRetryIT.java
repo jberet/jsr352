@@ -40,9 +40,33 @@ import static java.util.Arrays.asList;
  *     <li>10: first item of the 2nd chunk;
  *     <li>29: last item of the last chunk.
  * </ul>
+ * <p>
+ * For rollback and no-rollback behavior, see spec section 11.9 Chunk with RetryListener.
+ * <p>
+ * For retryable and no-rollback exception from an {@code ItemReader}, when no-rollback retry happens, it will just
+ * call the reader's {@code readItem()} method, which is likely to advance to the next item in the data source, and
+ * the original item that caused the exception will be effectively skipped. See test {@link #retryRead0NoRollback()}.
+ *<p>
+ * For retryable and no-rollback exception from an {@code ItemProcessor}, when no-rollback retry happens, it will pass
+ * the object that caused the exception in the {@code process()} method to the processor again. See test
+ * {@link #retryProcess0NoRollback()}.
+ *
+ * <p>
+ * For retryable and no-rollback exception from an {@code ItemWriter}, when no-rollback retry happens, it will pass the
+ * list of objects that caused the exception in the {@code writeItems} method to the writer again. See test
+ * {@link #retryWrite0NoRollback()}.
+ * <p>
+ * org.jberet.test.ExceptionClassFilterTest and exception-class-filter.xml contains tests for exception matching logic,
+ * how to reconcile between exceptions and their super classes listed in both {@code <include>} and {@code <exclude>}
+ * elements.
+ *
+ * @see "org.jberet.test.ExceptionClassFilterTest"
+ * @see "exception-class-filter.xml"
  */
 public class ChunkSkipRetryIT extends AbstractIT {
     protected int dataCount = 30;
+    protected String numbers0_29 = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29";
+    protected static final String arithmeticException = "java.lang.ArithmeticException";
     protected static final String chunkRetryXml = "chunkRetry.xml";
     protected static final String chunkSkipXml = "chunkSkip.xml";
     protected static final String chunkSkipRetryXml = "chunkSkipRetry.xml";
@@ -78,6 +102,26 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryRead0NoRollback() throws Exception {
+        params.setProperty("reader.fail.on.values", "0");
+        params.setProperty("retry.limit", "1");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        //no-rollback retry, calls readItem() again, which advances to the next item
+        expected.add(asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        expected.add(asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
+        expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryRead5() throws Exception {
         params.setProperty("reader.fail.on.values", "5");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -98,7 +142,24 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
         verifyMetric(Metric.MetricType.FILTER_COUNT, 0);
-        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryRead5NoRollback() throws Exception {
+        params.setProperty("reader.fail.on.values", "5");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 6, 7, 8, 9, 10));
+        expected.add(asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
+        expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+        verifyMetric(Metric.MetricType.FILTER_COUNT, 0);
     }
 
     @Test
@@ -127,6 +188,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryRead9NoRollback() throws Exception {
+        params.setProperty("reader.fail.on.values", "9");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 10));
+        expected.add(asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
+        expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryRead10() throws Exception {
         params.setProperty("reader.fail.on.values", "10");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -141,6 +219,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryRead10NoRollback() throws Exception {
+        params.setProperty("reader.fail.on.values", "10");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
+        expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test
@@ -169,6 +264,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryRead29NoRollback() throws Exception {
+        params.setProperty("reader.fail.on.values", "29");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryReadLimit() throws Exception {
         params.setProperty("reader.fail.on.values", "28, 29");
         params.setProperty("retry.limit", "2");
@@ -192,6 +304,24 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 2);
+    }
+
+    @Test
+    public void retryReadLimitNoRollback() throws Exception {
+        params.setProperty("reader.fail.on.values", "28, 29");
+        params.setProperty("retry.limit", "2");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test
@@ -255,6 +385,36 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryReadExceedLimitRepeatFailure() throws Exception {
+        params.setProperty("reader.fail.on.values", "27, 28, 29");
+        params.setProperty("retry.limit", "10");
+        params.setProperty("repeat.failure", "true");
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 11);
+    }
+
+    @Test
+    public void retryReadExceedLimitNoRollback() throws Exception {
+        params.setProperty("reader.fail.on.values", "27, 28, 29");
+        params.setProperty("retry.limit", "2");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
     public void retryReadProcessWriteExceedLimit() throws Exception {
         params.setProperty("reader.fail.on.values", "1");
         params.setProperty("processor.fail.on.values", "11");
@@ -296,6 +456,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryWrite0NoRollback() throws Exception {
+        params.setProperty("writer.fail.on.values", "0");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryWrite5() throws Exception {
         params.setProperty("writer.fail.on.values", "5");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -318,6 +495,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryWrite5NoRollback() throws Exception {
+        params.setProperty("writer.fail.on.values", "5");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test
@@ -346,6 +540,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryWrite9NoRollback() throws Exception {
+        params.setProperty("writer.fail.on.values", "9");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryWrite10() throws Exception {
         params.setProperty("writer.fail.on.values", "10");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -371,6 +582,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryWrite10NoRollback() throws Exception {
+        params.setProperty("writer.fail.on.values", "10");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryWrite29() throws Exception {
         params.setProperty("writer.fail.on.values", "29");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -393,6 +621,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryWrite29NoRollback() throws Exception {
+        params.setProperty("writer.fail.on.values", "29");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test
@@ -422,6 +667,24 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryWriteLimitNoRollback() throws Exception {
+        params.setProperty("writer.fail.on.values", "2, 29");
+        params.setProperty("retry.limit", "2");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryWriteExceedLimit() throws Exception {
         params.setProperty("writer.fail.on.values", "1, 28, 29");
         params.setProperty("retry.limit", "2");
@@ -433,6 +696,36 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 3);
+    }
+
+    @Test
+    public void retryWriteExceedLimitNoRollback() throws Exception {
+        params.setProperty("writer.fail.on.values", "1, 18, 29");
+        params.setProperty("retry.limit", "2");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryWriteExceedLimitRepeatFailure() throws Exception {
+        params.setProperty("writer.fail.on.values", "1, 28, 29");
+        params.setProperty("retry.limit", "10");
+        params.setProperty("repeat.failure", "true");
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 11);
     }
 
     @Test
@@ -451,6 +744,24 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryProcess0NoRollback() throws Exception {
+        params.setProperty("processor.fail.on.values", "0");
+        params.setProperty("retry.limit", "1");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test
@@ -473,6 +784,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryProcess5NoRollback() throws Exception {
+        params.setProperty("processor.fail.on.values", "5");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test
@@ -501,6 +829,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryProcess9NoRollback() throws Exception {
+        params.setProperty("processor.fail.on.values", "9");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryProcess10() throws Exception {
         params.setProperty("processor.fail.on.values", "10");
         final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -515,6 +860,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryProcess10NoRollback() throws Exception {
+        params.setProperty("processor.fail.on.values", "10");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test
@@ -540,6 +902,23 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryProcess29NoRollback() throws Exception {
+        params.setProperty("processor.fail.on.values", "29");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test
@@ -569,6 +948,24 @@ public class ChunkSkipRetryIT extends AbstractIT {
     }
 
     @Test
+    public void retryProcessLimitNoRollback() throws Exception {
+        params.setProperty("processor.fail.on.values", "27, 29");
+        params.setProperty("retry.limit", "2");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkRetryXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
     public void retryProcessExceedLimit() throws Exception {
         params.setProperty("processor.fail.on.values", "0, 27, 29");
         params.setProperty("retry.limit", "2");
@@ -580,6 +977,52 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 3);
+    }
+
+    @Test
+    public void retryProcessExceedLimitRepeatFailure() throws Exception {
+        params.setProperty("processor.fail.on.values", "0, 27, 29");
+        params.setProperty("retry.limit", "10");
+        params.setProperty("repeat.failure", "true");
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 11);
+    }
+
+    @Test
+    public void retryProcessExceedLimitRepeatFailureNoRollback() throws Exception {
+        params.setProperty("processor.fail.on.values", "0, 27, 29");
+        params.setProperty("retry.limit", "10");
+        params.setProperty("repeat.failure", "true");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    @Test
+    public void retryProcessExceedLimitNoRollback() throws Exception {
+        params.setProperty("processor.fail.on.values", "0, 27, 29");
+        params.setProperty("retry.limit", "2");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        startJob(chunkRetryXml);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
     @Test
@@ -676,6 +1119,18 @@ public class ChunkSkipRetryIT extends AbstractIT {
         runTest(chunkSkipXml, expected);
         verifyMetric(Metric.MetricType.COMMIT_COUNT, 3);
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 2);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    @Test
+    public void skipReadAll() throws Exception {
+        params.setProperty("reader.fail.on.values", numbers0_29);
+
+        runTest(chunkSkipXml, null);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 1);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 30);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
@@ -914,6 +1369,18 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 2);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+    }
+
+    @Test
+    public void skipProcessAll() throws Exception {
+        params.setProperty("processor.fail.on.values", numbers0_29);
+
+        runTest(chunkSkipXml, null);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 1);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 30);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
     }
 
     @Test

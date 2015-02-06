@@ -21,6 +21,9 @@
             <retryable-exception-classes>
                 <include class="java.lang.ArithmeticException"/>
             </retryable-exception-classes>
+            <no-rollback-exception-classes>
+                <include class="#{jobParameters['no.rollback.exception.classes']}"/>
+            </no-rollback-exception-classes>
         </chunk>
     </step>
 </job>
