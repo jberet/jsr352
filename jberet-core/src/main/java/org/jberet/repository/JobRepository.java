@@ -46,6 +46,15 @@ public interface JobRepository {
     List<JobExecution> getJobExecutions(JobInstance jobInstance);
     void updateJobExecution(JobExecutionImpl jobExecution, boolean fullUpdate);
 
+    /**
+     * Removes JobExecutions based on the criteria specified in {@code jobExecutionSelector}.
+     *
+     * @param jobExecutionSelector criteria for which JobExecutions to remove
+     *
+     * @since 1.1.0.Beta1
+     */
+    void removeJobExecutions(JobExecutionSelector jobExecutionSelector);
+
     List<StepExecution> getStepExecutions(long jobExecutionId);
     StepExecutionImpl createStepExecution(String stepName);
     void addStepExecution(JobExecutionImpl jobExecution, StepExecutionImpl stepExecution);

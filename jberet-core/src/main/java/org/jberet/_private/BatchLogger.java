@@ -115,4 +115,8 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.TRACE)
     void notImplementedOnLocalTx(String methodName);
 
+    @Message(id = 23, value = "Removing %s %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void removing(String objectType, String nameOrId);
+
 }

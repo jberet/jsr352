@@ -34,6 +34,7 @@
         <module>infinispanRepositoryLevelDB</module>
         <module>infinispanRepositoryJdbc</module>
         <module>chunkSkipRetry</module>
+        <module>purgeInMemoryRepository</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>

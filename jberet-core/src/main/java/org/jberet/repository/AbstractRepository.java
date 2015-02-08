@@ -61,18 +61,35 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public void removeJob(final String jobId) {
+        BatchLogger.LOGGER.removing("Job", jobId);
         jobs.remove(jobId);
         synchronized (jobInstances) {
-            for (Iterator<Map.Entry<Long, JobInstance>> it = jobInstances.entrySet().iterator(); it.hasNext(); ) {
+            for (final Iterator<Map.Entry<Long, JobInstance>> it = jobInstances.entrySet().iterator(); it.hasNext(); ) {
                 final JobInstance ji = it.next().getValue();
                 if (ji.getJobName().equals(jobId)) {
+                    BatchLogger.LOGGER.removing(JobInstance.class.getName(), String.valueOf(ji.getInstanceId()));
                     it.remove();
                 }
             }
         }
-        for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
+        for (final Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
             final JobExecution je = it.next().getValue();
             if (je.getJobName().equals(jobId)) {
+                je.getJobParameters().clear();
+                BatchLogger.LOGGER.removing(JobExecution.class.getName(), String.valueOf(je.getExecutionId()));
+                it.remove();
+            }
+        }
+    }
+
+    @Override
+    public void removeJobExecutions(final JobExecutionSelector jobExecutionSelector) {
+        final Collection<JobExecution> allJobExecutions = jobExecutions.values();
+        for (final Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
+            final JobExecution je = it.next().getValue();
+            if (jobExecutionSelector == null || jobExecutionSelector.select(je, allJobExecutions)) {
+                je.getJobParameters().clear();
+                BatchLogger.LOGGER.removing(JobExecution.class.getName(), String.valueOf(je.getExecutionId()));
                 it.remove();
             }
         }
@@ -102,6 +119,7 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public void removeJobInstance(final long jobInstanceIdToRemove) {
+        BatchLogger.LOGGER.removing(JobInstance.class.getName(), String.valueOf(jobInstanceIdToRemove));
         jobInstances.remove(jobInstanceIdToRemove);
     }
 
@@ -255,7 +273,7 @@ public abstract class AbstractRepository implements JobRepository {
                 return partitionExecutions;
             }
             final List<PartitionExecutionImpl> result = new ArrayList<PartitionExecutionImpl>();
-            for (PartitionExecutionImpl sei : partitionExecutions) {
+            for (final PartitionExecutionImpl sei : partitionExecutions) {
                 if (sei.getBatchStatus() != BatchStatus.COMPLETED) {
                     result.add(sei);
                 }
