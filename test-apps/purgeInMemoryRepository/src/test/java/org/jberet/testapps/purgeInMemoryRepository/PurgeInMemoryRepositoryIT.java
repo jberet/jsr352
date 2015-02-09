@@ -29,15 +29,10 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
         final long prepurge2JobExecutionId = prepurge();
 
         params.setProperty("purgeAllJobs", "true");
-        startJob(purgeInMemoryRepositoryXml);
-        Thread.sleep(purgeSleepMillis);
-        //awaitTermination();
-        //Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        startAndVerifyPurgeJob();
+
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
-
-        final long purgeJobExecutionId = prepurge2JobExecutionId + 1;
-        Assert.assertEquals(null, jobOperator.getJobExecution(purgeJobExecutionId));
     }
 
     @Test
@@ -47,14 +42,10 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
         //non-existent job execution id 999 will be ignored
         params.setProperty("jobExecutionIds", String.format("%s,%s,%s", prepurge1JobExecutionId, prepurge2JobExecutionId, 999));
-        startJob(purgeInMemoryRepositoryXml);
-        Thread.sleep(purgeSleepMillis);
+        startAndVerifyPurgeJob();
+
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
-
-        final long purgeJobExecutionId = prepurge2JobExecutionId + 1;
-        Assert.assertNotNull(jobOperator.getJobExecution(purgeJobExecutionId));
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
 
@@ -67,11 +58,10 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
         //the purge job itself
         //prepurge2
         params.setProperty("numberOfRecentJobExecutionsToKeep", "2");
-        startJob(purgeInMemoryRepositoryXml);
-        Thread.sleep(purgeSleepMillis);
+        startAndVerifyPurgeJob();
+
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertNotNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -81,12 +71,29 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
         //purge job executions whose id >= prepurge2JobExecutionId
         params.setProperty("jobExecutionIdFrom", String.valueOf(prepurge2JobExecutionId));
-        startJob(purgeInMemoryRepositoryXml);
-        Thread.sleep(purgeSleepMillis);
+        startAndVerifyPurgeJob();
+
         Assert.assertNotNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
+    }
+
+    @Test
+    public void jobExecutionIdFromIncludeRunningOnes() throws Exception {
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
+
+        //purge job executions whose id >= prepurge2JobExecutionId
+        params.setProperty("jobExecutionIdFrom", String.valueOf(prepurge2JobExecutionId));
+        //include running job executions
+        params.setProperty("keepRunningJobExecutions", String.valueOf(false));
+
+        startJob(purgeInMemoryRepositoryXml);
+        Thread.sleep(purgeSleepMillis);
         final long purgeJobExecutionId = prepurge2JobExecutionId + 1;
         Assert.assertNull(jobOperator.getJobExecution(purgeJobExecutionId));
+
+        Assert.assertNotNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
+        Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
     }
 
     @Test
@@ -96,12 +103,10 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
         //purge job executions whose id <= prepurge2JobExecutionId
         params.setProperty("jobExecutionIdTo", String.valueOf(prepurge2JobExecutionId));
-        startJob(purgeInMemoryRepositoryXml);
-        Thread.sleep(purgeSleepMillis);
+        startAndVerifyPurgeJob();
+
         Assert.assertNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertNotNull(jobOperator.getJobExecution(jobExecutionId));
     }
 
     @Test
@@ -113,13 +118,11 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
         //purge job executions whose id between prepurge2JobExecutionId and prepurge3JobExecutionId
         params.setProperty("jobExecutionIdFrom", String.valueOf(prepurge2JobExecutionId));
         params.setProperty("jobExecutionIdTo", String.valueOf(prepurge3JobExecutionId));
-        startJob(purgeInMemoryRepositoryXml);
-        Thread.sleep(purgeSleepMillis);
+        startAndVerifyPurgeJob();
+
         Assert.assertNotNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
         Assert.assertNull(jobOperator.getJobExecution(prepurge3JobExecutionId));
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertNotNull(jobOperator.getJobExecution(jobExecutionId));
     }
 
     @Test
@@ -129,13 +132,12 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
         //purge job executions which ended within past 5 minutes
         params.setProperty("withinPastMinutes", "5");
-        startJob(purgeInMemoryRepositoryXml);
-        Thread.sleep(purgeSleepMillis);
+        //keepRunningJobExecutions batch property defaults to true, the following sets it to its default value
+        params.setProperty("keepRunningJobExecutions", String.valueOf(true));
+        startAndVerifyPurgeJob();
+
         Assert.assertNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
-
-        final long purgeJobExecutionId = prepurge2JobExecutionId + 1;
-        Assert.assertEquals(null, jobOperator.getJobExecution(purgeJobExecutionId));
     }
 
 
@@ -145,5 +147,14 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         System.out.printf("%s job execution id: %s, status: %s%n", prepurgeXml, jobExecutionId, jobExecution.getBatchStatus());
         return jobExecutionId;
+    }
+
+    public void startAndVerifyPurgeJob() throws Exception {
+        startJob(purgeInMemoryRepositoryXml);
+        awaitTermination();
+
+        //the current job will not be purged, and should complete
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertNotNull(jobOperator.getJobExecution(jobExecutionId));
     }
 }

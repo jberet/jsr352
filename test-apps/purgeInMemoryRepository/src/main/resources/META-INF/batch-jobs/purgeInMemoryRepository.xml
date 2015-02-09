@@ -16,6 +16,7 @@
     <step id="purgeInMemoryRepository.step1">
         <batchlet ref="org.jberet.repository.PurgeBatchlet">
             <properties>
+                <property name="keepRunningJobExecutions" value="#{jobParameters['keepRunningJobExecutions']}"/>
                 <property name="purgeAllJobs" value="#{jobParameters['purgeAllJobs']}?:false;"/>
                 <property name="jobExecutionIds" value="#{jobParameters['jobExecutionIds']}"/>
                 <property name="numberOfRecentJobExecutionsToKeep"

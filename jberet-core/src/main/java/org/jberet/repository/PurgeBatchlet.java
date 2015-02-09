@@ -28,6 +28,10 @@ public final class PurgeBatchlet implements Batchlet {
 
     @Inject
     @BatchProperty
+    Boolean keepRunningJobExecutions;
+
+    @Inject
+    @BatchProperty
     boolean purgeAllJobs;
 
     @Inject
@@ -77,10 +81,12 @@ public final class PurgeBatchlet implements Batchlet {
 
         if (purgeAllJobs) {
             for (final Job job : jobRepository.getJobs()) {
-                jobRepository.removeJob(job.getId());
+                if (!jobContext.getJobName().equals(job.getId())) { //do not remove the current running job
+                    jobRepository.removeJob(job.getId());
+                }
             }
         } else {
-            final DefaultJobExecutionSelector selector = new DefaultJobExecutionSelector();
+            final DefaultJobExecutionSelector selector = new DefaultJobExecutionSelector(keepRunningJobExecutions);
             selector.jobExecutionIds = jobExecutionIds;
             selector.numberOfRecentJobExecutionsToExclude = numberOfRecentJobExecutionsToKeep;
             selector.jobExecutionIdFrom = jobExecutionIdFrom;

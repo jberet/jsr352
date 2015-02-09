@@ -20,6 +20,8 @@ import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 
 public final class DefaultJobExecutionSelector implements JobExecutionSelector {
+    Boolean excludeRunningJobExecutions = Boolean.TRUE;
+
     Set<Long> jobExecutionIds;
 
     Integer numberOfRecentJobExecutionsToExclude;
@@ -38,8 +40,24 @@ public final class DefaultJobExecutionSelector implements JobExecutionSelector {
 
     Set<String> jobNames;
 
+    public DefaultJobExecutionSelector(final Boolean excludeRunningJobExecutions) {
+        if (excludeRunningJobExecutions == Boolean.FALSE) {
+            this.excludeRunningJobExecutions = Boolean.FALSE;
+        }
+    }
+
     @Override
     public boolean select(final JobExecution jobExecution, final Collection<JobExecution> allJobExecutions) {
+        if (excludeRunningJobExecutions) {
+            final BatchStatus batchStatus = jobExecution.getBatchStatus();
+            if (batchStatus != BatchStatus.COMPLETED &&
+                    batchStatus != BatchStatus.FAILED &&
+                    batchStatus != BatchStatus.STOPPED &&
+                    batchStatus != BatchStatus.ABANDONED) {
+                return false;
+            }
+        }
+
         final long id = jobExecution.getExecutionId();
         if (jobExecutionIds != null && !jobExecutionIds.isEmpty()) {
             return jobExecutionIds.contains(id);
