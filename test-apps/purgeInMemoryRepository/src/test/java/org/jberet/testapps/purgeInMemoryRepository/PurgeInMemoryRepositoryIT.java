@@ -20,14 +20,13 @@ import org.junit.Test;
 
 public class PurgeInMemoryRepositoryIT extends AbstractIT {
     private static final long purgeSleepMillis = 2000;
-    static final String prepurge1Xml = "prepurge1.xml";
-    static final String prepurge2Xml = "prepurge2.xml";
+    static final String prepurgeXml = "prepurge.xml";
     static final String purgeInMemoryRepositoryXml = "purgeInMemoryRepository.xml";
 
     @Test
     public void purgeAllJobs() throws Exception {
-        final long prepurge1JobExecutionId = prepurge(prepurge1Xml);
-        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
 
         params.setProperty("purgeAllJobs", "true");
         startJob(purgeInMemoryRepositoryXml);
@@ -43,8 +42,8 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
     @Test
     public void jobExecutionIds() throws Exception {
-        final long prepurge1JobExecutionId = prepurge(prepurge1Xml);
-        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
 
         //non-existent job execution id 999 will be ignored
         params.setProperty("jobExecutionIds", String.format("%s,%s,%s", prepurge1JobExecutionId, prepurge2JobExecutionId, 999));
@@ -61,8 +60,8 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
     @Test
     public void numberOfRecentJobExecutionsToKeep() throws Exception {
-        final long prepurge1JobExecutionId = prepurge(prepurge1Xml);
-        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
 
         //2 job executions to keep:
         //the purge job itself
@@ -77,8 +76,8 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
     @Test
     public void jobExecutionIdFrom() throws Exception {
-        final long prepurge1JobExecutionId = prepurge(prepurge1Xml);
-        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
 
         //purge job executions whose id >= prepurge2JobExecutionId
         params.setProperty("jobExecutionIdFrom", String.valueOf(prepurge2JobExecutionId));
@@ -92,8 +91,8 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
     @Test
     public void jobExecutionIdTo() throws Exception {
-        final long prepurge1JobExecutionId = prepurge(prepurge1Xml);
-        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
 
         //purge job executions whose id <= prepurge2JobExecutionId
         params.setProperty("jobExecutionIdTo", String.valueOf(prepurge2JobExecutionId));
@@ -107,9 +106,9 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
     @Test
     public void jobExecutionIdFromTo() throws Exception {
-        final long prepurge1JobExecutionId = prepurge(prepurge1Xml);
-        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
-        final long prepurge3JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
+        final long prepurge3JobExecutionId = prepurge();
 
         //purge job executions whose id between prepurge2JobExecutionId and prepurge3JobExecutionId
         params.setProperty("jobExecutionIdFrom", String.valueOf(prepurge2JobExecutionId));
@@ -125,8 +124,8 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
 
     @Test
     public void withinPastMinutes() throws Exception {
-        final long prepurge1JobExecutionId = prepurge(prepurge1Xml);
-        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
 
         //purge job executions which ended within past 5 minutes
         params.setProperty("withinPastMinutes", "5");
@@ -140,11 +139,11 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
     }
 
 
-    public long prepurge(final String prepurgeJobName) throws Exception {
-        startJob(prepurgeJobName);
+    public long prepurge() throws Exception {
+        startJob(prepurgeXml);
         awaitTermination();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        System.out.printf("%s job execution id: %s, status: %s%n", prepurgeJobName, jobExecutionId, jobExecution.getBatchStatus());
+        System.out.printf("%s job execution id: %s, status: %s%n", prepurgeXml, jobExecutionId, jobExecution.getBatchStatus());
         return jobExecutionId;
     }
 }
