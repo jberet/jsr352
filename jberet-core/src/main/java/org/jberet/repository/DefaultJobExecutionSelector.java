@@ -18,8 +18,13 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
 
 public final class DefaultJobExecutionSelector implements JobExecutionSelector {
+    private JobContext jobContext;
+    private StepContext stepContext;
+
     Boolean excludeRunningJobExecutions = Boolean.TRUE;
 
     Set<Long> jobExecutionIds;
@@ -38,7 +43,7 @@ public final class DefaultJobExecutionSelector implements JobExecutionSelector {
 
     Set<String> exitStatuses;
 
-    Set<String> jobNames;
+    Set<String> jobExecutionsByJobNames;
 
     public DefaultJobExecutionSelector(final Boolean excludeRunningJobExecutions) {
         if (excludeRunningJobExecutions == Boolean.FALSE) {
@@ -114,10 +119,30 @@ public final class DefaultJobExecutionSelector implements JobExecutionSelector {
             return exitStatuses.contains(jobExecution.getExitStatus());
         }
 
-        if (jobNames != null) {
-            return jobNames.contains(jobExecution.getJobName());
+        if (jobExecutionsByJobNames != null) {
+            return jobExecutionsByJobNames.contains(jobExecution.getJobName());
         }
 
         return false;
+    }
+
+    @Override
+    public JobContext getJobContext() {
+        return jobContext;
+    }
+
+    @Override
+    public void setJobContext(final JobContext jobContext) {
+        this.jobContext = jobContext;
+    }
+
+    @Override
+    public StepContext getStepContext() {
+        return stepContext;
+    }
+
+    @Override
+    public void setStepContext(final StepContext stepContext) {
+        this.stepContext = stepContext;
     }
 }

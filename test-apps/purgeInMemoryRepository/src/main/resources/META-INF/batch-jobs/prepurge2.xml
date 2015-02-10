@@ -12,14 +12,6 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="prepurge" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="prepurge.step1">
-        <batchlet>
-            <script type="javascript">
-                function process() {
-                    return "prepurge process";
-                }
-            </script>
-        </batchlet>
-    </step>
+<job id="prepurge2" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="prepurge2.step1" parent="prepurge.step1" jsl-name="prepurge"/>
 </job>

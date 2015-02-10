@@ -14,7 +14,17 @@ package org.jberet.repository;
 
 import java.util.Collection;
 import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
 
 public interface JobExecutionSelector {
     boolean select(JobExecution jobExecution, Collection<JobExecution> allJobExecutions);
+
+    JobContext getJobContext();
+
+    void setJobContext(JobContext jobContext);
+
+    StepContext getStepContext();
+
+    void setStepContext(StepContext stepContext);
 }

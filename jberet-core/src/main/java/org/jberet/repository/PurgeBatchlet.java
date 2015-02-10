@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.Batchlet;
 import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
 import org.jberet.job.model.Job;
@@ -27,12 +28,15 @@ public final class PurgeBatchlet implements Batchlet {
     private JobContext jobContext;
 
     @Inject
-    @BatchProperty
-    Boolean keepRunningJobExecutions;
+    private StepContext stepContext;
 
     @Inject
     @BatchProperty
-    boolean purgeAllJobs;
+    Class jobExecutionSelector;
+
+    @Inject
+    @BatchProperty
+    Boolean keepRunningJobExecutions;
 
     @Inject
     @BatchProperty
@@ -72,32 +76,47 @@ public final class PurgeBatchlet implements Batchlet {
 
     @Inject
     @BatchProperty
-    Set<String> jobNames;
+    Set<String> jobExecutionsByJobNames;
+
+    @Inject
+    @BatchProperty
+    Set<String> purgeJobsByNames;
 
     @Override
     public String process() throws Exception {
         final JobContextImpl jobContextImpl = (JobContextImpl) jobContext;
         final JobRepository jobRepository = jobContextImpl.getJobRepository();
 
-        if (purgeAllJobs) {
+        if (purgeJobsByNames != null && !purgeJobsByNames.isEmpty()) {
+            final boolean purgeAll = purgeJobsByNames.size() == 1 && purgeJobsByNames.contains("*");
+            final String currentJobName = jobContext.getJobName();
             for (final Job job : jobRepository.getJobs()) {
-                if (!jobContext.getJobName().equals(job.getId())) { //do not remove the current running job
+                //do not remove the current running job if purgeJobsByNames = "*"
+                if (purgeJobsByNames.contains(job.getId()) ||
+                    (purgeAll && !currentJobName.equals(job.getId()))) {
                     jobRepository.removeJob(job.getId());
                 }
             }
         } else {
-            final DefaultJobExecutionSelector selector = new DefaultJobExecutionSelector(keepRunningJobExecutions);
-            selector.jobExecutionIds = jobExecutionIds;
-            selector.numberOfRecentJobExecutionsToExclude = numberOfRecentJobExecutionsToKeep;
-            selector.jobExecutionIdFrom = jobExecutionIdFrom;
-            selector.jobExecutionIdTo = jobExecutionIdTo;
-            selector.withinPastMinutes = withinPastMinutes;
-            selector.jobExecutionEndTimeFrom = jobExecutionEndTimeFrom;
-            selector.jobExecutionEndTimeTo = jobExecutionEndTimeTo;
-            selector.batchStatuses = batchStatuses;
-            selector.exitStatuses = exitStatuses;
-            selector.jobNames = jobNames;
-
+            final JobExecutionSelector selector;
+            if (jobExecutionSelector != null) { //use the custom selector configured by the application
+                selector = (JobExecutionSelector) jobExecutionSelector.newInstance();
+            } else {
+                final DefaultJobExecutionSelector selector1 = new DefaultJobExecutionSelector(keepRunningJobExecutions);
+                selector1.jobExecutionIds = jobExecutionIds;
+                selector1.numberOfRecentJobExecutionsToExclude = numberOfRecentJobExecutionsToKeep;
+                selector1.jobExecutionIdFrom = jobExecutionIdFrom;
+                selector1.jobExecutionIdTo = jobExecutionIdTo;
+                selector1.withinPastMinutes = withinPastMinutes;
+                selector1.jobExecutionEndTimeFrom = jobExecutionEndTimeFrom;
+                selector1.jobExecutionEndTimeTo = jobExecutionEndTimeTo;
+                selector1.batchStatuses = batchStatuses;
+                selector1.exitStatuses = exitStatuses;
+                selector1.jobExecutionsByJobNames = jobExecutionsByJobNames;
+                selector = selector1;
+            }
+            selector.setJobContext(jobContext);
+            selector.setStepContext(stepContext);
             jobRepository.removeJobExecutions(selector);
         }
 

@@ -12,8 +12,13 @@
 
 package org.jberet.testapps.purgeInMemoryRepository;
 
+import java.util.Collection;
 import javax.batch.runtime.BatchStatus;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
 
+import org.jberet.repository.JobExecutionSelector;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,18 +26,48 @@ import org.junit.Test;
 public class PurgeInMemoryRepositoryIT extends AbstractIT {
     private static final long purgeSleepMillis = 2000;
     static final String prepurgeXml = "prepurge.xml";
+    static final String prepurge2Xml = "prepurge2.xml";
     static final String purgeInMemoryRepositoryXml = "purgeInMemoryRepository.xml";
 
     @Test
-    public void purgeAllJobs() throws Exception {
+    public void jobExecutionSelector() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
         final long prepurge2JobExecutionId = prepurge();
 
-        params.setProperty("purgeAllJobs", "true");
+        params.setProperty("jobExecutionSelector",
+                "org.jberet.testapps.purgeInMemoryRepository.PurgeInMemoryRepositoryIT$JobExecutionSelector1");
         startAndVerifyPurgeJob();
 
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
+    }
+
+    @Test
+    public void purgeJobsByNamesAll() throws Exception {
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
+        final long prepurge3JobExecutionId = prepurge(prepurge2Xml);
+
+        params.setProperty("purgeJobsByNames", "*");
+        startAndVerifyPurgeJob();
+
+        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
+        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
+        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge3JobExecutionId));
+    }
+
+    @Test
+    public void jobExecutionsByJobNames() throws Exception {
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge();
+        final long prepurge3JobExecutionId = prepurge(prepurge2Xml);
+
+        params.setProperty("jobExecutionsByJobNames", "prepurge");
+        startAndVerifyPurgeJob();
+
+        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
+        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
+        Assert.assertNotNull(jobOperator.getJobExecution(prepurge3JobExecutionId));
     }
 
     @Test
@@ -141,11 +176,12 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
     }
 
 
-    public long prepurge() throws Exception {
-        startJob(prepurgeXml);
+    public long prepurge(final String... jobName) throws Exception {
+        final String prepurgeJobName = (jobName.length == 0) ? prepurgeXml : jobName[0];
+        startJob(prepurgeJobName);
         awaitTermination();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        System.out.printf("%s job execution id: %s, status: %s%n", prepurgeXml, jobExecutionId, jobExecution.getBatchStatus());
+        System.out.printf("%s job execution id: %s, status: %s%n", prepurgeJobName, jobExecutionId, jobExecution.getBatchStatus());
         return jobExecutionId;
     }
 
@@ -156,5 +192,42 @@ public class PurgeInMemoryRepositoryIT extends AbstractIT {
         //the current job will not be purged, and should complete
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertNotNull(jobOperator.getJobExecution(jobExecutionId));
+    }
+
+    public static final class JobExecutionSelector1 implements JobExecutionSelector {
+        private JobContext jobContext;
+        private StepContext stepContext;
+
+        @Override
+        public boolean select(final JobExecution jobExecution,
+                              final Collection<JobExecution> allJobExecutions) {
+            //select completed job executions and whose job name starts with "pre"
+            if (jobExecution.getBatchStatus() == BatchStatus.COMPLETED && jobExecution.getJobName().startsWith("pre")) {
+                System.out.printf("In select method of %s, return true.%n", this);
+                return true;
+            }
+            System.out.printf("In select method of %s, return false.%n", this);
+            return false;
+        }
+
+        @Override
+        public JobContext getJobContext() {
+            return jobContext;
+        }
+
+        @Override
+        public void setJobContext(final JobContext jobContext) {
+            this.jobContext = jobContext;
+        }
+
+        @Override
+        public StepContext getStepContext() {
+            return stepContext;
+        }
+
+        @Override
+        public void setStepContext(final StepContext stepContext) {
+            this.stepContext = stepContext;
+        }
     }
 }
