@@ -794,6 +794,35 @@ public final class JdbcRepository extends AbstractRepository {
         return count;
     }
 
+    /**
+     * Executes a series of sql statements.
+     *
+     * @param statements sql statements as string separated with ; character; not null
+     * @throws SQLException
+     */
+    public void executeStatements(final String statements) throws SQLException {
+        final String delim = ";";
+        final Connection connection = getConnection();
+        final int semicolon = statements.indexOf(delim);
+        Statement st = null;
+        try {
+            st = connection.createStatement();
+            if (semicolon <= 0 || semicolon == statements.length() - 1) {
+                st.executeUpdate(statements);
+            } else {
+                for (final String s : statements.split(delim)) {
+                    final String ddlEntry = s.trim();
+                    if (!s.isEmpty()) {
+                        st.addBatch(ddlEntry);
+                    }
+                }
+                st.executeBatch();
+            }
+        } finally {
+            close(connection, st, null, null);
+        }
+    }
+
     private Connection getConnection() {
         if (dataSource != null) {
             try {

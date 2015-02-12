@@ -32,6 +32,10 @@ public final class PurgeBatchlet implements Batchlet {
 
     @Inject
     @BatchProperty
+    String sql;
+
+    @Inject
+    @BatchProperty
     Class jobExecutionSelector;
 
     @Inject
@@ -118,6 +122,10 @@ public final class PurgeBatchlet implements Batchlet {
             selector.setJobContext(jobContext);
             selector.setStepContext(stepContext);
             jobRepository.removeJobExecutions(selector);
+        }
+
+        if (jobRepository instanceof JdbcRepository && sql != null) {
+            ((JdbcRepository) jobRepository).executeStatements(sql.trim());
         }
 
         return null;

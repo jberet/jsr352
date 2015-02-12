@@ -35,6 +35,7 @@
         <module>infinispanRepositoryJdbc</module>
         <module>chunkSkipRetry</module>
         <module>purgeInMemoryRepository</module>
+        <module>purgeJdbcRepository</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
