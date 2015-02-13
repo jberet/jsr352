@@ -20,9 +20,9 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeJdbcRepositoryXml = "purgeJdbcRepository.xml";
 
     @Test
-    public void deleteStepExecutionsWithSql() throws Exception {
+    public void withSql() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
-        final long prepurge2JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
 
         params.setProperty("sql",
         "delete from STEP_EXECUTION where JOBEXECUTIONID in " +
@@ -40,6 +40,24 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
         Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
+    }
+
+    @Test
+    public void withSqlFile() throws Exception {
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge(prepurge2Xml);
+
+        params.setProperty("sqlFile", "purgeJdbcRepository.sql");
+
+        //prepurge2 job execution is purged from in-memory part, but still kept in database.
+        //So next when calling getJobExecution(prepurge2JobExecutionId) should retrieve it from the database, and return
+        //non-null.
+        params.setProperty("jobExecutionsByJobNames", "prepurge, prepurge2");
+
+        startAndVerifyPurgeJob(purgeJdbcRepositoryXml);
+
+        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
+        Assert.assertNotNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
     }
 
 }

@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
@@ -797,23 +798,52 @@ public final class JdbcRepository extends AbstractRepository {
     /**
      * Executes a series of sql statements.
      *
-     * @param statements sql statements as string separated with ; character; not null
+     * @param statements             sql statements as string separated with ; character; not null unless {@code statementsResourcePath} is present.
+     * @param statementsResourcePath loadable resource path to obtain sql statements. Ignored when {@code statements} is present.
      * @throws SQLException
      */
-    public void executeStatements(final String statements) throws SQLException {
+    public void executeStatements(final String statements, final String statementsResourcePath) throws SQLException {
         final String delim = ";";
         final Connection connection = getConnection();
-        final int semicolon = statements.indexOf(delim);
+        final List<String> statementList;
+        if (statements == null) {
+            InputStream statementsResource = null;
+            try {
+                statementsResource = getClassLoader().getResourceAsStream(statementsResourcePath);
+                if (statementsResource != null) {
+                    statementList = new ArrayList<String>();
+                } else {
+                    throw BatchMessages.MESSAGES.failToLoadSqlProperties(null, statementsResourcePath);
+                }
+
+                final java.util.Scanner scanner = new java.util.Scanner(statementsResource).useDelimiter(delim);
+                while (scanner.hasNext()) {
+                    statementList.add(scanner.next());
+                }
+                scanner.close();
+            } finally {
+                if (statementsResource != null) {
+                    try {
+                        statementsResource.close();
+                    } catch (final IOException e) {
+                        //ignore
+                    }
+                }
+            }
+        } else {
+            statementList = Arrays.asList(statements.split(delim));
+        }
+
         Statement st = null;
         try {
             st = connection.createStatement();
-            if (semicolon <= 0 || semicolon == statements.length() - 1) {
-                st.executeUpdate(statements);
+            if (statementList.size() <= 1) {
+                st.executeUpdate(statementList.get(0));
             } else {
-                for (final String s : statements.split(delim)) {
-                    final String ddlEntry = s.trim();
-                    if (!s.isEmpty()) {
-                        st.addBatch(ddlEntry);
+                for (final String s : statementList) {
+                    final String sqlEntry = s.trim();
+                    if (!sqlEntry.isEmpty()) {
+                        st.addBatch(sqlEntry);
                     }
                 }
                 st.executeBatch();

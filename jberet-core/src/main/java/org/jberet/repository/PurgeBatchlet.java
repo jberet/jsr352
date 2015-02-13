@@ -36,6 +36,10 @@ public final class PurgeBatchlet implements Batchlet {
 
     @Inject
     @BatchProperty
+    String sqlFile;
+
+    @Inject
+    @BatchProperty
     Class jobExecutionSelector;
 
     @Inject
@@ -97,7 +101,7 @@ public final class PurgeBatchlet implements Batchlet {
             for (final Job job : jobRepository.getJobs()) {
                 //do not remove the current running job if purgeJobsByNames = "*"
                 if (purgeJobsByNames.contains(job.getId()) ||
-                    (purgeAll && !currentJobName.equals(job.getId()))) {
+                        (purgeAll && !currentJobName.equals(job.getId()))) {
                     jobRepository.removeJob(job.getId());
                 }
             }
@@ -124,8 +128,12 @@ public final class PurgeBatchlet implements Batchlet {
             jobRepository.removeJobExecutions(selector);
         }
 
-        if (jobRepository instanceof JdbcRepository && sql != null) {
-            ((JdbcRepository) jobRepository).executeStatements(sql.trim());
+        if (jobRepository instanceof JdbcRepository) {
+            if (sql != null) {
+                ((JdbcRepository) jobRepository).executeStatements(sql, null);
+            } else if (sqlFile != null) {
+                ((JdbcRepository) jobRepository).executeStatements(null, sqlFile);
+            }
         }
 
         return null;
