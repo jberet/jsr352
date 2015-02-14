@@ -24,6 +24,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
@@ -390,10 +391,9 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement = isOracle ? connection.prepareStatement(insert, idIndexInOracle) :
                     connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setLong(1, jobExecution.getJobInstance().getInstanceId());
-            preparedStatement.setTimestamp(2, new Timestamp(jobExecution.getCreateTime().getTime()));
-            preparedStatement.setTimestamp(3, new Timestamp(jobExecution.getStartTime().getTime()));
-            preparedStatement.setString(4, jobExecution.getBatchStatus().name());
-            preparedStatement.setString(5, BatchUtil.propertiesToString(jobExecution.getJobParameters()));
+            preparedStatement.setTimestamp(2, createTimestamp(jobExecution.getCreateTime()));
+            preparedStatement.setString(3, jobExecution.getBatchStatus().name());
+            preparedStatement.setString(4, BatchUtil.propertiesToString(jobExecution.getJobParameters()));
             preparedStatement.executeUpdate();
             rs = preparedStatement.getGeneratedKeys();
             rs.next();
@@ -416,16 +416,17 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement = connection.prepareStatement(update);
 
             if (fullUpdate) {
-                preparedStatement.setTimestamp(1, new Timestamp(jobExecution.getEndTime().getTime()));
-                preparedStatement.setTimestamp(2, new Timestamp(jobExecution.getLastUpdatedTime().getTime()));
+                preparedStatement.setTimestamp(1, createTimestamp(jobExecution.getEndTime()));
+                preparedStatement.setTimestamp(2, createTimestamp(jobExecution.getLastUpdatedTime()));
                 preparedStatement.setString(3, jobExecution.getBatchStatus().name());
                 preparedStatement.setString(4, jobExecution.getExitStatus());
                 preparedStatement.setString(5, jobExecution.getRestartPosition());
                 preparedStatement.setLong(6, jobExecution.getExecutionId());  //where clause
             } else {
-                preparedStatement.setTimestamp(1, new Timestamp(jobExecution.getLastUpdatedTime().getTime()));
-                preparedStatement.setString(2, jobExecution.getBatchStatus().name());
-                preparedStatement.setLong(3, jobExecution.getExecutionId());  //where clause
+                preparedStatement.setTimestamp(1, createTimestamp(jobExecution.getLastUpdatedTime()));
+                preparedStatement.setTimestamp(2, createTimestamp(jobExecution.getStartTime()));
+                preparedStatement.setString(3, jobExecution.getBatchStatus().name());
+                preparedStatement.setLong(4, jobExecution.getExecutionId());  //where clause
             }
 
             preparedStatement.executeUpdate();
@@ -992,5 +993,12 @@ public final class JdbcRepository extends AbstractRepository {
             });
         }
         return JdbcRepository.class.getClassLoader();
+    }
+
+    private static Timestamp createTimestamp(final Date date) {
+        if (date == null) {
+            return null;
+        }
+        return new Timestamp(date.getTime());
     }
 }

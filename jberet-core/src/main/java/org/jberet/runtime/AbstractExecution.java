@@ -31,11 +31,18 @@ public abstract class AbstractExecution implements Cloneable, Serializable {
     }
 
     public Date getStartTime() {
-        return new Date(startTime);
+        final long startTime = this.startTime;
+        if (startTime > 0L) {
+            return new Date(startTime);
+        }
+        return null;
     }
 
     public Date getEndTime() {
-        return new Date(endTime);
+        if (endTime > 0L) {
+            return new Date(endTime);
+        }
+        return null;
     }
 
     public String getExitStatus() {
@@ -62,6 +69,16 @@ public abstract class AbstractExecution implements Cloneable, Serializable {
 
     public void setBatchStatus(final BatchStatus batchStatus) {
         this.batchStatus = batchStatus;
+        switch (batchStatus) {
+            case STARTED:
+                startTime = System.currentTimeMillis();
+                break;
+            case COMPLETED:
+            case FAILED:
+            case STOPPED:
+                endTime = System.currentTimeMillis();
+                break;
+        }
     }
 
 }

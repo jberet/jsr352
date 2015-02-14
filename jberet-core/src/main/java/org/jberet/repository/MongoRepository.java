@@ -188,7 +188,6 @@ public final class MongoRepository extends AbstractRepository {
         final DBObject dbObject = new BasicDBObject(TableColumns.JOBEXECUTIONID, nextId);
         dbObject.put(TableColumns.JOBINSTANCEID, jobExecution.getJobInstance().getInstanceId());
         dbObject.put(TableColumns.CREATETIME, jobExecution.getCreateTime());
-        dbObject.put(TableColumns.STARTTIME, jobExecution.getStartTime());
         dbObject.put(TableColumns.BATCHSTATUS, jobExecution.getBatchStatus().name());
         dbObject.put(TableColumns.JOBPARAMETERS, BatchUtil.propertiesToString(jobExecution.getJobParameters()));
         db.getCollection(TableColumns.JOB_EXECUTION).insert(dbObject);
@@ -198,6 +197,7 @@ public final class MongoRepository extends AbstractRepository {
     public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
         super.updateJobExecution(jobExecution, fullUpdate);
         final DBObject update = new BasicDBObject(TableColumns.LASTUPDATEDTIME, jobExecution.getLastUpdatedTime());
+        update.put(TableColumns.STARTTIME, jobExecution.getStartTime());
         update.put(TableColumns.BATCHSTATUS, jobExecution.getBatchStatus().name());
 
         if (fullUpdate) {
@@ -321,7 +321,6 @@ public final class MongoRepository extends AbstractRepository {
         final DBObject dbObject = new BasicDBObject(TableColumns.STEPEXECUTIONID, nextId);
         dbObject.put(TableColumns.JOBEXECUTIONID, jobExecution.getExecutionId());
         dbObject.put(TableColumns.STEPNAME, stepExecution.getStepName());
-        dbObject.put(TableColumns.STARTTIME, stepExecution.getStartTime());
         dbObject.put(TableColumns.BATCHSTATUS, stepExecution.getBatchStatus().name());
         db.getCollection(TableColumns.STEP_EXECUTION).insert(dbObject);
     }
