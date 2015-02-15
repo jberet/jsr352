@@ -24,8 +24,8 @@ import org.junit.Assert;
 
 public abstract class PurgeRepositoryTestBase extends AbstractIT {
     protected static final long purgeSleepMillis = 2000;
-    protected static final String prepurgeXml = "prepurge.xml";
-    protected static final String prepurge2Xml = "prepurge2.xml";
+    protected static final String prepurgeXml = "prepurge";
+    protected static final String prepurge2Xml = "prepurge2";
 
     public long prepurge(final String... jobName) throws Exception {
         final String prepurgeJobName = (jobName.length == 0) ? prepurgeXml : jobName[0];

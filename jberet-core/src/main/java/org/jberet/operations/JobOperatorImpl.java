@@ -144,7 +144,7 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public int getJobInstanceCount(final String jobName) throws NoSuchJobException, JobSecurityException {
         final int count = repository.getJobInstanceCount(jobName);
-        if (count == 0) {
+        if (count == 0 && repository.getJob(jobName) == null) {
             throw MESSAGES.noSuchJobException(jobName);
         }
         return count;
@@ -166,7 +166,7 @@ public class JobOperatorImpl implements JobOperator {
             }
             pos++;
         }
-        if (pos == 0) {
+        if (pos == 0 && repository.getJob(jobName) == null) {
             throw MESSAGES.noSuchJobException(jobName);
         }
         return result;
