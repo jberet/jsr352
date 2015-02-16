@@ -175,17 +175,15 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<Long> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
         final List<Long> result = new ArrayList<Long>();
-        boolean jobExists = false;
         for (final JobExecution e : repository.getJobExecutions(null)) {
             if (e.getJobName().equals(jobName)) {
-                jobExists = true;
                 final BatchStatus s = e.getBatchStatus();
                 if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
                     result.add(e.getExecutionId());
                 }
             }
         }
-        if (!jobExists) {
+        if (result.size() == 0 && repository.getJob(jobName) == null) {
             throw MESSAGES.noSuchJobException(jobName);
         }
         return result;

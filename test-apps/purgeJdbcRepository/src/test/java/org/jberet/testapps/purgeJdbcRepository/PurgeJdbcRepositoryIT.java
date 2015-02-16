@@ -57,6 +57,8 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         Assert.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurge2Xml));
         Assert.assertNotNull(jobOperator.getJobInstances(prepurgeXml, 0, 1).get(0));
         Assert.assertNotNull(jobOperator.getJobInstances(prepurge2Xml, 0, 1).get(0));
+        Assert.assertEquals(0, jobOperator.getRunningExecutions(prepurgeXml).size());
+        Assert.assertEquals(0, jobOperator.getRunningExecutions(prepurge2Xml).size());
 
         params.setProperty("sql",
         "delete from STEP_EXECUTION where JOBEXECUTIONID in " +
@@ -80,20 +82,29 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         Assert.assertEquals(0, jobOperator.getJobInstanceCount(prepurge2Xml));
         Assert.assertEquals(0, jobOperator.getJobInstances(prepurgeXml, 0, 1).size());
         Assert.assertEquals(0, jobOperator.getJobInstances(prepurge2Xml, 0, 1).size());
+        Assert.assertEquals(0, jobOperator.getRunningExecutions(prepurgeXml).size());
+        Assert.assertEquals(0, jobOperator.getRunningExecutions(prepurge2Xml).size());
     }
 
     @Test
     public void noSuchJobException() throws Exception {
+        final String noSuchJobName = "no-such-job-name";
         try {
-            final int result = jobOperator.getJobInstanceCount("no-such-job");
+            final int result = jobOperator.getJobInstanceCount(noSuchJobName);
             Assert.fail("Expecting NoSuchJobException, but got " + result);
         } catch (final NoSuchJobException e) {
             System.out.printf("Got expected %s%n", e);
         }
 
         try {
-            final List<JobInstance> result = jobOperator.getJobInstances("no-such-job", 0, 1);
+            final List<JobInstance> result = jobOperator.getJobInstances(noSuchJobName, 0, 1);
             Assert.fail("Expecting NoSuchJobException, but got " + result);
+        } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+        try {
+            final List<Long> runningExecutions = jobOperator.getRunningExecutions(noSuchJobName);
+            Assert.fail("Expecting NoSuchJobException, but got " + runningExecutions);
         } catch (final NoSuchJobException e) {
             System.out.printf("Got expected %s%n", e);
         }
