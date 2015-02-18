@@ -12,11 +12,45 @@
 
 package org.jberet.testapps.purgeInMemoryRepository;
 
+import javax.batch.operations.NoSuchJobException;
+import javax.batch.operations.NoSuchJobExecutionException;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeInMemoryRepositoryXml = "purgeInMemoryRepository.xml";
+
+    @Test(expected = NoSuchJobExecutionException.class)
+    public void restartNoSuchJobExecutionException() throws NoSuchJobExecutionException {
+        jobOperator.restart(-1, null);
+    }
+
+    @Test(expected = NoSuchJobExecutionException.class)
+    public void stopNoSuchJobExecutionException() throws NoSuchJobExecutionException {
+        jobOperator.stop(-1);
+    }
+
+    @Test(expected = NoSuchJobExecutionException.class)
+    public void abandonNoSuchJobExecutionException() throws NoSuchJobExecutionException {
+        jobOperator.abandon(-1);
+    }
+
+    @Test(expected = NoSuchJobExecutionException.class)
+    public void getParametersNoSuchJobExecutionException() throws NoSuchJobExecutionException {
+        jobOperator.getParameters(-1);
+    }
+
+    @Test(expected = NoSuchJobExecutionException.class)
+    public void getJobInstanceNoSuchJobExecutionException() throws NoSuchJobExecutionException {
+        jobOperator.getJobInstance(-1);
+    }
+
+    @Test(expected = NoSuchJobExecutionException.class)
+    public void getStepExecutionsNoSuchJobExecutionException() throws NoSuchJobExecutionException {
+        jobOperator.getStepExecutions(-1);
+    }
+
 
     @Test
     public void jobExecutionSelector() throws Exception {
@@ -27,35 +61,35 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
                 "org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase$JobExecutionSelector1");
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
     }
 
     @Test
     public void purgeJobsByNamesAll() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
         final long prepurge2JobExecutionId = prepurge();
-        final long prepurge3JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge3JobExecutionId = prepurge(prepurge2JobName);
 
         params.setProperty("purgeJobsByNames", "*");
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge3JobExecutionId));
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
+        assertNoSuchJobExecution(prepurge3JobExecutionId);
     }
 
     @Test
     public void jobExecutionsByJobNames() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
         final long prepurge2JobExecutionId = prepurge();
-        final long prepurge3JobExecutionId = prepurge(prepurge2Xml);
+        final long prepurge3JobExecutionId = prepurge(prepurge2JobName);
 
-        params.setProperty("jobExecutionsByJobNames", "prepurge");
+        params.setProperty("jobExecutionsByJobNames", prepurgeJobName);
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
         Assert.assertNotNull(jobOperator.getJobExecution(prepurge3JobExecutionId));
     }
 
@@ -68,8 +102,8 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         params.setProperty("jobExecutionIds", String.format("%s,%s,%s", prepurge1JobExecutionId, prepurge2JobExecutionId, 999));
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge2JobExecutionId));
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
     }
 
 
@@ -84,7 +118,7 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         params.setProperty("numberOfRecentJobExecutionsToKeep", "2");
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
-        Assert.assertEquals(null, jobOperator.getJobExecution(prepurge1JobExecutionId));
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
         Assert.assertNotNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
     }
 
@@ -98,7 +132,7 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
         Assert.assertNotNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
     }
 
     @Test
@@ -114,10 +148,10 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         startJob(purgeInMemoryRepositoryXml);
         Thread.sleep(purgeSleepMillis);
         final long purgeJobExecutionId = prepurge2JobExecutionId + 1;
-        Assert.assertNull(jobOperator.getJobExecution(purgeJobExecutionId));
+        assertNoSuchJobExecution(purgeJobExecutionId);
 
         Assert.assertNotNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
     }
 
     @Test
@@ -129,8 +163,8 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         params.setProperty("jobExecutionIdTo", String.valueOf(prepurge2JobExecutionId));
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
-        Assert.assertNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
     }
 
     @Test
@@ -145,8 +179,8 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
         Assert.assertNotNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
-        Assert.assertNull(jobOperator.getJobExecution(prepurge3JobExecutionId));
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
+        assertNoSuchJobExecution(prepurge3JobExecutionId);
     }
 
     @Test
@@ -160,7 +194,7 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         params.setProperty("keepRunningJobExecutions", String.valueOf(true));
         startAndVerifyPurgeJob(purgeInMemoryRepositoryXml);
 
-        Assert.assertNull(jobOperator.getJobExecution(prepurge1JobExecutionId));
-        Assert.assertNull(jobOperator.getJobExecution(prepurge2JobExecutionId));
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
+import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
@@ -25,10 +26,8 @@ import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 
 abstract public class AbstractIT {
     /**
@@ -125,6 +124,15 @@ abstract public class AbstractIT {
         }
         if (!metricFound) {
             throw new IllegalStateException("Unmatched MetricType " + metricType);
+        }
+    }
+
+    protected void assertNoSuchJobExecution(final long i) {
+        try {
+            final JobExecution j = jobOperator.getJobExecution(i);
+            Assert.fail("Expecting NoSuchJobExecutionException, but got " + j);
+        } catch (final NoSuchJobExecutionException e) {
+            System.out.printf("Got expected %s%n", e);
         }
     }
 }

@@ -194,6 +194,9 @@ public abstract class AbstractRepository implements JobRepository {
     @Override
     public List<StepExecution> getStepExecutions(final long jobExecutionId) {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(jobExecutionId);
+        if (jobExecution == null) {
+            return Collections.emptyList();
+        }
         return jobExecution.getStepExecutions();
     }
 

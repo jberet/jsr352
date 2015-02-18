@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -116,10 +116,7 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public void stop(final long executionId) throws NoSuchJobExecutionException,
             JobExecutionNotRunningException, JobSecurityException {
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) repository.getJobExecution(executionId);
-        if (jobExecution == null) {
-            throw MESSAGES.noSuchJobExecution(executionId);
-        }
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(executionId);
         final BatchStatus s = jobExecution.getBatchStatus();
         if (s == BatchStatus.STOPPED || s == BatchStatus.FAILED || s == BatchStatus.ABANDONED ||
                 s == BatchStatus.COMPLETED) {
@@ -199,9 +196,6 @@ public class JobOperatorImpl implements JobOperator {
             NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
         long newExecutionId = 0;
         final JobExecutionImpl originalToRestart = (JobExecutionImpl) getJobExecution(executionId);
-        if (originalToRestart == null) {
-            throw MESSAGES.noSuchJobExecution(executionId);
-        }
         final BatchStatus previousStatus = originalToRestart.getBatchStatus();
         if (previousStatus == BatchStatus.COMPLETED) {
             throw MESSAGES.jobExecutionAlreadyCompleteException(executionId);
@@ -247,9 +241,6 @@ public class JobOperatorImpl implements JobOperator {
     public void abandon(final long executionId) throws
             NoSuchJobExecutionException, JobExecutionIsRunningException, JobSecurityException {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(executionId);
-        if (jobExecution == null) {
-            throw MESSAGES.noSuchJobExecution(executionId);
-        }
         final BatchStatus batchStatus = jobExecution.getBatchStatus();
         if (batchStatus == BatchStatus.COMPLETED ||
                 batchStatus == BatchStatus.FAILED ||
@@ -276,13 +267,24 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public JobExecution getJobExecution(final long executionId) throws NoSuchJobExecutionException, JobSecurityException {
-        return repository.getJobExecution(executionId);
+        final JobExecution jobExecution = repository.getJobExecution(executionId);
+        if (jobExecution == null) {
+            throw MESSAGES.noSuchJobExecution(executionId);
+        }
+        return jobExecution;
     }
 
     @Override
     public List<StepExecution> getStepExecutions(final long jobExecutionId) throws
             NoSuchJobExecutionException, JobSecurityException {
-        return repository.getStepExecutions(jobExecutionId);
+        final List<StepExecution> stepExecutions = repository.getStepExecutions(jobExecutionId);
+        if (stepExecutions.isEmpty()) {
+            //check if the jobExecutionId passed in points to a valid JobExecution
+            //since no step executions under this jobExecutionId was found, it's likely this job execution may not exist
+            //getJobExecution() call will throw NoSuchJobExecutionException for non-exist jobExecutionId.
+            getJobExecution(jobExecutionId);
+        }
+        return stepExecutions;
     }
 
     private long startJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters, final JobExecutionImpl originalToRestart) throws JobStartException, JobSecurityException {

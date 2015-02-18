@@ -24,11 +24,12 @@ import org.junit.Assert;
 
 public abstract class PurgeRepositoryTestBase extends AbstractIT {
     protected static final long purgeSleepMillis = 2000;
-    protected static final String prepurgeXml = "prepurge";
-    protected static final String prepurge2Xml = "prepurge2";
+    protected static final String prepurgeJobName = "prepurge";
+    protected static final String prepurge2JobName = "prepurge2";
+    protected static final String prepurgeAndPrepurge2JobNames = "prepurge, prepurge2";
 
     public long prepurge(final String... jobName) throws Exception {
-        final String prepurgeJobName = (jobName.length == 0) ? prepurgeXml : jobName[0];
+        final String prepurgeJobName = (jobName.length == 0) ? PurgeRepositoryTestBase.prepurgeJobName : jobName[0];
         startJob(prepurgeJobName);
         awaitTermination();
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
