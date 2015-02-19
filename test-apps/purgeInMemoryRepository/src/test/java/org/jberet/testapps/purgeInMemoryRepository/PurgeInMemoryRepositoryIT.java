@@ -12,7 +12,6 @@
 
 package org.jberet.testapps.purgeInMemoryRepository;
 
-import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 
 import org.junit.Assert;
@@ -199,7 +198,14 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test
+    @Override
     public void noSuchJobException() throws Exception {
         super.noSuchJobException();
+    }
+
+    @Test
+    @Override
+    public void noSuchJobInstanceException() throws Exception {
+        super.noSuchJobInstanceException();
     }
 }

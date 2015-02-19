@@ -12,11 +12,9 @@
 
 package org.jberet.testapps.purgeMongoRepository;
 
-import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
@@ -53,8 +51,14 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test
+    @Override
     public void noSuchJobException() throws Exception {
         super.noSuchJobException();
     }
 
+    @Test
+    @Override
+    public void noSuchJobInstanceException() throws Exception {
+        super.noSuchJobInstanceException();
+    }
 }

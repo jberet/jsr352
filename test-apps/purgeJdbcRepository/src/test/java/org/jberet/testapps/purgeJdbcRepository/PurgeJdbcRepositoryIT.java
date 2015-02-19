@@ -116,8 +116,15 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test
+    @Override
     public void noSuchJobException() throws Exception {
         super.noSuchJobException();
+    }
+
+    @Test
+    @Override
+    public void noSuchJobInstanceException() throws Exception {
+        super.noSuchJobInstanceException();
     }
 
     @Test

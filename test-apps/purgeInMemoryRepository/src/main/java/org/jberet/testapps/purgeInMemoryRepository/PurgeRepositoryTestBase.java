@@ -13,7 +13,9 @@
 package org.jberet.testapps.purgeInMemoryRepository;
 
 import java.util.Collection;
+import java.util.List;
 import javax.batch.operations.NoSuchJobException;
+import javax.batch.operations.NoSuchJobInstanceException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.context.JobContext;
@@ -65,6 +67,15 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         try {
             Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getRunningExecutions(noSuchJobName));
         } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+    }
+
+    protected void noSuchJobInstanceException() throws Exception {
+        try {
+            final List<JobExecution> result = jobOperator.getJobExecutions(null);
+            Assert.fail("Expecting NoSuchJobInstanceException, but got " + result);
+        } catch (final NoSuchJobInstanceException e) {
             System.out.printf("Got expected %s%n", e);
         }
     }

@@ -262,6 +262,9 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<JobExecution> getJobExecutions(final JobInstance instance) throws
             NoSuchJobInstanceException, JobSecurityException {
+        if (instance == null) {
+            throw MESSAGES.noSuchJobInstance(null);
+        }
         return repository.getJobExecutions(instance);
     }
 

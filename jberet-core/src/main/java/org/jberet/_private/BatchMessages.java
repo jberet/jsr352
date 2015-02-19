@@ -11,6 +11,7 @@ import javax.batch.operations.JobRestartException;
 import javax.batch.operations.JobStartException;
 import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
+import javax.batch.operations.NoSuchJobInstanceException;
 import javax.batch.runtime.BatchStatus;
 import javax.xml.stream.Location;
 
@@ -160,5 +161,8 @@ public interface BatchMessages {
 
     @Message(id = 644, value = "Execution of split %s timed out after %s seconds")
     BatchRuntimeException splitExecutionTimeout(String splitId, long timeoutSeconds);
+
+    @Message(id = 645, value = "No job instance %s")
+    NoSuchJobInstanceException noSuchJobInstance(String jobInstanceValue);
 
 }
