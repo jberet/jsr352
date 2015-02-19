@@ -13,6 +13,7 @@
 package org.jberet.testapps.purgeInMemoryRepository;
 
 import java.util.Collection;
+import javax.batch.operations.NoSuchJobException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.context.JobContext;
@@ -21,6 +22,7 @@ import javax.batch.runtime.context.StepContext;
 import org.jberet.repository.JobExecutionSelector;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
+import org.junit.Test;
 
 public abstract class PurgeRepositoryTestBase extends AbstractIT {
     protected static final long purgeSleepMillis = 2000;
@@ -44,6 +46,27 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         //the current job will not be purged, and should complete
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertNotNull(jobOperator.getJobExecution(jobExecutionId));
+    }
+
+    protected void noSuchJobException() throws Exception {
+        final String noSuchJobName = "no-such-job-name";
+        try {
+            final int result = jobOperator.getJobInstanceCount(noSuchJobName);
+            Assert.fail("Expecting NoSuchJobException, but got " + result);
+        } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+
+        try {
+            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstances(noSuchJobName, 0, 1));
+        } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+        try {
+            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getRunningExecutions(noSuchJobName));
+        } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
     }
 
     public static final class JobExecutionSelector1 implements JobExecutionSelector {

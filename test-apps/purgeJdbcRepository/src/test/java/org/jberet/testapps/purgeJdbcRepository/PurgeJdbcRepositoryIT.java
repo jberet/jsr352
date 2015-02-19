@@ -12,7 +12,6 @@
 
 package org.jberet.testapps.purgeJdbcRepository;
 
-import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
 
@@ -21,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
-    static final String purgeJdbcRepositoryXml = "purgeJdbcRepository";
+    static final String purgeJdbcRepositoryJobName = "purgeJdbcRepository";
 
     @Test(expected = NoSuchJobExecutionException.class)
     public void restartNoSuchJobExecutionException() throws NoSuchJobExecutionException {
@@ -71,7 +70,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
         params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
 
-        startAndVerifyPurgeJob(purgeJdbcRepositoryXml);
+        startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
 
         assertNoSuchJobExecution(prepurge1JobExecutionId);
         assertNoSuchJobExecution(prepurge2JobExecutionId);
@@ -104,7 +103,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
         params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
 
-        startAndVerifyPurgeJob(purgeJdbcRepositoryXml);
+        startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
 
         assertNoSuchJobExecution(prepurge1JobExecutionId);
         assertNoSuchJobExecution(prepurge2JobExecutionId);
@@ -118,24 +117,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
     @Test
     public void noSuchJobException() throws Exception {
-        final String noSuchJobName = "no-such-job-name";
-        try {
-            final int result = jobOperator.getJobInstanceCount(noSuchJobName);
-            Assert.fail("Expecting NoSuchJobException, but got " + result);
-        } catch (final NoSuchJobException e) {
-            System.out.printf("Got expected %s%n", e);
-        }
-
-        try {
-            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstances(noSuchJobName, 0, 1));
-        } catch (final NoSuchJobException e) {
-            System.out.printf("Got expected %s%n", e);
-        }
-        try {
-            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getRunningExecutions(noSuchJobName));
-        } catch (final NoSuchJobException e) {
-            System.out.printf("Got expected %s%n", e);
-        }
+        super.noSuchJobException();
     }
 
     @Test
@@ -150,7 +132,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         //non-null.
         params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
 
-        startAndVerifyPurgeJob(purgeJdbcRepositoryXml);
+        startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
 
         assertNoSuchJobExecution(prepurge1JobExecutionId);
         Assert.assertEquals(BatchStatus.COMPLETED, jobOperator.getJobExecution(prepurge2JobExecutionId).getBatchStatus());

@@ -100,9 +100,18 @@ public final class MongoRepository extends AbstractRepository {
     @Override
     public List<StepExecution> getStepExecutions(final long jobExecutionId) {
         //check cache first, if not found, then retrieve from database
-        List<StepExecution> stepExecutions = super.getStepExecutions(jobExecutionId);
-        if (stepExecutions.isEmpty()) {
+        final List<StepExecution> stepExecutions;
+        final JobExecution jobExecution = jobExecutions.get(jobExecutionId);
+
+        if (jobExecution == null) {
             stepExecutions = selectStepExecutions(jobExecutionId);
+        } else {
+            final List<StepExecution> stepExecutions1 = ((JobExecutionImpl) jobExecution).getStepExecutions();
+            if (stepExecutions1.isEmpty()) {
+                stepExecutions = selectStepExecutions(jobExecutionId);
+            } else {
+                stepExecutions = stepExecutions1;
+            }
         }
         return stepExecutions;
     }

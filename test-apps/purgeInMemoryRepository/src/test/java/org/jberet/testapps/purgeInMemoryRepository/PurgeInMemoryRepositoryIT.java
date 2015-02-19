@@ -197,4 +197,9 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         assertNoSuchJobExecution(prepurge1JobExecutionId);
         assertNoSuchJobExecution(prepurge2JobExecutionId);
     }
+
+    @Test
+    public void noSuchJobException() throws Exception {
+        super.noSuchJobException();
+    }
 }

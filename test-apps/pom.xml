@@ -36,6 +36,7 @@
         <module>chunkSkipRetry</module>
         <module>purgeInMemoryRepository</module>
         <module>purgeJdbcRepository</module>
+        <module>purgeMongoRepository</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
