@@ -296,8 +296,7 @@ public class JobOperatorImpl implements JobOperator {
 
         final JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
         jobContext.getBatchEnvironment().submitTask(jobExecutionRunner);
-        final long jobExecutionId = jobExecution.getExecutionId();
-        return jobExecutionId;
+        return jobExecution.getExecutionId();
     }
 
     private String getApplicationName() {

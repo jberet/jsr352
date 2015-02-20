@@ -12,6 +12,7 @@
 
 package org.jberet.testapps.purgeJdbcRepository;
 
+import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
 
@@ -143,6 +144,77 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
         assertNoSuchJobExecution(prepurge1JobExecutionId);
         Assert.assertEquals(BatchStatus.COMPLETED, jobOperator.getJobExecution(prepurge2JobExecutionId).getBatchStatus());
+    }
+
+    @Test
+    public void withSqlDeleteJobInstancesCascade() throws Exception {
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge(prepurge2JobName);
+
+        params.setProperty("sql", "delete from JOB_INSTANCE where JOBNAME like 'prepurge%'");
+        params.setProperty("purgeJobsByNames", prepurgeAndPrepurge2JobNames);
+
+        startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
+
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
+
+        try {
+            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstanceCount(prepurgeJobName));
+        } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+
+        try {
+            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstanceCount(prepurge2JobName));
+        } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+
+        try {
+            Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge1JobExecutionId));
+        } catch (final NoSuchJobExecutionException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+
+        try {
+            Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge2JobExecutionId));
+        } catch (final NoSuchJobExecutionException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+    }
+
+    @Test
+    public void withSqlDeleteJobExecutionsCascade() throws Exception {
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge(prepurge2JobName);
+
+        params.setProperty("sql",
+                "delete from JOB_EXECUTION where JOBEXECUTIONID in " +
+                    "(select JOBEXECUTIONID from JOB_EXECUTION, JOB_INSTANCE " +
+                        "where JOB_EXECUTION.JOBINSTANCEID = JOB_INSTANCE.JOBINSTANCEID and JOB_INSTANCE.JOBNAME like 'prepurge%'); ");
+
+        params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
+
+        startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
+
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
+
+        Assert.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurgeJobName));
+        Assert.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurge2JobName));
+
+        try {
+            Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge1JobExecutionId));
+        } catch (final NoSuchJobExecutionException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+
+        try {
+            Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge2JobExecutionId));
+        } catch (final NoSuchJobExecutionException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
     }
 
 }
