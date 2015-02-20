@@ -24,10 +24,10 @@ public abstract class BatchTestBase {
 
     protected TextPage runJob(final String contextPath,
                               final String servletPath,
-                              final String jobName,
+                              final String jobCommand,
                               final NameValuePair... requestParams) throws Exception {
-        if (jobName == null || jobName.isEmpty()) {
-            throw new IllegalArgumentException("jobName must be a non-empty string");
+        if (jobCommand == null || jobCommand.isEmpty()) {
+            throw new IllegalArgumentException(BatchJobServlet.JOB_COMMAND_KEY + " must be a non-empty string");
         }
         final WebClient webClient = new WebClient();
         String url = BASE_URL;
@@ -39,7 +39,7 @@ public abstract class BatchTestBase {
         }
         final WebRequest request = new WebRequest(new URI(url).toURL(), HttpMethod.POST);
         final List<NameValuePair> paramsList = new ArrayList<NameValuePair>();
-        paramsList.add(new NameValuePair(BatchJobServlet.JOB_NAME_KEY, jobName));
+        paramsList.add(new NameValuePair(BatchJobServlet.JOB_COMMAND_KEY, jobCommand));
 
         Collections.addAll(paramsList, requestParams);
         request.setRequestParameters(paramsList);

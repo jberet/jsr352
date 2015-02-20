@@ -21,11 +21,11 @@ import org.samples.wildfly.jberet.common.BatchTestBase;
 public final class Xml2JsonIT extends BatchTestBase {
     static final String CONTEXT_PATH = "xml2json";
     static final String SERVLET_PATH = null;
-    static final String JOB_NAME = CONTEXT_PATH;
+    static final String JOB_COMMAND = "start " + CONTEXT_PATH;
 
     @Test
     public void testCsv2Json() throws Exception {
-        final TextPage page = runJob(CONTEXT_PATH, SERVLET_PATH, JOB_NAME);
+        final TextPage page = runJob(CONTEXT_PATH, SERVLET_PATH, JOB_COMMAND);
         final String content = page.getContent();
         assertContainsBatchStatus(content, BatchStatus.COMPLETED);
     }
