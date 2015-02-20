@@ -8,6 +8,8 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -65,7 +67,10 @@ public class BatchJobServlet extends HttpServlet {
         if (jobCommandName.equals("start")) {
             jobExecutionId = jobOperator.start(jobCommandLine[1], jobParams);
         } else if (jobCommandName.equals("restart")) {
-            jobExecutionId = jobOperator.restart(Long.parseLong(jobCommandLine[1]), jobParams);
+            final String jobName = jobCommandLine[1];
+            final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, 0, 1);
+            final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstances.get(0));
+            jobExecutionId = jobOperator.restart(jobExecutions.get(0).getExecutionId(), jobParams);
         } else {
             throw new ServletException(JOB_COMMAND_KEY + " not implemented yet: " + jobCommand);
         }
