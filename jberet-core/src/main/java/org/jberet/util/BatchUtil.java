@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,7 +29,7 @@ import org.jboss.marshalling.cloner.ObjectClonerFactory;
 import org.jboss.marshalling.cloner.ObjectCloners;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
-public class BatchUtil {
+public final class BatchUtil {
     public static final String NL = WildFlySecurityManager.getPropertyPrivileged("line.separator", "\n");
     private static final String keyValDelimiter = " = ";
     private static final ObjectClonerFactory clonerFactory;
@@ -100,14 +100,15 @@ public class BatchUtil {
         }
     }
 
-    public static Serializable bytesToSerializableObject(final byte[] bytes) throws IOException, ClassNotFoundException {
+    public static Serializable bytesToSerializableObject(final byte[] bytes, final ClassLoader classLoader)
+            throws IOException, ClassNotFoundException {
         if (bytes == null) {
             return null;
         }
         final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         ObjectInputStream in = null;
         try {
-            in = new ObjectInputStream(bis);
+            in = new ObjectInputStreamWithClassloader(bis, classLoader);
             return (Serializable) in.readObject();
         } finally {
             try {

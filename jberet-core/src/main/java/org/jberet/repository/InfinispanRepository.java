@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,15 @@
 
 package org.jberet.repository;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.JobInstance;
+import javax.batch.runtime.StepExecution;
+import javax.transaction.TransactionManager;
+
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.context.Flag;
@@ -19,17 +28,12 @@ import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Job;
-import org.jberet.runtime.*;
+import org.jberet.runtime.AbstractStepExecution;
+import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.JobInstanceImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
+import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.spi.PropertyKey;
-
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.JobInstance;
-import javax.batch.runtime.StepExecution;
-import javax.transaction.TransactionManager;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 
 public final class InfinispanRepository extends AbstractRepository {
     private static final String DEFAULT_INFINISPAN_XML = "infinispan.xml";
@@ -141,7 +145,7 @@ public final class InfinispanRepository extends AbstractRepository {
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(final long jobExecutionId) {
+    public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
         final JobExecutionImpl jobExecution = jobExecutionCache.get(jobExecutionId);
         return jobExecution.getStepExecutions();
     }
@@ -178,7 +182,9 @@ public final class InfinispanRepository extends AbstractRepository {
     }
 
     @Override
-    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName, final JobExecutionImpl jobExecutionToRestart0) {
+    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName,
+                                                                 final JobExecutionImpl jobExecutionToRestart0,
+                                                                 final ClassLoader classLoader) {
         final JobExecutionImpl jobExecutionToRestart = jobExecutionCache.get(jobExecutionToRestart0.getExecutionId());
         for (final StepExecution stepExecution : jobExecutionToRestart.getStepExecutions()) {
             if (stepName.equals(stepExecution.getStepName())) {
@@ -217,8 +223,9 @@ public final class InfinispanRepository extends AbstractRepository {
     @Override
     public List<PartitionExecutionImpl> getPartitionExecutions(final long stepExecutionId,
                                                                final StepExecutionImpl stepExecution,
-                                                               final boolean notCompletedOnly) {
-        return super.getPartitionExecutions(stepExecutionId, stepExecutionCache.get(stepExecutionId), notCompletedOnly);
+                                                               final boolean notCompletedOnly,
+                                                               final ClassLoader classLoader) {
+        return super.getPartitionExecutions(stepExecutionId, stepExecutionCache.get(stepExecutionId), notCompletedOnly, classLoader);
     }
 
     @Override

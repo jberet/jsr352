@@ -242,16 +242,16 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(final long jobExecutionId) {
+    public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
         //check cache first, if not found, then retrieve from database
         final List<StepExecution> stepExecutions;
         final JobExecution jobExecution = jobExecutions.get(jobExecutionId);
         if (jobExecution == null) {
-            stepExecutions = selectStepExecutions(jobExecutionId);
+            stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
         } else {
             final List<StepExecution> stepExecutions1 = ((JobExecutionImpl) jobExecution).getStepExecutions();
             if (stepExecutions1.isEmpty()) {
-                stepExecutions = selectStepExecutions(jobExecutionId);
+                stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
             } else {
                 stepExecutions = stepExecutions1;
             }
@@ -616,7 +616,7 @@ public final class JdbcRepository extends AbstractRepository {
         }
     }
 
-    StepExecution selectStepExecution(final long stepExecutionId) {
+    StepExecution selectStepExecution(final long stepExecutionId, final ClassLoader classLoader) {
         final String select = sqls.getProperty(SELECT_STEP_EXECUTION);
         final Connection connection = getConnection();
         ResultSet rs = null;
@@ -626,7 +626,7 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement = connection.prepareStatement(select);
             preparedStatement.setLong(1, stepExecutionId);
             rs = preparedStatement.executeQuery();
-            createStepExecutionsFromResultSet(rs, result, false);
+            createStepExecutionsFromResultSet(rs, result, false, classLoader);
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
@@ -640,9 +640,10 @@ public final class JdbcRepository extends AbstractRepository {
      * should only be called after the cache has been searched without a match.
      *
      * @param jobExecutionId if null, retrieves all StepExecutions; otherwise, retrieves all StepExecutions belongs to the JobExecution id
+     * @param classLoader the current application class loader
      * @return a list of StepExecutions
      */
-    List<StepExecution> selectStepExecutions(final Long jobExecutionId) {
+    List<StepExecution> selectStepExecutions(final Long jobExecutionId, final ClassLoader classLoader) {
         final String select = (jobExecutionId == null) ? sqls.getProperty(SELECT_ALL_STEP_EXECUTIONS) :
                 sqls.getProperty(SELECT_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID);
         final Connection connection = getConnection();
@@ -655,7 +656,7 @@ public final class JdbcRepository extends AbstractRepository {
                 preparedStatement.setLong(1, jobExecutionId);
             }
             rs = preparedStatement.executeQuery();
-            createStepExecutionsFromResultSet(rs, result, false);
+            createStepExecutionsFromResultSet(rs, result, false, classLoader);
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
@@ -684,8 +685,10 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName, final JobExecutionImpl jobExecutionToRestart) {
-        final StepExecutionImpl result = super.findOriginalStepExecutionForRestart(stepName, jobExecutionToRestart);
+    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName,
+                                                                 final JobExecutionImpl jobExecutionToRestart,
+                                                                 final ClassLoader classLoader) {
+        final StepExecutionImpl result = super.findOriginalStepExecutionForRestart(stepName, jobExecutionToRestart, classLoader);
         if (result != null) {
             return result;
         }
@@ -699,7 +702,7 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(1, jobExecutionToRestart.getJobInstance().getInstanceId());
             preparedStatement.setString(2, stepName);
             rs = preparedStatement.executeQuery();
-            createStepExecutionsFromResultSet(rs, results, true);
+            createStepExecutionsFromResultSet(rs, results, true, classLoader);
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, select);
         } finally {
@@ -711,8 +714,9 @@ public final class JdbcRepository extends AbstractRepository {
     @Override
     public List<PartitionExecutionImpl> getPartitionExecutions(final long stepExecutionId,
                                                                final StepExecutionImpl stepExecution,
-                                                               final boolean notCompletedOnly) {
-        List<PartitionExecutionImpl> result = super.getPartitionExecutions(stepExecutionId, stepExecution, notCompletedOnly);
+                                                               final boolean notCompletedOnly,
+                                                               final ClassLoader classLoader) {
+        List<PartitionExecutionImpl> result = super.getPartitionExecutions(stepExecutionId, stepExecution, notCompletedOnly, classLoader);
         if (result != null && !result.isEmpty()) {
             return result;
         }
@@ -735,9 +739,9 @@ public final class JdbcRepository extends AbstractRepository {
                             stepExecution.getStepName(),
                             BatchStatus.valueOf(batchStatusValue),
                             rs.getString(TableColumns.EXITSTATUS),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.PERSISTENTUSERDATA)),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.READERCHECKPOINTINFO)),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.WRITERCHECKPOINTINFO))
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.PERSISTENTUSERDATA), classLoader),
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.READERCHECKPOINTINFO), classLoader),
+                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.WRITERCHECKPOINTINFO), classLoader)
                     ));
                 }
             }
@@ -749,7 +753,10 @@ public final class JdbcRepository extends AbstractRepository {
         return result;
     }
 
-    private void createStepExecutionsFromResultSet(final ResultSet rs, final List<StepExecution> result, final boolean top1)
+    private void createStepExecutionsFromResultSet(final ResultSet rs,
+                                                   final List<StepExecution> result,
+                                                   final boolean top1,
+                                                   final ClassLoader classLoader)
             throws SQLException, ClassNotFoundException, IOException {
         while (rs.next()) {
             final StepExecutionImpl e = new StepExecutionImpl(
@@ -759,7 +766,7 @@ public final class JdbcRepository extends AbstractRepository {
                     rs.getTimestamp(TableColumns.ENDTIME),
                     rs.getString(TableColumns.BATCHSTATUS),
                     rs.getString(TableColumns.EXITSTATUS),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.PERSISTENTUSERDATA)),
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.PERSISTENTUSERDATA), classLoader),
                     rs.getInt(TableColumns.READCOUNT),
                     rs.getInt(TableColumns.WRITECOUNT),
                     rs.getInt(TableColumns.COMMITCOUNT),
@@ -768,8 +775,8 @@ public final class JdbcRepository extends AbstractRepository {
                     rs.getInt(TableColumns.PROCESSSKIPCOUNT),
                     rs.getInt(TableColumns.FILTERCOUNT),
                     rs.getInt(TableColumns.WRITESKIPCOUNT),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.READERCHECKPOINTINFO)),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.WRITERCHECKPOINTINFO))
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.READERCHECKPOINTINFO), classLoader),
+                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.WRITERCHECKPOINTINFO), classLoader)
             );
             result.add(e);
             if (top1) {

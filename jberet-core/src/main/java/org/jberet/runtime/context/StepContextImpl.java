@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -50,7 +50,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
 
         final JobExecutionImpl originalToRestart = getJobContext().originalToRestart;
         if (originalToRestart != null) {  //currently in a restarted execution
-            originalStepExecution = getJobContext().getJobRepository().findOriginalStepExecutionForRestart(id, originalToRestart);
+            originalStepExecution = getJobContext().getJobRepository().findOriginalStepExecutionForRestart(id, originalToRestart, classLoader);
             if (originalStepExecution != null) {
                 if (originalStepExecution.getBatchStatus() == BatchStatus.COMPLETED) {
                     allowStartIfComplete = Boolean.valueOf(step.getAllowStartIfComplete());

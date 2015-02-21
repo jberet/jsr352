@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -243,7 +243,8 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             //need to carry over partition execution data from previous run of the same step
             final StepExecutionImpl originalStepExecution = batchContext.getOriginalStepExecution();
             abortedPartitionExecutionsFromPrevious =
-                    jobContext.getJobRepository().getPartitionExecutions(originalStepExecution.getStepExecutionId(), originalStepExecution, true);
+                    jobContext.getJobRepository().getPartitionExecutions(originalStepExecution.getStepExecutionId(),
+                            originalStepExecution, true, jobContext.getClassLoader());
             numOfPartitions = abortedPartitionExecutionsFromPrevious.size();
         }
         if (numOfPartitions > numOfThreads) {

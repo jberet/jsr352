@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -98,17 +98,17 @@ public final class MongoRepository extends AbstractRepository {
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(final long jobExecutionId) {
+    public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
         //check cache first, if not found, then retrieve from database
         final List<StepExecution> stepExecutions;
         final JobExecution jobExecution = jobExecutions.get(jobExecutionId);
 
         if (jobExecution == null) {
-            stepExecutions = selectStepExecutions(jobExecutionId);
+            stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
         } else {
             final List<StepExecution> stepExecutions1 = ((JobExecutionImpl) jobExecution).getStepExecutions();
             if (stepExecutions1.isEmpty()) {
-                stepExecutions = selectStepExecutions(jobExecutionId);
+                stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
             } else {
                 stepExecutions = stepExecutions1;
             }
@@ -346,10 +346,10 @@ public final class MongoRepository extends AbstractRepository {
         }
     }
 
-    StepExecution selectStepExecution(final long stepExecutionId) {
+    StepExecution selectStepExecution(final long stepExecutionId, final ClassLoader classLoader) {
         final DBCollection collection = db.getCollection(TableColumns.STEP_EXECUTION);
         final DBObject dbObject = collection.findOne(new BasicDBObject(TableColumns.STEPEXECUTIONID, stepExecutionId));
-        return createStepExecutionFromDBObject(dbObject);
+        return createStepExecutionFromDBObject(dbObject, classLoader);
     }
 
     /**
@@ -359,13 +359,13 @@ public final class MongoRepository extends AbstractRepository {
      * @param jobExecutionId if null, retrieves all StepExecutions; otherwise, retrieves all StepExecutions belongs to the JobExecution id
      * @return a list of StepExecutions
      */
-    List<StepExecution> selectStepExecutions(final Long jobExecutionId) {
+    List<StepExecution> selectStepExecutions(final Long jobExecutionId, final ClassLoader classLoader) {
         final DBCollection collection = db.getCollection(TableColumns.STEP_EXECUTION);
         DBCursor cursor = jobExecutionId == null ? collection.find() :
                 collection.find(new BasicDBObject(TableColumns.JOBEXECUTIONID, jobExecutionId));
         cursor = cursor.sort(new BasicDBObject(TableColumns.STEPEXECUTIONID, 1));
         final List<StepExecution> result = new ArrayList<StepExecution>();
-        createStepExecutionsFromDBCursor(cursor, result);
+        createStepExecutionsFromDBCursor(cursor, result, classLoader);
         return result;
     }
 
@@ -381,8 +381,9 @@ public final class MongoRepository extends AbstractRepository {
 
     @Override
     public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName,
-                                                                 final JobExecutionImpl jobExecutionToRestart) {
-        final StepExecutionImpl result = super.findOriginalStepExecutionForRestart(stepName, jobExecutionToRestart);
+                                                                 final JobExecutionImpl jobExecutionToRestart,
+                                                                 final ClassLoader classLoader) {
+        final StepExecutionImpl result = super.findOriginalStepExecutionForRestart(stepName, jobExecutionToRestart, classLoader);
         if (result != null) {
             return result;
         }
@@ -403,14 +404,15 @@ public final class MongoRepository extends AbstractRepository {
         final DBCursor cursor1 = db.getCollection(TableColumns.STEP_EXECUTION).find(query).sort(
                 new BasicDBObject(TableColumns.STEPEXECUTIONID, -1));
 
-        return createStepExecutionFromDBObject(cursor1.one());
+        return createStepExecutionFromDBObject(cursor1.one(), classLoader);
     }
 
     @Override
     public List<PartitionExecutionImpl> getPartitionExecutions(final long stepExecutionId,
                                                                final StepExecutionImpl stepExecution,
-                                                               final boolean notCompletedOnly) {
-        List<PartitionExecutionImpl> result = super.getPartitionExecutions(stepExecutionId, stepExecution, notCompletedOnly);
+                                                               final boolean notCompletedOnly,
+                                                               final ClassLoader classLoader) {
+        List<PartitionExecutionImpl> result = super.getPartitionExecutions(stepExecutionId, stepExecution, notCompletedOnly, classLoader);
         if (result != null && !result.isEmpty()) {
             return result;
         }
@@ -431,9 +433,9 @@ public final class MongoRepository extends AbstractRepository {
                             stepExecution.getStepName(),
                             BatchStatus.valueOf(batchStatusValue),
                             (String) next.get(TableColumns.EXITSTATUS),
-                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.PERSISTENTUSERDATA)),
-                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.READERCHECKPOINTINFO)),
-                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.WRITERCHECKPOINTINFO))
+                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.PERSISTENTUSERDATA), classLoader),
+                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.READERCHECKPOINTINFO), classLoader),
+                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.WRITERCHECKPOINTINFO), classLoader)
                     ));
                 }
             }
@@ -443,13 +445,13 @@ public final class MongoRepository extends AbstractRepository {
         return result;
     }
 
-    private void createStepExecutionsFromDBCursor(final DBCursor cursor, final List<StepExecution> result) {
+    private void createStepExecutionsFromDBCursor(final DBCursor cursor, final List<StepExecution> result, final ClassLoader classLoader) {
         while (cursor.hasNext()) {
-            result.add(createStepExecutionFromDBObject(cursor.next()));
+            result.add(createStepExecutionFromDBObject(cursor.next(), classLoader));
         }
     }
 
-    private StepExecutionImpl createStepExecutionFromDBObject(final DBObject dbObject) {
+    private StepExecutionImpl createStepExecutionFromDBObject(final DBObject dbObject, final ClassLoader classLoader) {
         if (dbObject == null) {
             return null;
         }
@@ -461,7 +463,7 @@ public final class MongoRepository extends AbstractRepository {
                     (Date) dbObject.get(TableColumns.ENDTIME),
                     (String) dbObject.get(TableColumns.BATCHSTATUS),
                     (String) dbObject.get(TableColumns.EXITSTATUS),
-                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.PERSISTENTUSERDATA)),
+                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.PERSISTENTUSERDATA), classLoader),
                     ((Number) dbObject.get(TableColumns.READCOUNT)).longValue(),
                     ((Number) dbObject.get(TableColumns.WRITECOUNT)).longValue(),
                     ((Number) dbObject.get(TableColumns.COMMITCOUNT)).longValue(),
@@ -470,8 +472,8 @@ public final class MongoRepository extends AbstractRepository {
                     ((Number) dbObject.get(TableColumns.PROCESSSKIPCOUNT)).longValue(),
                     ((Number) dbObject.get(TableColumns.FILTERCOUNT)).longValue(),
                     ((Number) dbObject.get(TableColumns.WRITESKIPCOUNT)).longValue(),
-                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.READERCHECKPOINTINFO)),
-                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.WRITERCHECKPOINTINFO))
+                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.READERCHECKPOINTINFO), classLoader),
+                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.WRITERCHECKPOINTINFO), classLoader)
             );
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, "createStepExecutionFromDBObject");

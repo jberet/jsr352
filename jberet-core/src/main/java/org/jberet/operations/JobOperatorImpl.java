@@ -280,7 +280,7 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<StepExecution> getStepExecutions(final long jobExecutionId) throws
             NoSuchJobExecutionException, JobSecurityException {
-        final List<StepExecution> stepExecutions = repository.getStepExecutions(jobExecutionId);
+        final List<StepExecution> stepExecutions = repository.getStepExecutions(jobExecutionId, batchEnvironment.getClassLoader());
         if (stepExecutions.isEmpty()) {
             //check if the jobExecutionId passed in points to a valid JobExecution
             //since no step executions under this jobExecutionId was found, it's likely this job execution may not exist

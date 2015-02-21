@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -192,7 +192,7 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(final long jobExecutionId) {
+    public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(jobExecutionId);
         if (jobExecution == null) {
             return Collections.emptyList();
@@ -234,7 +234,9 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
-    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName, final JobExecutionImpl jobExecutionToRestart) {
+    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName,
+                                                                 final JobExecutionImpl jobExecutionToRestart,
+                                                                 final ClassLoader classLoader) {
         for (final StepExecution stepExecution : jobExecutionToRestart.getStepExecutions()) {
             if (stepName.equals(stepExecution.getStepName())) {
                 return (StepExecutionImpl) stepExecution;
@@ -269,7 +271,8 @@ public abstract class AbstractRepository implements JobRepository {
     @Override
     public List<PartitionExecutionImpl> getPartitionExecutions(final long stepExecutionId,
                                                                final StepExecutionImpl stepExecution,
-                                                               final boolean notCompletedOnly) {
+                                                               final boolean notCompletedOnly,
+                                                               final ClassLoader classLoader) {
         if (stepExecution != null) {
             final List<PartitionExecutionImpl> partitionExecutions = stepExecution.getPartitionExecutions();
             if (partitionExecutions.isEmpty() || !notCompletedOnly) {
