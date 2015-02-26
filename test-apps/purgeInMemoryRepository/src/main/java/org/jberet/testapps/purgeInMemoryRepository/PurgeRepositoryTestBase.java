@@ -51,23 +51,26 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
     }
 
     protected void noSuchJobException() throws Exception {
-        final String noSuchJobName = "no-such-job-name";
-        try {
-            final int result = jobOperator.getJobInstanceCount(noSuchJobName);
-            Assert.fail("Expecting NoSuchJobException, but got " + result);
-        } catch (final NoSuchJobException e) {
-            System.out.printf("Got expected %s%n", e);
-        }
+        final String[] noSuchJobNames = {"no-such-job-name", null, ""};
+        for(final String noSuchJobName : noSuchJobNames) {
+            try {
+                final int result = jobOperator.getJobInstanceCount(noSuchJobName);
+                Assert.fail("Expecting NoSuchJobException, but got " + result);
+            } catch (final NoSuchJobException e) {
+                System.out.printf("Got expected %s%n", e);
+            }
 
-        try {
-            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstances(noSuchJobName, 0, 1));
-        } catch (final NoSuchJobException e) {
-            System.out.printf("Got expected %s%n", e);
-        }
-        try {
-            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getRunningExecutions(noSuchJobName));
-        } catch (final NoSuchJobException e) {
-            System.out.printf("Got expected %s%n", e);
+            try {
+                Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstances(noSuchJobName, 0, 1));
+            } catch (final NoSuchJobException e) {
+                System.out.printf("Got expected %s%n", e);
+            }
+
+            try {
+                Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getRunningExecutions(noSuchJobName));
+            } catch (final NoSuchJobException e) {
+                System.out.printf("Got expected %s%n", e);
+            }
         }
     }
 

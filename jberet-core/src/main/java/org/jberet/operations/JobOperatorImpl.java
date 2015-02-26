@@ -140,6 +140,9 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public int getJobInstanceCount(final String jobName) throws NoSuchJobException, JobSecurityException {
+        if (jobName == null) {
+            throw MESSAGES.noSuchJobException(jobName);
+        }
         final int count = repository.getJobInstanceCount(jobName);
         if (count == 0 && repository.getJob(jobName) == null) {
             throw MESSAGES.noSuchJobException(jobName);
@@ -149,6 +152,9 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public List<JobInstance> getJobInstances(final String jobName, final int start, final int count) throws NoSuchJobException, JobSecurityException {
+        if (jobName == null) {
+            throw MESSAGES.noSuchJobException(jobName);
+        }
         final List<JobInstance> result = new ArrayList<JobInstance>();
         int pos = 0;
         final List<JobInstance> instances = repository.getJobInstances(jobName);
@@ -171,6 +177,9 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public List<Long> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
+        if (jobName == null) {
+            throw MESSAGES.noSuchJobException(jobName);
+        }
         final List<Long> result = new ArrayList<Long>();
         for (final JobExecution e : repository.getJobExecutions(null)) {
             if (e.getJobName().equals(jobName)) {
