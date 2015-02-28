@@ -165,4 +165,7 @@ public interface BatchMessages {
     @Message(id = 645, value = "No job instance %s")
     NoSuchJobInstanceException noSuchJobInstance(String jobInstanceValue);
 
+    @Message(id = 646, value = "Failed to restart the job with name: %s, execution id: %s, because the job is configured not restartable")
+    JobRestartException unrestartableJob(String jobName, long jobExecutionId);
+
 }

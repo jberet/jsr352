@@ -12,6 +12,7 @@
 
 package org.jberet.testapps.chunkstop;
 
+import javax.batch.operations.JobRestartException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 
@@ -40,6 +41,7 @@ public class ChunkStopIT extends AbstractIT {
     @Test
     public void chunkStopRestart() throws Exception {
         params.setProperty("writer.sleep.time", "500");
+        params.setProperty("restartable", Boolean.TRUE.toString());
         startJob(jobXml);
         jobOperator.stop(jobExecutionId);
         awaitTermination();
@@ -85,6 +87,22 @@ public class ChunkStopIT extends AbstractIT {
         Assert.assertEquals(20, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
         Assert.assertEquals(20, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
         Assert.assertEquals(3, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
+    }
+
+    @Test
+    public void chunkFailUnrestartable() throws Exception {
+        params.setProperty("reader.fail.on.values", "13");
+        params.setProperty("restartable", Boolean.FALSE.toString());
+        startJobAndWait(jobXml);
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        params.setProperty("reader.fail.on.values", "3");
+        try {
+            restartAndWait();
+            Assert.fail("Expecting JobRestartException, but got none.");
+        } catch (final JobRestartException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
     }
 
     @Test

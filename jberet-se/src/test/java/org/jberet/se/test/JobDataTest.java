@@ -105,7 +105,12 @@ public class JobDataTest {
         restartJobMatchOther(jobExecution.getExecutionId());
     }
 
-    // restart the job execution stopped in org.jberet.se.test.Batchlet1Test.testStopWithRestartPoint()
+    /**
+     * Restarts the job execution stopped in {@link Batchlet1Test#testStopWithRestartPoint()}
+     * @throws Exception
+     *
+     * @see org.jberet.se.test.Batchlet1Test#testStopWithRestartPoint
+     */
     @Test
     public void testRestartPositionFromBatchlet2Test() throws Exception {
         final long previousJobExecutionId = getOriginalJobExecutionIdFromFile(Batchlet1Test.jobName2ExecutionIdSaveTo);

@@ -47,8 +47,13 @@ public class Batchlet1Test {
         jobExecutionId = restartJobMatchStop(jobExecutionId);
     }
 
-    // the stopped job execution in this test will be restarted in test
-    // org.jberet.se.test.JobDataTest.testRestartPositionFromBatchlet2Test()
+    /**
+     * The stopped job execution in this test will be restarted in test
+     * {@link JobDataTest#testRestartPositionFromBatchlet2Test()}
+     * @throws Exception
+     *
+     * @see JobDataTest#testRestartPositionFromBatchlet2Test()
+     */
     @Test
     public void testStopWithRestartPoint() throws Exception {
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_STOP);

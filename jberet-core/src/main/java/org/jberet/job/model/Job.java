@@ -19,6 +19,8 @@ import java.util.List;
 public final class Job extends InheritableJobElement implements Serializable, PropertiesHolder {
     private static final long serialVersionUID = -3566969844084046522L;
 
+    public static final String UNRESTARTABLE = "jberet.unrestartable";
+
     private String restartable;
     private final List<JobElement> jobElements = new ArrayList<JobElement>();
 
@@ -37,7 +39,7 @@ public final class Job extends InheritableJobElement implements Serializable, Pr
     }
 
     public boolean getRestartableBoolean() {
-        return Boolean.parseBoolean(restartable);
+        return (restartable == null || restartable.isEmpty()) ? true : Boolean.parseBoolean(restartable);
     }
 
     void setRestartable(final String restartable) {

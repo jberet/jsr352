@@ -171,6 +171,50 @@ public final class JobParserTest {
     }
 
     @Test
+    public void testRestartableDefault() throws Exception {
+        final String jobXml =
+                "<job id=\"job1\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version=\"1.0\">" + NL +
+                    "<step id=\"step1\" next=\"step2\">" + NL +
+                        "<batchlet ref=\"batchlet1\"/>" + NL +
+                    "</step>" + NL +
+                "</job>" + NL;
+
+        ByteArrayInputStream is = null;
+        try {
+            is = new ByteArrayInputStream(jobXml.getBytes());
+            final Job job = JobParser.parseJob(is, getClass().getClassLoader());
+            Assert.assertEquals(true, job.getRestartableBoolean());
+            Assert.assertEquals(null, job.getRestartable());
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+
+    @Test
+    public void testRestartableFalse() throws Exception {
+        final String jobXml =
+                "<job id=\"job1\" restartable=\"false\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version=\"1.0\">" + NL +
+                    "<step id=\"step1\" next=\"step2\">" + NL +
+                        "<batchlet ref=\"batchlet1\"/>" + NL +
+                    "</step>" + NL +
+                "</job>" + NL;
+
+        ByteArrayInputStream is = null;
+        try {
+            is = new ByteArrayInputStream(jobXml.getBytes());
+            final Job job = JobParser.parseJob(is, getClass().getClassLoader());
+            Assert.assertEquals(false, job.getRestartableBoolean());
+            Assert.assertEquals(Boolean.FALSE.toString(), job.getRestartable());
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+
+    @Test
     public void testParseJob() throws Exception {
         Job job = null;
         final InputStream is = getClass().getClassLoader().getResourceAsStream(SAMPLE_JOB_XML);

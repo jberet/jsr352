@@ -12,7 +12,7 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="chunkStop" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="chunkStop" restartable="#{jobParameters['restartable']}" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="step1">
         <chunk>
             <reader ref="integerArrayReader">

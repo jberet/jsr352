@@ -205,6 +205,11 @@ public class JobOperatorImpl implements JobOperator {
             NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
         long newExecutionId = 0;
         final JobExecutionImpl originalToRestart = (JobExecutionImpl) getJobExecution(executionId);
+
+        if (Job.UNRESTARTABLE.equals(originalToRestart.getRestartPosition())) {
+            throw MESSAGES.unrestartableJob(originalToRestart.getJobName(), executionId);
+        }
+
         final BatchStatus previousStatus = originalToRestart.getBatchStatus();
         if (previousStatus == BatchStatus.COMPLETED) {
             throw MESSAGES.jobExecutionAlreadyCompleteException(executionId);
