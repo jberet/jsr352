@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.batch.api.BatchProperty;
+import javax.batch.runtime.BatchRuntime;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -94,6 +98,12 @@ public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase 
     @BatchProperty
     protected Map<String, String> properties;
 
+    @Inject
+    protected JobContext jobContext;
+    @Inject
+    protected StepContext stepContext;
+    
+    protected boolean useLocalTx;
     protected PreparedStatement preparedStatement;
     protected DataSource dataSource;
     private Properties dbProperties;
@@ -116,6 +126,7 @@ public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase 
         if (beanType != List.class && beanType != Map.class) {
             initJsonFactoryAndObjectMapper();
         }
+        useLocalTx = useLocalTx(jobContext, stepContext);
     }
 
     protected Connection getConnection() throws Exception {
@@ -141,5 +152,34 @@ public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase 
                 SupportLogger.LOGGER.tracef(e, "Failed to close connection.");
             }
         }
+    }
+
+    private static boolean useLocalTx(final JobContext jobContext, final StepContext stepContext) {
+        final String localTx = "jberet.local-tx";
+        
+        // Jobs parameters passed to the start should always be preferred
+        final JobExecution jobExecution = BatchRuntime.getJobOperator().getJobExecution(jobContext.getExecutionId());
+        if (jobExecution.getJobParameters() != null) {
+            final String value = jobExecution.getJobParameters().getProperty(localTx);
+            if (value != null) {
+                return "true".equalsIgnoreCase(value);
+            }
+        }
+        // Next any step parameters should take precedence
+        if (stepContext.getProperties() != null) {
+            final String value = stepContext.getProperties().getProperty(localTx);
+            if (value != null) {
+                return "true".equalsIgnoreCase(value);
+            }
+        }
+        // Finally job parameters set in the job.xml
+        if (jobContext.getProperties() != null) {
+            final String value = jobContext.getProperties().getProperty(localTx);
+            if (value != null) {
+                return "true".equalsIgnoreCase(value);
+            }
+        }
+        // Not found use the standard TransactionManager
+        return false;
     }
 }
