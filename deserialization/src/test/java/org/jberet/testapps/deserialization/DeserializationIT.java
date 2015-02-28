@@ -4,6 +4,7 @@ import javax.batch.runtime.BatchStatus;
 
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.samples.wildfly.jberet.common.BatchTestBase;
 
@@ -14,6 +15,16 @@ public class DeserializationIT extends BatchTestBase {
     @Test
     public void startJob() throws Exception {
         final TextPage page = runJob(CONTEXT_PATH, SERVLET_PATH, "start " + CONTEXT_PATH,
+                new NameValuePair("fail.on", "8"));
+        final String content = page.getContent();
+        assertContainsBatchStatus(content, BatchStatus.FAILED);
+    }
+
+    @Test
+    @Ignore("This test bans the job to be restarted, and any restart will fail")
+    public void banRestart() throws Exception {
+        final TextPage page = runJob(CONTEXT_PATH, SERVLET_PATH, "start " + CONTEXT_PATH,
+                new NameValuePair("restartable", Boolean.FALSE.toString()),
                 new NameValuePair("fail.on", "8"));
         final String content = page.getContent();
         assertContainsBatchStatus(content, BatchStatus.FAILED);

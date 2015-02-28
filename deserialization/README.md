@@ -33,3 +33,14 @@ The following is the detailed steps for running such test:
 * run org.jberet.testapps.deserialization.DeserializationIT.startJob test, and the job execution will fail
 * restart WildFly
 * run org.jberet.testapps.deserialization.DeserializationIT.restartJob test, and the job execution will complete
+
+This test app can also verify the restartable job attribute. The value of restartable attribute in job xml is controlled
+by the job parameter named "restartable". When a job is initially started with job parameter restartable=false, it cannot
+be restarted after the initial execution failed or stopped.
+
+* deploy to WildFly
+* run org.jberet.testapps.deserialization.DeserializationIT.banRestart, the job execution will fail as the test app
+throws exception, and the test will pass with the expected job failure.
+* restart WildFly to make sure the previous decision to ban restart was persisted and retrieved upon the next restart.
+* run org.jberet.testapps.deserialization.DeserializationIT.restartJob, the restart will fail with JobRestartException,
+since the initial job execution was configured not restartable.
