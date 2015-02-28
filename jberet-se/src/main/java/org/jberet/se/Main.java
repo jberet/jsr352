@@ -61,6 +61,6 @@ public class Main {
     }
 
     private static void usage(final String[] args) {
-        System.err.printf("Usage: java -classpath ... -Dkey1=val1 ... org.jberet.Main jobXML%nThe following application args are invalid:%n%s", Arrays.asList(args));
+        System.err.printf("Usage: java -classpath ... -Dkey1=val1 ... org.jberet.se.Main jobXML%nThe following application args are invalid:%n%s", Arrays.asList(args));
     }
 }
