@@ -97,12 +97,23 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
         Connection connection = null;
         try {
             connection = getConnection();
+            if (dataSource == null) {
+                connection.setAutoCommit(false);
+            }
             preparedStatement = connection.prepareStatement(sql);
             for (final Object item : items) {
                 mapParameters(item);
                 preparedStatement.addBatch();
             }
             preparedStatement.executeBatch();
+            if (dataSource == null) {
+                connection.commit();
+            }
+        } catch (Exception e) {
+            if (dataSource == null && connection != null) {
+                connection.rollback();
+            }
+            throw e;
         } finally {
             JdbcItemReaderWriterBase.close(connection, preparedStatement);
         }
