@@ -12,13 +12,16 @@
 
 package org.jberet.job.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.jberet._private.BatchMessages;
+import org.jberet.creation.ArchiveXmlLoader;
 
 import static javax.xml.stream.XMLStreamConstants.CDATA;
 import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
@@ -40,7 +43,9 @@ public final class JobParser {
      * @throws XMLStreamException
      */
     public static Job parseJob(final InputStream inputStream, final ClassLoader classLoader) throws XMLStreamException {
-        final XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+        final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+        xmlInputFactory.setXMLResolver(new JobXMLResolver(classLoader));
+        final XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(inputStream);
         Job job = null;
         try {
             while (reader.hasNext()) {
@@ -667,5 +672,22 @@ public final class JobParser {
             }
         }
         throw BatchMessages.MESSAGES.unexpectedXmlElement(reader.getLocalName(), reader.getLocation());
+    }
+
+    private static class JobXMLResolver implements XMLResolver {
+        private final ClassLoader classLoader;
+
+        private JobXMLResolver(ClassLoader classLoader) {
+            this.classLoader = classLoader;
+        }
+
+        @Override
+        public Object resolveEntity(String publicID, String systemID, String baseURI, String namespace) throws XMLStreamException {
+            try {
+                return ArchiveXmlLoader.getJobXml(systemID, classLoader);
+            } catch (IOException e) {
+                throw new XMLStreamException(e);
+            }
+        }
     }
 }
