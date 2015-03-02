@@ -107,7 +107,7 @@ public class ArchiveXmlLoader {
         return job;
     }
 
-    private static InputStream getJobXml(String jobXml, final ClassLoader classLoader) throws IOException {
+    public static InputStream getJobXml(String jobXml, final ClassLoader classLoader) throws IOException {
         if (!jobXml.endsWith(".xml")) {
             jobXml += ".xml";
         }
