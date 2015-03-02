@@ -180,15 +180,7 @@ public class JobOperatorImpl implements JobOperator {
         if (jobName == null) {
             throw MESSAGES.noSuchJobException(jobName);
         }
-        final List<Long> result = new ArrayList<Long>();
-        for (final JobExecution e : repository.getJobExecutions(null)) {
-            if (e.getJobName().equals(jobName)) {
-                final BatchStatus s = e.getBatchStatus();
-                if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
-                    result.add(e.getExecutionId());
-                }
-            }
-        }
+        final List<Long> result = repository.getRunningExecutions(jobName);
         if (result.size() == 0 && repository.getJob(jobName) == null) {
             throw MESSAGES.noSuchJobException(jobName);
         }

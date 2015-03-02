@@ -300,4 +300,19 @@ public abstract class AbstractRepository implements JobRepository {
         }
         return BatchUtil.clone(object);
     }
+
+    @Override
+    public List<Long> getRunningExecutions(final String jobName) {
+        final List<Long> result = new ArrayList<Long>();
+
+        for (final Map.Entry<Long, JobExecution> e : jobExecutions.entrySet()) {
+            if (e.getValue().getJobName().equals(jobName)) {
+                final BatchStatus s = e.getValue().getBatchStatus();
+                if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
+                    result.add(e.getKey());
+                }
+            }
+        }
+        return result;
+    }
 }

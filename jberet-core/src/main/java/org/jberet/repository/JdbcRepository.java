@@ -72,6 +72,7 @@ public final class JdbcRepository extends AbstractRepository {
 
     private static final String SELECT_ALL_JOB_EXECUTIONS = "select-all-job-executions";
     private static final String SELECT_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID = "select-job-executions-by-job-instance-id";
+    private static final String SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME = "select-running-job-executions-by-job-name";
     private static final String SELECT_JOB_EXECUTION = "select-job-execution";
     private static final String INSERT_JOB_EXECUTION = "insert-job-execution";
     private static final String UPDATE_JOB_EXECUTION = "update-job-execution";
@@ -525,6 +526,30 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
+    public List<Long> getRunningExecutions(final String jobName) {
+        final List<Long> result = new ArrayList<Long>();
+        final String select = sqls.getProperty(SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME);
+
+        final Connection connection = getConnection();
+        ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setString(1, jobName);
+            rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                final long i = rs.getLong(1);
+                result.add(i);
+            }
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null, rs);
+        }
+        return result;
+    }
+
+    @Override
     void insertStepExecution(final StepExecutionImpl stepExecution, final JobExecutionImpl jobExecution) {
         final String insert = sqls.getProperty(INSERT_STEP_EXECUTION);
         final Connection connection = getConnection();
@@ -640,7 +665,7 @@ public final class JdbcRepository extends AbstractRepository {
      * should only be called after the cache has been searched without a match.
      *
      * @param jobExecutionId if null, retrieves all StepExecutions; otherwise, retrieves all StepExecutions belongs to the JobExecution id
-     * @param classLoader the current application class loader
+     * @param classLoader    the current application class loader
      * @return a list of StepExecutions
      */
     List<StepExecution> selectStepExecutions(final Long jobExecutionId, final ClassLoader classLoader) {

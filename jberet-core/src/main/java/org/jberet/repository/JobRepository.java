@@ -47,6 +47,17 @@ public interface JobRepository {
     void updateJobExecution(JobExecutionImpl jobExecution, boolean fullUpdate);
 
     /**
+     * Gets the ids of running job executions belonging to a specific job.
+     *
+     * @param jobName  the name of the job, not null
+     * @return  a list of job execution ids
+     *
+     * @since 1.1.0.Beta2
+     * @see org.jberet.operations.JobOperatorImpl#getRunningExecutions(java.lang.String)
+     */
+    List<Long> getRunningExecutions(final String jobName);
+
+    /**
      * Removes JobExecutions based on the criteria specified in {@code jobExecutionSelector}.
      *
      * @param jobExecutionSelector criteria for which JobExecutions to remove
