@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.batch.operations.JobStartException;
+import javax.xml.stream.XMLResolver;
+import javax.xml.stream.XMLStreamException;
 
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Job;
@@ -88,7 +90,7 @@ public class ArchiveXmlLoader {
         }
 
         try {
-            job = JobParser.parseJob(is, classLoader);
+            job = JobParser.parseJob(is, classLoader, new JobXMLResolver(classLoader));
             loadedJobs.add(job);
             if (!job.getInheritingJobElements().isEmpty()) {
                 JobMerger.resolveInheritance(job, classLoader, loadedJobs);
@@ -143,5 +145,22 @@ public class ArchiveXmlLoader {
 
         is = new BufferedInputStream(new FileInputStream(jobFile));
         return is;
+    }
+
+    private static class JobXMLResolver implements XMLResolver {
+        private final ClassLoader classLoader;
+
+        private JobXMLResolver(final ClassLoader classLoader) {
+            this.classLoader = classLoader;
+        }
+
+        @Override
+        public Object resolveEntity(final String publicID, final String systemID, final String baseURI, final String namespace) throws XMLStreamException {
+            try {
+                return getJobXml(systemID, classLoader);
+            } catch (IOException e) {
+                throw new XMLStreamException(e);
+            }
+        }
     }
 }

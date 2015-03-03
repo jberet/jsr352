@@ -15,6 +15,7 @@ package org.jberet.job.model;
 import java.io.InputStream;
 import java.util.List;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -36,11 +37,15 @@ public final class JobParser {
      *
      * @param inputStream the source of the job xml definition
      * @param classLoader the current application class loader
+     * @param xmlResolver the XMLResolver for the job xml
      * @return a Job object
      * @throws XMLStreamException
      */
-    public static Job parseJob(final InputStream inputStream, final ClassLoader classLoader) throws XMLStreamException {
-        final XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+    public static Job parseJob(final InputStream inputStream, final ClassLoader classLoader, final XMLResolver xmlResolver) throws XMLStreamException {
+        final XMLInputFactory factory = XMLInputFactory.newInstance();
+        factory.setXMLResolver(xmlResolver);
+        final XMLStreamReader reader = factory.createXMLStreamReader(inputStream);
+        
         Job job = null;
         try {
             while (reader.hasNext()) {
