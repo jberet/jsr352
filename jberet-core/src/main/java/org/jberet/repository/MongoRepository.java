@@ -275,6 +275,46 @@ public final class MongoRepository extends AbstractRepository {
     }
 
     @Override
+    public List<Long> getRunningExecutions(final String jobName) {
+        //find all job instance ids belonging to the jobName
+        DBObject keys = new BasicDBObject(TableColumns.JOBINSTANCEID, 1);
+        DBCursor cursor = db.getCollection(TableColumns.JOB_INSTANCE).find(
+                new BasicDBObject(TableColumns.JOBNAME, jobName), keys);
+
+        if (cursor.size() == 0) {
+            throw BatchMessages.MESSAGES.noSuchJobException(jobName);
+        }
+
+        //add matching job instance ids to the "jobinstanceid in" list
+        BasicDBList basicDBList = new BasicDBList();
+        while (cursor.hasNext()) {
+            final DBObject next = cursor.next();
+            basicDBList.add(next.get(TableColumns.JOBINSTANCEID));
+        }
+        final DBObject inJobInstanceIdsClause = new BasicDBObject("$in", basicDBList);
+        final DBObject query = new BasicDBObject(TableColumns.JOBINSTANCEID, inJobInstanceIdsClause);
+
+        //create "batchstatus in" list
+        basicDBList = new BasicDBList();
+        basicDBList.add(BatchStatus.STARTED.name());
+        basicDBList.add(BatchStatus.STARTING.name());
+        final DBObject inBatchStatusClause = new BasicDBObject("$in", basicDBList);
+
+        //combine batchstatus in clause into jobinstanceid in clause
+        query.put(TableColumns.BATCHSTATUS, inBatchStatusClause);
+        keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
+        cursor = db.getCollection(TableColumns.JOB_EXECUTION).find(query, keys);
+
+        final List<Long> result = new ArrayList<Long>();
+        while (cursor.hasNext()) {
+            final DBObject next = cursor.next();
+            result.add((Long) next.get(TableColumns.JOBEXECUTIONID));
+        }
+
+        return result;
+    }
+
+    @Override
     void insertStepExecution(final StepExecutionImpl stepExecution, final JobExecutionImpl jobExecution) {
         final Long nextId = incrementAndGetSequence(TableColumns.STEPEXECUTIONID);
         stepExecution.setId(nextId);
