@@ -50,6 +50,15 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         jobOperator.getStepExecutions(-1);
     }
 
+    @Test
+    public void getRunningExecutions() throws Exception {
+        super.getRunningExecutions();
+    }
+
+    @Test
+    public void getRunningExecutions2() throws Exception {
+        super.getRunningExecutions2();
+    }
 
     @Test
     public void jobExecutionSelector() throws Exception {

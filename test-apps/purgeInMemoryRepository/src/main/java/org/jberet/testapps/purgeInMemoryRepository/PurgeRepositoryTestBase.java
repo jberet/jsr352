@@ -24,7 +24,6 @@ import javax.batch.runtime.context.StepContext;
 import org.jberet.repository.JobExecutionSelector;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
-import org.junit.Test;
 
 public abstract class PurgeRepositoryTestBase extends AbstractIT {
     protected static final long purgeSleepMillis = 2000;
@@ -52,7 +51,7 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
 
     protected void noSuchJobException() throws Exception {
         final String[] noSuchJobNames = {"no-such-job-name", null, ""};
-        for(final String noSuchJobName : noSuchJobNames) {
+        for (final String noSuchJobName : noSuchJobNames) {
             try {
                 final int result = jobOperator.getJobInstanceCount(noSuchJobName);
                 Assert.fail("Expecting NoSuchJobException, but got " + result);
@@ -81,6 +80,32 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         } catch (final NoSuchJobInstanceException e) {
             System.out.printf("Got expected %s%n", e);
         }
+    }
+
+    /**
+     * Starts and wait for the job to finish, and then call getRunningExecutions(jobName), which should return
+     * empty List<Long>, since no job with jobName is running.
+     *
+     * @throws Exception
+     */
+    protected void getRunningExecutions() throws Exception {
+        prepurge();
+        final List<Long> runningExecutions = jobOperator.getRunningExecutions(prepurgeJobName);
+        Assert.assertEquals(0, runningExecutions.size());
+    }
+
+    /**
+     * Starts a job without waiting for it to finish, and then call getRunningExecutions(jobName), which should return
+     * 1-element List<Long>. The job execution launches javascript engine (the batchlet is inline javascript) and so
+     * should still be running when the test calls getRunningExecutions.
+     *
+     * @throws Exception
+     */
+    protected void getRunningExecutions2() throws Exception {
+        startJob(prepurgeJobName);
+        final List<Long> runningExecutions = jobOperator.getRunningExecutions(prepurgeJobName);
+        Assert.assertEquals(1, runningExecutions.size());
+        awaitTermination();
     }
 
     public static final class JobExecutionSelector1 implements JobExecutionSelector {

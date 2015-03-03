@@ -61,4 +61,14 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     public void noSuchJobInstanceException() throws Exception {
         super.noSuchJobInstanceException();
     }
+
+    @Test
+    public void getRunningExecutions() throws Exception {
+        super.getRunningExecutions();
+    }
+
+    @Test
+    public void getRunningExecutions2() throws Exception {
+        super.getRunningExecutions2();
+    }
 }

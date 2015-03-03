@@ -53,6 +53,15 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         jobOperator.getStepExecutions(-1);
     }
 
+    @Test
+    public void getRunningExecutions() throws Exception {
+        super.getRunningExecutions();
+    }
+
+    @Test
+    public void getRunningExecutions2() throws Exception {
+        super.getRunningExecutions2();
+    }
 
     @Test
     public void withSql() throws Exception {
@@ -191,7 +200,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
         params.setProperty("sql",
                 "delete from JOB_EXECUTION where JOBEXECUTIONID in " +
-                    "(select JOBEXECUTIONID from JOB_EXECUTION, JOB_INSTANCE " +
+                        "(select JOBEXECUTIONID from JOB_EXECUTION, JOB_INSTANCE " +
                         "where JOB_EXECUTION.JOBINSTANCEID = JOB_INSTANCE.JOBINSTANCEID and JOB_INSTANCE.JOBNAME like 'prepurge%'); ");
 
         params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
