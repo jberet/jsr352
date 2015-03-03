@@ -54,7 +54,7 @@ public class JobMergerTest {
     /**
      * Shared by tests expecting JobStartException.
      *
-     * @param jobName          the job name to load
+     * @param jobName        the job name to load
      * @param failureMessage the message to include when failing the test
      */
     private void jobStartException(final String jobName, final String failureMessage) {
@@ -95,6 +95,46 @@ public class JobMergerTest {
         Assert.assertEquals(2, child.getProperties().getPropertiesMapping().size());
         Assert.assertEquals(2, child.getListeners().getListeners().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"});
+    }
+
+    /**
+     * Verifies that a job xml can reference custom entities for reusing common segments of job definition.
+     * This test does not use JSL inheritance.
+     *
+     * @throws Exception
+     * @see <a href="https://issues.jboss.org/browse/JBERET-139">JBERET-139 Implement XMLResolver for Job XML parsing</a>
+     */
+    @Test
+    public void testEntityXMLResolver() throws Exception {
+        final String jobName = "job-with-xml-entities";
+        Job job = loadJob(jobName);
+
+        Assert.assertEquals(jobName, job.getId());
+        Assert.assertEquals(true, job.getRestartableBoolean());
+        Assert.assertEquals(null, job.getRestartable());
+        Assert.assertEquals(null, job.getParent());
+        Assert.assertEquals(null, job.getJslName());
+
+        final List<JobElement> jobElements = job.getJobElements();
+        Assert.assertEquals(1, jobElements.size());
+        final Step step = (Step) jobElements.get(0);
+        Assert.assertEquals(jobName + ".step1", step.getId());
+        Assert.assertEquals(null, step.getAttributeNext());
+        Assert.assertEquals(null, step.getChunk());
+
+        final RefArtifact batchlet = step.getBatchlet();
+        Assert.assertEquals("batchlet1", batchlet.getRef());
+        Assert.assertEquals(null, batchlet.getScript());
+        Assert.assertEquals(null, batchlet.getProperties());
+
+        //check resolved XML entities
+        final Properties properties = job.getProperties();
+        Assert.assertEquals(1, properties.size());
+        Assert.assertEquals("common.property.value", properties.get("common.property.key"));
+        final List<RefArtifact> listeners = job.getListeners().getListeners();
+        Assert.assertEquals(2, listeners.size());
+        Assert.assertEquals("EL1", listeners.get(0).getRef());
+        Assert.assertEquals("EL2", listeners.get(1).getRef());
     }
 
     /**
