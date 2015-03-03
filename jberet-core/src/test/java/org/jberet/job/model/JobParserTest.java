@@ -182,7 +182,7 @@ public final class JobParserTest {
         ByteArrayInputStream is = null;
         try {
             is = new ByteArrayInputStream(jobXml.getBytes());
-            final Job job = JobParser.parseJob(is, getClass().getClassLoader());
+            final Job job = JobParser.parseJob(is, getClass().getClassLoader(), null);
             Assert.assertEquals(true, job.getRestartableBoolean());
             Assert.assertEquals(null, job.getRestartable());
         } finally {
@@ -204,7 +204,7 @@ public final class JobParserTest {
         ByteArrayInputStream is = null;
         try {
             is = new ByteArrayInputStream(jobXml.getBytes());
-            final Job job = JobParser.parseJob(is, getClass().getClassLoader());
+            final Job job = JobParser.parseJob(is, getClass().getClassLoader(), null);
             Assert.assertEquals(false, job.getRestartableBoolean());
             Assert.assertEquals(Boolean.FALSE.toString(), job.getRestartable());
         } finally {
@@ -219,7 +219,7 @@ public final class JobParserTest {
         Job job = null;
         final InputStream is = getClass().getClassLoader().getResourceAsStream(SAMPLE_JOB_XML);
         try {
-            job = JobParser.parseJob(is, getClass().getClassLoader());
+            job = JobParser.parseJob(is, getClass().getClassLoader(), null);
         } finally {
             is.close();
         }
@@ -267,7 +267,7 @@ public final class JobParserTest {
         InputStream is = null;
         try {
             is = new ByteArrayInputStream(xmlContent.getBytes());
-            JobParser.parseJob(is, getClass().getClassLoader());
+            JobParser.parseJob(is, getClass().getClassLoader(), null);
             Assert.fail("Exception should already have been thrown.");
         } catch (XMLStreamException e) {
             System.out.printf("Got expected exception %s%n", e);
