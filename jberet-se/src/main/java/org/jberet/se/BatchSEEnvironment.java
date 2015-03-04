@@ -71,8 +71,14 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         if (configStream != null) {
             try {
                 configProperties.load(configStream);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw SEBatchLogger.LOGGER.failToLoadConfig(e, CONFIG_FILE_NAME);
+            } finally {
+                try {
+                    configStream.close();
+                } catch (final IOException ioe) {
+                    //ignore
+                }
             }
         } else {
             SEBatchLogger.LOGGER.useDefaultJBeretConfig(CONFIG_FILE_NAME);
