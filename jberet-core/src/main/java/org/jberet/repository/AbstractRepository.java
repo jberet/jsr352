@@ -230,7 +230,7 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
-        jobExecution.setEndTime(System.currentTimeMillis());
+        jobExecution.setLastUpdatedTime(System.currentTimeMillis());
     }
 
     @Override

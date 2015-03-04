@@ -70,7 +70,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         } else {
             this.substitutedJob = BatchUtil.clone(jobInstance.unsubstitutedJob);
         }
-        this.startTime = this.createTime = System.currentTimeMillis();
+        this.createTime = System.currentTimeMillis();
         setBatchStatus(BatchStatus.STARTING);
     }
 
@@ -214,9 +214,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         }
     }
 
-    public void setEndTime(final long endTime) {
-        this.endTime = endTime;
-        this.lastUpdatedTime = endTime;
+    public void setLastUpdatedTime(final long lastUpdatedTime) {
+        this.lastUpdatedTime = lastUpdatedTime;
     }
 
     public void cleanUp() {

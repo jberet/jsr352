@@ -94,21 +94,24 @@ public final class DefaultJobExecutionSelector implements JobExecutionSelector {
         }
 
         final Date endTime = jobExecution.getEndTime();
-        if (withinPastMinutes != null) {
-            final long diffMillis = System.currentTimeMillis() - endTime.getTime();
-            final long diffMinutes = TimeUnit.MILLISECONDS.toMinutes(diffMillis);
-            return diffMinutes <= withinPastMinutes;
-        }
-
-        if (jobExecutionEndTimeFrom != null) {
-            if (jobExecutionEndTimeTo != null) {
-                return (endTime.after(jobExecutionEndTimeFrom) || endTime.equals(jobExecutionEndTimeFrom)) &&
-                        (endTime.before(jobExecutionEndTimeTo) || endTime.equals(jobExecutionEndTimeTo));
-            } else {
-                return endTime.after(jobExecutionEndTimeFrom) || endTime.equals(jobExecutionEndTimeFrom);
+        // End time may be null if there are unfinished batch jobs
+        if (endTime != null) {
+            if (withinPastMinutes != null) {
+                final long diffMillis = System.currentTimeMillis() - endTime.getTime();
+                final long diffMinutes = TimeUnit.MILLISECONDS.toMinutes(diffMillis);
+                return diffMinutes <= withinPastMinutes;
             }
-        } else if (jobExecutionEndTimeTo != null) {
-            return endTime.before(jobExecutionEndTimeTo) || endTime.equals(jobExecutionEndTimeTo);
+
+            if (jobExecutionEndTimeFrom != null) {
+                if (jobExecutionEndTimeTo != null) {
+                    return (endTime.after(jobExecutionEndTimeFrom) || endTime.equals(jobExecutionEndTimeFrom)) &&
+                            (endTime.before(jobExecutionEndTimeTo) || endTime.equals(jobExecutionEndTimeTo));
+                } else {
+                    return endTime.after(jobExecutionEndTimeFrom) || endTime.equals(jobExecutionEndTimeFrom);
+                }
+            } else if (jobExecutionEndTimeTo != null) {
+                return endTime.before(jobExecutionEndTimeTo) || endTime.equals(jobExecutionEndTimeTo);
+            }
         }
 
         if (batchStatuses != null) {
