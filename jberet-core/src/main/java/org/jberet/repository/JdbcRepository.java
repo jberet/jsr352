@@ -583,7 +583,7 @@ public final class JdbcRepository extends AbstractRepository {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(update);
-            preparedStatement.setTimestamp(1, new Timestamp(stepExecution.getEndTime().getTime()));
+            preparedStatement.setTimestamp(1, createTimestamp(stepExecution.getEndTime()));
             preparedStatement.setString(2, stepExecution.getBatchStatus().name());
             preparedStatement.setString(3, stepExecution.getExitStatus());
             preparedStatement.setString(4, TableColumns.formatException(stepExecutionImpl.getException()));
