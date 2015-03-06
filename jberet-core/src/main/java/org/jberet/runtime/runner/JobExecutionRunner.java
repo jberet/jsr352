@@ -81,6 +81,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         }
 
         batchContext.getJobRepository().updateJobExecution(jobExecution, true);
+        batchContext.setTransientUserData(null);
         jobExecution.cleanUp();
     }
 

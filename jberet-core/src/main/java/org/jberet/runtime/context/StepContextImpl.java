@@ -95,6 +95,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
             } else {
                 c.step = BatchUtil.clone(step);
             }
+            c.transientUserData = null;
         } catch (CloneNotSupportedException e) {
             BatchLogger.LOGGER.failToClone(e, this, getJobContext().getJobName(), getStepName());
         }

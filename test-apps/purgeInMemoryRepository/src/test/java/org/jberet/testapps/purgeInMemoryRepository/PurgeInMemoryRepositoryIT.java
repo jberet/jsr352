@@ -13,12 +13,14 @@
 package org.jberet.testapps.purgeInMemoryRepository;
 
 import javax.batch.operations.NoSuchJobExecutionException;
+import javax.batch.runtime.BatchStatus;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeInMemoryRepositoryXml = "purgeInMemoryRepository.xml";
+    static final String transientUserDataXml = "transient-user-data.xml";
 
     @Test(expected = NoSuchJobExecutionException.class)
     public void restartNoSuchJobExecutionException() throws NoSuchJobExecutionException {
@@ -216,5 +218,12 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
     @Override
     public void noSuchJobInstanceException() throws Exception {
         super.noSuchJobInstanceException();
+    }
+
+    @Test
+    public void transientUserData() throws Exception {
+        startJobAndWait(transientUserDataXml);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals("step persistent user data", stepExecution0.getPersistentUserData());
     }
 }

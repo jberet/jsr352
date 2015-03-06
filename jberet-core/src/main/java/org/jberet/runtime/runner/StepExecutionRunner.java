@@ -183,6 +183,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
         }
         batchContext.getJobContext().getJobRepository().updateStepExecution(stepExecution);
+        batchContext.setTransientUserData(null);
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             final String next = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);
