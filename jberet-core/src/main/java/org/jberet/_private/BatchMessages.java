@@ -36,6 +36,8 @@ public interface BatchMessages {
     @Message(id = 601, value = "Failed to get job xml file for job %s")
     JobStartException failToGetJobXml(@Cause Throwable e, String jobName);
 
+    JobStartException failToGetJobXml(String jobName);
+
     @Message(id = 602, value = "Failed to parse and bind XML for job %s")
     JobStartException failToParseJobXml(@Cause Throwable e, String jobName);
 

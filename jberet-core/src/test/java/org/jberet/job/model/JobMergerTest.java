@@ -17,6 +17,7 @@ import java.util.List;
 import javax.batch.operations.JobStartException;
 
 import org.jberet.creation.ArchiveXmlLoader;
+import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -179,6 +180,6 @@ public class JobMergerTest {
     }
 
     static Job loadJob(final String jobName) {
-        return ArchiveXmlLoader.loadJobXml(jobName, JobMergerTest.class.getClassLoader(), new ArrayList<Job>());
+        return ArchiveXmlLoader.loadJobXml(jobName, JobMergerTest.class.getClassLoader(), new ArrayList<Job>(), new MetaInfBatchJobsJobXmlResolver());
     }
 }

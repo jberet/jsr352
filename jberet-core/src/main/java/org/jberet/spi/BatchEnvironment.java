@@ -93,6 +93,13 @@ public interface BatchEnvironment {
     JobRepository getJobRepository();
 
     /**
+     * Returns the job XML resolver used to locate the job XML content.
+     *
+     * @return the job XML resolver
+     */
+    JobXmlResolver getJobXmlResolver();
+
+    /**
      * Gets configuration data for batch container.
      * @return a key-value map of batch configuration
      */

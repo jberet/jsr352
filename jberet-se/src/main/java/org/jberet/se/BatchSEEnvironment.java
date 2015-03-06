@@ -15,6 +15,7 @@ package org.jberet.se;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +33,9 @@ import org.jberet.repository.JobRepository;
 import org.jberet.se._private.SEBatchLogger;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
+import org.jberet.tools.ChainedJobXmlResolver;
+import org.jberet.spi.JobXmlResolver;
+import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.jberet.tx.LocalTransactionManager;
 
 /**
@@ -48,8 +52,14 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     public static final String REPOSITORY_TYPE_MONGODB = "mongodb";
     public static final String REPOSITORY_TYPE_INFINISPAN = "infinispan";
 
+    private static final JobXmlResolver[] DEFAULT_JOB_XML_RESOLVERS = {
+            new ClassPathJobXmlResolver(),
+            new MetaInfBatchJobsJobXmlResolver(),
+    };
+
     private final Properties configProperties;
     private final TransactionManager tm;
+    private final JobXmlResolver jobXmlResolver;
 
     static final String THREAD_POOL_TYPE = "thread-pool-type";
     static final String THREAD_POOL_TYPE_CACHED = "Cached";
@@ -86,6 +96,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         this.tm = LocalTransactionManager.getInstance();
 
         createThreadPoolExecutor();
+        final ServiceLoader<JobXmlResolver> userJobXmlResolvers = ServiceLoader.load(JobXmlResolver.class, getClassLoader());
+        this.jobXmlResolver = new ChainedJobXmlResolver(userJobXmlResolvers, DEFAULT_JOB_XML_RESOLVERS);
     }
 
     @Override
@@ -125,6 +137,11 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     @Override
     public JobRepository getJobRepository() {
         return JobRepositoryFactory.getJobRepository(configProperties);
+    }
+
+    @Override
+    public JobXmlResolver getJobXmlResolver() {
+        return jobXmlResolver;
     }
 
     @Override

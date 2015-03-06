@@ -34,11 +34,14 @@ import org.jberet.repository.InMemoryRepository;
 import org.jberet.repository.JobRepository;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
+import org.jberet.spi.JobXmlResolver;
+import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class JobRepositoryTest {
+
     static final Transaction NO_OP_TRANSACTION = new Transaction() {
         @Override
         public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException, SecurityException, SystemException {
@@ -152,6 +155,11 @@ public class JobRepositoryTest {
             }
 
             @Override
+            public JobXmlResolver getJobXmlResolver() {
+                return new MetaInfBatchJobsJobXmlResolver();
+            }
+
+            @Override
             public Properties getBatchConfigurationProperties() {
                 final Properties props = new Properties();
                 //props.setProperty(JobRepositoryFactory.JOB_REPOSITORY_TYPE_KEY, JobRepositoryFactory.REPOSITORY_TYPE_JDBC);
@@ -163,7 +171,7 @@ public class JobRepositoryTest {
 
     @Test
     public void addRemoveJob() throws Exception {
-        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", this.getClass().getClassLoader(), new ArrayList<Job>());
+        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", this.getClass().getClassLoader(), new ArrayList<Job>(), new MetaInfBatchJobsJobXmlResolver());
         repo.removeJob(job.getId());
         final Collection<Job> jobs = repo.getJobs();
         final int existingJobsCount = jobs.size();

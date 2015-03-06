@@ -24,6 +24,7 @@ import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
 import org.jberet.job.model.Step;
+import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ public class ExceptionClassFilterTest {
     @Test
     public void exceptionClassFilter2() throws Exception {
         final ClassLoader cl = this.getClass().getClassLoader();
-        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", cl, new ArrayList<Job>());
+        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", cl, new ArrayList<Job>(), new MetaInfBatchJobsJobXmlResolver());
         Chunk chunk = getChunk(job, "exception-class-filter-step");
 
         ExceptionClassFilter filter = chunk.getSkippableExceptionClasses();
