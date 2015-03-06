@@ -38,7 +38,7 @@ Increase `ulimit` to avoid such errors. For example,
 * [jBatch Suite, Visual Modeling](https://java.net/projects/jbatchsuite)
 
 ####Project Resources:
-* [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET)
+* [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET), [Issues Awaiting Volunteers](https://issues.jboss.org/browse/JBERET-143?jql=project%20%3D%20JBERET%20AND%20fixVersion%20%3D%20%22Awaiting%20Volunteers%22)
 * [JBeret Documentation](http://docs.jboss.org/jberet/)
 * [JBeret-dev Mailing List](https://lists.jboss.org/mailman/listinfo/jberet-dev)
 * [WildFly Forum](https://community.jboss.org/en/wildfly?view=discussions)
