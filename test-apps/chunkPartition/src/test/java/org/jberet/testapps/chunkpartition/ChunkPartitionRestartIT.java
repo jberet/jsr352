@@ -13,6 +13,7 @@
 package org.jberet.testapps.chunkpartition;
 
 import java.util.List;
+import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 
@@ -29,7 +30,11 @@ public class ChunkPartitionRestartIT extends AbstractIT {
      */
     @Test
     public void restartFailedPartition() throws Exception {
-        this.params.setProperty("writer.sleep.time", "0");
+        params = new Properties();
+        params.setProperty("writer.sleep.time", "0");
+        //params.setProperty("reader.fail.on.values", String.valueOf(-1));
+        params.setProperty("writer.fail.on.values", String.valueOf(-1));
+
         restartAndWait(getOriginalJobExecutionId(ChunkPartitionIT.jobChunkPartitionFailComplete));
 
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());

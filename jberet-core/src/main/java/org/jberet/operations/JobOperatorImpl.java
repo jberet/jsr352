@@ -230,10 +230,25 @@ public class JobOperatorImpl implements JobOperator {
                 jobInstance.setUnsubstitutedJob(repository.getJob(jobName));
             }
             try {
+                final Properties oldJobParameters = originalToRestart.getJobParameters();
+                final Properties combinedProperties;
+                if (oldJobParameters != null) {
+                    if (restartParameters == null) {
+                        combinedProperties = oldJobParameters;
+                    } else {
+                        combinedProperties = new Properties(oldJobParameters);
+                        for (final String k : restartParameters.stringPropertyNames()) {
+                            combinedProperties.setProperty(k, restartParameters.getProperty(k));
+                        }
+                    }
+                } else {
+                    combinedProperties = restartParameters;
+                }
+
                 newExecutionId = invokeTransaction(new TransactionInvocation<Long>() {
                     @Override
                     public Long invoke() throws JobStartException, JobSecurityException {
-                        return startJobExecution(jobInstance, restartParameters, originalToRestart);
+                        return startJobExecution(jobInstance, combinedProperties, originalToRestart);
                     }
                 });
             } catch (Exception e) {

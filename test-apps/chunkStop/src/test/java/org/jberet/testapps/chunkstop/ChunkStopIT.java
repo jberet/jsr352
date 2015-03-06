@@ -12,6 +12,7 @@
 
 package org.jberet.testapps.chunkstop;
 
+import java.util.Properties;
 import javax.batch.operations.JobRestartException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
@@ -56,6 +57,34 @@ public class ChunkStopIT extends AbstractIT {
 
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertTrue(MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT) < dataCount);
+    }
+
+    @Test
+    public void restartJobParameters() throws Exception {
+        params.setProperty("writer.sleep.time", "500");
+        params.setProperty("old.restart.prop.key", "old.restart.prop.val");
+        startJob(jobXml);
+        jobOperator.stop(jobExecutionId);
+        awaitTermination();
+        Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
+        Properties parameters1 = jobOperator.getParameters(jobExecutionId);
+        System.out.printf("%nstart job parameters: %s%n", parameters1);
+        Assert.assertEquals(3, parameters1.size());
+
+        params = new Properties();
+        params.setProperty("data.count", String.valueOf(dataCount));
+        params.setProperty("writer.sleep.time", "501");
+        params.setProperty("new.restart.prop.key", "new.restart.prop.val");
+        restartAndWait();
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        final Properties parameters2 = jobOperator.getParameters(jobExecutionId);
+        System.out.printf("%nrestart job parameters: %s%n", parameters2);
+        //Assert.assertEquals(4, parameters2.size());
+
+        Assert.assertEquals("old.restart.prop.val", parameters2.getProperty("old.restart.prop.key"));
+        Assert.assertEquals("new.restart.prop.val", parameters2.getProperty("new.restart.prop.key"));
+        Assert.assertEquals("501", parameters2.getProperty("writer.sleep.time"));
+        Assert.assertEquals(String.valueOf(dataCount), parameters2.getProperty("data.count"));
     }
 
     @Test
