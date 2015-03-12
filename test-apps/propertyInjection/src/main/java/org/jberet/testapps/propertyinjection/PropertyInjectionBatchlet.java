@@ -20,6 +20,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -278,7 +279,6 @@ public class PropertyInjectionBatchlet extends BatchletNoNamed {
     StringBuffer stringBuffer;
 
 
-
     @Inject @BatchProperty(name = "include.not.defined")
     String includeNotDefined;
 
@@ -288,8 +288,33 @@ public class PropertyInjectionBatchlet extends BatchletNoNamed {
     @Inject @BatchProperty(name = "include.not.defined.3")
     String includeNotDefined3;
 
-    @Inject @BatchProperty(name = "not.defined")
-    String notDefined;
+
+    @Inject @BatchProperty(name = "not.defined...")
+    private String notDefined = "defaultValue";
+
+    @Inject @BatchProperty(name = "not.defined...")
+    List notDefinedList = Arrays.asList("a", "b", "c");
+
+    @Inject @BatchProperty(name = "not.defined...")
+    int notDefinedInt = 2015;
+
+    @Inject @BatchProperty(name = "not.defined...")
+    double notDefinedDouble = 3.14;
+
+    @Inject @BatchProperty(name = "not.defined...")
+    Date notDefinedDate = new Date();
+
+    @Inject @BatchProperty(name = "not.defined...")
+    boolean notDefinedBoolean = true;
+
+    @Inject @BatchProperty(name = "not.defined...")
+    int[] notDefinedIntArray = {1, 2};
+
+    @Inject @BatchProperty(name = "not.defined...")
+    URL notDefinedURL;
+
+    @Inject @BatchProperty(name = "not.defined...")
+    File notDefinedFile = new File("/tmp");
 
     @Override
     public String process() throws Exception {
@@ -304,4 +329,6 @@ public class PropertyInjectionBatchlet extends BatchletNoNamed {
 
         return includeNotDefined + " " + includeNotDefined2 + " " + includeNotDefined3 + " " + notDefined;
     }
+
+
 }

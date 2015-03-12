@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,6 +20,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.URI;
 import java.net.URL;
+import java.security.PrivilegedExceptionAction;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,9 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.management.ObjectName;
 
+import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Properties;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 public class BatchBeanProducer {
     @Produces
@@ -378,15 +381,43 @@ public class BatchBeanProducer {
         }
         final ArtifactCreationContext ac = ArtifactCreationContext.getCurrentArtifactCreationContext();
         final Properties properties = ac.properties;
-        if (properties != null) {
-            final String rawVal = properties.get(propName);
-            if (rawVal == null || rawVal.isEmpty()) {
+        final String rawVal = properties == null ? null : properties.get(propName);
+        if (rawVal == null) {
+            try {
+                final Class<?> beanClass = injectionPoint.getBean().getBeanClass();
+
+                //best effort to get a default value
+                //no-arg constructor may not exist, in which case, we use null as its default value
+                //BatchLogger.LOGGER.infof("Injected batch property %s is not defined in job xml, will attempt to use the default value in class %s", propName, beanClass);
+                final Object o = beanClass.newInstance();
+                final Object fieldVal;
+
+                if (WildFlySecurityManager.isChecking()) {
+                    fieldVal = WildFlySecurityManager.doUnchecked(new PrivilegedExceptionAction<Object>() {
+                        @Override
+                        public Object run() throws Exception {
+                            if (!field.isAccessible()) {
+                                field.setAccessible(true);
+                            }
+                            return field.get(o);
+                        }
+                    });
+                } else {
+                    if (!field.isAccessible()) {
+                        field.setAccessible(true);
+                    }
+                    fieldVal = field.get(o);
+                }
+                return (T) fieldVal;
+            } catch (final Exception e) {
+                BatchLogger.LOGGER.tracef(e, "Failed to get the default value for undefined batch property %s, will use null.", propName);
                 return null;
             }
-            final Class<?> fieldType = field.getType();
-            return fieldType.isAssignableFrom(String.class) ? (T) rawVal :
-                    (T) ValueConverter.convertFieldValue(rawVal, fieldType, field, ac.jobContext.getClassLoader());
+        } else if (rawVal.isEmpty()) {
+            return null;
         }
-        return null;
+        final Class<?> fieldType = field.getType();
+        return fieldType.isAssignableFrom(String.class) ? (T) rawVal :
+                (T) ValueConverter.convertFieldValue(rawVal, fieldType, field, ac.jobContext.getClassLoader());
     }
 }
