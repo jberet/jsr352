@@ -18,7 +18,7 @@ import java.util.Map;
 import javax.batch.operations.JobStartException;
 
 import org.jberet._private.BatchMessages;
-import org.jberet.util.BatchUtil;
+import org.jberet.spi.JobXmlResolver;
 
 abstract class AbstractMerger<T extends AbstractJobElement> {
      T parent;
@@ -27,16 +27,18 @@ abstract class AbstractMerger<T extends AbstractJobElement> {
     Job currentJob;
     ClassLoader classLoader;
     List<Job> loadedJobs;
+    final JobXmlResolver jobXmlResolver;
 
     /**
      * For tracking cyclic inheritance
      */
     private List<T> inheritingElements;
 
-    AbstractMerger(final Job currentJob, final ClassLoader classLoader, final List<Job> loadedJobs) {
+    AbstractMerger(final Job currentJob, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver) {
         this.currentJob = currentJob;
         this.classLoader = classLoader;
         this.loadedJobs = loadedJobs;
+        this.jobXmlResolver = jobXmlResolver;
     }
 
     /**

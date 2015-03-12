@@ -16,33 +16,34 @@ import java.util.List;
 import javax.batch.operations.JobStartException;
 
 import org.jberet.creation.ArchiveXmlLoader;
+import org.jberet.spi.JobXmlResolver;
 
 public final class JobMerger extends AbstractMerger<Job> {
-    public JobMerger(final Job child, final ClassLoader classLoader, final List<Job> loadedJobs) throws JobStartException {
-        super(child, classLoader, loadedJobs);
+    public JobMerger(final Job child, final ClassLoader classLoader, final List<Job> loadedJobs,  final JobXmlResolver jobXmlResolver) throws JobStartException {
+        super(child, classLoader, loadedJobs, jobXmlResolver);
         final String parentName = child.getParent();
         if (parentName != null) {
-            this.parent = ArchiveXmlLoader.loadJobXml(parentName, classLoader, loadedJobs);
+            this.parent = ArchiveXmlLoader.loadJobXml(parentName, classLoader, loadedJobs, jobXmlResolver);
         }
         this.child = child;
     }
 
-    public static void resolveInheritance(final Job job, final ClassLoader classLoader, final List<Job> loadedJobs)
+    public static void resolveInheritance(final Job job, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {
         for (final InheritableJobElement e : job.inheritingJobElements) {
             if (e instanceof Step) {
                 if (e.getParent() != null) {
-                    final StepMerger stepMerger = new StepMerger(job, (Step) e, classLoader, loadedJobs);
+                    final StepMerger stepMerger = new StepMerger(job, (Step) e, classLoader, loadedJobs, jobXmlResolver);
                     stepMerger.merge();
                 }
             } else if (e instanceof Job) {
                 if (e.getParent() != null) {
-                    final JobMerger jobMerger = new JobMerger((Job) e, classLoader, loadedJobs);
+                    final JobMerger jobMerger = new JobMerger((Job) e, classLoader, loadedJobs, jobXmlResolver);
                     jobMerger.merge();
                 }
             } else if (e instanceof Flow) {
                 if (e.getParent() != null) {
-                    final FlowMerger flowMerger = new FlowMerger(job, (Flow) e, classLoader, loadedJobs);
+                    final FlowMerger flowMerger = new FlowMerger(job, (Flow) e, classLoader, loadedJobs, jobXmlResolver);
                     flowMerger.merge();
                 }
             } else {
@@ -56,7 +57,7 @@ public final class JobMerger extends AbstractMerger<Job> {
 
         //check if parent has its own parent
         if (parent.getParent() != null) {
-            final JobMerger merger2 = new JobMerger(parent, classLoader, loadedJobs);
+            final JobMerger merger2 = new JobMerger(parent, classLoader, loadedJobs, jobXmlResolver);
             recordInheritingElements(merger2);
             merger2.merge();
         }

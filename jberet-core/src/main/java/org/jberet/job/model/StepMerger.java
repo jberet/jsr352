@@ -17,11 +17,12 @@ import javax.batch.operations.JobStartException;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.ArchiveXmlLoader;
+import org.jberet.spi.JobXmlResolver;
 
 public final class StepMerger extends AbstractMerger<Step> {
-    public StepMerger(final Job job, final Step child, final ClassLoader classLoader, final List<Job> loadedJobs)
+    public StepMerger(final Job job, final Step child, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {
-        super(job, classLoader, loadedJobs);
+        super(job, classLoader, loadedJobs, jobXmlResolver);
         this.child = child;
         final String parentName = child.getParent();
         final String jslName = child.getJslName();
@@ -33,7 +34,7 @@ public final class StepMerger extends AbstractMerger<Step> {
                 }
             }
         } else { // jslName points to a different jsl document
-            final Job jobOfParentStep = ArchiveXmlLoader.loadJobXml(jslName, classLoader, loadedJobs);
+            final Job jobOfParentStep = ArchiveXmlLoader.loadJobXml(jslName, classLoader, loadedJobs, jobXmlResolver);
             for (final JobElement e : jobOfParentStep.getJobElements()) {
                 if (parentName.equals(e.getId())) {
                     this.parent = (Step) e;
@@ -45,7 +46,7 @@ public final class StepMerger extends AbstractMerger<Step> {
     public void merge() throws JobStartException {
         checkInheritingElements(this.parent, this.parent.getId());
         if (parent.getParent() != null) {
-            final StepMerger merger2 = new StepMerger(currentJob, parent, classLoader, loadedJobs);
+            final StepMerger merger2 = new StepMerger(currentJob, parent, classLoader, loadedJobs, jobXmlResolver);
             recordInheritingElements(merger2);
             merger2.merge();
         }

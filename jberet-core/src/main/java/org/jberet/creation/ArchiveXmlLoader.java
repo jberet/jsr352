@@ -12,9 +12,6 @@
 
 package org.jberet.creation;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -22,11 +19,12 @@ import javax.batch.operations.JobStartException;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobMerger;
 import org.jberet.job.model.JobParser;
-import org.wildfly.security.manager.WildFlySecurityManager;
+import org.jberet.spi.JobXmlResolver;
 
 import static org.jberet._private.BatchMessages.MESSAGES;
 
@@ -70,10 +68,16 @@ public class ArchiveXmlLoader {
     /**
      * Gets the job root element for a given job name.
      *
-     * @param jobName base name of the job xml document
+     * @param jobName      base name of the job xml document
+     * @param classLoader  the class loader used to locate the job
+     * @param loadedJobs   a collections of jobs that have already been loaded
+     * @param jobXmlResolver the job XML resolver
+     *
      * @return the job root element
+     *
+     * @throws javax.batch.operations.JobStartException if the job failed to start
      */
-    public static Job loadJobXml(final String jobName, final ClassLoader classLoader, final List<Job> loadedJobs)
+    public static Job loadJobXml(final String jobName, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {
         for (final Job j : loadedJobs) {
             if (jobName.equals(j.getId())) {
@@ -84,16 +88,16 @@ public class ArchiveXmlLoader {
         Job job = null;
         final InputStream is;
         try {
-            is = getJobXml(jobName, classLoader);
+            is = getJobXml(jobName, classLoader, jobXmlResolver);
         } catch (final IOException e) {
             throw MESSAGES.failToGetJobXml(e, jobName);
         }
 
         try {
-            job = JobParser.parseJob(is, classLoader, new JobXMLResolver(classLoader));
+            job = JobParser.parseJob(is, classLoader, new JobXmlEntityResolver(classLoader, jobXmlResolver));
             loadedJobs.add(job);
             if (!job.getInheritingJobElements().isEmpty()) {
-                JobMerger.resolveInheritance(job, classLoader, loadedJobs);
+                JobMerger.resolveInheritance(job, classLoader, loadedJobs, jobXmlResolver);
             }
         } catch (final Exception e) {
             throw MESSAGES.failToParseJobXml(e, jobName);
@@ -109,55 +113,32 @@ public class ArchiveXmlLoader {
         return job;
     }
 
-    private static InputStream getJobXml(String jobXml, final ClassLoader classLoader) throws IOException {
+    private static InputStream getJobXml(String jobXml, final ClassLoader classLoader, final JobXmlResolver jobXmlResolver) throws IOException {
         if (!jobXml.endsWith(".xml")) {
             jobXml += ".xml";
         }
-        // META-INF first
-        final String path = ARCHIVE_JOB_XML_DIR + jobXml;
-        InputStream is;
-        is = classLoader.getResourceAsStream(path);
+
+        // Use the SPI to locate the job XML
+        final InputStream is = jobXmlResolver.resolveJobXml(jobXml, classLoader);
         if (is != null) {
             return is;
         }
-
-        // javax.jobpath system property. jobpath format?
-        File jobFile = null;
-        final String jobpath = WildFlySecurityManager.getPropertyPrivileged("javax.jobpath", null);
-        if (jobpath != null && !jobpath.isEmpty()) {
-            final String[] jobPathElements = jobpath.split(":");
-            for (final String p : jobPathElements) {
-                jobFile = new File(p, jobXml);
-                if (jobFile.exists() && jobFile.isFile()) {
-                    break;
-                }
-            }
-        }
-
-        // default location: current directory
-        if (jobFile == null) {
-            jobFile = new File(WildFlySecurityManager.getPropertyPrivileged("user.dir", "."), jobXml);
-            if (!jobFile.exists() || !jobFile.isFile()) {
-                //may be an absolute path to the job file
-                jobFile = new File(jobXml);
-            }
-        }
-
-        is = new BufferedInputStream(new FileInputStream(jobFile));
-        return is;
+        throw BatchMessages.MESSAGES.failToGetJobXml(jobXml);
     }
 
-    private static class JobXMLResolver implements XMLResolver {
+    private static class JobXmlEntityResolver implements XMLResolver {
         private final ClassLoader classLoader;
+        private final JobXmlResolver jobXmlResolver;
 
-        private JobXMLResolver(final ClassLoader classLoader) {
+        private JobXmlEntityResolver(final ClassLoader classLoader, final JobXmlResolver jobXmlResolver) {
             this.classLoader = classLoader;
+            this.jobXmlResolver = jobXmlResolver;
         }
 
         @Override
         public Object resolveEntity(final String publicID, final String systemID, final String baseURI, final String namespace) throws XMLStreamException {
             try {
-                return getJobXml(systemID, classLoader);
+                return getJobXml(systemID, classLoader, jobXmlResolver);
             } catch (IOException e) {
                 throw new XMLStreamException(e);
             }
