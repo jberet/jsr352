@@ -96,7 +96,7 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public long start(final String jobXMLName, final Properties jobParameters) throws JobStartException, JobSecurityException {
         final ClassLoader classLoader = batchEnvironment.getClassLoader();
-        final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, classLoader, new ArrayList<Job>());
+        final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, classLoader, new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
         repository.addJob(jobDefined);
         try {
             return invokeTransaction(new TransactionInvocation<Long>() {
@@ -223,7 +223,7 @@ public class JobOperatorImpl implements JobOperator {
             // the job may not have been loaded, e.g., when the restart is performed in a new JVM
             final String jobName = originalToRestart.getJobName();
             if (repository.getJob(jobName) == null) {
-                final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobName, batchEnvironment.getClassLoader(), new ArrayList<Job>());
+                final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobName, batchEnvironment.getClassLoader(), new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
                 repository.addJob(jobDefined);
             }
             if (jobInstance.getUnsubstitutedJob() == null) {

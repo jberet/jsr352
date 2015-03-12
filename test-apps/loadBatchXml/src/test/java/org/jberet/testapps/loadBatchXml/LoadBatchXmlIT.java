@@ -12,8 +12,11 @@
 
 package org.jberet.testapps.loadBatchXml;
 
+import java.io.File;
+
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Test;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
  * Verifies the following:
@@ -41,5 +44,14 @@ public class LoadBatchXmlIT extends AbstractIT {
     @Test
     public void loadBatchXml() throws Exception {
         startJobAndWait("batchlet1.xml");
+    }
+
+    @Test
+    public void loadBatchXmlFromServiceLoader() throws Exception {
+        // Test a file defined in the jberet.job.path directory
+        startJobAndWait("simple-chunk.xml");
+
+        // Test an absolute path
+        startJobAndWait(new File(WildFlySecurityManager.getPropertyPrivileged("jberet.job.path.absolute", "."), "absolute-simple-chunk.xml").getAbsolutePath());
     }
 }

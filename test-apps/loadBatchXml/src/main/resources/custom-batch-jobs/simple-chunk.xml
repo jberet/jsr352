@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job id="simpleChunk" restartable="#{jobParameters['restartable']}" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="step1">
+        <chunk>
+            <reader ref="integerArrayReader">
+                <properties>
+                    <property name="data.count" value="10" />
+                </properties>
+            </reader>
+            <writer ref="integerArrayWriter">
+                <properties>
+                    <property name="writer.sleep.time" value="0" />
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>

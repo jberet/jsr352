@@ -17,13 +17,14 @@ import java.util.List;
 import javax.batch.operations.JobStartException;
 
 import org.jberet.creation.ArchiveXmlLoader;
+import org.jberet.spi.JobXmlResolver;
 import org.jberet.util.BatchUtil;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class FlowMerger extends AbstractMerger<Flow> {
-    public FlowMerger(final Job job, final Flow child, final ClassLoader classLoader, final List<Job> loadedJobs)
+    public FlowMerger(final Job job, final Flow child, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {
-        super(job, classLoader, loadedJobs);
+        super(job, classLoader, loadedJobs, jobXmlResolver);
         this.child = child;
         final String parentName = child.getParent();
         final String jslName = child.getJslName();
@@ -35,7 +36,7 @@ public final class FlowMerger extends AbstractMerger<Flow> {
                 }
             }
         } else { // jslName points to a different jsl document
-            final Job jobOfParentFlow = ArchiveXmlLoader.loadJobXml(jslName, classLoader, loadedJobs);
+            final Job jobOfParentFlow = ArchiveXmlLoader.loadJobXml(jslName, classLoader, loadedJobs, jobXmlResolver);
             for (final JobElement e : jobOfParentFlow.getJobElements()) {
                 if (parentName.equals(e.getId())) {
                     this.parent = (Flow) e;
@@ -49,7 +50,7 @@ public final class FlowMerger extends AbstractMerger<Flow> {
 
         //check if parent has its own parent, which may be in the same or different job xml document
         if (parent.getParent() != null) {
-            final FlowMerger merger2 = new FlowMerger(currentJob, parent, classLoader, loadedJobs);
+            final FlowMerger merger2 = new FlowMerger(currentJob, parent, classLoader, loadedJobs, jobXmlResolver);
             recordInheritingElements(merger2);
             merger2.merge();
         }
