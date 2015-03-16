@@ -12,6 +12,7 @@
 
 package org.jberet.repository;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +34,8 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.util.JSON;
+import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
@@ -535,6 +538,63 @@ public final class MongoRepository extends AbstractRepository {
         final DBObject query = new BasicDBObject(TableColumns.JOBEXECUTIONID, inClause);
         query.put(TableColumns.STEPNAME, stepName);
         return db.getCollection(TableColumns.STEP_EXECUTION).find(query).count();
+    }
+
+    /**
+     * Executes MongoDB remove queries.
+     *
+     * @param removeQueries a series of remove queries delimited by semi-colon (;). For example,
+     *                      db.PARTITION_EXECUTION.remove({ STEPEXECUTIONID: { $gt: 100 } });
+     *                      db.STEP_EXECUTION.remove({ STEPEXECUTIONID: { $gt: 100 } });
+     *                      db.JOB_EXECUTION.remove({ JOBEXECUTIONID: { $gt: 10 } });
+     *                      db.JOB_INSTANCE.remove({ JOBINSTANCEID: { $gt: 10 } })
+     */
+    public void executeRemoveQueries(final String removeQueries) {
+        //db.getCollection(TableColumns.PARTITION_EXECUTION).remove(null);
+        final String[] queries = removeQueries.split(";");
+        final List<AbstractMap.SimpleEntry<DBObject, DBCollection>> dbObjectsAndCollections =
+                new ArrayList<AbstractMap.SimpleEntry<DBObject, DBCollection>>();
+        String queryConditionJson;
+
+        for (String q : queries) {
+            q = q.trim();
+            if (q.isEmpty()) {
+                continue;
+            }
+            final int dot1Pos = q.indexOf('.', 2);
+            final int removePos = q.indexOf("remove", dot1Pos + 3);
+            final int dot2Pos = q.lastIndexOf('.', removePos);
+            final int leftParenthesisPos = q.indexOf('(', removePos + 6);
+            if (dot1Pos <= 0 || dot2Pos <= 0 || removePos <= 0 || leftParenthesisPos <= 0 ||
+                    leftParenthesisPos < removePos || leftParenthesisPos < dot2Pos || leftParenthesisPos < dot1Pos ||
+                    removePos < dot2Pos || removePos < dot1Pos || dot2Pos <= dot1Pos) {
+                throw BatchMessages.MESSAGES.failToRunQuery(null, q);
+            }
+
+            final String collectionName = q.substring(dot1Pos + 1, dot2Pos).trim();
+            queryConditionJson = q.substring(leftParenthesisPos + 1, q.length() - 1);
+            final DBObject parsedDBObject = (DBObject) JSON.parse(queryConditionJson);
+            final DBCollection coll;
+
+            if (collectionName.equalsIgnoreCase(TableColumns.JOB_EXECUTION)) {
+                coll = db.getCollection(TableColumns.JOB_EXECUTION);
+            } else if (collectionName.equalsIgnoreCase(TableColumns.STEP_EXECUTION)) {
+                coll = db.getCollection(TableColumns.STEP_EXECUTION);
+            } else if (collectionName.equalsIgnoreCase(TableColumns.JOB_INSTANCE)) {
+                coll = db.getCollection(TableColumns.JOB_INSTANCE);
+            } else if (collectionName.equalsIgnoreCase(TableColumns.PARTITION_EXECUTION)) {
+                coll = db.getCollection(TableColumns.PARTITION_EXECUTION);
+            } else {
+                throw BatchMessages.MESSAGES.failToRunQuery(null, q);
+            }
+            dbObjectsAndCollections.add(new AbstractMap.SimpleEntry<DBObject, DBCollection>(parsedDBObject, coll));
+            BatchLogger.LOGGER.tracef("About to remove from collection: %s, with query: %s%n", coll, parsedDBObject);
+        }
+
+        for (final AbstractMap.SimpleEntry<DBObject, DBCollection> e : dbObjectsAndCollections) {
+            e.getValue().remove(e.getKey());
+        }
+
     }
 
     private Long incrementAndGetSequence(final String whichId) {

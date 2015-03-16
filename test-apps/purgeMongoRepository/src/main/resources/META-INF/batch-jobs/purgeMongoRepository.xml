@@ -16,6 +16,8 @@
     <step id="purgeMongoRepository.step1">
         <batchlet ref="org.jberet.repository.PurgeBatchlet">
             <properties>
+                <property name="mongoRemoveQueries" value="#{jobParameters['mongoRemoveQueries']}"/>
+
                 <property name="jobExecutionSelector" value="#{jobParameters['jobExecutionSelector']}"/>
                 <property name="keepRunningJobExecutions" value="#{jobParameters['keepRunningJobExecutions']}"/>
                 <property name="purgeJobsByNames" value="#{jobParameters['purgeJobsByNames']}"/>

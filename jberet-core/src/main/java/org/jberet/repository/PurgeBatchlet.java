@@ -40,6 +40,10 @@ public final class PurgeBatchlet implements Batchlet {
 
     @Inject
     @BatchProperty
+    String mongoRemoveQueries;
+
+    @Inject
+    @BatchProperty
     Class jobExecutionSelector;
 
     @Inject
@@ -133,6 +137,10 @@ public final class PurgeBatchlet implements Batchlet {
                 ((JdbcRepository) jobRepository).executeStatements(sql, null);
             } else if (sqlFile != null) {
                 ((JdbcRepository) jobRepository).executeStatements(null, sqlFile);
+            }
+        } else if (jobRepository instanceof MongoRepository) {
+            if (mongoRemoveQueries != null) {
+                ((MongoRepository) jobRepository).executeRemoveQueries(mongoRemoveQueries);
             }
         }
 

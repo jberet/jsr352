@@ -13,6 +13,7 @@
 package org.jberet.testapps.purgeMongoRepository;
 
 import javax.batch.operations.NoSuchJobExecutionException;
+import javax.batch.runtime.JobInstance;
 
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
 import org.junit.Test;
@@ -71,4 +72,57 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     public void getRunningExecutions2() throws Exception {
         super.getRunningExecutions2();
     }
+
+    @Test
+    public void removeStepExecutionsAndJobExecutions() throws Exception {
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge(prepurge2JobName);
+
+        params.setProperty("mongoRemoveQueries",
+                "db.STEP_EXECUTION.remove({JOBEXECUTIONID: {$in: [" + prepurge1JobExecutionId + ", " + prepurge2JobExecutionId + "]}}); " +
+                        "db. JOB_EXECUTION.remove({JOBEXECUTIONID: {$in: [" + prepurge1JobExecutionId + ", " + prepurge2JobExecutionId + "]}})");
+
+        params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
+
+        startAndVerifyPurgeJob(purgeMongoRepositoryJobName);
+
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
+    }
+
+    @Test
+    public void removeStepExecutionsAndJobExecutionsAndJobInstances() throws Exception {
+        final long prepurge1JobExecutionId = prepurge();
+        final long prepurge2JobExecutionId = prepurge(prepurge2JobName);
+        final long instanceId1 = jobOperator.getJobInstance(prepurge1JobExecutionId).getInstanceId();
+        final long instanceId2 = jobOperator.getJobInstance(prepurge2JobExecutionId).getInstanceId();
+
+        params.setProperty("mongoRemoveQueries",
+                "db.STEP_EXECUTION.remove({JOBEXECUTIONID: {$in: [" + prepurge1JobExecutionId + ", " + prepurge2JobExecutionId + "]}}); " +
+                        "db. JOB_EXECUTION.remove({JOBEXECUTIONID: {$in: [" + prepurge1JobExecutionId + ", " + prepurge2JobExecutionId + "]}}); " +
+                        "db.  JOB_INSTANCE.remove({JOBINSTANCEID:  {$in: [" + instanceId1 + ", " + instanceId2 + "]}})"
+        );
+
+        params.setProperty("purgeJobsByNames", prepurgeAndPrepurge2JobNames);
+
+        startAndVerifyPurgeJob(purgeMongoRepositoryJobName);
+
+        assertNoSuchJobExecution(prepurge1JobExecutionId);
+        assertNoSuchJobExecution(prepurge2JobExecutionId);
+
+        try {
+            final JobInstance ins = jobOperator.getJobInstance(prepurge1JobExecutionId);
+            org.junit.Assert.fail("Expecting NoSuchJobExecutionException, but got " + ins);
+        } catch (final NoSuchJobExecutionException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+        try {
+            final JobInstance ins = jobOperator.getJobInstance(prepurge2JobExecutionId);
+            org.junit.Assert.fail("Expecting NoSuchJobException, but got " + ins);
+        } catch (final NoSuchJobExecutionException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+
+    }
+
 }
