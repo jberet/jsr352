@@ -573,7 +573,7 @@ public final class MongoRepository extends AbstractRepository {
 
             final String collectionName = q.substring(dot1Pos + 1, dot2Pos).trim();
             queryConditionJson = q.substring(leftParenthesisPos + 1, q.length() - 1);
-            final DBObject parsedDBObject = (DBObject) JSON.parse(queryConditionJson);
+            DBObject parsedDBObject = (DBObject) JSON.parse(queryConditionJson);
             final DBCollection coll;
 
             if (collectionName.equalsIgnoreCase(TableColumns.JOB_EXECUTION)) {
@@ -586,6 +586,9 @@ public final class MongoRepository extends AbstractRepository {
                 coll = db.getCollection(TableColumns.PARTITION_EXECUTION);
             } else {
                 throw BatchMessages.MESSAGES.failToRunQuery(null, q);
+            }
+            if (parsedDBObject == null) {
+                parsedDBObject = new BasicDBObject();
             }
             dbObjectsAndCollections.add(new AbstractMap.SimpleEntry<DBObject, DBCollection>(parsedDBObject, coll));
             BatchLogger.LOGGER.tracef("About to remove from collection: %s, with query: %s%n", coll, parsedDBObject);
