@@ -309,21 +309,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     //to skip the remainder of the current loop.  If retry with rollback, chunkState has been set to
                     //TO_RETRY; if retry with no rollback, itemState has been set to TO_RETRY_WRITE; if skip,
                     //itemState has been set to TO_SKIP
-                    if (processingInfo.chunkState == ChunkState.TO_RETRY || processingInfo.itemState == ItemState.TO_RETRY_WRITE ||
-                            processingInfo.itemState == ItemState.TO_SKIP) {
-                        continue;
-                    }
 
-                    for (final ChunkListener l : chunkListeners) {
-                        l.afterChunk();
-                    }
-
-                    tm.commit();
-                    if (checkpointAlgorithm != null) {
-                        checkpointAlgorithm.endCheckpoint();
-                    }
-
-                    stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
+                    // end of a chunk, so the following block is no longer needed
+                    //if (processingInfo.chunkState == ChunkState.TO_RETRY || processingInfo.itemState == ItemState.TO_RETRY_WRITE ||
+                    //        processingInfo.itemState == ItemState.TO_SKIP) {
+                    //    continue;
+                    //}
                 }
             } catch (final Exception e) {
                 final int txStatus = tm.getStatus();
@@ -506,23 +497,35 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private void doCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         final int outputSize = outputList.size();
-        if (outputSize == 0 && processingInfo.chunkState == ChunkState.DEPLETED) {
-            return;
-        }
+        boolean nothingToWrite = outputSize == 0 && processingInfo.chunkState == ChunkState.DEPLETED;
+
         try {
-            for (final ItemWriteListener l : itemWriteListeners) {
-                l.beforeWrite(outputList);
+            if (!nothingToWrite) {
+                for (final ItemWriteListener l : itemWriteListeners) {
+                    l.beforeWrite(outputList);
+                }
+                itemWriter.writeItems(outputList);
+                stepMetrics.increment(Metric.MetricType.WRITE_COUNT, outputSize);
+                for (final ItemWriteListener l : itemWriteListeners) {
+                    l.afterWrite(outputList);
+                }
             }
-            itemWriter.writeItems(outputList);
-            stepMetrics.increment(Metric.MetricType.WRITE_COUNT, outputSize);
-            for (final ItemWriteListener l : itemWriteListeners) {
-                l.afterWrite(outputList);
+
+            for (final ChunkListener l : chunkListeners) {
+                l.afterChunk();
             }
+
             stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
             stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
             batchContext.savePersistentData();
-            outputList.clear();
+            tm.commit();
+            stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
             processingInfo.checkpointPosition = processingInfo.readPosition;
+            outputList.clear();
+
+            if (checkpointAlgorithm != null) {
+                checkpointAlgorithm.endCheckpoint();
+            }
 
             if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
                 processingInfo.chunkState = ChunkState.JOB_STOPPED;
@@ -530,7 +533,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             } else if (processingInfo.chunkState != ChunkState.DEPLETED && processingInfo.chunkState != ChunkState.RETRYING) {
                 processingInfo.chunkState = ChunkState.TO_START_NEW;
             }
-            if (collector != null) {
+            if (collector != null && !nothingToWrite) {
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
         } catch (final Exception e) {
@@ -583,7 +586,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private void rollbackCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         outputList.clear();
         processingInfo.failurePoint = processingInfo.readPosition;
-        tm.rollback();
+
+        //when chunk commit failed, the transaction was already rolled back and its status is STATUS_NO_TRANSACTION (6)
+        if(tm.getStatus() != Status.STATUS_NO_TRANSACTION) {
+            tm.rollback();
+        }
+
         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
         // Close the reader and writer
         try {
