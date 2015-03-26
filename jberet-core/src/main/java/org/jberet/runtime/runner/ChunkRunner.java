@@ -12,6 +12,7 @@
 
 package org.jberet.runtime.runner;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -497,8 +498,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private void doCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         final int outputSize = outputList.size();
-        boolean nothingToWrite = outputSize == 0 && processingInfo.chunkState == ChunkState.DEPLETED;
+        final boolean nothingToWrite = outputSize == 0 && processingInfo.chunkState == ChunkState.DEPLETED;
 
+        //to back up reader and writer checkpointInfo, and if tx commit fails, restore to previous valid state
+        //ChunkState.TO_START_NEW and ChunkState.RUNNING here are used to indicate values not set by application.
+        Serializable backupReaderCheckpointInfo = ChunkState.TO_START_NEW;
+        Serializable backupWriterCheckpointInfo = ChunkState.TO_START_NEW;
         try {
             if (!nothingToWrite) {
                 for (final ItemWriteListener l : itemWriteListeners) {
@@ -515,10 +520,15 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 l.afterChunk();
             }
 
+            backupReaderCheckpointInfo = stepOrPartitionExecution.getReaderCheckpointInfo();
+            backupWriterCheckpointInfo = stepOrPartitionExecution.getWriterCheckpointInfo();
+
             stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
             stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
             batchContext.savePersistentData();
             tm.commit();
+            backupReaderCheckpointInfo = backupWriterCheckpointInfo = ChunkState.RUNNING;
+
             stepMetrics.increment(Metric.MetricType.COMMIT_COUNT, 1);
             processingInfo.checkpointPosition = processingInfo.readPosition;
             outputList.clear();
@@ -537,6 +547,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
         } catch (final Exception e) {
+            if (backupWriterCheckpointInfo != ChunkState.TO_START_NEW && backupWriterCheckpointInfo != ChunkState.RUNNING) {
+                //restore reader and writer checkpointInfo to previous valid state
+                stepOrPartitionExecution.setReaderCheckpointInfo(backupReaderCheckpointInfo);
+                stepOrPartitionExecution.setWriterCheckpointInfo(backupWriterCheckpointInfo);
+            }
+
             for (final ItemWriteListener l : itemWriteListeners) {
                 l.onWriteError(outputList, e);
             }
