@@ -58,7 +58,7 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
             pattern = pattern.replace("*", ".*");
         }
         if (!containsAsterisk && !containsQuestionMark) {
-            return text.equals(pattern);
+            return pattern.equals(text);
         }
         return Pattern.matches(pattern, text);
     }
