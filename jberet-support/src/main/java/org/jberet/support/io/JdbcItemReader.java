@@ -368,6 +368,9 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
             } else if (type.equals("Array")) {
                 val = resultSet.getArray(pos);
             }
+            if (resultSet.wasNull()) {
+                val = null;
+            }
         }
         return val;
     }
