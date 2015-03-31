@@ -14,6 +14,7 @@ package org.jberet.repository;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -985,7 +986,7 @@ public final class JdbcRepository extends AbstractRepository {
 
     private static ClassLoader getClassLoader() {
         if (WildFlySecurityManager.isChecking()) {
-            return WildFlySecurityManager.doUnchecked(new PrivilegedAction<ClassLoader>() {
+            return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
                 @Override
                 public ClassLoader run() {
                     return JdbcRepository.class.getClassLoader();

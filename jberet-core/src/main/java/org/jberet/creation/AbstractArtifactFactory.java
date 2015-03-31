@@ -16,6 +16,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -133,7 +134,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
         }
         for(final Method m : lifecycleMethods) {
             if (WildFlySecurityManager.isChecking()) {
-                WildFlySecurityManager.doUnchecked(new InvokeMethodPrivilegedExceptionAction(m, obj));
+                AccessController.doPrivileged(new InvokeMethodPrivilegedExceptionAction(m, obj));
             } else {
                 if (!m.isAccessible()) {
                     m.setAccessible(true);
@@ -145,7 +146,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
 
     private void doInjection(final Object obj, final Field field, final Object val) throws Exception {
         if (WildFlySecurityManager.isChecking()) {
-            WildFlySecurityManager.doUnchecked(new SetFieldPrivilegedExceptionAction(field, obj, val));
+            AccessController.doPrivileged(new SetFieldPrivilegedExceptionAction(field, obj, val));
         } else {
             if (!field.isAccessible()) {
                 field.setAccessible(true);

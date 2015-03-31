@@ -13,6 +13,7 @@
 package org.jberet.repository;
 
 import java.io.Serializable;
+import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -291,7 +292,7 @@ public abstract class AbstractRepository implements JobRepository {
 
     private static <T extends Serializable> T clone(final T object) {
         if (WildFlySecurityManager.isChecking()) {
-            return WildFlySecurityManager.doUnchecked(new PrivilegedAction<T>() {
+            return AccessController.doPrivileged(new PrivilegedAction<T>() {
                 @Override
                 public T run() {
                     return BatchUtil.clone(object);

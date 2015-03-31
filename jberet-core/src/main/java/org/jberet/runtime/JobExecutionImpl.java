@@ -12,6 +12,7 @@
 
 package org.jberet.runtime;
 
+import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,7 +62,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
         if (WildFlySecurityManager.isChecking()) {
-            this.substitutedJob = WildFlySecurityManager.doUnchecked(new PrivilegedAction<Job>() {
+            this.substitutedJob = AccessController.doPrivileged(new PrivilegedAction<Job>() {
                 @Override
                 public Job run() {
                     return BatchUtil.clone(jobInstance.unsubstitutedJob);
