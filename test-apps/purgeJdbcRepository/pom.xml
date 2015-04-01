@@ -24,6 +24,9 @@
     </parent>
 
     <artifactId>purgeJdbcRepository</artifactId>
+    <properties>
+        <jvmArgs>-Xmx32m</jvmArgs>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -36,6 +39,27 @@
             <artifactId>purgeInMemoryRepository</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jberet.test-apps</groupId>
+            <artifactId>chunkPartition</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${jvmArgs}</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <argLine>${jvmArgs}</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
