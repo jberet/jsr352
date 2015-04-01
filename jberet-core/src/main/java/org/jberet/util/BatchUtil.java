@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -37,13 +38,13 @@ public final class BatchUtil {
 
 
     static {
-        clonerFactory = WildFlySecurityManager.doUnchecked(new PrivilegedAction<ObjectClonerFactory>() {
+        clonerFactory = AccessController.doPrivileged(new PrivilegedAction<ObjectClonerFactory>() {
             @Override
             public ObjectClonerFactory run() {
                 return ObjectCloners.getSerializingObjectClonerFactory();
             }
         });
-        cloner = WildFlySecurityManager.doUnchecked(new PrivilegedAction<ObjectCloner>() {
+        cloner = AccessController.doPrivileged(new PrivilegedAction<ObjectCloner>() {
             @Override
             public ObjectCloner run() {
                 return clonerFactory.createCloner(new ClonerConfiguration());

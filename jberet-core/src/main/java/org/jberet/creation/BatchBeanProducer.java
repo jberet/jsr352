@@ -20,6 +20,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.URI;
 import java.net.URL;
+import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.Date;
 import java.util.List;
@@ -393,7 +394,7 @@ public class BatchBeanProducer {
                 final Object fieldVal;
 
                 if (WildFlySecurityManager.isChecking()) {
-                    fieldVal = WildFlySecurityManager.doUnchecked(new PrivilegedExceptionAction<Object>() {
+                    fieldVal = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                         @Override
                         public Object run() throws Exception {
                             if (!field.isAccessible()) {

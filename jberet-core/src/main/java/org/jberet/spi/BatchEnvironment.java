@@ -12,8 +12,6 @@
 package org.jberet.spi;
 
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import javax.transaction.TransactionManager;
 
 import org.jberet.repository.JobRepository;
@@ -38,45 +36,11 @@ public interface BatchEnvironment {
     ArtifactFactory getArtifactFactory();
 
     /**
-     * Submits a {@link Runnable runnable} task for execution and returns a {@link java.util.concurrent.Future future} representing that
-     * task. The futures {@link java.util.concurrent.Future#get() geth} method will return {@code null} upon successful
-     * completion.
+     * Submits a {@link Runnable runnable} task for execution.
      *
      * @param task the task to submit
-     *
-     * @return a future representing pending completion of the task
-     *
-     * @see java.util.concurrent.ExecutorService#submit(Runnable)
      */
-    Future<?> submitTask(Runnable task);
-
-    /**
-     * Submits a {@link Runnable runnable} task for execution and returns a {@link Future future} representing that
-     * task. The {@link Future future's} get method will return the given result upon successful completion.
-     *
-     * @param task   the task to submit
-     * @param result the result to return
-     * @param <T>    the type of the result
-     *
-     * @return a {@link Future future} representing pending completion of the task
-     *
-     * @see java.util.concurrent.ExecutorService#submit(Runnable, Object)
-     */
-    <T> Future<T> submitTask(Runnable task, T result);
-
-    /**
-     * Submits a value-returning task for execution and returns a {@link Future future} representing the pending
-     * results of the task. The {@link Future future's} get method will return the task's result upon successful
-     * completion.
-     *
-     * @param task the task to submit
-     * @param <T>  the type of the result
-     *
-     * @return a {@link Future future} representing pending completion of the task
-     *
-     * @see java.util.concurrent.ExecutorService#submit(java.util.concurrent.Callable)
-     */
-    <T> Future<T> submitTask(Callable<T> task);
+    void submitTask(Runnable task);
 
     /**
      * Returns a transaction manager to be used for executions that require a transaction.

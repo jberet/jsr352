@@ -13,6 +13,7 @@
 package org.jberet.runtime.context;
 
 import java.io.Serializable;
+import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
@@ -86,7 +87,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
                 c.outerContexts[i] = outerContexts[i];
             }
             if (WildFlySecurityManager.isChecking()) {
-                c.step = WildFlySecurityManager.doUnchecked(new PrivilegedAction<Step>() {
+                c.step = AccessController.doPrivileged(new PrivilegedAction<Step>() {
                     @Override
                     public Step run() {
                         return BatchUtil.clone(step);
