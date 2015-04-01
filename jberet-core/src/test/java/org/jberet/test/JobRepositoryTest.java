@@ -91,18 +91,8 @@ public class JobRepositoryTest {
             }
 
             @Override
-            public Future<?> submitTask(final Runnable task) {
-                return null;
-            }
+            public void submitTask(final Runnable task) {
 
-            @Override
-            public <T> Future<T> submitTask(final Runnable task, final T result) {
-                return null;
-            }
-
-            @Override
-            public <T> Future<T> submitTask(final Callable<T> task) {
-                return null;
             }
 
             @Override

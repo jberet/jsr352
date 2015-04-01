@@ -115,18 +115,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     }
 
     @Override
-    public Future<?> submitTask(final Runnable task) {
-        return executorService.submit(task);
-    }
-
-    @Override
-    public <T> Future<T> submitTask(final Runnable task, final T result) {
-        return executorService.submit(task, result);
-    }
-
-    @Override
-    public <T> Future<T> submitTask(final Callable<T> task) {
-        return executorService.submit(task);
+    public void submitTask(final Runnable task) {
+        executorService.submit(task);
     }
 
     @Override
