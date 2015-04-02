@@ -15,6 +15,7 @@ package org.jberet.repository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AccessController;
+import java.lang.ref.SoftReference;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -47,7 +48,7 @@ import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
-public final class JdbcRepository extends AbstractRepository {
+public final class JdbcRepository extends AbstractPersistentRepository {
     //keys used in jberet.properties
     public static final String DDL_FILE_NAME_KEY = "ddl-file";
     public static final String SQL_FILE_NAME_KEY = "sql-file";
@@ -245,24 +246,6 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
-        //check cache first, if not found, then retrieve from database
-        final List<StepExecution> stepExecutions;
-        final JobExecution jobExecution = jobExecutions.get(jobExecutionId);
-        if (jobExecution == null) {
-            stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
-        } else {
-            final List<StepExecution> stepExecutions1 = ((JobExecutionImpl) jobExecution).getStepExecutions();
-            if (stepExecutions1.isEmpty()) {
-                stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
-            } else {
-                stepExecutions = stepExecutions1;
-            }
-        }
-        return stepExecutions;
-    }
-
-    @Override
     void insertJobInstance(final JobInstanceImpl jobInstance) {
         final String insert = sqls.getProperty(INSERT_JOB_INSTANCE);
         final Connection connection = getConnection();
@@ -301,17 +284,18 @@ public final class JdbcRepository extends AbstractRepository {
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 final long i = rs.getLong(TableColumns.JOBINSTANCEID);
-                JobInstanceImpl jobInstance1 = (JobInstanceImpl) jobInstances.get(i);
+                final SoftReference<JobInstanceImpl> ref = jobInstances.get(i);
+                JobInstanceImpl jobInstance1 = (ref != null) ? ref.get() : null;
                 if (jobInstance1 == null) {
                     final String appName = rs.getString(TableColumns.APPLICATIONNAME);
                     if (jobName == null) {
                         final String goodJobName = rs.getString(TableColumns.JOBNAME);
-                        jobInstance1 = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
+                        jobInstance1 = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, goodJobName)), appName, goodJobName);
                     } else {
-                        jobInstance1 = new JobInstanceImpl(getJob(jobName), new ApplicationAndJobName(appName, jobName));
+                        jobInstance1 = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, jobName)), appName, jobName);
                     }
                     jobInstance1.setId(i);
-                    jobInstances.put(i, jobInstance1);
+                    jobInstances.put(i, new SoftReference<JobInstanceImpl>(jobInstance1));
                 }
                 //this job instance is already in the cache, so get it from the cache
                 result.add(jobInstance1);
@@ -325,8 +309,8 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public JobInstance getJobInstance(final long jobInstanceId) {
-        JobInstance result = super.getJobInstance(jobInstanceId);
+    public JobInstanceImpl getJobInstance(final long jobInstanceId) {
+        JobInstanceImpl result = super.getJobInstance(jobInstanceId);
         if (result != null) {
             return result;
         }
@@ -340,13 +324,14 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(1, jobInstanceId);
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                result = jobInstances.get(jobInstanceId);
+                final SoftReference<JobInstanceImpl> jobInstanceSoftReference = jobInstances.get(jobInstanceId);
+                result = jobInstanceSoftReference != null ? jobInstanceSoftReference.get() : null;
                 if (result == null) {
                     final String appName = rs.getString(TableColumns.APPLICATIONNAME);
                     final String goodJobName = rs.getString(TableColumns.JOBNAME);
-                    result = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
-                    ((JobInstanceImpl) result).setId(jobInstanceId);
-                    jobInstances.put(jobInstanceId, result);
+                    result = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, goodJobName)), appName, goodJobName);
+                    result.setId(jobInstanceId);
+                    jobInstances.put(jobInstanceId, new SoftReference<JobInstanceImpl>(result));
                 }
                 break;
             }
@@ -408,7 +393,7 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public void updateJobExecution(final JobExecutionImpl jobExecution, boolean fullUpdate) {
+    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
         super.updateJobExecution(jobExecution, fullUpdate);
         final String update = fullUpdate ? sqls.getProperty(UPDATE_JOB_EXECUTION) : sqls.getProperty(UPDATE_JOB_EXECUTION_PARTIAL);
         final Connection connection = getConnection();
@@ -439,8 +424,8 @@ public final class JdbcRepository extends AbstractRepository {
     }
 
     @Override
-    public JobExecution getJobExecution(final long jobExecutionId) {
-        JobExecutionImpl result = (JobExecutionImpl) super.getJobExecution(jobExecutionId);
+    public JobExecutionImpl getJobExecution(final long jobExecutionId) {
+        JobExecutionImpl result = super.getJobExecution(jobExecutionId);
         if (result != null) {
             return result;
         }
@@ -453,10 +438,11 @@ public final class JdbcRepository extends AbstractRepository {
             preparedStatement.setLong(1, jobExecutionId);
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                result = (JobExecutionImpl) jobExecutions.get(jobExecutionId);
+                final SoftReference<JobExecutionImpl> ref = jobExecutions.get(jobExecutionId);
+                result = (ref != null) ? ref.get() : null;
                 if (result == null) {
                     final long jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
-                    result = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId),
+                    result = new JobExecutionImpl(getJobInstance(jobInstanceId),
                             jobExecutionId,
                             BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS)),
                             rs.getTimestamp(TableColumns.CREATETIME),
@@ -466,7 +452,7 @@ public final class JdbcRepository extends AbstractRepository {
                             rs.getString(TableColumns.BATCHSTATUS),
                             rs.getString(TableColumns.EXITSTATUS),
                             rs.getString(TableColumns.RESTARTPOSITION));
-                    jobExecutions.put(jobExecutionId, result);
+                    jobExecutions.put(jobExecutionId, new SoftReference<JobExecutionImpl>(result));
                 }
                 break;
             }
@@ -501,20 +487,21 @@ public final class JdbcRepository extends AbstractRepository {
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 final long i = rs.getLong(TableColumns.JOBEXECUTIONID);
-                JobExecution jobExecution1 = jobExecutions.get(i);
+                final SoftReference<JobExecutionImpl> ref = jobExecutions.get(i);
+                JobExecutionImpl jobExecution1 = (ref != null) ? ref.get() : null;
                 if (jobExecution1 == null) {
                     if (jobInstanceId == 0) {
                         jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
                     }
                     final Properties jobParameters1 = BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS));
                     jobExecution1 =
-                            new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId), i, jobParameters1,
+                            new JobExecutionImpl(getJobInstance(jobInstanceId), i, jobParameters1,
                                     rs.getTimestamp(TableColumns.CREATETIME), rs.getTimestamp(TableColumns.STARTTIME),
                                     rs.getTimestamp(TableColumns.ENDTIME), rs.getTimestamp(TableColumns.LASTUPDATEDTIME),
                                     rs.getString(TableColumns.BATCHSTATUS), rs.getString(TableColumns.EXITSTATUS),
                                     rs.getString(TableColumns.RESTARTPOSITION));
 
-                    jobExecutions.put(i, jobExecution1);
+                    jobExecutions.put(i, new SoftReference<JobExecutionImpl>(jobExecution1));
                 }
                 // jobExecution1 is either got from the cache, or created, now add it to the result list
                 result.add(jobExecution1);
@@ -643,6 +630,7 @@ public final class JdbcRepository extends AbstractRepository {
         }
     }
 
+    /*
     StepExecution selectStepExecution(final long stepExecutionId, final ClassLoader classLoader) {
         final String select = sqls.getProperty(SELECT_STEP_EXECUTION);
         final Connection connection = getConnection();
@@ -661,6 +649,7 @@ public final class JdbcRepository extends AbstractRepository {
         }
         return result.get(0);
     }
+    */
 
     /**
      * Retrieves a list of StepExecution from database by JobExecution id.  This method does not check the cache, so it
@@ -670,6 +659,7 @@ public final class JdbcRepository extends AbstractRepository {
      * @param classLoader    the current application class loader
      * @return a list of StepExecutions
      */
+    @Override
     List<StepExecution> selectStepExecutions(final Long jobExecutionId, final ClassLoader classLoader) {
         final String select = (jobExecutionId == null) ? sqls.getProperty(SELECT_ALL_STEP_EXECUTIONS) :
                 sqls.getProperty(SELECT_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID);

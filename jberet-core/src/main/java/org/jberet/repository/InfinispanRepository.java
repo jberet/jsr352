@@ -14,8 +14,12 @@ package org.jberet.repository;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
@@ -26,6 +30,7 @@ import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.context.Flag;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Job;
 import org.jberet.runtime.AbstractStepExecution;
@@ -44,7 +49,7 @@ public final class InfinispanRepository extends AbstractRepository {
     private Cache<Long, StepExecutionImpl> stepExecutionCache;
     private Cache<String, PartitionExecutionImpl> partitionExecutionCache;
 
-    private EmbeddedCacheManager cacheManager;
+    private final EmbeddedCacheManager cacheManager;
 
     public static InfinispanRepository create(final Configuration infinispanConfig) {
         return new InfinispanRepository(infinispanConfig);
@@ -74,7 +79,7 @@ public final class InfinispanRepository extends AbstractRepository {
 
     @Override
     public void removeJob(final String jobId) {
-        jobs.remove(jobId);
+        super.removeJob(jobId);
 
         //do not cascade-remove JobInstance or JobExecution, since it will be too expensive in a distributed cache, and
         //also too destructive to remove all these historical records.
@@ -82,8 +87,7 @@ public final class InfinispanRepository extends AbstractRepository {
 
     @Override
     public JobInstanceImpl createJobInstance(final Job job, final String applicationName, final ClassLoader classLoader) {
-        final ApplicationAndJobName appJobNames = new ApplicationAndJobName(applicationName, job.getId());
-        final JobInstanceImpl jobInstance = new JobInstanceImpl(job, appJobNames);
+        final JobInstanceImpl jobInstance = new JobInstanceImpl(job, applicationName, job.getId());
         insertJobInstance(jobInstance);
         return jobInstance;
     }
@@ -91,6 +95,22 @@ public final class InfinispanRepository extends AbstractRepository {
     @Override
     public void removeJobInstance(final long jobInstanceIdToRemove) {
         jobInstanceCache.remove(jobInstanceIdToRemove);
+    }
+
+    @Override
+    public void removeJobExecutions(final JobExecutionSelector jobExecutionSelector) {
+        final Collection<Long> allJobExecutionIds = jobExecutionCache.keySet();
+        for (final Iterator<Map.Entry<Long, JobExecutionImpl>> it = jobExecutionCache.entrySet().iterator(); it.hasNext(); ) {
+            final JobExecutionImpl je = it.next().getValue();
+            if (je != null &&
+                    (jobExecutionSelector == null || jobExecutionSelector.select(je, allJobExecutionIds))) {
+                if (je.getJobParameters() != null) {
+                    je.getJobParameters().clear();
+                }
+                BatchLogger.LOGGER.removing(JobExecution.class.getName(), String.valueOf(je.getExecutionId()));
+                it.remove();
+            }
+        }
     }
 
     @Override
@@ -135,13 +155,20 @@ public final class InfinispanRepository extends AbstractRepository {
     }
 
     @Override
-    public JobExecution getJobExecution(final long jobExecutionId) {
+    public JobExecutionImpl getJobExecution(final long jobExecutionId) {
         return jobExecutionCache.get(jobExecutionId);
     }
 
     @Override
     public List<JobExecution> getJobExecutions(final JobInstance jobInstance) {
-        return super.getJobExecutions(jobInstanceCache.get(jobInstance.getInstanceId()));
+        if (jobInstance == null) {
+            //return all JobExecution
+            final List<JobExecution> result = new ArrayList<JobExecution>();
+            result.addAll(jobExecutionCache.values());
+            return result;
+        } else {
+            return jobInstanceCache.get(jobInstance.getInstanceId()).getJobExecutions();
+        }
     }
 
     @Override
@@ -243,6 +270,21 @@ public final class InfinispanRepository extends AbstractRepository {
             }
         }
         return count;
+    }
+
+    @Override
+    public List<Long> getRunningExecutions(final String jobName) {
+        final List<Long> result = new ArrayList<Long>();
+
+        for (final Map.Entry<Long, JobExecutionImpl> e : jobExecutionCache.entrySet()) {
+            if (e.getValue().getJobName().equals(jobName)) {
+                final BatchStatus s = e.getValue().getBatchStatus();
+                if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
+                    result.add(e.getKey());
+                }
+            }
+        }
+        return result;
     }
 
     @Override

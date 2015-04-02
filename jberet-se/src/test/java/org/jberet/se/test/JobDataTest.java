@@ -31,16 +31,28 @@ import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.JobInstanceImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * This test verifies the job data in jdbc job repository from executing the previous test class Batchlet1Test.
  * This test class is configured in pom.xml surefire plugin to run test in separate JVM to avoid having any in-memory stats.
+ *
+ * This test is configured to run with jdbc job repository via resources/jberet.properties.
+ * This test should also run with mongodb job repository, by modifying resources/jberet.properties (switch 2 properties)
+ *
+ * @see Batchlet1Test
  */
 public class JobDataTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
+    /**
+     * Tests job data from running test {@link Batchlet1Test#testBatchlet1()}
+     * @throws Exception
+     *
+     * @see Batchlet1Test#testBatchlet1()
+     */
     @Test
     public void testJobData() throws Exception {
         final String stepName = "step2";
@@ -48,7 +60,9 @@ public class JobDataTest {
         final List<JobInstance> jobInstances = jobOperator.getJobInstances(Batchlet1Test.jobName, 0, 1);
         Assert.assertEquals(1, jobInstances.size());
 
-        final JobInstance jobInstance = jobInstances.get(0);
+        final JobInstanceImpl jobInstance = (JobInstanceImpl) jobInstances.get(0);
+        System.out.printf("In testJobData, jobInstance: %s, id: %s%n", jobInstance, jobInstance.getInstanceId());
+
         Assert.assertEquals(Batchlet1Test.jobName, jobInstance.getJobName());
         Assert.assertNotEquals(0, jobInstance.getInstanceId());
 
@@ -89,6 +103,10 @@ public class JobDataTest {
         final Serializable persistentUserData = stepExecution.getPersistentUserData();
         final Metric[] metrics = stepExecution.getMetrics();
 
+        System.out.printf("StepExecution id: %s, stepName: %s, batchStatus: %s, exitStatus: %s, startTime: %s, endTime: %s, persistentUserData: %s, metrics: %s%n",
+                stepExecution.getStepExecutionId(), stepName1, batchStatus1, exitStatus1, startTime1, endTime1, persistentUserData,
+                Arrays.toString(metrics));
+
         Assert.assertNotNull(stepExecution.getStepExecutionId());
         Assert.assertEquals(stepName, stepName1);
         Assert.assertEquals(BatchStatus.COMPLETED, batchStatus1);
@@ -98,9 +116,6 @@ public class JobDataTest {
         //Assert.assertEquals(new Integer(1), persistentUserData);
         Assert.assertEquals("Persistent User Data", persistentUserData);
         Assert.assertNotNull(metrics);
-        System.out.printf("StepExecution id: %s, stepName: %s, batchStatus: %s, exitStatus: %s, startTime: %s, endTime: %s, persistentUserData: %s, metrics: %s%n",
-                stepExecution.getStepExecutionId(), stepName1, batchStatus1, exitStatus1, startTime1, endTime1, persistentUserData,
-                Arrays.toString(metrics));
 
         restartJobMatchOther(jobExecution.getExecutionId());
     }

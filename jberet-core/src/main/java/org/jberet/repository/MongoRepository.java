@@ -12,6 +12,7 @@
 
 package org.jberet.repository;
 
+import java.lang.ref.SoftReference;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,7 +45,7 @@ import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
 
-public final class MongoRepository extends AbstractRepository {
+public final class MongoRepository extends AbstractPersistentRepository {
     private String dataSourceName;
     private String dbUrl;
     private MongoClient mongoClient;
@@ -101,25 +102,6 @@ public final class MongoRepository extends AbstractRepository {
     }
 
     @Override
-    public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
-        //check cache first, if not found, then retrieve from database
-        final List<StepExecution> stepExecutions;
-        final JobExecution jobExecution = jobExecutions.get(jobExecutionId);
-
-        if (jobExecution == null) {
-            stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
-        } else {
-            final List<StepExecution> stepExecutions1 = ((JobExecutionImpl) jobExecution).getStepExecutions();
-            if (stepExecutions1.isEmpty()) {
-                stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
-            } else {
-                stepExecutions = stepExecutions1;
-            }
-        }
-        return stepExecutions;
-    }
-
-    @Override
     void insertJobInstance(final JobInstanceImpl jobInstance) {
         final Long nextId = incrementAndGetSequence(TableColumns.JOBINSTANCEID);
         jobInstance.setId(nextId);
@@ -133,22 +115,24 @@ public final class MongoRepository extends AbstractRepository {
     public List<JobInstance> getJobInstances(final String jobName) {
         final List<JobInstance> result = new ArrayList<JobInstance>();
         final DBCursor cursor = jobName == null ? db.getCollection(TableColumns.JOB_INSTANCE).find() :
-                db.getCollection(TableColumns.JOB_INSTANCE).find(new BasicDBObject(TableColumns.JOBNAME, jobName));
+                db.getCollection(TableColumns.JOB_INSTANCE).find(new BasicDBObject(TableColumns.JOBNAME, jobName)).sort(
+                        new BasicDBObject(TableColumns.JOBINSTANCEID, -1));
 
         while (cursor.hasNext()) {
             final DBObject next = cursor.next();
             final Long i = (Long) next.get(TableColumns.JOBINSTANCEID);
-            JobInstanceImpl jobInstance1 = (JobInstanceImpl) jobInstances.get(i);
+            final SoftReference<JobInstanceImpl> ref = jobInstances.get(i);
+            JobInstanceImpl jobInstance1 = (ref != null) ? ref.get() : null;
             if (jobInstance1 == null) {
                 final String appName = (String) next.get(TableColumns.APPLICATIONNAME);
                 if (jobName == null) {
                     final String goodJobName = (String) next.get(TableColumns.JOBNAME);
-                    jobInstance1 = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
+                    jobInstance1 = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, goodJobName)), appName, goodJobName);
                 } else {
-                    jobInstance1 = new JobInstanceImpl(getJob(jobName), new ApplicationAndJobName(appName, jobName));
+                    jobInstance1 = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, jobName)), appName, jobName);
                 }
                 jobInstance1.setId(i);
-                jobInstances.put(i, jobInstance1);
+                jobInstances.put(i, new SoftReference<JobInstanceImpl>(jobInstance1));
             }
             //this job instance is already in the cache, so get it from the cache
             result.add(jobInstance1);
@@ -157,8 +141,8 @@ public final class MongoRepository extends AbstractRepository {
     }
 
     @Override
-    public JobInstance getJobInstance(final long jobInstanceId) {
-        JobInstance result = super.getJobInstance(jobInstanceId);
+    public JobInstanceImpl getJobInstance(final long jobInstanceId) {
+        JobInstanceImpl result = super.getJobInstance(jobInstanceId);
         if (result != null) {
             return result;
         }
@@ -168,13 +152,14 @@ public final class MongoRepository extends AbstractRepository {
         if (one == null) {
             return null;
         }
-        result = jobInstances.get(jobInstanceId);
+        final SoftReference<JobInstanceImpl> ref = jobInstances.get(jobInstanceId);
+        result = (ref != null) ? ref.get() : null;
         if (result == null) {
             final String appName = (String) one.get(TableColumns.APPLICATIONNAME);
             final String goodJobName = (String) one.get(TableColumns.JOBNAME);
-            result = new JobInstanceImpl(getJob(goodJobName), new ApplicationAndJobName(appName, goodJobName));
-            ((JobInstanceImpl) result).setId(jobInstanceId);
-            jobInstances.put(jobInstanceId, result);
+            result = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, goodJobName)), appName, goodJobName);
+            result.setId(jobInstanceId);
+            jobInstances.put(jobInstanceId, new SoftReference<JobInstanceImpl>(result));
         }
         return result;
     }
@@ -215,8 +200,8 @@ public final class MongoRepository extends AbstractRepository {
     }
 
     @Override
-    public JobExecution getJobExecution(final long jobExecutionId) {
-        JobExecutionImpl result = (JobExecutionImpl) super.getJobExecution(jobExecutionId);
+    public JobExecutionImpl getJobExecution(final long jobExecutionId) {
+        JobExecutionImpl result = super.getJobExecution(jobExecutionId);
         if (result != null) {
             return result;
         }
@@ -225,10 +210,11 @@ public final class MongoRepository extends AbstractRepository {
         if (one == null) {
             return null;
         }
-        result = (JobExecutionImpl) jobExecutions.get(jobExecutionId);
+        final SoftReference<JobExecutionImpl> ref = jobExecutions.get(jobExecutionId);
+        result = (ref != null) ? ref.get() : null;
         if (result == null) {
             final Long jobInstanceId = (Long) one.get(TableColumns.JOBINSTANCEID);
-            result = new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId),
+            result = new JobExecutionImpl(getJobInstance(jobInstanceId),
                     jobExecutionId,
                     BatchUtil.stringToProperties((String) one.get(TableColumns.JOBPARAMETERS)),
                     (Date) one.get(TableColumns.CREATETIME),
@@ -238,7 +224,7 @@ public final class MongoRepository extends AbstractRepository {
                     (String) one.get(TableColumns.BATCHSTATUS),
                     (String) one.get(TableColumns.EXITSTATUS),
                     (String) one.get(TableColumns.RESTARTPOSITION));
-            jobExecutions.put(jobExecutionId, result);
+            jobExecutions.put(jobExecutionId, new SoftReference<JobExecutionImpl>(result));
         }
         return result;
     }
@@ -254,14 +240,15 @@ public final class MongoRepository extends AbstractRepository {
         while (cursor.hasNext()) {
             final DBObject next = cursor.next();
             final Long i = (Long) next.get(TableColumns.JOBEXECUTIONID);
-            JobExecution jobExecution1 = jobExecutions.get(i);
+            final SoftReference<JobExecutionImpl> ref = jobExecutions.get(i);
+            JobExecutionImpl jobExecution1 = (ref != null) ? ref.get() : null;
             if (jobExecution1 == null) {
                 if (jobInstanceId == 0) {
                     jobInstanceId = (Long) next.get(TableColumns.JOBINSTANCEID);
                 }
                 final Properties jobParameters1 = BatchUtil.stringToProperties((String) next.get(TableColumns.JOBPARAMETERS));
                 jobExecution1 =
-                        new JobExecutionImpl((JobInstanceImpl) getJobInstance(jobInstanceId), i, jobParameters1,
+                        new JobExecutionImpl(getJobInstance(jobInstanceId), i, jobParameters1,
                                 (Date) next.get(TableColumns.CREATETIME),
                                 (Date) next.get(TableColumns.STARTTIME),
                                 (Date) next.get(TableColumns.ENDTIME),
@@ -269,7 +256,7 @@ public final class MongoRepository extends AbstractRepository {
                                 (String) next.get(TableColumns.BATCHSTATUS),
                                 (String) next.get(TableColumns.EXITSTATUS),
                                 (String) next.get(TableColumns.RESTARTPOSITION));
-                jobExecutions.put(i, jobExecution1);
+                jobExecutions.put(i, new SoftReference<JobExecutionImpl>(jobExecution1));
             }
             // jobExecution1 is either got from the cache, or created, now add it to the result list
             result.add(jobExecution1);
@@ -324,6 +311,7 @@ public final class MongoRepository extends AbstractRepository {
         final DBObject dbObject = new BasicDBObject(TableColumns.STEPEXECUTIONID, nextId);
         dbObject.put(TableColumns.JOBEXECUTIONID, jobExecution.getExecutionId());
         dbObject.put(TableColumns.STEPNAME, stepExecution.getStepName());
+        dbObject.put(TableColumns.STARTTIME, stepExecution.getStartTime());
         dbObject.put(TableColumns.BATCHSTATUS, stepExecution.getBatchStatus().name());
         db.getCollection(TableColumns.STEP_EXECUTION).insert(dbObject);
     }
@@ -388,11 +376,13 @@ public final class MongoRepository extends AbstractRepository {
         }
     }
 
+    /*
     StepExecution selectStepExecution(final long stepExecutionId, final ClassLoader classLoader) {
         final DBCollection collection = db.getCollection(TableColumns.STEP_EXECUTION);
         final DBObject dbObject = collection.findOne(new BasicDBObject(TableColumns.STEPEXECUTIONID, stepExecutionId));
         return createStepExecutionFromDBObject(dbObject, classLoader);
     }
+    */
 
     /**
      * Retrieves a list of StepExecution from database by JobExecution id.  This method does not check the cache, so it
@@ -401,6 +391,7 @@ public final class MongoRepository extends AbstractRepository {
      * @param jobExecutionId if null, retrieves all StepExecutions; otherwise, retrieves all StepExecutions belongs to the JobExecution id
      * @return a list of StepExecutions
      */
+    @Override
     List<StepExecution> selectStepExecutions(final Long jobExecutionId, final ClassLoader classLoader) {
         final DBCollection collection = db.getCollection(TableColumns.STEP_EXECUTION);
         DBCursor cursor = jobExecutionId == null ? collection.find() :

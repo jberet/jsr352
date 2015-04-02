@@ -14,24 +14,20 @@ package org.jberet.repository;
 
 import java.io.Serializable;
 import java.security.AccessController;
+import java.lang.ref.SoftReference;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.JobInstance;
-import javax.batch.runtime.StepExecution;
 
 import org.jberet._private.BatchLogger;
-import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Job;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
@@ -42,9 +38,7 @@ import org.jberet.util.BatchUtil;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 public abstract class AbstractRepository implements JobRepository {
-    final ConcurrentMap<String, Job> jobs = new ConcurrentHashMap<String, Job>();
-    final Map<Long, JobInstance> jobInstances = Collections.synchronizedMap(new LinkedHashMap<Long, JobInstance>());
-    final ConcurrentMap<Long, JobExecution> jobExecutions = new ConcurrentHashMap<Long, JobExecution>();
+    ConcurrentMap<ApplicationAndJobName, SoftReference<Job>> jobs = new ConcurrentHashMap<ApplicationAndJobName, SoftReference<Job>>();
 
     abstract void insertJobInstance(JobInstanceImpl jobInstance);
 
@@ -53,135 +47,45 @@ public abstract class AbstractRepository implements JobRepository {
     abstract void insertStepExecution(StepExecutionImpl stepExecution, JobExecutionImpl jobExecution);
 
     @Override
-    public void addJob(final Job job) {
-        final Job existing = jobs.putIfAbsent(job.getId(), job);
-        if (existing != null) {
-            BatchLogger.LOGGER.jobAlreadyExists(job.getId());
-        }
+    public void addJob(final ApplicationAndJobName applicationAndJobName, final Job job) {
+        jobs.put(applicationAndJobName, new SoftReference<Job>(job));
     }
+
+    @Override
+    public Job getJob(final ApplicationAndJobName applicationAndJobName) {
+        final SoftReference<Job> jobSoftReference = jobs.get(applicationAndJobName);
+        return jobSoftReference != null ? jobSoftReference.get() : null;
+    }
+
+    public boolean jobExists(final String jobName) {
+        for (final ApplicationAndJobName e : jobs.keySet()) {
+            if (e.jobName.equals(jobName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Set<String> getJobNames() {
+        final Set<String> jobNames = new HashSet<String>();
+        for (final ApplicationAndJobName e : jobs.keySet()) {
+            jobNames.add(e.jobName);
+        }
+        return jobNames;
+    }
+
 
     @Override
     public void removeJob(final String jobId) {
-        BatchLogger.LOGGER.removing("Job", jobId);
-        jobs.remove(jobId);
-        synchronized (jobInstances) {
-            for (final Iterator<Map.Entry<Long, JobInstance>> it = jobInstances.entrySet().iterator(); it.hasNext(); ) {
-                final JobInstance ji = it.next().getValue();
-                if (ji.getJobName().equals(jobId)) {
-                    BatchLogger.LOGGER.removing(JobInstance.class.getName(), String.valueOf(ji.getInstanceId()));
-                    it.remove();
-                }
-            }
-        }
-        for (final Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
-            final JobExecution je = it.next().getValue();
-            if (je.getJobName().equals(jobId)) {
-                je.getJobParameters().clear();
-                BatchLogger.LOGGER.removing(JobExecution.class.getName(), String.valueOf(je.getExecutionId()));
+        for (final Iterator<Map.Entry<ApplicationAndJobName, SoftReference<Job>>> it = jobs.entrySet().iterator(); it.hasNext(); ) {
+            final Map.Entry<ApplicationAndJobName, SoftReference<Job>> next = it.next();
+            if (next.getKey().jobName.equals(jobId)) {
+                BatchLogger.LOGGER.removing("Job", jobId);
                 it.remove();
             }
         }
-    }
-
-    @Override
-    public void removeJobExecutions(final JobExecutionSelector jobExecutionSelector) {
-        final Collection<JobExecution> allJobExecutions = jobExecutions.values();
-        for (final Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
-            final JobExecution je = it.next().getValue();
-            if (jobExecutionSelector == null || jobExecutionSelector.select(je, allJobExecutions)) {
-                je.getJobParameters().clear();
-                BatchLogger.LOGGER.removing(JobExecution.class.getName(), String.valueOf(je.getExecutionId()));
-                it.remove();
-            }
-        }
-    }
-
-    @Override
-    public Job getJob(final String jobId) {
-        return jobs.get(jobId);
-    }
-
-    @Override
-    public Collection<Job> getJobs() {
-        return jobs.values();
-    }
-
-    @Override
-    public JobInstanceImpl createJobInstance(final Job job, final String applicationName, final ClassLoader classLoader) {
-        final ApplicationAndJobName appJobNames = new ApplicationAndJobName(applicationName, job.getId());
-        final JobInstanceImpl jobInstance = new JobInstanceImpl(job, appJobNames);
-        insertJobInstance(jobInstance);
-        final JobInstance jobInstanceExisting = jobInstances.put(jobInstance.getInstanceId(), jobInstance);
-        if (jobInstanceExisting != null) {
-            throw BatchMessages.MESSAGES.jobInstanceAlreadyExists(jobInstance.getInstanceId());
-        }
-        return jobInstance;
-    }
-
-    @Override
-    public void removeJobInstance(final long jobInstanceIdToRemove) {
-        BatchLogger.LOGGER.removing(JobInstance.class.getName(), String.valueOf(jobInstanceIdToRemove));
-        jobInstances.remove(jobInstanceIdToRemove);
-    }
-
-    @Override
-    public JobInstance getJobInstance(final long jobInstanceId) {
-        return jobInstances.get(jobInstanceId);
-    }
-
-    @Override
-    public List<JobInstance> getJobInstances(final String jobName) {
-        final List<JobInstance> result = new ArrayList<JobInstance>();
-        synchronized (jobInstances) {
-            for (final JobInstance e : jobInstances.values()) {
-                if (e.getJobName().equals(jobName)) {
-                    result.add(e);
-                }
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public int getJobInstanceCount(final String jobName) {
-        int count = 0;
-        synchronized (jobInstances) {
-            for (final JobInstance e : jobInstances.values()) {
-                if (e.getJobName().equals(jobName)) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
-    @Override
-    public JobExecutionImpl createJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters) {
-        final JobExecutionImpl jobExecution = new JobExecutionImpl(jobInstance, jobParameters);
-        insertJobExecution(jobExecution);
-        final JobExecution jobExecutionExisting = jobExecutions.putIfAbsent(jobExecution.getExecutionId(), jobExecution);
-        if (jobExecutionExisting != null) {
-            throw BatchMessages.MESSAGES.jobExecutionAlreadyExists(jobExecutionExisting.getExecutionId());
-        }
-        jobInstance.addJobExecution(jobExecution);
-        return jobExecution;
-    }
-
-    @Override
-    public JobExecution getJobExecution(final long jobExecutionId) {
-        return jobExecutions.get(jobExecutionId);
-    }
-
-    @Override
-    public List<JobExecution> getJobExecutions(final JobInstance jobInstance) {
-        if (jobInstance == null) {
-            //return all JobExecution
-            final List<JobExecution> result = new ArrayList<JobExecution>();
-            result.addAll(this.jobExecutions.values());
-            return result;
-        } else {
-            return ((JobInstanceImpl) jobInstance).getJobExecutions();
-        }
+        //cascade delete to be performed by subclasses, which have access to jobInstances and jobExecutions data structure
     }
 
     @Override
@@ -190,15 +94,6 @@ public abstract class AbstractRepository implements JobRepository {
 //        completed steps are not added to the enclosing JobExecution
 //        jobExecution.addStepExecution(stepExecution);
         return new StepExecutionImpl(stepName);
-    }
-
-    @Override
-    public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) getJobExecution(jobExecutionId);
-        if (jobExecution == null) {
-            return Collections.emptyList();
-        }
-        return jobExecution.getStepExecutions();
     }
 
     @Override
@@ -232,36 +127,6 @@ public abstract class AbstractRepository implements JobRepository {
     @Override
     public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
         jobExecution.setLastUpdatedTime(System.currentTimeMillis());
-    }
-
-    @Override
-    public StepExecutionImpl findOriginalStepExecutionForRestart(final String stepName,
-                                                                 final JobExecutionImpl jobExecutionToRestart,
-                                                                 final ClassLoader classLoader) {
-        for (final StepExecution stepExecution : jobExecutionToRestart.getStepExecutions()) {
-            if (stepName.equals(stepExecution.getStepName())) {
-                return (StepExecutionImpl) stepExecution;
-            }
-        }
-        StepExecutionImpl result = null;
-        // the same-named StepExecution is not found in the jobExecutionToRestart.  It's still possible the same-named
-        // StepExecution may exit in JobExecution earlier than jobExecutionToRestart for the same JobInstance.
-        final long instanceId = jobExecutionToRestart.getJobInstance().getInstanceId();
-        for (final JobExecution jobExecution : jobExecutions.values()) {
-            final JobExecutionImpl jobExecutionImpl = (JobExecutionImpl) jobExecution;
-            //skip the JobExecution that has already been checked above
-            if (instanceId == jobExecutionImpl.getJobInstance().getInstanceId() &&
-                    jobExecutionImpl.getExecutionId() != jobExecutionToRestart.getExecutionId()) {
-                for (final StepExecution stepExecution : jobExecutionImpl.getStepExecutions()) {
-                    if (stepExecution.getStepName().equals(stepName)) {
-                        if (result == null || result.getStepExecutionId() < stepExecution.getStepExecutionId()) {
-                            result = (StepExecutionImpl) stepExecution;
-                        }
-                    }
-                }
-            }
-        }
-        return result;
     }
 
     @Override
@@ -300,20 +165,5 @@ public abstract class AbstractRepository implements JobRepository {
             });
         }
         return BatchUtil.clone(object);
-    }
-
-    @Override
-    public List<Long> getRunningExecutions(final String jobName) {
-        final List<Long> result = new ArrayList<Long>();
-
-        for (final Map.Entry<Long, JobExecution> e : jobExecutions.entrySet()) {
-            if (e.getValue().getJobName().equals(jobName)) {
-                final BatchStatus s = e.getValue().getBatchStatus();
-                if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
-                    result.add(e.getKey());
-                }
-            }
-        }
-        return result;
     }
 }

@@ -18,7 +18,7 @@ import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 
 public interface JobExecutionSelector {
-    boolean select(JobExecution jobExecution, Collection<JobExecution> allJobExecutions);
+    boolean select(JobExecution jobExecution, Collection<Long> allJobExecutionIds);
 
     JobContext getJobContext();
 

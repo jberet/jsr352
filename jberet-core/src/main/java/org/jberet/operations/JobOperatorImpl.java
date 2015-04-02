@@ -15,7 +15,6 @@ package org.jberet.operations;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -47,6 +46,7 @@ import org.jberet._private.BatchMessages;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactFactoryWrapper;
 import org.jberet.job.model.Job;
+import org.jberet.repository.ApplicationAndJobName;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
@@ -98,12 +98,13 @@ public class JobOperatorImpl implements JobOperator {
     public long start(final String jobXMLName, final Properties jobParameters) throws JobStartException, JobSecurityException {
         final ClassLoader classLoader = batchEnvironment.getClassLoader();
         final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, classLoader, new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
-        repository.addJob(jobDefined);
+        final String applicationName = getApplicationName();
+        repository.addJob(new ApplicationAndJobName(applicationName, jobDefined.getId()), jobDefined);
         try {
             return invokeTransaction(new TransactionInvocation<Long>() {
                 @Override
                 public Long invoke() throws JobStartException, JobSecurityException {
-                    final JobInstanceImpl jobInstance = repository.createJobInstance(jobDefined, getApplicationName(), classLoader);
+                    final JobInstanceImpl jobInstance = repository.createJobInstance(jobDefined, applicationName, classLoader);
                     return startJobExecution(jobInstance, jobParameters, null);
                 }
             });
@@ -132,20 +133,16 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public Set<String> getJobNames() throws JobSecurityException {
-        final Set<String> result = new HashSet<String>();
-        for (final Job e : repository.getJobs()) {
-            result.add(e.getId());
-        }
-        return result;
+        return repository.getJobNames();
     }
 
     @Override
     public int getJobInstanceCount(final String jobName) throws NoSuchJobException, JobSecurityException {
         if (jobName == null) {
-            throw MESSAGES.noSuchJobException(jobName);
+            throw MESSAGES.noSuchJobException(null);
         }
         final int count = repository.getJobInstanceCount(jobName);
-        if (count == 0 && repository.getJob(jobName) == null) {
+        if (count == 0 && !repository.jobExists(jobName)) {
             throw MESSAGES.noSuchJobException(jobName);
         }
         return count;
@@ -154,35 +151,23 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<JobInstance> getJobInstances(final String jobName, final int start, final int count) throws NoSuchJobException, JobSecurityException {
         if (jobName == null) {
-            throw MESSAGES.noSuchJobException(jobName);
+            throw MESSAGES.noSuchJobException(null);
         }
-        final List<JobInstance> result = new ArrayList<JobInstance>();
-        int pos = 0;
         final List<JobInstance> instances = repository.getJobInstances(jobName);
-        for (int i = instances.size() - 1; i >= 0; i--) {
-            final JobInstance e = instances.get(i);
-            if (pos >= start) {
-                if (result.size() < count) {
-                    result.add(e);
-                } else {
-                    break;
-                }
-            }
-            pos++;
-        }
-        if (pos == 0 && repository.getJob(jobName) == null) {
+        final int size = instances.size();
+        if (size == 0 && !repository.jobExists(jobName)) {
             throw MESSAGES.noSuchJobException(jobName);
         }
-        return result;
+        return instances.subList(Math.min(start, size), Math.min(start + count, size));
     }
 
     @Override
     public List<Long> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
         if (jobName == null) {
-            throw MESSAGES.noSuchJobException(jobName);
+            throw MESSAGES.noSuchJobException(null);
         }
         final List<Long> result = repository.getRunningExecutions(jobName);
-        if (result.size() == 0 && repository.getJob(jobName) == null) {
+        if (result.size() == 0 && !repository.jobExists(jobName)) {
             throw MESSAGES.noSuchJobException(jobName);
         }
         return result;
@@ -223,13 +208,18 @@ public class JobOperatorImpl implements JobOperator {
 
             // the job may not have been loaded, e.g., when the restart is performed in a new JVM
             final String jobName = originalToRestart.getJobName();
-            if (repository.getJob(jobName) == null) {
-                final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobName, batchEnvironment.getClassLoader(), new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
-                repository.addJob(jobDefined);
+            Job jobDefined = jobInstance.getUnsubstitutedJob();
+            if (jobDefined == null) {
+                final ApplicationAndJobName applicationAndJobName = new ApplicationAndJobName(jobInstance.getApplicationName(), jobName);
+                jobDefined = repository.getJob(applicationAndJobName);
+
+                if (jobDefined == null) {
+                    jobDefined = ArchiveXmlLoader.loadJobXml(jobName, batchEnvironment.getClassLoader(), new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
+                    repository.addJob(applicationAndJobName, jobDefined);
+                }
+                jobInstance.setUnsubstitutedJob(jobDefined);
             }
-            if (jobInstance.getUnsubstitutedJob() == null) {
-                jobInstance.setUnsubstitutedJob(repository.getJob(jobName));
-            }
+
             try {
                 final Properties oldJobParameters = originalToRestart.getJobParameters();
                 final Properties combinedProperties;
@@ -270,6 +260,11 @@ public class JobOperatorImpl implements JobOperator {
                 batchStatus == BatchStatus.ABANDONED) {
             jobExecution.setBatchStatus(BatchStatus.ABANDONED);
             repository.updateJobExecution(jobExecution, false);
+
+            final JobInstanceImpl jobInstance = jobExecution.getJobInstance();
+            if (jobInstance != null) {
+                jobInstance.setUnsubstitutedJob(null);
+            }
         } else {
             throw MESSAGES.jobExecutionIsRunningException(executionId);
         }

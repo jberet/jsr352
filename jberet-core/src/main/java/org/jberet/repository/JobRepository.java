@@ -12,9 +12,9 @@
 
 package org.jberet.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
@@ -27,13 +27,28 @@ import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 
 public interface JobRepository {
-    void addJob(Job job);
+    void addJob(ApplicationAndJobName applicationAndJobName, Job job);
 
     void removeJob(String jobId);
 
-    Job getJob(String jobId);
+    Job getJob(ApplicationAndJobName applicationAndJobName);
 
-    Collection<Job> getJobs();
+    /**
+     * Gets all the job names from the job repository.
+     * @return a set of job names
+     *
+     * @since 1.1.0.Beta2
+     */
+    Set<String> getJobNames();
+
+    /**
+     * Checks if a job with the specified {@code jobName} exists or not.
+     * @param jobName the job name to check
+     * @return true if the named job exists; false otherwise
+     *
+     * @since 1.1.0.Beta2
+     */
+    boolean jobExists(String jobName);
 
     JobInstanceImpl createJobInstance(Job job, String applicationName, ClassLoader classLoader);
     void removeJobInstance(long jobInstanceId);

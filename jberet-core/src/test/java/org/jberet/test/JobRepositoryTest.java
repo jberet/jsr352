@@ -13,10 +13,7 @@
 package org.jberet.test;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.InvalidTransactionException;
@@ -30,6 +27,7 @@ import javax.transaction.xa.XAResource;
 
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.job.model.Job;
+import org.jberet.repository.ApplicationAndJobName;
 import org.jberet.repository.InMemoryRepository;
 import org.jberet.repository.JobRepository;
 import org.jberet.spi.ArtifactFactory;
@@ -161,19 +159,17 @@ public class JobRepositoryTest {
 
     @Test
     public void addRemoveJob() throws Exception {
-        final Job job = ArchiveXmlLoader.loadJobXml("exception-class-filter.xml", this.getClass().getClassLoader(), new ArrayList<Job>(), new MetaInfBatchJobsJobXmlResolver());
-        repo.removeJob(job.getId());
-        final Collection<Job> jobs = repo.getJobs();
-        final int existingJobsCount = jobs.size();
+        final String jobId = "exception-class-filter";
+        final Job job = ArchiveXmlLoader.loadJobXml(jobId, this.getClass().getClassLoader(), new ArrayList<Job>(), new MetaInfBatchJobsJobXmlResolver());
+        repo.removeJob(job.getId());  //the job has not been added, but removeJob should still work
 
-        repo.addJob(job);
-        Assert.assertEquals(existingJobsCount + 1, repo.getJobs().size());
+        repo.addJob(new ApplicationAndJobName(null, jobId), job);
+        Assert.assertTrue(repo.jobExists(jobId));
+
+        repo.removeJob(jobId);
+        Assert.assertFalse(repo.jobExists(jobId));
 
         repo.removeJob(job.getId());
-        Assert.assertEquals(existingJobsCount, repo.getJobs().size());
-
-        repo.removeJob(job.getId());
-        Assert.assertEquals(existingJobsCount, repo.getJobs().size());
     }
 
 }

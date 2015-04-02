@@ -52,7 +52,7 @@ public final class DefaultJobExecutionSelector implements JobExecutionSelector {
     }
 
     @Override
-    public boolean select(final JobExecution jobExecution, final Collection<JobExecution> allJobExecutions) {
+    public boolean select(final JobExecution jobExecution, final Collection<Long> allJobExecutionIds) {
         if (excludeRunningJobExecutions) {
             final BatchStatus batchStatus = jobExecution.getBatchStatus();
             if (batchStatus != BatchStatus.COMPLETED &&
@@ -70,8 +70,8 @@ public final class DefaultJobExecutionSelector implements JobExecutionSelector {
 
         if (numberOfRecentJobExecutionsToExclude != null) {
             int numOfLargerIds = 0;
-            for (final JobExecution je : allJobExecutions) {
-                if (je.getExecutionId() > id) {
+            for (final Long jeid : allJobExecutionIds) {
+                if (jeid > id) {
                     numOfLargerIds++;
                     if (numOfLargerIds >= numberOfRecentJobExecutionsToExclude) {
                         return true;

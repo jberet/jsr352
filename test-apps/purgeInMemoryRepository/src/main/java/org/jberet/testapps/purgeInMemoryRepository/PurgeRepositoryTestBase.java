@@ -114,7 +114,7 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
 
         @Override
         public boolean select(final JobExecution jobExecution,
-                              final Collection<JobExecution> allJobExecutions) {
+                              final Collection<Long> allJobExecutionIds) {
             //select completed job executions and whose job name starts with "pre"
             if (jobExecution.getBatchStatus() == BatchStatus.COMPLETED && jobExecution.getJobName().startsWith("pre")) {
                 System.out.printf("In select method of %s, return true.%n", this);

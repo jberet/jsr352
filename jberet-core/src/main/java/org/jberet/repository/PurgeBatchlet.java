@@ -20,7 +20,6 @@ import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
-import org.jberet.job.model.Job;
 import org.jberet.runtime.context.JobContextImpl;
 
 public final class PurgeBatchlet implements Batchlet {
@@ -102,11 +101,11 @@ public final class PurgeBatchlet implements Batchlet {
         if (purgeJobsByNames != null && !purgeJobsByNames.isEmpty()) {
             final boolean purgeAll = purgeJobsByNames.size() == 1 && purgeJobsByNames.contains("*");
             final String currentJobName = jobContext.getJobName();
-            for (final Job job : jobRepository.getJobs()) {
+            for (final String n : jobRepository.getJobNames()) {
                 //do not remove the current running job if purgeJobsByNames = "*"
-                if (purgeJobsByNames.contains(job.getId()) ||
-                        (purgeAll && !currentJobName.equals(job.getId()))) {
-                    jobRepository.removeJob(job.getId());
+                if (purgeJobsByNames.contains(n) ||
+                        (purgeAll && !currentJobName.equals(n))) {
+                    jobRepository.removeJob(n);
                 }
             }
         } else {

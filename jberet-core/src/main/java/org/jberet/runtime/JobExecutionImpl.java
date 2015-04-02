@@ -221,6 +221,11 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     public void cleanUp() {
         substitutedJob = null;
+        if (batchStatus == BatchStatus.COMPLETED) {
+            //COMPLETED job execution cannot be restarted, so no need to keep unsubstitutedJob
+            jobInstance.setUnsubstitutedJob(null);
+        }
+
         ArtifactCreationContext.removeCurrentArtifactCreationContext();
         jobTerminationLatch.countDown();
         jobTerminationLatch = null;

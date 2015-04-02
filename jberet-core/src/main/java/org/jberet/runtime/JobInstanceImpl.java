@@ -19,7 +19,6 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
 import org.jberet.job.model.Job;
-import org.jberet.repository.ApplicationAndJobName;
 
 public final class JobInstanceImpl implements JobInstance, Serializable {
 
@@ -33,9 +32,10 @@ public final class JobInstanceImpl implements JobInstance, Serializable {
 
     private final List<JobExecution> jobExecutions = new CopyOnWriteArrayList<JobExecution>();
 
-    public JobInstanceImpl(final Job unsubstitutedJob, final ApplicationAndJobName applicationAndJobName) {
-        this.jobName = applicationAndJobName.jobName;
-        this.applicationName = applicationAndJobName.appName;
+    public JobInstanceImpl(final Job unsubstitutedJob, final String applicationName, final String jobName) {
+        //unsubstitutedJob may be null, so cannot get jobId from unsubstitutedJob
+        this.jobName = jobName;
+        this.applicationName = applicationName;
         this.unsubstitutedJob = unsubstitutedJob;
     }
 
