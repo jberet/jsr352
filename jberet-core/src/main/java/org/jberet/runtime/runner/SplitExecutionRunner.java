@@ -127,7 +127,7 @@ public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitCo
                 for (int i = 0; i < fes.size(); i++) {
                     stepExecutions[i] = fes.get(i).getLastStepExecution();
                 }
-                enclosingRunner.runJobElement(next, stepExecutions);
+                enclosingRunner.runJobElement(next, batchContext.getExitStatus(), stepExecutions);
             }
         }
     }

@@ -72,7 +72,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
                 } else if (e instanceof Decision) {
                     final Decision decision = (Decision) e;
                     if (decision.getId().equals(restartPoint)) {
-                        runDecision(decision);
+                        runDecision(decision, null); //TODO: need to set previous exit status
                     }
                     break;
                 }
@@ -115,9 +115,10 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
      * Runs the job element including step, decision, flow, and split.
      *
      * @param jobElementName          ref name of the job element
+     * @param precedingExitStatus     exit status of preceding element
      * @param precedingStepExecutions 0 or 1 StepExecution, 1 StepExecution is passed in for decision element, and 0 StepExecution for others.
      */
-    protected void runJobElement(final String jobElementName, final StepExecution... precedingStepExecutions) {
+    protected void runJobElement(final String jobElementName, final String precedingExitStatus, final StepExecution... precedingStepExecutions) {
         if (jobElementName == null) {
             return;
         }
@@ -131,7 +132,7 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             } else if (e instanceof Decision) {
                 final Decision decision = (Decision) e;
                 if (decision.getId().equals(jobElementName)) {
-                    runDecision(decision, precedingStepExecutions);
+                    runDecision(decision, precedingExitStatus, precedingStepExecutions);
                     return;
                 }
             } else if (e instanceof Flow) {
@@ -164,14 +165,14 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         stepExecutionRunner.run();
     }
 
-    protected void runDecision(final Decision decision, final StepExecution... precedingStepExecutions) {
+    protected void runDecision(final Decision decision, final String precedingExitStatus, final StepExecution... precedingStepExecutions) {
         final Decider decider = jobContext.createArtifact(decision.getRef(), null, decision.getProperties());
         final String newExitStatus;
         try {
             newExitStatus = decider.decide(precedingStepExecutions);
-            batchContext.setExitStatus(newExitStatus);
+            batchContext.setExitStatus(newExitStatus != null ? newExitStatus : precedingExitStatus);
             final String next = resolveTransitionElements(decision.getTransitionElements(), null, true);
-            runJobElement(next, precedingStepExecutions);
+            runJobElement(next, batchContext.getExitStatus(), precedingStepExecutions);
         } catch (Exception e) {
             BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), decision.getRef(), decider);
             batchContext.setBatchStatus(BatchStatus.FAILED);
