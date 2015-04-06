@@ -31,6 +31,13 @@
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- use woodstox xml parser, which supports resolving custom xml external entities -->
+        <!-- aalto-xml from the parent pom does not support it -->
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>woodstox-core-asl</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

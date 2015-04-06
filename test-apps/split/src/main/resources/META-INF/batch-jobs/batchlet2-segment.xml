@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<batchlet ref="batchlet2">
+    <properties>
+        <!-- this batchlet will sleep for 5 seconds, which is longer than the value of
+        jberet.split.timeout.seconds property above. So the split and job execution will timeout and fail.
+        -->
+        <property name="sleepSeconds" value="5"/>
+    </properties>
+</batchlet>

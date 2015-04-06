@@ -12,6 +12,10 @@
  Cheng Fang - Initial API and implementation
 -->
 
+<!DOCTYPE job [
+        <!ENTITY batchlet2-segment SYSTEM "batchlet2-segment.xml">
+        ]>
+
 <job id="splitTimeoutProperty" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <properties>
         <property name="jberet.split.timeout.seconds" value="3"/>
@@ -20,14 +24,7 @@
     <split id="splitTimeoutProperty.split1">
         <flow id="splitTimeoutProperty.split1.flow1">
             <step id="splitTimeoutProperty.split1.flow1.step1">
-                <batchlet ref="batchlet2">
-                    <properties>
-                        <!-- this batchlet will sleep for 5 seconds, which is longer than the value of
-                        jberet.split.timeout.seconds property above. So the split and job execution will timeout and fail.
-                        -->
-                        <property name="sleepSeconds" value="5"/>
-                    </properties>
-                </batchlet>
+                &batchlet2-segment;
             </step>
         </flow>
     </split>

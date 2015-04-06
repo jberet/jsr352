@@ -16,6 +16,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <version.org.codehaus.woodstox.woodstox-core-asl>4.4.1</version.org.codehaus.woodstox.woodstox-core-asl>
+    </properties>
+
     <modules>
         <module>common</module>
         <module>loadBatchXml</module>
@@ -47,6 +52,18 @@
     <groupId>org.jberet.test-apps</groupId>
     <artifactId>test-apps</artifactId>
     <packaging>pom</packaging>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- If necessary, use woodstox xml parser, which supports resolving custom xml external entities -->
+            <!-- aalto-xml from the parent pom does not support it -->
+            <dependency>
+                <groupId>org.codehaus.woodstox</groupId>
+                <artifactId>woodstox-core-asl</artifactId>
+                <version>${version.org.codehaus.woodstox.woodstox-core-asl}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>

@@ -12,15 +12,15 @@
  Cheng Fang - Initial API and implementation
 -->
 
+<!DOCTYPE job [
+        <!ENTITY batchlet2-segment SYSTEM "batchlet2-segment.xml">
+        ]>
+
 <job id="splitWithoutTimeoutProperty" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <split id="splitWithoutTimeoutProperty.split1">
         <flow id="splitWithoutTimeoutProperty.split1.flow1">
             <step id="splitWithoutTimeoutProperty.split1.flow1.step1">
-                <batchlet ref="batchlet2">
-                    <properties>
-                        <property name="sleepSeconds" value="5"/>
-                    </properties>
-                </batchlet>
+                &batchlet2-segment;
             </step>
         </flow>
     </split>

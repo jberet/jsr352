@@ -12,12 +12,14 @@
  Cheng Fang - Initial API and implementation
 -->
 
+<!DOCTYPE job [
+        <!ENTITY batchlet-properties-segment SYSTEM "batchlet-properties-segment.xml">
+        ]>
+
 <job id="batchletGroovySrc" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="batchletGroovySrc.step1">
         <batchlet>
-            <properties>
-                <property name="testName" value="#{jobParameters['testName']}"/>
-            </properties>
+            &batchlet-properties-segment;
             <script src="groovy/simple-batchlet.groovy"/>
         </batchlet>
     </step>

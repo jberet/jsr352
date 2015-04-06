@@ -12,12 +12,15 @@
  Cheng Fang - Initial API and implementation
 -->
 
+
+<!DOCTYPE job [
+        <!ENTITY batchlet-properties-segment SYSTEM "batchlet-properties-segment.xml">
+        ]>
+
 <job id="batchletPythonInline" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="batchletPythonInline.step1">
         <batchlet>
-            <properties>
-                <property name="testName" value="#{jobParameters['testName']}"/>
-            </properties>
+            &batchlet-properties-segment;
             <!-- indentation is significant in python so script content is left justified -->
             <script type="jython">
 def stop():
