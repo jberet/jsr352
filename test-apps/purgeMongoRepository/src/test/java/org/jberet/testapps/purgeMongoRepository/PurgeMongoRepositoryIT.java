@@ -26,7 +26,7 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeMongoRepositoryJobName = "purgeMongoRepository";
 
     @Test
-    //@Ignore("run it manually")
+    @Ignore("run it manually")
     public void memoryTest() throws Exception {
         super.memoryTest();
     }

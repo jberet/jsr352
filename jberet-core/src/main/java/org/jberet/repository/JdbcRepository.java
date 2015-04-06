@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,6 @@ package org.jberet.repository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AccessController;
-import java.lang.ref.SoftReference;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -284,7 +283,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 final long i = rs.getLong(TableColumns.JOBINSTANCEID);
-                final SoftReference<JobInstanceImpl> ref = jobInstances.get(i);
+                final SoftReference<JobInstanceImpl, Long> ref = jobInstances.get(i);
                 JobInstanceImpl jobInstance1 = (ref != null) ? ref.get() : null;
                 if (jobInstance1 == null) {
                     final String appName = rs.getString(TableColumns.APPLICATIONNAME);
@@ -295,7 +294,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                         jobInstance1 = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, jobName)), appName, jobName);
                     }
                     jobInstance1.setId(i);
-                    jobInstances.put(i, new SoftReference<JobInstanceImpl>(jobInstance1));
+                    jobInstances.put(i, new SoftReference<JobInstanceImpl, Long>(jobInstance1, jobInstanceReferenceQueue, i));
                 }
                 //this job instance is already in the cache, so get it from the cache
                 result.add(jobInstance1);
@@ -324,14 +323,15 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             preparedStatement.setLong(1, jobInstanceId);
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                final SoftReference<JobInstanceImpl> jobInstanceSoftReference = jobInstances.get(jobInstanceId);
+                final SoftReference<JobInstanceImpl, Long> jobInstanceSoftReference = jobInstances.get(jobInstanceId);
                 result = jobInstanceSoftReference != null ? jobInstanceSoftReference.get() : null;
                 if (result == null) {
                     final String appName = rs.getString(TableColumns.APPLICATIONNAME);
                     final String goodJobName = rs.getString(TableColumns.JOBNAME);
                     result = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, goodJobName)), appName, goodJobName);
                     result.setId(jobInstanceId);
-                    jobInstances.put(jobInstanceId, new SoftReference<JobInstanceImpl>(result));
+                    jobInstances.put(jobInstanceId,
+                            new SoftReference<JobInstanceImpl, Long>(result, jobInstanceReferenceQueue, jobInstanceId));
                 }
                 break;
             }
@@ -438,7 +438,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             preparedStatement.setLong(1, jobExecutionId);
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                final SoftReference<JobExecutionImpl> ref = jobExecutions.get(jobExecutionId);
+                final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(jobExecutionId);
                 result = (ref != null) ? ref.get() : null;
                 if (result == null) {
                     final long jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
@@ -452,7 +452,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                             rs.getString(TableColumns.BATCHSTATUS),
                             rs.getString(TableColumns.EXITSTATUS),
                             rs.getString(TableColumns.RESTARTPOSITION));
-                    jobExecutions.put(jobExecutionId, new SoftReference<JobExecutionImpl>(result));
+                    jobExecutions.put(jobExecutionId,
+                            new SoftReference<JobExecutionImpl, Long>(result, jobExecutionReferenceQueue, jobExecutionId));
                 }
                 break;
             }
@@ -487,7 +488,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 final long i = rs.getLong(TableColumns.JOBEXECUTIONID);
-                final SoftReference<JobExecutionImpl> ref = jobExecutions.get(i);
+                final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(i);
                 JobExecutionImpl jobExecution1 = (ref != null) ? ref.get() : null;
                 if (jobExecution1 == null) {
                     if (jobInstanceId == 0) {
@@ -501,7 +502,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                                     rs.getString(TableColumns.BATCHSTATUS), rs.getString(TableColumns.EXITSTATUS),
                                     rs.getString(TableColumns.RESTARTPOSITION));
 
-                    jobExecutions.put(i, new SoftReference<JobExecutionImpl>(jobExecution1));
+                    jobExecutions.put(i,
+                            new SoftReference<JobExecutionImpl, Long>(jobExecution1, jobExecutionReferenceQueue, i));
                 }
                 // jobExecution1 is either got from the cache, or created, now add it to the result list
                 result.add(jobExecution1);

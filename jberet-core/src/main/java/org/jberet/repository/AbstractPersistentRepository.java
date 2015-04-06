@@ -12,7 +12,7 @@
 
 package org.jberet.repository;
 
-import java.lang.ref.SoftReference;
+import java.lang.ref.ReferenceQueue;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -31,8 +31,14 @@ import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.StepExecutionImpl;
 
 public abstract class AbstractPersistentRepository extends AbstractRepository implements JobRepository {
-    final ConcurrentMap<Long, SoftReference<JobExecutionImpl>> jobExecutions = new ConcurrentHashMap<Long, SoftReference<JobExecutionImpl>>();
-    final ConcurrentMap<Long, SoftReference<JobInstanceImpl>> jobInstances = new ConcurrentHashMap<Long, SoftReference<JobInstanceImpl>>();
+    final ConcurrentMap<Long, SoftReference<JobExecutionImpl, Long>> jobExecutions =
+            new ConcurrentHashMap<Long, SoftReference<JobExecutionImpl, Long>>();
+
+    final ConcurrentMap<Long, SoftReference<JobInstanceImpl, Long>> jobInstances =
+            new ConcurrentHashMap<Long, SoftReference<JobInstanceImpl, Long>>();
+
+    final ReferenceQueue<JobExecutionImpl> jobExecutionReferenceQueue = new ReferenceQueue<JobExecutionImpl>();
+    final ReferenceQueue<JobInstanceImpl> jobInstanceReferenceQueue = new ReferenceQueue<JobInstanceImpl>();
 
     abstract void insertJobInstance(JobInstanceImpl jobInstance);
 
@@ -47,7 +53,8 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
         super.removeJob(jobId);
 
         //perform cascade delete
-        for (final Iterator<Map.Entry<Long, SoftReference<JobInstanceImpl>>> it = jobInstances.entrySet().iterator(); it.hasNext(); ) {
+        for (final Iterator<Map.Entry<Long, SoftReference<JobInstanceImpl, Long>>> it =
+             jobInstances.entrySet().iterator(); it.hasNext(); ) {
             final JobInstanceImpl ji = it.next().getValue().get();
             if (ji != null && ji.getJobName().equals(jobId)) {
                 BatchLogger.LOGGER.removing(JobInstance.class.getName(), String.valueOf(ji.getInstanceId()));
@@ -55,7 +62,8 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
             }
         }
 
-        for (final Iterator<Map.Entry<Long, SoftReference<JobExecutionImpl>>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
+        for (final Iterator<Map.Entry<Long, SoftReference<JobExecutionImpl, Long>>> it =
+             jobExecutions.entrySet().iterator(); it.hasNext(); ) {
             final JobExecutionImpl je = it.next().getValue().get();
             if (je != null && je.getJobName().equals(jobId)) {
                 if (je.getJobParameters() != null) {
@@ -70,7 +78,8 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
     @Override
     public void removeJobExecutions(final JobExecutionSelector jobExecutionSelector) {
         final Collection<Long> allJobExecutionIds = jobExecutions.keySet();
-        for (final Iterator<Map.Entry<Long, SoftReference<JobExecutionImpl>>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
+        for (final Iterator<Map.Entry<Long, SoftReference<JobExecutionImpl, Long>>> it =
+             jobExecutions.entrySet().iterator(); it.hasNext(); ) {
             final JobExecutionImpl je = it.next().getValue().get();
             if (je != null &&
                     (jobExecutionSelector == null || jobExecutionSelector.select(je, allJobExecutionIds))) {
@@ -85,9 +94,18 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
 
     @Override
     public JobInstanceImpl createJobInstance(final Job job, final String applicationName, final ClassLoader classLoader) {
+        //expunge stale entries
+        for (Object x; (x = jobInstanceReferenceQueue.poll()) != null; ) {
+            @SuppressWarnings("unchecked")
+            final SoftReference<JobInstanceImpl, Long> entry = (SoftReference<JobInstanceImpl, Long>) x;
+            jobInstances.remove(entry.getKey());
+        }
+
         final JobInstanceImpl jobInstance = new JobInstanceImpl(job, applicationName, job.getId());
         insertJobInstance(jobInstance);
-        jobInstances.put(jobInstance.getInstanceId(), new SoftReference<JobInstanceImpl>(jobInstance));
+        final Long instanceId = jobInstance.getInstanceId();
+        jobInstances.put(instanceId,
+                new SoftReference<JobInstanceImpl, Long>(jobInstance, jobInstanceReferenceQueue, instanceId));
         return jobInstance;
     }
 
@@ -99,22 +117,31 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
 
     @Override
     public JobInstanceImpl getJobInstance(final long jobInstanceId) {
-        final SoftReference<JobInstanceImpl> jobInstanceSoftReference = jobInstances.get(jobInstanceId);
+        final SoftReference<JobInstanceImpl, Long> jobInstanceSoftReference = jobInstances.get(jobInstanceId);
         return jobInstanceSoftReference != null ? jobInstanceSoftReference.get() : null;
     }
 
     @Override
     public JobExecutionImpl createJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters) {
+        //expunge stale entries
+        for (Object x; (x = jobExecutionReferenceQueue.poll()) != null; ) {
+            @SuppressWarnings("unchecked")
+            final SoftReference<JobExecutionImpl, Long> entry = (SoftReference<JobExecutionImpl, Long>) x;
+            jobExecutions.remove(entry.getKey());
+        }
+
         final JobExecutionImpl jobExecution = new JobExecutionImpl(jobInstance, jobParameters);
         insertJobExecution(jobExecution);
-        jobExecutions.put(jobExecution.getExecutionId(), new SoftReference<JobExecutionImpl>(jobExecution));
+        final Long executionId = jobExecution.getExecutionId();
+        jobExecutions.put(executionId,
+                new SoftReference<JobExecutionImpl, Long>(jobExecution, jobExecutionReferenceQueue, executionId));
         jobInstance.addJobExecution(jobExecution);
         return jobExecution;
     }
 
     @Override
     public JobExecutionImpl getJobExecution(final long jobExecutionId) {
-        final SoftReference<JobExecutionImpl> jobExecutionSoftReference = jobExecutions.get(jobExecutionId);
+        final SoftReference<JobExecutionImpl, Long> jobExecutionSoftReference = jobExecutions.get(jobExecutionId);
         return jobExecutionSoftReference != null ? jobExecutionSoftReference.get() : null;
     }
 
@@ -122,7 +149,7 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
     public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
         //check cache first, if not found, then retrieve from database
         final List<StepExecution> stepExecutions;
-        final SoftReference<JobExecutionImpl> ref = jobExecutions.get(jobExecutionId);
+        final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(jobExecutionId);
         final JobExecution jobExecution = (ref != null) ? ref.get() : null;
         if (jobExecution == null) {
             stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
@@ -150,7 +177,7 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
         // the same-named StepExecution is not found in the jobExecutionToRestart.  It's still possible the same-named
         // StepExecution may exit in JobExecution earlier than jobExecutionToRestart for the same JobInstance.
         final long instanceId = jobExecutionToRestart.getJobInstance().getInstanceId();
-        for (final SoftReference<JobExecutionImpl> e : jobExecutions.values()) {
+        for (final SoftReference<JobExecutionImpl, Long> e : jobExecutions.values()) {
             final JobExecutionImpl jobExecutionImpl = e.get();
             //skip the JobExecution that has already been checked above
             if (jobExecutionImpl != null && instanceId == jobExecutionImpl.getJobInstance().getInstanceId() &&

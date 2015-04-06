@@ -13,8 +13,8 @@
 package org.jberet.repository;
 
 import java.io.Serializable;
+import java.lang.ref.ReferenceQueue;
 import java.security.AccessController;
-import java.lang.ref.SoftReference;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,7 +38,10 @@ import org.jberet.util.BatchUtil;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 public abstract class AbstractRepository implements JobRepository {
-    ConcurrentMap<ApplicationAndJobName, SoftReference<Job>> jobs = new ConcurrentHashMap<ApplicationAndJobName, SoftReference<Job>>();
+    final ConcurrentMap<ApplicationAndJobName, SoftReference<Job, ApplicationAndJobName>> jobs =
+            new ConcurrentHashMap<ApplicationAndJobName, SoftReference<Job, ApplicationAndJobName>>();
+
+    final ReferenceQueue<Job> jobReferenceQueue = new ReferenceQueue<Job>();
 
     abstract void insertJobInstance(JobInstanceImpl jobInstance);
 
@@ -48,12 +51,20 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public void addJob(final ApplicationAndJobName applicationAndJobName, final Job job) {
-        jobs.put(applicationAndJobName, new SoftReference<Job>(job));
+        //expunge stale entries
+        for (Object x; (x = jobReferenceQueue.poll()) != null; ) {
+            @SuppressWarnings("unchecked")
+            final SoftReference<Job, ApplicationAndJobName> entry = (SoftReference<Job, ApplicationAndJobName>) x;
+            jobs.remove(entry.getKey());
+        }
+
+        jobs.put(applicationAndJobName,
+                new SoftReference<Job, ApplicationAndJobName>(job, jobReferenceQueue, applicationAndJobName));
     }
 
     @Override
     public Job getJob(final ApplicationAndJobName applicationAndJobName) {
-        final SoftReference<Job> jobSoftReference = jobs.get(applicationAndJobName);
+        final SoftReference<Job, ApplicationAndJobName> jobSoftReference = jobs.get(applicationAndJobName);
         return jobSoftReference != null ? jobSoftReference.get() : null;
     }
 
@@ -78,8 +89,9 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public void removeJob(final String jobId) {
-        for (final Iterator<Map.Entry<ApplicationAndJobName, SoftReference<Job>>> it = jobs.entrySet().iterator(); it.hasNext(); ) {
-            final Map.Entry<ApplicationAndJobName, SoftReference<Job>> next = it.next();
+        for (final Iterator<Map.Entry<ApplicationAndJobName, SoftReference<Job, ApplicationAndJobName>>> it =
+             jobs.entrySet().iterator(); it.hasNext(); ) {
+            final Map.Entry<ApplicationAndJobName, SoftReference<Job, ApplicationAndJobName>> next = it.next();
             if (next.getKey().jobName.equals(jobId)) {
                 BatchLogger.LOGGER.removing("Job", jobId);
                 it.remove();

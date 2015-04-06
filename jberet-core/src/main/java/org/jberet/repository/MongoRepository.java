@@ -12,7 +12,6 @@
 
 package org.jberet.repository;
 
-import java.lang.ref.SoftReference;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
@@ -121,7 +120,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         while (cursor.hasNext()) {
             final DBObject next = cursor.next();
             final Long i = (Long) next.get(TableColumns.JOBINSTANCEID);
-            final SoftReference<JobInstanceImpl> ref = jobInstances.get(i);
+            final SoftReference<JobInstanceImpl, Long> ref = jobInstances.get(i);
             JobInstanceImpl jobInstance1 = (ref != null) ? ref.get() : null;
             if (jobInstance1 == null) {
                 final String appName = (String) next.get(TableColumns.APPLICATIONNAME);
@@ -132,7 +131,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
                     jobInstance1 = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, jobName)), appName, jobName);
                 }
                 jobInstance1.setId(i);
-                jobInstances.put(i, new SoftReference<JobInstanceImpl>(jobInstance1));
+                jobInstances.put(i,
+                        new SoftReference<JobInstanceImpl, Long>(jobInstance1, jobInstanceReferenceQueue, i));
             }
             //this job instance is already in the cache, so get it from the cache
             result.add(jobInstance1);
@@ -152,14 +152,15 @@ public final class MongoRepository extends AbstractPersistentRepository {
         if (one == null) {
             return null;
         }
-        final SoftReference<JobInstanceImpl> ref = jobInstances.get(jobInstanceId);
+        final SoftReference<JobInstanceImpl, Long> ref = jobInstances.get(jobInstanceId);
         result = (ref != null) ? ref.get() : null;
         if (result == null) {
             final String appName = (String) one.get(TableColumns.APPLICATIONNAME);
             final String goodJobName = (String) one.get(TableColumns.JOBNAME);
             result = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, goodJobName)), appName, goodJobName);
             result.setId(jobInstanceId);
-            jobInstances.put(jobInstanceId, new SoftReference<JobInstanceImpl>(result));
+            jobInstances.put(jobInstanceId,
+                    new SoftReference<JobInstanceImpl, Long>(result, jobInstanceReferenceQueue, jobInstanceId));
         }
         return result;
     }
@@ -210,7 +211,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         if (one == null) {
             return null;
         }
-        final SoftReference<JobExecutionImpl> ref = jobExecutions.get(jobExecutionId);
+        final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(jobExecutionId);
         result = (ref != null) ? ref.get() : null;
         if (result == null) {
             final Long jobInstanceId = (Long) one.get(TableColumns.JOBINSTANCEID);
@@ -224,7 +225,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
                     (String) one.get(TableColumns.BATCHSTATUS),
                     (String) one.get(TableColumns.EXITSTATUS),
                     (String) one.get(TableColumns.RESTARTPOSITION));
-            jobExecutions.put(jobExecutionId, new SoftReference<JobExecutionImpl>(result));
+            jobExecutions.put(jobExecutionId,
+                    new SoftReference<JobExecutionImpl, Long>(result, jobExecutionReferenceQueue, jobExecutionId));
         }
         return result;
     }
@@ -240,7 +242,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         while (cursor.hasNext()) {
             final DBObject next = cursor.next();
             final Long i = (Long) next.get(TableColumns.JOBEXECUTIONID);
-            final SoftReference<JobExecutionImpl> ref = jobExecutions.get(i);
+            final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(i);
             JobExecutionImpl jobExecution1 = (ref != null) ? ref.get() : null;
             if (jobExecution1 == null) {
                 if (jobInstanceId == 0) {
@@ -256,7 +258,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
                                 (String) next.get(TableColumns.BATCHSTATUS),
                                 (String) next.get(TableColumns.EXITSTATUS),
                                 (String) next.get(TableColumns.RESTARTPOSITION));
-                jobExecutions.put(i, new SoftReference<JobExecutionImpl>(jobExecution1));
+                jobExecutions.put(i,
+                        new SoftReference<JobExecutionImpl, Long>(jobExecution1, jobExecutionReferenceQueue, i));
             }
             // jobExecution1 is either got from the cache, or created, now add it to the result list
             result.add(jobExecution1);
