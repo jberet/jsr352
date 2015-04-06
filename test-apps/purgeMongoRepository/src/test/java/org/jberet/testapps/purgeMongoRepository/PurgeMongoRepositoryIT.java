@@ -19,10 +19,17 @@ import javax.batch.runtime.JobInstance;
 
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeMongoRepositoryJobName = "purgeMongoRepository";
+
+    @Test
+    //@Ignore("run it manually")
+    public void memoryTest() throws Exception {
+        super.memoryTest();
+    }
 
     @Test(expected = NoSuchJobExecutionException.class)
     public void restartNoSuchJobExecutionException() throws NoSuchJobExecutionException {

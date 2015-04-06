@@ -18,10 +18,17 @@ import javax.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeJdbcRepositoryJobName = "purgeJdbcRepository";
+
+    @Test
+    @Ignore("run it manually")
+    public void memoryTest() throws Exception {
+        super.memoryTest();
+    }
 
     @Test(expected = NoSuchJobExecutionException.class)
     public void restartNoSuchJobExecutionException() throws NoSuchJobExecutionException {
@@ -225,5 +232,4 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
             System.out.printf("Got expected %s%n", e);
         }
     }
-
 }

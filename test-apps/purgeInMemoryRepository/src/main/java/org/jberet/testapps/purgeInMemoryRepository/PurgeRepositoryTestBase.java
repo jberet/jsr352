@@ -14,6 +14,7 @@ package org.jberet.testapps.purgeInMemoryRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobInstanceException;
 import javax.batch.runtime.BatchStatus;
@@ -30,6 +31,7 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
     protected static final String prepurgeJobName = "prepurge";
     protected static final String prepurge2JobName = "prepurge2";
     protected static final String prepurgeAndPrepurge2JobNames = "prepurge, prepurge2";
+    protected static final String chunkPartitionJobXml = "org.jberet.test.chunkPartition";
 
     public long prepurge(final String... jobName) throws Exception {
         final String prepurgeJobName = (jobName.length == 0) ? PurgeRepositoryTestBase.prepurgeJobName : jobName[0];
@@ -106,6 +108,27 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         final List<Long> runningExecutions = jobOperator.getRunningExecutions(prepurgeJobName);
         Assert.assertEquals(1, runningExecutions.size());
         awaitTermination();
+    }
+
+    protected void memoryTest() throws Exception {
+        final int times = Integer.getInteger("times", 5000);
+        for (int i = 0; i < times; i++) {
+            System.out.printf("================ %s ================ %n", i);
+
+            params = new Properties();
+
+            //add more job parameters to consume memory
+            final String val = System.getProperty("user.dir");
+            for (int n = 0; n < 20; n++) {
+                params.setProperty(String.valueOf(n), val);
+            }
+
+            params.setProperty("thread.count", "10");
+            params.setProperty("skip.thread.check", "true");
+            params.setProperty("writer.sleep.time", "0");
+            startJobAndWait(chunkPartitionJobXml);
+            Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        }
     }
 
     public static final class JobExecutionSelector1 implements JobExecutionSelector {
