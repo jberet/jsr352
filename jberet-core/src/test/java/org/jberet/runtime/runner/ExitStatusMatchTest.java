@@ -29,6 +29,7 @@ public class ExitStatusMatchTest {
         Assert.assertFalse(matches("pass", "P???"));
         Assert.assertFalse(matches("PASS", "p???"));
         Assert.assertFalse(matches("pass", "p??S"));
+        Assert.assertFalse(matches(null, "*"));
 
         Assert.assertTrue(matches("pass", "*a*"));
         Assert.assertTrue(matches("pass", "*s"));
