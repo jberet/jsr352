@@ -178,12 +178,6 @@ public final class InfinispanRepository extends AbstractRepository {
     }
 
     @Override
-    public void addStepExecution(final JobExecutionImpl jobExecution, final StepExecutionImpl stepExecution) {
-        jobExecution.addStepExecution(stepExecution);
-        insertStepExecution(stepExecution, jobExecution);
-    }
-
-    @Override
     public void savePersistentData(final JobExecution jobExecution, final AbstractStepExecution stepOrPartitionExecution) {
         //super.savePersistentData() serialize persistent data and checkpoint info to avoid further modification
         super.savePersistentData(jobExecution, stepOrPartitionExecution);
