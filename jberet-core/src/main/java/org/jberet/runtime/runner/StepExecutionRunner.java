@@ -187,7 +187,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
         if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
             final String next = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);
-            enclosingRunner.runJobElement(next, stepExecution);
+            enclosingRunner.runJobElement(next, batchContext.getExitStatus(), stepExecution);
         } else if (batchContext.getBatchStatus() == BatchStatus.FAILED) {
             //transition elements can direct to the next job element even after the current step failed
             final String next = resolveTransitionElements(step.getTransitionElements(), null, false);
@@ -197,7 +197,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     for (final AbstractContext e : batchContext.getOuterContexts()) {
                         e.setBatchStatus(BatchStatus.STARTED);
                     }
-                    enclosingRunner.runJobElement(next, stepExecution);
+                    enclosingRunner.runJobElement(next, batchContext.getExitStatus(), stepExecution);
                 }
             }
         }
