@@ -46,6 +46,9 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
     }
 
     protected static final boolean matches(final String text, String pattern) {
+        if (text == null) {
+            return false;
+        }
         if (pattern.equals("*")) {
             return true;
         }

@@ -169,7 +169,9 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         final String newExitStatus;
         try {
             newExitStatus = decider.decide(precedingStepExecutions);
-            batchContext.setExitStatus(newExitStatus);
+            if (newExitStatus != null) {
+                batchContext.setExitStatus(newExitStatus);
+            }
             final String next = resolveTransitionElements(decision.getTransitionElements(), null, true);
             runJobElement(next, precedingStepExecutions);
         } catch (Exception e) {
