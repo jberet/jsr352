@@ -36,4 +36,22 @@ public class DeserializationIT extends BatchTestBase {
         final String content = page.getContent();
         assertContainsBatchStatus(content, BatchStatus.COMPLETED);
     }
+
+
+
+    @Test
+    public void startJobNameDifferent() throws Exception {
+        final TextPage page = runJob(CONTEXT_PATH, SERVLET_PATH, "start job-xml-name-different",
+                new NameValuePair("fail.on", "8"));
+        final String content = page.getContent();
+        assertContainsBatchStatus(content, BatchStatus.FAILED);
+    }
+
+    @Test
+    public void restartJobNameDifferent() throws Exception {
+        final TextPage page = runJob(CONTEXT_PATH, SERVLET_PATH, "restart jobXmlNameDifferent");
+        final String content = page.getContent();
+        assertContainsBatchStatus(content, BatchStatus.COMPLETED);
+    }
+
 }

@@ -44,3 +44,14 @@ throws exception, and the test will pass with the expected job failure.
 * restart WildFly to make sure the previous decision to ban restart was persisted and retrieved upon the next restart.
 * run org.jberet.testapps.deserialization.DeserializationIT.restartJob, the restart will fail with JobRestartException,
 since the initial job execution was configured not restartable.
+
+This test app can also verify that a job whose job id differs from job xml file name can be started and restarted.
+When the job is first started, it is started with job xml name, and is configured to fail. When it is restarted with
+the previous job execution id after WildFly server restart, the batch runtime should be able to correctly load job
+from job xml name (the job cache is gone after WildFly restart), even though job id differs from job xml name.
+
+* deploy to WildFly
+* run org.jberet.testapps.deserialization.DeserializationIT.startJobNameDifferent, the job execution will fail as the test app
+throws exception, and the test will pass with the expected job failure.
+* restart WildFly
+* run org.jberet.testapps.deserialization.DeserializationIT.restartJobNameDifferent, which should complete successfully.
