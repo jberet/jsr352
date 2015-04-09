@@ -12,6 +12,10 @@
  Cheng Fang - Initial API and implementation
 -->
 
+<!--
+the job id attribute is different from the job xml file name to verify the job can still be correctly started and
+restarted.
+-->
 <job id="org.jberet.se.test.batchlet2" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <!--
      The initial job start will complete stepA, stepB, stepC, stepD, and stop at stepE.

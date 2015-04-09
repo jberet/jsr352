@@ -67,9 +67,11 @@ public class ChunkStopIT extends AbstractIT {
         jobOperator.stop(jobExecutionId);
         awaitTermination();
         Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
-        Properties parameters1 = jobOperator.getParameters(jobExecutionId);
+        final Properties parameters1 = jobOperator.getParameters(jobExecutionId);
         System.out.printf("%nstart job parameters: %s%n", parameters1);
-        Assert.assertEquals(3, parameters1.size());
+
+        //there may be internal job parameters added, so skip checking its size.
+        //Assert.assertEquals(3, parameters1.size());
 
         params = new Properties();
         params.setProperty("data.count", String.valueOf(dataCount));

@@ -68,7 +68,7 @@ public class ArchiveXmlLoader {
     /**
      * Gets the job root element for a given job name.
      *
-     * @param jobName      base name of the job xml document
+     * @param jobXmlName      base name of the job xml document
      * @param classLoader  the class loader used to locate the job
      * @param loadedJobs   a collections of jobs that have already been loaded
      * @param jobXmlResolver the job XML resolver
@@ -77,10 +77,10 @@ public class ArchiveXmlLoader {
      *
      * @throws javax.batch.operations.JobStartException if the job failed to start
      */
-    public static Job loadJobXml(final String jobName, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
+    public static Job loadJobXml(final String jobXmlName, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {
         for (final Job j : loadedJobs) {
-            if (jobName.equals(j.getId())) {
+            if (jobXmlName.equals(j.getJobXmlName() != null ? j.getJobXmlName() : j.getId())) {
                 return j;
             }
         }
@@ -88,19 +88,22 @@ public class ArchiveXmlLoader {
         Job job = null;
         final InputStream is;
         try {
-            is = getJobXml(jobName, classLoader, jobXmlResolver);
+            is = getJobXml(jobXmlName, classLoader, jobXmlResolver);
         } catch (final IOException e) {
-            throw MESSAGES.failToGetJobXml(e, jobName);
+            throw MESSAGES.failToGetJobXml(e, jobXmlName);
         }
 
         try {
             job = JobParser.parseJob(is, classLoader, new JobXmlEntityResolver(classLoader, jobXmlResolver));
+            if (!jobXmlName.equals(job.getId())) {
+                job.setJobXmlName(jobXmlName);
+            }
             loadedJobs.add(job);
             if (!job.getInheritingJobElements().isEmpty()) {
                 JobMerger.resolveInheritance(job, classLoader, loadedJobs, jobXmlResolver);
             }
         } catch (final Exception e) {
-            throw MESSAGES.failToParseJobXml(e, jobName);
+            throw MESSAGES.failToParseJobXml(e, jobXmlName);
         } finally {
             if (is != null) {
                 try {
@@ -113,17 +116,17 @@ public class ArchiveXmlLoader {
         return job;
     }
 
-    private static InputStream getJobXml(String jobXml, final ClassLoader classLoader, final JobXmlResolver jobXmlResolver) throws IOException {
-        if (!jobXml.endsWith(".xml")) {
-            jobXml += ".xml";
+    private static InputStream getJobXml(String jobXmlName, final ClassLoader classLoader, final JobXmlResolver jobXmlResolver) throws IOException {
+        if (!jobXmlName.endsWith(".xml")) {
+            jobXmlName += ".xml";
         }
 
         // Use the SPI to locate the job XML
-        final InputStream is = jobXmlResolver.resolveJobXml(jobXml, classLoader);
+        final InputStream is = jobXmlResolver.resolveJobXml(jobXmlName, classLoader);
         if (is != null) {
             return is;
         }
-        throw BatchMessages.MESSAGES.failToGetJobXml(jobXml);
+        throw BatchMessages.MESSAGES.failToGetJobXml(jobXmlName);
     }
 
     private static class JobXmlEntityResolver implements XMLResolver {

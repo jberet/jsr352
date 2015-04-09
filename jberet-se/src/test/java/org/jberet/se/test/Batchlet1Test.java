@@ -30,7 +30,7 @@ import org.junit.Test;
 public class Batchlet1Test {
     static final String tmpdir = System.getProperty("jberet.tmp.dir");
     static final String jobName = "org.jberet.se.test.batchlet1";
-    static final String jobName2 = "org.jberet.se.test.batchlet2";
+    static final String jobName2 = "org-jberet-se-test-batchlet2";
     static final String jobName3 = "org.jberet.se.test.batchlet3";
     static final String jobName4 = "org.jberet.se.test.batchlet4";
     static final File jobName2ExecutionIdSaveTo = new File(tmpdir, jobName2 + ".executionId");

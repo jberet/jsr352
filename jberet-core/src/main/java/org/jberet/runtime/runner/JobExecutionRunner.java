@@ -42,7 +42,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         // the job may be stopped right after starting
         if (jobExecution.getBatchStatus() != BatchStatus.STOPPING) {
             jobExecution.setBatchStatus(BatchStatus.STARTED);
-            batchContext.getJobRepository().updateJobExecution(jobExecution, false);
+            batchContext.getJobRepository().updateJobExecution(jobExecution, false, false);
         }
         final JobListener[] jobListeners = batchContext.getJobListeners();
         int i = 0;
@@ -69,25 +69,41 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         batchContext.destroyArtifact(jobListeners);
 
         final BatchStatus batchStatus = jobExecution.getBatchStatus();
+        boolean saveJobParameters = false;
         if (batchStatus == BatchStatus.STARTED) {
             jobExecution.setBatchStatus(BatchStatus.COMPLETED);
         } else if (batchStatus == BatchStatus.STOPPING) {
             jobExecution.setBatchStatus(BatchStatus.STOPPED);
-            adjustRestart(jobExecution);
+            saveJobParameters = adjustRestartFailedOrStopped(jobExecution);
         } else if (batchStatus == BatchStatus.FAILED) {
-            adjustRestart(jobExecution);
+            saveJobParameters = adjustRestartFailedOrStopped(jobExecution);
         } else if (batchStatus == BatchStatus.STOPPED) {
-            adjustRestart(jobExecution);
+            saveJobParameters = adjustRestartFailedOrStopped(jobExecution);
         }
 
-        batchContext.getJobRepository().updateJobExecution(jobExecution, true);
+        batchContext.getJobRepository().updateJobExecution(jobExecution, true, saveJobParameters);
         batchContext.setTransientUserData(null);
         jobExecution.cleanUp();
     }
 
-    private void adjustRestart(final JobExecutionImpl jobExecution) {
+    /**
+     * Adjusts restart position and job xml name if needed for FAILED or STOPPED job execution.
+     *
+     * @param jobExecution a failed or stopped job execution
+     *
+     * @return true if the internal job parameter with key {@link org.jberet.job.model.Job#JOB_XML_NAME} was added to
+     *         {@code jobExecution}; false otherwise.
+     */
+    private boolean adjustRestartFailedOrStopped(final JobExecutionImpl jobExecution) {
         if (!job.getRestartableBoolean()) {
             jobExecution.setRestartPosition(Job.UNRESTARTABLE);
         }
+        if (job.getJobXmlName() != null) {
+            //jobXmlName is different than jobId, save it so the restart can correctly locate job xml file if the job
+            //is not available from the cache.
+            jobExecution.addJobParameter(Job.JOB_XML_NAME, job.getJobXmlName());
+            return true;gith
+        }
+        return false;
     }
 }

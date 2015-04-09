@@ -59,7 +59,7 @@ public interface JobRepository {
     JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters);
     JobExecution getJobExecution(long jobExecutionId);
     List<JobExecution> getJobExecutions(JobInstance jobInstance);
-    void updateJobExecution(JobExecutionImpl jobExecution, boolean fullUpdate);
+    void updateJobExecution(JobExecutionImpl jobExecution, boolean fullUpdate, boolean saveJobParameters);
 
     /**
      * Gets the ids of running job executions belonging to a specific job.

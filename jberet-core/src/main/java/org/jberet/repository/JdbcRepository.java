@@ -78,6 +78,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String SELECT_JOB_EXECUTION = "select-job-execution";
     private static final String INSERT_JOB_EXECUTION = "insert-job-execution";
     private static final String UPDATE_JOB_EXECUTION = "update-job-execution";
+    private static final String UPDATE_JOB_EXECUTION_AND_PARAMETERS = "update-job-execution-and-parameters";
     private static final String UPDATE_JOB_EXECUTION_PARTIAL = "update-job-execution-partial";
 
     private static final String SELECT_ALL_STEP_EXECUTIONS = "select-all-step-executions";
@@ -393,9 +394,19 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     }
 
     @Override
-    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
-        super.updateJobExecution(jobExecution, fullUpdate);
-        final String update = fullUpdate ? sqls.getProperty(UPDATE_JOB_EXECUTION) : sqls.getProperty(UPDATE_JOB_EXECUTION_PARTIAL);
+    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate, final boolean saveJobParameters) {
+        super.updateJobExecution(jobExecution, fullUpdate, saveJobParameters);
+        final String update;
+        if (fullUpdate) {
+            if (saveJobParameters) {
+                update = sqls.getProperty(UPDATE_JOB_EXECUTION_AND_PARAMETERS);
+            } else {
+                update = sqls.getProperty(UPDATE_JOB_EXECUTION);
+            }
+        } else {
+            update = sqls.getProperty(UPDATE_JOB_EXECUTION_PARTIAL);
+        }
+
         final Connection connection = getConnection();
         PreparedStatement preparedStatement = null;
         try {
@@ -407,14 +418,19 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 preparedStatement.setString(3, jobExecution.getBatchStatus().name());
                 preparedStatement.setString(4, jobExecution.getExitStatus());
                 preparedStatement.setString(5, jobExecution.getRestartPosition());
-                preparedStatement.setLong(6, jobExecution.getExecutionId());  //where clause
+
+                if (saveJobParameters) {
+                    preparedStatement.setString(6, BatchUtil.propertiesToString(jobExecution.getJobParameters()));  //job parameters
+                    preparedStatement.setLong(7, jobExecution.getExecutionId());  //where clause
+                } else {
+                    preparedStatement.setLong(6, jobExecution.getExecutionId());  //where clause
+                }
             } else {
                 preparedStatement.setTimestamp(1, createTimestamp(jobExecution.getLastUpdatedTime()));
                 preparedStatement.setTimestamp(2, createTimestamp(jobExecution.getStartTime()));
                 preparedStatement.setString(3, jobExecution.getBatchStatus().name());
                 preparedStatement.setLong(4, jobExecution.getExecutionId());  //where clause
             }
-
             preparedStatement.executeUpdate();
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, update);

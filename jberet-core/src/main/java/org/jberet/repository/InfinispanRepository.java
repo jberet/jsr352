@@ -197,7 +197,7 @@ public final class InfinispanRepository extends AbstractRepository {
     }
 
     @Override
-    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
+    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate, final boolean saveJobParameters) {
         jobExecution.setLastUpdatedTime(System.currentTimeMillis());
         jobExecutionCache.put(jobExecution.getExecutionId(), jobExecution);
     }

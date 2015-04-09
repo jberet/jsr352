@@ -44,7 +44,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private final List<StepExecution> stepExecutions = new CopyOnWriteArrayList<StepExecution>();
 
-    private final Properties jobParameters;
+    private Properties jobParameters;
 
     protected long createTime;
     protected long lastUpdatedTime;
@@ -169,6 +169,19 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     @Override
     public Properties getJobParameters() {
         return jobParameters;
+    }
+
+    /**
+     * Adds job parameter key-value pair. Should only be used to add internal job parameters.
+     *
+     * @param k key of the job parameter
+     * @param v value of the job parameter
+     */
+    public void addJobParameter(final String k, final String v) {
+        if (jobParameters == null) {
+            jobParameters = new Properties();
+        }
+        jobParameters.setProperty(k, v);
     }
 
     public List<StepExecution> getStepExecutions() {

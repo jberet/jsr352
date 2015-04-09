@@ -183,8 +183,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
     }
 
     @Override
-    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate) {
-        super.updateJobExecution(jobExecution, fullUpdate);
+    public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate, final boolean saveJobParameters) {
+        super.updateJobExecution(jobExecution, fullUpdate, saveJobParameters);
         final DBObject update = new BasicDBObject(TableColumns.LASTUPDATEDTIME, jobExecution.getLastUpdatedTime());
         update.put(TableColumns.STARTTIME, jobExecution.getStartTime());
         update.put(TableColumns.BATCHSTATUS, jobExecution.getBatchStatus().name());
@@ -193,6 +193,9 @@ public final class MongoRepository extends AbstractPersistentRepository {
             update.put(TableColumns.ENDTIME, jobExecution.getEndTime());
             update.put(TableColumns.EXITSTATUS, jobExecution.getExitStatus());
             update.put(TableColumns.RESTARTPOSITION, jobExecution.getRestartPosition());
+            if (saveJobParameters) {
+                update.put(TableColumns.JOBPARAMETERS, BatchUtil.propertiesToString(jobExecution.getJobParameters()));
+            }
         }
 
         db.getCollection(TableColumns.JOB_EXECUTION).update(

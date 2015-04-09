@@ -27,7 +27,7 @@ import org.junit.Test;
 
 public class SleepBatchletTest {
     private final JobOperator operator = BatchRuntime.getJobOperator();
-    private static final String jobName = "org.jberet.se.test.sleepBatchlet.xml";
+    private static final String jobName = "org.jberet.se.test.sleepBatchlet";
     private static final String listenerJobName = "org.jberet.se.test.sleepBatchletListeners";
     private static final String transitionJobName = "org.jberet.se.test.sleepBatchletTransition";
     private static final String transitionEndJobName = "org.jberet.se.test.sleepBatchletTransitionEnd";
@@ -61,6 +61,11 @@ public class SleepBatchletTest {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) operator.getJobExecution(jobExecutionId);
         operator.stop(jobExecutionId);
         jobExecution.awaitTermination(1, TimeUnit.MINUTES);
+        System.out.printf("jobExecution id=%s, batchStatus=%s, exitStatus=%s, jobParameters=%s, restartPosition=%s, " +
+                        "createTime=%s, startTime=%s, lastUpdateTime=%s, endTime=%s%n",
+                jobExecutionId, jobExecution.getBatchStatus(), jobExecution.getExitStatus(), jobExecution.getJobParameters(),
+                jobExecution.getRestartPosition(), jobExecution.getCreateTime(), jobExecution.getStartTime(),
+                jobExecution.getLastUpdatedTime(), jobExecution.getLastUpdatedTime(), jobExecution.getEndTime());
         Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.STOPPED.name(), jobExecution.getExitStatus());
 

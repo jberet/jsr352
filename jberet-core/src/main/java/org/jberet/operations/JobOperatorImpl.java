@@ -208,20 +208,32 @@ public class JobOperatorImpl implements JobOperator {
 
             // the job may not have been loaded, e.g., when the restart is performed in a new JVM
             final String jobName = originalToRestart.getJobName();
+            Properties oldJobParameters = originalToRestart.getJobParameters();
             Job jobDefined = jobInstance.getUnsubstitutedJob();
             if (jobDefined == null) {
                 final ApplicationAndJobName applicationAndJobName = new ApplicationAndJobName(jobInstance.getApplicationName(), jobName);
                 jobDefined = repository.getJob(applicationAndJobName);
 
                 if (jobDefined == null) {
-                    jobDefined = ArchiveXmlLoader.loadJobXml(jobName, batchEnvironment.getClassLoader(), new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
+                    String jobXmlName = null;
+                    if (oldJobParameters != null) {
+                        jobXmlName = oldJobParameters.getProperty(Job.JOB_XML_NAME);
+                    }
+                    if (jobXmlName == null) {
+                        jobXmlName = jobName;
+                    } else {
+                        oldJobParameters.remove(Job.JOB_XML_NAME);
+                        if (!oldJobParameters.propertyNames().hasMoreElements()) {
+                            oldJobParameters = null;
+                        }
+                    }
+                    jobDefined = ArchiveXmlLoader.loadJobXml(jobXmlName, batchEnvironment.getClassLoader(), new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
                     repository.addJob(applicationAndJobName, jobDefined);
                 }
                 jobInstance.setUnsubstitutedJob(jobDefined);
             }
 
             try {
-                final Properties oldJobParameters = originalToRestart.getJobParameters();
                 final Properties combinedProperties;
                 if (oldJobParameters != null) {
                     if (restartParameters == null) {
@@ -259,7 +271,7 @@ public class JobOperatorImpl implements JobOperator {
                 batchStatus == BatchStatus.STOPPED ||
                 batchStatus == BatchStatus.ABANDONED) {
             jobExecution.setBatchStatus(BatchStatus.ABANDONED);
-            repository.updateJobExecution(jobExecution, false);
+            repository.updateJobExecution(jobExecution, false, false);
 
             final JobInstanceImpl jobInstance = jobExecution.getJobInstance();
             if (jobInstance != null) {
