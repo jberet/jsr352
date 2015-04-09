@@ -102,7 +102,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             //jobXmlName is different than jobId, save it so the restart can correctly locate job xml file if the job
             //is not available from the cache.
             jobExecution.addJobParameter(Job.JOB_XML_NAME, job.getJobXmlName());
-            return true;gith
+            return true;
         }
         return false;
     }
