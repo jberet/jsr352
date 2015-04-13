@@ -20,7 +20,7 @@ import java.lang.ref.ReferenceQueue;
  * @param <T> the type of the referent
  * @param <K> the key to identify this reference within a {@code Map}
  *
- * @since 1.1.0.Beta2
+ * @since 1.1.0.Final
  */
 final class SoftReference<T, K> extends java.lang.ref.SoftReference<T> {
     private final K key;

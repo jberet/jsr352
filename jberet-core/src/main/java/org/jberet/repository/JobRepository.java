@@ -37,7 +37,7 @@ public interface JobRepository {
      * Gets all the job names from the job repository.
      * @return a set of job names
      *
-     * @since 1.1.0.Beta2
+     * @since 1.1.0.Final
      */
     Set<String> getJobNames();
 
@@ -46,7 +46,7 @@ public interface JobRepository {
      * @param jobName the job name to check
      * @return true if the named job exists; false otherwise
      *
-     * @since 1.1.0.Beta2
+     * @since 1.1.0.Final
      */
     boolean jobExists(String jobName);
 
@@ -67,7 +67,7 @@ public interface JobRepository {
      * @param jobName  the name of the job, not null
      * @return  a list of job execution ids
      *
-     * @since 1.1.0.Beta2
+     * @since 1.1.0.Final
      * @see org.jberet.operations.JobOperatorImpl#getRunningExecutions(java.lang.String)
      */
     List<Long> getRunningExecutions(final String jobName);
