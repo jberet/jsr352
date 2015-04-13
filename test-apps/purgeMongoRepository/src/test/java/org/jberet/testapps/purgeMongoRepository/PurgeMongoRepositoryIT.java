@@ -12,6 +12,7 @@
 
 package org.jberet.testapps.purgeMongoRepository;
 
+import java.util.Properties;
 import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
@@ -24,6 +25,19 @@ import org.junit.Test;
 
 public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeMongoRepositoryJobName = "purgeMongoRepository";
+
+    @Test
+    @Ignore("run it manually,Ctrl-C before it completes")
+    public void ctrlC() throws Exception {
+        super.ctrlC();
+    }
+
+    @Test
+    @Ignore("run it manually, after ctrlC test has been killed")
+    public void restartKilled() throws Exception {
+        final Properties restartParams = new Properties();
+        super.restartKilled(restartParams);
+    }
 
     @Test
     @Ignore("run it manually")

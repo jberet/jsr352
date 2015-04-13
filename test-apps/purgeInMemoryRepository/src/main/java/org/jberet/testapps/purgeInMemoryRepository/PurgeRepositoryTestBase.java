@@ -131,6 +131,19 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         }
     }
 
+    protected void ctrlC() throws Exception {
+        params.setProperty("thread.count", "2");
+        params.setProperty("skip.thread.check", "true");
+        params.setProperty("writer.sleep.time", "3000");
+        startJobAndWait(chunkPartitionJobXml);
+    }
+
+    protected void restartKilled(final Properties restartParams) {
+        final long originalJobExecutionId = getOriginalJobExecutionId(chunkPartitionJobXml);
+        jobOperator.restart(originalJobExecutionId, restartParams);
+
+    }
+
     public static final class JobExecutionSelector1 implements JobExecutionSelector {
         private JobContext jobContext;
         private StepContext stepContext;
