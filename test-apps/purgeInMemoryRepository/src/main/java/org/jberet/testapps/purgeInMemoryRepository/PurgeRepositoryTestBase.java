@@ -23,6 +23,7 @@ import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 
 import org.jberet.repository.JobExecutionSelector;
+import org.jberet.spi.PropertyKey;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 
@@ -138,7 +139,40 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         startJobAndWait(chunkPartitionJobXml);
     }
 
-    protected void restartKilled(final Properties restartParams) throws InterruptedException {
+    protected void restartKilledImmediately() throws Exception {
+        final Properties restartParams = new Properties();
+        restartKilled(restartParams);
+    }
+
+    protected void restartKilledStrict() throws Exception {
+        final Properties restartParams = new Properties();
+        restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_STRICT);
+        restartKilled(restartParams);
+    }
+
+    protected void restartKilledDetectShortInterval() throws Exception {
+        final Properties restartParams = new Properties();
+        restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_DETECT);
+        restartParams.setProperty(PropertyKey.RESTART_INTERVAL, String.valueOf(1));
+        restartKilled(restartParams);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    protected void restartKilled() throws Exception {
+        final Properties restartParams = new Properties();
+        restartKilled(restartParams);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    protected void restartKilledForce() throws Exception {
+        final Properties restartParams = new Properties();
+        restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_FORCE);
+        restartKilled(restartParams);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+
+    private void restartKilled(final Properties restartParams) throws InterruptedException {
         final long originalJobExecutionId = getOriginalJobExecutionId(chunkPartitionJobXml);
         params.putAll(restartParams);
         restartAndWait(originalJobExecutionId);

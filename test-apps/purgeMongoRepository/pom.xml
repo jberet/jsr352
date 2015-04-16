@@ -34,6 +34,8 @@
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- dependency for kill-and-restart tests -->
         <dependency>
             <groupId>org.jberet.test-apps</groupId>
             <artifactId>purgeInMemoryRepository</artifactId>
@@ -44,6 +46,7 @@
             <artifactId>chunkPartition</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
