@@ -503,14 +503,14 @@ public final class MongoRepository extends AbstractPersistentRepository {
                     (String) dbObject.get(TableColumns.BATCHSTATUS),
                     (String) dbObject.get(TableColumns.EXITSTATUS),
                     BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.PERSISTENTUSERDATA), classLoader),
-                    ((Number) dbObject.get(TableColumns.READCOUNT)).longValue(),
-                    ((Number) dbObject.get(TableColumns.WRITECOUNT)).longValue(),
-                    ((Number) dbObject.get(TableColumns.COMMITCOUNT)).longValue(),
-                    ((Number) dbObject.get(TableColumns.ROLLBACKCOUNT)).longValue(),
-                    ((Number) dbObject.get(TableColumns.READSKIPCOUNT)).longValue(),
-                    ((Number) dbObject.get(TableColumns.PROCESSSKIPCOUNT)).longValue(),
-                    ((Number) dbObject.get(TableColumns.FILTERCOUNT)).longValue(),
-                    ((Number) dbObject.get(TableColumns.WRITESKIPCOUNT)).longValue(),
+                    numberObjectToLong(dbObject.get(TableColumns.READCOUNT)),
+                    numberObjectToLong(dbObject.get(TableColumns.WRITECOUNT)),
+                    numberObjectToLong(dbObject.get(TableColumns.COMMITCOUNT)),
+                    numberObjectToLong(dbObject.get(TableColumns.ROLLBACKCOUNT)),
+                    numberObjectToLong(dbObject.get(TableColumns.READSKIPCOUNT)),
+                    numberObjectToLong(dbObject.get(TableColumns.PROCESSSKIPCOUNT)),
+                    numberObjectToLong(dbObject.get(TableColumns.FILTERCOUNT)),
+                    numberObjectToLong(dbObject.get(TableColumns.WRITESKIPCOUNT)),
                     BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.READERCHECKPOINTINFO), classLoader),
                     BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.WRITERCHECKPOINTINFO), classLoader)
             );
@@ -602,5 +602,9 @@ public final class MongoRepository extends AbstractPersistentRepository {
         final DBObject update = new BasicDBObject("$inc", new BasicDBObject(TableColumns.SEQ, 1));
         final DBObject result = seqCollection.findAndModify(query, update);
         return (Long) result.get(TableColumns.SEQ);
+    }
+
+    private static long numberObjectToLong(final Object obj) {
+        return obj == null ? 0 : ((Number) obj).longValue();
     }
 }

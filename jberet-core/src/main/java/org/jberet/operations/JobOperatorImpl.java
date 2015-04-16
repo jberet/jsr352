@@ -15,6 +15,7 @@ package org.jberet.operations;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -42,6 +43,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
+import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactFactoryWrapper;
@@ -54,6 +56,7 @@ import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
+import org.jberet.spi.PropertyKey;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 import static org.jberet._private.BatchMessages.MESSAGES;
@@ -181,7 +184,6 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public long restart(final long executionId, final Properties restartParameters) throws JobExecutionAlreadyCompleteException,
             NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
-        long newExecutionId = 0;
         final JobExecutionImpl originalToRestart = (JobExecutionImpl) getJobExecution(executionId);
 
         if (Job.UNRESTARTABLE.equals(originalToRestart.getRestartPosition())) {
@@ -189,76 +191,49 @@ public class JobOperatorImpl implements JobOperator {
         }
 
         final BatchStatus previousStatus = originalToRestart.getBatchStatus();
+        if (previousStatus == BatchStatus.FAILED || previousStatus == BatchStatus.STOPPED) {
+            return restartFailedOrStopped(executionId, originalToRestart, restartParameters);
+        }
+
         if (previousStatus == BatchStatus.COMPLETED) {
             throw MESSAGES.jobExecutionAlreadyCompleteException(executionId);
         }
-        if (previousStatus == BatchStatus.ABANDONED ||
-                previousStatus == BatchStatus.STARTED ||
-                previousStatus == BatchStatus.STARTING ||
-                previousStatus == BatchStatus.STOPPING) {
+
+        if (previousStatus == BatchStatus.ABANDONED) {
             throw MESSAGES.jobRestartException(executionId, previousStatus);
         }
-        if (previousStatus == BatchStatus.FAILED || previousStatus == BatchStatus.STOPPED) {
-            final JobInstanceImpl jobInstance = (JobInstanceImpl) getJobInstance(executionId);
-            final List<JobExecution> executions = getJobExecutions(jobInstance);
-            final JobExecution mostRecentExecution = executions.get(executions.size() - 1);
-            if (executionId != mostRecentExecution.getExecutionId()) {
-                throw MESSAGES.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
-            }
 
-            // the job may not have been loaded, e.g., when the restart is performed in a new JVM
-            final String jobName = originalToRestart.getJobName();
-            Properties oldJobParameters = originalToRestart.getJobParameters();
-            Job jobDefined = jobInstance.getUnsubstitutedJob();
-            if (jobDefined == null) {
-                final ApplicationAndJobName applicationAndJobName = new ApplicationAndJobName(jobInstance.getApplicationName(), jobName);
-                jobDefined = repository.getJob(applicationAndJobName);
-
-                if (jobDefined == null) {
-                    String jobXmlName = null;
-                    if (oldJobParameters != null) {
-                        jobXmlName = oldJobParameters.getProperty(Job.JOB_XML_NAME);
-                    }
-                    if (jobXmlName == null) {
-                        jobXmlName = jobName;
-                    } else {
-                        oldJobParameters.remove(Job.JOB_XML_NAME);
-                        if (!oldJobParameters.propertyNames().hasMoreElements()) {
-                            oldJobParameters = null;
-                        }
-                    }
-                    jobDefined = ArchiveXmlLoader.loadJobXml(jobXmlName, batchEnvironment.getClassLoader(), new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
-                    repository.addJob(applicationAndJobName, jobDefined);
+        //previousStatus is now one of STARTING, STARTED, or STOPPING
+        final String restartMode = restartParameters.getProperty(PropertyKey.RESTART_MODE);
+        if (PropertyKey.RESTART_MODE_STRICT.equalsIgnoreCase(restartMode)) {
+            throw MESSAGES.jobRestartException(executionId, previousStatus);
+        } else if(restartMode == null || restartMode.equalsIgnoreCase(PropertyKey.RESTART_MODE_DETECT)) {
+            //to detect if originalToRestart had crashed or not
+            if (originalToRestart.getSubstitutedJob() == null) {
+                final Date lastUpdatedTime = originalToRestart.getLastUpdatedTime();
+                final long elapsed = System.currentTimeMillis() - lastUpdatedTime.getTime();
+                final String restartIntervalValue = restartParameters.getProperty(PropertyKey.RESTART_INTERVAL);
+                final long restartIntervalSeconds = restartIntervalValue != null ? Long.parseLong(restartIntervalValue) : 60;
+                if (elapsed < restartIntervalSeconds * 1000) {
+                    BatchLogger.LOGGER.tracef("Restarting job execution %s, job name %s, batch status %s, restart mode %s, " +
+                                    "restart interval %s, but the elapsed time from previous execution %s has not exceeded restart interval %s",
+                            executionId, originalToRestart.getJobName(), previousStatus, restartMode,
+                            restartIntervalValue, elapsed, restartIntervalSeconds);
+                    throw MESSAGES.jobRestartException(executionId, previousStatus);
                 }
-                jobInstance.setUnsubstitutedJob(jobDefined);
-            }
-
-            try {
-                final Properties combinedProperties;
-                if (oldJobParameters != null) {
-                    if (restartParameters == null) {
-                        combinedProperties = oldJobParameters;
-                    } else {
-                        combinedProperties = new Properties(oldJobParameters);
-                        for (final String k : restartParameters.stringPropertyNames()) {
-                            combinedProperties.setProperty(k, restartParameters.getProperty(k));
-                        }
-                    }
-                } else {
-                    combinedProperties = restartParameters;
-                }
-
-                newExecutionId = invokeTransaction(new TransactionInvocation<Long>() {
-                    @Override
-                    public Long invoke() throws JobStartException, JobSecurityException {
-                        return startJobExecution(jobInstance, combinedProperties, originalToRestart);
-                    }
-                });
-            } catch (Exception e) {
-                throw new JobRestartException(e);
+            } else {
+                BatchLogger.LOGGER.tracef("Restarting job execution %s, job name %s, batch status %s, restart mode %s, " +
+                                "but it seems the original execution is still alive.",
+                        executionId, originalToRestart.getJobName(), previousStatus, restartMode);
+                throw MESSAGES.jobRestartException(executionId, previousStatus);
             }
         }
-        return newExecutionId;
+
+        //update batch status in originalToRestart to FAILED, regardless of previousStatus
+        BatchLogger.LOGGER.markAsFailed(executionId, originalToRestart.getJobName(), previousStatus, restartMode);
+        originalToRestart.setBatchStatus(BatchStatus.FAILED);
+        repository.updateJobExecution(originalToRestart, false, false);
+        return restartFailedOrStopped(executionId, originalToRestart, restartParameters);
     }
 
     @Override
@@ -317,6 +292,78 @@ public class JobOperatorImpl implements JobOperator {
             getJobExecution(jobExecutionId);
         }
         return stepExecutions;
+    }
+
+    /**
+     * Restarts a FAILED or STOPPED job execution.
+     *
+     * @param executionId the old job execution id to restart
+     * @param originalToRestart the old job execution
+     * @param restartParameters restart job parameters
+     * @return the new job execution id
+     * @throws JobExecutionNotMostRecentException
+     * @throws JobRestartException
+     */
+    private long restartFailedOrStopped(final long executionId, final JobExecutionImpl originalToRestart, final Properties restartParameters)
+            throws JobExecutionNotMostRecentException, JobRestartException {
+        final JobInstanceImpl jobInstance = (JobInstanceImpl) getJobInstance(executionId);
+        final List<JobExecution> executions = getJobExecutions(jobInstance);
+        final JobExecution mostRecentExecution = executions.get(executions.size() - 1);
+        if (executionId != mostRecentExecution.getExecutionId()) {
+            throw MESSAGES.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
+        }
+
+        // the job may not have been loaded, e.g., when the restart is performed in a new JVM
+        final String jobName = originalToRestart.getJobName();
+        Properties oldJobParameters = originalToRestart.getJobParameters();
+        Job jobDefined = jobInstance.getUnsubstitutedJob();
+        if (jobDefined == null) {
+            final ApplicationAndJobName applicationAndJobName = new ApplicationAndJobName(jobInstance.getApplicationName(), jobName);
+            jobDefined = repository.getJob(applicationAndJobName);
+
+            if (jobDefined == null) {
+                String jobXmlName = null;
+                if (oldJobParameters != null) {
+                    jobXmlName = oldJobParameters.getProperty(Job.JOB_XML_NAME);
+                }
+                if (jobXmlName == null) {
+                    jobXmlName = jobName;
+                } else {
+                    oldJobParameters.remove(Job.JOB_XML_NAME);
+                    if (!oldJobParameters.propertyNames().hasMoreElements()) {
+                        oldJobParameters = null;
+                    }
+                }
+                jobDefined = ArchiveXmlLoader.loadJobXml(jobXmlName, batchEnvironment.getClassLoader(), new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
+                repository.addJob(applicationAndJobName, jobDefined);
+            }
+            jobInstance.setUnsubstitutedJob(jobDefined);
+        }
+
+        try {
+            final Properties combinedProperties;
+            if (oldJobParameters != null) {
+                if (restartParameters == null) {
+                    combinedProperties = oldJobParameters;
+                } else {
+                    combinedProperties = new Properties(oldJobParameters);
+                    for (final String k : restartParameters.stringPropertyNames()) {
+                        combinedProperties.setProperty(k, restartParameters.getProperty(k));
+                    }
+                }
+            } else {
+                combinedProperties = restartParameters;
+            }
+
+            return invokeTransaction(new TransactionInvocation<Long>() {
+                @Override
+                public Long invoke() throws JobStartException, JobSecurityException {
+                    return startJobExecution(jobInstance, combinedProperties, originalToRestart);
+                }
+            });
+        } catch (final Exception e) {
+            throw new JobRestartException(e);
+        }
     }
 
     private long startJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters, final JobExecutionImpl originalToRestart) throws JobStartException, JobSecurityException {

@@ -138,10 +138,10 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         startJobAndWait(chunkPartitionJobXml);
     }
 
-    protected void restartKilled(final Properties restartParams) {
+    protected void restartKilled(final Properties restartParams) throws InterruptedException {
         final long originalJobExecutionId = getOriginalJobExecutionId(chunkPartitionJobXml);
-        jobOperator.restart(originalJobExecutionId, restartParams);
-
+        params.putAll(restartParams);
+        restartAndWait(originalJobExecutionId);
     }
 
     public static final class JobExecutionSelector1 implements JobExecutionSelector {

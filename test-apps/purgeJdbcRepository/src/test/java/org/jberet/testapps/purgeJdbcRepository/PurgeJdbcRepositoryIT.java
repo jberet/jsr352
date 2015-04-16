@@ -13,10 +13,12 @@
 package org.jberet.testapps.purgeJdbcRepository;
 
 import java.util.Properties;
+import javax.batch.operations.JobRestartException;
 import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet.spi.PropertyKey;
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -26,17 +28,53 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeJdbcRepositoryJobName = "purgeJdbcRepository";
 
     @Test
-    @Ignore("run it manually,Ctrl-C before it completes")
+    @Ignore("run it manually, Ctrl-C before it completes")
     public void ctrlC() throws Exception {
         super.ctrlC();
     }
 
-    @Test
-    @Ignore("run it manually, after ctrlC test has been killed")
-    public void restartKilled() throws Exception {
+    @Test(expected = JobRestartException.class)
+    @Ignore("run immediately after ctrlC test has been killed, should fail")
+    public void restartKilledImmediately() throws Exception {
         final Properties restartParams = new Properties();
         super.restartKilled(restartParams);
     }
+
+    @Test(expected = JobRestartException.class)
+    @Ignore("run after ctrlC test has been killed, should fail")
+    public void restartKilledStrict() throws Exception {
+        final Properties restartParams = new Properties();
+        restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_STRICT);
+        super.restartKilled(restartParams);
+    }
+
+    @Test
+    @Ignore("run after ctrlC test has been killed")
+    public void restartKilledDetect() throws Exception {
+        final Properties restartParams = new Properties();
+        restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_DETECT);
+        restartParams.setProperty(PropertyKey.RESTART_INTERVAL, String.valueOf(1));
+        super.restartKilled(restartParams);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    @Test
+    @Ignore("run a couple of minutes after ctrlC test has been killed")
+    public void restartKilled() throws Exception {
+        final Properties restartParams = new Properties();
+        super.restartKilled(restartParams);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    @Test
+    @Ignore("run after ctrlC test has been killed")
+    public void restartKilledForce() throws Exception {
+        final Properties restartParams = new Properties();
+        restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_FORCE);
+        super.restartKilled(restartParams);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
 
     @Test
     @Ignore("run it manually")

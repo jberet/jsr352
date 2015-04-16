@@ -42,4 +42,30 @@ public interface PropertyKey {
      * complete.
      */
     String SPLIT_TIMEOUT_SECONDS = "jberet.split.timeout.seconds";
+
+    /**
+     * A key used to specify restart mode as an optional restart job parameter.
+     * Valid values are:
+     * <ul>
+     * <li>strict: only job executions with FAILED or STOPPED batch status can be restarted;
+     * <li>force: will restart job execution with FAILED, STOPPED, STARTING, STARTED, or STOPPING batch status;
+     * <li>detect: will restart job executions with FAILED or STOPPED batch status, and will restart job executions with
+     *             STARTING, STARTED, or STOPPING batch status only if they are detected to have terminated, which might
+     *             have been caused by JVM crash or processed been killed. {@code detect} is the default value.
+     * </ul>
+     */
+    String RESTART_MODE = "jberet.restart.mode";
+
+    String RESTART_MODE_STRICT = "strict";
+    String RESTART_MODE_FORCE = "force";
+    String RESTART_MODE_DETECT = "detect";
+
+    /**
+     * A key used to specify, as an optional restart job parameter, the minimum number of seconds after which to restart
+     * a job execution with batch status STARTING, STARTED, or STOPPING. This job parameter is only used when
+     * restart mode is not set, or set to {@code detect}. If the time elapsed since the original job execution last
+     * update time is less than the value of {@code RESTART_INTERVAL} parameter, the original job execution is considered
+     * to be active, and therefore the restart operation will fail.
+     */
+    String RESTART_INTERVAL = "jberet.restart.interval";
 }

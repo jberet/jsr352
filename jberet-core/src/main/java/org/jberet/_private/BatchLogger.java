@@ -14,6 +14,8 @@ package org.jberet._private;
 
 import java.sql.Connection;
 
+import javax.batch.runtime.BatchStatus;
+
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
@@ -118,5 +120,9 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 23, value = "Removing %s %s")
     @LogMessage(level = Logger.Level.INFO)
     void removing(String objectType, String nameOrId);
+
+    @Message(id = 24, value = "About to mark it FAILED before restarting job execution %s, job name %s, batch status %s, restart mode %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void markAsFailed(long executionId, String jobName, BatchStatus batchStatus, String restartMode);
 
 }
