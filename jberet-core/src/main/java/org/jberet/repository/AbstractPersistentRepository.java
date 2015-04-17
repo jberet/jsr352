@@ -150,11 +150,11 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
         //check cache first, if not found, then retrieve from database
         final List<StepExecution> stepExecutions;
         final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(jobExecutionId);
-        final JobExecution jobExecution = (ref != null) ? ref.get() : null;
+        final JobExecutionImpl jobExecution = (ref != null) ? ref.get() : null;
         if (jobExecution == null) {
             stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
         } else {
-            final List<StepExecution> stepExecutions1 = ((JobExecutionImpl) jobExecution).getStepExecutions();
+            final List<StepExecution> stepExecutions1 = jobExecution.getStepExecutions();
             if (stepExecutions1.isEmpty()) {
                 stepExecutions = selectStepExecutions(jobExecutionId, classLoader);
             } else {

@@ -210,10 +210,13 @@ public class JobOperatorImpl implements JobOperator {
         } else if(restartMode == null || restartMode.equalsIgnoreCase(PropertyKey.RESTART_MODE_DETECT)) {
             //to detect if originalToRestart had crashed or not
             if (originalToRestart.getSubstitutedJob() == null) {
-                final Date lastUpdatedTime = originalToRestart.getLastUpdatedTime();
-                final long elapsed = System.currentTimeMillis() - lastUpdatedTime.getTime();
                 final String restartIntervalValue = restartParameters.getProperty(PropertyKey.RESTART_INTERVAL);
                 final long restartIntervalSeconds = restartIntervalValue != null ? Long.parseLong(restartIntervalValue) : 60;
+
+                final long currentTimeMillis = System.currentTimeMillis();
+                Date lastUpdatedTime = originalToRestart.getLastUpdatedTime();
+                final long elapsed = currentTimeMillis - lastUpdatedTime.getTime();
+
                 if (elapsed < restartIntervalSeconds * 1000) {
                     BatchLogger.LOGGER.tracef("Restarting job execution %s, job name %s, batch status %s, restart mode %s, " +
                                     "restart interval %s, but the elapsed time from previous execution %s has not exceeded restart interval %s",

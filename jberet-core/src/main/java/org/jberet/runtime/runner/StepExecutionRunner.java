@@ -14,6 +14,7 @@ package org.jberet.runtime.runner;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -241,11 +242,44 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         final boolean isRestartNotOverride = isRestart && !isOverride;
         List<PartitionExecutionImpl> abortedPartitionExecutionsFromPrevious = null;
         if (isRestartNotOverride) {
-            //need to carry over partition execution data from previous run of the same step
+            //need to carry over partition execution data from previous run of the same step.
+            //for crashed original step execution, some partitions might not have chance to run during the original
+            // job execution, and so should be added
             final StepExecutionImpl originalStepExecution = batchContext.getOriginalStepExecution();
-            abortedPartitionExecutionsFromPrevious =
-                    jobContext.getJobRepository().getPartitionExecutions(originalStepExecution.getStepExecutionId(),
-                            originalStepExecution, true, jobContext.getClassLoader());
+            final BatchStatus oldStatus = originalStepExecution.getBatchStatus();
+            final long oldStepExecutionId = originalStepExecution.getStepExecutionId();
+            if (oldStatus == BatchStatus.FAILED || oldStatus == BatchStatus.STOPPED || oldStatus == BatchStatus.COMPLETED) {
+                abortedPartitionExecutionsFromPrevious =
+                        jobContext.getJobRepository().getPartitionExecutions(oldStepExecutionId,
+                                originalStepExecution, true, jobContext.getClassLoader());
+            } else {  //the original step execution terminated abruptly
+                final List<PartitionExecutionImpl> partitionExecutionsFromPrevious =
+                        jobContext.getJobRepository().getPartitionExecutions(oldStepExecutionId,
+                                originalStepExecution, false, jobContext.getClassLoader());
+                abortedPartitionExecutionsFromPrevious = new ArrayList<PartitionExecutionImpl>();
+                if (numOfPartitions == partitionExecutionsFromPrevious.size()) {
+                    for (final PartitionExecutionImpl e : partitionExecutionsFromPrevious) {
+                        if (e.getBatchStatus() != BatchStatus.COMPLETED) {
+                            abortedPartitionExecutionsFromPrevious.add(e);
+                        }
+                    }
+                } else {
+                    final int[] coveredPartitions = new int[numOfPartitions];
+                    Arrays.fill(coveredPartitions, 0);
+                    for (final PartitionExecutionImpl e : partitionExecutionsFromPrevious) {
+                        coveredPartitions[e.getPartitionId()] = 1;
+                        if (e.getBatchStatus() != BatchStatus.COMPLETED) {
+                            abortedPartitionExecutionsFromPrevious.add(e);
+                        }
+                    }
+                    for (int i = 0; i < coveredPartitions.length; i++) {
+                        if (coveredPartitions[i] == 0) {
+                            abortedPartitionExecutionsFromPrevious.add(new PartitionExecutionImpl(i, oldStepExecutionId,
+                            originalStepExecution.getStepName(), BatchStatus.FAILED, BatchStatus.FAILED.name(), null, null, null));
+                        }
+                    }
+                }
+            }
             numOfPartitions = abortedPartitionExecutionsFromPrevious.size();
         }
         if (numOfPartitions > numOfThreads) {

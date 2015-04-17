@@ -154,6 +154,7 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         final Properties restartParams = new Properties();
         restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_DETECT);
         restartParams.setProperty(PropertyKey.RESTART_INTERVAL, String.valueOf(1));
+        params.setProperty("writer.sleep.time", "0");
         restartKilled(restartParams);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
@@ -167,6 +168,7 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
     protected void restartKilledForce() throws Exception {
         final Properties restartParams = new Properties();
         restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_FORCE);
+        params.setProperty("writer.sleep.time", "0");
         restartKilled(restartParams);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
