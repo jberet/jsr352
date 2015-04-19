@@ -137,6 +137,13 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
     @BatchProperty
     protected Map<String, String> resultSetProperties;
 
+    /**
+     * Auto-commit mode for the JDBC connection.
+     */
+    @Inject
+    @BatchProperty
+    protected Boolean autoCommit;
+
     protected String[] columnLabels;
 
     protected Connection connection;
@@ -149,6 +156,9 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
     public void open(final Serializable checkpoint) throws Exception {
         init();
         connection = getConnection();
+        if (autoCommit != null) {
+            connection.setAutoCommit(autoCommit);
+        }
 
         if (resultSetProperties == null) {
             preparedStatement = connection.prepareStatement(sql,
