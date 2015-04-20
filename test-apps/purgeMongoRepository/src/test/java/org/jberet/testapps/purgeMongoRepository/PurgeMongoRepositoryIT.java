@@ -33,12 +33,6 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test(expected = JobRestartException.class)
-    @Ignore("run immediately after ctrlC test has been killed, should fail")
-    public void restartKilledImmediately() throws Exception {
-        super.restartKilledImmediately();
-    }
-
-    @Test(expected = JobRestartException.class)
     @Ignore("run after ctrlC test has been killed, should fail")
     public void restartKilledStrict() throws Exception {
         super.restartKilledStrict();
@@ -46,12 +40,6 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
 
     @Test
     @Ignore("run after ctrlC test has been killed")
-    public void restartKilledDetectShortInterval() throws Exception {
-        super.restartKilledDetectShortInterval();
-    }
-
-    @Test
-    @Ignore("run a couple of minutes after ctrlC test has been killed")
     public void restartKilled() throws Exception {
         super.restartKilled();
     }

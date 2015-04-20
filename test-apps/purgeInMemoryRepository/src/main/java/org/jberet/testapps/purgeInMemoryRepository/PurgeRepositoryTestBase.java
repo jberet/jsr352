@@ -139,28 +139,15 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         startJobAndWait(chunkPartitionJobXml);
     }
 
-    protected void restartKilledImmediately() throws Exception {
-        final Properties restartParams = new Properties();
-        restartKilled(restartParams);
-    }
-
     protected void restartKilledStrict() throws Exception {
         final Properties restartParams = new Properties();
         restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_STRICT);
         restartKilled(restartParams);
     }
 
-    protected void restartKilledDetectShortInterval() throws Exception {
-        final Properties restartParams = new Properties();
-        restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_DETECT);
-        restartParams.setProperty(PropertyKey.RESTART_INTERVAL, String.valueOf(1));
-        params.setProperty("writer.sleep.time", "0");
-        restartKilled(restartParams);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-    }
-
     protected void restartKilled() throws Exception {
         final Properties restartParams = new Properties();
+        restartParams.setProperty("writer.sleep.time", "0");
         restartKilled(restartParams);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
@@ -168,17 +155,18 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
     protected void restartKilledForce() throws Exception {
         final Properties restartParams = new Properties();
         restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_FORCE);
-        params.setProperty("writer.sleep.time", "0");
+        restartParams.setProperty("writer.sleep.time", "0");
         restartKilled(restartParams);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
-
 
     private void restartKilled(final Properties restartParams) throws InterruptedException {
         final long originalJobExecutionId = getOriginalJobExecutionId(chunkPartitionJobXml);
         params.putAll(restartParams);
         restartAndWait(originalJobExecutionId);
     }
+
+
 
     public static final class JobExecutionSelector1 implements JobExecutionSelector {
         private JobContext jobContext;

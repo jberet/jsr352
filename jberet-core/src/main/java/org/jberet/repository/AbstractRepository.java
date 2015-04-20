@@ -17,6 +17,7 @@ import java.lang.ref.ReferenceQueue;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -153,6 +154,9 @@ public abstract class AbstractRepository implements JobRepository {
                                                                final ClassLoader classLoader) {
         if (stepExecution != null) {
             final List<PartitionExecutionImpl> partitionExecutions = stepExecution.getPartitionExecutions();
+            if (partitionExecutions == null) {
+                return Collections.emptyList();
+            }
             if (partitionExecutions.isEmpty() || !notCompletedOnly) {
                 return partitionExecutions;
             }

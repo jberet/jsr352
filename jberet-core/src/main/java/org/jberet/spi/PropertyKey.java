@@ -60,12 +60,4 @@ public interface PropertyKey {
     String RESTART_MODE_FORCE = "force";
     String RESTART_MODE_DETECT = "detect";
 
-    /**
-     * A key used to specify, as an optional restart job parameter, the minimum number of seconds after which to restart
-     * a job execution with batch status STARTING, STARTED, or STOPPING. This job parameter is only used when
-     * restart mode is not set, or set to {@code detect}. If the time elapsed since the original job execution last
-     * update time is less than the value of {@code RESTART_INTERVAL} parameter, the original job execution is considered
-     * to be active, and therefore the restart operation will fail.
-     */
-    String RESTART_INTERVAL = "jberet.restart.interval";
 }

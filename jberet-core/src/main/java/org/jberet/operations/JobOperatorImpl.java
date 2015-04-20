@@ -15,7 +15,6 @@ package org.jberet.operations;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -209,30 +208,12 @@ public class JobOperatorImpl implements JobOperator {
             throw MESSAGES.jobRestartException(executionId, previousStatus);
         } else if(restartMode == null || restartMode.equalsIgnoreCase(PropertyKey.RESTART_MODE_DETECT)) {
             //to detect if originalToRestart had crashed or not
-            if (originalToRestart.getSubstitutedJob() == null) {
-                final String restartIntervalValue = restartParameters.getProperty(PropertyKey.RESTART_INTERVAL);
-                final long restartIntervalSeconds = restartIntervalValue != null ? Long.parseLong(restartIntervalValue) : 60;
-
-                final long currentTimeMillis = System.currentTimeMillis();
-                Date lastUpdatedTime = originalToRestart.getLastUpdatedTime();
-                final long elapsed = currentTimeMillis - lastUpdatedTime.getTime();
-
-                if (elapsed < restartIntervalSeconds * 1000) {
-                    BatchLogger.LOGGER.tracef("Restarting job execution %s, job name %s, batch status %s, restart mode %s, " +
-                                    "restart interval %s, but the elapsed time from previous execution %s has not exceeded restart interval %s",
-                            executionId, originalToRestart.getJobName(), previousStatus, restartMode,
-                            restartIntervalValue, elapsed, restartIntervalSeconds);
-                    throw MESSAGES.jobRestartException(executionId, previousStatus);
-                }
-            } else {
-                BatchLogger.LOGGER.tracef("Restarting job execution %s, job name %s, batch status %s, restart mode %s, " +
-                                "but it seems the original execution is still alive.",
-                        executionId, originalToRestart.getJobName(), previousStatus, restartMode);
-                throw MESSAGES.jobRestartException(executionId, previousStatus);
+            if (originalToRestart.getJobInstance().getUnsubstitutedJob() != null) {
+                throw MESSAGES.restartRunningExecution(executionId, originalToRestart.getJobName(), previousStatus, restartMode);
             }
         }
 
-        //update batch status in originalToRestart to FAILED, regardless of previousStatus
+        //update batch status in originalToRestart to FAILED, for previousStatus STARTING, STARTED, or STOPPING
         BatchLogger.LOGGER.markAsFailed(executionId, originalToRestart.getJobName(), previousStatus, restartMode);
         originalToRestart.setBatchStatus(BatchStatus.FAILED);
         repository.updateJobExecution(originalToRestart, false, false);
@@ -309,7 +290,7 @@ public class JobOperatorImpl implements JobOperator {
      */
     private long restartFailedOrStopped(final long executionId, final JobExecutionImpl originalToRestart, final Properties restartParameters)
             throws JobExecutionNotMostRecentException, JobRestartException {
-        final JobInstanceImpl jobInstance = (JobInstanceImpl) getJobInstance(executionId);
+        final JobInstanceImpl jobInstance = originalToRestart.getJobInstance();
         final List<JobExecution> executions = getJobExecutions(jobInstance);
         final JobExecution mostRecentExecution = executions.get(executions.size() - 1);
         if (executionId != mostRecentExecution.getExecutionId()) {

@@ -161,14 +161,24 @@ public final class InfinispanRepository extends AbstractRepository {
 
     @Override
     public List<JobExecution> getJobExecutions(final JobInstance jobInstance) {
+        List<JobExecution> result;
         if (jobInstance == null) {
             //return all JobExecution
-            final List<JobExecution> result = new ArrayList<JobExecution>();
+            result = new ArrayList<JobExecution>();
             result.addAll(jobExecutionCache.values());
-            return result;
         } else {
-            return jobInstanceCache.get(jobInstance.getInstanceId()).getJobExecutions();
+            final long instanceId = jobInstance.getInstanceId();
+            result = jobInstanceCache.get(instanceId).getJobExecutions();
+            if (result.isEmpty()) {
+                result = new ArrayList<JobExecution>();
+                for (final JobExecutionImpl e : jobExecutionCache.values()) {
+                    if (instanceId == e.getJobInstance().getInstanceId()) {
+                        result.add(e);
+                    }
+                }
+            }
         }
+        return result;
     }
 
     @Override

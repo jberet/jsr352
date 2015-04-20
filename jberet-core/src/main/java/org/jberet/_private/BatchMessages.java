@@ -170,4 +170,7 @@ public interface BatchMessages {
     @Message(id = 646, value = "Failed to restart the job with name: %s, execution id: %s, because the job is configured not restartable")
     JobRestartException unrestartableJob(String jobName, long jobExecutionId);
 
+    @Message(id = 647, value = "Restarting job execution %s, job name %s, batch status %s, restart mode %s, but it seems the original execution is still alive.")
+    JobRestartException restartRunningExecution(long executionId, String jobName, BatchStatus previousStatus, String restartMode);
+
 }
