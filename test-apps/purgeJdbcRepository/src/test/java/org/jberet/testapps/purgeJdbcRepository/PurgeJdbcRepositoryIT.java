@@ -32,6 +32,12 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test(expected = JobRestartException.class)
+    @Ignore("run after ctrlC test has been killed with invalid restart mode, should fail")
+    public void invalidRestartMode() throws Exception {
+        super.invalidRestartMode();
+    }
+
+    @Test(expected = JobRestartException.class)
     @Ignore("run after ctrlC test has been killed, should fail")
     public void restartKilledStrict() throws Exception {
         super.restartKilledStrict();
@@ -45,10 +51,15 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
     @Test
     @Ignore("run after ctrlC test has been killed")
+    public void restartKilledDetect() throws Exception {
+        super.restartKilledDetect();
+    }
+
+    @Test
+    @Ignore("run after ctrlC test has been killed")
     public void restartKilledForce() throws Exception {
         super.restartKilledForce();
     }
-
 
 
     @Test

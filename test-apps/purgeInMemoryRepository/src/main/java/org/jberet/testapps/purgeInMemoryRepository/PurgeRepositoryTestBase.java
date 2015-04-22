@@ -139,6 +139,12 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         startJobAndWait(chunkPartitionJobXml);
     }
 
+    protected void invalidRestartMode() throws Exception {
+        final Properties restartParams = new Properties();
+        restartParams.setProperty(PropertyKey.RESTART_MODE, "auto");
+        restartKilled(restartParams);
+    }
+
     protected void restartKilledStrict() throws Exception {
         final Properties restartParams = new Properties();
         restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_STRICT);
@@ -146,26 +152,32 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
     }
 
     protected void restartKilled() throws Exception {
-        final Properties restartParams = new Properties();
-        restartParams.setProperty("writer.sleep.time", "0");
-        restartKilled(restartParams);
+        restartKilled(null);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
     protected void restartKilledForce() throws Exception {
         final Properties restartParams = new Properties();
         restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_FORCE);
-        restartParams.setProperty("writer.sleep.time", "0");
+        restartKilled(restartParams);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    protected void restartKilledDetect() throws Exception {
+        final Properties restartParams = new Properties();
+        restartParams.setProperty(PropertyKey.RESTART_MODE, PropertyKey.RESTART_MODE_DETECT);
         restartKilled(restartParams);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
     private void restartKilled(final Properties restartParams) throws InterruptedException {
         final long originalJobExecutionId = getOriginalJobExecutionId(chunkPartitionJobXml);
-        params.putAll(restartParams);
+        params.setProperty("writer.sleep.time", "0");
+        if (restartParams != null) {
+            params.putAll(restartParams);
+        }
         restartAndWait(originalJobExecutionId);
     }
-
 
 
     public static final class JobExecutionSelector1 implements JobExecutionSelector {

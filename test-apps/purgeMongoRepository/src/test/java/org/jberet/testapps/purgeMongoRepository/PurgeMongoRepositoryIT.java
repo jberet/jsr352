@@ -33,6 +33,12 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test(expected = JobRestartException.class)
+    @Ignore("run after ctrlC test has been killed with invalid restart mode, should fail")
+    public void invalidRestartMode() throws Exception {
+        super.invalidRestartMode();
+    }
+
+    @Test(expected = JobRestartException.class)
     @Ignore("run after ctrlC test has been killed, should fail")
     public void restartKilledStrict() throws Exception {
         super.restartKilledStrict();
@@ -42,6 +48,12 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     @Ignore("run after ctrlC test has been killed")
     public void restartKilled() throws Exception {
         super.restartKilled();
+    }
+
+    @Test
+    @Ignore("run after ctrlC test has been killed")
+    public void restartKilledDetect() throws Exception {
+        super.restartKilledDetect();
     }
 
     @Test

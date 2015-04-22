@@ -15,6 +15,7 @@ package org.jberet.operations;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -211,6 +212,9 @@ public class JobOperatorImpl implements JobOperator {
             if (originalToRestart.getJobInstance().getUnsubstitutedJob() != null) {
                 throw MESSAGES.restartRunningExecution(executionId, originalToRestart.getJobName(), previousStatus, restartMode);
             }
+        } else if (!restartMode.equalsIgnoreCase(PropertyKey.RESTART_MODE_FORCE)) {
+            throw MESSAGES.invalidRestartMode(executionId, originalToRestart.getJobName(), previousStatus, restartMode,
+                    Arrays.asList(PropertyKey.RESTART_MODE_DETECT, PropertyKey.RESTART_MODE_FORCE, PropertyKey.RESTART_MODE_STRICT));
         }
 
         //update batch status in originalToRestart to FAILED, for previousStatus STARTING, STARTED, or STOPPING

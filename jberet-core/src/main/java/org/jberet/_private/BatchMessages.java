@@ -173,4 +173,7 @@ public interface BatchMessages {
     @Message(id = 647, value = "Restarting job execution %s, job name %s, batch status %s, restart mode %s, but it seems the original execution is still alive.")
     JobRestartException restartRunningExecution(long executionId, String jobName, BatchStatus previousStatus, String restartMode);
 
+    @Message(id = 648, value = "Restarting job execution %s, job name %s, batch status %s, but restart mode %s is invalid. Valid values are %s")
+    JobRestartException invalidRestartMode(long executionId, String jobName, BatchStatus previousStatus, String restartMode, List<String> validRestartMode);
+
 }
