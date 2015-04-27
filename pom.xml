@@ -26,20 +26,20 @@
     <properties>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <version.com.fasterxml.aalto-xml>0.9.9</version.com.fasterxml.aalto-xml>
-        <version.com.fasterxml.jackson>2.3.1</version.com.fasterxml.jackson>
+        <version.com.fasterxml.aalto-xml>0.9.11</version.com.fasterxml.aalto-xml>
+        <version.com.fasterxml.jackson>2.5.1</version.com.fasterxml.jackson>
         <version.javax.enterprise>1.1</version.javax.enterprise>
         <version.javax.inject>1</version.javax.inject>
         <version.javax.servlet-api>3.1.0</version.javax.servlet-api>
         <version.junit>4.11</version.junit>
-        <version.net.sf.supercsv>2.1.0</version.net.sf.supercsv>
+        <version.net.sf.supercsv>2.2.0</version.net.sf.supercsv>
         <version.net.sourceforge.htmlunit>2.13</version.net.sourceforge.htmlunit>
-        <version.org.codehaus.woodstox.stax2-api>3.1.3</version.org.codehaus.woodstox.stax2-api>
+        <version.org.codehaus.woodstox.stax2-api>4.0.0</version.org.codehaus.woodstox.stax2-api>
         <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final</version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
-        <version.org.jberet.jberet-core>1.1.0.Alpha1</version.org.jberet.jberet-core>
-        <version.org.jberet.jberet-support>1.1.0.Alpha1</version.org.jberet.jberet-support>
+        <version.org.jberet.jberet-core>1.1.0.Final</version.org.jberet.jberet-core>
+        <version.org.jberet.jberet-support>1.1.0.Final</version.org.jberet.jberet-support>
 
-        <version.org.apache.poi>3.10-FINAL</version.org.apache.poi>
+        <version.org.apache.poi>3.10.1</version.org.apache.poi>
         <version.commons-codec>1.9</version.commons-codec>
     </properties>
 
