@@ -82,6 +82,7 @@ public class BatchJobServlet extends HttpServlet {
             throw new ServletException(e);
         }
 
+        pw.println("job name: " + jobExecution.getJobName() + ", job execution id: " + jobExecutionId);
         pw.println("job batch status: " + jobExecution.getBatchStatus());
         pw.println("job exit status: " + jobExecution.getExitStatus());
 

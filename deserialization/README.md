@@ -39,10 +39,10 @@ by the job parameter named "restartable". When a job is initially started with j
 be restarted after the initial execution failed or stopped.
 
 * deploy to WildFly
-* run org.jberet.testapps.deserialization.DeserializationIT.banRestart, the job execution will fail as the test app
+* run startNotRestartable, the job execution will fail as the test app
 throws exception, and the test will pass with the expected job failure.
 * restart WildFly to make sure the previous decision to ban restart was persisted and retrieved upon the next restart.
-* run org.jberet.testapps.deserialization.DeserializationIT.restartJob, the restart will fail with JobRestartException,
+* run org.jberet.testapps.deserialization.DeserializationIT.restartNotRestartable, the restart will fail with JobRestartException,
 since the initial job execution was configured not restartable.
 
 This test app can also verify that a job whose job id differs from job xml file name can be started and restarted.
