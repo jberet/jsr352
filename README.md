@@ -1,3 +1,6 @@
+![thumbnail](./images/jberet_logo_600px.png)
+
+
 JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platform)](https://java.net/projects/jbatch). It is also included in [WildFly, the new and improved JBoss Application Server](http://wildfly.org/) to provide portable batch processing support in Java EE environment. 
 
 ####Build JBeret
