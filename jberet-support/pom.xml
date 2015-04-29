@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
@@ -205,6 +205,18 @@
         <dependency>
             <groupId>org.hornetq</groupId>
             <artifactId>hornetq-jms-server</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>${version.com.fasterxml.jackson}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk7</artifactId>
+            <version>2.5.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>

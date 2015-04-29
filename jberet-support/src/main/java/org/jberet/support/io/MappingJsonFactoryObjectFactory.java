@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
@@ -34,9 +35,9 @@ import org.jberet.support._private.SupportMessages;
  * {@code com.fasterxml.jackson.databind.MappingJsonFactory}. This class can be used to create a custom JNDI resource
  * in an application server. See wildfly.home/docs/schema/jboss-as-naming_2_0.xsd for more details.
  *
- * @see     "javax.naming.spi.ObjectFactory"
- * @see     "wildfly.home/docs/schema/jboss-as-naming_2_0.xsd"
- * @since   1.0.2
+ * @see "javax.naming.spi.ObjectFactory"
+ * @see "wildfly.home/docs/schema/jboss-as-naming_2_0.xsd"
+ * @since 1.0.2
  */
 public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
     private volatile MappingJsonFactory jsonFactoryCached;
@@ -53,6 +54,7 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
      * <li>customDeserializers:
      * <li>customSerializers:
      * <li>deserializationProblemHandlers:
+     * <li>customDataTypeModules:
      * <li>inputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.InputDecorator}
      * <li>outputDecorator: fully-qualified name of a class that extends {@code com.fasterxml.jackson.core.io.OutputDecorator}
      * </ul>
@@ -106,7 +108,8 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
                 }
 
                 configureCustomSerializersAndDeserializers(objectMapper, (String) environment.get("customSerializers"),
-                        (String) environment.get("customDeserializers"), classLoader);
+                        (String) environment.get("customDeserializers"), (String) environment.get("customDataTypeModules"),
+                        classLoader);
                 NoMappingJsonFactoryObjectFactory.configureInputDecoratorAndOutputDecorator(jsonFactory, environment);
             }
         }
@@ -126,27 +129,33 @@ public final class MappingJsonFactoryObjectFactory implements ObjectFactory {
     static void configureCustomSerializersAndDeserializers(final ObjectMapper objectMapper,
                                                            final String customSerializers,
                                                            final String customDeserializers,
+                                                           final String customDataTypeModules,
                                                            final ClassLoader classLoader) throws Exception {
-        if (customDeserializers == null && customSerializers == null) {
-            return;
+        if (customDeserializers != null || customSerializers != null) {
+            final SimpleModule simpleModule = new SimpleModule("custom-serializer-deserializer-module");
+            if (customSerializers != null) {
+                final StringTokenizer st = new StringTokenizer(customSerializers, ", ");
+                while (st.hasMoreTokens()) {
+                    final Class<?> aClass = classLoader.loadClass(st.nextToken());
+                    simpleModule.addSerializer(aClass, (JsonSerializer) aClass.newInstance());
+                }
+            }
+            if (customDeserializers != null) {
+                final StringTokenizer st = new StringTokenizer(customDeserializers, ", ");
+                while (st.hasMoreTokens()) {
+                    final Class<?> aClass = classLoader.loadClass(st.nextToken());
+                    simpleModule.addDeserializer(aClass, (JsonDeserializer) aClass.newInstance());
+                }
+            }
+            objectMapper.registerModule(simpleModule);
         }
-
-        final SimpleModule simpleModule = new SimpleModule("custom-serializer-deserializer-module");
-        if (customSerializers != null) {
-            final StringTokenizer st = new StringTokenizer(customSerializers, ", ");
+        if (customDataTypeModules != null) {
+            final StringTokenizer st = new StringTokenizer(customDataTypeModules, ", ");
             while (st.hasMoreTokens()) {
                 final Class<?> aClass = classLoader.loadClass(st.nextToken());
-                simpleModule.addSerializer(aClass, (JsonSerializer) aClass.newInstance());
+                objectMapper.registerModule((Module) aClass.newInstance());
             }
         }
-        if (customDeserializers != null) {
-            final StringTokenizer st = new StringTokenizer(customDeserializers, ", ");
-            while (st.hasMoreTokens()) {
-                final Class<?> aClass = classLoader.loadClass(st.nextToken());
-                simpleModule.addDeserializer(aClass, (JsonDeserializer) aClass.newInstance());
-            }
-        }
-        objectMapper.registerModule(simpleModule);
     }
 
     static void configureMapperFeatures(final ObjectMapper objectMapper, final String features) {

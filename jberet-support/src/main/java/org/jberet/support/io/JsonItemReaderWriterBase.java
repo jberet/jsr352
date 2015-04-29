@@ -102,7 +102,7 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
      * </pre>
      *
      * @see "com.fasterxml.jackson.databind.JsonSerializer"
-     * @see MappingJsonFactoryObjectFactory#configureCustomSerializersAndDeserializers(com.fasterxml.jackson.databind.ObjectMapper, java.lang.String, java.lang.String, java.lang.ClassLoader)
+     * @see MappingJsonFactoryObjectFactory#configureCustomSerializersAndDeserializers
      */
     @Inject
     @BatchProperty
@@ -133,11 +133,25 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
      * </pre>
      *
      * @see "com.fasterxml.jackson.databind.JsonDeserializer"
-     * @see MappingJsonFactoryObjectFactory#configureCustomSerializersAndDeserializers(com.fasterxml.jackson.databind.ObjectMapper, java.lang.String, java.lang.String, java.lang.ClassLoader)
+     * @see MappingJsonFactoryObjectFactory#configureCustomSerializersAndDeserializers
      */
     @Inject
     @BatchProperty
     protected String customDeserializers;
+
+    /**
+     * A comma-separated list of Jackson datatype module type ids that extend {@code com.fasterxml.jackson.databind.Module}.
+     * These modules will be registered with {@link #objectMapper}. For example,
+     * <p>
+     * <pre>
+     * com.fasterxml.jackson.datatype.joda.JodaModule, com.fasterxml.jackson.datatype.jsr353.JSR353Module, com.fasterxml.jackson.datatype.jsr310.JSR310Module
+     * </pre>
+     *
+     * @see MappingJsonFactoryObjectFactory#configureCustomSerializersAndDeserializers
+     */
+    @Inject
+    @BatchProperty
+    protected String customDataTypeModules;
 
     protected JsonFactory jsonFactory;
     protected ObjectMapper objectMapper;
@@ -148,7 +162,7 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
      */
     protected void registerModule() throws Exception {
         MappingJsonFactoryObjectFactory.configureCustomSerializersAndDeserializers(
-                objectMapper, customSerializers, customDeserializers, getClass().getClassLoader());
+                objectMapper, customSerializers, customDeserializers, customDataTypeModules, getClass().getClassLoader());
     }
 
     /**

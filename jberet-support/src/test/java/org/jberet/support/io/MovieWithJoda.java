@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,29 +12,28 @@
 
 package org.jberet.support.io;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.joda.time.DateTime;
 
 /**
- * A bean that represents the movie data from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv,
+ * A bean that represents the movie data, using joda date, from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv,
  * or http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=xml
  *
- * @see MovieWithJoda
+ * @see Movie
  */
 
 @JacksonXmlRootElement(localName = "t")
-public final class Movie extends MovieBase {
+public final class MovieWithJoda extends MovieBase {
 
     @JacksonXmlProperty(isAttribute = true)
-    private Date opn;
+    private DateTime opn;
 
-    public Date getOpn() {
+    public DateTime getOpn() {
         return opn;
     }
 
-    public void setOpn(final Date opn) {
+    public void setOpn(final DateTime opn) {
         this.opn = opn;
     }
 

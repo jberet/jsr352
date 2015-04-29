@@ -65,6 +65,7 @@ public final class JsonItemReaderTest {
 
     private String jsonGeneratorFeatures;
     private String deserializationProblemHandlers;
+    private String customDataTypeModules;
 
     //https://issues.jboss.org/browse/JBERET-44
     //no transaction started after a chunk where no data is written.
@@ -117,6 +118,13 @@ public final class JsonItemReaderTest {
     @Test
     public void testBeanTypeFull() throws Exception {
         testReadWrite0(movieJson, "testBeanTypeFull.out", null, null, Movie.class, MovieTest.expectFull, null, BatchStatus.COMPLETED);
+    }
+
+    @Test
+    public void testBeanTypeJodaFull() throws Exception {
+        customDataTypeModules = "com.fasterxml.jackson.datatype.joda.JodaModule, com.fasterxml.jackson.datatype.jdk7.Jdk7Module";
+        testReadWrite0(movieJson, "testBeanTypeJodaFull.out", null, null, MovieWithJoda.class, MovieTest.expectFull, null, BatchStatus.COMPLETED);
+        customDataTypeModules = null;
     }
 
     @Test
@@ -196,6 +204,9 @@ public final class JsonItemReaderTest {
         }
         if (deserializationProblemHandlers != null) {
             params.setProperty("deserializationProblemHandlers", deserializationProblemHandlers);
+        }
+        if (customDataTypeModules != null) {
+            params.setProperty("customDataTypeModules", customDataTypeModules);
         }
 
         params.setProperty(CsvProperties.HEADER_KEY, MovieTest.header);

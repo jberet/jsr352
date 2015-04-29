@@ -25,6 +25,7 @@
                     <property name="customDeserializers" value="org.jberet.support.io.JsonItemReaderTest$JsonDeserializer"/>
                     <property name="deserializationProblemHandlers"
                               value="#{jobParameters['deserializationProblemHandlers']}"/>
+                    <property name="customDataTypeModules" value="#{jobParameters['customDataTypeModules']}"/>
                 </properties>
             </reader>
             <processor ref="movieFilterProcessor">
@@ -39,6 +40,7 @@
                     <property name="serializationFeatures" value="WRITE_ENUMS_USING_INDEX=true"/>
                     <property name="outputDecorator" value="org.jberet.support.io.JsonItemReaderTest$NoopOutputDecorator"/>
                     <property name="customSerializers" value="org.jberet.support.io.JsonItemReaderTest$JsonSerializer"/>
+                    <property name="customDataTypeModules" value="#{jobParameters['customDataTypeModules']}"/>
                     <property name="writeMode" value="#{jobParameters['writeMode']}"/>
                     <!--<property name="prettyPrinter" value="com.fasterxml.jackson.core.util.MinimalPrettyPrinter"/>-->
                 </properties>
