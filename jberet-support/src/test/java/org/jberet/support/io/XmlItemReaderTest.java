@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,6 +41,7 @@ public final class XmlItemReaderTest {
 
     static final String movieRootElementName = "movies";
     static final String osmRootElementName = "osm";
+    private String customDataTypeModules;
 
     @Test
     public void testXmlMovieBeanType1_2() throws Exception {
@@ -53,8 +54,15 @@ public final class XmlItemReaderTest {
     }
 
     @Test
-    public void testXmlMovieBeanTypeFull() throws Exception {
+    public void testXmlMovieBeanTypeJodaFull() throws Exception {
         testReadWrite0(movieXml, "testXmlMovieBeanTypeFull.out", null, null, Movie.class, null, null);
+    }
+
+    @Test
+    public void testXmlMovieBeanTypeFull() throws Exception {
+        customDataTypeModules = "com.fasterxml.jackson.datatype.joda.JodaModule, com.fasterxml.jackson.datatype.jdk7.Jdk7Module";
+        testReadWrite0(movieXml, "testXmlMovieBeanTypeFull.out", null, null, MovieWithJoda.class, null, null);
+        customDataTypeModules = null;
     }
 
     @Test
@@ -94,14 +102,17 @@ public final class XmlItemReaderTest {
         if (end != null) {
             params.setProperty(CsvProperties.END_KEY, end);
         }
+        if (customDataTypeModules != null) {
+            params.setProperty("customDataTypeModules", customDataTypeModules);
+        }
         CsvItemReaderWriterTest.setRandomWriteMode(params);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes*100, TimeUnit.MINUTES);
+        jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes * 100, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
 
-        if(!resource.equals(osmXml)) {
+        if (!resource.equals(osmXml)) {
             //avoid reading the very large osm xml output file
             CsvItemReaderWriterTest.validate(file, expect, forbid);
         }
