@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,33 +13,33 @@
 package org.jberet.support.io;
 
 import java.io.Serializable;
-import java.util.Date;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.joda.time.DateTime;
 
 /**
- * Extends {@link StockTradeBase} with a {@code java.util.Date} field, which should be able to be serialized and
- * deserialized with no extra configuration.
+ * Extends {@link StockTradeBase} with a {@code org.joda.time.DateTime} field, which should be able to be serialized and
+ * deserialized registering jackson-datatype-joda module.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class StockTrade extends StockTradeBase {
-    private static final long serialVersionUID = 671273522774714965L;
+public class StockTradeWithJoda extends StockTradeBase {
+    private static final long serialVersionUID = -8633645369476783517L;
 
     @NotNull
     @Past
     @JsonProperty("Date")
-    Date date;
+    DateTime date;
 
-    public Date getDate() {
+    public DateTime getDate() {
         return date;
     }
 
-    public void setDate(final Date date) {
+    public void setDate(final DateTime date) {
         this.date = date;
     }
 
@@ -60,9 +60,9 @@ public class StockTrade extends StockTradeBase {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof StockTrade)) return false;
+        if (!(o instanceof StockTradeWithJoda)) return false;
 
-        final StockTrade that = (StockTrade) o;
+        final StockTradeWithJoda that = (StockTradeWithJoda) o;
 
         if (Double.compare(that.close, close) != 0) return false;
         if (Double.compare(that.high, high) != 0) return false;

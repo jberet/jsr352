@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
@@ -19,7 +19,7 @@
                 <properties>
                     <property name="resource" value="IBM_unadjusted.txt"/>
                     <property name="headerless" value="true"/>
-                    <property name="beanType" value="#{jobParameters['beanType']}"/>
+                    <property name="beanType" value="#{jobParameters['readerBeanType']}"/>
                     <property name="start" value="#{jobParameters['start']}"/>
                     <property name="end" value="#{jobParameters['end']}"/>
                     <property name="nameMapping" value="#{jobParameters['nameMapping']}"/>
@@ -40,7 +40,11 @@
                     <property name="url" value="#{jobParameters['url']}"/>
                     <property name="parameterNames" value="#{jobParameters['parameterNames']}"/>
                     <property name="parameterTypes" value="#{jobParameters['parameterTypes']}"/>
-                    <property name="beanType" value="#{jobParameters['beanType']}"/>
+
+                    <property name="beanType" value="#{jobParameters['writerBeanType']}"/>
+                    <property name="customDataTypeModules"
+                              value="com.fasterxml.jackson.datatype.joda.JodaModule, com.fasterxml.jackson.datatype.jdk7.Jdk7Module"/>
+
                     <!--<property name="serializationFeatures" value="WRITE_DATES_AS_TIMESTAMPS=false"/>-->
                 </properties>
             </writer>

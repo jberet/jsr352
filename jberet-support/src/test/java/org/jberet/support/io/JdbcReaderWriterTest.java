@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,8 +34,8 @@ import org.junit.Test;
 public class JdbcReaderWriterTest {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String h2JdbcDriverClassName = "org.h2.Driver";
-    static final String writerTestJobName = "org.jberet.support.io.JdbcWriterTest.xml";
-    static final String readerTestJobName = "org.jberet.support.io.JdbcReaderTest.xml";
+    static final String writerTestJobName = "org.jberet.support.io.JdbcWriterTest";
+    static final String readerTestJobName = "org.jberet.support.io.JdbcReaderTest";
 
     static final File dbDir = new File(CsvItemReaderWriterTest.tmpdir, "JdbcReaderWriterTest");
     static final String url = "jdbc:h2:" + dbDir.getPath();
@@ -75,7 +75,9 @@ public class JdbcReaderWriterTest {
 
     @Test
     public void readIBMStockTradeCsvWriteJdbcBeanType() throws Exception {
-        testWrite0(writerTestJobName, StockTrade.class, ExcelWriterTest.ibmStockTradeHeader,
+        //use StockTradeWithJoda for jdbc writer to test jackson-datatype-joda module
+        //
+        testWrite0(writerTestJobName, StockTrade.class, StockTradeWithJoda.class, ExcelWriterTest.ibmStockTradeHeader,
                 "0", "10",
                 writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
 
@@ -89,7 +91,9 @@ public class JdbcReaderWriterTest {
 
         //this JdbcItemReader only reads row 1 (start = 1 and end = 1 below)
         //use custom resultSetProperties
-        testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteJdbcBeanType.out",
+        //use StockTradeWithJoda for jdbc reader to test jackson-datatype-joda module
+        //
+        testRead0(readerTestJobName, StockTradeWithJoda.class, StockTrade.class, "readIBMStockTradeCsvWriteJdbcBeanType.out",
                 "1", "1",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
                 readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes, resultSetProperties,
@@ -98,7 +102,7 @@ public class JdbcReaderWriterTest {
 
     @Test
     public void readIBMStockTradeCsvWriteJdbcMapType() throws Exception {
-        testWrite0(writerTestJobName, Map.class, ExcelWriterTest.ibmStockTradeHeader,
+        testWrite0(writerTestJobName, Map.class, Map.class, ExcelWriterTest.ibmStockTradeHeader,
                 "0", "120",
                 writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
 
@@ -109,7 +113,7 @@ public class JdbcReaderWriterTest {
 
         //this JdbcItemReader reads all available rows (start = null and end = null below)
         //use default resultSetProperties
-        testRead0(readerTestJobName, Map.class, "readIBMStockTradeCsvWriteJdbcMapType.out",
+        testRead0(readerTestJobName, Map.class, Map.class, "readIBMStockTradeCsvWriteJdbcMapType.out",
                 null, null,
                 null, ibmStockTradeColumnsUpperCase,
                 //readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
@@ -119,7 +123,7 @@ public class JdbcReaderWriterTest {
 
     @Test
     public void readIBMStockTradeCsvWriteJdbcListType() throws Exception {
-        testWrite0(writerTestJobName, List.class, ExcelWriterTest.ibmStockTradeHeader,
+        testWrite0(writerTestJobName, List.class, List.class, ExcelWriterTest.ibmStockTradeHeader,
                 "0", "200",
                 writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
 
@@ -128,17 +132,21 @@ public class JdbcReaderWriterTest {
 
         //this JdbcItemReader reads row 2, 3, 4, 5 (start = 2 and end = 5 below)
         //use default resultSetProperties
-        testRead0(readerTestJobName, List.class, "readIBMStockTradeCsvWriteJdbcListType.out",
+        testRead0(readerTestJobName, List.class, List.class, "readIBMStockTradeCsvWriteJdbcListType.out",
                 "2", "5",
                 null, ExcelWriterTest.ibmStockTradeHeader,
                 readerQuery, null, parameterTypes, null,
                 "09:31, 10810,  09:32, 09:33,  09:34, 4800", "09:35");
     }
 
-    void testWrite0(final String jobName, final Class<?> beanType, final String csvNameMapping,
+    void testWrite0(final String jobName, final Class<?> readerBeanType, final Class<?> writerBeanType, final String csvNameMapping,
                     final String start, final String end,
                     final String sql, final String parameterNames, final String parameterTypes) throws Exception {
-        final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
+        // jdbc reader or writer may use org.jberet.support.io.StockTradeWithJoda to test custom module
+        // jackson-datatype-joda, so use separate readerBeanType and writerBeanType
+        final Properties params = new Properties();
+        params.setProperty("readerBeanType", readerBeanType.getName());
+        params.setProperty("writerBeanType", writerBeanType.getName());
 
         if (csvNameMapping != null) {
             params.setProperty("nameMapping", csvNameMapping);
@@ -168,12 +176,17 @@ public class JdbcReaderWriterTest {
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
-    void testRead0(final String jobName, final Class<?> beanType, final String writeResource,
+    void testRead0(final String jobName, final Class<?> readerBeanType, final Class<?> writerBeanType, final String writeResource,
                    final String start, final String end,
                    final String csvNameMapping, final String csvHeader,
                    final String sql, final String columnMapping, final String columnTypes, final String resultSetProperties,
                    final String expect, final String forbid) throws Exception {
-        final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
+
+        // jdbc reader or writer may use org.jberet.support.io.StockTradeWithJoda to test custom module
+        // jackson-datatype-joda, so use separate readerBeanType and writerBeanType
+        final Properties params = new Properties();
+        params.setProperty("readerBeanType", readerBeanType.getName());
+        params.setProperty("writerBeanType", writerBeanType.getName());
 
         final File writeResourceFile;
         if (writeResource != null) {
