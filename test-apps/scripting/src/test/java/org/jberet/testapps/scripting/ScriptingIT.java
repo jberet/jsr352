@@ -105,6 +105,15 @@ public class ScriptingIT extends AbstractIT {
     }
 
     @Test
+    public void batchletRInlineCDATA() throws Exception {
+        //test0("batchletRInlineCDATA");
+        startJobAndWait("batchletRInlineCDATA");
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        System.out.printf("%nstep exit status: %s%n", stepExecution0.getExitStatus());
+    }
+
+    @Test
     public void chunkJavascript() throws Exception {
         test0("chunkJavascript");
     }

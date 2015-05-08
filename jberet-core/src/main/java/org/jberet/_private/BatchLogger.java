@@ -125,4 +125,8 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     void markAsFailed(long executionId, String jobName, BatchStatus batchStatus, String restartMode);
 
+    @Message(id = 25, value = "Failed to set attributes to script context for engine %s, script type %s, and some data will not be passed to script")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToSetAttributesToScriptContext(@Cause Throwable cause, String engine, String scriptType);
+
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<!DOCTYPE job [
+        <!ENTITY batchlet-properties-segment SYSTEM "batchlet-properties-segment.xml">
+        ]>
+
+<job id="batchletRInline" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="batchletRInline.step1">
+        <batchlet>
+            &batchlet-properties-segment;
+            <script type="Renjin">
+                <![CDATA[
+                    stop <- function() {
+                        print("In stop function\n");
+                    }
+
+                    # reads numbers.csv file and calculate statistics of all these numbers
+                    #
+                    process <- function() {
+                        tbl <- read.table(file.path(tempdir(), "numbers.csv"), header=FALSE, sep=",")
+                        numbers <- tbl[2]
+                        print(summary(numbers))
+                    }
+                ]]>
+            </script>
+        </batchlet>
+    </step>
+</job>

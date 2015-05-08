@@ -58,12 +58,28 @@
             <artifactId>woodstox-core-asl</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.renjin</groupId>
+            <artifactId>renjin-script-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
     </dependencies>
 
     <repositories>
         <repository>
             <id>caucho-repository</id>
             <url>http://caucho.com/m2/</url>
+        </repository>
+
+        <!-- R and renjin repo -->
+        <repository>
+            <id>bedatadriven</id>
+            <name>bedatadriven public repo</name>
+            <url>http://nexus.bedatadriven.com/content/groups/public/</url>
         </repository>
     </repositories>
 

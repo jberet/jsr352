@@ -20,6 +20,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.Script;
 import org.jberet.runtime.context.StepContextImpl;
@@ -66,9 +67,13 @@ abstract class ScriptArtifactBase {
 
     void setEngineScopeAttributes() {
         final ScriptContext scriptContext = this.engine.getContext();
-        scriptContext.setAttribute("jobContext", stepContext.getJobContext(), ScriptContext.ENGINE_SCOPE);
-        scriptContext.setAttribute("stepContext", stepContext, ScriptContext.ENGINE_SCOPE);
-        scriptContext.setAttribute("batchProperties", Properties.toJavaUtilProperties(artifactProperties), ScriptContext.ENGINE_SCOPE);
+        try {
+            scriptContext.setAttribute("jobContext", stepContext.getJobContext(), ScriptContext.ENGINE_SCOPE);
+            scriptContext.setAttribute("stepContext", stepContext, ScriptContext.ENGINE_SCOPE);
+            scriptContext.setAttribute("batchProperties", Properties.toJavaUtilProperties(artifactProperties), ScriptContext.ENGINE_SCOPE);
+        } catch (final Exception e) {
+            BatchLogger.LOGGER.failToSetAttributesToScriptContext(e, engine.toString(), script.getType());
+        }
     }
 
     String getFunctionName(final String batchApiMethodName) {
