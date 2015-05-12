@@ -12,19 +12,24 @@
 
 package org.jberet.testapps.postconstruct;
 
+import java.util.Date;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.listener.StepListener;
 import javax.batch.operations.BatchRuntimeException;
+import javax.batch.runtime.BatchStatus;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.runtime.AbstractStepExecution;
+import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.testapps.common.PostConstructPreDestroyBase;
 
 @Named
 public class StepListener1 extends PostConstructPreDestroyBase implements StepListener {
-    @Inject @BatchProperty(name = "os.name")
+    @Inject
+    @BatchProperty(name = "os.name")
     private String osName;
 
     @Override
@@ -35,6 +40,18 @@ public class StepListener1 extends PostConstructPreDestroyBase implements StepLi
     @Override
     public void afterStep() throws Exception {
         addToJobExitStatus("StepListener1.afterStep");
+        final StepContextImpl stepContextImpl = (StepContextImpl) this.stepContext;
+        final AbstractStepExecution stepExecution = stepContextImpl.getStepExecution();
+        final BatchStatus batchStatus = this.stepContext.getBatchStatus();
+        final Date endTime = stepExecution.getEndTime();
+        System.out.printf("%nStepListener1.afterStep, batchStatus=%s, endTime=%s%n%n", batchStatus, endTime);
+
+        if (batchStatus != BatchStatus.COMPLETED) {
+            throw new BatchRuntimeException("Expecting BatchStatus.COMPLETED in StepListener1.afterStep(), but got " + batchStatus);
+        }
+        if (endTime == null) {
+            throw new BatchRuntimeException("Expecting a valid end time in StepListener1.afterStep(), but got " + endTime);
+        }
     }
 
     @PostConstruct

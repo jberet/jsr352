@@ -51,7 +51,12 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             for (; i < jobListeners.length; i++) {
                 jobListeners[i].beforeJob();
             }
+
             runFromHeadOrRestartPoint(jobExecution.getRestartPosition());
+
+            if (jobExecution.getBatchStatus() == BatchStatus.STARTED) {
+                jobExecution.setBatchStatus(BatchStatus.COMPLETED);
+            }
         } catch (final Throwable e) {
             BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", job);
             jobExecution.setBatchStatus(BatchStatus.FAILED);
@@ -68,17 +73,20 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
 
         batchContext.destroyArtifact(jobListeners);
 
-        final BatchStatus batchStatus = jobExecution.getBatchStatus();
         boolean saveJobParameters = false;
-        if (batchStatus == BatchStatus.STARTED) {
-            jobExecution.setBatchStatus(BatchStatus.COMPLETED);
-        } else if (batchStatus == BatchStatus.STOPPING) {
-            jobExecution.setBatchStatus(BatchStatus.STOPPED);
-            saveJobParameters = adjustRestartFailedOrStopped(jobExecution);
-        } else if (batchStatus == BatchStatus.FAILED) {
-            saveJobParameters = adjustRestartFailedOrStopped(jobExecution);
-        } else if (batchStatus == BatchStatus.STOPPED) {
-            saveJobParameters = adjustRestartFailedOrStopped(jobExecution);
+        switch (jobExecution.getBatchStatus()) {
+            case COMPLETED:
+                break;
+            case STARTED:
+                jobExecution.setBatchStatus(BatchStatus.COMPLETED);
+                break;
+            case STOPPING:
+                jobExecution.setBatchStatus(BatchStatus.STOPPED);
+                //fall through
+            case FAILED:
+            case STOPPED:
+                saveJobParameters = adjustRestartFailedOrStopped(jobExecution);
+                break;
         }
 
         batchContext.getJobRepository().updateJobExecution(jobExecution, true, saveJobParameters);
@@ -90,9 +98,8 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
      * Adjusts restart position and job xml name if needed for FAILED or STOPPED job execution.
      *
      * @param jobExecution a failed or stopped job execution
-     *
      * @return true if the internal job parameter with key {@link org.jberet.job.model.Job#JOB_XML_NAME} was added to
-     *         {@code jobExecution}; false otherwise.
+     * {@code jobExecution}; false otherwise.
      */
     private boolean adjustRestartFailedOrStopped(final JobExecutionImpl jobExecution) {
         if (!job.getRestartableBoolean()) {

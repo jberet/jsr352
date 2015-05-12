@@ -168,8 +168,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             jobContext.destroyArtifact(mapper, reducer, analyzer);
             jobContext.destroyArtifact(stepListeners);
 
-            final BatchStatus stepStatus = batchContext.getBatchStatus();
-            switch (stepStatus) {
+            switch (batchContext.getBatchStatus()) {
+                case COMPLETED:
+                    break;
                 case STARTED:
                     batchContext.setBatchStatus(BatchStatus.COMPLETED);
                     break;
@@ -183,24 +184,28 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     break;
             }
         }
+
         batchContext.getJobContext().getJobRepository().updateStepExecution(stepExecution);
         batchContext.setTransientUserData(null);
 
-        if (batchContext.getBatchStatus() == BatchStatus.COMPLETED) {
-            final String next = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);
-            enclosingRunner.runJobElement(next, stepExecution);
-        } else if (batchContext.getBatchStatus() == BatchStatus.FAILED) {
-            //transition elements can direct to the next job element even after the current step failed
-            final String next = resolveTransitionElements(step.getTransitionElements(), null, false);
-            if (next != null) {
-                //check for possible loopback step
-                if (!jobContext.getExecutedStepIds().contains(next)) {
-                    for (final AbstractContext e : batchContext.getOuterContexts()) {
-                        e.setBatchStatus(BatchStatus.STARTED);
+        switch (batchContext.getBatchStatus()) {
+            case COMPLETED:
+                final String next1 = resolveTransitionElements(step.getTransitionElements(), step.getAttributeNext(), false);
+                enclosingRunner.runJobElement(next1, stepExecution);
+                break;
+            case FAILED:
+                //transition elements can direct to the next job element even after the current step failed
+                final String next2 = resolveTransitionElements(step.getTransitionElements(), null, false);
+                if (next2 != null) {
+                    //check for possible loopback step
+                    if (!jobContext.getExecutedStepIds().contains(next2)) {
+                        for (final AbstractContext e : batchContext.getOuterContexts()) {
+                            e.setBatchStatus(BatchStatus.STARTED);
+                        }
+                        enclosingRunner.runJobElement(next2, stepExecution);
                     }
-                    enclosingRunner.runJobElement(next, stepExecution);
                 }
-            }
+                break;
         }
     }
 

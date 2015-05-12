@@ -34,7 +34,7 @@ public class Batchlet1 extends Batchlet0 {
     }
 
     @PostConstruct
-    private void ps() throws Exception {
+    private void ps() {
         System.out.printf("Batchlet1 PostConstruct of %s%n", this);
         if (jobContext == null || stepContext == null || date == null) {
             throw new BatchRuntimeException("Some fields are not initialized: jobContext=" + jobContext +
@@ -44,7 +44,7 @@ public class Batchlet1 extends Batchlet0 {
     }
 
     @PreDestroy
-    private void pd() throws Exception {
+    private void pd() {
         System.out.printf("Batchlet1 PreDestroy of %s%n", this);
         addToJobExitStatus("Batchlet1.pd");
     }

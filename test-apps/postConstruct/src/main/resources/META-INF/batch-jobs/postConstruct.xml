@@ -12,31 +12,11 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="postConstruct" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <properties>
-        <property name="add.to.job.exit.status" value="true"/>
-    </properties>
-    <listeners>
-        <listener ref="jobListener1">
-            <properties>
-                <property name="os.name" value="#systemProperties['os.name']"/>
-            </properties>
-        </listener>
-    </listeners>
-    <step id="step1" next="decision1">
-        <listeners>
-            <listener ref="stepListener1">
-                <properties>
-                    <property name="os.name" value="#systemProperties['os.name']"/>
-                </properties>
-            </listener>
-        </listeners>
-        <batchlet ref="batchlet1">
-            <properties>
-                <property name="date" value="5/16/2013"/>
-            </properties>
-        </batchlet>
-    </step>
+<job id="postConstruct" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0"
+     parent="afterJobBatchStatus" jsl-name="afterJobBatchStatus">
+
+    <step id="step1" parent="step1" jsl-name="afterJobBatchStatus" next="decision1"/>
+
     <decision id="decision1" ref="postconstruct.Decider1">
         <properties>
             <property name="os.name" value="#systemProperties['os.name']"/>
