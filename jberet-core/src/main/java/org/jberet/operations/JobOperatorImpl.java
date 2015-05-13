@@ -204,7 +204,7 @@ public class JobOperatorImpl implements JobOperator {
         }
 
         //previousStatus is now one of STARTING, STARTED, or STOPPING
-        final String restartMode = restartParameters.getProperty(PropertyKey.RESTART_MODE);
+        final String restartMode = restartParameters != null ? restartParameters.getProperty(PropertyKey.RESTART_MODE) : null;
         if (PropertyKey.RESTART_MODE_STRICT.equalsIgnoreCase(restartMode)) {
             throw MESSAGES.jobRestartException(executionId, previousStatus);
         } else if(restartMode == null || restartMode.equalsIgnoreCase(PropertyKey.RESTART_MODE_DETECT)) {

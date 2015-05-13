@@ -17,6 +17,7 @@ import javax.batch.operations.JobRestartException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 
+import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.metric.MetricImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.After;
@@ -87,6 +88,24 @@ public class ChunkStopIT extends AbstractIT {
         Assert.assertEquals("new.restart.prop.val", parameters2.getProperty("new.restart.prop.key"));
         Assert.assertEquals("501", parameters2.getProperty("writer.sleep.time"));
         Assert.assertEquals(String.valueOf(dataCount), parameters2.getProperty("data.count"));
+    }
+
+    /**
+     * Verifies that restarting with null job parameters should work without causing {@code NullPointerException}.
+     * @throws Exception
+     */
+    @Test
+    public void restartWithNullJobParameters() throws Exception {
+        params.setProperty("writer.sleep.time", "500");
+        startJob(jobXml);
+        jobOperator.stop(jobExecutionId);
+        awaitTermination();
+
+        final long restartExecutionId = jobOperator.restart(jobExecutionId, null);
+        final JobExecutionImpl jobEx = (JobExecutionImpl) jobOperator.getJobExecution(restartExecutionId);
+        awaitTermination(jobEx);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobEx.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobOperator.getStepExecutions(restartExecutionId).get(0).getBatchStatus());
     }
 
     @Test

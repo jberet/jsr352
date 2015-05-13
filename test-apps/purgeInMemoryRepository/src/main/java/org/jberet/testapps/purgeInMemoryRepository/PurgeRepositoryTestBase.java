@@ -15,6 +15,7 @@ package org.jberet.testapps.purgeInMemoryRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobInstanceException;
 import javax.batch.runtime.BatchStatus;
@@ -23,6 +24,7 @@ import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 
 import org.jberet.repository.JobExecutionSelector;
+import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.spi.PropertyKey;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
@@ -154,6 +156,20 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
     protected void restartKilled() throws Exception {
         restartKilled(null);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    protected void restartKilledStopAbandon() throws Exception {
+        final long originalJobExecutionId = getOriginalJobExecutionId(chunkPartitionJobXml);
+        params.setProperty("writer.sleep.time", "0");
+
+        final long restartExecutionId = jobOperator.restart(originalJobExecutionId, null);
+        final JobExecutionImpl restartExecution = (JobExecutionImpl) jobOperator.getJobExecution(restartExecutionId);
+        jobOperator.stop(restartExecutionId);
+        restartExecution.awaitTermination(5, TimeUnit.MINUTES);
+        jobOperator.abandon(restartExecutionId);
+        jobOperator.abandon(originalJobExecutionId);
+        Assert.assertEquals(BatchStatus.ABANDONED, jobOperator.getJobExecution(originalJobExecutionId).getBatchStatus());
+        Assert.assertEquals(BatchStatus.ABANDONED, restartExecution.getBatchStatus());
     }
 
     protected void restartKilledForce() throws Exception {
