@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.hibernate.validator.constraints.Email;
 
 /**
@@ -28,47 +30,58 @@ import org.hibernate.validator.constraints.Email;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE)
+
+//define column order for JacksonCsvItemReader and JacksonCsvItemWriter, so this class can be used to create CSV schema
+@JsonPropertyOrder({"number", "gender", "title", "givenName", "middleInitial", "surname",
+        "streetAddress", "city", "state", "zipCode", "country", "countryFull",
+        "emailAddress", "username", "password", "telephoneNumber", "mothersMaiden", "birthday",
+        "CCType", "CCNumber", "CVV2", "CCExpires", "nationalID", "UPS", "color",
+        "occupation", "company", "vehicle", "domain", "bloodType", "pounds", "kilograms", "feetInches", "centimeters",
+        "GUID", "latitude", "longitude"})
+
 public class Person {
-    private long number;
-    private String gender;
-    private String title;
-    private String givenName;
-    private char middleInitial;
-    private String surname;
-    private String streetAddress;
-    private String city;
-    private String state;
-    private String zipCode;
-    private String country;
-    private String countryFull;
+    long number;
+    String gender;
+    String title;
+    String givenName;
+    char middleInitial;
+    String surname;
+    String streetAddress;
+    String city;
+    String state;
+    String zipCode;
+    String country;
+    String countryFull;
 
     @Email
-    private String emailAddress;
+    String emailAddress;
 
-    private String username;
-    private String password;
-    private String telephoneNumber;
-    private String mothersMaiden;
-    private Date birthday;
-    private String CCType;
-    private String CCNumber;
-    private String CVV2;
-    private String CCExpires;
-    private String nationalID;
-    private String UPS;
-    private String color;
-    private String occupation;
-    private String company;
-    private String vehicle;
-    private String domain;
-    private String bloodType;
-    private BigDecimal pounds;
-    private BigDecimal kilograms;
-    private String feetInches;
-    private int centimeters;
-    private String GUID;
-    private double latitude;
-    private double longitude;
+    String username;
+    String password;
+    String telephoneNumber;
+    String mothersMaiden;
+
+    Date birthday;
+
+    String CCType;
+    String CCNumber;
+    String CVV2;
+    String CCExpires;
+    String nationalID;
+    String UPS;
+    String color;
+    String occupation;
+    String company;
+    String vehicle;
+    String domain;
+    String bloodType;
+    BigDecimal pounds;
+    BigDecimal kilograms;
+    String feetInches;
+    int centimeters;
+    String GUID;
+    double latitude;
+    double longitude;
 
     public long getNumber() {
         return number;
@@ -386,7 +399,7 @@ public class Person {
         sb.append(", password='").append(password).append('\'');
         sb.append(", telephoneNumber='").append(telephoneNumber).append('\'');
         sb.append(", mothersMaiden='").append(mothersMaiden).append('\'');
-        sb.append(", birthday='").append(birthday).append('\'');
+        sb.append(", birthday='").append(getBirthday()).append('\'');
         sb.append(", CCType='").append(CCType).append('\'');
         sb.append(", CCNumber='").append(CCNumber).append('\'');
         sb.append(", CVV2='").append(CVV2).append('\'');

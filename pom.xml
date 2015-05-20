@@ -59,7 +59,7 @@
         <version.org.jboss.weld.weld-se>2.2.2.Final</version.org.jboss.weld.weld-se>
         <version.org.jboss.jandex>1.2.2.Final</version.org.jboss.jandex>
         <version.net.sf.supercsv>2.2.0</version.net.sf.supercsv>
-        <version.com.fasterxml.jackson>2.5.1</version.com.fasterxml.jackson>
+        <version.com.fasterxml.jackson>2.5.3</version.com.fasterxml.jackson>
         <version.org.mongodb.mongo-java-driver>2.12.4</version.org.mongodb.mongo-java-driver>
         <version.org.mongojack>2.1.0</version.org.mongojack>
         <version.org.beanio>2.1.0</version.org.beanio>
@@ -401,6 +401,14 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Jackson CSV Dependencies -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-csv</artifactId>
                 <version>${version.com.fasterxml.jackson}</version>
                 <scope>provided</scope>
             </dependency>

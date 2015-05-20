@@ -36,7 +36,7 @@ public class CsvItemReaderWriterTest {
     static final String personResource = "person.csv";
     static final String personPipeResource = "person-pipe.txt";
     static final String personTabResource = "person-tab.txt";
-    private final JobOperator jobOperator = BatchRuntime.getJobOperator();
+    final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final int waitTimeoutMinutes = 5;
     static final String writeComments = "# Comments written by csv writer.";
     static final File tmpdir = new File(System.getProperty("jberet.tmp.dir"));

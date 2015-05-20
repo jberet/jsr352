@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -135,41 +135,7 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
             throw SupportMessages.MESSAGES.invalidStartPosition((Integer) checkpoint, start, end);
         }
         initJsonFactoryAndObjectMapper();
-        if (inputDecorator != null) {
-            jsonFactory.setInputDecorator((InputDecorator) inputDecorator.newInstance());
-        }
-
-        jsonParser = jsonFactory.createParser(getInputStream(resource, false));
-
-        if (deserializationProblemHandlers != null) {
-            MappingJsonFactoryObjectFactory.configureDeserializationProblemHandlers(
-                    objectMapper, deserializationProblemHandlers, getClass().getClassLoader());
-        }
-        SupportLogger.LOGGER.openingResource(resource, this.getClass());
-
-        if (jsonParserFeatures != null) {
-            for (final Map.Entry<String, String> e : jsonParserFeatures.entrySet()) {
-                final String key = e.getKey();
-                final String value = e.getValue();
-                final JsonParser.Feature feature;
-                try {
-                    feature = JsonParser.Feature.valueOf(key);
-                } catch (final Exception e1) {
-                    throw SupportMessages.MESSAGES.unrecognizedReaderWriterProperty(key, value);
-                }
-                if ("true".equals(value)) {
-                    if (!feature.enabledByDefault()) {
-                        jsonParser.configure(feature, true);
-                    }
-                } else if ("false".equals(value)) {
-                    if (feature.enabledByDefault()) {
-                        jsonParser.configure(feature, false);
-                    }
-                } else {
-                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, value, key);
-                }
-            }
-        }
+        jsonParser = configureJsonParser(this, inputDecorator, deserializationProblemHandlers, jsonParserFeatures);
     }
 
     @Override
@@ -218,5 +184,50 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
             jsonParser.close();
             jsonParser = null;
         }
+    }
+
+    protected static JsonParser configureJsonParser(final JsonItemReaderWriterBase batchReaderArtifact,
+                                                    final Class<?> inputDecorator,
+                                                    final String deserializationProblemHandlers,
+                                                    final Map<String, String> jsonParserFeatures) throws Exception {
+        final JsonParser jsonParser;
+        if (inputDecorator != null) {
+            batchReaderArtifact.jsonFactory.setInputDecorator((InputDecorator) inputDecorator.newInstance());
+        }
+
+        jsonParser = batchReaderArtifact.jsonFactory.createParser(getInputStream(batchReaderArtifact.resource, false));
+
+        if (deserializationProblemHandlers != null) {
+            MappingJsonFactoryObjectFactory.configureDeserializationProblemHandlers(
+                    batchReaderArtifact.objectMapper, deserializationProblemHandlers,
+                    batchReaderArtifact.getClass().getClassLoader());
+        }
+        SupportLogger.LOGGER.openingResource(batchReaderArtifact.resource, batchReaderArtifact.getClass());
+
+        if (jsonParserFeatures != null) {
+            for (final Map.Entry<String, String> e : jsonParserFeatures.entrySet()) {
+                final String key = e.getKey();
+                final String value = e.getValue();
+                final JsonParser.Feature feature;
+                try {
+                    feature = JsonParser.Feature.valueOf(key);
+                } catch (final Exception e1) {
+                    throw SupportMessages.MESSAGES.unrecognizedReaderWriterProperty(key, value);
+                }
+                if ("true".equals(value)) {
+                    if (!feature.enabledByDefault()) {
+                        jsonParser.configure(feature, true);
+                    }
+                } else if ("false".equals(value)) {
+                    if (feature.enabledByDefault()) {
+                        jsonParser.configure(feature, false);
+                    }
+                } else {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, value, key);
+                }
+            }
+        }
+
+        return jsonParser;
     }
 }

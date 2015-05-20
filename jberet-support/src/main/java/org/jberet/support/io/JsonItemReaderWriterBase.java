@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -166,17 +166,31 @@ public abstract class JsonItemReaderWriterBase extends ItemReaderWriterBase {
     }
 
     /**
+     * Initializes {@code JsonFactory} or its subtypes, e.g., {@code com.fasterxml.jackson.dataformat.xml.XmlFactory},
+     * or {@code com.fasterxml.jackson.dataformat.csv.CsvFactory}. The factory should be initialized with a valid
+     * {@code ObjectMapper}.
+     *
+     * Subclass may override this method to use different concrete types of {@code JsonFactory}.
+     *
+     * @throws Exception
+     * @since 1.2.0.Alpha1
+     */
+    protected void initJsonFactory() throws Exception {
+        if (jsonFactoryLookup != null) {
+            jsonFactory = InitialContext.doLookup(jsonFactoryLookup);
+        } else {
+            jsonFactory = new MappingJsonFactory();
+        }
+    }
+
+    /**
      * Initializes {@link #jsonFactory} and {@link #objectMapper} fields, which may be instantiated or obtained from
      * other part of the application. This method also configures the {@link #jsonFactory}, {@link #objectMapper},
      * {@link #serializationFeatures}, {@link #deserializationFeatures}, {@link #customDeserializers}, and
      * {@link #customSerializers} properly based on the current batch artifact properties.
      */
     protected void initJsonFactoryAndObjectMapper() throws Exception {
-        if (jsonFactoryLookup != null) {
-            jsonFactory = InitialContext.doLookup(jsonFactoryLookup);
-        } else {
-            jsonFactory = new MappingJsonFactory();
-        }
+        initJsonFactory();
         objectMapper = (ObjectMapper) jsonFactory.getCodec();
         if (jsonFactoryFeatures != null) {
             NoMappingJsonFactoryObjectFactory.configureJsonFactoryFeatures(jsonFactory, jsonFactoryFeatures);
