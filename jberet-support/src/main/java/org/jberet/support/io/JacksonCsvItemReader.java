@@ -30,7 +30,7 @@ import org.jberet.support._private.SupportMessages;
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from CSV files using jackson-csv.
  *
  * @see CsvItemReader
- * @see JacksonCsvItemReader
+ * @see JacksonCsvItemWriter
  * @see JacksonCsvItemReaderWriterBase
  * @since 1.2.0
  */
@@ -58,7 +58,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
      * Whether the first data line (either first line of the document, if useHeader=false, or second, if useHeader=true)
      * should be completely ignored by parser. Needed to support CSV-like file formats that include additional
      * non-data content before real data begins (specifically some database dumps do this)
-     * <p/>
+     * <p>
      * Optional property, valid values are "true" and "false" and defaults to "false".
      *
      * @see "com.fasterxml.jackson.dataformat.csv.CsvSchema"
@@ -81,7 +81,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
     /**
      * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.core.JsonParser} features.
      * Optional property and defaults to null. For example,
-     * <p/>
+     * <p>
      * <pre>
      * ALLOW_COMMENTS=true, ALLOW_YAML_COMMENTS=true, ALLOW_NUMERIC_LEADING_ZEROS=true, STRICT_DUPLICATE_DETECTION=true
      * </pre>
@@ -95,7 +95,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
     /**
      * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.dataformat.csv.CsvParser.Feature}.
      * Optional property and defaults to null. For example,
-     * <p/>
+     * <p>
      * <pre>
      * TRIM_SPACES=false, WRAP_AS_ARRAY=false
      * </pre>
@@ -112,7 +112,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
      * called when a potentially recoverable problem is encountered during deserialization process.
      * Handlers can try to resolve the problem, throw an exception or do nothing. Optional property and defaults to null.
      * For example,
-     * <p/>
+     * <p>
      * <pre>
      * org.jberet.support.io.JsonItemReaderTest$UnknownHandler, org.jberet.support.io.JsonItemReaderTest$UnknownHandler2
      * </pre>
@@ -130,7 +130,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
      * used to decorate input sources. Typical use is to use a filter abstraction (filtered stream, reader)
      * around original input source, and apply additional processing during read operations. Optional property and
      * defaults to null. For example,
-     * <p/>
+     * <p>
      * <pre>
      * org.jberet.support.io.JsonItemReaderTest$NoopInputDecorator
      * </pre>
@@ -144,6 +144,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
 
     private CsvParser csvParser;
     private int rowNumber;
+    private boolean rawAccess;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
@@ -184,28 +185,28 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
             }
         }
 
-        CsvSchema schema = CsvSchema.emptySchema();
-        if (columns != null) {
-            schema = buildCsvSchema(null);
-        } else if (beanType != List.class) {
-            //columns not defined, but beanType is either Map.class or Pojo.class
-            if (useHeader) {
-                schema = buildCsvSchema(CsvSchema.emptySchema());
+        rawAccess = beanType == List.class || beanType == String[].class;
+        if (!rawAccess) {
+            CsvSchema schema;
+            if (columns != null) {
+                schema = buildCsvSchema(null);
             } else {
-                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, "columns", columns);
+                //columns not defined, but beanType is either Map.class or Pojo.class or JsonNode.class
+                if (useHeader) {
+                    schema = buildCsvSchema(CsvSchema.emptySchema());
+                } else {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, columns, "columns");
+                }
             }
-        } else {
-            csvMapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-        }
 
-        if (escapeChar != null) {
-            schema = schema.withEscapeChar(escapeChar.charAt(0));
+            if (escapeChar != null) {
+                schema = schema.withEscapeChar(escapeChar.charAt(0));
+            }
+            if (skipFirstDataRow != null) {
+                schema = schema.withSkipFirstDataRow(Boolean.parseBoolean(skipFirstDataRow.trim()));
+            }
+            csvParser.setSchema(schema);
         }
-        if (skipFirstDataRow != null) {
-            schema = schema.withSkipFirstDataRow(Boolean.parseBoolean(skipFirstDataRow.trim()));
-        }
-
-        csvParser.setSchema(schema);
     }
 
     @Override
@@ -218,20 +219,40 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
             return null;
         }
 
-        do {
-            final JsonToken token = csvParser.nextToken();
-            if (token == null) {
-                return null;
-            } else if (token == JsonToken.START_OBJECT) {
-                if (++rowNumber >= start) {
-                    break;
-                }
-            }
-        } while (true);
+        JsonToken token;
+        final Object readValue;
 
-        final Object readValue = objectMapper.readValue(csvParser, beanType);
-        if (!skipBeanValidation) {
-            ItemReaderWriterBase.validate(readValue);
+        if (!rawAccess) {
+            do {
+                token = csvParser.nextToken();
+                if (token == null) {
+                    return null;
+                }
+                if (token == JsonToken.START_OBJECT) {
+                    if (++rowNumber >= start) {
+                        break;
+                    }
+                }
+            } while (true);
+
+            readValue = objectMapper.readValue(csvParser, beanType);
+            if (!skipBeanValidation) {
+                ItemReaderWriterBase.validate(readValue);
+            }
+        } else {
+            do {
+                token = csvParser.nextToken();
+                if (token == null) {
+                    return null;
+                }
+                if (token == JsonToken.START_ARRAY) {
+                    if (++rowNumber >= start) {
+                        break;
+                    }
+                }
+            } while (true);
+
+            readValue = objectMapper.readValue(csvParser, beanType);
         }
         return readValue;
     }

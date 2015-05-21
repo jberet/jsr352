@@ -34,9 +34,15 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
      * <p/>
      * <ul>
      * <li>a custom java type that represents data item and serves as the CSV schema class
-     * <li>java.util.Map
-     * <li>java.util.List
+     * <li>{@code java.util.Map}
+     * <li>{@code java.util.List}
+     * <li>{@code java.lang.String[]}
+     * <li>{@code com.fasterxml.jackson.databind.JsonNode}
      * </ul>
+     * <p>
+     * When using {@code java.util.List} or {@code java.lang.String[]} for reading, it is deemed raw access, and CSV
+     * schema will not be configured and any schema-related properties are ignored. Specifically, CSV header and
+     * comment lines are read as raw access content.
      */
     @Inject
     @BatchProperty

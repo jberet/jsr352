@@ -14,6 +14,7 @@ package org.jberet.support.io;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  */
 
 @JacksonXmlRootElement(localName = "t")
+@JsonPropertyOrder({"rank","tit","grs","opn"})
 public final class Movie extends MovieBase {
 
     @JacksonXmlProperty(isAttribute = true)

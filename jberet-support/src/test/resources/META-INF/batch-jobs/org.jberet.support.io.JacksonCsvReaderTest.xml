@@ -18,8 +18,8 @@
             <reader ref="jacksonCsvItemReader">
                 <properties>
                     <property name="resource" value="#{jobParameters['resource']}"/>
-                    <property name="start" value="7"/>
-                    <property name="end" value="9"/>
+                    <property name="start" value="#{jobParameters['start']}?:7;"/>
+                    <property name="end" value="#{jobParameters['end']}?:9;"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="columns" value="#{jobParameters['columns']}"/>
                     <property name="useHeader" value="#{jobParameters['useHeader']}?:false;"/>
@@ -43,7 +43,7 @@
                     <property name="writeMode" value="#{jobParameters['writeMode']}?:append;"/>
                     <property name="writeMode" value="#{jobParameters['writeMode']}?:failIfExists;"/>
                     -->
-                    <property name="writeMode" value="#{jobParameters['writeMode']}"/>
+                    <property name="writeMode" value="overwrite"/>
                     <property name="columns" value="#{jobParameters['columns']}"/>
                     <property name="useHeader" value="#{jobParameters['useHeader']}?:false;"/>
                     <property name="quoteChar" value="#{jobParameters['quoteChar']}"/>

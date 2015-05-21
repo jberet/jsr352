@@ -42,7 +42,8 @@ public class JacksonCsvItemReaderWriterTest extends CsvItemReaderWriterTest {
     @Test
     public void testBeanType() throws Exception {
         //override the default quote char ", which is used in feetInches cell
-        testReadWrite0(personResource, "testBeanType.out", Person2.class.getName(), true, Person2.class.getName(),
+        testReadWrite0(personResource, "testBeanType.out", null, null,
+                Person2.class.getName(), true, Person2.class.getName(),
                 null, "|",
                 personResourceExpect, personResourceForbid);
     }
@@ -50,7 +51,8 @@ public class JacksonCsvItemReaderWriterTest extends CsvItemReaderWriterTest {
     @Test
     public void testBeanTypeTab() throws Exception {
         //override the default quote char ", which is used in feetInches cell
-        testReadWrite0(personTabResource, "testBeanTypeTab.out", Person2.class.getName(), true, nameMapping,
+        testReadWrite0(personTabResource, "testBeanTypeTab.out", null, null,
+                Person2.class.getName(), true, nameMapping,
                 "\t", "|",
                 null, null);
     }
@@ -59,21 +61,57 @@ public class JacksonCsvItemReaderWriterTest extends CsvItemReaderWriterTest {
     public void testBeanTypePipe() throws Exception {
         //override the default quote char ", which is used in feetInches cell. | is already used as the delimiterChar
         //so cannot be used as quoteChar again.
-        testReadWrite0(personPipeResource, "testBeanTypePipe.out", Person2.class.getName(), true, nameMapping,
+        testReadWrite0(personPipeResource, "testBeanTypePipe.out", null, null,
+                Person2.class.getName(), true, nameMapping,
                 "|", "^",
                 null, null);
     }
 
+    /**
+     * This test method and {@link #testStringArrayType()} have {@code beanType} List or String[] for raw access to
+     * CSV data. So CSV schema will not be used and any schema-related configurations will not take affect.
+     * header and comment line are also read as part of raw data.
+     * Need to count in header and comment line when set start, end, expected strings and forbidden strings.
+     *
+     * @throws Exception
+     *
+     * @see #testStringArrayType()
+     */
     @Test
     public void testListType() throws Exception {
-        testReadWrite0(personResource, "testListType.out", JsonNode.class.getName(), true, nameMapping,
+        testReadWrite0(personResource, "testListType.out", "8", "11",
+                java.util.List.class.getName(), false, nameMapping,
+                null, "|",
+                personResourceExpect, personResourceForbid);
+    }
+
+    /**
+     * reads csv raw data and convert each line data into String[], similar to {@link #testListType()}.
+     *
+     * @throws Exception
+     *
+     * @see #testListType()
+     */
+    @Test
+    public void testStringArrayType() throws Exception {
+        testReadWrite0(personResource, "testStringArrayType.out", "8", "11",
+                String[].class.getName(), false, nameMapping,
+                null, "|",
+                personResourceExpect, personResourceForbid);
+    }
+
+    @Test
+    public void testJsonNodeType() throws Exception {
+        testReadWrite0(personResource, "testJsonNodeType.out", null, null,
+                JsonNode.class.getName(), true, nameMapping,
                 null, "|",
                 personResourceExpect, personResourceForbid);
     }
 
     @Test
     public void testMapType() throws Exception {
-        testReadWrite0(personResource, "testMapType.out", java.util.Map.class.getName(), true, nameMapping,
+        testReadWrite0(personResource, "testMapType.out", null, null,
+                java.util.Map.class.getName(), true, nameMapping,
                 null, "|",
                 personResourceExpect, personResourceForbid);
     }
@@ -91,13 +129,19 @@ public class JacksonCsvItemReaderWriterTest extends CsvItemReaderWriterTest {
     //person.csv,
     //to write:
     //        /var/folders/s3/2m3bc7_n0550tp44h4bcgwtm0000gn/T/testMapType.out
-    private void testReadWrite0(final String resource, final String writeResource,
+    private void testReadWrite0(final String resource, final String writeResource, final String start, final String end,
                                 final String beanType, final boolean useHeader, final String columns,
                                 final String columnSeparator, final String quoteChar,
                                 final String expect, final String forbid) throws Exception {
         final Properties params = createParams(CsvProperties.BEAN_TYPE_KEY, beanType);
         params.setProperty(CsvProperties.RESOURCE_KEY, resource);
 
+        if (start != null) {
+            params.setProperty("start", start);
+        }
+        if (end != null) {
+            params.setProperty("end", end);
+        }
         if (useHeader) {
             params.setProperty("useHeader", String.valueOf(useHeader));
         }
@@ -149,7 +193,6 @@ public class JacksonCsvItemReaderWriterTest extends CsvItemReaderWriterTest {
 
         final File writeResourceFile = new File(tmpdir, writeResource);
         params.setProperty("writeResource", writeResourceFile.getPath());
-        JacksonCsvItemReaderWriterTest.setRandomWriteMode(params);
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);

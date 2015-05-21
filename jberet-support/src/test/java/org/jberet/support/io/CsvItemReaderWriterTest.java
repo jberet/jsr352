@@ -236,6 +236,9 @@ public class CsvItemReaderWriterTest {
                 if (scanner != null) {
                     scanner.close();
                 }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
             } catch (final Exception e) {
                 //ignore
             }

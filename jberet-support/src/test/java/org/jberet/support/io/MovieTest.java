@@ -28,10 +28,10 @@ import org.junit.Test;
 /**
  * A test class that reads CSV resource from http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=csv
  */
-public final class MovieTest {
-    static final String jobName = "org.jberet.support.io.MovieTest";
+public class MovieTest {
+    private static final String jobName = "org.jberet.support.io.MovieTest";
     static final String moviesCsv = "movies-2012.csv";
-    private final JobOperator jobOperator = BatchRuntime.getJobOperator();
+    final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String header = "rank,tit,grs,opn";
 
     static final String cellProcessors =
