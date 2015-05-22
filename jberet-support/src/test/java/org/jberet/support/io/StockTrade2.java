@@ -17,21 +17,24 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
- * Extends {@link StockTradeBase} with a {@code java.util.Date} field, which should be able to be serialized and
- * deserialized with no extra configuration.
+ * Extends {@link StockTradeBase} with a {@code java.util.Date} field that is configured with {@code JsonFormat}.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class StockTrade extends StockTradeBase {
+@JsonPropertyOrder({"Date", "Time", "Open", "High", "Low", "Close", "Volume"})
+public class StockTrade2 extends StockTradeBase {
     private static final long serialVersionUID = 671273522774714965L;
 
     @NotNull
     @Past
     @JsonProperty("Date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM/dd/yyyy")
     Date date;
 
     public Date getDate() {
@@ -59,9 +62,9 @@ public class StockTrade extends StockTradeBase {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof StockTrade)) return false;
+        if (!(o instanceof StockTrade2)) return false;
 
-        final StockTrade that = (StockTrade) o;
+        final StockTrade2 that = (StockTrade2) o;
 
         if (Double.compare(that.close, close) != 0) return false;
         if (Double.compare(that.high, high) != 0) return false;
