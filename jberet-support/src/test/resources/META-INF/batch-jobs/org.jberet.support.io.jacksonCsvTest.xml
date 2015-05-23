@@ -20,6 +20,7 @@
                     <property name="resource" value="IBM_unadjusted.txt"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="columns" value="#{jobParameters['columns']}"/>
+                    <property name="skipBeanValidation" value="true"/>
                 </properties>
             </reader>
             <writer ref="noopItemWriter"/>

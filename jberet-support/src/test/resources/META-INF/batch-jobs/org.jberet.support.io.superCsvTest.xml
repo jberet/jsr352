@@ -23,6 +23,7 @@
                     <property name="cellProcessors"
                               value= "ParseDate('MM/dd/yyyy'); null; ParseDouble; ParseDouble; ParseDouble; ParseDouble; ParseDouble"/>
                     <property name="nameMapping" value="date,time,open,high,low,close,volume"/>
+                    <property name="skipBeanValidation" value="true"/>
                 </properties>
             </reader>
             <writer ref="noopItemWriter"/>

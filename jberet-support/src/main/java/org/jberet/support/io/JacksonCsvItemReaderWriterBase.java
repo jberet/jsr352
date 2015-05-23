@@ -52,7 +52,9 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
      * <p/>
      * <ul>
      * <li>columns = "&lt;fully-qualified class name&gt;":<br>
-     * CSV schema is defined in the named POJO class;</li>
+     * CSV schema is defined in the named POJO class, which typically has class-level annotation
+     * {@code com.fasterxml.jackson.annotation.JsonPropertyOrder} to define property order corresponding to
+     * CSV column order.</li>
      * <p/>
      * <li>columns = "&lt;comma-separated list of column names, each of which may be followed by a space and column type":<br>
      * use the value to manually build CSV schema. Valid column types are defined in
@@ -74,9 +76,10 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
      * columns = "org.jberet.support.io.StockTrade"
      * columns = "firstName STRING, lastName STRING, age NUMBER"
      * </pre>
-     * <p/>
-     * In {@link JacksonCsvItemReader}, if this property is not defined and {@code headerless} is false
-     * (CSV input has a header), the header is used to create CSV schema.
+     * In {@link JacksonCsvItemReader}, if this property is not defined and {@link #useHeader} is true
+     * (CSV input has a header), the header is used to create CSV schema. However, when {@link #beanType} is
+     * {@code java.util.List} or {@code java.lang.String[]}, the reader is considered raw access, and all schema-related
+     * properties are ignored.
      * <p/>
      * This property is optional for reader and required for writer class.
      *
@@ -90,6 +93,10 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
      * whether the first line of physical document defines column names (true) or not (false):
      * if enabled, parser will take first-line values to define column names; and generator will output column names as
      * the first line Optional property.
+     * <p>
+     * For {@link JacksonCsvItemReader}, if {@link #beanType} is {@code java.util.List} or {@code java.lang.String[]},
+     * it is considered raw access, {@code useHeader} property is ignored and no CSV schema is used.
+     * <p>
      * valid values are {@code true} or {@code false}, and the default is {@code false}.
      *
      * @see "com.fasterxml.jackson.dataformat.csv.CsvSchema"
@@ -123,6 +130,8 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
     /**
      * When asked to write Java `null`, this String value will be used instead.
      * Optional property and defaults to empty string.
+     *
+     * @see "com.fasterxml.jackson.dataformat.csv.CsvSchema"
      */
     @Inject
     @BatchProperty

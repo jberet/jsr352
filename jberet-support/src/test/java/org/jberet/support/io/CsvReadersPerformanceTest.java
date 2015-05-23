@@ -12,9 +12,8 @@
 
 package org.jberet.support.io;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.api.chunk.AbstractItemWriter;
@@ -43,7 +42,7 @@ public final class CsvReadersPerformanceTest {
     }
 
     @Test
-    public void superCsvBeanMapFull() throws Exception {
+    public void superCsvMapTypeFull() throws Exception {
         final Properties params = new Properties();
         params.setProperty("beanType", java.util.Map.class.getName());
         params.setProperty("nameMapping", ExcelWriterTest.ibmStockTradeNameMapping);
@@ -51,13 +50,12 @@ public final class CsvReadersPerformanceTest {
     }
 
     @Test
-    public void superCsvBeanListFull() throws Exception {
+    public void superCsvListTypeFull() throws Exception {
         final Properties params = new Properties();
         params.setProperty("beanType", java.util.List.class.getName());
         //params.setProperty("nameMapping", ExcelWriterTest.ibmStockTradeNameMapping);
         testReadWrite0(superCsvjobName, params);
     }
-
 
     ///////////////////////////////////////////////////////
 
@@ -89,7 +87,15 @@ public final class CsvReadersPerformanceTest {
     public void jacksonCsvListTypeFull() throws Exception {
         final Properties params = new Properties();
         params.setProperty("beanType", java.util.List.class.getName());
-        //params.setProperty("columns", StockTrade.class.getName());  //use POJO to define CSV schema
+        //params.setProperty("columns", StockTrade.class.getName());
+        testReadWrite0(jacksonCsvjobName, params);
+    }
+
+    @Test
+    public void jacksonCsvStringArrayTypeFull() throws Exception {
+        final Properties params = new Properties();
+        params.setProperty("beanType", String[].class.getName());
+        //params.setProperty("columns", StockTrade.class.getName());
         testReadWrite0(jacksonCsvjobName, params);
     }
 
@@ -102,9 +108,8 @@ public final class CsvReadersPerformanceTest {
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final long duration = System.currentTimeMillis() - startTime;
-        System.out.printf("%s\t\t%s seconds%n", jobName, TimeUnit.MILLISECONDS.toSeconds(duration));
+        System.out.printf("%s\t\t%s seconds%n", jobName, duration / 1000.0);
     }
-
 
 
     @Named
@@ -112,7 +117,8 @@ public final class CsvReadersPerformanceTest {
         @Override
         public void writeItems(final List<Object> items) throws Exception {
             System.out.printf("%s items%n", items.size());
-            System.out.printf("%s%n", items.get(0));
+            final Object firstItem = items.get(0);
+            System.out.printf("%s%n", firstItem instanceof String[] ? Arrays.asList((String[]) firstItem) : firstItem);
         }
     }
 }
