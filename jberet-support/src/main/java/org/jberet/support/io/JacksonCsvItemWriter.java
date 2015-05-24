@@ -23,6 +23,7 @@ import javax.inject.Named;
 
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 /**
@@ -152,7 +153,11 @@ public class JacksonCsvItemWriter extends JacksonCsvItemReaderWriterBase impleme
 
     @Override
     public void close() throws Exception {
-
+        if (csvGenerator != null) {
+            SupportLogger.LOGGER.closingResource(resource, this.getClass());
+            csvGenerator.close();
+            csvGenerator = null;
+        }
     }
 
     @Override

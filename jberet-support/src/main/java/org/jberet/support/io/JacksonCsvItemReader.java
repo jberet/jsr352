@@ -24,6 +24,7 @@ import javax.inject.Named;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 /**
@@ -58,7 +59,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
      * Whether the first data line (either first line of the document, if useHeader=false, or second, if useHeader=true)
      * should be completely ignored by parser. Needed to support CSV-like file formats that include additional
      * non-data content before real data begins (specifically some database dumps do this)
-     * <p>
+     * <p/>
      * Optional property, valid values are "true" and "false" and defaults to "false".
      *
      * @see "com.fasterxml.jackson.dataformat.csv.CsvSchema"
@@ -81,7 +82,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
     /**
      * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.core.JsonParser} features.
      * Optional property and defaults to null. For example,
-     * <p>
+     * <p/>
      * <pre>
      * ALLOW_COMMENTS=true, ALLOW_YAML_COMMENTS=true, ALLOW_NUMERIC_LEADING_ZEROS=true, STRICT_DUPLICATE_DETECTION=true
      * </pre>
@@ -95,7 +96,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
     /**
      * A comma-separated list of key-value pairs that specify {@code com.fasterxml.jackson.dataformat.csv.CsvParser.Feature}.
      * Optional property and defaults to null. For example,
-     * <p>
+     * <p/>
      * <pre>
      * TRIM_SPACES=false, WRAP_AS_ARRAY=false
      * </pre>
@@ -112,7 +113,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
      * called when a potentially recoverable problem is encountered during deserialization process.
      * Handlers can try to resolve the problem, throw an exception or do nothing. Optional property and defaults to null.
      * For example,
-     * <p>
+     * <p/>
      * <pre>
      * org.jberet.support.io.JsonItemReaderTest$UnknownHandler, org.jberet.support.io.JsonItemReaderTest$UnknownHandler2
      * </pre>
@@ -130,7 +131,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
      * used to decorate input sources. Typical use is to use a filter abstraction (filtered stream, reader)
      * around original input source, and apply additional processing during read operations. Optional property and
      * defaults to null. For example,
-     * <p>
+     * <p/>
      * <pre>
      * org.jberet.support.io.JsonItemReaderTest$NoopInputDecorator
      * </pre>
@@ -211,6 +212,14 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
 
     @Override
     public void close() throws Exception {
+        if (csvParser != null) {
+            SupportLogger.LOGGER.closingResource(resource, this.getClass());
+            if (deserializationProblemHandlers != null) {
+                objectMapper.clearProblemHandlers();
+            }
+            csvParser.close();
+            csvParser = null;
+        }
     }
 
     @Override
