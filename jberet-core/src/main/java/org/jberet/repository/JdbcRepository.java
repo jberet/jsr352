@@ -972,7 +972,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             ddlFile = "sql/jberet-mysql.ddl";
         } else if (databaseProductName.startsWith("Oracle")) {
             ddlFile = "sql/jberet-oracle.ddl";
-        } else if (databaseProductName.contains("PostgreSQL")) {
+        } else if (databaseProductName.contains("PostgreSQL") || databaseProductName.contains("EnterpriseDB")) {
             ddlFile = "sql/jberet-postgresql.ddl";
         } else if (databaseProductName.startsWith("Microsoft SQL Server")) {
             ddlFile = "sql/jberet-mssqlserver.ddl";
