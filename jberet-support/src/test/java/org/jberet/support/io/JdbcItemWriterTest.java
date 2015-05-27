@@ -14,7 +14,7 @@ import org.junit.Test;
 import javax.batch.operations.BatchRuntimeException;
 
 import static org.junit.Assert.*;
-import static org.jberet.support.io.JdbcItemWriter.determineParameterNamesList;
+import static org.jberet.support.io.JdbcItemWriter.determineParameterNames;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class JdbcItemWriterTest {
@@ -23,7 +23,7 @@ public class JdbcItemWriterTest {
     public void normal() throws Exception {
         final String sql = "INSERT INTO forex (symbol, ts, bid_open, bid_high, bid_low, bid_close, volume) " +
                 "values ('USDJPY', ?, ?, ?, ?, ?, ?)";
-        final String[] actual = determineParameterNamesList(sql);
+        final String[] actual = determineParameterNames(sql);
         final String[] expected = {"ts", "bid_open", "bid_high", "bid_low", "bid_close", "volume"};
         assertArrayEquals(expected, actual);
     }
@@ -32,6 +32,6 @@ public class JdbcItemWriterTest {
     public void canNotDetermine() throws Exception {
         final String sql = "INSERT INTO forex (symbol, ts, bid_open, bid_high, bid_low, bid_close, volume) " +
                 "values ('USDJPY', parsedatetime('yyyyMMdd HHmmss', ?), ?, ?, ?, ?, ?)";
-        determineParameterNamesList(sql);
+        determineParameterNames(sql);
     }
 }

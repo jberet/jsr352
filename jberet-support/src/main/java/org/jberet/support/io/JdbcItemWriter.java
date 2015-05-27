@@ -124,11 +124,11 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
         init();
 
         if (parameterNames == null && beanType != java.util.List.class) {
-            parameterNames = determineParameterNamesList(sql);
+            parameterNames = determineParameterNames(sql);
         }
     }
 
-    static String[] determineParameterNamesList(final String sql) {
+    static String[] determineParameterNames(final String sql) {
         final String sqlLowerCase = sql.toLowerCase();
         final int insertPos = sqlLowerCase.indexOf("insert");
         int leftParenthesisPos = sqlLowerCase.indexOf('(', insertPos + 7);
