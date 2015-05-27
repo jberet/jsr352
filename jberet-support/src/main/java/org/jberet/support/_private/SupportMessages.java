@@ -80,4 +80,7 @@ public interface SupportMessages {
     @Message(id = 60020, value = "Expecting JMS message types: %s, but got %s, %s")
     BatchRuntimeException unexpectedJmsMessageType(String expectedTypes, String actualType, Object val);
 
+    @Message(id = 60021, value = "Failed to determine parameterNames due to a complex SQL was supplied. please specify parameterNames explicitly")
+    BatchRuntimeException failedToDetermineParameterNames();
+
 }

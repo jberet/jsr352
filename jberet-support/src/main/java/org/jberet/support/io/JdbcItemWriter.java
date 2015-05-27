@@ -123,30 +123,40 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
     public void open(final Serializable checkpoint) throws Exception {
         init();
 
-        if (parameterNames == null) {
-            final String sqlLowerCase = sql.toLowerCase();
-            final int insertPos = sqlLowerCase.indexOf("insert");
-            int leftParenthesisPos = sqlLowerCase.indexOf('(', insertPos + 7);
-            int rightParenthesisPos = sqlLowerCase.indexOf(')', leftParenthesisPos + 1);
-            final String[] columns = sql.substring(leftParenthesisPos + 1, rightParenthesisPos).split(",");
-            final int valuesPos = sqlLowerCase.indexOf("values", rightParenthesisPos + 1);
-            leftParenthesisPos = sqlLowerCase.indexOf('(', valuesPos + 1);
-            rightParenthesisPos = sqlLowerCase.lastIndexOf(')');
-
-            if (rightParenthesisPos <= leftParenthesisPos) {
-                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, sql, "sql");
-            }
-
-            final String[] values = sql.substring(leftParenthesisPos + 1, rightParenthesisPos).split(",");
-            final List<String> parameterNamesList = new ArrayList<String>();
-            for (int i = 0; i < values.length; ++i) {
-                final String v = values[i].trim();
-                if (v.equals("?")) {
-                    parameterNamesList.add(columns[i].trim());
-                }
-            }
-            parameterNames = parameterNamesList.toArray(new String[parameterNamesList.size()]);
+        if (parameterNames == null && beanType != java.util.List.class) {
+            parameterNames = determineParameterNamesList(sql);
         }
+    }
+
+    static String[] determineParameterNamesList(final String sql) {
+        final String sqlLowerCase = sql.toLowerCase();
+        final int insertPos = sqlLowerCase.indexOf("insert");
+        int leftParenthesisPos = sqlLowerCase.indexOf('(', insertPos + 7);
+        int rightParenthesisPos = sqlLowerCase.indexOf(')', leftParenthesisPos + 1);
+        final String[] columns = sql.substring(leftParenthesisPos + 1, rightParenthesisPos).split(",");
+        final int valuesPos = sqlLowerCase.indexOf("values", rightParenthesisPos + 1);
+        leftParenthesisPos = sqlLowerCase.indexOf('(', valuesPos + 1);
+        rightParenthesisPos = sqlLowerCase.lastIndexOf(')');
+
+        if (rightParenthesisPos <= leftParenthesisPos) {
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, sql, "sql");
+        }
+
+        final String[] values = sql.substring(leftParenthesisPos + 1, rightParenthesisPos).split(",");
+
+        if (values.length != columns.length) {
+            throw SupportMessages.MESSAGES.failedToDetermineParameterNames();
+        }
+
+        final List<String> parameterNamesList = new ArrayList<String>();
+        for (int i = 0; i < values.length; ++i) {
+            final String v = values[i].trim();
+            if (v.equals("?")) {
+                parameterNamesList.add(columns[i].trim());
+            }
+        }
+
+        return parameterNamesList.toArray(new String[parameterNamesList.size()]);
     }
 
     @Override
@@ -164,7 +174,7 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
             final List itemAsList = (List) item;
             //the item is a list and should contain data of proper types, e.g., String, Integer, Date, etc,
             //and in the same order as SQL insert statement parameters.
-            for (int i = 0; i < parameterNames.length; ++i) {
+            for (int i = 0; i < itemAsList.size(); ++i) {
                 setParameter(i, itemAsList.get(i));
             }
         } else {
