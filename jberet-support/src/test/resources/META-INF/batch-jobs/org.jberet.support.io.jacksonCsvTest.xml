@@ -12,8 +12,8 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="org.jberet.support.io.MovieTestWithJacksonCsv" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="org.jberet.support.io.MovieTest.step1">
+<job id="org.jberet.support.io.jacksonCsvTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="org.jberet.support.io.jacksonCsvTest.step1">
         <chunk item-count="200000">
             <reader ref="jacksonCsvItemReader">
                 <properties>

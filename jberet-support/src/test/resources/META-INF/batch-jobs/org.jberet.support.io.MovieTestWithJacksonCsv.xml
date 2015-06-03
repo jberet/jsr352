@@ -13,7 +13,7 @@
 -->
 
 <job id="org.jberet.support.io.MovieTestWithJacksonCsv" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="org.jberet.support.io.MovieTest.step1">
+    <step id="org.jberet.support.io.MovieTestWithJacksonCsv.step1">
         <chunk>
             <reader ref="jacksonCsvItemReader">
                 <properties>
