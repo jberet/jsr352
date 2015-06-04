@@ -56,7 +56,7 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
      * {@code com.fasterxml.jackson.annotation.JsonPropertyOrder} to define property order corresponding to
      * CSV column order.</li>
      * <p/>
-     * <li>columns = "&lt;comma-separated list of column names, each of which may be followed by a space and column type":<br>
+     * <li>columns = "&lt;comma-separated list of column names, each of which may be followed by a space and column type&gt;":<br>
      * use the value to manually build CSV schema. Valid column types are defined in
      * {@code com.fasterxml.jackson.dataformat.csv.CsvSchema.ColumnType}, including:
      * <ul>
@@ -92,7 +92,7 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
     /**
      * whether the first line of physical document defines column names (true) or not (false):
      * if enabled, parser will take first-line values to define column names; and generator will output column names as
-     * the first line Optional property.
+     * the first line. Optional property.
      * <p>
      * For {@link JacksonCsvItemReader}, if {@link #beanType} is {@code java.util.List} or {@code java.lang.String[]},
      * it is considered raw access, {@code useHeader} property is ignored and no CSV schema is used.

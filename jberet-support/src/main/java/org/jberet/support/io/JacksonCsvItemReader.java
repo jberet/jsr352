@@ -28,7 +28,7 @@ import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from CSV files using jackson-csv.
+ * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from CSV files using jackson-dataformat-csv.
  *
  * @see CsvItemReader
  * @see JacksonCsvItemWriter
@@ -41,7 +41,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
 
     /**
      * Specifies the start position (a positive integer starting from 1) to read the data. If reading from the beginning
-     * of the input Json resource, there is no need to specify this property.
+     * of the input CSV resource, there is no need to specify this property.
      */
     @Inject
     @BatchProperty
@@ -49,7 +49,7 @@ public class JacksonCsvItemReader extends JacksonCsvItemReaderWriterBase impleme
 
     /**
      * Specify the end position in the data set (inclusive). Optional property, and defaults to {@code Integer.MAX_VALUE}.
-     * If reading till the end of the input Json resource, there is no need to specify this property.
+     * If reading till the end of the input CSV resource, there is no need to specify this property.
      */
     @Inject
     @BatchProperty

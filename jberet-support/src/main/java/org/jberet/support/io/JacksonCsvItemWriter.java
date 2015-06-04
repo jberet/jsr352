@@ -27,7 +27,7 @@ import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes data in CSV format using jackson-csv.
+ * An implementation of {@code javax.batch.api.chunk.ItemWriter} that writes data in CSV format using jackson-dataformat-csv.
  *
  * @see CsvItemWriter
  * @see JacksonCsvItemReader
