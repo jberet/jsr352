@@ -12,8 +12,8 @@
 
 package org.jberet.testapps.cdiscopes;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.inject.Named;
 
 import org.jberet.cdi.JobScoped;
@@ -21,7 +21,7 @@ import org.jberet.cdi.JobScoped;
 @Named
 @JobScoped
 public class Foo {
-    private final List<String> stepNames = new ArrayList<String>();
+    private final List<String> stepNames = new CopyOnWriteArrayList<String>();
 
     public List<String> getStepNames() {
         return stepNames;
