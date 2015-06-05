@@ -42,6 +42,7 @@
         <module>purgeInMemoryRepository</module>
         <module>purgeJdbcRepository</module>
         <module>purgeMongoRepository</module>
+        <module>cdiScopes</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>

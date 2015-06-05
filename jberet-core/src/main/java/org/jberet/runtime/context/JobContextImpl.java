@@ -16,22 +16,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.context.JobContext;
+import javax.enterprise.context.spi.Contextual;
 
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactCreationContext;
+import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.Listeners;
 import org.jberet.job.model.PropertyResolver;
 import org.jberet.job.model.RefArtifact;
-import org.jberet.job.model.Step;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 
@@ -50,6 +54,15 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
     JobExecutionImpl originalToRestart;
     final BatchEnvironment batchEnvironment;
     BatchArtifacts batchArtifacts;
+
+    /**
+     * A store for keeping CDI beans with {@link org.jberet.cdi.JobScoped} custom scope.
+     * Cleared at the end of a job execution, see {@link JobExecutionRunner#run()}, and all
+     * stored beans are destroyed by calling
+     * {@link JobScopedContextImpl.ScopedInstance#destroy(java.util.concurrent.ConcurrentMap)}
+     */
+    private final ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> jobScopedBeans =
+            new ConcurrentHashMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>>();
 
     public JobContextImpl(final JobExecutionImpl jobExecution,
                           final JobExecutionImpl originalToRestart,
@@ -176,6 +189,10 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
 
     public BatchEnvironment getBatchEnvironment() {
         return batchEnvironment;
+    }
+
+    public ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> getJobScopedBeans() {
+        return jobScopedBeans;
     }
 
     /**
