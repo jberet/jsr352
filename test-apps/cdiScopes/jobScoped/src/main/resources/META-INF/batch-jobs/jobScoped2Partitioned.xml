@@ -18,11 +18,11 @@
 
 <job id="jobScoped2Partitioned" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="jobScoped2Partitioned.step1" next="jobScoped2Partitioned.step2">
-        <batchlet ref="cdiScopeBatchlet1"/>
+        <batchlet ref="jobScopeBatchlet1"/>
         &partition-segment;
     </step>
     <step id="jobScoped2Partitioned.step2">
-        <batchlet ref="cdiScopeBatchlet2"/>
+        <batchlet ref="jobScopeBatchlet2"/>
         &partition-segment;
     </step>
 </job>

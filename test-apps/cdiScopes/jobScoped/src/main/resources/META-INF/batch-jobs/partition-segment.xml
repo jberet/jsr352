@@ -14,5 +14,5 @@
 
 <partition>
     <plan partitions="2"/>
-    <analyzer ref="cdiScopePartitionAnalyzer"/>
+    <analyzer ref="jobScopePartitionAnalyzer"/>
 </partition>

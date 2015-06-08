@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.testapps.cdiscopes.jobscoped;
+package org.jberet.testapps.cdiscopes.stepscoped;
 
 import java.util.List;
 import javax.batch.api.partition.AbstractPartitionAnalyzer;
@@ -20,28 +20,26 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named
-public class CdiScopePartitionAnalyzer extends AbstractPartitionAnalyzer {
+public class StepScopePartitionAnalyzer extends AbstractPartitionAnalyzer {
     @Inject
     private Foo foo;
 
     @Inject
     private StepContext stepContext;
 
-    static final int numberOfPartitions = 2;
+    static final int numberOfPartitions = 3;
     private int numberOfPartitionsFinished;
 
     @Override
     public void analyzeStatus(final BatchStatus batchStatus, final String exitStatus) throws Exception {
         if (++numberOfPartitionsFinished == numberOfPartitions) {
-            if (stepContext.getStepName().equals("jobScopedPartitioned.step2") ||
-                    stepContext.getStepName().equals("jobScoped2Partitioned.step2")) {
-                // step2 has finished, and all partitions are finished
-                final List<String> stepNames = foo.getStepNames();
-                if (stepNames.size() == 4) {
-                    stepContext.setExitStatus(stepNames.toString());
-                } else {
-                    throw new IllegalStateException("Expecting 4 elements, but got " + stepNames);
-                }
+            final List<String> stepNames = foo.getStepNames();
+
+            //3 entries from 3 partitions, plus step listener before step
+            if (stepNames.size() == 4) {
+                stepContext.setExitStatus(stepNames.toString());
+            } else {
+                throw new IllegalStateException("Expecting 4 elements, but got " + stepNames);
             }
         }
     }

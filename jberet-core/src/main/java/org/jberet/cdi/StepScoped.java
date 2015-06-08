@@ -22,12 +22,12 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Custom CDI scope for job execution.
+ * Custom CDI scope for step execution.
  */
 @Target({TYPE})
 @Retention(RUNTIME)
 @Documented
 @NormalScope
 @Inherited
-public @interface JobScoped {
+public @interface StepScoped {
 }

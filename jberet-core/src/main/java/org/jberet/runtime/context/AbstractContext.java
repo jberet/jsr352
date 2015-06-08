@@ -12,12 +12,27 @@
 
 package org.jberet.runtime.context;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.batch.runtime.BatchStatus;
+import javax.enterprise.context.spi.Contextual;
+
+import org.jberet.creation.JobScopedContextImpl;
 
 public abstract class AbstractContext implements Cloneable {
     protected String id;
     protected Object transientUserData;
     protected ClassLoader classLoader;
+
+    /**
+     * A store for keeping CDI beans with {@link org.jberet.cdi.JobScoped} or {@link org.jberet.cdi.StepScoped}
+     * custom scopes.
+     * Cleared at the end of the execution of the respecitve job, step, or partition, and all
+     * stored beans are destroyed by calling
+     * {@link JobScopedContextImpl.ScopedInstance#destroy(ConcurrentMap)}
+     */
+    private final ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> scopedBeans =
+            new ConcurrentHashMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>>();
 
     /**
      * Chain of batch contexts, the first one is the root JobContext.
@@ -87,6 +102,10 @@ public abstract class AbstractContext implements Cloneable {
         System.arraycopy(contextArray, 0, result, 0, contextArray.length);
         result[contextArray.length] = add;
         return result;
+    }
+
+    public ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> getScopedBeans() {
+        return scopedBeans;
     }
 }
 

@@ -12,11 +12,15 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="jobScoped2" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="jobScoped2.step1" next="jobScoped2.step2">
-        <batchlet ref="jobScopeBatchlet1"/>
-    </step>
-    <step id="jobScoped2.step2">
-        <batchlet ref="jobScopeBatchlet2"/>
+<job id="stepScopedPartitioned" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="stepScopedPartitioned.step1">
+        <listeners>
+            <listener ref="stepScopedListener"/>
+        </listeners>
+        <batchlet ref="stepScopeBatchlet1"/>
+        <partition>
+            <plan partitions="3"/>
+            <analyzer ref="stepScopePartitionAnalyzer"/>
+        </partition>
     </step>
 </job>

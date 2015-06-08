@@ -14,9 +14,9 @@
 
 <job id="jobScoped" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="jobScoped.step1" next="jobScoped.step2">
-        <batchlet ref="cdiScopeBatchlet1"/>
+        <batchlet ref="jobScopeBatchlet1"/>
     </step>
     <step id="jobScoped.step2">
-        <batchlet ref="cdiScopeBatchlet2"/>
+        <batchlet ref="jobScopeBatchlet2"/>
     </step>
 </job>

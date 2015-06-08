@@ -65,12 +65,12 @@ public class JobScopedContextImpl implements Context {
 
     private ConcurrentMap<Contextual<?>, ScopedInstance<?>> getJobScopedBeans() {
         final JobContextImpl jobContext = ArtifactCreationContext.getCurrentArtifactCreationContext().jobContext;
-        return jobContext.getJobScopedBeans();
+        return jobContext.getScopedBeans();
     }
 
     public static final class ScopedInstance<T> {
-        private final T instance;
-        private final CreationalContext<T> creationalContext;
+        final T instance;
+        final CreationalContext<T> creationalContext;
 
         public ScopedInstance(final T instance, final CreationalContext<T> creationalContext) {
             this.instance = instance;

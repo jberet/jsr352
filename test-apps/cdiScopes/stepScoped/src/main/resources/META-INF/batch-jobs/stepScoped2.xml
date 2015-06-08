@@ -12,11 +12,11 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="jobScoped2" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="jobScoped2.step1" next="jobScoped2.step2">
-        <batchlet ref="jobScopeBatchlet1"/>
+<job id="stepScoped2" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="stepScoped2.step1" next="stepScoped2.step2">
+        <batchlet ref="stepScopeBatchlet1"/>
     </step>
-    <step id="jobScoped2.step2">
-        <batchlet ref="jobScopeBatchlet2"/>
+    <step id="stepScoped2.step2">
+        <batchlet ref="stepScopeBatchlet2"/>
     </step>
 </job>

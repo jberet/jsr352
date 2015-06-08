@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
  
-package org.jberet.testapps.cdiscopes.jobscoped;
+package org.jberet.testapps.cdiscopes.stepscoped;
 
 import java.util.List;
 import javax.batch.api.AbstractBatchlet;
@@ -19,7 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named
-public class CdiScopeBatchlet1 extends AbstractBatchlet {
+public class StepScopeBatchlet2 extends AbstractBatchlet {
     @Inject
     private Foo foo;
 
@@ -31,6 +31,10 @@ public class CdiScopeBatchlet1 extends AbstractBatchlet {
         final List<String> stepNames = foo.getStepNames();
         stepNames.add(stepContext.getStepName());
         System.out.printf("In %s, foo.stepNames: %s%n", this, stepNames);
+
+        if (stepNames.size() > 1) {
+            throw new IllegalStateException("Expecting foo.stepNames size 1, but is " + stepNames.size());
+        }
         return stepNames.toString();
     }
 }

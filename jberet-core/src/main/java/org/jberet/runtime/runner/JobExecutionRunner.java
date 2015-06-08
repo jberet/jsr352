@@ -13,10 +13,8 @@
 package org.jberet.runtime.runner;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
-import javax.enterprise.context.spi.Contextual;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;
@@ -95,7 +93,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         batchContext.getJobRepository().updateJobExecution(jobExecution, true, saveJobParameters);
         batchContext.setTransientUserData(null);
 
-        JobScopedContextImpl.ScopedInstance.destroy(batchContext.getJobScopedBeans());
+        JobScopedContextImpl.ScopedInstance.destroy(batchContext.getScopedBeans());
         jobExecution.cleanUp();
     }
 

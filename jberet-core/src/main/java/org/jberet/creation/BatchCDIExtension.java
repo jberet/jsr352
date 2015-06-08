@@ -26,5 +26,6 @@ public class BatchCDIExtension implements javax.enterprise.inject.spi.Extension 
 
     public void addContext(@Observes final AfterBeanDiscovery afterBeanDiscovery) {
         afterBeanDiscovery.addContext(JobScopedContextImpl.INSTANCE);
+        afterBeanDiscovery.addContext(StepScopedContextImpl.INSTANCE);
     }
 }

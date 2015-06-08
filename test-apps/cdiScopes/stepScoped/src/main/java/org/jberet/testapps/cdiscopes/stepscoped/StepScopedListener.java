@@ -9,17 +9,17 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
-package org.jberet.testapps.cdiscopes.jobscoped;
+
+package org.jberet.testapps.cdiscopes.stepscoped;
 
 import java.util.List;
-import javax.batch.api.AbstractBatchlet;
+import javax.batch.api.listener.StepListener;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named
-public class CdiScopeBatchlet2 extends AbstractBatchlet {
+public class StepScopedListener implements StepListener {
     @Inject
     private Foo foo;
 
@@ -27,14 +27,16 @@ public class CdiScopeBatchlet2 extends AbstractBatchlet {
     private StepContext stepContext;
 
     @Override
-    public String process() throws Exception {
-        final List<String> stepNames = foo.getStepNames();
-        stepNames.add(stepContext.getStepName());
-        System.out.printf("In %s, foo.stepNames: %s%n", this, stepNames);
+    public void beforeStep() throws Exception {
+        foo.getStepNames().add(stepContext.getStepName());
+        System.out.printf("In %s, foo.stepNames: %s%n", this, foo.getStepNames());
+    }
 
-        if (stepNames.size() < 2) {
-            throw new IllegalStateException("Expecting foo.stepNames size 2, but is " + stepNames.size());
-        }
-        return stepNames.toString();
+    @Override
+    public void afterStep() throws Exception {
+        foo.getStepNames().add(stepContext.getStepName());
+
+        System.out.printf("In %s, foo.stepNames: %s%n", this, foo.getStepNames());
+        stepContext.setExitStatus(foo.getStepNames().toString());
     }
 }

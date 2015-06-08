@@ -16,30 +16,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
-    <modules>
-        <module>jobScoped</module>
-        <module>stepScoped</module>
-    </modules>
 
     <parent>
-        <artifactId>test-apps</artifactId>
+        <artifactId>cdiScopes</artifactId>
         <groupId>org.jberet.test-apps</groupId>
         <version>1.2.0.Alpha1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cdiScopes</artifactId>
+    <artifactId>stepScoped</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.jberet.test-apps</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>woodstox-core-asl</artifactId>
-        </dependency>
-    </dependencies>
 
 </project>

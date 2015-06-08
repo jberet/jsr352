@@ -40,6 +40,7 @@ import javax.batch.runtime.BatchStatus;
 import javax.transaction.TransactionManager;
 
 import org.jberet._private.BatchLogger;
+import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.Listeners;
 import org.jberet.job.model.Partition;
@@ -167,6 +168,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
             jobContext.destroyArtifact(mapper, reducer, analyzer);
             jobContext.destroyArtifact(stepListeners);
+            JobScopedContextImpl.ScopedInstance.destroy(batchContext.getScopedBeans());
 
             switch (batchContext.getBatchStatus()) {
                 case COMPLETED:
@@ -280,7 +282,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                     for (int i = 0; i < coveredPartitions.length; i++) {
                         if (coveredPartitions[i] == 0) {
                             abortedPartitionExecutionsFromPrevious.add(new PartitionExecutionImpl(i, oldStepExecutionId,
-                            originalStepExecution.getStepName(), BatchStatus.FAILED, BatchStatus.FAILED.name(), null, null, null));
+                                    originalStepExecution.getStepName(), BatchStatus.FAILED, BatchStatus.FAILED.name(), null, null, null));
                         }
                     }
                 }
