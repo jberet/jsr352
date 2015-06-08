@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
  
-package org.jberet.testapps.cdiscopes;
+package org.jberet.testapps.cdiscopes.jobscoped;
 
 import java.util.List;
 import javax.batch.api.AbstractBatchlet;

@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.testapps.cdiscopes;
+package org.jberet.testapps.cdiscopes.jobscoped;
 
 import java.util.Arrays;
 import javax.batch.runtime.BatchStatus;
@@ -19,7 +19,7 @@ import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CdiScopesIT extends AbstractIT {
+public class JobScopedIT extends AbstractIT {
     static final String jobScopedTest = "jobScoped";
     static final String jobScopedTest2 = "jobScoped2";
     static final String jobScopedPartitionedTest = "jobScopedPartitioned";
