@@ -24,6 +24,7 @@ import org.junit.Test;
  */
 public class StepScopedIT extends AbstractIT {
     static final String stepScopedTest = "stepScoped";
+    static final String stepScopedFailedTest = "stepScopedFail";
     static final String stepScopedTest2 = "stepScoped2";
     static final String stepScopedPartitionedTest = "stepScopedPartitioned";
 
@@ -69,4 +70,12 @@ public class StepScopedIT extends AbstractIT {
         Assert.assertEquals("[stepScopedPartitioned.step1, stepScopedPartitioned.step1, stepScopedPartitioned.step1, stepScopedPartitioned.step1, stepScopedPartitioned.step1]",
                 stepExitStatus);
     }
+
+    @Test
+    public void stepScopedFail() throws Exception {
+        //injecting @StepScoped Foo into a job listener will fail
+        startJobAndWait(stepScopedFailedTest);
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
 }

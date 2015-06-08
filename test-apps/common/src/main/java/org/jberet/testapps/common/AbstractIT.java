@@ -81,7 +81,9 @@ abstract public class AbstractIT {
         final JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
         exe.awaitTermination(getJobTimeoutSeconds(), TimeUnit.SECONDS);
         stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
-        stepExecution0 = (StepExecutionImpl) stepExecutions.get(0);
+        if (!stepExecutions.isEmpty()) {
+            stepExecution0 = (StepExecutionImpl) stepExecutions.get(0);
+        }
     }
 
     protected void startJobAndWait(final String jobXml) throws Exception {
