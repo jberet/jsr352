@@ -16,11 +16,15 @@ import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.context.StepContext;
+import javax.enterprise.context.spi.Contextual;
 
 import org.jberet._private.BatchLogger;
+import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.Step;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
@@ -42,6 +46,14 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
 
     private StepExecutionImpl originalStepExecution;
     Boolean allowStartIfComplete;
+
+    /**
+     * A store for keeping CDI beans with {@link org.jberet.cdi.PartitionScoped} custom scopes.
+     * Cleared at the end of the execution of the respecitve job, step, or partition, and all
+     * stored beans are destroyed by calling
+     * {@link JobScopedContextImpl.ScopedInstance#destroy(ConcurrentMap)}
+     */
+    private ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> partitionScopedBeans;
 
     public StepContextImpl(final Step step, final AbstractContext[] outerContexts) {
         super(step.getId(), outerContexts);
@@ -97,6 +109,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
                 c.step = BatchUtil.clone(step);
             }
             c.transientUserData = null;
+            c.partitionScopedBeans = new ConcurrentHashMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>>();
         } catch (CloneNotSupportedException e) {
             BatchLogger.LOGGER.failToClone(e, this, getJobContext().getJobName(), getStepName());
         }
@@ -180,5 +193,9 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
 
     public StepExecutionImpl getOriginalStepExecution() {
         return originalStepExecution;
+    }
+
+    public ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> getPartitionScopedBeans() {
+        return partitionScopedBeans;
     }
 }

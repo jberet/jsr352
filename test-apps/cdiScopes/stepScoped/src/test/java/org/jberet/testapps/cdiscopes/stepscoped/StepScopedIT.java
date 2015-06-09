@@ -30,11 +30,11 @@ public class StepScopedIT extends AbstractIT {
 
     static final String step1 = "stepScoped.step1";
     static final String step2 = "stepScoped.step2";
-    static final String stepName1Repeat3 = Arrays.asList((new String[]{step1, step1, step1})).toString();
-    static final String stepName2 = Arrays.asList((new String[]{step2})).toString();
+    static final String stepName1Repeat3 = Arrays.asList(step1, step1, step1).toString();
+    static final String stepName2 = Arrays.asList(step2).toString();
 
-    static final String job2StepName1 = Arrays.asList((new String[]{"stepScoped2.step1"})).toString();
-    static final String job2StepName2 = Arrays.asList((new String[]{"stepScoped2.step2"})).toString();
+    static final String job2StepName1 = Arrays.asList("stepScoped2.step1").toString();
+    static final String job2StepName2 = Arrays.asList("stepScoped2.step2").toString();
 
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,5 +27,6 @@ public class BatchCDIExtension implements javax.enterprise.inject.spi.Extension 
     public void addContext(@Observes final AfterBeanDiscovery afterBeanDiscovery) {
         afterBeanDiscovery.addContext(JobScopedContextImpl.INSTANCE);
         afterBeanDiscovery.addContext(StepScopedContextImpl.INSTANCE);
+        afterBeanDiscovery.addContext(PartitionScopedContextImpl.INSTANCE);
     }
 }

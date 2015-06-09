@@ -25,11 +25,11 @@ public class JobScopedIT extends AbstractIT {
     static final String jobScopedPartitionedTest = "jobScopedPartitioned";
     static final String jobScopedPartitionedTest2 = "jobScoped2Partitioned";
 
-    static final String stepName1 = Arrays.asList((new String[]{"jobScoped.step1"})).toString();
-    static final String step1Step2Names = Arrays.asList((new String[]{"jobScoped.step1", "jobScoped.step2"})).toString();
+    static final String stepName1 = Arrays.asList("jobScoped.step1").toString();
+    static final String step1Step2Names = Arrays.asList("jobScoped.step1", "jobScoped.step2").toString();
 
-    static final String job2StepName1 = Arrays.asList((new String[]{"jobScoped2.step1"})).toString();
-    static final String job2Step1Step2Names = Arrays.asList((new String[]{"jobScoped2.step1", "jobScoped2.step2"})).toString();
+    static final String job2StepName1 = Arrays.asList("jobScoped2.step1").toString();
+    static final String job2Step1Step2Names = Arrays.asList("jobScoped2.step1", "jobScoped2.step2").toString();
 
 
     @Test

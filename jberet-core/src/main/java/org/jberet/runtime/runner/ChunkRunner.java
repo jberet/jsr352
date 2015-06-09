@@ -37,6 +37,7 @@ import javax.batch.runtime.Metric;
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 
+import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.Listeners;
@@ -223,6 +224,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             try {
                 if (stepRunner.collectorDataQueue != null) {
                     stepRunner.collectorDataQueue.put(stepOrPartitionExecution);
+                    JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
                 }
             } catch (InterruptedException e) {
                 //ignore

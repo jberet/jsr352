@@ -17,6 +17,7 @@ import javax.batch.api.partition.PartitionCollector;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet._private.BatchLogger;
+import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.context.StepContextImpl;
@@ -101,6 +102,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             try {
                 if (stepRunner.collectorDataQueue != null) {
                     stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
+                    JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
                 }
             } catch (InterruptedException e) {
                 //ignore
