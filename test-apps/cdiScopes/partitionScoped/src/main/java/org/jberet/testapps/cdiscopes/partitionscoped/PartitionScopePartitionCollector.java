@@ -25,6 +25,12 @@ public class PartitionScopePartitionCollector implements PartitionCollector {
     private Foo foo;
 
     @Inject
+    private JobScopedFoo jobScopedFoo;
+
+    @Inject
+    private StepScopedFoo stepScopedFoo;
+
+    @Inject
     @BatchProperty
     private String stepName;
 
@@ -33,6 +39,8 @@ public class PartitionScopePartitionCollector implements PartitionCollector {
     @Override
     public Serializable collectPartitionData() throws Exception {
         if (!collected) {
+            System.out.printf("In %s, jobScopedFoo: %s, stepScopedFoo: %s%n", this, jobScopedFoo, stepScopedFoo);
+
             final List<String> stepNames = foo.getStepNames();
             stepNames.add(stepName);
             System.out.printf("In %s, foo.stepNames: %s%n", this, stepNames);

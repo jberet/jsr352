@@ -24,6 +24,12 @@ public class PartitionScopeBatchlet1 extends AbstractBatchlet {
     private Foo foo;
 
     @Inject
+    private JobScopedFoo jobScopedFoo;
+
+    @Inject
+    private StepScopedFoo stepScopedFoo;
+
+    @Inject
     @BatchProperty
     private String stepName;
 
@@ -32,6 +38,7 @@ public class PartitionScopeBatchlet1 extends AbstractBatchlet {
         final List<String> stepNames = foo.getStepNames();
         stepNames.add(stepName);
         System.out.printf("In %s, foo.stepNames: %s%n", this, foo.getStepNames());
+        System.out.printf("In %s, jobScopedFoo: %s, stepScopedFoo: %s%n", this, jobScopedFoo, stepScopedFoo);
 
         return null;
     }

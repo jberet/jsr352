@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Tests for {@link org.jberet.cdi.StepScoped}.
+ * Tests for {@link org.jberet.cdi.PartitionScoped}.
  */
 public class PartitionScopedIT extends AbstractIT {
     static final String partitionScopedTest = "partitionScopedPartitioned";

@@ -28,6 +28,12 @@ public class PartitionScopePartitionAnalyzer implements PartitionAnalyzer {
     private Foo foo;
 
     @Inject
+    private JobScopedFoo jobScopedFoo;
+
+    @Inject
+    private StepScopedFoo stepScopedFoo;
+
+    @Inject
     private StepContext stepContext;
 
     static final int numberOfPartitions = 3;
@@ -51,6 +57,8 @@ public class PartitionScopePartitionAnalyzer implements PartitionAnalyzer {
     @Override
     public void analyzeStatus(final BatchStatus batchStatus, final String exitStatus) throws Exception {
         if (++numberOfPartitionsFinished == numberOfPartitions) {
+            System.out.printf("In %s, jobScopedFoo: %s, stepScopedFoo: %s%n", this, jobScopedFoo, stepScopedFoo);
+
             if (expectedData.equals(collectedData)) {
                 stepContext.setExitStatus(collectedData.toString());
             } else {

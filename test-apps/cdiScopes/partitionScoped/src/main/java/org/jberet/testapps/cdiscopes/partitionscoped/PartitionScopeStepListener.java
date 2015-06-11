@@ -21,9 +21,16 @@ public class PartitionScopeStepListener implements StepListener {
     @Inject
     private Foo foo;
 
+    @Inject
+    private JobScopedFoo jobScopedFoo;
+
+    @Inject
+    private StepScopedFoo stepScopedFoo;
+
     @Override
     public void beforeStep() throws Exception {
         System.out.printf("In %s, foo: %s%n", this, foo);
+        System.out.printf("In %s, jobScopedFoo: %s, stepScopedFoo: %s%n", this, jobScopedFoo, stepScopedFoo);
     }
 
     @Override
