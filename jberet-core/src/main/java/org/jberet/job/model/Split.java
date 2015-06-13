@@ -18,8 +18,8 @@ import java.util.List;
 public final class Split extends AbstractJobElement {
     private static final long serialVersionUID = 4996794734335749303L;
 
-    private String next;
-    private final List<Flow> flows = new ArrayList<Flow>();
+    String next;
+    final List<Flow> flows = new ArrayList<Flow>();
 
     Split(final String id) {
         super(id);

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.JobOperator;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.JobExecution;
@@ -24,6 +23,8 @@ import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.Metric;
 import javax.batch.runtime.StepExecution;
 
+import org.jberet.job.model.Job;
+import org.jberet.operations.JobOperatorImpl;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.junit.Assert;
@@ -51,7 +52,7 @@ abstract public class AbstractIT {
 
     //delay bootstrapping JobOperator, since some tests may need to adjust jberet configuration, such as
     //infinispanRepository tests.
-    protected JobOperator jobOperator;
+    protected JobOperatorImpl jobOperator;
 
     /**
      * Initializes and bootstraps {@code JobOperator}.
@@ -64,7 +65,7 @@ abstract public class AbstractIT {
     @Before
     public void before() throws Exception {
         if (jobOperator == null) {
-            jobOperator = BatchRuntime.getJobOperator();
+            jobOperator = (JobOperatorImpl) BatchRuntime.getJobOperator();
         }
     }
 
@@ -74,6 +75,11 @@ abstract public class AbstractIT {
 
     protected void startJob(final String jobXml) {
         jobExecutionId = jobOperator.start(jobXml, params);
+        jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+    }
+
+    protected void startJob(final Job job) {
+        jobExecutionId = jobOperator.start(job, params);
         jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
     }
 
@@ -88,6 +94,11 @@ abstract public class AbstractIT {
 
     protected void startJobAndWait(final String jobXml) throws Exception {
         startJob(jobXml);
+        awaitTermination();
+    }
+
+    protected void startJobAndWait(final Job job) throws Exception {
+        startJob(job);
         awaitTermination();
     }
 

@@ -16,13 +16,13 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
     private static final long serialVersionUID = 7699066774192733641L;
     private static final int DEFAULT_START_LIMIT = 0;
 
-    private String startLimit;  //default 0, no limit
-    private String allowStartIfComplete;  //default false
-    private String next;
+    String startLimit;  //default 0, no limit
+    String allowStartIfComplete;  //default false
+    String next;
 
-    private RefArtifact batchlet;
-    private Chunk chunk;
-    private Partition partition;
+    RefArtifact batchlet;
+    Chunk chunk;
+    Partition partition;
 
     Step(final String id) {
         super(id);

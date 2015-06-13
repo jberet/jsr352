@@ -99,8 +99,13 @@ public class JobOperatorImpl implements JobOperator {
 
     @Override
     public long start(final String jobXMLName, final Properties jobParameters) throws JobStartException, JobSecurityException {
+        final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, batchEnvironment.getClassLoader(),
+                new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
+        return start(jobDefined, jobParameters);
+    }
+
+    public long start(final Job jobDefined, final Properties jobParameters) throws JobStartException, JobSecurityException {
         final ClassLoader classLoader = batchEnvironment.getClassLoader();
-        final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, classLoader, new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
         final String applicationName = getApplicationName();
         repository.addJob(new ApplicationAndJobName(applicationName, jobDefined.getId()), jobDefined);
         try {

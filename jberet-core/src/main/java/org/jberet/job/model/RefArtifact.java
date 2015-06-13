@@ -13,7 +13,6 @@
 package org.jberet.job.model;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.jberet._private.BatchMessages;
 
