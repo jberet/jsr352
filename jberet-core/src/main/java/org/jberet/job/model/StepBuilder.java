@@ -49,29 +49,29 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
         return this;
     }
 
-    public StepBuilder listener(final String ref, final String[]... propKeysValues) {
+    public StepBuilder listener(final String listenerRef, final String[]... pairsOfKeyValue) {
         if (listeners == null) {
             listeners = new Listeners();
         }
-        listeners.getListeners().add(JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues));
+        listeners.getListeners().add(JobBuilder.createRefArtifactWithProperties(listenerRef, null, pairsOfKeyValue));
         return this;
     }
 
-    public StepBuilder listener(final String ref, final java.util.Properties props) {
+    public StepBuilder listener(final String listenerRef, final java.util.Properties props) {
         if (listeners == null) {
             listeners = new Listeners();
         }
-        listeners.getListeners().add(JobBuilder.createRefArtifactWithProperties(ref, props));
+        listeners.getListeners().add(JobBuilder.createRefArtifactWithProperties(listenerRef, props));
         return this;
     }
 
-    public StepBuilder batchlet(final String ref, final String[]... propKeysValues) {
-        batchlet = JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues);
+    public StepBuilder batchlet(final String batchletRef, final String[]... pairsOfKeyValue) {
+        batchlet = JobBuilder.createRefArtifactWithProperties(batchletRef, null, pairsOfKeyValue);
         return this;
     }
 
-    public StepBuilder batchlet(final String ref, final java.util.Properties props) {
-        batchlet = JobBuilder.createRefArtifactWithProperties(ref, props);
+    public StepBuilder batchlet(final String batchletRef, final java.util.Properties props) {
+        batchlet = JobBuilder.createRefArtifactWithProperties(batchletRef, props);
         return this;
     }
 
@@ -105,43 +105,43 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
     }
 
 
-    public StepBuilder partitionMapper(final String ref, final String[]... propKeysValues) {
-        partition.setMapper(JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues));
+    public StepBuilder partitionMapper(final String partitionMapperRef, final String[]... pairsOfKeyValue) {
+        partition.setMapper(JobBuilder.createRefArtifactWithProperties(partitionMapperRef, null, pairsOfKeyValue));
         return this;
     }
 
-    public StepBuilder partitionMapper(final String ref, final java.util.Properties props) {
-        partition.setMapper(JobBuilder.createRefArtifactWithProperties(ref, props));
+    public StepBuilder partitionMapper(final String partitionMapperRef, final java.util.Properties props) {
+        partition.setMapper(JobBuilder.createRefArtifactWithProperties(partitionMapperRef, props));
         return this;
     }
 
-    public StepBuilder partitionCollector(final String ref, final String[]... propKeysValues) {
-        partition.setCollector(JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues));
+    public StepBuilder partitionCollector(final String partitionCollectorRef, final String[]... pairsOfKeyValue) {
+        partition.setCollector(JobBuilder.createRefArtifactWithProperties(partitionCollectorRef, null, pairsOfKeyValue));
         return this;
     }
 
-    public StepBuilder partitionCollector(final String ref, final java.util.Properties props) {
-        partition.setCollector(JobBuilder.createRefArtifactWithProperties(ref, props));
+    public StepBuilder partitionCollector(final String partitionCollectorRef, final java.util.Properties props) {
+        partition.setCollector(JobBuilder.createRefArtifactWithProperties(partitionCollectorRef, props));
         return this;
     }
 
-    public StepBuilder partitionAnalyzer(final String ref, final String[]... propKeysValues) {
-        partition.setAnalyzer(JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues));
+    public StepBuilder partitionAnalyzer(final String partitionAnalyzerRef, final String[]... pairsOfKeyValue) {
+        partition.setAnalyzer(JobBuilder.createRefArtifactWithProperties(partitionAnalyzerRef, null, pairsOfKeyValue));
         return this;
     }
 
-    public StepBuilder partitionAnalyzer(final String ref, final java.util.Properties props) {
-        partition.setAnalyzer(JobBuilder.createRefArtifactWithProperties(ref, props));
+    public StepBuilder partitionAnalyzer(final String partitionAnalyzerRef, final java.util.Properties props) {
+        partition.setAnalyzer(JobBuilder.createRefArtifactWithProperties(partitionAnalyzerRef, props));
         return this;
     }
 
-    public StepBuilder partitionReducer(final String ref, final String[]... propKeysValues) {
-        partition.setReducer(JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues));
+    public StepBuilder partitionReducer(final String partitionReducerRef, final String[]... pairsOfKeyValue) {
+        partition.setReducer(JobBuilder.createRefArtifactWithProperties(partitionReducerRef, null, pairsOfKeyValue));
         return this;
     }
 
-    public StepBuilder partitionReducer(final String ref, final java.util.Properties props) {
-        partition.setReducer(JobBuilder.createRefArtifactWithProperties(ref, props));
+    public StepBuilder partitionReducer(final String partitionReducerRef, final java.util.Properties props) {
+        partition.setReducer(JobBuilder.createRefArtifactWithProperties(partitionReducerRef, props));
         return this;
     }
 
@@ -173,43 +173,43 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
     }
 
 
-    public StepBuilder reader(final String ref, final String[]... propKeysValues) {
-        chunk.reader = JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues);
+    public StepBuilder reader(final String readerRef, final String[]... pairsOfKeyValue) {
+        chunk.reader = JobBuilder.createRefArtifactWithProperties(readerRef, null, pairsOfKeyValue);
         return this;
     }
 
-    public StepBuilder reader(final String ref, final java.util.Properties props) {
-        chunk.reader = JobBuilder.createRefArtifactWithProperties(ref, props);
+    public StepBuilder reader(final String readerRef, final java.util.Properties props) {
+        chunk.reader = JobBuilder.createRefArtifactWithProperties(readerRef, props);
         return this;
     }
 
-    public StepBuilder writer(final String ref, final String[]... propKeysValues) {
-        chunk.writer = JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues);
+    public StepBuilder writer(final String writerRef, final String[]... pairsOfKeyValue) {
+        chunk.writer = JobBuilder.createRefArtifactWithProperties(writerRef, null, pairsOfKeyValue);
         return this;
     }
 
-    public StepBuilder writer(final String ref, final java.util.Properties props) {
-        chunk.writer = JobBuilder.createRefArtifactWithProperties(ref, props);
+    public StepBuilder writer(final String writerRef, final java.util.Properties props) {
+        chunk.writer = JobBuilder.createRefArtifactWithProperties(writerRef, props);
         return this;
     }
 
-    public StepBuilder processor(final String ref, final String[]... propKeysValues) {
-        chunk.processor = JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues);
+    public StepBuilder processor(final String processorRef, final String[]... pairsOfKeyValue) {
+        chunk.processor = JobBuilder.createRefArtifactWithProperties(processorRef, null, pairsOfKeyValue);
         return this;
     }
 
-    public StepBuilder processor(final String ref, final java.util.Properties props) {
-        chunk.processor = JobBuilder.createRefArtifactWithProperties(ref, props);
+    public StepBuilder processor(final String processorRef, final java.util.Properties props) {
+        chunk.processor = JobBuilder.createRefArtifactWithProperties(processorRef, props);
         return this;
     }
 
-    public StepBuilder checkpointAlgorithm(final String ref, final String[]... propKeysValues) {
-        chunk.checkpointAlgorithm = JobBuilder.createRefArtifactWithProperties(ref, null, propKeysValues);
+    public StepBuilder checkpointAlgorithm(final String checkpointAlgorithmRef, final String[]... pairsOfKeyValue) {
+        chunk.checkpointAlgorithm = JobBuilder.createRefArtifactWithProperties(checkpointAlgorithmRef, null, pairsOfKeyValue);
         return this;
     }
 
-    public StepBuilder checkpointAlgorithm(final String ref, final java.util.Properties props) {
-        chunk.checkpointAlgorithm = JobBuilder.createRefArtifactWithProperties(ref, props);
+    public StepBuilder checkpointAlgorithm(final String checkpointAlgorithmRef, final java.util.Properties props) {
+        chunk.checkpointAlgorithm = JobBuilder.createRefArtifactWithProperties(checkpointAlgorithmRef, props);
         return this;
     }
 
@@ -239,61 +239,61 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
     }
 
 
-    public StepBuilder skippableExceptionsInclude(final Class<? extends Exception>... cls) {
+    public StepBuilder skippableExceptionsInclude(final Class<? extends Exception>... classes) {
         if (chunk.skippableExceptionClasses == null) {
             chunk.skippableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : cls) {
+        for (final Class<? extends Exception> cl : classes) {
             chunk.skippableExceptionClasses.include.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder skippableExceptionsExclude(final Class<? extends Exception>... cls) {
+    public StepBuilder skippableExceptionsExclude(final Class<? extends Exception>... classes) {
         if (chunk.skippableExceptionClasses == null) {
             chunk.skippableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : cls) {
+        for (final Class<? extends Exception> cl : classes) {
             chunk.skippableExceptionClasses.exclude.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder retryableExceptionsInclude(final Class<? extends Exception>... cls) {
+    public StepBuilder retryableExceptionsInclude(final Class<? extends Exception>... classes) {
         if (chunk.retryableExceptionClasses == null) {
             chunk.retryableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : cls) {
+        for (final Class<? extends Exception> cl : classes) {
             chunk.retryableExceptionClasses.include.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder retryableExceptionsExclude(final Class<? extends Exception>... cls) {
+    public StepBuilder retryableExceptionsExclude(final Class<? extends Exception>... classes) {
         if (chunk.retryableExceptionClasses == null) {
             chunk.retryableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : cls) {
+        for (final Class<? extends Exception> cl : classes) {
             chunk.retryableExceptionClasses.exclude.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder noRollbackExceptionsInclude(final Class<? extends Exception>... cls) {
+    public StepBuilder noRollbackExceptionsInclude(final Class<? extends Exception>... classes) {
         if (chunk.noRollbackExceptionClasses == null) {
             chunk.noRollbackExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : cls) {
+        for (final Class<? extends Exception> cl : classes) {
             chunk.noRollbackExceptionClasses.include.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder noRollbackExceptionsExclude(final Class<? extends Exception>... cls) {
+    public StepBuilder noRollbackExceptionsExclude(final Class<? extends Exception>... classes) {
         if (chunk.noRollbackExceptionClasses == null) {
             chunk.noRollbackExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : cls) {
+        for (final Class<? extends Exception> cl : classes) {
             chunk.noRollbackExceptionClasses.exclude.add(cl.getName());
         }
         return this;

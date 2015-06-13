@@ -33,8 +33,8 @@ abstract class AbstractPropertiesBuilder<T> {
         return (T) this;
     }
 
-    public T properties(final String[]... propKeysValues) {
-        for (final String[] pair : propKeysValues) {
+    public T properties(final String[]... pairsOfKeyValue) {
+        for (final String[] pair : pairsOfKeyValue) {
             nameValues.put(pair[0], pair.length > 1 ? pair[1] : null);
         }
         return (T) this;

@@ -20,9 +20,9 @@ public final class DecisionBuilder extends AbstractPropertiesBuilder<DecisionBui
     private final String ref;
     private final List<Transition> transitions = new ArrayList<Transition>();
 
-    public DecisionBuilder(final String id, final String ref) {
+    public DecisionBuilder(final String id, final String deciderRef) {
         this.id = id;
-        this.ref = ref;
+        this.ref = deciderRef;
     }
 
     public Transition.End<DecisionBuilder> endOn(final String exitStatus) {

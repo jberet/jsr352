@@ -30,19 +30,19 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         return this;
     }
 
-    public JobBuilder listener(final String ref, final String[]... propKeysValues) {
+    public JobBuilder listener(final String listenerRef, final String[]... pairsOfKeyValue) {
         if (listeners == null) {
             listeners = new Listeners();
         }
-        listeners.getListeners().add(createRefArtifactWithProperties(ref, null, propKeysValues));
+        listeners.getListeners().add(createRefArtifactWithProperties(listenerRef, null, pairsOfKeyValue));
         return this;
     }
 
-    public JobBuilder listener(final String ref, final java.util.Properties props) {
+    public JobBuilder listener(final String listenerRef, final java.util.Properties props) {
         if (listeners == null) {
             listeners = new Listeners();
         }
-        listeners.getListeners().add(createRefArtifactWithProperties(ref, props));
+        listeners.getListeners().add(createRefArtifactWithProperties(listenerRef, props));
         return this;
     }
 

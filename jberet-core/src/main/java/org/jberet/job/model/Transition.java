@@ -117,8 +117,8 @@ public abstract class Transition<T> implements Serializable {
             this.to = to;
         }
 
-        public T to(final String to) {
-            this.to = to;
+        public T to(final String nextToRun) {
+            this.to = nextToRun;
             final T builder = enclosingBuilder;
             enclosingBuilder = null;
             return builder;
