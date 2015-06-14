@@ -109,6 +109,7 @@ public class JavaJSLIT extends AbstractIT {
         final String step2Name = jobName + ".step2";
 
         final Job job = new JobBuilder(jobName)
+                .restartable()
                 .flow(new FlowBuilder(flowName)
                         .step(new StepBuilder(stepName).batchlet(batchlet1Name)
                                 .next(step2Name)
@@ -138,6 +139,7 @@ public class JavaJSLIT extends AbstractIT {
         final String decisionName = jobName + ".decision1";
 
         final Job job = new JobBuilder(jobName)
+                .restartable(true)
                 .step(new StepBuilder(stepName).batchlet(batchlet1Name).next(decisionName)
                         .build())
                 .decision(new DecisionBuilder(decisionName, deciderName)

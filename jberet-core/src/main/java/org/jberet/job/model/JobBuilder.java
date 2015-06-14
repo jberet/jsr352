@@ -25,8 +25,12 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         this.id = id;
     }
 
-    public JobBuilder restartable(final boolean b) {
-        this.restartable = String.valueOf(b);
+    public JobBuilder restartable(final boolean... b) {
+        if (b.length == 0) {
+            this.restartable = String.valueOf(true);
+        } else {
+            this.restartable = String.valueOf(b[0]);
+        }
         return this;
     }
 
