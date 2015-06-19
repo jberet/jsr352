@@ -79,7 +79,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private final StepMetrics stepMetrics;
     private AbstractStepExecution stepOrPartitionExecution;
     private final ItemReader itemReader;
+    private boolean readerClosed = false;
     private final ItemWriter itemWriter;
+    private boolean writerClosed = false;
     private ItemProcessor itemProcessor;
     private PartitionCollector collector;
 
@@ -195,12 +197,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             tm.begin();
             try {
                 itemWriter.close();
+                writerClosed = true;
                 itemReader.close();
+                readerClosed = true;
                 tm.commit();
             } catch (Exception e) {
                 tm.rollback();
                 // An error occurred, safely close the reader and writer
-                safeClose();
                 throw e;
             }
             //collect data at the end of the partition
@@ -614,7 +617,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         // Close the reader and writer
         try {
             itemWriter.close();
+            writerClosed = true;
             itemReader.close();
+            readerClosed = true;
         } catch (Exception e) {
             // An error occurred, safely close the reader and writer
             safeClose();
@@ -735,12 +740,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
      */
     private void safeClose() {
         try {
-            if (itemWriter != null) itemWriter.close();
+            if (itemWriter != null && !writerClosed) itemWriter.close();
         } catch (Exception e) {
             LOGGER.trace("Error closing ItemWriter.", e);
         }
         try {
-            if (itemReader != null) itemReader.close();
+            if (itemReader != null && !readerClosed) itemReader.close();
         } catch (Exception e) {
             LOGGER.trace("Error closing ItemReader.", e);
         }
