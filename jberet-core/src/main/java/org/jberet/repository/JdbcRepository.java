@@ -96,10 +96,9 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String INSERT_PARTITION_EXECUTION = "insert-partition-execution";
     private static final String UPDATE_PARTITION_EXECUTION = "update-partition-execution";
 
-    private final Properties configProperties;
-    private String dataSourceName;
-    private DataSource dataSource;
-    private String dbUrl;
+    private final DataSource dataSource;
+    private final String dbUrl;
+    private final String userDefinedDdlFile;
     private final Properties dbProperties;
     private final Properties sqls = new Properties();
     private boolean isOracle;
@@ -110,10 +109,9 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     }
 
     public JdbcRepository(final Properties configProperties) {
-        this.configProperties = configProperties;
-        dataSourceName = configProperties.getProperty(DATASOURCE_JNDI_KEY);
-        dbUrl = configProperties.getProperty(DB_URL_KEY);
+        String dataSourceName = configProperties.getProperty(DATASOURCE_JNDI_KEY);
         dbProperties = new Properties();
+        userDefinedDdlFile = configProperties.getProperty(DDL_FILE_NAME_KEY);
 
         //if dataSourceName is configured, use dataSourceName;
         //else if dbUrl is specified, use dbUrl;
@@ -122,18 +120,22 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             dataSourceName = dataSourceName.trim();
         }
         if (dataSourceName != null && !dataSourceName.isEmpty()) {
+            dbUrl = null;
             try {
                 dataSource = InitialContext.doLookup(dataSourceName);
             } catch (final NamingException e) {
                 throw BatchMessages.MESSAGES.failToLookupDataSource(e, dataSourceName);
             }
         } else {
+            String dbUrl = configProperties.getProperty(DB_URL_KEY);
+            dataSource = null;
             if (dbUrl != null) {
                 dbUrl = dbUrl.trim();
             }
             if (dbUrl == null || dbUrl.isEmpty()) {
                 dbUrl = DEFAULT_DB_URL;
             }
+            this.dbUrl = dbUrl;
             final String dbUser = configProperties.getProperty(DB_USER_KEY);
             if (dbUser != null) {
                 dbProperties.setProperty("user", dbUser.trim());
@@ -153,6 +155,57 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 }
             }
         }
+        createTables(configProperties);
+    }
+
+    /**
+     * Creates a new JDBC job repository.
+     *
+     * @param dataSource the data source used to connect to the database
+     */
+    public JdbcRepository(final DataSource dataSource) {
+        this(dataSource, new Properties());
+    }
+
+    /**
+     * Creates a new JDBC job repository.
+     *
+     * @param dataSource       the data source used to connect to the database
+     * @param configProperties the configuration properties to use
+     */
+    public JdbcRepository(final DataSource dataSource, final Properties configProperties) {
+        if (dataSource == null) {
+            throw BatchMessages.MESSAGES.nullVar("dataSource");
+        }
+        if (configProperties == null) {
+            throw BatchMessages.MESSAGES.nullVar("configProperties");
+        }
+        dbProperties = new Properties();
+        userDefinedDdlFile = configProperties.getProperty(DDL_FILE_NAME_KEY);
+        this.dataSource = dataSource;
+        dbUrl = null;
+        String sqlFile = DEFAULT_SQL_FILE;
+        final InputStream sqlResource = getClassLoader().getResourceAsStream(sqlFile);
+        try {
+            if (sqlResource == null) {
+                throw BatchMessages.MESSAGES.failToLoadSqlProperties(null, sqlFile);
+            }
+            sqls.load(sqlResource);
+        } catch (final IOException e) {
+            throw BatchMessages.MESSAGES.failToLoadSqlProperties(e, sqlFile);
+        } finally {
+            if (sqlResource != null) {
+                try {
+                    sqlResource.close();
+                } catch (final IOException e) {
+                    BatchLogger.LOGGER.failToClose(e, InputStream.class, sqlResource);
+                }
+            }
+        }
+        createTables(configProperties);
+    }
+
+    private void createTables(final Properties configProperties) {
         String sqlFile = configProperties.getProperty(SQL_FILE_NAME_KEY);
         if (sqlFile != null) {
             sqlFile = sqlFile.trim();
@@ -177,10 +230,6 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 }
             }
         }
-        createTables();
-    }
-
-    private void createTables() {
         //first test table existence by running a query against the last table in the ddl entry list
         final String countPartitionExecutions = sqls.getProperty(COUNT_PARTITION_EXECUTIONS);
         Connection connection1 = getConnection();
@@ -908,7 +957,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             try {
                 return dataSource.getConnection();
             } catch (final SQLException e) {
-                throw BatchMessages.MESSAGES.failToObtainConnection(e, dataSource, dataSourceName);
+                throw BatchMessages.MESSAGES.failToObtainConnection(e, dataSource);
             }
         } else {
             try {
@@ -960,7 +1009,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
      * @return location of ddl file resource, e.g., sql/jberet.ddl
      */
     private String getDDLLocation(final String databaseProductName) {
-        String ddlFile = configProperties.getProperty(DDL_FILE_NAME_KEY);
+        String ddlFile = userDefinedDdlFile;
         if (ddlFile != null) {
             ddlFile = ddlFile.trim();
             if (!ddlFile.isEmpty()) {

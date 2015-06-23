@@ -95,7 +95,10 @@ public interface BatchMessages {
     @Message(id = 621, value = "Failed to look up datasource by jndi name %s.")
     BatchRuntimeException failToLookupDataSource(@Cause Throwable cause, String dataSourceName);
 
-    @Message(id = 622, value = "Failed to obtain connection from %s, %s")
+    @Message(id = 622, value = "Failed to obtain connection from %s")
+    BatchRuntimeException failToObtainConnection(@Cause Throwable cause, Object connectionSource);
+
+    @Message(id = Message.INHERIT, value = "Failed to obtain connection from %s, %s")
     BatchRuntimeException failToObtainConnection(@Cause Throwable cause, Object connectionSource, Object props);
 
     @Message(id = 623, value = "Failed to load sql properties %s")
@@ -175,5 +178,8 @@ public interface BatchMessages {
 
     @Message(id = 648, value = "Restarting job execution %s, job name %s, batch status %s, but restart mode %s is invalid. Valid values are %s")
     JobRestartException invalidRestartMode(long executionId, String jobName, BatchStatus previousStatus, String restartMode, List<String> validRestartMode);
+
+    @Message(id = 649, value = "%s cannot be null")
+    IllegalArgumentException nullVar(String name);
 
 }
