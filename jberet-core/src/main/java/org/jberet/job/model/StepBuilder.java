@@ -14,6 +14,7 @@ package org.jberet.job.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
     private final String id;
@@ -223,8 +224,12 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
         return this;
     }
 
-    public StepBuilder timeLimit(final int timeLimit) {
-        chunk.timeLimit = String.valueOf(timeLimit);
+    public StepBuilder timeLimit(final int timeLimit, final TimeUnit... timeUnit) {
+        if (timeUnit.length == 0) {
+            chunk.timeLimit = String.valueOf(timeLimit);
+        } else {
+            chunk.timeLimit = String.valueOf(TimeUnit.SECONDS.convert(timeLimit, timeUnit[0]));
+        }
         return this;
     }
 
@@ -239,61 +244,61 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
     }
 
 
-    public StepBuilder skippableExceptionsInclude(final Class<? extends Exception>... classes) {
+    public StepBuilder skippableExceptionsInclude(final Class<? extends Exception>... exceptionClasses) {
         if (chunk.skippableExceptionClasses == null) {
             chunk.skippableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : classes) {
+        for (final Class<? extends Exception> cl : exceptionClasses) {
             chunk.skippableExceptionClasses.include.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder skippableExceptionsExclude(final Class<? extends Exception>... classes) {
+    public StepBuilder skippableExceptionsExclude(final Class<? extends Exception>... exceptionClasses) {
         if (chunk.skippableExceptionClasses == null) {
             chunk.skippableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : classes) {
+        for (final Class<? extends Exception> cl : exceptionClasses) {
             chunk.skippableExceptionClasses.exclude.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder retryableExceptionsInclude(final Class<? extends Exception>... classes) {
+    public StepBuilder retryableExceptionsInclude(final Class<? extends Exception>... exceptionClasses) {
         if (chunk.retryableExceptionClasses == null) {
             chunk.retryableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : classes) {
+        for (final Class<? extends Exception> cl : exceptionClasses) {
             chunk.retryableExceptionClasses.include.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder retryableExceptionsExclude(final Class<? extends Exception>... classes) {
+    public StepBuilder retryableExceptionsExclude(final Class<? extends Exception>... exceptionClasses) {
         if (chunk.retryableExceptionClasses == null) {
             chunk.retryableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : classes) {
+        for (final Class<? extends Exception> cl : exceptionClasses) {
             chunk.retryableExceptionClasses.exclude.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder noRollbackExceptionsInclude(final Class<? extends Exception>... classes) {
+    public StepBuilder noRollbackExceptionsInclude(final Class<? extends Exception>... exceptionClasses) {
         if (chunk.noRollbackExceptionClasses == null) {
             chunk.noRollbackExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : classes) {
+        for (final Class<? extends Exception> cl : exceptionClasses) {
             chunk.noRollbackExceptionClasses.include.add(cl.getName());
         }
         return this;
     }
 
-    public StepBuilder noRollbackExceptionsExclude(final Class<? extends Exception>... classes) {
+    public StepBuilder noRollbackExceptionsExclude(final Class<? extends Exception>... exceptionClasses) {
         if (chunk.noRollbackExceptionClasses == null) {
             chunk.noRollbackExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : classes) {
+        for (final Class<? extends Exception> cl : exceptionClasses) {
             chunk.noRollbackExceptionClasses.exclude.add(cl.getName());
         }
         return this;
