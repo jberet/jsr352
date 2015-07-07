@@ -77,9 +77,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private final Chunk chunk;
     private final StepExecutionRunner stepRunner;
     private final StepMetrics stepMetrics;
-    private AbstractStepExecution stepOrPartitionExecution;
-    private final ItemReader itemReader;
-    private final ItemWriter itemWriter;
+    private final AbstractStepExecution stepOrPartitionExecution;
+    private ItemReader itemReader;
+    private ItemWriter itemWriter;
     private ItemProcessor itemProcessor;
     private PartitionCollector collector;
 
@@ -87,8 +87,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private CheckpointAlgorithm checkpointAlgorithm;
     private int itemCount = 10;
     private int timeLimit;  //in seconds
-    private int skipLimit;  //default no limit
-    private int retryLimit;  //default no limit
+    private final int skipLimit;  //default no limit
+    private final int retryLimit;  //default no limit
 
     private final ExceptionClassFilter skippableExceptionClasses;
     private final ExceptionClassFilter retryableExceptionClasses;
@@ -111,47 +111,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         this.stepOrPartitionExecution = stepContext.getStepExecution();
         this.stepMetrics = this.stepOrPartitionExecution.getStepMetrics();
 
-        itemReader = (ItemReader) createArtifact(chunk.getReader(), batchContext, ScriptItemReader.class);
-        itemWriter = (ItemWriter) createArtifact(chunk.getWriter(), batchContext, ScriptItemWriter.class);
-
-        final RefArtifact processorElement = chunk.getProcessor();
-        if (processorElement != null) {
-            itemProcessor = (ItemProcessor) createArtifact(processorElement, batchContext, ScriptItemProcessor.class);
-        }
-
-        if (stepRunner.collectorDataQueue != null) {
-            final RefArtifact collectorConfig = batchContext.getStep().getPartition().getCollector();
-            if (collectorConfig != null) {
-                collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
-            }
-        }
-
-        String attrVal = chunk.getCheckpointPolicy();
-        if (attrVal == null || attrVal.equals("item")) {
-            attrVal = chunk.getItemCount();
-            if (attrVal != null) {
-                itemCount = Integer.parseInt(attrVal);
-                if (itemCount < 1) {
-                    throw MESSAGES.invalidItemCount(itemCount);
-                }
-            }
-            attrVal = chunk.getTimeLimit();
-            if (attrVal != null) {
-                timeLimit = Integer.parseInt(attrVal);
-            }
-        } else if (attrVal.equals("custom")) {
-            checkpointPolicy = "custom";
-            final RefArtifact alg = chunk.getCheckpointAlgorithm();
-            if (alg != null) {
-                checkpointAlgorithm = jobContext.createArtifact(alg.getRef(), null, alg.getProperties(), batchContext);
-            } else {
-                throw MESSAGES.checkpointAlgorithmMissing(stepRunner.step.getId());
-            }
-        } else {
-            throw MESSAGES.invalidCheckpointPolicy(attrVal);
-        }
-
-        attrVal = chunk.getSkipLimit();
+        String attrVal = chunk.getSkipLimit();
         skipLimit = attrVal == null ? -1 : Integer.parseInt(attrVal);
 
         attrVal = chunk.getRetryLimit();
@@ -161,12 +121,53 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         retryableExceptionClasses = chunk.getRetryableExceptionClasses();
         noRollbackExceptionClasses = chunk.getNoRollbackExceptionClasses();
         this.tm = stepRunner.tm;
-        createChunkRelatedListeners();
     }
 
     @Override
     public void run() {
         try {
+            itemReader = (ItemReader) createArtifact(chunk.getReader(), batchContext, ScriptItemReader.class);
+            itemWriter = (ItemWriter) createArtifact(chunk.getWriter(), batchContext, ScriptItemWriter.class);
+
+            final RefArtifact processorElement = chunk.getProcessor();
+            if (processorElement != null) {
+                itemProcessor = (ItemProcessor) createArtifact(processorElement, batchContext, ScriptItemProcessor.class);
+            }
+
+            if (stepRunner.collectorDataQueue != null) {
+                final RefArtifact collectorConfig = batchContext.getStep().getPartition().getCollector();
+                if (collectorConfig != null) {
+                    collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
+                }
+            }
+
+            String attrVal = chunk.getCheckpointPolicy();
+            if (attrVal == null || attrVal.equals("item")) {
+                attrVal = chunk.getItemCount();
+                if (attrVal != null) {
+                    itemCount = Integer.parseInt(attrVal);
+                    if (itemCount < 1) {
+                        throw MESSAGES.invalidItemCount(itemCount);
+                    }
+                }
+                attrVal = chunk.getTimeLimit();
+                if (attrVal != null) {
+                    timeLimit = Integer.parseInt(attrVal);
+                }
+            } else if (attrVal.equals("custom")) {
+                checkpointPolicy = "custom";
+                final RefArtifact alg = chunk.getCheckpointAlgorithm();
+                if (alg != null) {
+                    checkpointAlgorithm = jobContext.createArtifact(alg.getRef(), null, alg.getProperties(), batchContext);
+                } else {
+                    throw MESSAGES.checkpointAlgorithmMissing(stepRunner.step.getId());
+                }
+            } else {
+                throw MESSAGES.invalidCheckpointPolicy(attrVal);
+            }
+            createChunkRelatedListeners();
+
+
             //When running in EE environment, set global transaction timeout for the current thread
             // from javax.transaction.global.timeout property at step level
             final Properties stepProps = stepRunner.step.getProperties();
@@ -606,7 +607,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         processingInfo.failurePoint = processingInfo.readPosition;
 
         //when chunk commit failed, the transaction was already rolled back and its status is STATUS_NO_TRANSACTION (6)
-        if(tm.getStatus() != Status.STATUS_NO_TRANSACTION) {
+        if (tm.getStatus() != Status.STATUS_NO_TRANSACTION) {
             tm.rollback();
         }
 
