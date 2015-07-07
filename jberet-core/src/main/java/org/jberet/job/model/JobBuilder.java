@@ -9,17 +9,27 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.job.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import javax.batch.operations.BatchRuntimeException;
+
+import org.jberet._private.BatchMessages;
 
 public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
     private final String id;
     private String restartable;
     private Listeners listeners;
     private final List<JobElement> jobElements = new ArrayList<JobElement>();
+
+    /**
+     * stores ids for all job elements: job, step, flow, split and decision. These ids should be checked for uniqueness.
+     */
+    final Set<String> ids = new HashSet<String>();
 
     public JobBuilder(final String id) {
         this.id = id;
@@ -81,9 +91,15 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         }
 
         job.setListeners(listeners);
+
+        ids.add(id);
         for (final JobElement jobElement : jobElements) {
+            assertUniqueId(jobElement);
             job.addJobElement(jobElement);
         }
+
+        jobElements.clear();
+        ids.clear();
         return job;
     }
 
@@ -103,5 +119,21 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         }
         refArtifact.setProperties(properties);
         return refArtifact;
+    }
+
+    private void assertUniqueId(final JobElement jobElement) throws BatchRuntimeException {
+        final String jobElementId = jobElement.getId();
+        if (!ids.add(jobElementId)) {
+            throw BatchMessages.MESSAGES.idAlreadyExists(jobElement.getClass().getSimpleName(), jobElementId);
+        }
+        if (jobElement instanceof Split) {
+            for (final Flow f : ((Split) jobElement).flows) {
+                assertUniqueId(f);
+            }
+        } else if (jobElement instanceof Flow) {
+            for (final JobElement e : ((Flow) jobElement).jobElements) {
+                assertUniqueId(e);
+            }
+        }
     }
 }

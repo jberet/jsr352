@@ -182,4 +182,8 @@ public interface BatchMessages {
     @Message(id = 649, value = "%s cannot be null")
     IllegalArgumentException nullVar(String name);
 
+    @Message(id = 650, value = "%s id %s already exists")
+    BatchRuntimeException idAlreadyExists(String jobElementType, String id);
+
+
 }
