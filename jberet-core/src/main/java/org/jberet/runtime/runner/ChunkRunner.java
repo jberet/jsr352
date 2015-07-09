@@ -32,6 +32,7 @@ import javax.batch.api.chunk.listener.SkipProcessListener;
 import javax.batch.api.chunk.listener.SkipReadListener;
 import javax.batch.api.chunk.listener.SkipWriteListener;
 import javax.batch.api.partition.PartitionCollector;
+import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.transaction.Status;
@@ -184,7 +185,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
                 itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
                 tm.commit();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 tm.rollback();
                 // An error occurred, safely close the reader and writer
                 safeClose();
@@ -198,7 +199,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 itemWriter.close();
                 itemReader.close();
                 tm.commit();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 tm.rollback();
                 // An error occurred, safely close the reader and writer
                 safeClose();
@@ -214,8 +215,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
                 batchContext.setBatchStatus(BatchStatus.COMPLETED);
             }
-        } catch (final Exception e) {
-            batchContext.setException(e);
+        } catch (final Throwable e) {
+            batchContext.setException(e instanceof Exception ? (Exception) e : new BatchRuntimeException(e));
             LOGGER.log(Logger.Level.ERROR, "item-count=" + itemCount + ", time-limit=" + timeLimit +
                     ", skip-limit=" + skipLimit + ", skipCount=" + skipCount +
                     ", retry-limit=" + retryLimit + ", retryCount=" + retryCount);
@@ -227,7 +228,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     stepRunner.collectorDataQueue.put(stepOrPartitionExecution);
                     JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 //ignore
             }
             if (stepRunner.completedPartitionThreads != null) {

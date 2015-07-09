@@ -614,4 +614,94 @@ public class JavaJSLIT extends AbstractIT {
         startJob(job);
     }
 
+    @Test
+    public void noClassDefFoundErrorFromBatchlet() throws Exception {
+        final String jobName = "javaJSL-noClassDefFoundErrorFromBatchlet";
+        final String stepName = jobName + ".step1";
+        final String batchletName = "batchletWithNoClassDefFoundError";
+
+        final Job job = new JobBuilder(jobName)
+                .step(new StepBuilder(stepName).batchlet(batchletName).partitionPlan(2).build())
+                .build();
+
+        startJobAndWait(job);
+        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
+    @Test
+    public void noClassDefFoundErrorFromItemReader() throws Exception {
+        final String jobName = "javaJSL-noClassDefFoundErrorFromItemReader";
+        final String stepName = jobName + ".step1";
+        final String itemReaderName = "itemReaderWithNoClassDefFoundError";
+        final String itemWriterName = "itemWriterWithNoClassDefFoundError";
+
+        final Job job = new JobBuilder(jobName)
+                .step(new StepBuilder(stepName).reader(itemReaderName, new String[]{"throwError", "true"})
+                        .writer(itemWriterName)
+                        .partitionPlan(2).build())
+                .build();
+
+        startJobAndWait(job);
+        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
+    @Test
+    public void noClassDefFoundErrorFromItemWriter() throws Exception {
+        final String jobName = "javaJSL-noClassDefFoundErrorFromItemWriter";
+        final String stepName = jobName + ".step1";
+        final String itemReaderName = "itemReaderWithNoClassDefFoundError";
+        final String itemWriterName = "itemWriterWithNoClassDefFoundError";
+
+        final Job job = new JobBuilder(jobName)
+                .step(new StepBuilder(stepName).reader(itemReaderName)
+                        .writer(itemWriterName, new String[]{"throwError", "true"})
+                        .partitionPlan(2).build())
+                .build();
+
+        startJobAndWait(job);
+        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
+    @Test
+    public void noClassDefFoundErrorFromItemProcessor() throws Exception {
+        final String jobName = "javaJSL-noClassDefFoundErrorFromItemProcessor";
+        final String stepName = jobName + ".step1";
+        final String itemReaderName = "itemReaderWithNoClassDefFoundError";
+        final String itemWriterName = "itemWriterWithNoClassDefFoundError";
+        final String itemProcessorName = "itemProcessorWithNoClassDefFoundError";
+
+        final Job job = new JobBuilder(jobName)
+                .step(new StepBuilder(stepName).reader(itemReaderName).writer(itemWriterName)
+                        .processor(itemProcessorName, new String[]{"throwError", "true"})
+                        .partitionPlan(2).build())
+                .build();
+
+        startJobAndWait(job);
+        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
+    @Test
+    public void noClassDefFoundErrorFromChunkListener() throws Exception {
+        final String jobName = "javaJSL-noClassDefFoundErrorFromChunkListener";
+        final String stepName = jobName + ".step1";
+        final String itemReaderName = "itemReaderWithNoClassDefFoundError";
+        final String itemWriterName = "itemWriterWithNoClassDefFoundError";
+        final String chunkListenerName = "chunkListenerWithNoClassDefFoundError";
+
+        final Job job = new JobBuilder(jobName)
+                .step(new StepBuilder(stepName).reader(itemReaderName).writer(itemWriterName)
+                        .listener(chunkListenerName, new String[]{"throwError", "true"})
+                        .partitionPlan(2)
+                        .build())
+                .build();
+
+        startJobAndWait(job);
+        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+    }
+
 }

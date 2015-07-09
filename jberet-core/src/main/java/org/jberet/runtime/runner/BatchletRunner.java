@@ -14,6 +14,7 @@ package org.jberet.runtime.runner;
 
 import javax.batch.api.Batchlet;
 import javax.batch.api.partition.PartitionCollector;
+import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet._private.BatchLogger;
@@ -86,16 +87,16 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             if (collector != null) {
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
-        } catch (Exception e) {
+        } catch (final Throwable e) {
             //TODO remove this block.  collector is not called for unhandled exceptions.
             try {
                 if (collector != null) {
                     stepRunner.collectorDataQueue.put(collector.collectPartitionData());
                 }
-            } catch (Exception e1) {
+            } catch (final Exception e1) {
                 //ignore
             }
-            batchContext.setException(e);
+            batchContext.setException(e instanceof Exception ? (Exception) e : new BatchRuntimeException(e));
             LOGGER.failToRunBatchlet(e, batchlet);
             batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
@@ -104,7 +105,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
                     stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
                     JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 //ignore
             }
             if (stepRunner.completedPartitionThreads != null) {
