@@ -574,6 +574,12 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     skipCount++;
                     outputList.clear();
 
+                    //usually the transaction should not be rolled back upon skippable exception, but if the transaction
+                    //is marked rollback only by other parties, it's no longer usable and so roll it back.
+                    if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
+                        tm.rollback();
+                    }
+
                     //during normal processing, upon a skippable exception in writer that is not configured to be
                     //retryable at the same time (i.e., the exception resolved to skip), skip all items in the chunk,
                     //and on to a new chunk
