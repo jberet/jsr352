@@ -628,12 +628,16 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             safeClose();
             throw e;
         }
+
+        tm.begin();
         try {
             // Open the reader and writer
             itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
             processingInfo.readPosition = processingInfo.checkpointPosition;
             itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
-        } catch (Exception e) {
+            tm.commit();
+        } catch (final Exception e) {
+            tm.rollback();
             // An error occurred, safely close the reader and writer
             safeClose();
             throw e;
