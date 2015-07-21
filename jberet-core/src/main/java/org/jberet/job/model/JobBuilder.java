@@ -20,6 +20,14 @@ import javax.batch.operations.BatchRuntimeException;
 
 import org.jberet._private.BatchMessages;
 
+/**
+ * Builder class for building a single {@linkplain Job job}. After the job is built, the same {@code JobBuilder} instance
+ * should not be reused to build another job.
+ * <p/>
+ * This class does not support multi-threaded access or modification.
+ *
+ * @since 1.2.0
+ */
 public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
     private final String id;
     private String restartable;
@@ -31,10 +39,22 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
      */
     final Set<String> ids = new HashSet<String>();
 
+    /**
+     * Constructs a {@code JobBuilder} for building the job with the specified {@code id}.
+     *
+     * @param id the job id, corresponding to the id attribute of jsl:Job element in XML
+     */
     public JobBuilder(final String id) {
         this.id = id;
     }
 
+    /**
+     * Sets the {@code restartable} attribute value on the job. This method may be invoked with 0 or 1 boolean parameter.
+     * {@code restartable()} is equivalent to {@code restartable(true)}.
+     *
+     * @param b optional restartable value (true or false)
+     * @return this {@code JobBuilder}
+     */
     public JobBuilder restartable(final boolean... b) {
         if (b.length == 0) {
             this.restartable = String.valueOf(true);
@@ -44,6 +64,22 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         return this;
     }
 
+    /**
+     * Adds a job listener to the job. The listener may be added with 0 or more listener properties. Each listener
+     * property is represented by a 2-element string array, whose 1st element is the property key, and 2nd element is
+     * the property value. For example,
+     * <p/>
+     * <pre>
+     * listener("listener1");
+     * listener1("listener2", new String[]{"key1", "value1"});
+     * listener1("listener3", new String[]{"key1", "value1"}, new String[]{"key2", "value2"});
+     * listener1("listener4", new String[]{"jobListenerk1", "#{jobParameters['jobListenerPropVal']}"}
+     * </pre>
+     *
+     * @param listenerRef job listener name
+     * @param pairsOfKeyValue optional listener properties in the form of a series of 2-element string arrays
+     * @return this {@code JobBuilder}
+     */
     public JobBuilder listener(final String listenerRef, final String[]... pairsOfKeyValue) {
         if (listeners == null) {
             listeners = new Listeners();
@@ -52,6 +88,13 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         return this;
     }
 
+    /**
+     * Adds a job listener to the job, with listener properties.
+     *
+     * @param listenerRef job listener name
+     * @param props job listener properties, null means no properties
+     * @return this {@code JobBuilder}
+     */
     public JobBuilder listener(final String listenerRef, final java.util.Properties props) {
         if (listeners == null) {
             listeners = new Listeners();
@@ -60,26 +103,55 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         return this;
     }
 
+    /**
+     * Adds a {@linkplain Step step} to the job. The step is typically built with {@link StepBuilder}.
+     *
+     * @param step a pre-built step
+     * @return this {@code JobBuilder}
+     */
     public JobBuilder step(final Step step) {
         jobElements.add(step);
         return this;
     }
 
+    /**
+     * Adds a {@linkplain Decision decision} to the job. The decision is typically built with {@link DecisionBuilder}.
+     *
+     * @param decision a pre-built decision
+     * @return this {@code JobBuilder}
+     */
     public JobBuilder decision(final Decision decision) {
         jobElements.add(decision);
         return this;
     }
 
+    /**
+     * Adds a {@linkplain Flow flow} to the job. The flow is typically built with {@link FlowBuilder}.
+     *
+     * @param flow a pre-built flow
+     * @return this {@code JobBuilder}
+     */
     public JobBuilder flow(final Flow flow) {
         jobElements.add(flow);
         return this;
     }
 
+    /**
+     * Adds a {@linkplain Split split} to the job. The split is typically built with {@link SplitBuilder}.
+     *
+     * @param split a pre-built split
+     * @return this {@code JobBuilder}
+     */
     public JobBuilder split(final Split split) {
         jobElements.add(split);
         return this;
     }
 
+    /**
+     * Builds the job. This method also verifies the uniqueness of all id values within the job.
+     *
+     * @return a job built by this {@code JobBuilder}
+     */
     public Job build() {
         final Job job = new Job(id);
 
@@ -103,6 +175,17 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         return job;
     }
 
+    /**
+     * Creates {@link RefArtifact} with optional properties. If {@code props} is not null, it is taken as the artifact
+     * properties, and {@code propKeysValues} is ignored. If {@code props} is null, {@code propKeysValues} is taken as
+     * the artifact properties.
+     *
+     * @param ref batch artifact name
+     * @param props artifact properties, may be null
+     * @param propKeysValues optional artifact properties as a series of 2-element string arrays
+     *
+     * @return created {@code RefArtifact}
+     */
     static RefArtifact createRefArtifactWithProperties(final String ref,
                                                        final java.util.Properties props,
                                                        final String[]... propKeysValues) {
@@ -121,6 +204,12 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
         return refArtifact;
     }
 
+    /**
+     * Asserts all id values within a job are unique.
+     *
+     * @param jobElement a job element: step, decision, flow, or split
+     * @throws BatchRuntimeException in case of duplicate id values within a job
+     */
     private void assertUniqueId(final JobElement jobElement) throws BatchRuntimeException {
         final String jobElementId = jobElement.getId();
         if (!ids.add(jobElementId)) {
