@@ -15,6 +15,19 @@ package org.jberet.job.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Builder class for building a single {@link Decision}. After the decision is built, the same {@code DecisionBuilder}
+ * instance should not be reused to build another decision.
+ * <p/>
+ * This class does not support multi-threaded access or modification.
+ *
+ * @see JobBuilder
+ * @see FlowBuilder
+ * @see SplitBuilder
+ * @see StepBuilder
+ *
+ * @since 1.2.0
+ */
 public final class DecisionBuilder extends AbstractPropertiesBuilder<DecisionBuilder> {
     private final String id;
     private final String ref;

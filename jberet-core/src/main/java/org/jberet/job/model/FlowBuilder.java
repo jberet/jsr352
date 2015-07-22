@@ -15,6 +15,19 @@ package org.jberet.job.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Builder class for building a single {@link Flow}. After the flow is built, the same {@code FlowBuilder}
+ * instance should not be reused to build another flow.
+ * <p/>
+ * This class does not support multi-threaded access or modification.
+ *
+ * @see JobBuilder
+ * @see DecisionBuilder
+ * @see SplitBuilder
+ * @see StepBuilder
+ *
+ * @since 1.2.0
+ */
 public final class FlowBuilder {
     private final String id;
     private String next;

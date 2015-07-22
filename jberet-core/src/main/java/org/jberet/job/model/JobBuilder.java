@@ -26,6 +26,11 @@ import org.jberet._private.BatchMessages;
  * <p/>
  * This class does not support multi-threaded access or modification.
  *
+ * @see StepBuilder
+ * @see FlowBuilder
+ * @see SplitBuilder
+ * @see DecisionBuilder
+
  * @since 1.2.0
  */
 public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
@@ -149,6 +154,7 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
 
     /**
      * Builds the job. This method also verifies the uniqueness of all id values within the job.
+     * After this method, this {@code JobBuilder} should not be used to build another job.
      *
      * @return a job built by this {@code JobBuilder}
      */
