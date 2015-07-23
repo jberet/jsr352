@@ -40,7 +40,45 @@ import java.util.concurrent.TimeUnit;
  * and {@link org.jberet.job.model.Transition.Next} respectively. These classes all contain a terminating method, which
  * pops the context back to the current {@code StepBuilder}.
  * <p/>
- * This class does not support multi-threaded access or modification.
+ * This class does not support multi-threaded access or modification. Usage example,
+ * <p/>
+ * <pre>
+ *     Step step1 = new StepBuilder(step1Name).batchlet(batchlet1Name).build();
+ *
+ *     Step step2 = new StepBuilder(step2Name)
+ *              .properties(new String[]{"stepk1", "S"}, new String[]{"stepk2", "S"})
+ *              .batchlet(batchlet1Name, new String[]{"batchletk1", "B"}, new String[]{"batchletk2", "B"})
+ *              .listener("stepListener1", stepListenerProps)
+ *              .stopOn("STOP").restartFrom(step1Name).exitStatus()
+ *              .endOn("END").exitStatus("new status for end")
+ *              .failOn("FAIL").exitStatus()
+ *              .nextOn("*").to(step3Name)
+ *              .build());
+ *
+ *     Step step3 = new StepBuilder(step3Name)
+ *              .reader("integerArrayReader", new String[]{"data.count", "30"})
+ *              .writer("integerArrayWriter", new String[]{"fail.on.values", "-1"}, new String[]{"writer.sleep.time", "0"})
+ *              .processor("integerProcessor")
+ *              .checkpointPolicy("item")
+ *              .listener("chunkListener1", new String[]{"stepExitStatus", stepExitStatusExpected})
+ *              .itemCount(10)
+ *              .allowStartIfComplete()
+ *              .startLimit(2)
+ *              .skipLimit(8)
+ *              .timeLimit(2, TimeUnit.MINUTES)
+ *              .build());
+ *
+ *     Step step4 = new StepBuilder(stepName)
+ *              .reader("integerArrayReader", new String[]{"data.count", "30"},
+ *                      new String[]{"partition.start", "#{partitionPlan['partition.start']}"},
+ *                      new String[]{"partition.end", "#{partitionPlan['partition.end']}"})
+ *              .writer("integerArrayWriter", new String[]{"fail.on.values", "-1"}, new String[]{"writer.sleep.time", "0"})
+ *              .partitionMapper("partitionMapper1", new String[]{"partitionCount", String.valueOf(partitionCount)})
+ *              .partitionCollector("partitionCollector1")
+ *              .partitionAnalyzer("partitionAnalyzer1")
+ *              .partitionReducer("partitionReducer1")
+ *              .build())
+ * </pre>
  *
  * @see JobBuilder
  * @see FlowBuilder
@@ -189,10 +227,12 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * endOn("END").exitStatus("new status for end").&lt;other StepBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition (may contain wildcard ? and *)
+     * @param exitStatus exit status condition to trigger "end" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.End<StepBuilder>}
      *
      * @see org.jberet.job.model.Transition.End
+     * @see DecisionBuilder#endOn(java.lang.String)
+     * @see FlowBuilder#endOn(String)
      */
     public Transition.End<StepBuilder> endOn(final String exitStatus) {
         final Transition.End<StepBuilder> end = new Transition.End<StepBuilder>(exitStatus);
@@ -211,10 +251,12 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * failOn("FAIL").exitStatus("new status for fail").&lt;other StepBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition (may contain wildcard ? and *)
+     * @param exitStatus exit status condition to trigger "fail" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.Fail<StepBuilder>}
      *
      * @see org.jberet.job.model.Transition.Fail
+     * @see DecisionBuilder#failOn(java.lang.String)
+     * @see FlowBuilder#failOn(String)
      */
     public Transition.Fail<StepBuilder> failOn(final String exitStatus) {
         final Transition.Fail<StepBuilder> fail = new Transition.Fail<StepBuilder>(exitStatus);
@@ -233,10 +275,12 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * stopOn("STOP").restartFrom("step1").exitStatus().&lt;other StepBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition (may contain wildcard ? and *)
+     * @param exitStatus exit status condition to trigger "stop" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.Stop<StepBuilder>}
      *
      * @see org.jberet.job.model.Transition.Stop
+     * @see DecisionBuilder#stopOn(java.lang.String)
+     * @see FlowBuilder#stopOn(String)
      */
     public Transition.Stop<StepBuilder> stopOn(final String exitStatus) {
         final Transition.Stop<StepBuilder> stop = new Transition.Stop<StepBuilder>(exitStatus, null);
@@ -254,10 +298,12 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * <pre>
      * nextOn("*").to("step2").&lt;other StepBuilder methods&gt;
      * </pre>
-     * @param exitStatus exit status condition (may contain wildcard ? and *)
+     * @param exitStatus exit status condition to trigger "next" action(may contain wildcard ? and *)
      * @return an instance of {@code Transition.Next<StepBuilder>}
      *
      * @see org.jberet.job.model.Transition.Next
+     * @see DecisionBuilder#nextOn(java.lang.String)
+     * @see FlowBuilder#nextOn(String)
      */
     public Transition.Next<StepBuilder> nextOn(final String exitStatus) {
         final Transition.Next<StepBuilder> nx = new Transition.Next<StepBuilder>(exitStatus);

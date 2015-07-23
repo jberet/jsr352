@@ -24,7 +24,32 @@ import org.jberet._private.BatchMessages;
  * Builder class for building a single {@linkplain Job job}. After the job is built, the same {@code JobBuilder} instance
  * should not be reused to build another job.
  * <p/>
- * This class does not support multi-threaded access or modification.
+ * This class does not support multi-threaded access or modification. Usage example,
+ * <p/>
+ * <pre>
+ *     Job job = new JobBuilder(jobName)
+ *              .restartable(false)
+ *              .property("jobk1", "J")
+ *              .property("jobk2", "J")
+ *              .listener("jobListener1", new String[]{"jobListenerk1", "#{jobParameters['jobListenerPropVal']}"},
+ *                      new String[]{"jobListenerk2", "#{jobParameters['jobListenerPropVal']}"})
+ *
+ *              .step(new StepBuilder(stepName)
+ *                      .properties(new String[]{"stepk1", "S"}, new String[]{"stepk2", "S"})
+ *                      .batchlet(batchlet1Name, new String[]{"batchletk1", "B"}, new String[]{"batchletk2", "B"})
+ *                      .listener("stepListener1", stepListenerProps)
+ *                      .stopOn("STOP").restartFrom(stepName).exitStatus()
+ *                      .endOn("END").exitStatus("new status for end")
+ *                      .failOn("FAIL").exitStatus()
+ *                      .nextOn("*").to(step2Name)
+ *                      .build())
+ *
+ *              .step(new StepBuilder(step2Name)
+ *                      .batchlet(batchlet1Name)
+ *                      .build())
+ *
+ *              .build();
+ * </pre>
  *
  * @see StepBuilder
  * @see FlowBuilder
