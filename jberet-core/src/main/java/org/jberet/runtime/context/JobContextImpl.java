@@ -83,7 +83,6 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
             BatchLogger.LOGGER.failToClone(e, this, getJobName(), "");
         }
         result.jobExecution = jobExecution.clone();
-        result.transientUserData = null;
         return result;
     }
 
