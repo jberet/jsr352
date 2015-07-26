@@ -190,7 +190,7 @@ public final class JobBuilder extends AbstractPropertiesBuilder<JobBuilder> {
             job.setRestartable(restartable);
         }
         if (nameValues.size() > 0) {
-            job.setProperties(nameValuesToProperties(nameValues));
+            job.setProperties(nameValuesToProperties());
         }
 
         job.setListeners(listeners);

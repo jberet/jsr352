@@ -159,7 +159,7 @@ public final class DecisionBuilder extends AbstractPropertiesBuilder<DecisionBui
         decision.getTransitionElements().addAll(this.transitions);
 
         if (nameValues.size() > 0) {
-            decision.setProperties(nameValuesToProperties(nameValues));
+            decision.setProperties(nameValuesToProperties());
         }
         return decision;
     }

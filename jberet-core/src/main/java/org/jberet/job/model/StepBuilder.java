@@ -822,7 +822,7 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
         step.setListeners(listeners);
 
         if (nameValues.size() > 0) {
-            step.setProperties(nameValuesToProperties(nameValues));
+            step.setProperties(nameValuesToProperties());
         }
         if (chunk.reader != null) {
             step.chunk = chunk;

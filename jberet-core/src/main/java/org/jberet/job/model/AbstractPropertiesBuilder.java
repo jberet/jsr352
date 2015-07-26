@@ -78,10 +78,9 @@ abstract class AbstractPropertiesBuilder<T> {
     /**
      * Converts {@code Map<String, String>} to {@code org.jberet.job.model.Properties}.
      *
-     * @param nameValues {@code Map<String, String>}
      * @return an instance of org.jberet.job.model.Properties
      */
-    Properties nameValuesToProperties(final Map<String, String> nameValues) {
+    Properties nameValuesToProperties() {
         final Properties properties = new Properties();
         for (final Map.Entry<String, String> e : nameValues.entrySet()) {
             properties.add(e.getKey(), e.getValue());
