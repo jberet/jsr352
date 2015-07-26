@@ -64,15 +64,15 @@ public final class DecisionBuilder extends AbstractPropertiesBuilder<DecisionBui
      * endOn("END").exitStatus("new status for end").&lt;other DecisionBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition to trigger "end" action (may contain wildcard ? and *)
+     * @param exitStatusCondition exit status condition to trigger "end" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.End<DecisionBuilder>}
      *
      * @see org.jberet.job.model.Transition.End
      * @see StepBuilder#endOn(java.lang.String)
      * @see FlowBuilder#endOn(String)
      */
-    public Transition.End<DecisionBuilder> endOn(final String exitStatus) {
-        final Transition.End<DecisionBuilder> end = new Transition.End<DecisionBuilder>(exitStatus);
+    public Transition.End<DecisionBuilder> endOn(final String exitStatusCondition) {
+        final Transition.End<DecisionBuilder> end = new Transition.End<DecisionBuilder>(exitStatusCondition);
         end.enclosingBuilder = this;
         transitions.add(end);
         return end;
@@ -88,15 +88,15 @@ public final class DecisionBuilder extends AbstractPropertiesBuilder<DecisionBui
      * failOn("FAIL").exitStatus("new status for fail").&lt;other DecisionBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition to trigger "fail" action (may contain wildcard ? and *)
+     * @param exitStatusCondition exit status condition to trigger "fail" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.Fail<DecisionBuilder>}
      *
      * @see org.jberet.job.model.Transition.Fail
      * @see StepBuilder#failOn(java.lang.String)
      * @see FlowBuilder#failOn(String)
      */
-    public Transition.Fail<DecisionBuilder> failOn(final String exitStatus) {
-        final Transition.Fail<DecisionBuilder> fail = new Transition.Fail<DecisionBuilder>(exitStatus);
+    public Transition.Fail<DecisionBuilder> failOn(final String exitStatusCondition) {
+        final Transition.Fail<DecisionBuilder> fail = new Transition.Fail<DecisionBuilder>(exitStatusCondition);
         fail.enclosingBuilder = this;
         transitions.add(fail);
         return fail;
@@ -112,15 +112,15 @@ public final class DecisionBuilder extends AbstractPropertiesBuilder<DecisionBui
      * stopOn("STOP").restartFrom("step1").exitStatus().&lt;other DecisionBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition to trigger "stop" action (may contain wildcard ? and *)
+     * @param exitStatusCondition exit status condition to trigger "stop" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.Stop<DecisionBuilder>}
      *
      * @see org.jberet.job.model.Transition.Stop
      * @see StepBuilder#stopOn(java.lang.String)
      * @see FlowBuilder#stopOn(String)
      */
-    public Transition.Stop<DecisionBuilder> stopOn(final String exitStatus) {
-        final Transition.Stop<DecisionBuilder> stop = new Transition.Stop<DecisionBuilder>(exitStatus, null);
+    public Transition.Stop<DecisionBuilder> stopOn(final String exitStatusCondition) {
+        final Transition.Stop<DecisionBuilder> stop = new Transition.Stop<DecisionBuilder>(exitStatusCondition, null);
         stop.enclosingBuilder = this;
         transitions.add(stop);
         return stop;
@@ -135,15 +135,15 @@ public final class DecisionBuilder extends AbstractPropertiesBuilder<DecisionBui
      * <pre>
      * nextOn("*").to("step2").&lt;other DecisionBuilder methods&gt;
      * </pre>
-     * @param exitStatus exit status condition to trigger "next" action (may contain wildcard ? and *)
+     * @param exitStatusCondition exit status condition to trigger "next" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.Next<DecisionBuilder>}
      *
      * @see org.jberet.job.model.Transition.Next
      * @see StepBuilder#nextOn(java.lang.String)
      * @see FlowBuilder#nextOn(String)
      */
-    public Transition.Next<DecisionBuilder> nextOn(final String exitStatus) {
-        final Transition.Next<DecisionBuilder> nx = new Transition.Next<DecisionBuilder>(exitStatus);
+    public Transition.Next<DecisionBuilder> nextOn(final String exitStatusCondition) {
+        final Transition.Next<DecisionBuilder> nx = new Transition.Next<DecisionBuilder>(exitStatusCondition);
         nx.enclosingBuilder = this;
         transitions.add(nx);
         return nx;

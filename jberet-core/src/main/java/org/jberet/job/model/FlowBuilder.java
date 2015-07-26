@@ -73,15 +73,15 @@ public final class FlowBuilder {
      * endOn("END").exitStatus("new status for end").&lt;other FlowBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition to trigger "end" action (may contain wildcard ? and *)
+     * @param exitStatusCondition exit status condition to trigger "end" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.End<FlowBuilder>}
      *
      * @see org.jberet.job.model.Transition.End
      * @see StepBuilder#endOn(java.lang.String)
      * @see DecisionBuilder#endOn(String)
      */
-    public Transition.End<FlowBuilder> endOn(final String exitStatus) {
-        final Transition.End<FlowBuilder> end = new Transition.End<FlowBuilder>(exitStatus);
+    public Transition.End<FlowBuilder> endOn(final String exitStatusCondition) {
+        final Transition.End<FlowBuilder> end = new Transition.End<FlowBuilder>(exitStatusCondition);
         end.enclosingBuilder = this;
         transitions.add(end);
         return end;
@@ -97,15 +97,15 @@ public final class FlowBuilder {
      * failOn("FAIL").exitStatus("new status for fail").&lt;other FlowBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition to trigger "fail" action (may contain wildcard ? and *)
+     * @param exitStatusCondition exit status condition to trigger "fail" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.Fail<FlowBuilder>}
      *
      * @see org.jberet.job.model.Transition.Fail
      * @see StepBuilder#failOn(java.lang.String)
      * @see DecisionBuilder#failOn(String)
      */
-    public Transition.Fail<FlowBuilder> failOn(final String exitStatus) {
-        final Transition.Fail<FlowBuilder> fail = new Transition.Fail<FlowBuilder>(exitStatus);
+    public Transition.Fail<FlowBuilder> failOn(final String exitStatusCondition) {
+        final Transition.Fail<FlowBuilder> fail = new Transition.Fail<FlowBuilder>(exitStatusCondition);
         fail.enclosingBuilder = this;
         transitions.add(fail);
         return fail;
@@ -121,15 +121,15 @@ public final class FlowBuilder {
      * stopOn("STOP").restartFrom("step1").exitStatus().&lt;other FlowBuilder methods&gt;
      * </pre>
      *
-     * @param exitStatus exit status condition to trigger "stop" action (may contain wildcard ? and *)
+     * @param exitStatusCondition exit status condition to trigger "stop" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.Stop<FlowBuilder>}
      *
      * @see org.jberet.job.model.Transition.Stop
      * @see StepBuilder#stopOn(java.lang.String)
      * @see DecisionBuilder#stopOn(String)
      */
-    public Transition.Stop<FlowBuilder> stopOn(final String exitStatus) {
-        final Transition.Stop<FlowBuilder> stop = new Transition.Stop<FlowBuilder>(exitStatus, null);
+    public Transition.Stop<FlowBuilder> stopOn(final String exitStatusCondition) {
+        final Transition.Stop<FlowBuilder> stop = new Transition.Stop<FlowBuilder>(exitStatusCondition, null);
         stop.enclosingBuilder = this;
         transitions.add(stop);
         return stop;
@@ -144,15 +144,15 @@ public final class FlowBuilder {
      * <pre>
      * nextOn("*").to("step2").&lt;other FlowBuilder methods&gt;
      * </pre>
-     * @param exitStatus exit status condition to trigger "next" action (may contain wildcard ? and *)
+     * @param exitStatusCondition exit status condition to trigger "next" action (may contain wildcard ? and *)
      * @return an instance of {@code Transition.Next<FlowBuilder>}
      *
      * @see org.jberet.job.model.Transition.Next
      * @see StepBuilder#nextOn(java.lang.String)
      * @see DecisionBuilder#nextOn(String)
      */
-    public Transition.Next<FlowBuilder> nextOn(final String exitStatus) {
-        final Transition.Next<FlowBuilder> nx = new Transition.Next<FlowBuilder>(exitStatus);
+    public Transition.Next<FlowBuilder> nextOn(final String exitStatusCondition) {
+        final Transition.Next<FlowBuilder> nx = new Transition.Next<FlowBuilder>(exitStatusCondition);
         nx.enclosingBuilder = this;
         transitions.add(nx);
         return nx;
