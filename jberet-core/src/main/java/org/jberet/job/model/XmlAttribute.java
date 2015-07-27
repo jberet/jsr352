@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,9 +11,6 @@
  */
 
 package org.jberet.job.model;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public enum XmlAttribute {
     UNKNOWN(null),
@@ -60,23 +57,5 @@ public enum XmlAttribute {
      */
     public String getLocalName() {
         return name;
-    }
-
-    private static final Map<String, XmlAttribute> MAP;
-
-    static {
-        final Map<String, XmlAttribute> map = new HashMap<String, XmlAttribute>();
-        for (final XmlAttribute attribute : values()) {
-            final String name = attribute.getLocalName();
-            if (name != null) {
-                map.put(name, attribute);
-            }
-        }
-        MAP = map;
-    }
-
-    public static XmlAttribute forName(final String localName) {
-        final XmlAttribute attribute = MAP.get(localName);
-        return attribute == null ? UNKNOWN : attribute;
     }
 }

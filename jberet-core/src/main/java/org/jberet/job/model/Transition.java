@@ -93,8 +93,11 @@ public abstract class Transition<T> implements Serializable {
          * Sets the {@code exit-status} attribute value, which is the new exit status after matching the current
          * transition element, and returns the current builder, such as
          * {@link StepBuilder}, {@link DecisionBuilder}, or {@link FlowBuilder}.
+         * <p/>
+         * If no need for a new exit status, invoking this method without argument to simply exit operation on this
+         * transition element and return the enclosing builder.
          *
-         * @param newExitStatus the new, updated exit status
+         * @param newExitStatus the new, updated exit status (optional param and may be omitted)
          * @return the current builder
          */
         public T exitStatus(final String... newExitStatus) {
