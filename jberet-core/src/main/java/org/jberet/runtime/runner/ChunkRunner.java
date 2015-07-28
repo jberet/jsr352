@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.batch.api.chunk.CheckpointAlgorithm;
 import javax.batch.api.chunk.ItemProcessor;
 import javax.batch.api.chunk.ItemReader;
@@ -101,6 +102,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private final List<Object> outputList = new ArrayList<Object>();
 
     private final TransactionManager tm;
+    private final AtomicBoolean itemReaderClosed = new AtomicBoolean(false);
+    private final AtomicBoolean itemWriterClosed = new AtomicBoolean(false);
 
     public ChunkRunner(final StepContextImpl stepContext,
                        final CompositeExecutionRunner enclosingRunner,
@@ -182,7 +185,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             tm.setTransactionTimeout(globalTimeout);
             tm.begin();
             try {
+                itemReaderClosed.set(false);
                 itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
+                itemWriterClosed.set(false);
                 itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
                 tm.commit();
             } catch (final Exception e) {
@@ -196,8 +201,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
             tm.begin();
             try {
-                itemWriter.close();
-                itemReader.close();
+                closeItemWriter();
+                closeItemReader();
                 tm.commit();
             } catch (final Exception e) {
                 tm.rollback();
@@ -621,8 +626,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
         // Close the reader and writer
         try {
-            itemWriter.close();
-            itemReader.close();
+            closeItemWriter();
+            closeItemReader();
         } catch (Exception e) {
             // An error occurred, safely close the reader and writer
             safeClose();
@@ -632,8 +637,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         tm.begin();
         try {
             // Open the reader and writer
+            itemReaderClosed.set(false);
             itemReader.open(stepOrPartitionExecution.getReaderCheckpointInfo());
             processingInfo.readPosition = processingInfo.checkpointPosition;
+            itemWriterClosed.set(false);
             itemWriter.open(stepOrPartitionExecution.getWriterCheckpointInfo());
             tm.commit();
         } catch (final Exception e) {
@@ -747,14 +754,26 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
      */
     private void safeClose() {
         try {
-            if (itemWriter != null) itemWriter.close();
+            if (itemWriter != null) closeItemWriter();
         } catch (Exception e) {
             LOGGER.trace("Error closing ItemWriter.", e);
         }
         try {
-            if (itemReader != null) itemReader.close();
+            if (itemReader != null) closeItemReader();
         } catch (Exception e) {
             LOGGER.trace("Error closing ItemReader.", e);
+        }
+    }
+
+    private void closeItemReader() throws Exception {
+        if (itemReaderClosed.compareAndSet(false, true)) {
+            itemReader.close();
+        }
+    }
+
+    private void closeItemWriter() throws Exception {
+        if (itemWriterClosed.compareAndSet(false, true)) {
+            itemWriter.close();
         }
     }
 
