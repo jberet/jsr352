@@ -104,6 +104,18 @@ public class JobOperatorImpl implements JobOperator {
         return start(jobDefined, jobParameters);
     }
 
+    /**
+     * Starts a pre-configured {@link Job} instance, with job parameters.
+     *
+     * @param jobDefined a pre-configured job
+     * @param jobParameters job parameters for the current job execution
+     * @return job execution id as a long number
+     * @throws JobStartException if failed to start the job
+     * @throws JobSecurityException if failed to start the job due to security permission
+     *
+     * @see org.jberet.job.model.JobBuilder
+     * @since 1.2.0
+     */
     public long start(final Job jobDefined, final Properties jobParameters) throws JobStartException, JobSecurityException {
         final ClassLoader classLoader = batchEnvironment.getClassLoader();
         final String applicationName = getApplicationName();

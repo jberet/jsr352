@@ -12,6 +12,11 @@
 
 package org.jberet.job.model;
 
+/**
+ * Enum type to hold all XML attribute names for job xml and batch.xml.
+ *
+ * @see XmlElement
+ */
 public enum XmlAttribute {
     UNKNOWN(null),
 

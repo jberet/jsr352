@@ -15,6 +15,12 @@ package org.jberet.job.model;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Enum type to hold all XML element names for job xml and batch.xml. It supports getting an enum instance by its
+ * corresponding local XML element string value, and getting the string name of an enum instance.
+ *
+ * @see XmlAttribute
+ */
 public enum XmlElement {
     UNKNOWN(null),
 
@@ -62,7 +68,7 @@ public enum XmlElement {
     }
 
     /**
-     * Get the local name of this element.
+     * Get the local name of the corresponding XML element.
      *
      * @return the local name
      */
@@ -83,6 +89,12 @@ public enum XmlElement {
         MAP = map;
     }
 
+    /**
+     * Looks up {@code XmlElement} enum instance by the local XML element name.
+     *
+     * @param localName local name of an XML element
+     * @return an instance of {@code XmlElement} enum type for {@code localName}, and {@link #UNKNOWN} if no match
+     */
     public static XmlElement forName(final String localName) {
         final XmlElement element = MAP.get(localName);
         return element == null ? UNKNOWN : element;
