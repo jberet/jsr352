@@ -70,7 +70,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     PartitionReducer reducer;
     PartitionAnalyzer analyzer;
-    RefArtifact collectorConfig;
 
     int numOfPartitions;
     int numOfThreads;
@@ -431,7 +430,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (analyzerConfig != null) {
                 analyzer = jobContext.createArtifact(analyzerConfig.getRef(), null, analyzerConfig.getProperties(), batchContext);
             }
-            collectorConfig = partition.getCollector();
             plan = partition.getPlan();
         }
     }

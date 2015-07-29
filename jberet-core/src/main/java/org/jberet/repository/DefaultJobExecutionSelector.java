@@ -46,7 +46,7 @@ public final class DefaultJobExecutionSelector implements JobExecutionSelector {
     Set<String> jobExecutionsByJobNames;
 
     public DefaultJobExecutionSelector(final Boolean excludeRunningJobExecutions) {
-        if (excludeRunningJobExecutions == Boolean.FALSE) {
+        if (Boolean.FALSE.equals(excludeRunningJobExecutions)) {
             this.excludeRunningJobExecutions = Boolean.FALSE;
         }
     }

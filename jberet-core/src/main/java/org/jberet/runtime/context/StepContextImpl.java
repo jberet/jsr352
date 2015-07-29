@@ -45,7 +45,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
     private AbstractStepExecution stepExecution;
 
     private StepExecutionImpl originalStepExecution;
-    Boolean allowStartIfComplete;
+    private Boolean allowStartIfComplete;
 
     /**
      * A store for keeping CDI beans with {@link org.jberet.cdi.PartitionScoped} custom scopes.

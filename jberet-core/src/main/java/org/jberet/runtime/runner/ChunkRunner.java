@@ -179,7 +179,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             if (stepProps != null) {
                 final String globalTimeoutProp = stepProps.get("javax.transaction.global.timeout");
                 if (globalTimeoutProp != null) {
-                    globalTimeout = Integer.valueOf(globalTimeoutProp);
+                    globalTimeout = Integer.parseInt(globalTimeoutProp);
                 }
             }
             tm.setTransactionTimeout(globalTimeout);

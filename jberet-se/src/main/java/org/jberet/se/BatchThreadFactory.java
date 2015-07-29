@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class BatchThreadFactory implements ThreadFactory {
     final AtomicInteger threadNumber = new AtomicInteger(1);
-    final String namePrefix = "jberet-";
+    final static String namePrefix = "jberet-";
 
     @Override
     public Thread newThread(final Runnable r) {
