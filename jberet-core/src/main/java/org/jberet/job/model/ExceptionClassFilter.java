@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,17 +21,11 @@ import java.util.List;
  * It represents job XML elements such as {@code skippable-exception-classes}, {@code retryable-exception-classes},
  * and {@code no-rollback-exception-classes}.
  */
-public final class ExceptionClassFilter implements Serializable, Cloneable {
+public final class ExceptionClassFilter extends MergeableElement implements Serializable, Cloneable {
     private static final long serialVersionUID = -6174512038188933722L;
 
     final List<String> include = new ArrayList<String>();
     final List<String> exclude = new ArrayList<String>();
-
-    /**
-     * Indicates whether to merge with the counterpart element from the parent job element. Only applicable when the
-     * current job element (e.g., a step) has a parent. The default merge value is true.
-     */
-    private boolean merge = true;
 
     /**
      * Adds an exception class fully-qualified name to either the include or exclude list.
@@ -43,26 +37,6 @@ public final class ExceptionClassFilter implements Serializable, Cloneable {
         final String trimmed = exceptionClass.trim();
         if (!trimmed.isEmpty()) {
             includeOrExcludeList.add(trimmed);
-        }
-    }
-
-    /**
-     * Checks whether to merge with the counterpart element from the parent job element.
-     *
-     * @return true (default) or false
-     */
-    boolean isMerge() {
-        return merge;
-    }
-
-    /**
-     * Sets the {@code merge} attribute when the current job element inherits from a parent.
-     *
-     * @param mergeVal {@code merge} attribute value ("true" or "false") as string
-     */
-    void setMerge(final String mergeVal) {
-        if (mergeVal != null && !mergeVal.toLowerCase().equals("true")) {
-            this.merge = false;
         }
     }
 
@@ -132,6 +106,7 @@ public final class ExceptionClassFilter implements Serializable, Cloneable {
 
     @Override
     protected ExceptionClassFilter clone() {
+        //merge attribute from super class is not copied over
         final ExceptionClassFilter c = new ExceptionClassFilter();
         c.include.addAll(this.include);
         c.exclude.addAll(this.exclude);

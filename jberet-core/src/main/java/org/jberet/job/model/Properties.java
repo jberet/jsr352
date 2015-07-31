@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Corresponds to {@code jsl:Properties} of job XML element type.
  */
-public final class Properties implements Serializable, Cloneable {
+public final class Properties extends MergeableElement implements Serializable, Cloneable {
     private static final long serialVersionUID = 7115483407256741761L;
 
     /**
@@ -30,12 +30,6 @@ public final class Properties implements Serializable, Cloneable {
     private String partition;
 
     private final Map<String, String> nameValues = new LinkedHashMap<String, String>();
-
-    /**
-     * Indicates whether to merge with the counterpart element from the parent job element. Only applicable when the
-     * current job element (e.g., a step) has a parent. The default merge value is true.
-     */
-    private boolean merge = true;
 
     Properties() {
     }
@@ -79,26 +73,6 @@ public final class Properties implements Serializable, Cloneable {
      */
     public String get(final String name) {
         return nameValues.get(name);
-    }
-
-    /**
-     * Checks whether to merge with the counterpart element from the parent job element.
-     *
-     * @return true (default) or false
-     */
-    boolean isMerge() {
-        return merge;
-    }
-
-    /**
-     * Sets the {@code merge} attribute when the current job element inherits from a parent.
-     *
-     * @param mergeVal {@code merge} attribute value ("true" or "false") as string
-     */
-    void setMerge(final String mergeVal) {
-        if (mergeVal != null && !mergeVal.toLowerCase().equals("true")) {
-            this.merge = false;
-        }
     }
 
     /**
@@ -159,7 +133,7 @@ public final class Properties implements Serializable, Cloneable {
     @Override
     protected Properties clone() {
         final Properties c = new Properties();
-        //merge attribute is not copied over
+        //merge attribute from super class is not copied over
         c.setPartition(this.partition);
         for (final Map.Entry<String, String> e : this.nameValues.entrySet()) {
             c.add(e.getKey(), e.getValue());
