@@ -16,13 +16,29 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Corresponds to {@code jsl:ExceptionClassFilter} job XML element type.
+ * It represents job XML elements such as {@code skippable-exception-classes}, {@code retryable-exception-classes},
+ * and {@code no-rollback-exception-classes}.
+ */
 public final class ExceptionClassFilter implements Serializable, Cloneable {
     private static final long serialVersionUID = -6174512038188933722L;
 
     final List<String> include = new ArrayList<String>();
     final List<String> exclude = new ArrayList<String>();
+
+    /**
+     * Indicates whether to merge with the counterpart element from the parent job element. Only applicable when the
+     * current job element (e.g., a step) has a parent. The default merge value is true.
+     */
     private boolean merge = true;
 
+    /**
+     * Adds an exception class fully-qualified name to either the include or exclude list.
+     *
+     * @param exceptionClass fully-qualified exception class name
+     * @param includeOrExcludeList include or exclude list to add to
+     */
     static void addExceptionClassTo(final String exceptionClass, final List<String> includeOrExcludeList) {
         final String trimmed = exceptionClass.trim();
         if (!trimmed.isEmpty()) {
@@ -30,10 +46,20 @@ public final class ExceptionClassFilter implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * Checks whether to merge with the counterpart element from the parent job element.
+     *
+     * @return true (default) or false
+     */
     boolean isMerge() {
         return merge;
     }
 
+    /**
+     * Sets the {@code merge} attribute when the current job element inherits from a parent.
+     *
+     * @param mergeVal {@code merge} attribute value ("true" or "false") as string
+     */
     void setMerge(final String mergeVal) {
         if (mergeVal != null && !mergeVal.toLowerCase().equals("true")) {
             this.merge = false;

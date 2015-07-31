@@ -14,6 +14,9 @@ package org.jberet.job.model;
 
 import java.io.Serializable;
 
+/**
+ * Corresponds to jsl:Chunk job XML element type.
+ */
 public final class Chunk implements Serializable, Cloneable {
     private static final long serialVersionUID = 352707227911452807L;
 
@@ -156,13 +159,6 @@ public final class Chunk implements Serializable, Cloneable {
 
     public String getRetryLimit() {
         return retryLimit;
-    }
-
-    public int getRetryLimitInt() {
-        if (retryLimit == null) {
-            return DEFAULT_LIMIT;
-        }
-        return Integer.parseInt(retryLimit);
     }
 
     void setRetryLimit(final String retryLimit) {

@@ -24,7 +24,8 @@ import org.jberet._private.BatchMessages;
  * Builder class for building a single {@linkplain Job job}. After the job is built, the same {@code JobBuilder} instance
  * should not be reused to build another job.
  * <p/>
- * Jobs built programmatically with this builder and other related builder classes do not support JSL inheritance.
+ * Unlike XML JSL, jobs built programmatically with this builder and other related builder classes do not support
+ * JSL inheritance, nor artifacts written in scripting languages.
  * <p/>
  * This class does not support multi-threaded access or modification. Usage example,
  * <p/>
