@@ -14,6 +14,9 @@ package org.jberet.job.model;
 
 import java.io.Serializable;
 
+/**
+ * Corresponds to {@code jsl:Partition} job element type in job XML.
+ */
 public final class Partition implements Serializable, Cloneable {
     private static final long serialVersionUID = 1535154712638288876L;
 
@@ -26,42 +29,92 @@ public final class Partition implements Serializable, Cloneable {
     Partition() {
     }
 
+    /**
+     * Gets the partition mapper.
+     *
+     * @return partition mapper as a {@code RefArtifact}
+     */
     public RefArtifact getMapper() {
         return mapper;
     }
 
+    /**
+     * Sets the partition mapper.
+     *
+     * @param mapper partition mapper as a {@code RefArtifact}
+     */
     void setMapper(final RefArtifact mapper) {
         this.mapper = mapper;
     }
 
+    /**
+     * Gets the {@linkplain PartitionPlan partition plan} for this partition.
+     *
+     * @return a {@code org.jberet.job.model.PartitionPlan}
+     */
     public PartitionPlan getPlan() {
         return plan;
     }
 
+    /**
+     * Sets the {@linkplain PartitionPlan partition plan} for this partition.
+     *
+     * @param plan a {@code org.jberet.job.model.PartitionPlan}
+     */
     void setPlan(final PartitionPlan plan) {
         this.plan = plan;
     }
 
+    /**
+     * Gets the partition collector.
+     *
+     * @return partition collector as a {@code RefArtifact}
+     */
     public RefArtifact getCollector() {
         return collector;
     }
 
+    /**
+     * Sets the partition collector.
+     *
+     * @param collector partition collector as a {@code RefArtifact}
+     */
     void setCollector(final RefArtifact collector) {
         this.collector = collector;
     }
 
+    /**
+     * Gets the partition analyzer.
+     *
+     * @return partition analyzer as a {@code RefArtifact}
+     */
     public RefArtifact getAnalyzer() {
         return analyzer;
     }
 
+    /**
+     * Sets the partition analyzer.
+     *
+     * @param analyzer partition analyzer as a {@code RefArtifact}
+     */
     void setAnalyzer(final RefArtifact analyzer) {
         this.analyzer = analyzer;
     }
 
+    /**
+     * Gets the partition reducer.
+     *
+     * @return partition reducer as a {@code RefArtifact}
+     */
     public RefArtifact getReducer() {
         return reducer;
     }
 
+    /**
+     * Sets the partition reducer.
+     *
+     * @param reducer partition reducer as a {@code RefArtifact}
+     */
     void setReducer(final RefArtifact reducer) {
         this.reducer = reducer;
     }

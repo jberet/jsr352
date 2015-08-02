@@ -27,6 +27,39 @@ import org.jberet._private.BatchMessages;
 
 /**
  * Represents a script element under an enclosing element represented by {@link org.jberet.job.model.RefArtifact}.
+ * The script may be included inline in job XML as element text or CDATA, or reference an external resource via
+ * {@code src} attribute. For example,
+ * <p/>
+ * <pre>
+ *&lt;step id="batchletJavascriptSrc.step1"&gt;
+ *  &lt;batchlet&gt;
+ *      &lt;script src="javascript/simple-batchlet.js"/&gt;
+ *  &lt;/batchlet&gt;
+ *&lt;/step&gt;
+ * </pre>
+ *<pre>
+ *&lt;step id="batchletJavascriptInline.step1"&gt;
+ *&lt;batchlet&gt;
+ *&lt;script type="javascript"&gt;
+ *  function stop() {
+ *      print('In stop function\n');
+ *  }
+ *
+ *  //access built-in variables: jobContext, stepContext and batchProperties,
+ *  //set job exit status to the value of testName property, and
+ *  //return the value of testName property as step exit status,
+ *
+ *  function process() {
+ *      print('jobName: ' + jobContext.getJobName() + '\n');
+ *      print('stepName: ' + stepContext.getStepName() + '\n');
+ *      var testName = batchProperties.get('testName');
+ *      jobContext.setExitStatus(testName);
+ *      return testName;
+ *  }
+ *    &lt;/script&gt;
+ *  &lt;/batchlet&gt;
+ *&lt;/step&gt;
+ * </pre>
  */
 public class Script implements Serializable, Cloneable {
     private static final long serialVersionUID = 3048730979495066553L;
@@ -42,6 +75,14 @@ public class Script implements Serializable, Cloneable {
         this.src = src;
     }
 
+    /**
+     * Gets the content of the script as string.
+     * If the script is specified as inline in job XML, its content is returned.  Otherwise, this method tries to load
+     * the content of the resource as specified in {@code scr attribute} fo the {@code script} element in job XML.
+     *
+     * @param classLoader class loader to load the resource
+     * @return the string content of the script
+     */
     public String getContent(final ClassLoader classLoader) {
         if (content != null) {
             return content;
@@ -77,6 +118,7 @@ public class Script implements Serializable, Cloneable {
         } finally {
             if (scanner != null) {
                 try {
+                    //closing the scannr also closes the InputStream source.
                     scanner.close();
                 } catch (final Exception e) {
                     BatchLogger.LOGGER.tracef(e, "Failed to close resource %s", src);
@@ -85,10 +127,21 @@ public class Script implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * Gets the type of the script, for example, {@code javascript}.
+
+     * @return type of the script
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Gets the javax.script.ScriptEngine for this script.
+     *
+     * @param classLoader class loader used to obtain the script engine
+     * @return {@code ScriptEngine} for this script
+     */
     public ScriptEngine getEngine(final ClassLoader classLoader) {
         ScriptEngineManager mgr = scriptEngineManager;
         if (mgr == null) {

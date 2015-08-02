@@ -17,7 +17,17 @@ package org.jberet.job.model;
  * {@link org.jberet.job.model.Properties}.
  */
 public interface PropertiesHolder {
-    public Properties getProperties();
+    /**
+     * Gets {@code org.jberet.job.model.Properties} in the current job model type.
+     *
+     * @return {@code org.jberet.job.model.Properties}
+     */
+    Properties getProperties();
 
+    /**
+     * Sets {@code org.jberet.job.model.Properties} to the current job model type.
+     *
+     * @param properties {@code org.jberet.job.model.Properties}
+     */
     void setProperties(final Properties properties);
 }

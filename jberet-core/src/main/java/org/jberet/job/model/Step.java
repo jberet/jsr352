@@ -59,6 +59,11 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
         }
     }
 
+    /**
+     * Gets the value of the {@code next} attribute, which specifies the next job element after this step completes.
+     *
+     * @return {@code next} attribute value
+     */
     public String getAttributeNext() {
         return next;
     }

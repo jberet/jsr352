@@ -16,6 +16,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Corresponds to {@code jsl:PartitionPlan} job element type in job XML.
+ */
 public final class PartitionPlan implements Serializable, Cloneable {
     private static final long serialVersionUID = -7038781842409368148L;
     private static final int DEFAULT_PARTITIONS = 1;
@@ -33,23 +36,47 @@ public final class PartitionPlan implements Serializable, Cloneable {
      */
     private String threads;
 
+    /**
+     * list of {@code org.jberet.job.model.Properties}, one properties for each partition.
+     */
     private final List<Properties> propertiesList = new ArrayList<Properties>();
 
     PartitionPlan() {
     }
 
+    /**
+     * Gets the list of {@code org.jberet.job.model.Properties} for this partition plan.
+     *
+     * @return list of {@code org.jberet.job.model.Properties}
+     */
     public List<Properties> getPropertiesList() {
         return propertiesList;
     }
 
+    /**
+     * Adds a {@code org.jberet.job.model.Properties} to the list of {@code org.jberet.job.model.Properties} for this
+     * partition plan.
+     *
+     * @param properties a {@code org.jberet.job.model.Properties}
+     */
     void addProperties(final Properties properties) {
         propertiesList.add(properties);
     }
 
+    /**
+     * Gets the number of partition as string.
+     *
+     * @return number of partitions as string
+     */
     public String getPartitions() {
         return partitions;
     }
 
+    /**
+     * Gets the number of partitions as int.
+     *
+     * @return number of partitions as int
+     */
     public int getPartitionsInt() {
         if (partitions == null) {
             return DEFAULT_PARTITIONS;
@@ -57,16 +84,32 @@ public final class PartitionPlan implements Serializable, Cloneable {
         return Integer.parseInt(partitions);
     }
 
+    /**
+     * Sets the number of partitions from a string parameter.
+     *
+     * @param partitions number of partitions as string
+     */
     void setPartitions(final String partitions) {
         if (partitions != null) {
             this.partitions = partitions;
         }
     }
 
+    /**
+     * Gets the number of threads as string.
+     *
+     * @return number of threads as string
+     */
     public String getThreads() {
         return threads;
     }
 
+    /**
+     * Gets the number of threads as int. If {@code threads} attribute is not present, this method returns the
+     * number of partitions.
+     *
+     * @return number of threads as int
+     */
     public int getThreadsInt() {
         if (threads == null) {
             return getPartitionsInt();
@@ -74,6 +117,11 @@ public final class PartitionPlan implements Serializable, Cloneable {
         return Integer.parseInt(threads);
     }
 
+    /**
+     * Sets the number of threads from a string parameter.
+     *
+     * @param threads number of threads as string
+     */
     void setThreads(final String threads) {
         if (threads != null) {
             this.threads = threads;
