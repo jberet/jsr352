@@ -16,6 +16,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Abstract base class for job element types such as job, step, flow, split and decision.
+ *
+ * @see Job
+ * @see Step
+ * @see Decision
+ * @see Flow
+ * @see Split
+ * @see InheritableJobElement
+ */
 abstract class AbstractJobElement implements JobElement, Serializable {
     private static final long serialVersionUID = -8396145727646776440L;
 
@@ -47,10 +57,20 @@ abstract class AbstractJobElement implements JobElement, Serializable {
         transitions.add(transition);
     }
 
+    /**
+     * Gets the {@code org.jberet.job.model.Properties} contained in this job element.
+     *
+     * @return the {@code org.jberet.job.model.Properties} contained in this job element
+     */
     public Properties getProperties() {
         return properties;
     }
 
+    /**
+     * Sets the {@code org.jberet.job.model.Properties} contained in this job element.
+     *
+     * @param properties {@code org.jberet.job.model.Properties} for this job element
+     */
     public void setProperties(final Properties properties) {
         this.properties = properties;
     }
