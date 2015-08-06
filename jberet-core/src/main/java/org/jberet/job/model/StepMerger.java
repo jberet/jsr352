@@ -41,7 +41,7 @@ public final class StepMerger extends AbstractMerger<Step> {
      *
      * @throws JobStartException if failed to construct the step merger
      */
-    public StepMerger(final Job job, final Step child, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
+    StepMerger(final Job job, final Step child, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {
         super(job, classLoader, loadedJobs, jobXmlResolver);
         this.child = child;

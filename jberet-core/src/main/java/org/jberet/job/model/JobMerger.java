@@ -42,7 +42,7 @@ public final class JobMerger extends AbstractMerger<Job> {
      *
      * @see BatchEnvironment#getJobXmlResolver()
      */
-    public JobMerger(final Job child, final ClassLoader classLoader, final List<Job> loadedJobs,  final JobXmlResolver jobXmlResolver) throws JobStartException {
+    private JobMerger(final Job child, final ClassLoader classLoader, final List<Job> loadedJobs,  final JobXmlResolver jobXmlResolver) throws JobStartException {
         super(child, classLoader, loadedJobs, jobXmlResolver);
         final String parentName = child.getParent();
         if (parentName != null) {

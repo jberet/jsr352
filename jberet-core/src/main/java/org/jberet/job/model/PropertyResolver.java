@@ -41,17 +41,11 @@ public final class PropertyResolver {
     private static final int shortestTemplateLen = "#{jobProperties['x']}".length();
     private static final int prefixLen = prefix.length();
 
-    private Properties systemProperties = null;
     private Properties jobParameters;
     private Properties partitionPlanProperties;
-    private Deque<org.jberet.job.model.Properties> jobPropertiesStack = new ArrayDeque<org.jberet.job.model.Properties>();
+    private final Deque<org.jberet.job.model.Properties> jobPropertiesStack = new ArrayDeque<org.jberet.job.model.Properties>();
 
     private boolean resolvePartitionPlanProperties;
-
-    @Deprecated
-    public void setSystemProperties(final Properties systemProperties) {
-        this.systemProperties = systemProperties;
-    }
 
     public void setJobParameters(final Properties jobParameters) {
         this.jobParameters = jobParameters;
@@ -331,7 +325,7 @@ public final class PropertyResolver {
     }
 
     private void resolveIncludeOrExclude(final List<String> clude) {
-        for (ListIterator<String> it = clude.listIterator(); it.hasNext();) {
+        for (final ListIterator<String> it = clude.listIterator(); it.hasNext();) {
             final String oldVal = it.next();
             final String newVal = resolve(oldVal);
             if (!oldVal.equals(newVal)) {
@@ -517,7 +511,7 @@ public final class PropertyResolver {
         final StringBuilder sb = new StringBuilder(rawVale);
         try {
             resolve(sb, 0, true, null);
-        } catch (BatchRuntimeException e) {
+        } catch (final BatchRuntimeException e) {
             LOGGER.unresolvableExpression(e.getMessage());
             return null;
         }
@@ -623,7 +617,7 @@ public final class PropertyResolver {
 
         try {
             resolve(sb, 0, defaultAllowed, referringExpressions);
-        } catch (BatchRuntimeException e) {
+        } catch (final BatchRuntimeException e) {
             LOGGER.unresolvableExpression(e.getMessage());
             return null;
         }
@@ -649,14 +643,10 @@ public final class PropertyResolver {
                 }
             }
         } else if (propCategory.equals(systemPropertiesToken)) {
-            if (systemProperties != null) {
-                val = systemProperties.getProperty(variableName);
+            if (variableName == null || variableName.isEmpty()) {
+                val = null;
             } else {
-                if (variableName == null || variableName.isEmpty()) {
-                    val = null;
-                } else {
-                    val = System.getProperty(variableName);
-                }
+                val = System.getProperty(variableName);
             }
         } else if (propCategory.equals(partitionPlanToken)) {
             if (partitionPlanProperties != null) {

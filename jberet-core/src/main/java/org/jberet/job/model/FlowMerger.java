@@ -47,7 +47,7 @@ public final class FlowMerger extends AbstractMerger<Flow> {
      *
      * @see BatchEnvironment#getJobXmlResolver()
      */
-    public FlowMerger(final Job job, final Flow child, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
+    FlowMerger(final Job job, final Flow child, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {
         super(job, classLoader, loadedJobs, jobXmlResolver);
         this.child = child;
