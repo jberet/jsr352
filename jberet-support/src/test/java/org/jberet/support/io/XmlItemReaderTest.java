@@ -30,7 +30,10 @@ import org.junit.Test;
 public final class XmlItemReaderTest {
     static final String jobName = "org.jberet.support.io.XmlItemReaderTest";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
-    static final String movieXml = "http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=xml";
+
+    //the online resource may change any time, so use a local copy
+    //static final String movieXml = "http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&format=xml";
+    static final String movieXml = "movies-2012.xml";
 
     // openstreammap file, 265M in size, make sure XmlItemReader and XmlItemWriter can handle large file, with
     // xml attributes, and sub-elements that are serialized unwrapped.

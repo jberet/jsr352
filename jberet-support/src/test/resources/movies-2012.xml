@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t>
+  <movie>
+    <grs>6.2335789E8</grs>
+    <opn>2012-05-04</opn>
+    <rank>1</rank>
+    <rating>PG13</rating>
+    <tit>Marvel's The Avengers</tit>
+  </movie>
+  <movie>
+    <grs>4.48139104E8</grs>
+    <opn>2012-07-20</opn>
+    <rank>2</rank>
+    <rating>PG13</rating>
+    <tit>The Dark Knight Rises</tit>
+  </movie>
+  <movie>
+    <grs>4.08010688E8</grs>
+    <opn>2012-03-23</opn>
+    <rank>3</rank>
+    <rating>PG</rating>
+    <tit>The Hunger Games</tit>
+  </movie>
+  <movie>
+    <grs>3.04360288E8</grs>
+    <opn>2012-11-09</opn>
+    <rank>4</rank>
+    <tit>Skyfall</tit>
+  </movie>
+  <movie>
+    <grs>3.03003584E8</grs>
+    <opn>2012-12-14</opn>
+    <rank>5</rank>
+    <tit>The Hobbit: An Unexpected Journey</tit>
+  </movie>
+  <movie>
+    <grs>2.92324736E8</grs>
+    <opn>2012-11-16</opn>
+    <rank>6</rank>
+    <tit>The Twilight Saga: Breaking Dawn Part 2</tit>
+  </movie>
+  <movie>
+    <grs>2.62030656E8</grs>
+    <opn>2012-07-03</opn>
+    <rank>7</rank>
+    <tit>The Amazing Spider-Man</tit>
+  </movie>
+  <movie>
+    <grs>2.372832E8</grs>
+    <opn>2012-06-22</opn>
+    <rank>8</rank>
+    <tit>Brave</tit>
+  </movie>
+  <movie>
+    <grs>2.18815488E8</grs>
+    <opn>2012-06-29</opn>
+    <rank>9</rank>
+    <tit>Ted</tit>
+  </movie>
+  <movie>
+    <grs>2.16391488E8</grs>
+    <opn>2012-06-08</opn>
+    <rank>10</rank>
+    <tit>Madagascar 3: Europe's Most Wanted</tit>
+  </movie>
+  <movie>
+    <grs>2.14030496E8</grs>
+    <opn>2012-03-02</opn>
+    <rank>11</rank>
+    <tit>Dr. Seuss' The Lorax</tit>
+  </movie>
+  <movie>
+    <grs>1.89422896E8</grs>
+    <opn>2012-11-02</opn>
+    <rank>12</rank>
+    <tit>Wreck-It Ralph</tit>
+  </movie>
+  <movie>
+    <grs>1.82207968E8</grs>
+    <opn>2012-11-09</opn>
+    <rank>13</rank>
+    <tit>Lincoln</tit>
+  </movie>
+  <movie>
+    <grs>1.79020848E8</grs>
+    <opn>2012-05-25</opn>
+    <rank>14</rank>
+    <tit>MIB 3</tit>
+  </movie>
+  <movie>
+    <grs>1.6280544E8</grs>
+    <opn>2012-12-25</opn>
+    <rank>15</rank>
+    <tit>Django Unchained</tit>
+  </movie>
+  <movie>
+    <grs>1.6132184E8</grs>
+    <opn>2012-07-13</opn>
+    <rank>16</rank>
+    <tit>Ice Age: Continental Drift</tit>
+  </movie>
+  <movie>
+    <grs>1.55332384E8</grs>
+    <opn>2012-06-01</opn>
+    <rank>17</rank>
+    <tit>Snow White and the Huntsman</tit>
+  </movie>
+  <movie>
+    <grs>1.48809776E8</grs>
+    <opn>2012-12-25</opn>
+    <rank>18</rank>
+    <tit>Les Miserables (2012)</tit>
+  </movie>
+  <movie>
+    <grs>1.48313056E8</grs>
+    <opn>2012-09-28</opn>
+    <rank>19</rank>
+    <tit>Hotel Transylvania</tit>
+  </movie>
+  <movie>
+    <grs>1.39854288E8</grs>
+    <opn>2012-10-05</opn>
+    <rank>20</rank>
+    <tit>Taken 2</tit>
+  </movie>
+  <movie>
+    <grs>1.38447664E8</grs>
+    <opn>2012-03-16</opn>
+    <rank>21</rank>
+    <tit>21 Jump Street</tit>
+  </movie>
+  <movie>
+    <grs>1.36024128E8</grs>
+    <opn>2012-10-12</opn>
+    <rank>22</rank>
+    <tit>Argo</tit>
+  </movie>
+  <movie>
+    <grs>1.3209296E8</grs>
+    <opn>2012-11-16</opn>
+    <rank>23</rank>
+    <tit>Silver Linings Playbook</tit>
+  </movie>
+  <movie>
+    <grs>1.26477088E8</grs>
+    <opn>2012-06-08</opn>
+    <rank>24</rank>
+    <tit>Prometheus</tit>
+  </movie>
+  <movie>
+    <grs>1.26373432E8</grs>
+    <opn>2012-02-10</opn>
+    <rank>25</rank>
+    <tit>Safe House</tit>
+  </movie>
+  <movie>
+    <grs>1.25014032E8</grs>
+    <opn>2012-02-10</opn>
+    <rank>26</rank>
+    <tit>The Vow</tit>
+  </movie>
+  <movie>
+    <grs>1.24987024E8</grs>
+    <opn>2012-11-21</opn>
+    <rank>27</rank>
+    <tit>Life of Pi</tit>
+  </movie>
+  <movie>
+    <grs>1.13721568E8</grs>
+    <opn>2012-06-29</opn>
+    <rank>28</rank>
+    <tit>Magic Mike</tit>
+  </movie>
+  <movie>
+    <grs>1.13203872E8</grs>
+    <opn>2012-08-10</opn>
+    <rank>29</rank>
+    <tit>The Bourne Legacy</tit>
+  </movie>
+  <movie>
+    <grs>1.03860288E8</grs>
+    <opn>2012-02-10</opn>
+    <rank>30</rank>
+    <tit>Journey 2: The Mysterious Island</tit>
+  </movie>
+  <movie>
+    <grs>1.0341276E8</grs>
+    <opn>2012-11-21</opn>
+    <rank>31</rank>
+    <tit>Rise of the Guardians</tit>
+  </movie>
+  <movie>
+    <grs>9.572072E7</grs>
+    <opn>2012-12-19</opn>
+    <rank>32</rank>
+    <tit>Zero Dark Thirty</tit>
+  </movie>
+  <movie>
+    <grs>9.3772376E7</grs>
+    <opn>2012-11-02</opn>
+    <rank>33</rank>
+    <tit>Flight</tit>
+  </movie>
+  <movie>
+    <grs>9.1547208E7</grs>
+    <opn>2012-04-20</opn>
+    <rank>34</rank>
+    <tit>Think Like a Man</tit>
+  </movie>
+  <movie>
+    <grs>8.6907744E7</grs>
+    <opn>2012-08-10</opn>
+    <rank>35</rank>
+    <tit>The Campaign</tit>
+  </movie>
+  <movie>
+    <grs>8.5028192E7</grs>
+    <opn>2012-08-17</opn>
+    <rank>36</rank>
+    <tit>The Expendables 2</tit>
+  </movie>
+  <movie>
+    <grs>8.367008E7</grs>
+    <opn>2012-03-30</opn>
+    <rank>37</rank>
+    <tit>Wrath of the Titans</tit>
+  </movie>
+  <movie>
+    <grs>8.0070736E7</grs>
+    <opn>2012-12-21</opn>
+    <rank>38</rank>
+    <tit>Jack Reacher</tit>
+  </movie>
+  <movie>
+    <grs>7.9727152E7</grs>
+    <opn>2012-05-11</opn>
+    <rank>39</rank>
+    <tit>Dark Shadows</tit>
+  </movie>
+  <movie>
+    <grs>7.7267296E7</grs>
+    <opn>2012-12-25</opn>
+    <rank>40</rank>
+    <tit>Parental Guidance</tit>
+  </movie>
+  <movie>
+    <grs>7.3078096E7</grs>
+    <opn>2012-03-09</opn>
+    <rank>41</rank>
+    <tit>John Carter</tit>
+  </movie>
+  <movie>
+    <grs>7.0012848E7</grs>
+    <opn>2012-02-24</opn>
+    <rank>42</rank>
+    <tit>Act of Valor</tit>
+  </movie>
+  <movie>
+    <grs>6.7544504E7</grs>
+    <opn>2012-12-21</opn>
+    <rank>43</rank>
+    <tit>This Is 40</tit>
+  </movie>
+  <movie>
+    <grs>6.6528E7</grs>
+    <opn>2012-01-13</opn>
+    <rank>44</rank>
+    <tit>Contraband</tit>
+  </movie>
+  <movie>
+    <grs>6.6486204E7</grs>
+    <opn>2012-09-28</opn>
+    <rank>45</rank>
+    <tit>Looper</tit>
+  </movie>
+  <movie>
+    <grs>6.565324E7</grs>
+    <opn>2012-06-29</opn>
+    <rank>46</rank>
+    <tit>Tyler Perry's Madea's Witness Protection</tit>
+  </movie>
+  <movie>
+    <grs>6.5422624E7</grs>
+    <opn>2012-05-18</opn>
+    <rank>47</rank>
+    <tit>Battleship</tit>
+  </movie>
+  <movie>
+    <grs>6.5001092E7</grs>
+    <opn>2012-09-28</opn>
+    <rank>48</rank>
+    <tit>Pitch Perfect</tit>
+  </movie>
+  <movie>
+    <grs>6.4935168E7</grs>
+    <opn>2012-03-30</opn>
+    <rank>49</rank>
+    <tit>Mirror Mirror</tit>
+  </movie>
+  <movie>
+    <grs>6.4575176E7</grs>
+    <opn>2012-02-03</opn>
+    <rank>50</rank>
+    <tit>Chronicle (2012)</tit>
+  </movie>
+  <movie>
+    <grs>6.3536012E7</grs>
+    <opn>2012-08-08</opn>
+    <rank>51</rank>
+    <tit>Hope Springs</tit>
+  </movie>
+  <movie>
+    <grs>6.232104E7</grs>
+    <opn>2012-01-20</opn>
+    <rank>52</rank>
+    <tit>Underworld Awakening</tit>
+  </movie>
+  <movie>
+    <grs>6.0457136E7</grs>
+    <opn>2012-04-20</opn>
+    <rank>53</rank>
+    <tit>The Lucky One</tit>
+  </movie>
+  <movie>
+    <grs>5.9650224E7</grs>
+    <opn>2012-05-16</opn>
+    <rank>54</rank>
+    <tit>The Dictator</tit>
+  </movie>
+  <movie>
+    <grs>5.8877968E7</grs>
+    <opn>2012-08-03</opn>
+    <rank>55</rank>
+    <tit>Total Recall (2012)</tit>
+  </movie>
+  <movie>
+    <grs>5.7884112E7</grs>
+    <opn>2012-04-04</opn>
+    <rank>56</rank>
+    <tit>Titanic 3D</tit>
+  </movie>
+  <movie>
+    <grs>5.701152E7</grs>
+    <opn>2012-04-06</opn>
+    <rank>57</rank>
+    <tit>American Reunion</tit>
+  </movie>
+  <movie>
+    <grs>5.6003052E7</grs>
+    <opn>2012-08-17</opn>
+    <rank>58</rank>
+    <tit>ParaNorman</tit>
+  </movie>
+  <movie>
+    <grs>5.4760792E7</grs>
+    <opn>2012-02-17</opn>
+    <rank>59</rank>
+    <tit>This Means War</tit>
+  </movie>
+  <movie>
+    <grs>5.4731864E7</grs>
+    <opn>2012-03-02</opn>
+    <rank>60</rank>
+    <tit>Project X</tit>
+  </movie>
+  <movie>
+    <grs>5.4333288E7</grs>
+    <opn>2012-02-03</opn>
+    <rank>61</rank>
+    <tit>The Woman in Black</tit>
+  </movie>
+  <movie>
+    <grs>5.39213E7</grs>
+    <opn>2012-10-19</opn>
+    <rank>62</rank>
+    <tit>Paranormal Activity 4</tit>
+  </movie>
+  <movie>
+    <grs>5.3261944E7</grs>
+    <opn>2012-01-06</opn>
+    <rank>63</rank>
+    <tit>The Devil Inside</tit>
+  </movie>
+  <movie>
+    <grs>5.1854876E7</grs>
+    <opn>2012-08-15</opn>
+    <rank>64</rank>
+    <tit>The Odd Life of Timothy Green</tit>
+  </movie>
+  <movie>
+    <grs>5.1774E7</grs>
+    <opn>2012-02-17</opn>
+    <rank>65</rank>
+    <tit>Ghost Rider: Spirit of Vengeance</tit>
+  </movie>
+  <movie>
+    <grs>5.1580236E7</grs>
+    <opn>2012-01-27</opn>
+    <rank>66</rank>
+    <tit>The Grey</tit>
+  </movie>
+  <movie>
+    <grs>4.9876376E7</grs>
+    <opn>2012-01-20</opn>
+    <rank>67</rank>
+    <tit>Red Tails</tit>
+  </movie>
+  <movie>
+    <grs>4.9130152E7</grs>
+    <opn>2012-08-31</opn>
+    <rank>68</rank>
+    <tit>The Possession</tit>
+  </movie>
+  <movie>
+    <grs>4.9008664E7</grs>
+    <opn>2012-08-03</opn>
+    <rank>69</rank>
+    <tit>Diary of a Wimpy Kid: Dog Days</tit>
+  </movie>
+  <movie>
+    <grs>4.8086904E7</grs>
+    <opn>2012-10-12</opn>
+    <rank>70</rank>
+    <tit>Sinister</tit>
+  </movie>
+  <movie>
+    <grs>4.7617068E7</grs>
+    <opn>2012-01-13</opn>
+    <rank>71</rank>
+    <tit>Beauty and the Beast (3D)</tit>
+  </movie>
+  <movie>
+    <grs>4.7382068E7</grs>
+    <opn>2012-07-06</opn>
+    <rank>72</rank>
+    <tit>Savages (2012)</tit>
+  </movie>
+  <movie>
+    <grs>4.641204E7</grs>
+    <opn>2012-05-04</opn>
+    <rank>73</rank>
+    <tit>The Best Exotic Marigold Hotel</tit>
+  </movie>
+  <movie>
+    <grs>4.5512464E7</grs>
+    <opn>2012-05-25</opn>
+    <rank>74</rank>
+    <tit>Moonrise Kingdom</tit>
+  </movie>
+  <movie>
+    <grs>4.529032E7</grs>
+    <opn>2012-10-12</opn>
+    <rank>75</rank>
+    <tit>Here Comes the Boom</tit>
+  </movie>
+  <movie>
+    <grs>4.4806784E7</grs>
+    <opn>2012-11-21</opn>
+    <rank>76</rank>
+    <tit>Red Dawn (2012)</tit>
+  </movie>
+  <movie>
+    <grs>4.4338224E7</grs>
+    <opn>2012-04-13</opn>
+    <rank>77</rank>
+    <tit>The Three Stooges</tit>
+  </movie>
+  <movie>
+    <grs>4.3456384E7</grs>
+    <opn>2012-02-10</opn>
+    <rank>78</rank>
+    <tit>Star Wars: Episode I - The Phantom Menace (in 3D)</tit>
+  </movie>
+  <movie>
+    <grs>4.2345532E7</grs>
+    <opn>2012-09-14</opn>
+    <rank>79</rank>
+    <tit>Resident Evil: Retribution</tit>
+  </movie>
+  <movie>
+    <grs>4.2073276E7</grs>
+    <opn>2012-04-13</opn>
+    <rank>80</rank>
+    <tit>The Cabin in the Woods</tit>
+  </movie>
+  <movie>
+    <grs>4.1152204E7</grs>
+    <opn>2012-05-18</opn>
+    <rank>81</rank>
+    <tit>What to Expect When You're Expecting</tit>
+  </movie>
+  <movie>
+    <grs>4.1128284E7</grs>
+    <opn>2012-09-14</opn>
+    <rank>82</rank>
+    <tit>Finding Nemo (3D)</tit>
+  </movie>
+  <movie>
+    <grs>4.1003372E7</grs>
+    <opn>2012-09-21</opn>
+    <rank>83</rank>
+    <tit>End of Watch</tit>
+  </movie>
+  <movie>
+    <grs>3.8518612E7</grs>
+    <opn>2012-06-15</opn>
+    <rank>84</rank>
+    <tit>Rock of Ages</tit>
+  </movie>
+  <movie>
+    <grs>3.751914E7</grs>
+    <opn>2012-06-22</opn>
+    <rank>85</rank>
+    <tit>Abraham Lincoln: Vampire Hunter</tit>
+  </movie>
+  <movie>
+    <grs>3.7400128E7</grs>
+    <opn>2012-08-29</opn>
+    <rank>86</rank>
+    <tit>Lawless</tit>
+  </movie>
+  <movie>
+    <grs>3.7134216E7</grs>
+    <opn>2012-12-19</opn>
+    <rank>87</rank>
+    <tit>The Guilt Trip</tit>
+  </movie>
+  <movie>
+    <grs>3.6931088E7</grs>
+    <opn>2012-06-15</opn>
+    <rank>88</rank>
+    <tit>That's My Boy</tit>
+  </movie>
+  <movie>
+    <grs>3.5763136E7</grs>
+    <opn>2012-09-21</opn>
+    <rank>89</rank>
+    <tit>Trouble with the Curve</tit>
+  </movie>
+  <movie>
+    <grs>3.5353E7</grs>
+    <opn>2012-07-27</opn>
+    <rank>90</rank>
+    <tit>The Watch</tit>
+  </movie>
+  <movie>
+    <grs>3.5291068E7</grs>
+    <opn>2012-10-05</opn>
+    <rank>91</rank>
+    <tit>Frankenweenie</tit>
+  </movie>
+  <movie>
+    <grs>3.5074676E7</grs>
+    <opn>2012-07-27</opn>
+    <rank>92</rank>
+    <tit>Step Up Revolution</tit>
+  </movie>
+  <movie>
+    <grs>3.5025792E7</grs>
+    <opn>2012-02-24</opn>
+    <rank>93</rank>
+    <tit>Tyler Perry's Good Deeds</tit>
+  </movie>
+  <movie>
+    <grs>3.4043008E7</grs>
+    <opn>2012-12-19</opn>
+    <rank>94</rank>
+    <tit>Monsters, Inc. (3D)</tit>
+  </movie>
+  <movie>
+    <grs>3.3449086E7</grs>
+    <opn>2012-07-13</opn>
+    <rank>95</rank>
+    <tit>2016 Obama's America</tit>
+  </movie>
+  <movie>
+    <grs>3.1611916E7</grs>
+    <opn>2012-09-21</opn>
+    <rank>96</rank>
+    <tit>House at the End of The Street</tit>
+  </movie>
+  <movie>
+    <grs>3.1051126E7</grs>
+    <opn>2012-04-27</opn>
+    <rank>97</rank>
+    <tit>The Pirates! Band of Misfits</tit>
+  </movie>
+  <movie>
+    <grs>3.0932112E7</grs>
+    <opn>2012-01-13</opn>
+    <rank>98</rank>
+    <tit>Joyful Noise</tit>
+  </movie>
+  <movie>
+    <grs>2.8972764E7</grs>
+    <opn>2012-04-20</opn>
+    <rank>99</rank>
+    <tit>Chimpanzee</tit>
+  </movie>
+  <movie>
+    <grs>2.8835528E7</grs>
+    <opn>2012-04-27</opn>
+    <rank>100</rank>
+    <tit>The Five-Year Engagement</tit>
+  </movie>
+</t>
