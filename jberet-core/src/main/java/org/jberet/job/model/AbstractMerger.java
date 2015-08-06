@@ -18,8 +18,21 @@ import java.util.Map;
 import javax.batch.operations.JobStartException;
 
 import org.jberet._private.BatchMessages;
+import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.JobXmlResolver;
 
+/**
+ * Abstract base class for various job element merger types, such as {@link JobMerger}, {@link StepMerger}, and
+ * {@link FlowMerger}.
+ *
+ * @param <T> the job element type this merger class handles
+ *
+ * @see JobMerger
+ * @see StepMerger
+ * @see FlowMerger
+ *
+ * @since 1.0.1
+ */
 abstract class AbstractMerger<T extends AbstractJobElement> {
      T parent;
      T child;
@@ -34,6 +47,16 @@ abstract class AbstractMerger<T extends AbstractJobElement> {
      */
     private List<T> inheritingElements;
 
+    /**
+     * Constructs common parts defined in this class for various concrete subclasses.
+     *
+     * @param currentJob the current job to be processed
+     * @param classLoader the class loader to use for loading jobs and resources
+     * @param loadedJobs list of already loaded jobs to avoid reloading them while resolving inheritance
+     * @param jobXmlResolver job xml resolver, typically obtained from {@code org.jberet.spi.BatchEnvironment#getJobXmlResolver()}
+     *
+     * @see BatchEnvironment#getJobXmlResolver()
+     */
     AbstractMerger(final Job currentJob, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver) {
         this.currentJob = currentJob;
         this.classLoader = classLoader;
@@ -42,10 +65,10 @@ abstract class AbstractMerger<T extends AbstractJobElement> {
     }
 
     /**
-     * Checks if the element is already recorded in inheritingElements.  If yes, a JobStartException is thrown to
-     * indicate cyclic inheritance.
+     * Checks if the element is already recorded in {@link #inheritingElements}.
+     * If yes, a {@code JobStartException} is thrown to indicate cyclic inheritance.
      *
-     * @param element   a job element of type Job, Step, or Flow
+     * @param element   a job element of type {@code Job}, {@code Step}, or {@code Flow}
      * @param elementId the id of the element
      * @throws JobStartException if a inheritance cycle is detected
      */
@@ -61,7 +84,7 @@ abstract class AbstractMerger<T extends AbstractJobElement> {
     }
 
     /**
-     * Records current parent and child elements in inheritingElements, and pass them along when creating a new
+     * Records current parent and child elements in {@link #inheritingElements}, and pass them along when creating a new
      * merger in order to resolve further inheritance.
      *
      * @param nextMerger the new merger for resolving the further inheritance
@@ -98,6 +121,12 @@ abstract class AbstractMerger<T extends AbstractJobElement> {
         }
     }
 
+    /**
+     * Merges listeners in parent with listeners in child element.
+     *
+     * @param parent parent job element that can contain listeners
+     * @param child child job element that can contain listeners
+     */
     static void mergeListeners(final InheritableJobElement parent, final InheritableJobElement child) {
         if (parent.getListeners() != null && !parent.getListeners().getListeners().isEmpty()) {
             final Listeners childListeners = child.getListeners();

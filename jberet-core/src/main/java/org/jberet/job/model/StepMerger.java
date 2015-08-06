@@ -19,7 +19,28 @@ import org.jberet._private.BatchLogger;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.spi.JobXmlResolver;
 
+/**
+ * Responsible for merging a child step and its parent step, and resolving its JSL inheritance.
+ *
+ * @see AbstractMerger
+ * @see JobMerger
+ * @see FlowMerger
+ *
+ * @since 1.0.1
+ */
 public final class StepMerger extends AbstractMerger<Step> {
+
+    /**
+     * Constructs a step merger.
+     *
+     * @param job the current job
+     * @param child the step to resolve its JSL inheritance
+     * @param classLoader the class loader to use for loading jobs and resources
+     * @param loadedJobs list of already loaded jobs to avoid reloading them while resolving inheritance
+     * @param jobXmlResolver job xml resolver, typically obtained from {@code org.jberet.spi.BatchEnvironment#getJobXmlResolver()}
+     *
+     * @throws JobStartException if failed to construct the step merger
+     */
     public StepMerger(final Job job, final Step child, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {
         super(job, classLoader, loadedJobs, jobXmlResolver);
@@ -43,6 +64,11 @@ public final class StepMerger extends AbstractMerger<Step> {
         }
     }
 
+    /**
+     * Performs the merge, and if the parent has its own parent, it is also resolved.
+     *
+     * @throws JobStartException if failed due to cyclic inheritance or other errors
+     */
     public void merge() throws JobStartException {
         checkInheritingElements(this.parent, this.parent.getId());
         if (parent.getParent() != null) {
@@ -76,7 +102,7 @@ public final class StepMerger extends AbstractMerger<Step> {
             }
         } else if (childChunk == null && childBatchlet != null) {  //child has batchlet type
             //nothing to do. Parent and child batchlet elements may refer to different artifacts and they cannot be
-            //merged in a meaninful way.
+            //merged in a meaningful way.
         } else if (childChunk == null) {  //if child has no batchlet or chunk, inherit from parent
             if (parentChunk != null) {
                 child.setChunk(parentChunk.clone());
@@ -97,6 +123,12 @@ public final class StepMerger extends AbstractMerger<Step> {
         child.setParentAndJslName(null, null);
     }
 
+    /**
+     * Merges a child chunk element with its parent chunk element.
+     *
+     * @param parentChunk parent chunk element
+     * @param childChunk child chunk element
+     */
     private void mergeChunk(final Chunk parentChunk, final Chunk childChunk) {
         if (childChunk.checkpointPolicy == null && parentChunk.checkpointPolicy != null) {
             childChunk.checkpointPolicy = parentChunk.checkpointPolicy;
