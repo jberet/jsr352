@@ -29,6 +29,9 @@ import org.jberet.job.model.Transition.Stop;
 import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
 
+/**
+ * Responsible for resolving property expressions in job and job elements.
+ */
 public final class PropertyResolver {
     protected static final String jobParametersToken = "jobParameters";
     protected static final String jobPropertiesToken = "jobProperties";
@@ -47,10 +50,20 @@ public final class PropertyResolver {
 
     private boolean resolvePartitionPlanProperties;
 
+    /**
+     * Sets job parameters to be used for resolving expressions referencing job parameters.
+     *
+     * @param jobParameters job parameters as {@code java.util.Properties}
+     */
     public void setJobParameters(final Properties jobParameters) {
         this.jobParameters = jobParameters;
     }
 
+    /**
+     * Sets partition plan properties to be used for resolving expressions referencing partition plan properties.
+     *
+     * @param partitionPlanProperties partition plan properties as {@code java.util.Properties}
+     */
     public void setPartitionPlanProperties(final Properties partitionPlanProperties) {
         this.partitionPlanProperties = partitionPlanProperties;
     }
@@ -59,6 +72,13 @@ public final class PropertyResolver {
         this.jobPropertiesStack.push(jobProps);
     }
 
+    /**
+     * Sets the flag whether this class need to resolve partition plan properties or not.
+     * Partition plan property substitution is resolved before the partition execution begins, which is later than
+     * the substitution of job parameters, job properties and system properties.
+     *
+     * @param resolvePartitionPlanProperties whether to resolve partition plan or not
+     */
     public void setResolvePartitionPlanProperties(final boolean resolvePartitionPlanProperties) {
         this.resolvePartitionPlanProperties = resolvePartitionPlanProperties;
     }
@@ -93,6 +113,11 @@ public final class PropertyResolver {
         }
     }
 
+    /**
+     * Resolves property expressions for a list of job elements.
+     *
+     * @param jobElements list of job elements
+     */
     private void resolveJobElements(final List<?> jobElements) {
         if (jobElements == null) {
             return;

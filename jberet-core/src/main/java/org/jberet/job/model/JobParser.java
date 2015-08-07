@@ -33,13 +33,16 @@ public final class JobParser {
     private static final String namespaceURI = null;
 
     /**
-     * Parses a job xml file, which defines a batch job.
+     * Parses a job xml input stream, which defines a batch job.
      *
-     * @param inputStream the source of the job xml definition
+     * @param inputStream the input source of the job xml definition
      * @param classLoader the current application class loader
-     * @param xmlResolver the XMLResolver for the job xml
-     * @return a Job object
-     * @throws XMLStreamException
+     * @param xmlResolver the {@code javax.xml.stream.XMLResolver} for the job xml,
+     *                    typically obtained from {@code org.jberet.spi.BatchEnvironment#getJobXmlResolver()}
+     * @return the {@code Job} from parsing the input source
+     * @throws XMLStreamException if failed to parse the input source
+     *
+     * @see org.jberet.spi.BatchEnvironment#getJobXmlResolver()
      */
     public static Job parseJob(final InputStream inputStream, final ClassLoader classLoader, final XMLResolver xmlResolver) throws XMLStreamException {
         final XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -106,8 +109,8 @@ public final class JobParser {
      * Parses batch.xml, which declares batch artifacts in xml format.
      *
      * @param inputStream source of the batch.xml
-     * @return a BatchArtifacts object
-     * @throws XMLStreamException
+     * @return {@code BatchArtifacts} object from parsing the input source
+     * @throws XMLStreamException if failed to parse the input source
      */
     public static BatchArtifacts parseBatchArtifacts(final InputStream inputStream) throws XMLStreamException {
         final XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
