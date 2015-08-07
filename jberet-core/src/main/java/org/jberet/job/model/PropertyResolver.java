@@ -68,7 +68,7 @@ public final class PropertyResolver {
         this.partitionPlanProperties = partitionPlanProperties;
     }
 
-    public void pushJobProperties(final org.jberet.job.model.Properties jobProps) {
+    void pushJobProperties(final org.jberet.job.model.Properties jobProps) {
         this.jobPropertiesStack.push(jobProps);
     }
 
@@ -372,7 +372,7 @@ public final class PropertyResolver {
         }
     }
 
-    public void resolve(final Flow flow) {
+    private void resolve(final Flow flow) {
         final String oldVal = flow.getAttributeNext();
         if (oldVal != null) {
             final String newVal = resolve(oldVal);
@@ -529,7 +529,7 @@ public final class PropertyResolver {
      * @throws java.lang.SecurityException if a security manager is installed, {@code systemProperties} is requested
      *                                     and the system property permission is not set.
      */
-    public String resolve(final String rawVale) {
+    String resolve(final String rawVale) {
         if (rawVale.length() < shortestTemplateLen || !rawVale.contains(prefix)) {
             return rawVale;
         }
