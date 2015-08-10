@@ -5,7 +5,7 @@
         <chunk>
             <reader ref="xmlItemReader">
                 <properties>
-                    <property name="resource" value="http://mysafeinfo.com/api/data?list=topmoviesboxoffice2012&amp;format=xml"/>
+                    <property name="resource" value="https://raw.githubusercontent.com/jberet/jsr352/master/jberet-support/src/test/resources/movies-2012.xml"/>
                     <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>
                     <property name="xmlFactoryLookup" value="#{jobProperties['xmlFactoryLookup']}"/>
                 </properties>
