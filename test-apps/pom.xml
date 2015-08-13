@@ -44,6 +44,7 @@
         <module>purgeMongoRepository</module>
         <module>cdiScopes</module>
         <module>javaJSL</module>
+        <module>throttle</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>

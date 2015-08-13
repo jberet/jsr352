@@ -86,7 +86,7 @@ abstract public class AbstractIT {
     protected void awaitTermination(final JobExecutionImpl... exes) throws InterruptedException {
         final JobExecutionImpl exe = exes.length == 0 ? jobExecution : exes[0];
         exe.awaitTermination(getJobTimeoutSeconds(), TimeUnit.SECONDS);
-        stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
+        stepExecutions = jobOperator.getStepExecutions(exe.getExecutionId());
         if (!stepExecutions.isEmpty()) {
             stepExecution0 = (StepExecutionImpl) stepExecutions.get(0);
         }
