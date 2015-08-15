@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -128,5 +128,13 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 25, value = "Failed to set attributes to script context for engine %s, script type %s, and some data will not be passed to script")
     @LogMessage(level = Logger.Level.WARN)
     void failToSetAttributesToScriptContext(@Cause Throwable cause, String engine, String scriptType);
+
+    @Message(id = 26, value = "job %s is added to waiting queue due to low number of available threads: %s")
+    @LogMessage
+    void jobAddedToWaitingQueue(Object jobTask, int numAvailableThreads);
+
+    @Message(id = 27, value = "job %s is taken from waiting queue and resubmitted")
+    @LogMessage
+    void resubmitedQueuedJob(Object jobTask);
 
 }

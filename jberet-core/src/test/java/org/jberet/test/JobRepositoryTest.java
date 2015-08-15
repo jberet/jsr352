@@ -90,7 +90,10 @@ public class JobRepositoryTest {
 
             @Override
             public void submitTask(final Runnable task) {
+            }
 
+            @Override
+            public void jobExecutionFinished() {
             }
 
             @Override

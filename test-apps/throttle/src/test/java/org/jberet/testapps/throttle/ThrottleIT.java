@@ -40,14 +40,15 @@ import org.junit.Test;
 public class ThrottleIT extends AbstractIT {
     static final String jobName = "throttle";
 
+    /**
+     * Starts the test job 50 times, one after another.  The test has a chunk-type step with 10 partitioins.
+     * Verifies the job submission is properly throttled and the these jobs should complete successfully without deadlock.
+     *
+     * @throws Exception
+     */
     @Test
-    public void start9() throws Exception {
-        runTest(9);
-    }
-
-    @Test
-    public void start20() throws Exception {
-        runTest(20);
+    public void start50() throws Exception {
+        runTest(50);
     }
 
     private void runTest(final int count) throws Exception {
