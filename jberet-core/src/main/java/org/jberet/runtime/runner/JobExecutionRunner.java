@@ -95,6 +95,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
 
         JobScopedContextImpl.ScopedInstance.destroy(batchContext.getScopedBeans());
         jobExecution.cleanUp();
+        batchContext.getBatchEnvironment().jobExecutionFinished();
     }
 
     /**

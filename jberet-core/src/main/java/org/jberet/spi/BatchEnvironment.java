@@ -68,4 +68,10 @@ public interface BatchEnvironment {
      * @return a key-value map of batch configuration
      */
     Properties getBatchConfigurationProperties();
+
+    /**
+     * Signals that a job execution has finished regardless of its batch status, so that the {@code BatchEnvironment}
+     * can take certain actions such as resource allocation.
+     */
+    void jobExecutionFinished();
 }

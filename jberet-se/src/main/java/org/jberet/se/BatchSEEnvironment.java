@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,12 +15,11 @@ package org.jberet.se;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.ServiceLoader;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
@@ -29,12 +28,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.transaction.TransactionManager;
 
+import org.jberet._private.BatchLogger;
 import org.jberet.repository.JobRepository;
+import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.se._private.SEBatchLogger;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.tools.ChainedJobXmlResolver;
 import org.jberet.spi.JobXmlResolver;
+import org.jberet.tools.ChainedJobXmlResolver;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.jberet.tx.LocalTransactionManager;
 
@@ -43,7 +44,7 @@ import org.jberet.tx.LocalTransactionManager;
  */
 public final class BatchSEEnvironment implements BatchEnvironment {
 
-    ExecutorService executorService;
+    ThreadPoolExecutor executorService;
 
     public static final String CONFIG_FILE_NAME = "jberet.properties";
     public static final String JOB_REPOSITORY_TYPE_KEY = "job-repository-type";
@@ -60,6 +61,23 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     private final Properties configProperties;
     private final TransactionManager tm;
     private final JobXmlResolver jobXmlResolver;
+
+    /**
+     * Max number of threads in the executor, which is typically obtained from the configuration.
+     * If the executor does not limit the number of threads, then this field is not assigned.
+     */
+    private int maxThreads;
+
+    /**
+     * An unbound queue to hold submitted job execution tasks that cannot be immediately submitted to the executor
+     * due to low number of available threads.
+     * If the executor does not limit the number of threads, then this queue is not initialized.
+     * <p/>
+     * Note that only job execution tasks are eligible for queuing, and other tasks such as flow or partition tasks
+     * are not eligible for queuing.
+     * Queued items may be dequeued when an active job execution finishes, see {@link #jobExecutionFinished()}
+     */
+    private Queue<Runnable> jobQueue;
 
     static final String THREAD_POOL_TYPE = "thread-pool-type";
     static final String THREAD_POOL_TYPE_CACHED = "Cached";
@@ -116,7 +134,32 @@ public final class BatchSEEnvironment implements BatchEnvironment {
 
     @Override
     public void submitTask(final Runnable task) {
-        executorService.submit(task);
+        if (jobQueue != null && task instanceof JobExecutionRunner) {
+            final int numAvailableThreads = maxThreads - executorService.getActiveCount();
+            if (numAvailableThreads >= 2) {
+                executorService.submit(task);
+            } else {
+                jobQueue.add(task);
+                BatchLogger.LOGGER.jobAddedToWaitingQueue(task, numAvailableThreads);
+            }
+        } else {
+            executorService.submit(task);
+        }
+    }
+
+    /**
+     * This method implementation takes the oldest item from the job waiting queue, and submit it to the executor.
+     * If the job waiting queue does not exist, or if there is nothing in the queue, this method does nothing.
+     */
+    @Override
+    public void jobExecutionFinished() {
+        if (jobQueue != null) {
+            final Runnable jobFromQueue = jobQueue.poll();
+            if (jobFromQueue != null) {
+                executorService.submit(jobFromQueue);
+                BatchLogger.LOGGER.resubmitedQueuedJob(jobFromQueue);
+            }
+        }
     }
 
     @Override
@@ -147,7 +190,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             try {
                 final Class<?> threadFactoryClass = getClassLoader().loadClass(threadFactoryProp.trim());
                 threadFactory = (ThreadFactory) threadFactoryClass.newInstance();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_FACTORY, threadFactoryProp, e);
             }
         } else {
@@ -155,7 +198,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         }
 
         if (threadPoolType == null || threadPoolType.isEmpty() || threadPoolType.trim().equalsIgnoreCase(THREAD_POOL_TYPE_CACHED)) {
-            executorService = Executors.newCachedThreadPool(threadFactory);
+            executorService = (ThreadPoolExecutor) Executors.newCachedThreadPool(threadFactory);
             return;
         }
 
@@ -163,13 +206,15 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         final int coreSize;
         try {
             coreSize = Integer.parseInt(coreSizeProp.trim());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_CORE_SIZE, coreSizeProp, e);
         }
 
         threadPoolType = threadPoolType.trim();
+        jobQueue = new ConcurrentLinkedQueue<Runnable>();
         if (threadPoolType.equalsIgnoreCase(THREAD_POOL_TYPE_FIXED)) {
-            executorService = Executors.newFixedThreadPool(coreSize, threadFactory);
+            executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(coreSize, threadFactory);
+            maxThreads = coreSize;
             return;
         }
 
@@ -178,7 +223,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             final int maxSize;
             try {
                 maxSize = Integer.parseInt(maxSizeProp.trim());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_MAX_SIZE, maxSizeProp, e);
             }
 
@@ -186,7 +231,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             final long keepAliveSeconds;
             try {
                 keepAliveSeconds = Long.parseLong(keepAliveProp.trim());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_KEEP_ALIVE_TIME, keepAliveProp, e);
             }
 
@@ -194,7 +239,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             final int queueCapacity;
             try {
                 queueCapacity = Integer.parseInt(queueCapacityProp.trim());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_QUEUE_CAPACITY, queueCapacityProp, e);
             }
 
@@ -216,7 +261,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
                 try {
                     final Class<?> aClass = getClassLoader().loadClass(rejectionPolicyProp.trim());
                     rejectionHandler = (RejectedExecutionHandler) aClass.newInstance();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_REJECTION_POLICY, rejectionPolicyProp, e);
                 }
             }
@@ -232,6 +277,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
                 threadPoolExecutor.prestartAllCoreThreads();
             }
             executorService = threadPoolExecutor;
+            maxThreads = maxSize;
             return;
         }
 
