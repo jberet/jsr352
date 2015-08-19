@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -72,6 +72,8 @@ public interface BatchEnvironment {
     /**
      * Signals that a job execution has finished regardless of its batch status, so that the {@code BatchEnvironment}
      * can take certain actions such as resource allocation.
+     *
+     * @since 1.2.0
      */
     void jobExecutionFinished();
 }

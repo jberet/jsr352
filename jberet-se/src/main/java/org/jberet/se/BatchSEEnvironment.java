@@ -70,7 +70,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
 
     /**
      * An unbound queue to hold submitted job execution tasks that cannot be immediately submitted to the executor
-     * due to low number of available threads.
+     * due to low number of available threads, or already queued items taking precedence. See {@link #submitTask(Runnable)}.
+     * <p/>
      * If the executor does not limit the number of threads, then this queue is not initialized.
      * <p/>
      * Note that only job execution tasks are eligible for queuing, and other tasks such as flow or partition tasks
