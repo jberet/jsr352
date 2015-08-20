@@ -73,8 +73,8 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
                     final Decision decision = (Decision) e;
                     if (decision.getId().equals(restartPoint)) {
                         runDecision(decision);
+                        break;
                     }
-                    break;
                 }
             }
         } else {

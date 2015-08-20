@@ -155,6 +155,56 @@ public class JavaJSLIT extends AbstractIT {
     }
 
     /**
+     * Runs a job that contains step0 (does nothing), decision1 and a chunk step.
+     * The first run is expected to be stopped, and the restart should complete successfully.
+     *
+     * @throws Exception
+     *
+     * @see <a href="https://issues.jboss.org/browse/JBERET-184">JBERET-184</a>
+     */
+    @Test
+    public void chunkRestartWithDecisionTest() throws Exception {
+        final String jobName = "javaJSL-chunkRestartWithDecisionTest";
+        final String step0Name = jobName + ".step0";
+        final String decisionName = jobName + "." + deciderName;
+        final String stepName = jobName + ".step1";
+        final String restartCompleted = "restartCompleted";
+
+        final Job job = new JobBuilder(jobName)
+                .step(new StepBuilder(step0Name)
+                        .batchlet(batchlet1Name)
+                        .next(decisionName)
+                        .build())
+                .decision(new DecisionBuilder(decisionName, "decider2")
+                        .nextOn("*").to(stepName)
+                        .build())
+                .step(new StepBuilder(stepName)
+                        .reader("integerArrayReader", new String[]{"data.count", "30"})
+                        .writer("integerArrayWriter", new String[]{"fail.on.values", "#{jobParameters['fail.on.values']}"})
+                        .startLimit(2)
+                        .stopOn(BatchStatus.FAILED.name()).restartFrom(stepName).exitStatus()
+                        .endOn(BatchStatus.COMPLETED.name()).exitStatus(restartCompleted)  //new exit status for the job
+                        .build())
+                .build();
+
+        params.setProperty("fail.on.values", "1");
+        startJobAndWait(job);
+        Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
+        System.out.printf("Stopped job execution: %s, with exit status: %s%n", jobExecutionId, jobExecution.getExitStatus());
+
+        params.setProperty("fail.on.values", "-1");
+        restartAndWait();
+
+        if (stepExecutions.size() == 0) {
+            Assert.fail("No step executions in the restart job execution, which means the restart job execution did nothing.");
+        }
+
+        System.out.printf("Completed restart job execution: %s, with exit status: %s%n", jobExecutionId, jobExecution.getExitStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assert.assertEquals(restartCompleted, jobExecution.getExitStatus());
+    }
+
+    /**
      * Runs a partitioned chunk step with item reader, processor, writer, and verifies the result step metrics.
      * The partition is configured with a partition plan.
      * <p/>
