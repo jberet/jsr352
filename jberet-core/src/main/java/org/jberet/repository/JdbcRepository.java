@@ -235,6 +235,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         Connection connection1 = getConnection();
         ResultSet rs = null;
         PreparedStatement countPartitionExecutionStatement = null;
+        PreparedStatement countJobInstancesStatement = null;
         InputStream ddlResource = null;
 
         String databaseProductName = "";
@@ -276,14 +277,25 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 }
                 scanner.close();
                 batchDDLStatement.executeBatch();
+                BatchLogger.LOGGER.tableCreated(ddlFile);
             } catch (final Exception e1) {
-                throw BatchMessages.MESSAGES.failToCreateTables(e1, databaseProductName, ddlFile);
+                //check if the tables have just been created by another concurrent client in the interim
+                try {
+                    final String countJobInstances = sqls.getProperty(COUNT_JOB_INSTANCES_BY_JOB_NAME);
+                    countJobInstancesStatement = connection1.prepareStatement(countJobInstances);
+                    countJobInstancesStatement.setString(1, "A");
+                    rs = countJobInstancesStatement.executeQuery();
+                    BatchLogger.LOGGER.tracef(
+                    "This invocation needed to create tables since they didn't exit, but failed to create because they've been created by another concurrent invocation, so ignore the exception and return normally: %s", e1);
+                } catch (final SQLException sqle) {
+                    //still cannot access the table, so fail it
+                    throw BatchMessages.MESSAGES.failToCreateTables(e1, databaseProductName, ddlFile);
+                }
             } finally {
                 close(connection2, batchDDLStatement, null, null);
             }
-            BatchLogger.LOGGER.tableCreated(ddlFile);
         } finally {
-            close(connection1, countPartitionExecutionStatement, null, rs);
+            close(connection1, countPartitionExecutionStatement, countJobInstancesStatement, rs);
             try {
                 if (ddlResource != null) {
                     ddlResource.close();
