@@ -35,6 +35,14 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- for test org.jberet.testapps.purgeJdbcRepository.PurgeJdbcRepositoryIT.concurrentCreateJdbcJobRepository -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.10.2.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- dependency for kill-and-restart tests -->
         <dependency>
             <groupId>org.jberet.test-apps</groupId>

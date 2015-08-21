@@ -12,11 +12,24 @@
 
 package org.jberet.testapps.purgeJdbcRepository;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import javax.batch.operations.JobRestartException;
 import javax.batch.operations.NoSuchJobException;
 import javax.batch.operations.NoSuchJobExecutionException;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet.repository.JdbcRepository;
+import org.jberet.se.BatchSEEnvironment;
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -304,6 +317,99 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
             Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge2JobExecutionId));
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
+        }
+    }
+
+    /**
+     * Verifies that a jdbc job repository can be created concurrently by multiple client without failure.
+     * In Java SE environment, it's already synchronized in {@link org.jberet.se.JobRepositoryFactory}, but in
+     * WildFly environment, especially in domain mode, multiple clients are in different JVM, and 2 clients may both
+     * see the table does not exist, but only the 1st client will be able to create tables successfully, and the 2nd
+     * one will failure because these tables have already been created by the 1st client.
+     * <p/>
+     * Note that this issue only affect those DBMS products that do not support "CREATE IF NOT EXIST" clause, such as
+     * Derby, Oracle, DB2, Sybase, etc. For DBMS products that support "CREATE IF NOT EXIST" clause (e.g., H2), it is
+     * not an issue.  That's also why this test uses embedded derby instead of H2.
+     * <p/>
+     * This test directly calls {@link JdbcRepository#create(Properties)} in order to bypass the synchronized path of
+     * {@link org.jberet.se.JobRepositoryFactory}.
+     * <p/>
+     * This test does not start any batch job.
+     *
+     * @throws Exception
+     * @see JdbcRepository#create(Properties)
+     * @see <a href="https://issues.jboss.org/browse/WFLY-5134">WFLY-5134</a>
+     * @see <a href="https://issues.jboss.org/browse/JBERET-185">JBERET-185</a>
+     */
+    @Test
+    public void concurrentCreateJdbcJobRepository() throws Exception {
+        final int count = 10;
+        Connection conn = null;
+        final String embeddedDerbyUrl = "jdbc:derby:target/derby;create=true";
+        final Properties props = new Properties();
+        props.setProperty(JdbcRepository.DB_URL_KEY, embeddedDerbyUrl);
+        props.setProperty(BatchSEEnvironment.JOB_REPOSITORY_TYPE_KEY, BatchSEEnvironment.REPOSITORY_TYPE_JDBC);
+
+        try {
+            conn = DriverManager.getConnection(embeddedDerbyUrl);
+            final Statement drop = conn.createStatement();
+            dropTableIgnoreException(drop, "PARTITION_EXECUTION");
+            dropTableIgnoreException(drop, "STEP_EXECUTION");
+            dropTableIgnoreException(drop, "JOB_EXECUTION");
+            dropTableIgnoreException(drop, "JOB_INSTANCE");
+            System.out.printf("Dropped 4 tables%n");
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (final SQLException sqle) {
+                    System.err.printf("Exception while closing Connection:%n");
+                    sqle.printStackTrace();
+                }
+            }
+        }
+
+        final ExecutorService executor = Executors.newCachedThreadPool();
+        final List<Callable<Exception>> tasks = new ArrayList<Callable<Exception>>();
+
+        for (int i = 0; i < count; i++) {
+            tasks.add(new Callable<Exception>() {
+                @Override
+                public Exception call() {
+                    try {
+                        final JdbcRepository jdbcRepository = JdbcRepository.create(props);
+                        return null;
+                    } catch (final Exception e) {
+                        return e;
+                    }
+                }
+            });
+        }
+
+        final List<Future<Exception>> results = executor.invokeAll(tasks);
+        System.out.printf("All exceptions while trying to create tables: %n");
+        int failedCount = 0;
+        for (final Future<Exception> e : results) {
+            final Exception ex = e.get();
+            if (ex != null) {
+                failedCount++;
+                System.out.printf("%n%s%n", ex);
+                if (ex.getCause() != null) {
+                    System.out.printf("%s%n", ex.getCause().toString());
+                }
+            }
+        }
+        executor.shutdown();
+        if (failedCount > 0) {
+            Assert.fail("Trying to create tables concurrently with " + count + " threads, " + failedCount + " failed.");
+        }
+    }
+
+    public static void dropTableIgnoreException(final Statement dropStatement, final String tableName) {
+        try {
+            dropStatement.executeUpdate("DROP TABLE " + tableName);
+        } catch (final SQLException e) {
+            System.out.printf("Exception while dropping tables: %s%n", e.toString());
         }
     }
 }
