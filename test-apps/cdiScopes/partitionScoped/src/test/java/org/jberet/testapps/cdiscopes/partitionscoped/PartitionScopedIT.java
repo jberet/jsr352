@@ -35,7 +35,11 @@ public class PartitionScopedIT extends AbstractIT {
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final String exitStatus = stepExecution0.getExitStatus();
         System.out.printf("step exit status: %s%n", exitStatus);
-        Assert.assertEquals(PartitionScopePartitionAnalyzer.expectedData.toString(), exitStatus);
+        // There's not guarantee which orders threads will be processed in, just check the existStatus contains
+        // each value from the expected data.
+        for (String expected : PartitionScopePartitionAnalyzer.expectedData) {
+            Assert.assertTrue("Missing expected data '" + expected + "' in '" + exitStatus + "'", exitStatus.contains(expected));
+        }
     }
 
     @Test
