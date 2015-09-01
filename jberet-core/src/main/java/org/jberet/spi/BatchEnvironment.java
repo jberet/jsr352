@@ -40,7 +40,7 @@ public interface BatchEnvironment {
      *
      * @param task the task to submit
      */
-    void submitTask(Runnable task);
+    void submitTask(JobTask task);
 
     /**
      * Returns a transaction manager to be used for executions that require a transaction.
@@ -68,12 +68,4 @@ public interface BatchEnvironment {
      * @return a key-value map of batch configuration
      */
     Properties getBatchConfigurationProperties();
-
-    /**
-     * Signals that a job execution has finished regardless of its batch status, so that the {@code BatchEnvironment}
-     * can take certain actions such as resource allocation.
-     *
-     * @since 1.2.0
-     */
-    void jobExecutionFinished();
 }

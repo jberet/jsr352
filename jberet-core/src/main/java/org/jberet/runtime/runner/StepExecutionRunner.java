@@ -54,13 +54,14 @@ import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
+import org.jberet.spi.JobTask;
 import org.jberet.spi.PropertyKey;
 import org.jberet.tx.LocalTransactionManager;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
 
-public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements Runnable {
+public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements JobTask {
     Step step;
     private final List<StepListener> stepListeners = new ArrayList<StepListener>();
     Map<String, Class<?>> chunkRelatedListeners;

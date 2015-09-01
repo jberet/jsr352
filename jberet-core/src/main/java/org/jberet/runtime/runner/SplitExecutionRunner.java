@@ -25,11 +25,12 @@ import org.jberet.job.model.Split;
 import org.jberet.runtime.FlowExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.SplitContextImpl;
+import org.jberet.spi.JobTask;
 import org.jberet.spi.PropertyKey;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
-public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitContextImpl> implements Runnable {
+public final class SplitExecutionRunner extends CompositeExecutionRunner<SplitContextImpl> implements JobTask {
     private final Split split;
 
     public SplitExecutionRunner(final SplitContextImpl splitContext, final CompositeExecutionRunner enclosingRunner) {

@@ -185,5 +185,8 @@ public interface BatchMessages {
     @Message(id = 650, value = "%s id %s already exists")
     BatchRuntimeException idAlreadyExists(String jobElementType, String id);
 
+    @Message(id = 651, value = "The requested permits (%d) is greater than the maximum number of permits (%d) allowed in the thread pool.")
+    IllegalStateException insufficientPermits(int requestedPermits, int maxPermits);
+
 
 }
