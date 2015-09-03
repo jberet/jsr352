@@ -22,8 +22,9 @@ import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.context.JobContextImpl;
+import org.jberet.spi.JobTask;
 
-public final class JobExecutionRunner extends CompositeExecutionRunner<JobContextImpl> implements Runnable {
+public final class JobExecutionRunner extends CompositeExecutionRunner<JobContextImpl> implements JobTask {
     private final Job job;
 
     public JobExecutionRunner(final JobContextImpl jobContext) {
@@ -95,7 +96,6 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
 
         JobScopedContextImpl.ScopedInstance.destroy(batchContext.getScopedBeans());
         jobExecution.cleanUp();
-        batchContext.getBatchEnvironment().jobExecutionFinished();
     }
 
     /**
@@ -116,5 +116,10 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int getRequiredRemainingPermits() {
+        return 2;
     }
 }

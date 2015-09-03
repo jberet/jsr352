@@ -48,6 +48,7 @@ import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
+import org.jberet.spi.JobTask;
 import org.jboss.logging.Logger;
 
 import static org.jberet._private.BatchLogger.LOGGER;
@@ -60,7 +61,7 @@ import static org.jberet._private.BatchMessages.MESSAGES;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-public final class ChunkRunner extends AbstractRunner<StepContextImpl> implements Runnable {
+public final class ChunkRunner extends AbstractRunner<StepContextImpl> implements JobTask {
     private final List<Object> allChunkRelatedListeners = new ArrayList<Object>();
     private final List<ChunkListener> chunkListeners = new ArrayList<ChunkListener>();
 

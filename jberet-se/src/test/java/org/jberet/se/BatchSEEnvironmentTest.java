@@ -45,7 +45,7 @@ public class BatchSEEnvironmentTest {
         final Class<? extends RejectedExecutionHandler> defaultRejectionHandlerClass = ThreadPoolExecutor.AbortPolicy.class;
         //when jberet-se/src/test/resources/jberet.properties contains no thread-pool related properties,
         //Cached thread-pool is used, with default values
-        verifyThreadPool(0, Integer.MAX_VALUE, 60L, 0, defaultThreadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.executorService);
+        verifyThreadPool(0, Integer.MAX_VALUE, 60L, 0, defaultThreadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.createThreadPoolExecutor());
 
         final Class<? extends ThreadFactory> threadFactoryClass = SimpleThreadFactory.class;
         final int coreSize = 10;
@@ -61,43 +61,36 @@ public class BatchSEEnvironmentTest {
         configProperties.setProperty(THREAD_POOL_KEEP_ALIVE_TIME, String.valueOf(keepAliveTime));
         configProperties.setProperty(THREAD_POOL_QUEUE_CAPACITY, String.valueOf(queueCapacity));
         configProperties.setProperty(THREAD_POOL_ALLOW_CORE_THREAD_TIMEOUT, String.valueOf(true));
-        batchEnvironment.createThreadPoolExecutor();
-        verifyThreadPool(0, Integer.MAX_VALUE, 60L, 0, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.executorService);
+        verifyThreadPool(0, Integer.MAX_VALUE, 60L, 0, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.createThreadPoolExecutor());
 
         //a Fixed thread-pool, with a thread-factory, coreSize (ignored), maxSize (ignored), keepAliveTime (ignored),
         //queueCapacity (ignored), allowCoreThreadTimeout (ignored)
         configProperties.setProperty(THREAD_POOL_TYPE, THREAD_POOL_TYPE_FIXED);
-        batchEnvironment.createThreadPoolExecutor();
-        verifyThreadPool(coreSize, coreSize, 0L, Integer.MAX_VALUE, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.executorService);
+        verifyThreadPool(coreSize, coreSize, 0L, Integer.MAX_VALUE, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.createThreadPoolExecutor());
 
         //a Fixed thread-pool, with default thread-factory
         configProperties.setProperty(THREAD_FACTORY, defaultThreadFactoryClass.getName());
-        batchEnvironment.createThreadPoolExecutor();
-        verifyThreadPool(coreSize, coreSize, 0L, Integer.MAX_VALUE, defaultThreadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.executorService);
+        verifyThreadPool(coreSize, coreSize, 0L, Integer.MAX_VALUE, defaultThreadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.createThreadPoolExecutor());
 
         //a Configured thread-pool, with a thread-factory, coreSize (ignored), maxSize (ignored), keepAliveTime (ignored),
         //queueCapacity (ignored), allowCoreThreadTimeout (ignored)
         configProperties.setProperty(THREAD_POOL_TYPE, THREAD_POOL_TYPE_CONFIGURED);
-        batchEnvironment.createThreadPoolExecutor();
-        verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, defaultThreadFactoryClass, true, defaultRejectionHandlerClass, batchEnvironment.executorService);
+        verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, defaultThreadFactoryClass, true, defaultRejectionHandlerClass, batchEnvironment.createThreadPoolExecutor());
 
         //a Configured thread-pool, with a custom thread-factory, allowCoreThreadTimeout false
         configProperties.setProperty(THREAD_FACTORY, threadFactoryClass.getName());
         configProperties.setProperty(THREAD_POOL_ALLOW_CORE_THREAD_TIMEOUT, String.valueOf(false));
-        batchEnvironment.createThreadPoolExecutor();
-        verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.executorService);
+        verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.createThreadPoolExecutor());
 
         //a Configured thread-pool, with prestartCore true
         configProperties.setProperty(THREAD_POOL_PRESTART_ALL_CORE_THREADS, String.valueOf(true));
-        batchEnvironment.createThreadPoolExecutor();
         final ThreadPoolExecutor threadPoolExecutor =
-                verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.executorService);
+                verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.createThreadPoolExecutor());
         Assert.assertEquals(coreSize, threadPoolExecutor.getPoolSize());
 
         //a Configured thread-pool, with custom rejection policy
         configProperties.setProperty(THREAD_POOL_REJECTION_POLICY, SimpleRejectionHandler.class.getName());
-        batchEnvironment.createThreadPoolExecutor();
-        verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, threadFactoryClass, false, SimpleRejectionHandler.class, batchEnvironment.executorService);
+        verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, threadFactoryClass, false, SimpleRejectionHandler.class, batchEnvironment.createThreadPoolExecutor());
 
 
         //a Configured thread-pool, with missing coreSize

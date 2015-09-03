@@ -32,6 +32,7 @@ import org.jberet.repository.InMemoryRepository;
 import org.jberet.repository.JobRepository;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
+import org.jberet.spi.JobTask;
 import org.jberet.spi.JobXmlResolver;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.junit.Assert;
@@ -89,11 +90,7 @@ public class JobRepositoryTest {
             }
 
             @Override
-            public void submitTask(final Runnable task) {
-            }
-
-            @Override
-            public void jobExecutionFinished() {
+            public void submitTask(final JobTask task) {
             }
 
             @Override

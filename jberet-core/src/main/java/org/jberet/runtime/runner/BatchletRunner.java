@@ -22,10 +22,11 @@ import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.context.StepContextImpl;
+import org.jberet.spi.JobTask;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
-public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements Runnable, JobStopNotificationListener {
+public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements JobTask, JobStopNotificationListener {
     private final RefArtifact batchlet;
     private final StepExecutionRunner stepRunner;
     private PartitionCollector collector;

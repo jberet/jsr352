@@ -28,8 +28,9 @@ import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
+import org.jberet.spi.JobTask;
 
-public abstract class AbstractRunner<C extends AbstractContext> implements Runnable {
+public abstract class AbstractRunner<C extends AbstractContext> implements JobTask {
     /**
      * The id of the job element this runner represents.
      */
@@ -64,6 +65,11 @@ public abstract class AbstractRunner<C extends AbstractContext> implements Runna
             return text.equals(pattern);
         }
         return Pattern.matches(pattern, text);
+    }
+
+    @Override
+    public int getRequiredRemainingPermits() {
+        return 0;
     }
 
     /**

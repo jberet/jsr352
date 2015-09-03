@@ -20,10 +20,11 @@ import org.jberet.job.model.Flow;
 import org.jberet.job.model.JobElement;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.FlowContextImpl;
+import org.jberet.spi.JobTask;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
-public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowContextImpl> implements Runnable {
+public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowContextImpl> implements JobTask {
     private final Flow flow;
     private final CountDownLatch latch;
 
@@ -66,5 +67,4 @@ public final class FlowExecutionRunner extends CompositeExecutionRunner<FlowCont
             enclosingRunner.runJobElement(next, batchContext.getFlowExecution().getLastStepExecution());
         }
     }
-
 }

@@ -15,10 +15,8 @@ package org.jberet.se;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.ServiceLoader;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -28,12 +26,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.transaction.TransactionManager;
 
-import org.jberet._private.BatchLogger;
 import org.jberet.repository.JobRepository;
-import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.se._private.SEBatchLogger;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
+import org.jberet.spi.JobExecutor;
+import org.jberet.spi.JobTask;
 import org.jberet.spi.JobXmlResolver;
 import org.jberet.tools.ChainedJobXmlResolver;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
@@ -43,8 +41,6 @@ import org.jberet.tx.LocalTransactionManager;
  * Represents the Java SE batch runtime environment and its services.
  */
 public final class BatchSEEnvironment implements BatchEnvironment {
-
-    ThreadPoolExecutor executorService;
 
     public static final String CONFIG_FILE_NAME = "jberet.properties";
     public static final String JOB_REPOSITORY_TYPE_KEY = "job-repository-type";
@@ -61,24 +57,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     private final Properties configProperties;
     private final TransactionManager tm;
     private final JobXmlResolver jobXmlResolver;
-
-    /**
-     * Max number of threads in the executor, which is typically obtained from the configuration.
-     * If the executor does not limit the number of threads, then this field is not assigned.
-     */
-    private int maxThreads;
-
-    /**
-     * An unbound queue to hold submitted job execution tasks that cannot be immediately submitted to the executor
-     * due to low number of available threads, or already queued items taking precedence. See {@link #submitTask(Runnable)}.
-     * <p/>
-     * If the executor does not limit the number of threads, then this queue is not initialized.
-     * <p/>
-     * Note that only job execution tasks are eligible for queuing, and other tasks such as flow or partition tasks
-     * are not eligible for queuing.
-     * Queued items may be dequeued when an active job execution finishes, see {@link #jobExecutionFinished()}
-     */
-    private Queue<Runnable> jobQueue;
+    private final JobExecutor executor;
 
     static final String THREAD_POOL_TYPE = "thread-pool-type";
     static final String THREAD_POOL_TYPE_CACHED = "Cached";
@@ -114,7 +93,13 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         }
         this.tm = LocalTransactionManager.getInstance();
 
-        createThreadPoolExecutor();
+        final ThreadPoolExecutor threadPoolExecutor = createThreadPoolExecutor();
+        executor = new JobExecutor(threadPoolExecutor) {
+            @Override
+            protected int getMaximumPoolSize() {
+                return threadPoolExecutor.getMaximumPoolSize();
+            }
+        };
         final ServiceLoader<JobXmlResolver> userJobXmlResolvers = ServiceLoader.load(JobXmlResolver.class, getClassLoader());
         this.jobXmlResolver = new ChainedJobXmlResolver(userJobXmlResolvers, DEFAULT_JOB_XML_RESOLVERS);
     }
@@ -134,33 +119,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     }
 
     @Override
-    public void submitTask(final Runnable task) {
-        if (jobQueue != null && task instanceof JobExecutionRunner) {
-            final int numAvailableThreads = maxThreads - executorService.getActiveCount();
-            if (numAvailableThreads >= 2) {
-                executorService.submit(task);
-            } else {
-                jobQueue.add(task);
-                BatchLogger.LOGGER.jobAddedToWaitingQueue(task, numAvailableThreads);
-            }
-        } else {
-            executorService.submit(task);
-        }
-    }
-
-    /**
-     * This method implementation takes the oldest item from the job waiting queue, and submit it to the executor.
-     * If the job waiting queue does not exist, or if there is nothing in the queue, this method does nothing.
-     */
-    @Override
-    public void jobExecutionFinished() {
-        if (jobQueue != null) {
-            final Runnable jobFromQueue = jobQueue.poll();
-            if (jobFromQueue != null) {
-                executorService.submit(jobFromQueue);
-                BatchLogger.LOGGER.resubmitedQueuedJob(jobFromQueue);
-            }
-        }
+    public void submitTask(final JobTask task) {
+        executor.execute(task);
     }
 
     @Override
@@ -183,7 +143,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         return this.configProperties;
     }
 
-    void createThreadPoolExecutor() {
+    ThreadPoolExecutor createThreadPoolExecutor() {
         String threadPoolType = configProperties.getProperty(THREAD_POOL_TYPE);
         final String threadFactoryProp = configProperties.getProperty(THREAD_FACTORY);
         final ThreadFactory threadFactory;
@@ -199,8 +159,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         }
 
         if (threadPoolType == null || threadPoolType.isEmpty() || threadPoolType.trim().equalsIgnoreCase(THREAD_POOL_TYPE_CACHED)) {
-            executorService = (ThreadPoolExecutor) Executors.newCachedThreadPool(threadFactory);
-            return;
+            return (ThreadPoolExecutor) Executors.newCachedThreadPool(threadFactory);
         }
 
         final String coreSizeProp = configProperties.getProperty(THREAD_POOL_CORE_SIZE);
@@ -212,11 +171,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         }
 
         threadPoolType = threadPoolType.trim();
-        jobQueue = new ConcurrentLinkedQueue<Runnable>();
         if (threadPoolType.equalsIgnoreCase(THREAD_POOL_TYPE_FIXED)) {
-            executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(coreSize, threadFactory);
-            maxThreads = coreSize;
-            return;
+            return (ThreadPoolExecutor) Executors.newFixedThreadPool(coreSize, threadFactory);
         }
 
         if (threadPoolType.equalsIgnoreCase(THREAD_POOL_TYPE_CONFIGURED)) {
@@ -277,9 +233,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             if (prestartAllCoreThreads) {
                 threadPoolExecutor.prestartAllCoreThreads();
             }
-            executorService = threadPoolExecutor;
-            maxThreads = maxSize;
-            return;
+            return threadPoolExecutor;
         }
 
         throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_TYPE, threadPoolType, null);
