@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.batch.runtime.context.StepContext;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -23,9 +23,9 @@ class ReaderWriterResult implements Serializable {
     private static final long serialVersionUID = 4791578864185317118L;
 
     private volatile boolean readerClosed;
-    private AtomicInteger readCount;
+    private final AtomicInteger readCount;
     private volatile boolean writerClosed;
-    private AtomicInteger writeCount;
+    private final AtomicInteger writeCount;
 
     public ReaderWriterResult() {
         readerClosed = false;
@@ -38,8 +38,9 @@ class ReaderWriterResult implements Serializable {
         return readerClosed;
     }
 
-    protected void setReaderClosed(final boolean readerClosed) {
+    protected ReaderWriterResult setReaderClosed(final boolean readerClosed) {
         this.readerClosed = readerClosed;
+        return this;
     }
 
     public int getReadCount() {
@@ -55,8 +56,9 @@ class ReaderWriterResult implements Serializable {
         return writerClosed;
     }
 
-    protected void setWriterClosed(final boolean writerClosed) {
+    protected ReaderWriterResult setWriterClosed(final boolean writerClosed) {
         this.writerClosed = writerClosed;
+        return this;
     }
 
     public int getWriteCount() {
@@ -69,24 +71,11 @@ class ReaderWriterResult implements Serializable {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(ReaderWriterResult.class)
+        return MoreObjects.toStringHelper(ReaderWriterResult.class)
                 .add("readerClosed", readerClosed)
                 .add("readCount", readCount)
                 .add("writerClosed", writerClosed)
                 .add("writeCount", writeCount)
                 .toString();
-    }
-
-    static ReaderWriterResult getOrCreateReaderWriterItem(final StepContext stepContext) {
-        ReaderWriterResult result = (ReaderWriterResult) stepContext.getPersistentUserData();
-        if (result == null) {
-            result = new ReaderWriterResult();
-            stepContext.setPersistentUserData(result);
-        }
-        return result;
-    }
-
-    static ReaderWriterResult getReaderWriterItem(final StepContext stepContext) {
-        return (ReaderWriterResult) stepContext.getPersistentUserData();
     }
 }

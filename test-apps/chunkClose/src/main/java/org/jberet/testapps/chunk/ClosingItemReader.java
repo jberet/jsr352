@@ -18,7 +18,7 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -43,7 +43,7 @@ public class ClosingItemReader extends AbstractItemReader implements ItemReader 
 
     @Override
     public void close() throws Exception {
-        ReaderWriterResult.getOrCreateReaderWriterItem(stepContext).setReaderClosed(true);
+        stepContext.setPersistentUserData(getOrCreateReaderWriterResult().setReaderClosed(true));
     }
 
     @Override
@@ -51,18 +51,19 @@ public class ClosingItemReader extends AbstractItemReader implements ItemReader 
         if (failReaderAtOpen) {
             throw new BatchRuntimeException("Failed reader at open");
         }
-        ReaderWriterResult.getOrCreateReaderWriterItem(stepContext).setReaderClosed(false);
+        stepContext.setPersistentUserData(getOrCreateReaderWriterResult().setReaderClosed(false));
     }
 
     @Override
     public Serializable checkpointInfo() throws Exception {
-        return ReaderWriterResult.getReaderWriterItem(stepContext);
+        return stepContext.getPersistentUserData();
     }
 
     @Override
     public Object readItem() throws Exception {
-        final ReaderWriterResult item = ReaderWriterResult.getOrCreateReaderWriterItem(stepContext);
+        final ReaderWriterResult item = getOrCreateReaderWriterResult();
         final int counter = item.incrementReadCount();
+        stepContext.setPersistentUserData(item);
         if (counter == stopReadAt) {
             return null;
         }
@@ -74,11 +75,19 @@ public class ClosingItemReader extends AbstractItemReader implements ItemReader 
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(getClass())
+        return MoreObjects.toStringHelper(getClass())
                 .add("failReaderAtOpen", failReaderAtOpen)
                 .add("stopReaderAt", stopReadAt)
                 .add("failReadAt", failReadAt)
-                .add("readerWriterItem", ReaderWriterResult.getOrCreateReaderWriterItem(stepContext))
+                .add("readerWriterItem", stepContext.getPersistentUserData())
                 .toString();
+    }
+
+    private ReaderWriterResult getOrCreateReaderWriterResult() {
+        ReaderWriterResult result = (ReaderWriterResult) stepContext.getPersistentUserData();
+        if (result == null) {
+            result = new ReaderWriterResult();
+        }
+        return result;
     }
 }

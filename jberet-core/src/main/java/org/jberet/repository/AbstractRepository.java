@@ -117,24 +117,7 @@ public abstract class AbstractRepository implements JobRepository {
 
     @Override
     public void savePersistentData(final JobExecution jobExecution, final AbstractStepExecution stepOrPartitionExecution) {
-        //persistent data and checkpoint info can be mutable objects, so serialize them to avoid further modification.
-        Serializable ser = stepOrPartitionExecution.getPersistentUserData();
-        Serializable copy;
-        if (ser != null) {
-            copy = clone(ser);
-            stepOrPartitionExecution.setPersistentUserData(copy);
-        }
-        ser = stepOrPartitionExecution.getReaderCheckpointInfo();
-        if (ser != null) {
-            copy = clone(ser);
-            stepOrPartitionExecution.setReaderCheckpointInfo(copy);
-        }
-        ser = stepOrPartitionExecution.getWriterCheckpointInfo();
-        if (ser != null) {
-            copy = clone(ser);
-            stepOrPartitionExecution.setWriterCheckpointInfo(copy);
-        }
-        //save stepExecution partition properties
+        // Does nothing as the serialized data is stored in serialized form and is immutable
     }
 
     @Override

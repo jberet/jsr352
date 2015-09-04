@@ -23,17 +23,17 @@ import org.jberet.runtime.metric.StepMetrics;
 public abstract class AbstractStepExecution extends AbstractExecution implements StepExecution {
     private static final long serialVersionUID = 1L;
 
-    long id;
+    private long id;
 
-    String stepName;
+    private String stepName;
 
-    Serializable persistentUserData;
+    private SerializableData persistentUserData;
 
-    Serializable readerCheckpointInfo;
+    private SerializableData readerCheckpointInfo;
 
-    Serializable writerCheckpointInfo;
+    private SerializableData writerCheckpointInfo;
 
-    Exception exception;
+    private SerializableData exception;
 
     StepMetrics stepMetrics = new StepMetrics();
 
@@ -45,6 +45,18 @@ public abstract class AbstractStepExecution extends AbstractExecution implements
     AbstractStepExecution(final String stepName) {
         this.stepName = stepName;
         startTime = System.currentTimeMillis();
+    }
+
+    AbstractStepExecution(final long id, final String stepName, final Serializable persistentUserData, final Serializable readerCheckpointInfo, final Serializable writerCheckpointInfo) {
+        this.id = id;
+        this.stepName = stepName;
+        this.persistentUserData = SerializableData.of(persistentUserData);
+        this.readerCheckpointInfo = SerializableData.of(readerCheckpointInfo);
+        this.writerCheckpointInfo = SerializableData.of(writerCheckpointInfo);
+    }
+
+    AbstractStepExecution(final AbstractStepExecution step) {
+        this(step.id, step.stepName, step.persistentUserData, step.readerCheckpointInfo, step.writerCheckpointInfo);
     }
 
     public void setId(final long id) {
@@ -68,11 +80,11 @@ public abstract class AbstractStepExecution extends AbstractExecution implements
 
     @Override
     public Serializable getPersistentUserData() {
-        return persistentUserData;
+        return deserialize(persistentUserData);
     }
 
     public void setPersistentUserData(final Serializable persistentUserData) {
-        this.persistentUserData = persistentUserData;
+        this.persistentUserData = SerializableData.of(persistentUserData);
     }
 
     @Override
@@ -85,11 +97,11 @@ public abstract class AbstractStepExecution extends AbstractExecution implements
     }
 
     public Exception getException() {
-        return exception;
+        return (Exception) deserialize(exception);
     }
 
     public void setException(final Exception exception) {
-        this.exception = exception;
+        this.exception = SerializableData.of(exception);
     }
 
     @Override
@@ -103,19 +115,19 @@ public abstract class AbstractStepExecution extends AbstractExecution implements
     }
 
     public Serializable getReaderCheckpointInfo() {
-        return readerCheckpointInfo;
+        return deserialize(readerCheckpointInfo);
     }
 
     public void setReaderCheckpointInfo(final Serializable readerCheckpointInfo) {
-        this.readerCheckpointInfo = readerCheckpointInfo;
+        this.readerCheckpointInfo = SerializableData.of(readerCheckpointInfo);
     }
 
     public Serializable getWriterCheckpointInfo() {
-        return writerCheckpointInfo;
+        return deserialize(writerCheckpointInfo);
     }
 
     public void setWriterCheckpointInfo(final Serializable writerCheckpointInfo) {
-        this.writerCheckpointInfo = writerCheckpointInfo;
+        this.writerCheckpointInfo = SerializableData.of(writerCheckpointInfo);
     }
 
     @Override
@@ -136,5 +148,12 @@ public abstract class AbstractStepExecution extends AbstractExecution implements
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + stepName.hashCode();
         return result;
+    }
+
+    private static Serializable deserialize(final SerializableData data) {
+        if (data == null){
+            return null;
+        }
+        return data.deserialize();
     }
 }

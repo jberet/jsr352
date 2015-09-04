@@ -19,7 +19,7 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -43,35 +43,47 @@ public class ClosingItemWriter extends AbstractItemWriter implements ItemWriter 
         if (failWriterAtOpen) {
             throw new BatchRuntimeException("Failed writer at open");
         }
-        ReaderWriterResult.getOrCreateReaderWriterItem(stepContext).setWriterClosed(false);
+        stepContext.setPersistentUserData(getOrCreateReaderWriterResult().setWriterClosed(false));
     }
 
     @Override
     public void close() throws Exception {
-        ReaderWriterResult.getOrCreateReaderWriterItem(stepContext).setWriterClosed(true);
+        stepContext.setPersistentUserData(getOrCreateReaderWriterResult().setWriterClosed(true));
     }
 
     @Override
     public Serializable checkpointInfo() throws Exception {
-        return ReaderWriterResult.getReaderWriterItem(stepContext);
+        return stepContext.getPersistentUserData();
     }
 
     @Override
     public void writeItems(final List<Object> items) throws Exception {
-        final ReaderWriterResult item = ReaderWriterResult.getOrCreateReaderWriterItem(stepContext);
+        final ReaderWriterResult item = getOrCreateReaderWriterResult();
         for (Object o : items) {
-            if (item.incrementWriteCount() == failWriteAt) {
-                throw new BatchRuntimeException("Failed writer at point " + failWriteAt + ". Reader and writer should both be closed.");
+            try {
+                if (item.incrementWriteCount() == failWriteAt) {
+                    throw new BatchRuntimeException("Failed writer at point " + failWriteAt + ". Reader and writer should both be closed.");
+                }
+            } finally {
+                stepContext.setPersistentUserData(item);
             }
         }
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(getClass())
+        return MoreObjects.toStringHelper(getClass())
                 .add("failWriterAtOpen", failWriterAtOpen)
                 .add("failWriteAt", failWriteAt)
-                .add("readerWriterItem", ReaderWriterResult.getOrCreateReaderWriterItem(stepContext))
+                .add("readerWriterItem", stepContext)
                 .toString();
+    }
+
+    private ReaderWriterResult getOrCreateReaderWriterResult() {
+        ReaderWriterResult result = (ReaderWriterResult) stepContext.getPersistentUserData();
+        if (result == null) {
+            result = new ReaderWriterResult();
+        }
+        return result;
     }
 }
