@@ -20,6 +20,8 @@ import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
+import org.jberet.job.model.Listeners;
+import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.spi.JobTask;
@@ -46,7 +48,7 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             jobExecution.setBatchStatus(BatchStatus.STARTED);
             batchContext.getJobRepository().updateJobExecution(jobExecution, false, false);
         }
-        final JobListener[] jobListeners = batchContext.getJobListeners();
+        final JobListener[] jobListeners = createJobListeners();
         int i = 0;
 
         try {
@@ -116,6 +118,22 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             return true;
         }
         return false;
+    }
+
+    private JobListener[] createJobListeners() {
+        final Listeners listeners = job.getListeners();
+        if (listeners != null) {
+            final List<RefArtifact> listenerList = listeners.getListeners();
+            final int count = listenerList.size();
+            final JobListener[] jobListeners = new JobListener[count];
+            for (int i = 0; i < count; i++) {
+                final RefArtifact listener = listenerList.get(i);
+                jobListeners[i] = batchContext.createArtifact(listener.getRef(), null, listener.getProperties());
+            }
+            return jobListeners;
+        } else {
+            return new JobListener[0];
+        }
     }
 
     @Override

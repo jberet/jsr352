@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import javax.batch.api.listener.JobListener;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.context.JobContext;
 
@@ -26,9 +25,7 @@ import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactCreationContext;
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Job;
-import org.jberet.job.model.Listeners;
 import org.jberet.job.model.PropertyResolver;
-import org.jberet.job.model.RefArtifact;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.spi.ArtifactFactory;
@@ -40,8 +37,6 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
     JobExecutionImpl jobExecution;
     private ArtifactFactory artifactFactory;
     JobRepository jobRepository;
-
-    private JobListener[] jobListeners;
 
     //to track the executed steps to detect loopback, may be accessed sub-threads (e.g., flows in split executions)
     private List<String> executedStepIds = Collections.synchronizedList(new ArrayList<String>());
@@ -71,7 +66,6 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         resolver.setJobParameters(jobExecution.getJobParameters());
         resolver.resolve(jobExecution.getSubstitutedJob());
         batchArtifacts = ArchiveXmlLoader.loadBatchXml(classLoader);
-        createJobListeners();
     }
 
     @Override
@@ -96,10 +90,6 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
 
     public ArtifactFactory getArtifactFactory() {
         return artifactFactory;
-    }
-
-    public JobListener[] getJobListeners() {
-        return this.jobListeners;
     }
 
     public Properties getJobParameters() {
@@ -219,21 +209,6 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
     public void destroyArtifact(final List<?> list) {
         for (final Object obj : list) {
             artifactFactory.destroy(obj);
-        }
-    }
-
-    private void createJobListeners() {
-        final Listeners listeners = jobExecution.getSubstitutedJob().getListeners();
-        if (listeners != null) {
-            final List<RefArtifact> listenerList = listeners.getListeners();
-            final int count = listenerList.size();
-            this.jobListeners = new JobListener[count];
-            for (int i = 0; i < count; i++) {
-                final RefArtifact listener = listenerList.get(i);
-                this.jobListeners[i] = createArtifact(listener.getRef(), null, listener.getProperties());
-            }
-        } else {
-            this.jobListeners = new JobListener[0];
         }
     }
 }
