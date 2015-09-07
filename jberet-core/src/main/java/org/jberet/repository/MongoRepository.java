@@ -87,7 +87,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             }
         }
         if (!db.collectionExists(TableColumns.SEQ)) {
-            seqCollection = db.createCollection(TableColumns.SEQ, null);
+            seqCollection = db.createCollection(TableColumns.SEQ, new BasicDBObject());
             final DBObject jobInstanceDbo = new BasicDBObject(TableColumns._id, TableColumns.JOBINSTANCEID);
             jobInstanceDbo.put(TableColumns.SEQ, 1L);
             final DBObject jobExecutionDbo = new BasicDBObject(TableColumns._id, TableColumns.JOBEXECUTIONID);
