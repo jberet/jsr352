@@ -48,19 +48,16 @@ public final class PartitionExecutionImpl extends AbstractStepExecution {
                           final Serializable readerCheckpointInfo,
                           final Serializable writerCheckpointInfo
     ) {
+        super(stepExecutionId, stepName, persistentUserData, readerCheckpointInfo, writerCheckpointInfo);
         this.partitionId = partitionId;
-        this.id = stepExecutionId;
-        this.stepName = stepName;
         this.batchStatus = batchStatus;
         this.exitStatus = exitStatus;
-        this.persistentUserData = persistentUserData;
-        this.readerCheckpointInfo = readerCheckpointInfo;
-        this.writerCheckpointInfo = writerCheckpointInfo;
     }
 
     public PartitionExecutionImpl(final AbstractStepExecution stepExecution) {
-        this(-1, stepExecution.id, stepExecution.stepName, stepExecution.batchStatus, stepExecution.exitStatus,
-                stepExecution.persistentUserData, stepExecution.readerCheckpointInfo, stepExecution.writerCheckpointInfo);
+        super(stepExecution);
+        batchStatus = stepExecution.batchStatus;
+        exitStatus = stepExecution.exitStatus;
     }
 
     public int getPartitionId() {

@@ -1,5 +1,6 @@
 package org.jberet._private;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.List;
 import javax.batch.operations.BatchRuntimeException;
@@ -187,6 +188,12 @@ public interface BatchMessages {
 
     @Message(id = 651, value = "The requested permits (%d) is greater than the maximum number of permits (%d) allowed in the thread pool.")
     IllegalStateException insufficientPermits(int requestedPermits, int maxPermits);
+
+    @Message(id = 652, value = "Failed to serialize: %s")
+    BatchRuntimeException failedToSerialize(@Cause Throwable cause, Serializable value);
+
+    @Message(id = 653, value = "Failed to deserialize: %s")
+    BatchRuntimeException failedToDeserialize(@Cause Throwable cause, Serializable value);
 
 
 }

@@ -59,9 +59,10 @@ public class IntegerArrayWriter extends IntegerArrayReaderWriterProcessorBase im
         ArrayList<List<Object>> recorded = (ArrayList<List<Object>>) stepContext.getPersistentUserData();
         if (recorded == null) {
             recorded = new ArrayList<List<Object>>();
-            stepContext.setPersistentUserData(recorded);
         }
         recorded.add(items);
+        // User data is immutable and needs to be set after the previous data has been mutated
+        stepContext.setPersistentUserData(recorded);
     }
 
     @Override

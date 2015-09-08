@@ -71,8 +71,7 @@ public final class StepExecutionImpl extends AbstractStepExecution {
                              final long writeSkipCount,
                              final Serializable readerCheckpointInfo,
                              final Serializable writerCheckpointInfo) {
-        this.id = id;
-        this.stepName = stepName;
+        super(id, stepName, persistentUserData, readerCheckpointInfo, writerCheckpointInfo);
 
         if (startTime != null) {
             this.startTime = startTime.getTime();
@@ -82,9 +81,6 @@ public final class StepExecutionImpl extends AbstractStepExecution {
         }
         this.batchStatus = Enum.valueOf(BatchStatus.class, batchStatus);
         this.exitStatus = exitStatus;
-        this.persistentUserData = persistentUserData;
-        this.readerCheckpointInfo = readerCheckpointInfo;
-        this.writerCheckpointInfo = writerCheckpointInfo;
         stepMetrics.set(Metric.MetricType.READ_COUNT, readCount);
         stepMetrics.set(Metric.MetricType.WRITE_COUNT, writeCount);
         stepMetrics.set(Metric.MetricType.COMMIT_COUNT, commitCount);
