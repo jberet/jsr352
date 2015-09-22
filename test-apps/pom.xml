@@ -45,6 +45,7 @@
         <module>cdiScopes</module>
         <module>javaJSL</module>
         <module>throttle</module>
+        <module>restAPI</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>

@@ -94,6 +94,8 @@
 
         <version.org.renjin.renjin-script-engine>0.7.0-RC8-SNAPSHOT</version.org.renjin.renjin-script-engine>
 
+        <version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>
+
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
     </properties>
@@ -106,6 +108,7 @@
         <module>jberet-distribution</module>
         <module>jberet-jpa-repository</module>
         <module>jberet-support</module>
+        <module>jberet-rest-api</module>
     </modules>
 
     <build>
@@ -610,6 +613,14 @@
                 <artifactId>hornetq-jms-server</artifactId>
                 <version>${version.org.hornetq}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <!-- rest-api dependencies -->
+            <dependency>
+                <groupId>org.jboss.spec.javax.ws.rs</groupId>
+                <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
+                <version>${version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
