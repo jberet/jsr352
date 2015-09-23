@@ -174,11 +174,11 @@ public class RestAPIIT {
                 .resolveTemplate("jobExecutionId", String.valueOf(jobExecutionData.getExecutionId())).build();
         System.out.printf("uri: %s%n", uri);
         final WebTarget target = client.target(uri);
-        final Response response = target.request().put(null);
+        final Response response = target.request().post(null);
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
 
         //abandon it again (should be idempotent)
-        final Response response2 = client.target(uri).request().put(null);
+        final Response response2 = client.target(uri).request().post(null);
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response2.getStatus());
 
         final URI abandonedJobExecutionUri = getJobExecutionUriBuilder(null).
@@ -218,7 +218,7 @@ public class RestAPIIT {
         final URI uri = getJobExecutionUriBuilder("stop").resolveTemplate("jobExecutionId", jobExecution.getExecutionId()).build();
         final WebTarget target = client.target(uri);
         System.out.printf("uri: %s%n", uri);
-        final Response response = target.request().put(emptyJsonEntity());
+        final Response response = target.request().post(emptyJsonEntity());
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
 
         Thread.sleep(1000);

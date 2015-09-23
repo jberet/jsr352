@@ -16,7 +16,6 @@ import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -48,13 +47,13 @@ public class JobExecutionResource {
     }
 
     @Path("{jobExecutionId}/abandon")
-    @PUT
+    @POST
     public void abandon(final @PathParam("jobExecutionId") long jobExecutionId) {
         JobService.getInstance().abandon(jobExecutionId);
     }
 
     @Path("{jobExecutionId}/stop")
-    @PUT
+    @POST
     public void stop(final @PathParam("jobExecutionId") long jobExecutionId) {
         JobService.getInstance().stop(jobExecutionId);
     }
