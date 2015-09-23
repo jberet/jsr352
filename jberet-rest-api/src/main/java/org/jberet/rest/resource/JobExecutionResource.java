@@ -22,10 +22,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.jberet.rest._private.RestAPIMessages;
 import org.jberet.rest.model.JobExecutionData;
+import org.jberet.rest.model.StepExecutionData;
 
 @Path("jobexecutions")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -34,16 +35,15 @@ public class JobExecutionResource {
 
     @Path("running")
     @GET
-    public Response getRunningExecutions(final @QueryParam("jobName") String jobName) {
+    public JobExecutionData[] getRunningExecutions(final @QueryParam("jobName") String jobName) {
         final List<JobExecutionData> runningExecutions = JobService.getInstance().getRunningExecutions(jobName);
-        return Response.ok(runningExecutions.toArray(new JobExecutionData[runningExecutions.size()])).build();
+        return runningExecutions.toArray(new JobExecutionData[runningExecutions.size()]);
     }
 
     @Path("{jobExecutionId}")
     @GET
-    public Response getJobExecution(final @PathParam("jobExecutionId") long jobExecutionId) {
-        final JobExecutionData jobExecutionData = JobService.getInstance().getJobExecution(jobExecutionId);
-        return Response.ok(jobExecutionData).build();
+    public JobExecutionData getJobExecution(final @PathParam("jobExecutionId") long jobExecutionId) {
+        return JobService.getInstance().getJobExecution(jobExecutionId);
     }
 
     @Path("{jobExecutionId}/abandon")
@@ -63,6 +63,26 @@ public class JobExecutionResource {
     public JobExecutionData restart(final @PathParam("jobExecutionId") long jobExecutionId,
                                     final @Context UriInfo uriInfo) {
         return JobService.getInstance().restart(jobExecutionId, JobResource.jobParametersFromUriInfo(uriInfo));
+    }
+
+    @GET
+    @Path("{jobExecutionId}/stepexecutions")
+    public StepExecutionData[] getStepExecutions(final @PathParam("jobExecutionId") long jobExecutionId) {
+        final List<StepExecutionData> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
+        return stepExecutionData.toArray(new StepExecutionData[stepExecutionData.size()]);
+    }
+
+    @GET
+    @Path("{jobExecutionId}/stepexecutions/{stepExecutionId}")
+    public StepExecutionData getStepExecution(final @PathParam("jobExecutionId") long jobExecutionId,
+                                              final @PathParam("stepExecutionId") long stepExecutionId) {
+        final List<StepExecutionData> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
+        for (final StepExecutionData e : stepExecutionData) {
+            if (e.getStepExecutionId() == stepExecutionId) {
+                return e;
+            }
+        }
+        throw RestAPIMessages.MESSAGES.notFoundException("stepExecutionId", String.valueOf(stepExecutionId));
     }
 
 }

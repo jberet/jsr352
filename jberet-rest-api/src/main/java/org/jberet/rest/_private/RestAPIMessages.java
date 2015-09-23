@@ -12,12 +12,10 @@
 
 package org.jberet.rest._private;
 
-import javax.batch.operations.BatchRuntimeException;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.NotFoundException;
 
 import org.jboss.logging.Messages;
-import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
 import org.jboss.logging.annotations.ValidIdRange;
@@ -32,5 +30,8 @@ public interface RestAPIMessages {
 
     @Message(id = 70001, value = "Invalid request query parameter value: %s = %s")
     BadRequestException invalidQueryParamValue(String paramKey, String paramValue);
+
+    @Message(id = 70002, value = "The resource identified is not found: %s = %s")
+    NotFoundException notFoundException(String key, String value);
 
 }

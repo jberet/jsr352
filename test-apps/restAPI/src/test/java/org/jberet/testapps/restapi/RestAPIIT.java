@@ -30,7 +30,6 @@ import org.jberet.rest.model.StepExecutionData;
 import org.jberet.rest.resource.JobExecutionResource;
 import org.jberet.rest.resource.JobInstanceResource;
 import org.jberet.rest.resource.JobResource;
-import org.jberet.rest.resource.StepExecutionResource;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -257,27 +256,39 @@ public class RestAPIIT {
         final JobExecutionData[] data = target.request().get(JobExecutionData[].class);
         assertEquals(0, data.length);
     }
-    
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
     public void getStepExecutions() throws Exception {
-        final Properties queryParams = new Properties();
         JobExecutionData jobExecution1 = startJob(jobWithParams, null);
 
         Thread.sleep(500);
-        final URI uri = getStepExecutionUriBuilder("getStepExecutions").build();
-        queryParams.setProperty("jobExecutionId", String.valueOf(jobExecution1.getExecutionId()));
-        WebTarget target = getTarget(uri, queryParams);
-        System.out.printf("uri: %s%n", uri);
-        final StepExecutionData[] data = target.request().get(StepExecutionData[].class);
+        final StepExecutionData[] data = getStepExecutions(jobExecution1.getExecutionId());
         assertEquals(1, data.length);
         assertEquals(BatchStatus.COMPLETED, data[0].getBatchStatus());
         assertEquals(jobWithParams + ".step1", data[0].getStepName());
-
-        System.out.printf("Got step metrics: %s%n", Arrays.asList(data[0].getMetrics()));
+        System.out.printf("Got step metrics: %s%n", Arrays.toString(data[0].getMetrics()));
     }
-    
+
+    @Test
+    public void getStepExecution() throws Exception {
+        JobExecutionData jobExecution1 = startJob(jobWithParams, null);
+
+        Thread.sleep(500);
+        final StepExecutionData[] data = getStepExecutions(jobExecution1.getExecutionId());
+        final long stepExecutionId = data[0].getStepExecutionId();
+        final URI uri = getJobExecutionUriBuilder("getStepExecution")
+                .resolveTemplate("jobExecutionId", jobExecution1.getExecutionId())
+                .resolveTemplate("stepExecutionId", stepExecutionId).build();
+        WebTarget target = getTarget(uri, null);
+        System.out.printf("uri: %s%n", uri);
+        final StepExecutionData stepExecutionData = target.request().get(StepExecutionData.class);
+        assertEquals(BatchStatus.COMPLETED, stepExecutionData.getBatchStatus());
+        assertEquals(jobWithParams + ".step1", stepExecutionData.getStepName());
+        System.out.printf("Got step metrics: %s%n", Arrays.toString(stepExecutionData.getMetrics()));
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private JobExecutionData startJob(final String jobXmlName, final Properties queryParams) throws Exception {
         final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();
@@ -313,6 +324,14 @@ public class RestAPIIT {
         return target.request().get(JobExecutionData.class);
     }
 
+    private StepExecutionData[] getStepExecutions(final long jobExecutionId) {
+        final URI uri = getJobExecutionUriBuilder("getStepExecutions")
+                .resolveTemplate("jobExecutionId", jobExecutionId).build();
+        WebTarget target = getTarget(uri, null);
+        System.out.printf("uri: %s%n", uri);
+        return target.request().get(StepExecutionData[].class);
+    }
+
     private Entity<Object> emptyJsonEntity() {
         return Entity.entity(null, MediaType.APPLICATION_JSON_TYPE);
     }
@@ -340,14 +359,4 @@ public class RestAPIIT {
         }
         return uriBuilder;
     }
-
-    private UriBuilder getStepExecutionUriBuilder(final String methodName) {
-        UriBuilder uriBuilder = UriBuilder.fromPath(restUrl).path(StepExecutionResource.class);
-        if (methodName != null) {
-            uriBuilder = uriBuilder.path(StepExecutionResource.class, methodName);
-        }
-        return uriBuilder;
-    }
-
-
 }
