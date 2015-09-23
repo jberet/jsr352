@@ -25,32 +25,10 @@
 
     <artifactId>jberet-rest-api</artifactId>
 
-    <properties>
-        <enunciate.version>2.0.0-M.4</enunciate.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
             <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
         </dependency>
     </dependencies>
-
-    <!--<build>-->
-        <!--<plugins>-->
-            <!--<plugin>-->
-                <!--<groupId>com.webcohesion.enunciate</groupId>-->
-                <!--<artifactId>enunciate-maven-plugin</artifactId>-->
-                <!--<version>${enunciate.version}</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<goals>-->
-                            <!--<goal>assemble</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-        <!--</plugins>-->
-    <!--</build>-->
-
 </project>

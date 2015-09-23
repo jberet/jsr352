@@ -254,8 +254,8 @@ public class RestAPIIT {
         queryParams.setProperty("jobName", jobWithParams);
         WebTarget target = getTarget(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
-        final Response response = target.request().get();
-        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
+        final JobExecutionData[] data = target.request().get(JobExecutionData[].class);
+        assertEquals(0, data.length);
     }
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////

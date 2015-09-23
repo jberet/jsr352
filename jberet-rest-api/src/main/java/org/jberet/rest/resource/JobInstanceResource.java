@@ -13,7 +13,6 @@
 package org.jberet.rest.resource;
 
 import java.util.List;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -52,9 +51,6 @@ public class JobInstanceResource {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("count", String.valueOf(count));
         }
         final List<JobInstanceData> jobInstanceData = JobService.getInstance().getJobInstances(jobName, start, count);
-        if (jobInstanceData.isEmpty()) {
-            return Response.noContent().build();
-        }
         return Response.ok(jobInstanceData.toArray(new JobInstanceData[jobInstanceData.size()])).build();
     }
 

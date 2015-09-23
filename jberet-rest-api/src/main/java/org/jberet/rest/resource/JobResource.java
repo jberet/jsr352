@@ -50,9 +50,6 @@ public class JobResource {
     @GET
     public Response getJobNames() {
         final Set<String> jobNames = JobService.getInstance().getJobNames();
-        if (jobNames.isEmpty()) {
-            return Response.noContent().build();
-        }
         final String[] jobNamesArray = jobNames.toArray(new String[jobNames.size()]);
 //        final GenericEntity<Set<String>> entity = new GenericEntity<Set<String>>(jobNames) {
 //        };

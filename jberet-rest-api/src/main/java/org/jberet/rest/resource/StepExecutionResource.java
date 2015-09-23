@@ -32,9 +32,6 @@ public class StepExecutionResource {
     @Path("/")
     public Response getStepExecutions(final @QueryParam("jobExecutionId") long jobExecutionId) {
         final List<StepExecutionData> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
-        if (stepExecutionData.isEmpty()) {
-            return Response.noContent().build();
-        }
         return Response.ok(stepExecutionData.toArray(new StepExecutionData[stepExecutionData.size()])).build();
     }
 }

@@ -37,9 +37,6 @@ public class JobExecutionResource {
     @GET
     public Response getRunningExecutions(final @QueryParam("jobName") String jobName) {
         final List<JobExecutionData> runningExecutions = JobService.getInstance().getRunningExecutions(jobName);
-        if (runningExecutions.isEmpty()) {
-            return Response.noContent().build();
-        }
         return Response.ok(runningExecutions.toArray(new JobExecutionData[runningExecutions.size()])).build();
     }
 
