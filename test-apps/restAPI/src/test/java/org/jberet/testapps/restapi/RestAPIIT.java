@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -119,6 +120,16 @@ public class RestAPIIT {
     public void getJobInstanceCountBadJobName() throws Exception {
         final URI uri = getJobInstanceUriBuilder("getJobInstanceCount").build();
         final WebTarget target = client.target(uri).queryParam("jobName", jobNameBad);
+        System.out.printf("uri: %s%n", uri);
+        final Response response = target.request().get();
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void getJobInstanceCountMissingJobName() throws Exception {
+        final URI uri = getJobInstanceUriBuilder("getJobInstanceCount").build();
+        final WebTarget target = client.target(uri);
         System.out.printf("uri: %s%n", uri);
         final Response response = target.request().get();
 
@@ -287,6 +298,25 @@ public class RestAPIIT {
         assertEquals(BatchStatus.COMPLETED, stepExecutionData.getBatchStatus());
         assertEquals(jobWithParams + ".step1", stepExecutionData.getStepName());
         System.out.printf("Got step metrics: %s%n", Arrays.toString(stepExecutionData.getMetrics()));
+    }
+
+    @Test
+    public void getStepExecutionBadStepExecutionId() throws Exception {
+        JobExecutionData jobExecution1 = startJob(jobWithParams, null);
+
+        Thread.sleep(500);
+        final long stepExecutionId = Long.MAX_VALUE;
+        final URI uri = getJobExecutionUriBuilder("getStepExecution")
+                .resolveTemplate("jobExecutionId", jobExecution1.getExecutionId())
+                .resolveTemplate("stepExecutionId", stepExecutionId).build();
+        WebTarget target = getTarget(uri, null);
+        System.out.printf("uri: %s%n", uri);
+
+        try {
+            target.request().get(StepExecutionData.class);
+        } catch (final WebApplicationException e) {
+            System.out.printf("Got expected exception: %s%n", e);
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
