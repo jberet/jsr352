@@ -31,9 +31,9 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 
-import org.jberet.rest.model.JobExecutionData;
-import org.jberet.rest.model.JobInstanceData;
-import org.jberet.rest.model.StepExecutionData;
+import org.jberet.rest.entity.JobExecutionEntity;
+import org.jberet.rest.entity.JobInstanceEntity;
+import org.jberet.rest.entity.StepExecutionEntity;
 
 final class JobService {
     private static final JobService instance = new JobService();
@@ -48,38 +48,38 @@ final class JobService {
         return instance;
     }
 
-    JobExecutionData start(final String jobXmlName, final Properties jobParameters)
+    JobExecutionEntity start(final String jobXmlName, final Properties jobParameters)
             throws JobStartException, JobSecurityException, NoSuchJobExecutionException {
         long jobExecutionId = jobOperator.start(jobXmlName, jobParameters);
-        return new JobExecutionData(jobOperator.getJobExecution(jobExecutionId));
+        return new JobExecutionEntity(jobOperator.getJobExecution(jobExecutionId));
     }
 
     Set<String> getJobNames() throws JobSecurityException {
         return jobOperator.getJobNames();
     }
 
-    List<JobInstanceData> getJobInstances(final String jobName, final int start, final int count)
+    List<JobInstanceEntity> getJobInstances(final String jobName, final int start, final int count)
             throws NoSuchJobException, JobSecurityException {
         final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, start, count);
-        final List<JobInstanceData> jobInstanceData = new ArrayList<JobInstanceData>();
+        final List<JobInstanceEntity> jobInstanceData = new ArrayList<JobInstanceEntity>();
         for (final JobInstance e : jobInstances) {
-            jobInstanceData.add(new JobInstanceData(e));
+            jobInstanceData.add(new JobInstanceEntity(e));
         }
         return jobInstanceData;
     }
 
-    public JobInstanceData getJobInstance(final long executionId) throws NoSuchJobExecutionException, JobSecurityException {
+    public JobInstanceEntity getJobInstance(final long executionId) throws NoSuchJobExecutionException, JobSecurityException {
         final JobInstance jobInstance = jobOperator.getJobInstance(executionId);
-        return new JobInstanceData(jobInstance);
+        return new JobInstanceEntity(jobInstance);
     }
 
     int getJobInstanceCount(final String jobName) throws NoSuchJobException, JobSecurityException {
         return jobOperator.getJobInstanceCount(jobName);
     }
 
-    JobExecutionData getJobExecution(final long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
+    JobExecutionEntity getJobExecution(final long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
         final JobExecution jobExecution = jobOperator.getJobExecution(jobExecutionId);
-        return new JobExecutionData(jobExecution);
+        return new JobExecutionEntity(jobExecution);
     }
 
 //    public List<JobExecution> getJobExecutions(final long jobInstanceId)
@@ -97,27 +97,27 @@ final class JobService {
         jobOperator.stop(jobExecutionId);
     }
 
-    JobExecutionData restart(final long jobExecutionId, final Properties restartParameters)
+    JobExecutionEntity restart(final long jobExecutionId, final Properties restartParameters)
             throws JobExecutionAlreadyCompleteException, NoSuchJobExecutionException, JobExecutionNotMostRecentException,
             JobRestartException, JobSecurityException {
         final long restartExecutionId = jobOperator.restart(jobExecutionId, restartParameters);
-        return new JobExecutionData(jobOperator.getJobExecution(restartExecutionId));
+        return new JobExecutionEntity(jobOperator.getJobExecution(restartExecutionId));
     }
 
-    List<JobExecutionData> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
+    List<JobExecutionEntity> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
         final List<Long> executionIds = jobOperator.getRunningExecutions(jobName);
-        List<JobExecutionData> runningExecutions = new ArrayList<JobExecutionData>();
+        List<JobExecutionEntity> runningExecutions = new ArrayList<JobExecutionEntity>();
         for (final Long e : executionIds) {
-            runningExecutions.add(new JobExecutionData(jobOperator.getJobExecution(e)));
+            runningExecutions.add(new JobExecutionEntity(jobOperator.getJobExecution(e)));
         }
         return runningExecutions;
     }
 
-    List<StepExecutionData> getStepExecutions(final long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
+    List<StepExecutionEntity> getStepExecutions(final long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
         final List<StepExecution> stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
-        final List<StepExecutionData> stepExecutionData = new ArrayList<StepExecutionData>();
+        final List<StepExecutionEntity> stepExecutionData = new ArrayList<StepExecutionEntity>();
         for (final StepExecution e : stepExecutions) {
-            stepExecutionData.add(new StepExecutionData(e));
+            stepExecutionData.add(new StepExecutionEntity(e));
         }
         return stepExecutionData;
     }

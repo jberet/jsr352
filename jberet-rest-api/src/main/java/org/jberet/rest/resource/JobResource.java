@@ -29,7 +29,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.jberet.rest.model.JobExecutionData;
+import org.jberet.rest.entity.JobExecutionEntity;
 
 @Path("jobs")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -40,7 +40,7 @@ public class JobResource {
     @POST
     public Response start(final @PathParam("jobXmlName") String jobXmlName,
                           final @Context UriInfo uriInfo) {
-        JobExecutionData jobExecutionData = JobService.getInstance().start(jobXmlName, jobParametersFromUriInfo(uriInfo));
+        JobExecutionEntity jobExecutionData = JobService.getInstance().start(jobXmlName, jobParametersFromUriInfo(uriInfo));
         final URI jobExecutionDataUri = uriInfo.getBaseUriBuilder().path(JobExecutionResource.class).
                 path(String.valueOf(jobExecutionData.getExecutionId())).
                 build();

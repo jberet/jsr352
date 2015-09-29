@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.rest.model;
+package org.jberet.rest.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement
-public final class JobExecutionData extends AbstractExecutionData implements JobExecution, Serializable {
+public final class JobExecutionEntity extends AbstractExecutionEntity implements JobExecution, Serializable {
     private static final long serialVersionUID = -8566764098276314827L;
 
     private long executionId;
@@ -31,13 +31,13 @@ public final class JobExecutionData extends AbstractExecutionData implements Job
     private Properties jobParameters;
     private String jobName;
 
-    private  JobInstanceData jobInstance;
-    private  List<StepExecutionData> stepExecutions = new ArrayList<StepExecutionData>();
+    private JobInstanceEntity jobInstance;
+    private  List<StepExecutionEntity> stepExecutions = new ArrayList<StepExecutionEntity>();
 
-    public JobExecutionData() {
+    public JobExecutionEntity() {
     }
 
-    public JobExecutionData(final JobExecution jobExecution) {
+    public JobExecutionEntity(final JobExecution jobExecution) {
         super(jobExecution.getStartTime(), jobExecution.getEndTime(),
                 jobExecution.getBatchStatus(), jobExecution.getExitStatus());
         executionId = jobExecution.getExecutionId();
@@ -88,20 +88,20 @@ public final class JobExecutionData extends AbstractExecutionData implements Job
     }
 
     @XmlTransient
-    public JobInstanceData getJobInstance() {
+    public JobInstanceEntity getJobInstance() {
         return jobInstance;
     }
 
-    public void setJobInstance(JobInstanceData jobInstance) {
+    public void setJobInstance(JobInstanceEntity jobInstance) {
         this.jobInstance = jobInstance;
     }
 
     @XmlTransient
-    public List<StepExecutionData> getStepExecutions() {
+    public List<StepExecutionEntity> getStepExecutions() {
         return stepExecutions;
     }
 
-    public void setStepExecutions(List<StepExecutionData> stepExecutions) {
+    public void setStepExecutions(List<StepExecutionEntity> stepExecutions) {
         this.stepExecutions = stepExecutions;
     }
 }

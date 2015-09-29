@@ -10,29 +10,29 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.rest.model;
+package org.jberet.rest.entity;
 
 import java.io.Serializable;
 import javax.batch.runtime.Metric;
 
-public class MetricData implements Serializable, Metric {
+public class MetricEntity implements Serializable, Metric {
     private static final long serialVersionUID = 717668174913816112L;
     private MetricType type;
     private long value;
 
-    public MetricData() {
+    public MetricEntity() {
     }
 
-    public MetricData(final Metric metric) {
+    public MetricEntity(final Metric metric) {
         this.type = metric.getType();
         this.value = metric.getValue();
     }
 
-    public static MetricData[] copyOf(final Metric[] metrics) {
+    public static MetricEntity[] copyOf(final Metric[] metrics) {
         if (metrics != null) {
-            MetricData[] metricArray = new MetricData[metrics.length];
+            MetricEntity[] metricArray = new MetricEntity[metrics.length];
             for (int i = 0; i < metricArray.length; i++) {
-                metricArray[i] = new MetricData(metrics[i]);
+                metricArray[i] = new MetricEntity(metrics[i]);
             }
             return metricArray;
         } else {

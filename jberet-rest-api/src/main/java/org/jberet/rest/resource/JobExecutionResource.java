@@ -25,8 +25,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.jberet.rest._private.RestAPIMessages;
-import org.jberet.rest.model.JobExecutionData;
-import org.jberet.rest.model.StepExecutionData;
+import org.jberet.rest.entity.JobExecutionEntity;
+import org.jberet.rest.entity.StepExecutionEntity;
 
 @Path("jobexecutions")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -35,14 +35,14 @@ public class JobExecutionResource {
 
     @Path("running")
     @GET
-    public JobExecutionData[] getRunningExecutions(final @QueryParam("jobName") String jobName) {
-        final List<JobExecutionData> runningExecutions = JobService.getInstance().getRunningExecutions(jobName);
-        return runningExecutions.toArray(new JobExecutionData[runningExecutions.size()]);
+    public JobExecutionEntity[] getRunningExecutions(final @QueryParam("jobName") String jobName) {
+        final List<JobExecutionEntity> runningExecutions = JobService.getInstance().getRunningExecutions(jobName);
+        return runningExecutions.toArray(new JobExecutionEntity[runningExecutions.size()]);
     }
 
     @Path("{jobExecutionId}")
     @GET
-    public JobExecutionData getJobExecution(final @PathParam("jobExecutionId") long jobExecutionId) {
+    public JobExecutionEntity getJobExecution(final @PathParam("jobExecutionId") long jobExecutionId) {
         return JobService.getInstance().getJobExecution(jobExecutionId);
     }
 
@@ -60,24 +60,24 @@ public class JobExecutionResource {
 
     @Path("{jobExecutionId}/restart")
     @POST
-    public JobExecutionData restart(final @PathParam("jobExecutionId") long jobExecutionId,
+    public JobExecutionEntity restart(final @PathParam("jobExecutionId") long jobExecutionId,
                                     final @Context UriInfo uriInfo) {
         return JobService.getInstance().restart(jobExecutionId, JobResource.jobParametersFromUriInfo(uriInfo));
     }
 
     @GET
     @Path("{jobExecutionId}/stepexecutions")
-    public StepExecutionData[] getStepExecutions(final @PathParam("jobExecutionId") long jobExecutionId) {
-        final List<StepExecutionData> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
-        return stepExecutionData.toArray(new StepExecutionData[stepExecutionData.size()]);
+    public StepExecutionEntity[] getStepExecutions(final @PathParam("jobExecutionId") long jobExecutionId) {
+        final List<StepExecutionEntity> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
+        return stepExecutionData.toArray(new StepExecutionEntity[stepExecutionData.size()]);
     }
 
     @GET
     @Path("{jobExecutionId}/stepexecutions/{stepExecutionId}")
-    public StepExecutionData getStepExecution(final @PathParam("jobExecutionId") long jobExecutionId,
+    public StepExecutionEntity getStepExecution(final @PathParam("jobExecutionId") long jobExecutionId,
                                               final @PathParam("stepExecutionId") long stepExecutionId) {
-        final List<StepExecutionData> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
-        for (final StepExecutionData e : stepExecutionData) {
+        final List<StepExecutionEntity> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
+        for (final StepExecutionEntity e : stepExecutionData) {
             if (e.getStepExecutionId() == stepExecutionId) {
                 return e;
             }

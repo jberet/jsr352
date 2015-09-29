@@ -10,13 +10,13 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.rest.model;
+package org.jberet.rest.entity;
 
 import java.io.Serializable;
 import java.util.Date;
 import javax.batch.runtime.BatchStatus;
 
-public abstract class AbstractExecutionData implements Serializable {
+public abstract class AbstractExecutionEntity implements Serializable {
     private static final long serialVersionUID = -6861630889634554990L;
 
     Date startTime;
@@ -24,10 +24,10 @@ public abstract class AbstractExecutionData implements Serializable {
     BatchStatus batchStatus;
     String exitStatus;
 
-    public AbstractExecutionData() {
+    public AbstractExecutionEntity() {
     }
 
-    public AbstractExecutionData(Date startTime, Date endTime, BatchStatus batchStatus, String exitStatus) {
+    public AbstractExecutionEntity(Date startTime, Date endTime, BatchStatus batchStatus, String exitStatus) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.batchStatus = batchStatus;

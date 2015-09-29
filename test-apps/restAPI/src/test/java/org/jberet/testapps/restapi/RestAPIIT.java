@@ -25,9 +25,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import org.jberet.rest.model.JobExecutionData;
-import org.jberet.rest.model.JobInstanceData;
-import org.jberet.rest.model.StepExecutionData;
+import org.jberet.rest.entity.JobExecutionEntity;
+import org.jberet.rest.entity.JobInstanceEntity;
+import org.jberet.rest.entity.StepExecutionEntity;
 import org.jberet.rest.resource.JobExecutionResource;
 import org.jberet.rest.resource.JobInstanceResource;
 import org.jberet.rest.resource.JobResource;
@@ -51,7 +51,7 @@ public class RestAPIIT {
 
     @Test
     public void start() throws Exception {
-        final JobExecutionData data = startJob(jobName1, null);
+        final JobExecutionEntity data = startJob(jobName1, null);
         System.out.printf("Response entity: %s%n", data);
         Assert.assertNotNull(data.getCreateTime());
     }
@@ -92,14 +92,14 @@ public class RestAPIIT {
 
     @Test
     public void getJobInstances() throws Exception {
-        final JobExecutionData jobExecutionData = startJob(jobName1, null);// to have at least 1 job instance
+        final JobExecutionEntity jobExecutionData = startJob(jobName1, null);// to have at least 1 job instance
         final URI uri = getJobInstanceUriBuilder(null).build();
         final WebTarget target = client.target(uri)
                 .queryParam("jobName", jobExecutionData.getJobName())
                 .queryParam("start", 0)
                 .queryParam("count", 99999999);
         System.out.printf("uri: %s%n", uri);
-        final JobInstanceData[] data = target.request().get(JobInstanceData[].class);
+        final JobInstanceEntity[] data = target.request().get(JobInstanceEntity[].class);
 
         System.out.printf("Got JobInstanceData[]: %s%n", Arrays.toString(data));
         assertEquals(jobName1, data[0].getJobName());
@@ -138,11 +138,11 @@ public class RestAPIIT {
 
     @Test
     public void getJobInstance() throws Exception {
-        final JobExecutionData jobExecutionData = startJob(jobName1, null);// to have at least 1 job instance
+        final JobExecutionEntity jobExecutionData = startJob(jobName1, null);// to have at least 1 job instance
         final URI uri = getJobInstanceUriBuilder(null).build();
         final WebTarget target = client.target(uri).queryParam("jobExecutionId", jobExecutionData.getExecutionId());
         System.out.printf("uri: %s%n", uri);
-        final JobInstanceData data = target.request().get(JobInstanceData.class);
+        final JobInstanceEntity data = target.request().get(JobInstanceEntity.class);
 
         System.out.printf("Got JobInstanceData: %s%n", data);
         assertEquals(jobName1, data.getJobName());
@@ -153,11 +153,11 @@ public class RestAPIIT {
 
     @Test
     public void getJobExecution() throws Exception {
-        final JobExecutionData jobExecutionData = startJob(jobName1, null);
+        final JobExecutionEntity jobExecutionData = startJob(jobName1, null);
         final URI uri = getJobExecutionUriBuilder(null).path(String.valueOf(jobExecutionData.getExecutionId())).build();
         System.out.printf("uri: %s%n", uri);
         final WebTarget target = client.target(uri);
-        final JobExecutionData data = target.request().get(JobExecutionData.class);
+        final JobExecutionEntity data = target.request().get(JobExecutionEntity.class);
 
         System.out.printf("Got JobExecutionData: %s%n", data);
         assertEquals(jobName1, data.getJobName());
@@ -177,7 +177,7 @@ public class RestAPIIT {
     public void abandon() throws Exception {
         final Properties queryParams = new Properties();
         queryParams.setProperty("fail", String.valueOf(true));
-        final JobExecutionData jobExecutionData = startJob(jobWithParams, queryParams);
+        final JobExecutionEntity jobExecutionData = startJob(jobWithParams, queryParams);
 
         Thread.sleep(500);
         final URI uri = getJobExecutionUriBuilder("abandon")
@@ -195,7 +195,7 @@ public class RestAPIIT {
                 path(String.valueOf(jobExecutionData.getExecutionId())).build();
         System.out.printf("uri: %s%n", abandonedJobExecutionUri);
         final WebTarget jobExecutionTarget = client.target(abandonedJobExecutionUri);
-        final JobExecutionData data = jobExecutionTarget.request().get(JobExecutionData.class);
+        final JobExecutionEntity data = jobExecutionTarget.request().get(JobExecutionEntity.class);
         assertEquals(BatchStatus.ABANDONED, data.getBatchStatus());
     }
 
@@ -203,12 +203,12 @@ public class RestAPIIT {
     public void restart() throws Exception {
         final Properties queryParams = new Properties();
         queryParams.setProperty("fail", String.valueOf(true));
-        JobExecutionData jobExecution = startJob(jobWithParams, queryParams);
+        JobExecutionEntity jobExecution = startJob(jobWithParams, queryParams);
         assertEquals(queryParams, jobExecution.getJobParameters());
 
         Thread.sleep(500);
         queryParams.setProperty("fail", String.valueOf(false));
-        final JobExecutionData restartJobExecution = restartJobExecution(jobExecution.getExecutionId(), queryParams);
+        final JobExecutionEntity restartJobExecution = restartJobExecution(jobExecution.getExecutionId(), queryParams);
         assertEquals(queryParams, restartJobExecution.getJobParameters());
 
         Thread.sleep(500);
@@ -222,7 +222,7 @@ public class RestAPIIT {
         final Properties queryParams = new Properties();
         queryParams.setProperty("sleepMillis", String.valueOf(1000));
         queryParams.setProperty("fail", String.valueOf(false));
-        JobExecutionData jobExecution = startJob(jobWithParams, queryParams);
+        JobExecutionEntity jobExecution = startJob(jobWithParams, queryParams);
         assertEquals(queryParams, jobExecution.getJobParameters());
 
         final URI uri = getJobExecutionUriBuilder("stop").resolveTemplate("jobExecutionId", jobExecution.getExecutionId()).build();
@@ -232,7 +232,7 @@ public class RestAPIIT {
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
 
         Thread.sleep(1000);
-        final JobExecutionData jobExecutionStopped = getJobExecution(jobExecution.getExecutionId());
+        final JobExecutionEntity jobExecutionStopped = getJobExecution(jobExecution.getExecutionId());
         assertEquals(BatchStatus.STOPPED, jobExecutionStopped.getBatchStatus());
         assertEquals(jobWithParams, jobExecutionStopped.getJobName());
     }
@@ -241,30 +241,30 @@ public class RestAPIIT {
     public void getRunningExecutions() throws Exception {
         final Properties queryParams = new Properties();
         queryParams.setProperty("sleepMillis", String.valueOf(2000));
-        JobExecutionData jobExecution1 = startJob(jobWithParams, queryParams);
-        JobExecutionData jobExecution2 = startJob(jobWithParams, queryParams);
+        JobExecutionEntity jobExecution1 = startJob(jobWithParams, queryParams);
+        JobExecutionEntity jobExecution2 = startJob(jobWithParams, queryParams);
 
         final URI uri = getJobExecutionUriBuilder("getRunningExecutions").build();
         queryParams.clear();
         queryParams.setProperty("jobName", jobWithParams);
         WebTarget target = getTarget(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
-        final JobExecutionData[] jobExecutionData = target.request().get(JobExecutionData[].class);
+        final JobExecutionEntity[] jobExecutionData = target.request().get(JobExecutionEntity[].class);
         assertEquals(2, jobExecutionData.length);
     }
 
     @Test
     public void getRunningExecutionsEmpty() throws Exception {
         final Properties queryParams = new Properties();
-        JobExecutionData jobExecution1 = startJob(jobWithParams, null);
-        JobExecutionData jobExecution2 = startJob(jobWithParams, null);
+        JobExecutionEntity jobExecution1 = startJob(jobWithParams, null);
+        JobExecutionEntity jobExecution2 = startJob(jobWithParams, null);
 
         Thread.sleep(500);
         final URI uri = getJobExecutionUriBuilder("getRunningExecutions").build();
         queryParams.setProperty("jobName", jobWithParams);
         WebTarget target = getTarget(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
-        final JobExecutionData[] data = target.request().get(JobExecutionData[].class);
+        final JobExecutionEntity[] data = target.request().get(JobExecutionEntity[].class);
         assertEquals(0, data.length);
     }
 
@@ -272,10 +272,10 @@ public class RestAPIIT {
 
     @Test
     public void getStepExecutions() throws Exception {
-        JobExecutionData jobExecution1 = startJob(jobWithParams, null);
+        JobExecutionEntity jobExecution1 = startJob(jobWithParams, null);
 
         Thread.sleep(500);
-        final StepExecutionData[] data = getStepExecutions(jobExecution1.getExecutionId());
+        final StepExecutionEntity[] data = getStepExecutions(jobExecution1.getExecutionId());
         assertEquals(1, data.length);
         assertEquals(BatchStatus.COMPLETED, data[0].getBatchStatus());
         assertEquals(jobWithParams + ".step1", data[0].getStepName());
@@ -284,17 +284,17 @@ public class RestAPIIT {
 
     @Test
     public void getStepExecution() throws Exception {
-        JobExecutionData jobExecution1 = startJob(jobWithParams, null);
+        JobExecutionEntity jobExecution1 = startJob(jobWithParams, null);
 
         Thread.sleep(500);
-        final StepExecutionData[] data = getStepExecutions(jobExecution1.getExecutionId());
+        final StepExecutionEntity[] data = getStepExecutions(jobExecution1.getExecutionId());
         final long stepExecutionId = data[0].getStepExecutionId();
         final URI uri = getJobExecutionUriBuilder("getStepExecution")
                 .resolveTemplate("jobExecutionId", jobExecution1.getExecutionId())
                 .resolveTemplate("stepExecutionId", stepExecutionId).build();
         WebTarget target = getTarget(uri, null);
         System.out.printf("uri: %s%n", uri);
-        final StepExecutionData stepExecutionData = target.request().get(StepExecutionData.class);
+        final StepExecutionEntity stepExecutionData = target.request().get(StepExecutionEntity.class);
         assertEquals(BatchStatus.COMPLETED, stepExecutionData.getBatchStatus());
         assertEquals(jobWithParams + ".step1", stepExecutionData.getStepName());
         System.out.printf("Got step metrics: %s%n", Arrays.toString(stepExecutionData.getMetrics()));
@@ -302,7 +302,7 @@ public class RestAPIIT {
 
     @Test
     public void getStepExecutionBadStepExecutionId() throws Exception {
-        JobExecutionData jobExecution1 = startJob(jobWithParams, null);
+        JobExecutionEntity jobExecution1 = startJob(jobWithParams, null);
 
         Thread.sleep(500);
         final long stepExecutionId = Long.MAX_VALUE;
@@ -313,25 +313,25 @@ public class RestAPIIT {
         System.out.printf("uri: %s%n", uri);
 
         try {
-            target.request().get(StepExecutionData.class);
+            target.request().get(StepExecutionEntity.class);
         } catch (final WebApplicationException e) {
             System.out.printf("Got expected exception: %s%n", e);
         }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private JobExecutionData startJob(final String jobXmlName, final Properties queryParams) throws Exception {
+    private JobExecutionEntity startJob(final String jobXmlName, final Properties queryParams) throws Exception {
         final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();
         WebTarget target = getTarget(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
-        return target.request().post(emptyJsonEntity(), JobExecutionData.class);
+        return target.request().post(emptyJsonEntity(), JobExecutionEntity.class);
     }
 
-    private JobExecutionData restartJobExecution(final long jobExecutionId, final Properties queryParams) throws Exception {
+    private JobExecutionEntity restartJobExecution(final long jobExecutionId, final Properties queryParams) throws Exception {
         final URI uri = getJobExecutionUriBuilder("restart").resolveTemplate("jobExecutionId", jobExecutionId).build();
         WebTarget target = getTarget(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
-        return target.request().post(emptyJsonEntity(), JobExecutionData.class);
+        return target.request().post(emptyJsonEntity(), JobExecutionEntity.class);
     }
 
     private WebTarget getTarget(final URI uri, final Properties props) {
@@ -347,19 +347,19 @@ public class RestAPIIT {
         return result;
     }
 
-    private JobExecutionData getJobExecution(final long jobExecutionId) {
+    private JobExecutionEntity getJobExecution(final long jobExecutionId) {
         final URI uri = getJobExecutionUriBuilder(null).path(String.valueOf(jobExecutionId)).build();
         System.out.printf("uri: %s%n", uri);
         final WebTarget target = client.target(uri);
-        return target.request().get(JobExecutionData.class);
+        return target.request().get(JobExecutionEntity.class);
     }
 
-    private StepExecutionData[] getStepExecutions(final long jobExecutionId) {
+    private StepExecutionEntity[] getStepExecutions(final long jobExecutionId) {
         final URI uri = getJobExecutionUriBuilder("getStepExecutions")
                 .resolveTemplate("jobExecutionId", jobExecutionId).build();
         WebTarget target = getTarget(uri, null);
         System.out.printf("uri: %s%n", uri);
-        return target.request().get(StepExecutionData[].class);
+        return target.request().get(StepExecutionEntity[].class);
     }
 
     private Entity<Object> emptyJsonEntity() {

@@ -22,7 +22,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jberet.rest._private.RestAPIMessages;
-import org.jberet.rest.model.JobInstanceData;
+import org.jberet.rest.entity.JobInstanceEntity;
 
 @Path("/jobinstances")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -35,7 +35,7 @@ public class JobInstanceResource {
                                     final @QueryParam("count") int count,
                                     final @QueryParam("jobExecutionId") long jobExecutionId) {
         if (jobExecutionId > 0) {
-            final JobInstanceData jobInstanceData = JobService.getInstance().getJobInstance(jobExecutionId);
+            final JobInstanceEntity jobInstanceData = JobService.getInstance().getJobInstance(jobExecutionId);
             return Response.ok(jobInstanceData).build();
         } else if (jobExecutionId < 0) {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("jobExecutionId", String.valueOf(jobExecutionId));
@@ -50,8 +50,8 @@ public class JobInstanceResource {
         if (count < 0) {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("count", String.valueOf(count));
         }
-        final List<JobInstanceData> jobInstanceData = JobService.getInstance().getJobInstances(jobName, start, count);
-        return Response.ok(jobInstanceData.toArray(new JobInstanceData[jobInstanceData.size()])).build();
+        final List<JobInstanceEntity> jobInstanceData = JobService.getInstance().getJobInstances(jobName, start, count);
+        return Response.ok(jobInstanceData.toArray(new JobInstanceEntity[jobInstanceData.size()])).build();
     }
 
     @Path("/count")

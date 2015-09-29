@@ -10,14 +10,14 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.rest.model;
+package org.jberet.rest.entity;
 
 import java.io.Serializable;
 import javax.batch.runtime.StepExecution;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class StepExecutionData extends AbstractExecutionData implements StepExecution, Serializable {
+public class StepExecutionEntity extends AbstractExecutionEntity implements StepExecution, Serializable {
     private static final long serialVersionUID = -8528930845788535109L;
 
     private long stepExecutionId;
@@ -26,17 +26,17 @@ public class StepExecutionData extends AbstractExecutionData implements StepExec
 
     private Serializable persistentUserData;
 
-    private MetricData[] metrics;
+    private MetricEntity[] metrics;
 
-    public StepExecutionData() {
+    public StepExecutionEntity() {
     }
 
-    public StepExecutionData(final StepExecution stepExe) {
+    public StepExecutionEntity(final StepExecution stepExe) {
         super(stepExe.getStartTime(), stepExe.getEndTime(), stepExe.getBatchStatus(), stepExe.getExitStatus());
         this.stepExecutionId = stepExe.getStepExecutionId();
         this.stepName = stepExe.getStepName();
         this.persistentUserData = stepExe.getPersistentUserData();
-        this.metrics = MetricData.copyOf(stepExe.getMetrics());
+        this.metrics = MetricEntity.copyOf(stepExe.getMetrics());
     }
 
     public long getStepExecutionId() {
@@ -63,11 +63,11 @@ public class StepExecutionData extends AbstractExecutionData implements StepExec
         this.persistentUserData = persistentUserData;
     }
 
-    public MetricData[] getMetrics() {
+    public MetricEntity[] getMetrics() {
         return metrics;
     }
 
-    public void setMetrics(final MetricData[] metrics) {
+    public void setMetrics(final MetricEntity[] metrics) {
         this.metrics = metrics;
     }
 }

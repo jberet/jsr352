@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.rest.model;
+package org.jberet.rest.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,17 +20,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement
-public final class JobInstanceData implements JobInstance, Serializable {
+public final class JobInstanceEntity implements JobInstance, Serializable {
     private static final long serialVersionUID = 2427272964201557394L;
 
     private long instanceId;
     private String jobName;
-    private final List<JobExecutionData> jobExecutions = new ArrayList<JobExecutionData>();
+    private final List<JobExecutionEntity> jobExecutions = new ArrayList<JobExecutionEntity>();
 
-    public JobInstanceData() {
+    public JobInstanceEntity() {
     }
 
-    public JobInstanceData(final JobInstance jobInstance) {
+    public JobInstanceEntity(final JobInstance jobInstance) {
         this.instanceId = jobInstance.getInstanceId();
         this.jobName = jobInstance.getJobName();
     }
@@ -52,7 +52,7 @@ public final class JobInstanceData implements JobInstance, Serializable {
     }
 
     @XmlTransient
-    public List<JobExecutionData> getJobExecutions() {
+    public List<JobExecutionEntity> getJobExecutions() {
         return jobExecutions;
     }
 }

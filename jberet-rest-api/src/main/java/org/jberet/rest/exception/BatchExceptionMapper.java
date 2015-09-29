@@ -26,10 +26,10 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.jberet.rest._private.RestAPILogger;
-import org.jberet.rest.model.BatchRuntimeExceptionData;
+import org.jberet.rest.entity.BatchExceptionEntity;
 
 @Provider
-public class BatchRuntimeExceptionMapper implements ExceptionMapper<BatchRuntimeException> {
+public class BatchExceptionMapper implements ExceptionMapper<BatchRuntimeException> {
 
     @Override
     public Response toResponse(final BatchRuntimeException exception) {
@@ -50,7 +50,7 @@ public class BatchRuntimeExceptionMapper implements ExceptionMapper<BatchRuntime
             status = Response.Status.INTERNAL_SERVER_ERROR;
         }
 
-        final Response response = Response.status(status).entity(new BatchRuntimeExceptionData(exception)).build();
+        final Response response = Response.status(status).entity(new BatchExceptionEntity(exception)).build();
         return response;
     }
 }
