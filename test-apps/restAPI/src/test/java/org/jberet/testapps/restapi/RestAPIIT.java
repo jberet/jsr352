@@ -69,6 +69,27 @@ public class RestAPIIT {
     }
 
     @Test
+    public void startWithJobParamsInBody() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("jobParam1", "jobParam1 value");
+        jobParams.setProperty("jobParam2", "jobParam2 value");
+
+        final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobName2).build();
+        final WebTarget target = client.target(uri);
+        System.out.printf("uri: %s%n", uri);
+        final Response response = target.request().post(Entity.entity(jobParams, MediaType.APPLICATION_JSON_TYPE));
+
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        final String location = response.getHeaderString("Location");
+        System.out.printf("location of the created: %s%n", location);
+        response.close();
+
+        final WebTarget target2 = client.target(location);
+        final JobExecutionEntity data = target2.request().get(JobExecutionEntity.class);
+        assertEquals(jobParams, data.getJobParameters());
+    }
+
+    @Test
     public void startWithBadJobXmlName() throws Exception {
         final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobNameBad).build();
         final WebTarget target = client.target(uri);

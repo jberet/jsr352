@@ -39,8 +39,10 @@ public class JobResource {
     @Path("{jobXmlName}/start")
     @POST
     public Response start(final @PathParam("jobXmlName") String jobXmlName,
-                          final @Context UriInfo uriInfo) {
-        JobExecutionEntity jobExecutionData = JobService.getInstance().start(jobXmlName, jobParametersFromUriInfo(uriInfo));
+                          final @Context UriInfo uriInfo,
+                          final Properties jobParamsAsProps) {
+        JobExecutionEntity jobExecutionData = JobService.getInstance()
+                .start(jobXmlName, jobParametersFromUriInfoAndProps(uriInfo, jobParamsAsProps));
         final URI jobExecutionDataUri = uriInfo.getBaseUriBuilder().path(JobExecutionResource.class).
                 path(String.valueOf(jobExecutionData.getExecutionId())).
                 build();
@@ -56,17 +58,22 @@ public class JobResource {
         return Response.ok(jobNamesArray).build();
     }
 
-    static Properties jobParametersFromUriInfo(final UriInfo uriInfo) {
+    static Properties jobParametersFromUriInfoAndProps(final UriInfo uriInfo, final Properties props) {
         final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
         if (queryParameters.isEmpty()) {
-            return null;
+            return props;
         }
 
-        final Properties props = new Properties();
+        final Properties p = new Properties();
         for (final Map.Entry<String, List<String>> e : queryParameters.entrySet()) {
-            props.setProperty(e.getKey(), e.getValue().get(0));
+            p.setProperty(e.getKey(), e.getValue().get(0));
         }
-        return props;
+        if (props != null) {
+            for (final String k : props.stringPropertyNames()) {
+                p.setProperty(k, props.getProperty(k));
+            }
+        }
+        return p;
     }
 
 }

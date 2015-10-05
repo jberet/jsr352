@@ -13,6 +13,7 @@
 package org.jberet.rest.resource;
 
 import java.util.List;
+import java.util.Properties;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -61,8 +62,10 @@ public class JobExecutionResource {
     @Path("{jobExecutionId}/restart")
     @POST
     public JobExecutionEntity restart(final @PathParam("jobExecutionId") long jobExecutionId,
-                                    final @Context UriInfo uriInfo) {
-        return JobService.getInstance().restart(jobExecutionId, JobResource.jobParametersFromUriInfo(uriInfo));
+                                    final @Context UriInfo uriInfo,
+                                    final Properties jobParamsAsProps) {
+        return JobService.getInstance().restart(
+                jobExecutionId, JobResource.jobParametersFromUriInfoAndProps(uriInfo, jobParamsAsProps));
     }
 
     @GET
