@@ -20,8 +20,11 @@ import java.util.Properties;
 import javax.batch.runtime.JobExecution;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
+@XmlType(propOrder =
+"executionId, jobName, jobParameters, batchStatus, exitStatus, createTime, startTime, lastUpdatedTime, endTime")
 public final class JobExecutionEntity extends AbstractExecutionEntity implements JobExecution, Serializable {
     private static final long serialVersionUID = -8566764098276314827L;
 

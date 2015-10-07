@@ -15,8 +15,11 @@ package org.jberet.rest.entity;
 import java.io.Serializable;
 import javax.batch.runtime.StepExecution;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
+@XmlType(propOrder =
+        "stepExecutionId, stepName, persistentUserData, batchStatus, exitStatus, startTime, endTime, metrics")
 public class StepExecutionEntity extends AbstractExecutionEntity implements StepExecution, Serializable {
     private static final long serialVersionUID = -8528930845788535109L;
 

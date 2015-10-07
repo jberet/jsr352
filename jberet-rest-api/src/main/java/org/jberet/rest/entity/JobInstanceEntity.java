@@ -18,8 +18,10 @@ import java.util.List;
 import javax.batch.runtime.JobInstance;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
+@XmlType(propOrder = "instanceId, jobName")
 public final class JobInstanceEntity implements JobInstance, Serializable {
     private static final long serialVersionUID = 2427272964201557394L;
 

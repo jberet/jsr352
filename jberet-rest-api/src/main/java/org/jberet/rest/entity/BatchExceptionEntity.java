@@ -15,10 +15,12 @@ package org.jberet.rest.entity;
 import java.io.Serializable;
 import javax.batch.operations.BatchRuntimeException;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import com.google.common.base.Throwables;
 
 @XmlRootElement
+@XmlType(propOrder = "type, message, stackTrace")
 public final class BatchExceptionEntity implements Serializable {
     private static final long serialVersionUID = 810435611118287431L;
 
