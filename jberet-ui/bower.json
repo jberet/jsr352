@@ -9,6 +9,7 @@
     "angular": "~1.4.0",
     "angular-route": "~1.4.0",
     "angular-loader": "~1.4.0",
+    "angular-ui-grid": "~3.0.6",
     "angular-mocks": "~1.4.0",
     "html5-boilerplate": "~5.2.0"
   }

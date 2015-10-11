@@ -1,1 +1,12 @@
-<p>This is the partial for view 1.</p>
+<div>
+
+    <form>
+        <input type="text" ng-model="jobName">
+        <input type="button" ng-click="startJob()" value="Start Job"/>
+    </form>
+
+    <p>Started job {{jobName}}</p>
+
+    <div ui-grid="gridOptions">
+    </div>
+</div>

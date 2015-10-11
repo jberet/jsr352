@@ -72,13 +72,12 @@ e2e-tests/            --> end-to-end tests
 
 ## Testing
 
-There are two kinds of tests in the angular-seed application: Unit tests and End to End tests.
+There are two kinds of tests: Unit tests and End to End tests.
 
 ### Running Unit Tests
 
-The angular-seed app comes preconfigured with unit tests. These are written in
-[Jasmine][jasmine], which we run with the [Karma Test Runner][karma]. We provide a Karma
-configuration file to run them.
+Unit tests are written in [Jasmine][jasmine], which we run with the [Karma Test Runner][karma]. 
+We provide a Karma configuration file to run them.
 
 * the configuration is found at `karma.conf.js`
 * the unit tests are found next to the code they are testing and are named as `..._test.js`.
@@ -105,9 +104,8 @@ npm run test-single-run
 
 ### End to end testing
 
-The angular-seed app comes with end-to-end tests, again written in [Jasmine][jasmine]. These tests
-are run with the [Protractor][protractor] End-to-End test runner.  It uses native events and has
-special features for Angular applications.
+End-to-end tests are also written in [Jasmine][jasmine]. These tests are run with the [Protractor][protractor] 
+End-to-End test runner.  It uses native events and has special features for Angular applications.
 
 * the configuration is found at `e2e-tests/protractor-conf.js`
 * the end-to-end tests are found in `e2e-tests/scenarios.js`
@@ -120,8 +118,8 @@ can interact with it.
 npm start
 ```
 
-In addition, since Protractor is built upon WebDriver we need to install this.  The angular-seed
-project comes with a predefined script to do this:
+In addition, since Protractor is built upon WebDriver we need to install this.  This project comes with a predefined 
+script to do this:
 
 ```
 npm run update-webdriver
@@ -164,7 +162,7 @@ This will find the latest versions that match the version ranges specified in th
 
 ## Loading Angular Asynchronously
 
-The angular-seed project supports loading the framework and application scripts asynchronously.  The
+This project supports loading the framework and application scripts asynchronously.  The
 special `index-async.html` is designed to support this style of loading.  For it to work you must
 inject a piece of Angular JavaScript into the HTML page.  The project has a predefined script to help
 do this.
@@ -188,7 +186,7 @@ etc to function properly when an html page is opened via `file://` scheme instea
 
 ### Running the App during Development
 
-The angular-seed project comes preconfigured with a local development webserver.  It is a node.js
+This project comes preconfigured with a local development webserver.  It is a node.js
 tool called [http-server][http-server].  You can start this webserver with `npm start` but you may choose to
 install the tool globally:
 
