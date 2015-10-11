@@ -1,15 +1,15 @@
 'use strict';
 
-angular.module('myApp.view2', ['ngRoute'])
+angular.module('jberetUI.jobinstances', ['ngRoute'])
 
     .config(['$routeProvider', function ($routeProvider) {
-        $routeProvider.when('/view2', {
-            templateUrl: 'view2/view2.html',
-            controller: 'View2Ctrl'
+        $routeProvider.when('/jobinstances', {
+            templateUrl: 'jobinstances/jobinstances.html',
+            controller: 'JobInstancesCtrl'
         });
     }])
 
-    .controller('View2Ctrl', ['$scope', '$http', function ($scope, $http) {
+    .controller('JobInstancesCtrl', ['$scope', '$http', function ($scope, $http) {
         var cellTemp =
             '<div ng-class="col.colIndex()"><div>{{grid.getCellValue(row, col) | date:"yyyy-MM-dd HH:mm:ss"}}</div></div>';
 

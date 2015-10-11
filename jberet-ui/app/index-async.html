@@ -31,14 +31,15 @@
       'bower_components/angular/angular.js',
       'bower_components/angular-route/angular-route.js',
       'app.js',
-      'view1/view1.js',
-      'view2/view2.js',
+      'jobs/jobs.js',
+      'jobinstances/jobinstances.js',
+      'jobexecutions/jobexecutions.js',
       'components/version/version.js',
       'components/version/version-directive.js',
       'components/version/interpolate-filter.js'
     ], function() {
       // when all is done, execute bootstrap angular application
-      angular.bootstrap(document, ['myApp']);
+      angular.bootstrap(document, ['jberetUI']);
     });
   </script>
   <title>My AngularJS App</title>
@@ -46,8 +47,9 @@
 </head>
 <body ng-cloak>
   <ul class="menu">
-    <li><a href="#/view1">view1</a></li>
-    <li><a href="#/view2">view2</a></li>
+    <li><a href="#/jobs">Jobs</a></li>
+    <li><a href="#/jobinstances">Job Executions</a></li>
+    <li><a href="#/jobexecutions">Job Executions</a></li>
   </ul>
 
   <div ng-view></div>
