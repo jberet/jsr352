@@ -21,3 +21,7 @@ target
 *.ipr
 *.iws
 .idea
+# other files to ignore
+derby.log
+server.lock
+
