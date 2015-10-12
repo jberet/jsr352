@@ -113,7 +113,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
     @Override
     public List<JobInstance> getJobInstances(final String jobName) {
         final List<JobInstance> result = new ArrayList<JobInstance>();
-        final DBCursor cursor = jobName == null ? db.getCollection(TableColumns.JOB_INSTANCE).find() :
+        final boolean selectAll = jobName == null || jobName.equals("*");
+        final DBCursor cursor = selectAll ? db.getCollection(TableColumns.JOB_INSTANCE).find() :
                 db.getCollection(TableColumns.JOB_INSTANCE).find(new BasicDBObject(TableColumns.JOBNAME, jobName)).sort(
                         new BasicDBObject(TableColumns.JOBINSTANCEID, -1));
 
@@ -124,7 +125,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             JobInstanceImpl jobInstance1 = (ref != null) ? ref.get() : null;
             if (jobInstance1 == null) {
                 final String appName = (String) next.get(TableColumns.APPLICATIONNAME);
-                if (jobName == null) {
+                if (selectAll) {
                     final String goodJobName = (String) next.get(TableColumns.JOBNAME);
                     jobInstance1 = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, goodJobName)), appName, goodJobName);
                 } else {

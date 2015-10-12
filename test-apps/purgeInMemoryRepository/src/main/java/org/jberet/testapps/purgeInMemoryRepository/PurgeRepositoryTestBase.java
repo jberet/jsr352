@@ -25,6 +25,7 @@ import javax.batch.runtime.context.StepContext;
 
 import org.jberet.repository.JobExecutionSelector;
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.spi.PropertyKey;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
@@ -79,9 +80,14 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
     }
 
     protected void noSuchJobInstanceException() throws Exception {
+        JobInstanceImpl invalidJobInstance = new JobInstanceImpl(null, null, "xxxxxxxxxxxxxxx");
         try {
-            final List<JobExecution> result = jobOperator.getJobExecutions(null);
-            Assert.fail("Expecting NoSuchJobInstanceException, but got " + result);
+            final List<JobExecution> result = jobOperator.getJobExecutions(invalidJobInstance);
+            if (result.isEmpty()) {
+                System.out.printf("Got expected result: %s%n", result);
+            } else {
+                Assert.fail("Expecting NoSuchJobInstanceException, but got " + result);
+            }
         } catch (final NoSuchJobInstanceException e) {
             System.out.printf("Got expected %s%n", e);
         }

@@ -123,9 +123,10 @@ public final class InfinispanRepository extends AbstractRepository {
         final List<JobInstance> result = new ArrayList<JobInstance>();
         final long largestJobInstanceId = sequenceCache.get(TableColumns.JOB_INSTANCE_ID_SEQ);
 
+        final boolean selectAll = jobName == null || jobName.equals("*");
         for (long i = largestJobInstanceId; i > 0; i--) {
             final JobInstanceImpl e = jobInstanceCache.get(i);
-            if (e != null && e.getJobName().equals(jobName)) {
+            if (e != null && (selectAll || jobName.equals(e.getJobName()))) {
                 result.add(e);
             }
         }

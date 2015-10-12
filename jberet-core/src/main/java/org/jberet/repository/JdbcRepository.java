@@ -331,7 +331,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
 
     @Override
     public List<JobInstance> getJobInstances(final String jobName) {
-        final String select = (jobName == null) ? sqls.getProperty(SELECT_ALL_JOB_INSTANCES) :
+        final boolean selectAll = jobName == null || jobName.equals("*");
+        final String select = selectAll ? sqls.getProperty(SELECT_ALL_JOB_INSTANCES) :
                 sqls.getProperty(SELECT_JOB_INSTANCES_BY_JOB_NAME);
         final Connection connection = getConnection();
         ResultSet rs = null;
@@ -339,7 +340,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         final List<JobInstance> result = new ArrayList<JobInstance>();
         try {
             preparedStatement = connection.prepareStatement(select);
-            if (jobName != null) {
+            if (!selectAll) {
                 preparedStatement.setString(1, jobName);
             }
             rs = preparedStatement.executeQuery();
@@ -349,7 +350,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 JobInstanceImpl jobInstance1 = (ref != null) ? ref.get() : null;
                 if (jobInstance1 == null) {
                     final String appName = rs.getString(TableColumns.APPLICATIONNAME);
-                    if (jobName == null) {
+                    if (selectAll) {
                         final String goodJobName = rs.getString(TableColumns.JOBNAME);
                         jobInstance1 = new JobInstanceImpl(getJob(new ApplicationAndJobName(appName, goodJobName)), appName, goodJobName);
                     } else {

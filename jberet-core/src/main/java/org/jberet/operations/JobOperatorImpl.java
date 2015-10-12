@@ -271,9 +271,6 @@ public class JobOperatorImpl implements JobOperator {
     @Override
     public List<JobExecution> getJobExecutions(final JobInstance instance) throws
             NoSuchJobInstanceException, JobSecurityException {
-        if (instance == null) {
-            throw MESSAGES.noSuchJobInstance(null);
-        }
         return repository.getJobExecutions(instance);
     }
 
@@ -312,6 +309,9 @@ public class JobOperatorImpl implements JobOperator {
     private long restartFailedOrStopped(final long executionId, final JobExecutionImpl originalToRestart, final Properties restartParameters)
             throws JobExecutionNotMostRecentException, JobRestartException {
         final JobInstanceImpl jobInstance = originalToRestart.getJobInstance();
+        if (jobInstance == null) {
+            throw MESSAGES.noSuchJobInstance(null);
+        }
         final List<JobExecution> executions = getJobExecutions(jobInstance);
         final JobExecution mostRecentExecution = executions.get(executions.size() - 1);
         if (executionId != mostRecentExecution.getExecutionId()) {

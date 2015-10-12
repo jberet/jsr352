@@ -168,9 +168,10 @@ public final class InMemoryRepository extends AbstractRepository {
         final List<JobInstance> result = new ArrayList<JobInstance>();
         final long largestJobInstanceId = jobInstanceIdSequence.get();
 
+        final boolean selectAll = jobName == null || jobName.equals("*");
         for (long i = largestJobInstanceId; i > 0; i--) {
             final JobInstanceImpl e = jobInstances.get(i);
-            if (e != null && e.getJobName().equals(jobName)) {
+            if (e != null && (selectAll || jobName.equals(e.getJobName()))) {
                 result.add(e);
             }
         }
