@@ -27,16 +27,10 @@ angular.module('jberetUI.jobexecutions', ['ngRoute', 'ui.grid'])
             ]
         };
 
-        $scope.startJob = function () {
-            console.log('starting job:' + $scope.jobName);
-            $http.post('http://localhost:8080/restAPI/api/jobs/' + $scope.jobName + '/start', null).then(function (responseData) {
-                console.log(responseData.data);
-                $scope.gridOptions.data = [
-                    responseData.data
-                ];
-
+        $http.get('http://localhost:8080/restAPI/api/jobexecutions')
+            .then(function (responseData) {
+                $scope.gridOptions.data = responseData.data;
             }, function (responseData) {
-                console.log(responseData)
-            })
-        };
+                console.log(responseData);
+            });
     }]);

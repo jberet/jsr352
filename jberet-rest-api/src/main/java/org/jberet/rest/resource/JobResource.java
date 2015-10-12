@@ -16,7 +16,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,6 +28,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
 
 @Path("jobs")
@@ -50,12 +50,9 @@ public class JobResource {
     }
 
     @GET
-    public Response getJobNames() {
-        final Set<String> jobNames = JobService.getInstance().getJobNames();
-        final String[] jobNamesArray = jobNames.toArray(new String[jobNames.size()]);
-//        final GenericEntity<Set<String>> entity = new GenericEntity<Set<String>>(jobNames) {
-//        };
-        return Response.ok(jobNamesArray).build();
+    public JobEntity[] getJobs() {
+        final JobEntity[] jobEntities = JobService.getInstance().getJobs();
+        return jobEntities;
     }
 
     static Properties jobParametersFromUriInfoAndProps(final UriInfo uriInfo, final Properties props) {

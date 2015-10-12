@@ -10,33 +10,20 @@ angular.module('jberetUI.jobinstances', ['ngRoute'])
     }])
 
     .controller('JobInstancesCtrl', ['$scope', '$http', function ($scope, $http) {
-        var cellTemp =
-            '<div ng-class="col.colIndex()"><div>{{grid.getCellValue(row, col) | date:"yyyy-MM-dd HH:mm:ss"}}</div></div>';
-
         $scope.gridOptions = {
             columnDefs: [
-                {field: 'executionId'},
+                {field: 'instanceId'},
                 {field: 'jobName'},
-                {field: 'jobParameters'},
-                {field: 'batchStatus'},
-                {field: 'exitStatus'},
-                {field: 'createTime', cellTemplate: cellTemp},
-                {field: 'startTime', cellTemplate: cellTemp},
-                {field: 'lastUpdatedTime', cellTemplate: cellTemp},
-                {field: 'endTime', cellTemplate: cellTemp}
+                {field: 'jobExecutions'}
             ]
         };
 
 
-        $http.get('http://localhost:8080/restAPI/api/jobexecutions', null)
+        $http.get('http://localhost:8080/restAPI/api/jobinstances')
             .then(function (responseData) {
-            console.log(responseData.data);
-            $scope.gridOptions.data = [
-                responseData.data
-            ];
-
-        }, function (responseData) {
-            alert(responseData.data)
-        });
+                $scope.gridOptions.data = responseData.data;
+            }, function (responseData) {
+                console.log(responseData);
+            });
 
     }]);

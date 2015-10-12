@@ -13,48 +13,41 @@
 package org.jberet.rest.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
-@XmlType(propOrder = "instanceId, jobName")
+@XmlType(propOrder = "instanceId, jobName, jobExecutions")
 public final class JobInstanceEntity implements JobInstance, Serializable {
     private static final long serialVersionUID = 2427272964201557394L;
 
     private long instanceId;
     private String jobName;
-    private final List<JobExecutionEntity> jobExecutions = new ArrayList<JobExecutionEntity>();
+    private JobExecutionEntity[] jobExecutions;
+
+    //    private int numberOfJobExecutions;
 
     public JobInstanceEntity() {
     }
 
-    public JobInstanceEntity(final JobInstance jobInstance) {
+    public JobInstanceEntity(final JobInstance jobInstance, final List<JobExecution> jobExecutions) {
         this.instanceId = jobInstance.getInstanceId();
         this.jobName = jobInstance.getJobName();
+        this.jobExecutions = JobExecutionEntity.fromJobExecutions(jobExecutions);
     }
 
     public long getInstanceId() {
         return instanceId;
     }
 
-    public void setInstanceId(final long instanceId) {
-        this.instanceId = instanceId;
-    }
-
     public String getJobName() {
         return jobName;
     }
 
-    public void setJobName(final String jobName) {
-        this.jobName = jobName;
-    }
-
-    @XmlTransient
-    public List<JobExecutionEntity> getJobExecutions() {
+    public JobExecutionEntity[] getJobExecutions() {
         return jobExecutions;
     }
 }

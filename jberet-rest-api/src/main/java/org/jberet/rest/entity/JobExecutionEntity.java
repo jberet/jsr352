@@ -50,6 +50,14 @@ public final class JobExecutionEntity extends AbstractExecutionEntity implements
         jobParameters = jobExecution.getJobParameters();
     }
 
+    public static JobExecutionEntity[] fromJobExecutions(final List<JobExecution> jobExecutions) {
+        JobExecutionEntity[] result = new JobExecutionEntity[jobExecutions.size()];
+        for (int i = 0, j = jobExecutions.size(); i < j; i++) {
+            result[i] = new JobExecutionEntity(jobExecutions.get(i));
+        }
+        return result;
+    }
+
     public long getExecutionId() {
         return executionId;
     }

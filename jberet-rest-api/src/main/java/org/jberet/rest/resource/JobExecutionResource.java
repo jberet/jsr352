@@ -34,6 +34,11 @@ import org.jberet.rest.entity.StepExecutionEntity;
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class JobExecutionResource {
 
+    @GET
+    public JobExecutionEntity[] getJobExecutions() {
+        return JobExecutionEntity.fromJobExecutions(JobService.getInstance().getJobExecutions());
+    }
+
     @Path("running")
     @GET
     public JobExecutionEntity[] getRunningExecutions(final @QueryParam("jobName") String jobName) {

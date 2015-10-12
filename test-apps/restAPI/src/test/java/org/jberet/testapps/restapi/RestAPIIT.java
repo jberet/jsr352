@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
@@ -101,12 +102,20 @@ public class RestAPIIT {
 
     @Test
     public void getJobNames() throws Exception {
+        startJob(jobName1, null);
+
         final URI uri = getJobUriBuilder(null).build();
         final WebTarget target = client.target(uri);
         System.out.printf("uri: %s%n", uri);
-        final Response response = target.request().get();
+        final JobEntity[] response = target.request().get(JobEntity[].class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        boolean foundJobName1 = false;
+        for (final JobEntity e : response) {
+            if (jobName1.equals(e.getJobName()) && (e.getNumberOfJobInstances() > 0)) {
+                foundJobName1 = true;
+            }
+        }
+        assertEquals(true, foundJobName1);
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////

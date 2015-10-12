@@ -41,16 +41,17 @@ public class JobInstanceResource {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("jobExecutionId", String.valueOf(jobExecutionId));
         }
 
-        if (jobName == null) {
-            throw RestAPIMessages.MESSAGES.missingQueryParams("jobName");
-        }
+        //if jobName is null, treat it as "*"
+        //if count is not set, treat it as Integer.MAX
         if (start < 0) {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("start", String.valueOf(start));
         }
         if (count < 0) {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("count", String.valueOf(count));
         }
-        final List<JobInstanceEntity> jobInstanceData = JobService.getInstance().getJobInstances(jobName, start, count);
+        final List<JobInstanceEntity> jobInstanceData =
+                JobService.getInstance().getJobInstances(jobName == null ? "*" : jobName, start,
+                        count == 0 ? Integer.MAX_VALUE : count);
         return Response.ok(jobInstanceData.toArray(new JobInstanceEntity[jobInstanceData.size()])).build();
     }
 
