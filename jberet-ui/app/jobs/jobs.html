@@ -2,20 +2,20 @@
 
     <form>
         <label for="tbJobName">Job XML Name:</label>
-        <input id="tbJobName" type="text" title="Job Xml Name" size="56"
+        <input id="tbJobName" type="text" title="Job Xml Name" size="56" autocomplete="on"
                ng-model="jobName"
                 placeholder="Job XML name, without '.xml' extension"/>
-        <input type="button" title="Start a Job Execution" ng-click="startJob()" value="Start Job"/>
+        <input type="button" title="Start a Job Execution" ng-click="startJob()"
+               value="Start Job"/>
         <br/><br/>
         <label for="taJobParameters">Job Parameters:</label>
         <br/>
         <textarea id="taJobParameters" title="Job Parameters"  data-ng-model="jobParameters"
-                placeholder="Job parameter key value pairs, each pair in its own line"
+                placeholder="key = value pairs, each pair in its own line"
                 rows="10" cols="80"></textarea>
     </form>
 
     <p id="txtJobStarted">{{jobStartResult}}</p>
 
-    <div ui-grid="gridOptions">
-    </div>
+    <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 </div>

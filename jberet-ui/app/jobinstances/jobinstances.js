@@ -1,6 +1,7 @@
 'use strict';
 
-angular.module('jberetUI.jobinstances', ['ngRoute'])
+angular.module('jberetUI.jobinstances',
+    ['ngRoute', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider.when('/jobinstances', {
@@ -11,11 +12,19 @@ angular.module('jberetUI.jobinstances', ['ngRoute'])
 
     .controller('JobInstancesCtrl', ['$scope', '$http', function ($scope, $http) {
         $scope.gridOptions = {
+            enableGridMenu: true,
+            enableSelectAll: true,
+            exporterCsvFilename: 'job-instances.csv',
+
+            enableFiltering: true,
+            showGridFooter: true,
+            minRowsToShow: 20,
             columnDefs: [
-                {field: 'instanceId'},
-                {field: 'jobName'},
-                {field: 'jobExecutions'}
-            ]
+                {name: 'instanceId'},
+                {name: 'jobName'},
+                {name: 'numberOfJobExecutions'}
+            ],
+
         };
 
 

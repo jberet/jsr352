@@ -1,6 +1,7 @@
 'use strict';
 
-angular.module('jberetUI.jobexecutions', ['ngRoute', 'ui.grid'])
+angular.module('jberetUI.jobexecutions', ['ngRoute',
+    'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider.when('/jobexecutions', {
@@ -14,16 +15,24 @@ angular.module('jberetUI.jobexecutions', ['ngRoute', 'ui.grid'])
             '<div ng-class="col.colIndex()"><div>{{grid.getCellValue(row, col) | date:"yyyy-MM-dd HH:mm:ss"}}</div></div>';
 
         $scope.gridOptions = {
+            enableGridMenu: true,
+            enableSelectAll: true,
+            exporterCsvFilename: 'job-executions.csv',
+
+            enableFiltering: true,
+            showGridFooter: true,
+            minRowsToShow: 15,
+            rowHeight:40,
             columnDefs: [
-                {field: 'executionId'},
-                {field: 'jobName'},
-                {field: 'jobParameters'},
-                {field: 'batchStatus'},
-                {field: 'exitStatus'},
-                {field: 'createTime', cellTemplate: cellTemp},
-                {field: 'startTime', cellTemplate: cellTemp},
-                {field: 'lastUpdatedTime', cellTemplate: cellTemp},
-                {field: 'endTime', cellTemplate: cellTemp}
+                {name: 'executionId'},
+                {name: 'jobName', cellTooltip: true},
+                {name: 'jobParameters', cellTooltip: true},
+                {name: 'batchStatus'},
+                {name: 'exitStatus', cellTooltip: true},
+                {name: 'createTime', cellTemplate: cellTemp, cellTooltip: true},
+                {name: 'startTime', cellTemplate: cellTemp, cellTooltip: true},
+                {name: 'lastUpdatedTime', cellTemplate: cellTemp, cellTooltip: true},
+                {name: 'endTime', cellTemplate: cellTemp, cellTooltip: true}
             ]
         };
 

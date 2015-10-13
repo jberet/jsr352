@@ -27,8 +27,7 @@ public final class JobInstanceEntity implements JobInstance, Serializable {
     private long instanceId;
     private String jobName;
     private JobExecutionEntity[] jobExecutions;
-
-    //    private int numberOfJobExecutions;
+    private int numberOfJobExecutions;
 
     public JobInstanceEntity() {
     }
@@ -37,6 +36,7 @@ public final class JobInstanceEntity implements JobInstance, Serializable {
         this.instanceId = jobInstance.getInstanceId();
         this.jobName = jobInstance.getJobName();
         this.jobExecutions = JobExecutionEntity.fromJobExecutions(jobExecutions);
+        this.numberOfJobExecutions = this.jobExecutions.length;
     }
 
     public long getInstanceId() {
@@ -45,6 +45,10 @@ public final class JobInstanceEntity implements JobInstance, Serializable {
 
     public String getJobName() {
         return jobName;
+    }
+
+    public int getNumberOfJobExecutions() {
+        return numberOfJobExecutions;
     }
 
     public JobExecutionEntity[] getJobExecutions() {

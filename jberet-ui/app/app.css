@@ -28,3 +28,13 @@
   content: "";
   padding: 0;
 }
+
+.grid {
+  font-size: small;
+}
+
+.app-footer {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}

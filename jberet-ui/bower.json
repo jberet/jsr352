@@ -6,11 +6,15 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "angular": "~1.4.0",
-    "angular-route": "~1.4.0",
-    "angular-loader": "~1.4.0",
-    "angular-ui-grid": "~3.0.6",
-    "angular-mocks": "~1.4.0",
-    "html5-boilerplate": "~5.2.0"
+    "angular": "~1.4.7",
+    "angular-route": "~1.4.7",
+    "angular-loader": "~1.4.7",
+    "angular-ui-grid": "~3.0.7",
+    "angular-mocks": "~1.4.7",
+    "angular-touch": "~1.4.7",
+    "angular-animate": "~1.4.7",
+    "html5-boilerplate": "~5.2.0",
+    "csv": "~1.0.2",
+    "pdfmake": "~0.1.20"
   }
 }
