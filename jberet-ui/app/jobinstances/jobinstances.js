@@ -20,9 +20,9 @@ angular.module('jberetUI.jobinstances',
             showGridFooter: true,
             minRowsToShow: 20,
             columnDefs: [
-                {name: 'instanceId'},
+                {name: 'instanceId', type: 'number'},
                 {name: 'jobName'},
-                {name: 'numberOfJobExecutions'}
+                {name: 'numberOfJobExecutions', type: 'number'}
             ],
 
         };

@@ -24,15 +24,15 @@ angular.module('jberetUI.jobexecutions', ['ngRoute',
             minRowsToShow: 15,
             rowHeight:40,
             columnDefs: [
-                {name: 'executionId'},
+                {name: 'executionId', type: 'number'},
                 {name: 'jobName', cellTooltip: true},
                 {name: 'jobParameters', cellTooltip: true},
                 {name: 'batchStatus'},
                 {name: 'exitStatus', cellTooltip: true},
-                {name: 'createTime', cellTemplate: cellTemp, cellTooltip: true},
-                {name: 'startTime', cellTemplate: cellTemp, cellTooltip: true},
-                {name: 'lastUpdatedTime', cellTemplate: cellTemp, cellTooltip: true},
-                {name: 'endTime', cellTemplate: cellTemp, cellTooltip: true}
+                {name: 'createTime', cellTemplate: cellTemp, cellTooltip: true, type: 'date'},
+                {name: 'startTime', cellTemplate: cellTemp, cellTooltip: true, type: 'date'},
+                {name: 'lastUpdatedTime', cellTemplate: cellTemp, cellTooltip: true, type: 'date'},
+                {name: 'endTime', cellTemplate: cellTemp, cellTooltip: true, type: 'date'}
             ]
         };
 
