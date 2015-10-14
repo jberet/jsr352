@@ -18,7 +18,7 @@ angular.module('jberetUI.jobinstances',
 
             enableFiltering: true,
             showGridFooter: true,
-            minRowsToShow: 20,
+            minRowsToShow: 15,
             columnDefs: [
                 {name: 'instanceId', type: 'number'},
                 {name: 'jobName'},

@@ -18,7 +18,7 @@ angular.module('jberetUI.jobs', ['ngRoute', 'ngAnimate', 'ngTouch', 'ui.grid', '
 
             enableFiltering: true,
             showGridFooter: true,
-            minRowsToShow: 12,
+            minRowsToShow: 8,
             columnDefs: [
                 {name: 'jobName'},
                 {name: 'numberOfJobInstances', type: 'number'},

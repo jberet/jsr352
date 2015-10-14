@@ -21,7 +21,7 @@ angular.module('jberetUI.jobexecutions', ['ngRoute',
 
             enableFiltering: true,
             showGridFooter: true,
-            minRowsToShow: 15,
+            minRowsToShow: 10,
             rowHeight:40,
             columnDefs: [
                 {name: 'executionId', type: 'number'},
