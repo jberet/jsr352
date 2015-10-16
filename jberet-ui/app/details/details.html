@@ -1,0 +1,41 @@
+<div class="btn-group pull-right" role="group">
+    <button type="button" class="btn btn-default">Stop</button>
+    <button type="button" class="btn btn-default">Restart</button>
+    <button type="button" class="btn btn-default">Abandon</button>
+</div>
+<div>
+    <table style="width: 100%">
+        <tr>
+            <td class="table-data-key-cell">Id:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.executionId}}</td>
+            <td class="table-data-key-cell">Job Name:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.jobName}}</td>
+        </tr>
+        <tr>
+            <td class="table-data-key-cell">Batch Status:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.batchStatus}}</td>
+            <td class="table-data-key-cell">Exit Status:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.exitStatus}}</td>
+        </tr>
+        <tr>
+            <td class="table-data-key-cell">Create Time:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.createTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+            <td class="table-data-key-cell">Start Time:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.startTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+        </tr>
+        <tr>
+            <td class="table-data-key-cell">Last Updated Time:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.lastUpdatedTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+            <td class="table-data-key-cell">End Time:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.endTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+        </tr>
+    </table>
+    <table style="table-layout: fixed; width: 100%">
+        <tr>
+            <td class="table-data-key-cell">Job Parameters:</td>
+            <td  class="table-data-value-cell-long">{{jobExecutionEntity.jobParameters}}</td>
+        </tr>
+    </table>
+</div>
+<h4 style="text-align: center">Step Executions</h4>
+<div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>

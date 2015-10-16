@@ -12,6 +12,7 @@
   <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
   <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="app.css">
   <link rel="stylesheet" href="ui-grid-sky-theme.css">
   <link rel="stylesheet" type="text/css" href="bower_components/angular-ui-grid/ui-grid.css">
@@ -21,16 +22,16 @@
   <img src="img/jberet_banner_1180px.png" width="100%">
 
   <ul class="menu">
-    <li><a href="#/jobs">Jobs</a></li>
-    <li><a href="#/jobinstances">Job Instances</a></li>
-    <li><a href="#/jobexecutions">Job Executions</a></li>
+    <li><a ui-sref="jobs">Jobs</a></li>
+    <li><a ui-sref="jobinstances">Job Instances</a></li>
+    <li><a ui-sref="jobexecutions">Job Executions</a></li>
   </ul>
 
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
 
-  <div ng-view></div>
+  <div ui-view></div>
 
   <div class="app-footer">jberet-ui: v<span app-version></span></div>
 
@@ -38,7 +39,7 @@
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
   -->
   <script src="bower_components/angular/angular.js"></script>
-  <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
   <script src="bower_components/angular-touch/angular-touch.js"></script>
   <script src="bower_components/angular-animate/angular-animate.js"></script>
   <script src="bower_components/angular-ui-grid/ui-grid.js"></script>
@@ -49,6 +50,7 @@
   <script src="jobs/jobs.js"></script>
   <script src="jobinstances/jobinstances.js"></script>
   <script src="jobexecutions/jobexecutions.js"></script>
+  <script src="details/details.js"></script>
   <script src="components/version/version.js"></script>
   <script src="components/version/version-directive.js"></script>
   <script src="components/version/interpolate-filter.js"></script>

@@ -39,3 +39,19 @@
   bottom: 10px;
   right: 10px;
 }
+
+.table-data-key-cell {
+  width: 12%;
+  font-weight: bold;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.table-data-value-cell {
+  width: 38%;
+}
+
+.table-data-value-cell-long {
+  width: 88%;
+  word-wrap: break-word;
+}

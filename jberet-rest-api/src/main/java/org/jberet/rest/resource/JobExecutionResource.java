@@ -23,6 +23,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.jberet.rest._private.RestAPIMessages;
@@ -35,21 +36,31 @@ import org.jberet.rest.entity.StepExecutionEntity;
 public class JobExecutionResource {
 
     @GET
-    public JobExecutionEntity[] getJobExecutions() {
-        return JobExecutionEntity.fromJobExecutions(JobService.getInstance().getJobExecutions());
+    public JobExecutionEntity[] getJobExecutions(final @Context UriInfo uriInfo) {
+        final JobExecutionEntity[] jobExecutionEntities =
+                JobExecutionEntity.fromJobExecutions(JobService.getInstance().getJobExecutions());
+        setJobExecutionEntityHref(uriInfo, jobExecutionEntities);
+        return jobExecutionEntities;
     }
 
     @Path("running")
     @GET
-    public JobExecutionEntity[] getRunningExecutions(final @QueryParam("jobName") String jobName) {
+    public JobExecutionEntity[] getRunningExecutions(final @QueryParam("jobName") String jobName,
+                                                     final @Context UriInfo uriInfo) {
         final List<JobExecutionEntity> runningExecutions = JobService.getInstance().getRunningExecutions(jobName);
-        return runningExecutions.toArray(new JobExecutionEntity[runningExecutions.size()]);
+        final JobExecutionEntity[] jobExecutionEntities =
+                runningExecutions.toArray(new JobExecutionEntity[runningExecutions.size()]);
+        setJobExecutionEntityHref(uriInfo, jobExecutionEntities);
+        return jobExecutionEntities;
     }
 
     @Path("{jobExecutionId}")
     @GET
-    public JobExecutionEntity getJobExecution(final @PathParam("jobExecutionId") long jobExecutionId) {
-        return JobService.getInstance().getJobExecution(jobExecutionId);
+    public JobExecutionEntity getJobExecution(final @PathParam("jobExecutionId") long jobExecutionId,
+                                              final @Context UriInfo uriInfo) {
+        final JobExecutionEntity jobExecution = JobService.getInstance().getJobExecution(jobExecutionId);
+        setJobExecutionEntityHref(uriInfo, jobExecution);
+        return jobExecution;
     }
 
     @Path("{jobExecutionId}/abandon")
@@ -67,10 +78,12 @@ public class JobExecutionResource {
     @Path("{jobExecutionId}/restart")
     @POST
     public JobExecutionEntity restart(final @PathParam("jobExecutionId") long jobExecutionId,
-                                    final @Context UriInfo uriInfo,
-                                    final Properties jobParamsAsProps) {
-        return JobService.getInstance().restart(
+                                      final @Context UriInfo uriInfo,
+                                      final Properties jobParamsAsProps) {
+        final JobExecutionEntity jobExecutionEntity = JobService.getInstance().restart(
                 jobExecutionId, JobResource.jobParametersFromUriInfoAndProps(uriInfo, jobParamsAsProps));
+        setJobExecutionEntityHref(uriInfo, jobExecutionEntity);
+        return jobExecutionEntity;
     }
 
     @GET
@@ -83,7 +96,7 @@ public class JobExecutionResource {
     @GET
     @Path("{jobExecutionId}/stepexecutions/{stepExecutionId}")
     public StepExecutionEntity getStepExecution(final @PathParam("jobExecutionId") long jobExecutionId,
-                                              final @PathParam("stepExecutionId") long stepExecutionId) {
+                                                final @PathParam("stepExecutionId") long stepExecutionId) {
         final List<StepExecutionEntity> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
         for (final StepExecutionEntity e : stepExecutionData) {
             if (e.getStepExecutionId() == stepExecutionId) {
@@ -91,6 +104,13 @@ public class JobExecutionResource {
             }
         }
         throw RestAPIMessages.MESSAGES.notFoundException("stepExecutionId", String.valueOf(stepExecutionId));
+    }
+
+    private static void setJobExecutionEntityHref(final UriInfo uriInfo, final JobExecutionEntity... entities) {
+        final UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path(JobExecutionResource.class);
+        for (final JobExecutionEntity e : entities) {
+            e.setHref(uriBuilder.clone().path(String.valueOf(e.getExecutionId())).build().toString());
+        }
     }
 
 }

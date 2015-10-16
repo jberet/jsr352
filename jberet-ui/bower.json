@@ -1,13 +1,12 @@
 {
-  "name": "angular-seed",
-  "description": "A starter project for AngularJS",
-  "version": "0.0.0",
-  "homepage": "https://github.com/angular/angular-seed",
-  "license": "MIT",
-  "private": true,
+  "name": "jberet-ui",
+  "description": "JBeret Batch Job Management",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jberet/jsr352",
+  "license": "epl-v10",
   "dependencies": {
     "angular": "~1.4.7",
-    "angular-route": "~1.4.7",
+    "angular-ui-router": "~0.2.15",
     "angular-loader": "~1.4.7",
     "angular-ui-grid": "~3.0.7",
     "angular-mocks": "~1.4.7",
@@ -15,6 +14,7 @@
     "angular-animate": "~1.4.7",
     "html5-boilerplate": "~5.2.0",
     "csv": "~1.0.2",
-    "pdfmake": "~0.1.20"
+    "pdfmake": "~0.1.20",
+    "bootstrap": "~3.3.5"
   }
 }

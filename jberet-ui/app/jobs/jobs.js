@@ -1,9 +1,11 @@
 'use strict';
 
-angular.module('jberetUI.jobs', ['ngRoute', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
+angular.module('jberetUI.jobs',
+    ['ui.router', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
-    .config(['$routeProvider', function ($routeProvider) {
-        $routeProvider.when('/jobs', {
+    .config(['$stateProvider', function ($stateProvider) {
+        $stateProvider.state('jobs', {
+            url: '/jobs',
             templateUrl: 'jobs/jobs.html',
             controller: 'JobsCtrl'
         });
@@ -35,7 +37,6 @@ angular.module('jberetUI.jobs', ['ngRoute', 'ngAnimate', 'ngTouch', 'ui.grid', '
 
         $scope.startJob = function () {
             var jobParams = parseJobParameters($scope.jobParameters);
-            console.log(jobParams);
             $http.post('http://localhost:8080/restAPI/api/jobs/' + $scope.jobName + '/start', jobParams).then(function (responseData) {
                 $scope.jobStartResult = 'Started job: ' + $scope.jobName +
                     (jobParams == null ? '.' : ', with parameters: ' + JSON.stringify(jobParams));

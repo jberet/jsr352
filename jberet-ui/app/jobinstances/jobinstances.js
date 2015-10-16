@@ -1,10 +1,11 @@
 'use strict';
 
 angular.module('jberetUI.jobinstances',
-    ['ngRoute', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
+    ['ui.router', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
-    .config(['$routeProvider', function ($routeProvider) {
-        $routeProvider.when('/jobinstances', {
+    .config(['$stateProvider', function ($stateProvider) {
+        $stateProvider.state('jobinstances', {
+            url: '/jobinstances',
             templateUrl: 'jobinstances/jobinstances.html',
             controller: 'JobInstancesCtrl'
         });

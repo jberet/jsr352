@@ -3,10 +3,10 @@
 
     <form>
         <label for="tbJobName">Job XML Name:</label>
-        <input id="tbJobName" type="text" title="Job Xml Name" size="56" autocomplete="on"
+        <input id="tbJobName" type="text" title="Job Xml Name" size="56" autocomplete="on" required
                ng-model="jobName"
                placeholder="Job XML name, without '.xml' extension"/>
-        <input type="button" title="Start a Job Execution" ng-click="startJob()"
+        <input class="btn btn-default" type="button" title="Start a Job Execution" ng-click="startJob()"
                value="Start Job"/>
         <br/><br/>
         <label for="taJobParameters">Job Parameters:</label>
