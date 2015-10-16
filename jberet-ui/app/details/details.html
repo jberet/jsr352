@@ -1,7 +1,7 @@
 <div class="btn-group pull-right" role="group">
-    <button type="button" class="btn btn-default">Stop</button>
-    <button type="button" class="btn btn-default">Restart</button>
-    <button type="button" class="btn btn-default">Abandon</button>
+    <button type="button" class="btn btn-default" title="Stop a Running Job Execution" ng-disabled="stopDisabled">Stop</button>
+    <button type="button" class="btn btn-default" title="Restart a Failed or Stopped Job Execution" ng-disabled="restartDisabled">Restart</button>
+    <button type="button" class="btn btn-default" title="Abandon a Failed or Stopped Job Execution" ng-disabled="abandonDisabled">Abandon</button>
 </div>
 <div>
     <table style="width: 100%">

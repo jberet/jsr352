@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('jberetUI.details',
-    ['ui.router', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('details', {
@@ -35,19 +35,26 @@ angular.module('jberetUI.details',
                     {name: 'exitStatus', cellTooltip: true},
                     {name: 'startTime', cellTemplate: dateCellTemp, cellTooltip: true, type: 'date'},
                     {name: 'endTime', cellTemplate: dateCellTemp, cellTooltip: true, type: 'date'},
-                    {name: 'metrics'}
+                    {name: 'metrics', cellTooltip: true}
                 ]
             };
 
-            if ($stateParams.jobExecutionEntity) {
-                $scope.jobExecutionEntity = $stateParams.jobExecutionEntity;
-
+            var handleJobExecutionEntity = function() {
                 $http.get($scope.jobExecutionEntity.href + '/stepexecutions')
                     .then(function (responseData) {
                         $scope.gridOptions.data = responseData.data;
                     }, function (responseData) {
                         console.log(responseData);
                     });
+                var batchStatus = $scope.jobExecutionEntity.batchStatus;
+                $scope.stopDisabled = batchStatus != 'STARTING' && batchStatus != 'STARTED';
+                $scope.restartDisabled = batchStatus != 'STOPPED' && batchStatus != 'FAILED';
+                $scope.abandonDisabled = batchStatus == 'STARTING' || batchStatus == 'STARTED' || batchStatus == 'STOPPING';
+            };
+
+            if ($stateParams.jobExecutionEntity) {
+                $scope.jobExecutionEntity = $stateParams.jobExecutionEntity;
+                handleJobExecutionEntity();
             } else {
                 var paths = $location.path().split('/');
                 var length = paths.length;
@@ -56,13 +63,7 @@ angular.module('jberetUI.details',
                 $http.get('http://localhost:8080/restAPI/api/jobexecutions/' + idPart)
                     .then(function (responseData) {
                         $scope.jobExecutionEntity = responseData.data;
-
-                        $http.get($scope.jobExecutionEntity.href + '/stepexecutions')
-                            .then(function (responseData) {
-                                $scope.gridOptions.data = responseData.data;
-                            }, function (responseData) {
-                                console.log(responseData);
-                            });
+                        handleJobExecutionEntity();
                     }, function (responseData) {
                         console.log(responseData);
                     });

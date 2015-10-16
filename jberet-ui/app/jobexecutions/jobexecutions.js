@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('jberetUI.jobexecutions',
-    ['ui.router', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('jobexecutions', {

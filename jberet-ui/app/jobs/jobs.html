@@ -7,7 +7,7 @@
                ng-model="jobName"
                placeholder="Job XML name, without '.xml' extension"/>
         <input class="btn btn-default" type="button" title="Start a Job Execution" ng-click="startJob()"
-               value="Start Job"/>
+               ng-disabled="startJobDisabled"  value="Start Job"/>
         <br/><br/>
         <label for="taJobParameters">Job Parameters:</label>
         <br/>
@@ -15,7 +15,8 @@
                   placeholder="key = value pairs, each pair in its own line"
                   rows="5" cols="80"></textarea>
     </form>
-
-    <p id="txtJobStarted">{{jobStartResult}}</p>
-
+    <div>
+        <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
+                   close="closeAlert($index)" template-url="alert.html">{{alert.msg}}</uib-alert>
+    </div>
 </div>
