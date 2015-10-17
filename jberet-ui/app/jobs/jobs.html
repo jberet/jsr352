@@ -2,21 +2,27 @@
     <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 
     <form>
-        <label for="tbJobName">Job XML Name:</label>
-        <input id="tbJobName" type="text" title="Job Xml Name" size="56" autocomplete="on" required
-               ng-model="jobName"
-               placeholder="Job XML name, without '.xml' extension"/>
-        <input class="btn btn-default" type="button" title="Start a Job Execution" ng-click="startJob()"
-               ng-disabled="startJobDisabled"  value="Start Job"/>
-        <br/><br/>
-        <label for="taJobParameters">Job Parameters:</label>
-        <br/>
-        <textarea id="taJobParameters" title="Job Parameters" data-ng-model="jobParameters"
-                  placeholder="key = value pairs, each pair in its own line"
-                  rows="5" cols="80"></textarea>
+        <div class="form-group required">
+            <div>
+                <label class='control-label' for="tbJobName">Job XML Name</label>
+                <input id="tbJobName" type="text" title="Job Xml Name" size="70" autocomplete="on" required
+                       ng-model="jobName"
+                       placeholder="Job XML name, without '.xml' extension"/>
+                <input class="btn btn-default" type="button" title="Start a Job Execution" ng-click="startJob()"
+                       value="Start Job"/>
+            </div>
+            <div>
+                <label>Job Parameters
+                    <textarea title="Job Parameters" data-ng-model="jobParameters"
+                              rows="5" cols="80"
+                              placeholder="key = value pairs, each pair in its own line"></textarea>
+                </label>
+            </div>
+        </div>
     </form>
     <div>
         <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
-                   close="closeAlert($index)" template-url="alert.html">{{alert.msg}}</uib-alert>
+                   close="closeAlert($index)" template-url="alert.html">{{alert.msg}}
+        </uib-alert>
     </div>
 </div>

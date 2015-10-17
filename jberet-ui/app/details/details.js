@@ -14,6 +14,7 @@ angular.module('jberetUI.details',
 
     .controller('DetailsCtrl', ['$scope', '$http', '$stateParams', '$location',
         function ($scope, $http, $stateParams, $location) {
+            $scope.alerts = [];
             var dateCellTemp =
                 '<div ng-class="col.colIndex()">{{COL_FIELD | date:"yyyy-MM-dd HH:mm:ss"}}</div>';
 
@@ -23,7 +24,7 @@ angular.module('jberetUI.details',
                 exporterCsvFilename: 'step-execution.csv',
 
                 enableFiltering: true,
-                showGridFooter: true,
+                //showGridFooter: true,
                 minRowsToShow: 5,
                 rowHeight: 40,
 
@@ -66,6 +67,74 @@ angular.module('jberetUI.details',
                         handleJobExecutionEntity();
                     }, function (responseData) {
                         console.log(responseData);
+                        $scope.stopDisabled = $scope.restartDisabled = $scope.abandonDisabled = true;
+                        $scope.alerts.push({type: 'danger', msg: 'Failed to get job execution with id ' + idPart});
                     });
             }
+
+            $scope.stopJobExecution = function () {
+                var idToStop = $scope.jobExecutionEntity.executionId;
+                $scope.alerts.length = 0; //clear alerts
+                $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToStop + '/stop', null)
+                    .then(function (responseData) {
+                        $scope.jobExecutionEntity = responseData.data;
+                        handleJobExecutionEntity();
+                        $scope.alerts.push({
+                            type: 'success',
+                            msg: 'Submitted stop request for job execution ' + idToStop
+                        });
+                    }, function (responseData) {
+                        console.log(responseData);
+                        $scope.alerts.push({
+                            type: 'danger',
+                            msg: 'Failed to stop job execution ' + idToStop
+                        });
+                    });
+            };
+
+            $scope.restartJobExecution = function() {
+                var idToRestart = $scope.jobExecutionEntity.executionId;
+                $scope.alerts.length = 0; //clear alerts
+                //TODO add restart params
+                $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToRestart + '/restart', null)
+                    .then(function (responseData) {
+                        $scope.restartJobExecutionEntity = responseData.data;
+                        $scope.restartDisabled = true;
+                        $scope.alerts.push({
+                            type: 'success',
+                            msg: 'Restarted job execution ' + idToRestart +
+                                ', and the new execution is ' + $scope.restartJobExecutionEntity.executionId
+                        });
+                    }, function (responseData) {
+                        console.log(responseData);
+                        $scope.alerts.push({
+                            type: 'danger',
+                            msg: 'Failed to restart job execution ' + idToRestart
+                        });
+                    });
+            };
+
+            $scope.abandonJobExecution = function() {
+                var idToAbandon = $scope.jobExecutionEntity.executionId;
+                $scope.alerts.length = 0; //clear alerts
+                $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToAbandon + '/abandon', null)
+                    .then(function () {
+                        $scope.jobExecutionEntity.batchStatus = 'ABANDONED';
+                        $scope.abandonDisabled = true;
+                        $scope.alerts.push({
+                            type: 'success',
+                            msg: 'Abandoned job execution ' + idToAbandon
+                        });
+                    }, function (responseData) {
+                        console.log(responseData);
+                        $scope.alerts.push({
+                            type: 'danger',
+                            msg: 'Failed to abandon job execution ' + idToAbandon
+                        });
+                    });
+            };
+
+            $scope.closeAlert = function (index) {
+                $scope.alerts.splice(index, 1);
+            };
         }]);

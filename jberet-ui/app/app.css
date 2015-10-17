@@ -41,17 +41,26 @@
 }
 
 .table-data-key-cell {
-  width: 12%;
+  width: 14%;
   font-weight: bold;
   text-align: right;
   padding-right: 8px;
 }
 
 .table-data-value-cell {
-  width: 38%;
+  width: 36%;
 }
 
 .table-data-value-cell-long {
-  width: 88%;
+  width: 86%;
   word-wrap: break-word;
+}
+
+.form-group.required .control-label:after {
+  content:"*";
+  color:red;
+}
+
+label textarea{
+  vertical-align: text-top;
 }

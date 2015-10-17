@@ -1,15 +1,23 @@
+<h4 style="text-align: center">Job Execution {{jobExecutionEntity.executionId}}</h4>
 <div class="btn-group pull-right" role="group">
-    <button type="button" class="btn btn-default" title="Stop a Running Job Execution" ng-disabled="stopDisabled">Stop</button>
-    <button type="button" class="btn btn-default" title="Restart a Failed or Stopped Job Execution" ng-disabled="restartDisabled">Restart</button>
-    <button type="button" class="btn btn-default" title="Abandon a Failed or Stopped Job Execution" ng-disabled="abandonDisabled">Abandon</button>
+    <button type="button" class="btn btn-default" title="Stop a Running Job Execution"
+            ng-disabled="stopDisabled" ng-click="stopJobExecution()">Stop Job Execution
+    </button>
+    <button type="button" class="btn btn-default" title="Restart a Failed or Stopped Job Execution"
+            ng-disabled="restartDisabled" ng-click="restartJobExecution()">Restart Job Execution
+    </button>
+    <button type="button" class="btn btn-default" title="Abandon an Inactive Job Execution"
+            ng-disabled="abandonDisabled" ng-click="abandonJobExecution()">Abandon Job Execution
+    </button>
 </div>
+<br/><br/>
 <div>
-    <table style="width: 100%">
+    <table style="width: 85%" title="Job Execution {{jobExecutionEntity.executionId}} Details">
         <tr>
-            <td class="table-data-key-cell">Id:</td>
-            <td class="table-data-value-cell">{{jobExecutionEntity.executionId}}</td>
             <td class="table-data-key-cell">Job Name:</td>
             <td class="table-data-value-cell">{{jobExecutionEntity.jobName}}</td>
+            <td class="table-data-key-cell">Job Instance Id:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.jobInstanceId}}</td>
         </tr>
         <tr>
             <td class="table-data-key-cell">Batch Status:</td>
@@ -24,18 +32,34 @@
             <td class="table-data-value-cell">{{jobExecutionEntity.startTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
         </tr>
         <tr>
-            <td class="table-data-key-cell">Last Updated Time:</td>
+            <td class="table-data-key-cell">Updated Time:</td>
             <td class="table-data-value-cell">{{jobExecutionEntity.lastUpdatedTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
             <td class="table-data-key-cell">End Time:</td>
             <td class="table-data-value-cell">{{jobExecutionEntity.endTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
         </tr>
     </table>
-    <table style="table-layout: fixed; width: 100%">
+    <table style="table-layout: fixed; width: 85%">
         <tr>
             <td class="table-data-key-cell">Job Parameters:</td>
-            <td  class="table-data-value-cell-long">{{jobExecutionEntity.jobParameters}}</td>
+            <td class="table-data-value-cell-long">{{jobExecutionEntity.jobParameters}}</td>
         </tr>
     </table>
 </div>
+
+<div ng-show="showJobParameters">
+    <label>Job Parameters
+                    <textarea title="Job Parameters" data-ng-model="jobParameters"
+                              rows="5" cols="80"
+                              placeholder="key = value pairs, each pair in its own line"></textarea>
+    </label>
+</div>
+
 <h4 style="text-align: center">Step Executions</h4>
 <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
+
+<div>
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
+               close="closeAlert($index)" template-url="alert.html">
+        {{alert.msg}}
+    </uib-alert>
+</div>
