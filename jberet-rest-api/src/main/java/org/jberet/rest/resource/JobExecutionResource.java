@@ -37,8 +37,7 @@ public class JobExecutionResource {
 
     @GET
     public JobExecutionEntity[] getJobExecutions(final @Context UriInfo uriInfo) {
-        final JobExecutionEntity[] jobExecutionEntities =
-                JobExecutionEntity.fromJobExecutions(JobService.getInstance().getJobExecutions());
+        final JobExecutionEntity[] jobExecutionEntities = JobService.getInstance().getJobExecutions();
         setJobExecutionEntityHref(uriInfo, jobExecutionEntities);
         return jobExecutionEntities;
     }

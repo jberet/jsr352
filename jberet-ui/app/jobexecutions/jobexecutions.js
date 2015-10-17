@@ -28,6 +28,7 @@ angular.module('jberetUI.jobexecutions',
             rowHeight:40,
             columnDefs: [
                 {name: 'executionId', type: 'number', cellTemplate: urlCellTemp},
+                {name: 'jobInstanceId', type: 'number'},
                 {name: 'jobName', cellTooltip: true},
                 {name: 'jobParameters', cellTooltip: true},
                 {name: 'batchStatus'},

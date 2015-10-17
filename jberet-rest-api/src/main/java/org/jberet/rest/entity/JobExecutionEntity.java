@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement
 //@XmlType(propOrder =
-//"executionId, href, jobName, jobParameters, batchStatus, exitStatus, createTime, startTime, lastUpdatedTime, endTime")
+//"executionId, href, jobName, jobInstanceId, jobParameters, batchStatus, exitStatus, createTime, startTime, lastUpdatedTime, endTime")
 public final class JobExecutionEntity extends AbstractExecutionEntity implements JobExecution, Serializable {
     private static final long serialVersionUID = -8566764098276314827L;
 
@@ -33,27 +33,28 @@ public final class JobExecutionEntity extends AbstractExecutionEntity implements
     private Date lastUpdatedTime;
     private Properties jobParameters;
     private String jobName;
+    private long jobInstanceId;
 
-    private JobInstanceEntity jobInstance;
     private  List<StepExecutionEntity> stepExecutions = new ArrayList<StepExecutionEntity>();
 
     public JobExecutionEntity() {
     }
 
-    public JobExecutionEntity(final JobExecution jobExecution) {
+    public JobExecutionEntity(final JobExecution jobExecution, final long jobInstanceId) {
         super(jobExecution.getStartTime(), jobExecution.getEndTime(),
                 jobExecution.getBatchStatus(), jobExecution.getExitStatus());
-        executionId = jobExecution.getExecutionId();
-        createTime = jobExecution.getCreateTime();
-        lastUpdatedTime = jobExecution.getLastUpdatedTime();
-        jobName = jobExecution.getJobName();
-        jobParameters = jobExecution.getJobParameters();
+        this.executionId = jobExecution.getExecutionId();
+        this.createTime = jobExecution.getCreateTime();
+        this.lastUpdatedTime = jobExecution.getLastUpdatedTime();
+        this.jobName = jobExecution.getJobName();
+        this.jobParameters = jobExecution.getJobParameters();
+        this.jobInstanceId = jobInstanceId;
     }
 
-    public static JobExecutionEntity[] fromJobExecutions(final List<JobExecution> jobExecutions) {
+    public static JobExecutionEntity[] fromJobExecutions(final List<JobExecution> jobExecutions, final long instanceId) {
         JobExecutionEntity[] result = new JobExecutionEntity[jobExecutions.size()];
         for (int i = 0, j = jobExecutions.size(); i < j; i++) {
-            result[i] = new JobExecutionEntity(jobExecutions.get(i));
+            result[i] = new JobExecutionEntity(jobExecutions.get(i), instanceId);
         }
         return result;
     }
@@ -99,15 +100,6 @@ public final class JobExecutionEntity extends AbstractExecutionEntity implements
     }
 
     @XmlTransient
-    public JobInstanceEntity getJobInstance() {
-        return jobInstance;
-    }
-
-    public void setJobInstance(JobInstanceEntity jobInstance) {
-        this.jobInstance = jobInstance;
-    }
-
-    @XmlTransient
     public List<StepExecutionEntity> getStepExecutions() {
         return stepExecutions;
     }
@@ -122,5 +114,13 @@ public final class JobExecutionEntity extends AbstractExecutionEntity implements
 
     public void setHref(final String href) {
         this.href = href;
+    }
+
+    public long getJobInstanceId() {
+        return jobInstanceId;
+    }
+
+    public void setJobInstanceId(final long jobInstanceId) {
+        this.jobInstanceId = jobInstanceId;
     }
 }

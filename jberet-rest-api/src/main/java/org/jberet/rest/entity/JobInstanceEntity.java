@@ -35,7 +35,7 @@ public final class JobInstanceEntity implements JobInstance, Serializable {
     public JobInstanceEntity(final JobInstance jobInstance, final List<JobExecution> jobExecutions) {
         this.instanceId = jobInstance.getInstanceId();
         this.jobName = jobInstance.getJobName();
-        this.jobExecutions = JobExecutionEntity.fromJobExecutions(jobExecutions);
+        this.jobExecutions = JobExecutionEntity.fromJobExecutions(jobExecutions, this.instanceId);
         this.numberOfJobExecutions = this.jobExecutions.length;
     }
 
