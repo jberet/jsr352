@@ -569,7 +569,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(i);
                 JobExecutionImpl jobExecution1 = (ref != null) ? ref.get() : null;
                 if (jobExecution1 == null) {
-                    if (jobInstanceId == 0) {
+                    if (jobInstance == null) {
                         jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
                     }
                     final Properties jobParameters1 = BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS));

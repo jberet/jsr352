@@ -249,7 +249,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(i);
             JobExecutionImpl jobExecution1 = (ref != null) ? ref.get() : null;
             if (jobExecution1 == null) {
-                if (jobInstanceId == 0) {
+                if (jobInstance == null) {
                     jobInstanceId = (Long) next.get(TableColumns.JOBINSTANCEID);
                 }
                 final Properties jobParameters1 = BatchUtil.stringToProperties((String) next.get(TableColumns.JOBPARAMETERS));
