@@ -46,6 +46,7 @@ public class JobResource {
         final URI jobExecutionDataUri = uriInfo.getBaseUriBuilder().path(JobExecutionResource.class).
                 path(String.valueOf(jobExecutionData.getExecutionId())).
                 build();
+        jobExecutionData.setHref(jobExecutionDataUri.toString());
         return Response.created(jobExecutionDataUri).entity(jobExecutionData).build();
     }
 
