@@ -23,6 +23,9 @@
     <div>
         <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
                    close="closeAlert($index)" template-url="alert.html">{{alert.msg}}
+            <span ng-if="stateTransitionParams">
+                <a ui-sref="details({{stateTransitionParams}})">View the new job execution {{jobExecutionEntity.executionId}}.</a>
+            </span>
         </uib-alert>
     </div>
 </div>

@@ -24,7 +24,7 @@ angular.module('jberetUI.details',
                 enableFiltering: true,
                 //showGridFooter: true,
                 minRowsToShow: 5,
-                rowHeight: 30,
+                //rowHeight: 30,
 
                 //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
                 columnDefs: [
@@ -33,8 +33,10 @@ angular.module('jberetUI.details',
                     {name: 'persistentUserData', cellTooltip: true, headerTooltip: true},
                     {name: 'batchStatus', headerTooltip: true},
                     {name: 'exitStatus', cellTooltip: true, headerTooltip: true},
-                    {name: 'startTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true},
-                    {name: 'endTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true},
+                    {name: 'startTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
+                        headerTooltip: 'Start Time HH:mm:ss MM-dd-yyyy'},
+                    {name: 'endTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
+                        headerTooltip: 'End Time HH:mm:ss MM-dd-yyyy'},
                     {name: 'metrics', cellTooltip: true, headerTooltip: true}
                 ]
             };
@@ -104,22 +106,26 @@ angular.module('jberetUI.details',
             $scope.restartJobExecution = function () {
                 var idToRestart = $scope.jobExecutionEntity.executionId;
                 $scope.alerts.length = 0; //clear alerts
+                $scope.stateTransitionParams = null;
                 if (confirm('Really restart job execution ' + idToRestart + '?')) {
                     var jobParams = jberetui.parseJobParameters($scope.jobParameters);
                     $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToRestart + '/restart', jobParams)
                         .then(function (responseData) {
                             $scope.restartJobExecutionEntity = responseData.data;
                             $scope.restartDisabled = true;
+                            $scope.stateTransitionParams = {jobExecutionId: $scope.restartJobExecutionEntity.executionId,
+                                                            jobExecutionEntity: $scope.restartJobExecutionEntity};
                             $scope.alerts.push({
                                 type: 'success',
                                 msg: 'Restarted job execution ' + idToRestart +
-                                ', and the new execution is ' + $scope.restartJobExecutionEntity.executionId
+                                (jobParams == null ? '.' : ', with additional parameters: ' + JSON.stringify(jobParams) + '.')
                             });
+                            $scope.jobParameters = '';
                         }, function (responseData) {
                             console.log(responseData);
                             $scope.alerts.push({
                                 type: 'danger',
-                                msg: 'Failed to restart job execution ' + idToRestart
+                                msg: 'Failed to restart job execution ' + idToRestart + '.'
                             });
                         });
                 }

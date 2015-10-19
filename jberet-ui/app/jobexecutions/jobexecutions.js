@@ -22,8 +22,8 @@ angular.module('jberetUI.jobexecutions',
 
             enableFiltering: true,
             showGridFooter: true,
-            minRowsToShow: 10,
-            rowHeight:40,
+            minRowsToShow: 15,
+            //rowHeight:40,
 
             //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
             columnDefs: [
@@ -34,10 +34,14 @@ angular.module('jberetUI.jobexecutions',
                 {name: 'jobParameters', cellTooltip: true, headerTooltip: true},
                 {name: 'batchStatus', headerTooltip: true},
                 {name: 'exitStatus', cellTooltip: true, headerTooltip: true},
-                {name: 'createTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true},
-                {name: 'startTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true},
-                {name: 'lastUpdatedTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true},
-                {name: 'endTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true}
+                {name: 'createTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
+                    headerTooltip: 'Create Time HH:mm:ss MM-dd-yyyy'},
+                {name: 'startTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
+                    headerTooltip: 'Start Time HH:mm:ss MM-dd-yyyy'},
+                {name: 'lastUpdatedTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
+                    headerTooltip: 'Last Updated Time HH:mm:ss MM-dd-yyyy'},
+                {name: 'endTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
+                    headerTooltip: 'End Time HH:mm:ss MM-dd-yyyy'}
             ]
         };
 
