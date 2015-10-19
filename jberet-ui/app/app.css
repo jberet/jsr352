@@ -63,4 +63,9 @@
 
 label textarea{
   vertical-align: text-top;
+  font-weight: normal;
+}
+
+button {
+  style: "min-width: 10ch";
 }

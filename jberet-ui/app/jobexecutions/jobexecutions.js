@@ -11,9 +11,7 @@ angular.module('jberetUI.jobexecutions',
         });
     }])
 
-    .controller('JobexecutionsCtrl', ['$scope', '$http', function ($scope, $http) {
-        var dateCellTemp =
-        '<div ng-class="col.colIndex()">{{COL_FIELD | date:"yyyy-MM-dd HH:mm:ss"}}</div>';
+    .controller('JobexecutionsCtrl', ['$scope', '$http', 'uiGridConstants', function ($scope, $http, uiGridConstants) {
         var urlCellTemp =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: COL_FIELD, jobExecutionEntity: row.entity})">{{COL_FIELD}}</a></div>';
 
@@ -26,17 +24,20 @@ angular.module('jberetUI.jobexecutions',
             showGridFooter: true,
             minRowsToShow: 10,
             rowHeight:40,
+
+            //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
             columnDefs: [
-                {name: 'executionId', type: 'number', cellTemplate: urlCellTemp},
-                {name: 'jobInstanceId', type: 'number'},
-                {name: 'jobName', cellTooltip: true},
-                {name: 'jobParameters', cellTooltip: true},
-                {name: 'batchStatus'},
-                {name: 'exitStatus', cellTooltip: true},
-                {name: 'createTime', cellTemplate: dateCellTemp, cellTooltip: true, type: 'date'},
-                {name: 'startTime', cellTemplate: dateCellTemp, cellTooltip: true, type: 'date'},
-                {name: 'lastUpdatedTime', cellTemplate: dateCellTemp, cellTooltip: true, type: 'date'},
-                {name: 'endTime', cellTemplate: dateCellTemp, cellTooltip: true, type: 'date'}
+                {name: 'executionId', type: 'number', cellTemplate: urlCellTemp, headerTooltip: true,
+                    sort: {direction: uiGridConstants.DESC}},
+                {name: 'jobInstanceId', type: 'number', headerTooltip: true},
+                {name: 'jobName', cellTooltip: true, headerTooltip: true},
+                {name: 'jobParameters', cellTooltip: true, headerTooltip: true},
+                {name: 'batchStatus', headerTooltip: true},
+                {name: 'exitStatus', cellTooltip: true, headerTooltip: true},
+                {name: 'createTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true},
+                {name: 'startTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true},
+                {name: 'lastUpdatedTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true},
+                {name: 'endTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date', headerTooltip: true}
             ]
         };
 

@@ -1,14 +1,13 @@
 <h4 style="text-align: center">Job Execution {{jobExecutionEntity.executionId}}</h4>
 <div class="btn-group pull-right" role="group">
-    <button type="button" class="btn btn-default" title="Stop a Running Job Execution"
-            ng-disabled="stopDisabled" ng-click="stopJobExecution()">Stop Job Execution
-    </button>
+    <button type="button" class="btn btn-default " title="Stop a Running Job Execution"
+            ng-disabled="stopDisabled" ng-click="stopJobExecution()">Stop</button>
     <button type="button" class="btn btn-default" title="Restart a Failed or Stopped Job Execution"
-            ng-disabled="restartDisabled" ng-click="restartJobExecution()">Restart Job Execution
-    </button>
+            ng-disabled="restartDisabled" ng-click="restartJobExecution()">Restart</button>
     <button type="button" class="btn btn-default" title="Abandon an Inactive Job Execution"
-            ng-disabled="abandonDisabled" ng-click="abandonJobExecution()">Abandon Job Execution
-    </button>
+            ng-disabled="abandonDisabled" ng-click="abandonJobExecution()">Abandon</button>
+    <button type="button" class="btn btn-default" title="Refresh Current Job Execution"
+            ng-click="refreshJobExecution()">Refresh</button>
 </div>
 <br/><br/>
 <div>
@@ -21,7 +20,8 @@
         </tr>
         <tr>
             <td class="table-data-key-cell">Batch Status:</td>
-            <td class="table-data-value-cell">{{jobExecutionEntity.batchStatus}}</td>
+            <td class="table-data-value-cell" ng-class="getColor(jobExecutionEntity.batchStatus)">
+                {{jobExecutionEntity.batchStatus}}</td>
             <td class="table-data-key-cell">Exit Status:</td>
             <td class="table-data-value-cell">{{jobExecutionEntity.exitStatus}}</td>
         </tr>
@@ -46,11 +46,11 @@
     </table>
 </div>
 
-<div ng-show="showJobParameters">
-    <label>Job Parameters
-                    <textarea title="Job Parameters" data-ng-model="jobParameters"
-                              rows="5" cols="80"
-                              placeholder="key = value pairs, each pair in its own line"></textarea>
+<div ng-hide="restartDisabled">
+    <label>Override/Add to Previous Job Parameters
+        <textarea title="Override/Add to Previous Job Parameters" data-ng-model="jobParameters"
+            rows="4" cols="80"
+      placeholder="Previous execution parameters will still be used in restart. You can override and add parameters here, as key = value pairs, each pair in its own line."></textarea>
     </label>
 </div>
 
