@@ -5,8 +5,9 @@
         <div class="form-group required">
             <div>
                 <label class='control-label' for="tbJobName">Job XML Name</label>
-                <input id="tbJobName" type="text" title="Job Xml Name" size="68" autocomplete="on" required
+                <input id="tbJobName" type="text" title="Job Xml Name" size="68" autocomplete="off" required
                        ng-model="jobName"
+                       uib-typeahead="jobNameEntity.jobName for jobNameEntity in gridOptions.data | filter:{jobName:$viewValue}"
                        placeholder="Job XML name, without '.xml' extension"/>
                 <button type="button" class="btn btn-default" title="Start a Job Execution" ng-click="startJob()">
                     <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start Job</button>
@@ -21,8 +22,7 @@
         </div>
     </form>
     <div>
-        <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
-                   close="closeAlert($index)" template-url="alert.html">
+        <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">
             <span ng-if="alert.type == 'danger'" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
             <span ng-if="alert.type == 'success'" class="glyphicon glyphicon-ok" aria-hidden="true"></span> {{alert.msg}}
             <span ng-if="stateTransitionParams">

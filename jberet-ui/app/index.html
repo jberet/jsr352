@@ -2,7 +2,8 @@
 <!--[if lt IE 7]>      <html lang="en" ng-app="jberetUI" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html lang="en" ng-app="jberetUI" class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html lang="en" ng-app="jberetUI" class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html lang="en" ng-app="jberetUI" class="no-js"> <!--<![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en" ng-app="jberetUI" class="no-js" xmlns:alignment="http://www.w3.org/1999/xhtml"> <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,11 +22,13 @@
 <body>
   <img src="img/jberet_banner_1180px.png" width="100%">
 
-  <ul class="menu">
-    <li><a ui-sref="jobs">Jobs</a></li>
-    <li><a ui-sref="jobinstances">Job Instances</a></li>
-    <li><a ui-sref="jobexecutions">Job Executions</a></li>
+
+  <ul class="nav nav-tabs nav-justified">
+      <li ui-sref-active="active"><a ui-sref="jobs">Jobs</a></li>
+      <li ui-sref-active="active"><a ui-sref="jobinstances">Job Instances</a></li>
+      <li ui-sref-active="active"><a ui-sref="jobexecutions">Job Executions</a></li>
   </ul>
+
 
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
