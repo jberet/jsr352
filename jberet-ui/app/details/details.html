@@ -1,13 +1,20 @@
 <h4 style="text-align: center">Job Execution {{jobExecutionEntity.executionId}}</h4>
 <div class="btn-group pull-right" role="group">
     <button type="button" class="btn btn-default " title="Stop a Running Job Execution"
-            ng-disabled="stopDisabled" ng-click="stopJobExecution()">Stop</button>
+            ng-disabled="stopDisabled" ng-click="stopJobExecution()">
+        <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Stop</button>
+
     <button type="button" class="btn btn-default" title="Restart a Failed or Stopped Job Execution"
-            ng-disabled="restartDisabled" ng-click="restartJobExecution()">Restart</button>
+            ng-disabled="restartDisabled" ng-click="restartJobExecution()">
+        <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Restart</button>
+
     <button type="button" class="btn btn-default" title="Abandon an Inactive Job Execution"
-            ng-disabled="abandonDisabled" ng-click="abandonJobExecution()">Abandon</button>
+            ng-disabled="abandonDisabled" ng-click="abandonJobExecution()">
+        <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> Abandon</button>
+
     <button type="button" class="btn btn-default" title="Refresh Current Job Execution"
-            ng-click="refreshJobExecution()">Refresh</button>
+            ng-click="refreshJobExecution()">
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</button>
 </div>
 <br/><br/>
 <div>
@@ -21,6 +28,13 @@
         <tr>
             <td class="table-data-key-cell">Batch Status:</td>
             <td class="table-data-value-cell" ng-class="getColor(jobExecutionEntity.batchStatus)">
+                <span ng-if="jobExecutionEntity.batchStatus == 'COMPLETED'" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="jobExecutionEntity.batchStatus == 'FAILED'" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span ng-if="jobExecutionEntity.batchStatus == 'STOPPED'" class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+                <span ng-if="jobExecutionEntity.batchStatus == 'ABANDONED'" class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+                <span ng-if="jobExecutionEntity.batchStatus == 'STOPPING'" class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+                <span ng-if="jobExecutionEntity.batchStatus == 'STARTING'" class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
+                <span ng-if="jobExecutionEntity.batchStatus == 'STARTED'" class="glyphicon glyphicon-star" aria-hidden="true"></span>
                 {{jobExecutionEntity.batchStatus}}</td>
             <td class="table-data-key-cell">Exit Status:</td>
             <td class="table-data-value-cell">{{jobExecutionEntity.exitStatus}}</td>

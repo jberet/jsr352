@@ -5,11 +5,11 @@
         <div class="form-group required">
             <div>
                 <label class='control-label' for="tbJobName">Job XML Name</label>
-                <input id="tbJobName" type="text" title="Job Xml Name" size="70" autocomplete="on" required
+                <input id="tbJobName" type="text" title="Job Xml Name" size="68" autocomplete="on" required
                        ng-model="jobName"
                        placeholder="Job XML name, without '.xml' extension"/>
-                <input class="btn btn-default" type="button" title="Start a Job Execution" ng-click="startJob()"
-                       value="Start Job"/>
+                <button type="button" class="btn btn-default" title="Start a Job Execution" ng-click="startJob()">
+                    <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start Job</button>
             </div>
             <div>
                 <label>Job Parameters
@@ -22,7 +22,9 @@
     </form>
     <div>
         <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
-                   close="closeAlert($index)" template-url="alert.html">{{alert.msg}}
+                   close="closeAlert($index)" template-url="alert.html">
+            <span ng-if="alert.type == 'danger'" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span ng-if="alert.type == 'success'" class="glyphicon glyphicon-ok" aria-hidden="true"></span> {{alert.msg}}
             <span ng-if="stateTransitionParams">
                 <a ui-sref="details({{stateTransitionParams}})">View the new job execution {{jobExecutionEntity.executionId}}.</a>
             </span>

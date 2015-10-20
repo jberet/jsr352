@@ -67,5 +67,5 @@ label textarea{
 }
 
 button {
-  style: "min-width: 10ch";
+  min-width: 11ch;
 }

@@ -86,9 +86,8 @@ angular.module('jberetUI.details',
                 $scope.alerts.length = 0; //clear alerts
                 if (confirm('Really stop job execution ' + idToStop + '?')) {
                     $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToStop + '/stop', null)
-                        .then(function (responseData) {
-                            $scope.jobExecutionEntity = responseData.data;
-                            handleJobExecutionEntity();
+                        .then(function () {
+                            $scope.jobExecutionEntity.batchStatus = 'STOPPING';
                             $scope.alerts.push({
                                 type: 'success',
                                 msg: 'Submitted stop request for job execution ' + idToStop
@@ -165,9 +164,8 @@ angular.module('jberetUI.details',
 
             $scope.getColor = function (data) {
                 return data == 'COMPLETED' ? 'text-success' :
-                    data == 'FAILED' ? 'text-danger' :
-                        data == 'STOPPED' ? 'text-warning' :
-                            data == 'ABANDONED' ? 'text-muted' :
+                        data == 'FAILED' || data == 'ABANDONED'? 'text-danger' :
+                        data == 'STOPPED' || data == 'STOPPING' ? 'text-warning' :
                                 'text-primary';
             };
         }]);
