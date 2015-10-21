@@ -33,7 +33,6 @@ angular.module('jberetUI.details',
                 columnDefs: [
                     {name: 'stepExecutionId', type: 'number', cellTemplate: urlCellTemp, headerTooltip: true},
                     {name: 'stepName', cellTooltip: true, headerTooltip: true},
-                    {name: 'persistentUserData', cellTooltip: true, headerTooltip: true},
                     {name: 'batchStatus', headerTooltip: true},
                     {name: 'exitStatus', cellTooltip: true, headerTooltip: true},
                     {name: 'startTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',

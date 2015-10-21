@@ -19,15 +19,13 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
 @XmlType(propOrder =
-        "stepExecutionId, stepName, persistentUserData, batchStatus, exitStatus, startTime, endTime, metrics")
+        "stepExecutionId, stepName, batchStatus, exitStatus, startTime, endTime, metrics")
 public class StepExecutionEntity extends AbstractExecutionEntity implements StepExecution, Serializable {
     private static final long serialVersionUID = -8528930845788535109L;
 
     private long stepExecutionId;
 
     private String stepName;
-
-    private Serializable persistentUserData;
 
     private MetricEntity[] metrics;
 
@@ -38,7 +36,6 @@ public class StepExecutionEntity extends AbstractExecutionEntity implements Step
         super(stepExe.getStartTime(), stepExe.getEndTime(), stepExe.getBatchStatus(), stepExe.getExitStatus());
         this.stepExecutionId = stepExe.getStepExecutionId();
         this.stepName = stepExe.getStepName();
-        this.persistentUserData = stepExe.getPersistentUserData();
         this.metrics = MetricEntity.copyOf(stepExe.getMetrics());
     }
 
@@ -59,11 +56,7 @@ public class StepExecutionEntity extends AbstractExecutionEntity implements Step
     }
 
     public Serializable getPersistentUserData() {
-        return persistentUserData;
-    }
-
-    public void setPersistentUserData(final Serializable persistentUserData) {
-        this.persistentUserData = persistentUserData;
+        return null;
     }
 
     public MetricEntity[] getMetrics() {
