@@ -12,8 +12,11 @@ angular.module('jberetUI.details',
         });
     }])
 
-    .controller('DetailsCtrl', ['$scope', '$http', '$stateParams', '$location',
-        function ($scope, $http, $stateParams, $location) {
+    .controller('DetailsCtrl', ['$scope', '$http', '$stateParams', '$state', '$location',
+        function ($scope, $http, $stateParams, $state, $location) {
+            var urlCellTemp =
+'<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="stepexecution({stepExecutionId: COL_FIELD, stepExecutionEntity: row.entity, jobExecutionEntity: grid.appScope.jobExecutionEntity, jobExecutionId: grid.appScope.jobExecutionEntity.executionId})">{{COL_FIELD}}</a></div>';
+
             $scope.alerts = [];
 
             $scope.gridOptions = {
@@ -28,7 +31,7 @@ angular.module('jberetUI.details',
 
                 //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
                 columnDefs: [
-                    {name: 'stepExecutionId', type: 'number', headerTooltip: true},
+                    {name: 'stepExecutionId', type: 'number', cellTemplate: urlCellTemp, headerTooltip: true},
                     {name: 'stepName', cellTooltip: true, headerTooltip: true},
                     {name: 'persistentUserData', cellTooltip: true, headerTooltip: true},
                     {name: 'batchStatus', headerTooltip: true},
@@ -75,10 +78,7 @@ angular.module('jberetUI.details',
                 $scope.jobExecutionEntity = $stateParams.jobExecutionEntity;
                 handleJobExecutionEntity();
             } else {
-                var paths = $location.path().split('/');
-                var len = paths.length;
-                var idPart = len == 1 ? paths[0] : paths[len - 1].length == 0 ? paths[len - 2] : paths[len - 1];
-                getJobExecution(idPart);
+                getJobExecution(jberetui.getIdFromUrl($location.path(), '/jobexecutions/'));
             }
 
             $scope.stopJobExecution = function () {
@@ -156,6 +156,10 @@ angular.module('jberetUI.details',
                 var idToRefresh = $scope.jobExecutionEntity.executionId;
                 $scope.alerts.length = 0;  //clear alerts
                 getJobExecution(idToRefresh);
+            };
+
+            $scope.backToJobExecutions = function() {
+                $state.go('jobexecutions');
             };
 
             $scope.closeAlert = function (index) {

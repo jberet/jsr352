@@ -1,0 +1,55 @@
+<h4 style="text-align: center">Step Execution {{stepExecutionEntity.stepExecutionId}}</h4>
+<div class="btn-group pull-right" role="group">
+    <button type="button" class="btn btn-default " title="Back to Job Execution" ng-click="backToJobExecution()">
+        <span class="glyphicon glyphicon-backward" aria-hidden="true"></span> Back to Job Execution</button>
+
+    <button type="button" class="btn btn-default" title="Refresh Current Step Execution" ng-click="refreshStepExecution()">
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</button>
+</div>
+<br/><br/>
+<div>
+    <table style="width: 85%" title="Step Execution {{stepExecutionEntity.stepExecutionId}} Details">
+        <tr>
+            <td class="table-data-key-cell">Step Name:</td>
+            <td class="table-data-value-cell">{{stepExecutionEntity.stepName}}</td>
+            <td class="table-data-key-cell">Job Name:</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.jobName}}</td>
+        </tr>
+        <tr>
+            <td class="table-data-key-cell">Batch Status:</td>
+            <td class="table-data-value-cell" ng-class="getColor(stepExecutionEntity.batchStatus)">
+                <span ng-if="stepExecutionEntity.batchStatus == 'COMPLETED'" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                <span ng-if="stepExecutionEntity.batchStatus == 'FAILED'" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span ng-if="stepExecutionEntity.batchStatus == 'STOPPED'" class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+                <span ng-if="stepExecutionEntity.batchStatus == 'ABANDONED'" class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+                <span ng-if="stepExecutionEntity.batchStatus == 'STOPPING'" class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+                <span ng-if="stepExecutionEntity.batchStatus == 'STARTING'" class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
+                <span ng-if="stepExecutionEntity.batchStatus == 'STARTED'" class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                {{stepExecutionEntity.batchStatus}}</td>
+            <td class="table-data-key-cell">Exit Status:</td>
+            <td class="table-data-value-cell">{{stepExecutionEntity.exitStatus}}</td>
+        </tr>
+        <tr>
+            <td class="table-data-key-cell">Start Time:</td>
+            <td class="table-data-value-cell">{{stepExecutionEntity.startTime | date:'medium'}}</td>
+            <td class="table-data-key-cell">End Time:</td>
+            <td class="table-data-value-cell">{{stepExecutionEntity.endTime | date:'medium'}}</td>
+        </tr>
+        <tr>
+            <td class="table-data-key-cell">Persistent User Data:</td>
+            <td class="table-data-value-cell">{{stepExecutionEntity.persistentUserData}}</td>
+        </tr>
+
+        <tr>
+            <td class="table-data-key-cell">Metrics:</td>
+            <td class="table-data-value-cell">{{stepExecutionEntity.metrics}}</td>
+        </tr>
+    </table>
+
+</div>
+
+<div>
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
+       close="closeAlert($index)">{{alert.msg}}
+    </uib-alert>
+</div>

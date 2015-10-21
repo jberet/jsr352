@@ -1,5 +1,9 @@
 <h4 style="text-align: center">Job Execution {{jobExecutionEntity.executionId}}</h4>
 <div class="btn-group pull-right" role="group">
+    <button type="button" class="btn btn-default " title="Back to Job Executions"
+            ng-click="backToJobExecutions()">
+        <span class="glyphicon glyphicon-backward" aria-hidden="true"></span> Back to Job Executions</button>
+
     <button type="button" class="btn btn-default " title="Stop a Running Job Execution"
             ng-disabled="stopDisabled" ng-click="stopJobExecution()">
         <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Stop</button>
@@ -41,15 +45,15 @@
         </tr>
         <tr>
             <td class="table-data-key-cell">Create Time:</td>
-            <td class="table-data-value-cell">{{jobExecutionEntity.createTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.createTime | date:'medium'}}</td>
             <td class="table-data-key-cell">Start Time:</td>
-            <td class="table-data-value-cell">{{jobExecutionEntity.startTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.startTime | date:'medium'}}</td>
         </tr>
         <tr>
             <td class="table-data-key-cell">Updated Time:</td>
-            <td class="table-data-value-cell">{{jobExecutionEntity.lastUpdatedTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.lastUpdatedTime | date:'medium'}}</td>
             <td class="table-data-key-cell">End Time:</td>
-            <td class="table-data-value-cell">{{jobExecutionEntity.endTime | date:"yyyy-MM-dd HH:mm:ss"}}</td>
+            <td class="table-data-value-cell">{{jobExecutionEntity.endTime | date:'medium'}}</td>
         </tr>
     </table>
     <table style="table-layout: fixed; width: 85%">

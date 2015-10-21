@@ -2,7 +2,8 @@
 
 // Declare app level module which depends on views, and components
 angular.module('jberetUI',
-    ['ui.router', 'jberetUI.jobs', 'jberetUI.jobinstances', 'jberetUI.jobexecutions', 'jberetUI.details', 'jberetUI.version']).
+    ['ui.router', 'jberetUI.jobs', 'jberetUI.jobinstances', 'jberetUI.jobexecutions', 'jberetUI.details',
+        'jberetUI.stepexecution', 'jberetUI.version']).
 
     config(['$urlRouterProvider', function ($urlRouterProvider) {
             $urlRouterProvider.otherwise('/jobs');
@@ -28,6 +29,20 @@ var jberetui = {
             var pair = line.split('=');
             var key = pair[0].trim();
             result[key] = pair.length > 1 ? pair[1].trim() : '';
+        }
+        return result;
+    },
+
+    getIdFromUrl: function(url, tokenBeforeId) {
+        var result = null;
+        var tokenStartPos = url.lastIndexOf(tokenBeforeId);
+        if(tokenStartPos >= 0) {
+            var startOfId = tokenStartPos + tokenBeforeId.length;
+            var stopPos = url.indexOf('/', startOfId + 1);
+            if(stopPos < 0) {
+                stopPos = url.length;
+            }
+            result = url.substring(startOfId, stopPos);
         }
         return result;
     }
