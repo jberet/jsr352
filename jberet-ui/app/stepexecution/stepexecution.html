@@ -35,12 +35,18 @@
             <td class="table-data-key-cell">End Time:</td>
             <td class="table-data-value-cell">{{stepExecutionEntity.endTime | date:'medium'}}</td>
         </tr>
-        <tr>
-            <td class="table-data-key-cell">Metrics:</td>
-            <td class="table-data-value-cell">{{stepExecutionEntity.metrics}}</td>
-        </tr>
     </table>
+</div>
 
+<div id="step-metrics-chart" class="row-fluid">
+    <div class="span10">
+        <fs-bar
+                width="900"
+                height="175"
+                duration="150"
+                bind="chartData"
+                ></fs-bar>
+    </div>
 </div>
 
 <div>

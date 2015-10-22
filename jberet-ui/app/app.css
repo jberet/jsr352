@@ -39,3 +39,8 @@ label textarea{
 button {
   min-width: 11ch;
 }
+
+#step-metrics-chart {
+  margin-left: 5em;
+  margin-top: 2em;
+}

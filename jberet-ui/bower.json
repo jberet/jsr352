@@ -16,6 +16,8 @@
     "html5-boilerplate": "~5.2.0",
     "csv": "~1.0.2",
     "pdfmake": "~0.1.20",
-    "bootstrap": "~3.3.5"
+    "bootstrap": "~3.3.5",
+    "dangle": "*",
+    "d3": "~3.5.6"
   }
 }
