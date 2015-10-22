@@ -11,7 +11,7 @@ angular.module('jberetUI.jobexecutions',
         });
     }])
 
-    .controller('JobexecutionsCtrl', ['$scope', '$http', 'uiGridConstants', function ($scope, $http, uiGridConstants) {
+    .controller('JobexecutionsCtrl', ['$scope', '$http', function ($scope, $http) {
         var urlCellTemp =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: COL_FIELD, jobExecutionEntity: row.entity})">{{COL_FIELD}}</a></div>';
 
@@ -27,8 +27,7 @@ angular.module('jberetUI.jobexecutions',
 
             //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
             columnDefs: [
-                {name: 'executionId', type: 'number', cellTemplate: urlCellTemp, headerTooltip: true,
-                    sort: {direction: uiGridConstants.DESC}},
+                {name: 'executionId', type: 'number', cellTemplate: urlCellTemp, headerTooltip: true},
                 {name: 'jobInstanceId', type: 'number', headerTooltip: true},
                 {name: 'jobName', cellTooltip: true, headerTooltip: true},
                 {name: 'jobParameters', cellTooltip: true, headerTooltip: true},

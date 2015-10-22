@@ -12,7 +12,6 @@
 
 package org.jberet.rest.resource;
 
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -49,10 +48,10 @@ public class JobInstanceResource {
         if (count < 0) {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("count", String.valueOf(count));
         }
-        final List<JobInstanceEntity> jobInstanceData =
+        final JobInstanceEntity[] jobInstanceData =
                 JobService.getInstance().getJobInstances(jobName == null ? "*" : jobName, start,
                         count == 0 ? Integer.MAX_VALUE : count);
-        return Response.ok(jobInstanceData.toArray(new JobInstanceEntity[jobInstanceData.size()])).build();
+        return Response.ok(jobInstanceData).build();
     }
 
     @Path("/count")

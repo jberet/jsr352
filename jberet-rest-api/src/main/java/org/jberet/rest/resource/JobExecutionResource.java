@@ -12,7 +12,6 @@
 
 package org.jberet.rest.resource;
 
-import java.util.List;
 import java.util.Properties;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -46,9 +45,7 @@ public class JobExecutionResource {
     @GET
     public JobExecutionEntity[] getRunningExecutions(final @QueryParam("jobName") String jobName,
                                                      final @Context UriInfo uriInfo) {
-        final List<JobExecutionEntity> runningExecutions = JobService.getInstance().getRunningExecutions(jobName);
-        final JobExecutionEntity[] jobExecutionEntities =
-                runningExecutions.toArray(new JobExecutionEntity[runningExecutions.size()]);
+        final JobExecutionEntity[] jobExecutionEntities = JobService.getInstance().getRunningExecutions(jobName);
         setJobExecutionEntityHref(uriInfo, jobExecutionEntities);
         return jobExecutionEntities;
     }
@@ -88,15 +85,14 @@ public class JobExecutionResource {
     @GET
     @Path("{jobExecutionId}/stepexecutions")
     public StepExecutionEntity[] getStepExecutions(final @PathParam("jobExecutionId") long jobExecutionId) {
-        final List<StepExecutionEntity> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
-        return stepExecutionData.toArray(new StepExecutionEntity[stepExecutionData.size()]);
+        return JobService.getInstance().getStepExecutions(jobExecutionId);
     }
 
     @GET
     @Path("{jobExecutionId}/stepexecutions/{stepExecutionId}")
     public StepExecutionEntity getStepExecution(final @PathParam("jobExecutionId") long jobExecutionId,
                                                 final @PathParam("stepExecutionId") long stepExecutionId) {
-        final List<StepExecutionEntity> stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
+        final StepExecutionEntity[] stepExecutionData = JobService.getInstance().getStepExecutions(jobExecutionId);
         for (final StepExecutionEntity e : stepExecutionData) {
             if (e.getStepExecutionId() == stepExecutionId) {
                 return e;

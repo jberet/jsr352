@@ -12,7 +12,6 @@
 
 package org.jberet.rest.resource;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -71,12 +70,15 @@ final class JobService {
         return result;
     }
 
-    List<JobInstanceEntity> getJobInstances(final String jobName, final int start, final int count)
+    JobInstanceEntity[] getJobInstances(final String jobName, final int start, final int count)
             throws NoSuchJobException, JobSecurityException {
         final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, start, count);
-        final List<JobInstanceEntity> jobInstanceData = new ArrayList<JobInstanceEntity>();
-        for (final JobInstance e : jobInstances) {
-            jobInstanceData.add(new JobInstanceEntity(e, jobOperator.getJobExecutions(e)));
+        final int len = jobInstances.size();
+
+        final JobInstanceEntity[] jobInstanceData = new JobInstanceEntity[len];
+        for (int i = 0; i < len; i++) {
+            final JobInstance e = jobInstances.get(i);
+            jobInstanceData[i] = new JobInstanceEntity(e, jobOperator.getJobExecutions(e));
         }
         return jobInstanceData;
     }
@@ -99,10 +101,11 @@ final class JobService {
             throws NoSuchJobInstanceException, JobSecurityException {
         //pass null JobInstance to get ALL job executions
         final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(null);
-        final JobExecutionEntity[] jobExecutionEntities = new JobExecutionEntity[jobExecutions.size()];
-        for (int i = 0; i < jobExecutionEntities.length; i++) {
+        final int len = jobExecutions.size();
+        final JobExecutionEntity[] jobExecutionEntities = new JobExecutionEntity[len];
+        for (int i = len - 1; i >= 0; i--) {
             final JobExecution e = jobExecutions.get(i);
-            jobExecutionEntities[i] = new JobExecutionEntity(e,
+            jobExecutionEntities[len - 1 - i] = new JobExecutionEntity(e,
                     jobOperator.getJobInstance(e.getExecutionId()).getInstanceId());
         }
         return jobExecutionEntities;
@@ -126,21 +129,26 @@ final class JobService {
                 jobOperator.getJobInstance(restartExecutionId).getInstanceId());
     }
 
-    List<JobExecutionEntity> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
+    JobExecutionEntity[] getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
         final List<Long> executionIds = jobOperator.getRunningExecutions(jobName);
-        List<JobExecutionEntity> runningExecutions = new ArrayList<JobExecutionEntity>();
-        for (final Long e : executionIds) {
-            runningExecutions.add(new JobExecutionEntity(jobOperator.getJobExecution(e),
-                    jobOperator.getJobInstance(e).getInstanceId()));
+        final int len = executionIds.size();
+        JobExecutionEntity[] runningExecutions = new JobExecutionEntity[len];
+
+        for (int i = len - 1; i >= 0; i--) {
+            final long e = executionIds.get(i);
+            runningExecutions[len - 1 - i] = new JobExecutionEntity(jobOperator.getJobExecution(e),
+                    jobOperator.getJobInstance(e).getInstanceId());
         }
         return runningExecutions;
     }
 
-    List<StepExecutionEntity> getStepExecutions(final long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
+    StepExecutionEntity[] getStepExecutions(final long jobExecutionId) throws NoSuchJobExecutionException, JobSecurityException {
         final List<StepExecution> stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
-        final List<StepExecutionEntity> stepExecutionData = new ArrayList<StepExecutionEntity>();
-        for (final StepExecution e : stepExecutions) {
-            stepExecutionData.add(new StepExecutionEntity(e));
+        final int len = stepExecutions.size();
+        final StepExecutionEntity[] stepExecutionData = new StepExecutionEntity[len];
+
+        for (int i = 0; i < len; i++) {
+            stepExecutionData[i] = new StepExecutionEntity(stepExecutions.get(i));
         }
         return stepExecutionData;
     }

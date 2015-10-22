@@ -27,6 +27,11 @@ public class StepExecutionEntity extends AbstractExecutionEntity implements Step
 
     private String stepName;
 
+    //unused property, kept here to satisfy Jackson mapping.  Otherwise will get error:
+    //UnrecognizedPropertyException: Unrecognized field "persistentUserData"
+    //we don't want to annotate Jackson-specific annotations either (@JsonIgnoreProperties(ignoreUnknown = true)
+    private Serializable persistentUserData;
+
     private MetricEntity[] metrics;
 
     public StepExecutionEntity() {

@@ -52,9 +52,11 @@ public final class JobExecutionEntity extends AbstractExecutionEntity implements
     }
 
     public static JobExecutionEntity[] fromJobExecutions(final List<JobExecution> jobExecutions, final long instanceId) {
-        JobExecutionEntity[] result = new JobExecutionEntity[jobExecutions.size()];
-        for (int i = 0, j = jobExecutions.size(); i < j; i++) {
-            result[i] = new JobExecutionEntity(jobExecutions.get(i), instanceId);
+        final int len = jobExecutions.size();
+        JobExecutionEntity[] result = new JobExecutionEntity[len];
+
+        for (int i = len - 1; i >= 0; i--) {
+            result[len - 1 - i] = new JobExecutionEntity(jobExecutions.get(i), instanceId);
         }
         return result;
     }
