@@ -17,8 +17,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.jberet.rest._private.RestAPIMessages;
 import org.jberet.rest.entity.JobInstanceEntity;
@@ -32,9 +34,11 @@ public class JobInstanceResource {
     public Response getJobInstances(final @QueryParam("jobName") String jobName,
                                     final @QueryParam("start") int start,
                                     final @QueryParam("count") int count,
-                                    final @QueryParam("jobExecutionId") long jobExecutionId) {
+                                    final @QueryParam("jobExecutionId") long jobExecutionId,
+                                    final @Context UriInfo uriInfo) {
         if (jobExecutionId > 0) {
             final JobInstanceEntity jobInstanceData = JobService.getInstance().getJobInstance(jobExecutionId);
+            JobExecutionResource.setJobExecutionEntityHref(uriInfo, jobInstanceData.getJobExecutions());
             return Response.ok(jobInstanceData).build();
         } else if (jobExecutionId < 0) {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("jobExecutionId", String.valueOf(jobExecutionId));
@@ -51,6 +55,11 @@ public class JobInstanceResource {
         final JobInstanceEntity[] jobInstanceData =
                 JobService.getInstance().getJobInstances(jobName == null ? "*" : jobName, start,
                         count == 0 ? Integer.MAX_VALUE : count);
+
+        for (final JobInstanceEntity e : jobInstanceData) {
+            JobExecutionResource.setJobExecutionEntityHref(uriInfo, e.getJobExecutions());
+        }
+
         return Response.ok(jobInstanceData).build();
     }
 

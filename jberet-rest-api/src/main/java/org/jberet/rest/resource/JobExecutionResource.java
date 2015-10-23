@@ -101,7 +101,7 @@ public class JobExecutionResource {
         throw RestAPIMessages.MESSAGES.notFoundException("stepExecutionId", String.valueOf(stepExecutionId));
     }
 
-    private static void setJobExecutionEntityHref(final UriInfo uriInfo, final JobExecutionEntity... entities) {
+    static void setJobExecutionEntityHref(final UriInfo uriInfo, final JobExecutionEntity... entities) {
         final UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path(JobExecutionResource.class);
         for (final JobExecutionEntity e : entities) {
             e.setHref(uriBuilder.clone().path(String.valueOf(e.getExecutionId())).build().toString());

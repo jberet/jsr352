@@ -12,6 +12,9 @@ angular.module('jberetUI.jobs',
     }])
 
     .controller('JobsCtrl', ['$scope', '$http', function ($scope, $http) {
+        var urlCellTemp =
+            '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobinstances({jobName: row.entity.jobName})">{{COL_FIELD}}</a></div>';
+
         $scope.alerts = [];
         $scope.gridOptions = {
             enableGridMenu: true,
@@ -23,7 +26,7 @@ angular.module('jberetUI.jobs',
             minRowsToShow: 8,
             columnDefs: [
                 {name: 'jobName'},
-                {name: 'numberOfJobInstances', type: 'number'},
+                {name: 'numberOfJobInstances', type: 'number', cellTemplate: urlCellTemp},
                 {name: 'numberOfRunningJobExecutions', type: 'number'}
             ]
         };

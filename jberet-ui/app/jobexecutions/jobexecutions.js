@@ -7,11 +7,14 @@ angular.module('jberetUI.jobexecutions',
         $stateProvider.state('jobexecutions', {
             url: '/jobexecutions',
             templateUrl: 'jobexecutions/jobexecutions.html',
-            controller: 'JobexecutionsCtrl'
+            controller: 'JobexecutionsCtrl',
+            params: {
+                jobExecutionEntities: null
+            }
         });
     }])
 
-    .controller('JobexecutionsCtrl', ['$scope', '$http', function ($scope, $http) {
+    .controller('JobexecutionsCtrl', ['$scope', '$http', '$stateParams', function ($scope, $http, $stateParams) {
         var urlCellTemp =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: COL_FIELD, jobExecutionEntity: row.entity})">{{COL_FIELD}}</a></div>';
 
@@ -44,10 +47,14 @@ angular.module('jberetUI.jobexecutions',
             ]
         };
 
-        $http.get('http://localhost:8080/restAPI/api/jobexecutions')
-            .then(function (responseData) {
-                $scope.gridOptions.data = responseData.data;
-            }, function (responseData) {
-                console.log(responseData);
-            });
+        if($stateParams.jobExecutionEntities) {
+            $scope.gridOptions.data = $stateParams.jobExecutionEntities;
+        } else {
+            $http.get('http://localhost:8080/restAPI/api/jobexecutions')
+                .then(function (responseData) {
+                    $scope.gridOptions.data = responseData.data;
+                }, function (responseData) {
+                    console.log(responseData);
+                });
+        }
     }]);
