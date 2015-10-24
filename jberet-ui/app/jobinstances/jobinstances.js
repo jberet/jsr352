@@ -42,6 +42,8 @@ angular.module('jberetUI.jobinstances',
                 jobInstancesUrl = 'http://localhost:8080/restAPI/api/jobinstances';
             }
 
+            $scope.pageTitle = $stateParams.jobName ? 'Job Instances for Job ' + $stateParams.jobName : 'Job Instances';
+
             $http.get(jobInstancesUrl)
                 .then(function (responseData) {
                     $scope.gridOptions.data = responseData.data;

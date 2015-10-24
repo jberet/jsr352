@@ -18,6 +18,14 @@ angular.module('jberetUI.jobs',
         var jobExecutionsLinkCell =
             '<div class="ngCellText" ng-class="col.colIndex()"><a ng-class="grid.appScope.getLinkActiveClass(COL_FIELD)" ui-sref="jobexecutions({jobName: row.entity.jobName, running: true})">{{COL_FIELD}}</a></div>';
 
+        var getJobRecentJobs = function() {
+            $http.get('http://localhost:8080/restAPI/api/jobs/').then(function (responseData) {
+                $scope.gridOptions.data = responseData.data;
+            }, function (responseData) {
+                console.log(responseData);
+            });
+        };
+
         $scope.alerts = [];
         $scope.gridOptions = {
             enableGridMenu: true,
@@ -34,11 +42,7 @@ angular.module('jberetUI.jobs',
             ]
         };
 
-        $http.get('http://localhost:8080/restAPI/api/jobs/').then(function (responseData) {
-            $scope.gridOptions.data = responseData.data;
-        }, function (responseData) {
-            console.log(responseData);
-        });
+        getJobRecentJobs();
 
         $scope.startJob = function () {
             $scope.alerts.length = 0; //clear alerts
@@ -48,12 +52,18 @@ angular.module('jberetUI.jobs',
                 $http.post('http://localhost:8080/restAPI/api/jobs/' + $scope.jobName + '/start', jobParams).then(function (responseData) {
                     $scope.jobExecutionEntity = responseData.data;
                     $scope.stateTransitionParams = {jobExecutionId: $scope.jobExecutionEntity.executionId,
-                                                jobExecutionEntity: $scope.jobExecutionEntity};
+                                                jobExecutionEntity: $scope.jobExecutionEntity,
+                                                jobName: $scope.jobName,
+                                                jobInstanceId: $scope.jobExecutionEntity.jobInstanceId,
+                                                jobExecutionId1: $scope.jobExecutionEntity.executionId
+                    };
                     $scope.alerts.push({
                         type: 'success',
                         msg: 'Started job: ' + $scope.jobName +
                         (jobParams == null ? '.' : ', with parameters: ' + JSON.stringify(jobParams) + '.')
                     });
+
+                    getJobRecentJobs();
                     $scope.jobName = '';
                     $scope.jobParameters = '';
                 }, function (responseData) {

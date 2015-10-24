@@ -105,7 +105,8 @@ angular.module('jberetUI.stepexecution',
             $scope.backToJobExecution = function() {
                 var jobExecutionId = $scope.jobExecutionEntity ? $scope.jobExecutionEntity.executionId :
                     jberetui.getIdFromUrl($location.path(), '/jobexecutions/');
-                $state.go('details', {
+                var transitionParams = $stateParams.jobTrace ?
+                {
                     jobExecutionId: jobExecutionId,
                     jobExecutionEntity : $scope.jobExecutionEntity,
 
@@ -113,7 +114,11 @@ angular.module('jberetUI.stepexecution',
                     jobInstanceId: $stateParams.jobTrace.jobInstanceId,
                     jobExecutionId1: $stateParams.jobTrace.jobExecutionId1,
                     running: $stateParams.jobTrace.running
-                });
+                } : {
+                    jobExecutionId: jobExecutionId,
+                    jobExecutionEntity : $scope.jobExecutionEntity
+                };
+                $state.go('details', transitionParams);
             };
 
             $scope.closeAlert = function (index) {

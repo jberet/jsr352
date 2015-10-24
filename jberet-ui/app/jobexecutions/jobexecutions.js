@@ -15,6 +15,7 @@ angular.module('jberetUI.jobexecutions',
         var detailsLinkCell =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: COL_FIELD, jobExecutionEntity: row.entity, jobName: grid.appScope.jobTrace.jobName, jobInstanceId: grid.appScope.jobTrace.jobInstanceId, jobExecutionId1: grid.appScope.jobTrace.jobExecutionId1, running: grid.appScope.jobTrace.running})">{{COL_FIELD}}</a></div>';
 
+        //save job trace info to $scope for future state transition use
         $scope.jobTrace = {
             jobName: $stateParams.jobName,
             jobInstanceId: $stateParams.jobInstanceId,
@@ -62,8 +63,10 @@ angular.module('jberetUI.jobexecutions',
             return url;
         };
 
-        //save job trace info to $scope for future state transition use
-
+        //set pageTitle depending on query params
+        $scope.pageTitle = $stateParams.jobInstanceId && $stateParams.jobExecutionId1 ? 'Job Executions in Job Instance ' + $stateParams.jobInstanceId :
+                            $stateParams.running && $stateParams.jobName ? 'Running Job Executions for Job ' + $stateParams.jobName :
+                                'Job Executions';
 
         $http.get(getJobInstancesUrl($stateParams))
             .then(function (responseData) {

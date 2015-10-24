@@ -124,7 +124,11 @@ angular.module('jberetUI.details',
                             $scope.restartJobExecutionEntity = responseData.data;
                             $scope.restartDisabled = true;
                             $scope.stateTransitionParams = {jobExecutionId: $scope.restartJobExecutionEntity.executionId,
-                                                            jobExecutionEntity: $scope.restartJobExecutionEntity};
+                                                            jobExecutionEntity: $scope.restartJobExecutionEntity,
+                                                            jobName: $scope.restartJobExecutionEntity.jobName,
+                                                            jobInstanceId: $scope.restartJobExecutionEntity.jobInstanceId,
+                                                            jobExecutionId1: $scope.restartJobExecutionEntity.executionId
+                            };
                             $scope.alerts.push({
                                 type: 'success',
                                 msg: 'Restarted job execution ' + idToRestart +
