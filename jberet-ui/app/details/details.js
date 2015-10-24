@@ -8,16 +8,28 @@ angular.module('jberetUI.details',
             url: '/jobexecutions/:jobExecutionId',
             templateUrl: 'details/details.html',
             controller: 'DetailsCtrl',
-            params: {jobExecutionEntity: null}
+            params: {
+                jobExecutionEntity: null,
+                jobName: null,
+                jobInstanceId: null,
+                jobExecutionId1: null,
+                running: null
+            }
         });
     }])
 
     .controller('DetailsCtrl', ['$scope', '$http', '$stateParams', '$state', '$location',
         function ($scope, $http, $stateParams, $state, $location) {
-            var urlCellTemp =
-'<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="stepexecution({stepExecutionId: COL_FIELD, stepExecutionEntity: row.entity, jobExecutionEntity: grid.appScope.jobExecutionEntity, jobExecutionId: grid.appScope.jobExecutionEntity.executionId})">{{COL_FIELD}}</a></div>';
+            var stepExecutionLinkCell =
+'<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="stepexecution({stepExecutionId: COL_FIELD, stepExecutionEntity: row.entity, jobExecutionEntity: grid.appScope.jobExecutionEntity, jobExecutionId: grid.appScope.jobExecutionEntity.executionId, jobTrace: grid.appScope.jobTrace})">{{COL_FIELD}}</a></div>';
 
             $scope.alerts = [];
+            $scope.jobTrace = $stateParams.jobTrace || {
+                jobName: $stateParams.jobName,
+                jobInstanceId: $stateParams.jobInstanceId,
+                jobExecutionId1: $stateParams.jobExecutionId1,
+                running: $stateParams.running
+            };
 
             $scope.gridOptions = {
                 enableGridMenu: true,
@@ -31,7 +43,7 @@ angular.module('jberetUI.details',
 
                 //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
                 columnDefs: [
-                    {name: 'stepExecutionId', type: 'number', cellTemplate: urlCellTemp, headerTooltip: true},
+                    {name: 'stepExecutionId', type: 'number', cellTemplate: stepExecutionLinkCell, headerTooltip: true},
                     {name: 'stepName', cellTooltip: true, headerTooltip: true},
                     {name: 'batchStatus', headerTooltip: true},
                     {name: 'exitStatus', cellTooltip: true, headerTooltip: true},
@@ -158,7 +170,12 @@ angular.module('jberetUI.details',
             };
 
             $scope.backToJobExecutions = function() {
-                $state.go('jobexecutions');
+                $state.go('jobexecutions', {
+                    jobName: $scope.jobTrace.jobName,
+                    jobInstanceId: $scope.jobTrace.jobInstanceId,
+                    jobExecutionId1: $scope.jobTrace.jobExecutionId1,
+                    running: $scope.jobTrace.running
+                });
             };
 
             $scope.closeAlert = function (index) {

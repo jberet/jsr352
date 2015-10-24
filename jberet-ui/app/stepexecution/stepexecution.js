@@ -9,7 +9,9 @@ angular.module('jberetUI.stepexecution',
             templateUrl: 'stepexecution/stepexecution.html',
             controller: 'StepExecutionCtrl',
             params: {stepExecutionEntity: null,
-                    jobExecutionEntity: null}
+                    jobExecutionEntity: null,
+                    jobTrace: null
+            }
         });
     }])
 
@@ -105,7 +107,12 @@ angular.module('jberetUI.stepexecution',
                     jberetui.getIdFromUrl($location.path(), '/jobexecutions/');
                 $state.go('details', {
                     jobExecutionId: jobExecutionId,
-                    jobExecutionEntity : $scope.jobExecutionEntity
+                    jobExecutionEntity : $scope.jobExecutionEntity,
+
+                    jobName: $stateParams.jobTrace.jobName,
+                    jobInstanceId: $stateParams.jobTrace.jobInstanceId,
+                    jobExecutionId1: $stateParams.jobTrace.jobExecutionId1,
+                    running: $stateParams.jobTrace.running
                 });
             };
 

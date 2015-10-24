@@ -13,8 +13,11 @@ angular.module('jberetUI.jobinstances',
 
     .controller('JobInstancesCtrl', ['$scope', '$http', '$stateParams',
         function ($scope, $http, $stateParams) {
-            var urlCellTemp =
-                '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobexecutions({jobExecutionEntities: row.entity.jobExecutions})">{{COL_FIELD}}</a></div>';
+            var jobExecutionsLinkCell =
+                '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobexecutions({jobName: row.entity.jobName, jobInstanceId: row.entity.instanceId, jobExecutionId1: row.entity.latestJobExecutionId})">{{COL_FIELD}}</a></div>';
+
+            var detailsLinkCell =
+                '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: row.entity.latestJobExecutionId, jobName: row.entity.jobName, jobInstanceId: row.entity.instanceId, jobExecutionId1: row.entity.latestJobExecutionId})">{{COL_FIELD}}</a></div>';
 
             $scope.gridOptions = {
                 enableGridMenu: true,
@@ -27,13 +30,18 @@ angular.module('jberetUI.jobinstances',
                 columnDefs: [
                     {name: 'instanceId', type: 'number'},
                     {name: 'jobName'},
-                    {name: 'numberOfJobExecutions', type: 'number', cellTemplate: urlCellTemp}
+                    {name: 'numberOfJobExecutions', type: 'number', cellTemplate: jobExecutionsLinkCell},
+                    {name: 'latestJobExecutionId', type: 'number', cellTemplate: detailsLinkCell}
                 ]
             };
 
-            var jobInstancesUrl = $stateParams.jobName ?
-            'http://localhost:8080/restAPI/api/jobinstances?jobName=' + $stateParams.jobName :
-                'http://localhost:8080/restAPI/api/jobinstances';
+            var jobInstancesUrl = null;
+            if($stateParams.jobName) {
+                jobInstancesUrl = 'http://localhost:8080/restAPI/api/jobinstances?jobName=' + $stateParams.jobName;
+            } else {
+                jobInstancesUrl = 'http://localhost:8080/restAPI/api/jobinstances';
+            }
+
             $http.get(jobInstancesUrl)
                 .then(function (responseData) {
                     $scope.gridOptions.data = responseData.data;

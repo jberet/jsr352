@@ -44,3 +44,9 @@ button {
   margin-left: 5em;
   margin-top: 2em;
 }
+
+.not-active {
+  pointer-events: none;
+  cursor: default;
+}
+

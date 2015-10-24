@@ -5,18 +5,22 @@ angular.module('jberetUI.jobexecutions',
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('jobexecutions', {
-            url: '/jobexecutions',
+            url: '/jobexecutions?jobName&running&jobExecutionId1&jobInstanceId',
             templateUrl: 'jobexecutions/jobexecutions.html',
-            controller: 'JobexecutionsCtrl',
-            params: {
-                jobExecutionEntities: null
-            }
+            controller: 'JobexecutionsCtrl'
         });
     }])
 
-    .controller('JobexecutionsCtrl', ['$scope', '$http', '$stateParams', function ($scope, $http, $stateParams) {
-        var urlCellTemp =
-'<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: COL_FIELD, jobExecutionEntity: row.entity})">{{COL_FIELD}}</a></div>';
+    .controller('JobexecutionsCtrl', ['$scope', '$http', '$state', '$stateParams', function ($scope, $http, $state, $stateParams) {
+        var detailsLinkCell =
+'<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: COL_FIELD, jobExecutionEntity: row.entity, jobName: grid.appScope.jobTrace.jobName, jobInstanceId: grid.appScope.jobTrace.jobInstanceId, jobExecutionId1: grid.appScope.jobTrace.jobExecutionId1, running: grid.appScope.jobTrace.running})">{{COL_FIELD}}</a></div>';
+
+        $scope.jobTrace = {
+            jobName: $stateParams.jobName,
+            jobInstanceId: $stateParams.jobInstanceId,
+            jobExecutionId1: $stateParams.jobExecutionId1,
+            running: $stateParams.running
+        };
 
         $scope.gridOptions = {
             enableGridMenu: true,
@@ -30,7 +34,7 @@ angular.module('jberetUI.jobexecutions',
 
             //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
             columnDefs: [
-                {name: 'executionId', type: 'number', cellTemplate: urlCellTemp, headerTooltip: true},
+                {name: 'executionId', type: 'number', cellTemplate: detailsLinkCell, headerTooltip: true},
                 {name: 'jobInstanceId', type: 'number', headerTooltip: true},
                 {name: 'jobName', cellTooltip: true, headerTooltip: true},
                 {name: 'jobParameters', cellTooltip: true, headerTooltip: true},
@@ -47,14 +51,30 @@ angular.module('jberetUI.jobexecutions',
             ]
         };
 
-        if($stateParams.jobExecutionEntities) {
-            $scope.gridOptions.data = $stateParams.jobExecutionEntities;
-        } else {
-            $http.get('http://localhost:8080/restAPI/api/jobexecutions')
-                .then(function (responseData) {
-                    $scope.gridOptions.data = responseData.data;
-                }, function (responseData) {
-                    console.log(responseData);
-                });
-        }
+        var getJobInstancesUrl = function (params) {
+            var url = 'http://localhost:8080/restAPI/api/jobexecutions';
+            if(params.running && params.jobName) {
+                url = url + '/running?jobName=' + params.jobName;
+            } else if(params.jobExecutionId1) {
+                url = url + '?jobExecutionId1=' + params.jobExecutionId1 + '&jobInstanceId=' +
+                    (params.jobInstanceId ? params.jobInstanceId : 0);
+            }
+            return url;
+        };
+
+        //save job trace info to $scope for future state transition use
+
+
+        $http.get(getJobInstancesUrl($stateParams))
+            .then(function (responseData) {
+                $scope.gridOptions.data = responseData.data;
+            }, function (responseData) {
+                console.log(responseData);
+            });
+
+        $scope.backToJobInstances = function () {
+            $state.go('jobinstances', {
+                jobName: $scope.jobTrace.jobName
+            });
+        };
     }]);

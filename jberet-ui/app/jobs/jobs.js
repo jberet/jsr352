@@ -12,8 +12,11 @@ angular.module('jberetUI.jobs',
     }])
 
     .controller('JobsCtrl', ['$scope', '$http', function ($scope, $http) {
-        var urlCellTemp =
+        var jobInstancesLinkCell =
             '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobinstances({jobName: row.entity.jobName})">{{COL_FIELD}}</a></div>';
+
+        var jobExecutionsLinkCell =
+            '<div class="ngCellText" ng-class="col.colIndex()"><a ng-class="grid.appScope.getLinkActiveClass(COL_FIELD)" ui-sref="jobexecutions({jobName: row.entity.jobName, running: true})">{{COL_FIELD}}</a></div>';
 
         $scope.alerts = [];
         $scope.gridOptions = {
@@ -26,8 +29,8 @@ angular.module('jberetUI.jobs',
             minRowsToShow: 8,
             columnDefs: [
                 {name: 'jobName'},
-                {name: 'numberOfJobInstances', type: 'number', cellTemplate: urlCellTemp},
-                {name: 'numberOfRunningJobExecutions', type: 'number'}
+                {name: 'numberOfJobInstances', type: 'number', cellTemplate: jobInstancesLinkCell},
+                {name: 'numberOfRunningJobExecutions', type: 'number', cellTemplate: jobExecutionsLinkCell}
             ]
         };
 
@@ -36,7 +39,6 @@ angular.module('jberetUI.jobs',
         }, function (responseData) {
             console.log(responseData);
         });
-
 
         $scope.startJob = function () {
             $scope.alerts.length = 0; //clear alerts
@@ -70,5 +72,9 @@ angular.module('jberetUI.jobs',
 
         $scope.closeAlert = function (index) {
             $scope.alerts.splice(index, 1);
+        };
+
+        $scope.getLinkActiveClass = function(value) {
+            return value > 0 ? '' : 'not-active';
         };
     }]);
