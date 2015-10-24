@@ -20,14 +20,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
-@XmlType(propOrder = "instanceId, jobName, jobExecutions")
+@XmlType(propOrder = "instanceId, jobName, jobExecutions, latestJobExecutionId")
 public final class JobInstanceEntity implements JobInstance, Serializable {
     private static final long serialVersionUID = 2427272964201557394L;
 
     private long instanceId;
     private String jobName;
-    private JobExecutionEntity[] jobExecutions;
     private int numberOfJobExecutions;
+    private long latestJobExecutionId;
 
     public JobInstanceEntity() {
     }
@@ -35,8 +35,10 @@ public final class JobInstanceEntity implements JobInstance, Serializable {
     public JobInstanceEntity(final JobInstance jobInstance, final List<JobExecution> jobExecutions) {
         this.instanceId = jobInstance.getInstanceId();
         this.jobName = jobInstance.getJobName();
-        this.jobExecutions = JobExecutionEntity.fromJobExecutions(jobExecutions, this.instanceId);
-        this.numberOfJobExecutions = this.jobExecutions.length;
+        this.numberOfJobExecutions = jobExecutions.size();
+        if (this.numberOfJobExecutions > 0) {
+            this.latestJobExecutionId = jobExecutions.get(this.numberOfJobExecutions - 1).getExecutionId();
+        }
     }
 
     public long getInstanceId() {
@@ -51,7 +53,7 @@ public final class JobInstanceEntity implements JobInstance, Serializable {
         return numberOfJobExecutions;
     }
 
-    public JobExecutionEntity[] getJobExecutions() {
-        return jobExecutions;
+    public long getLatestJobExecutionId() {
+        return latestJobExecutionId;
     }
 }

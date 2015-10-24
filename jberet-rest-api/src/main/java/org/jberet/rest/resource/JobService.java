@@ -97,10 +97,15 @@ final class JobService {
         return new JobExecutionEntity(jobExecution, jobOperator.getJobInstance(jobExecutionId).getInstanceId());
     }
 
-    public JobExecutionEntity[] getJobExecutions()
+    public JobExecutionEntity[] getJobExecutions(final long jobInstanceId, final long jobExecutionId1)
             throws NoSuchJobInstanceException, JobSecurityException {
         //pass null JobInstance to get ALL job executions
-        final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(null);
+        JobInstance jobInstance = null;
+        if (jobExecutionId1 > 0) {
+            jobInstance = jobOperator.getJobInstance(jobExecutionId1);
+        }
+
+        final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
         final int len = jobExecutions.size();
         final JobExecutionEntity[] jobExecutionEntities = new JobExecutionEntity[len];
         for (int i = len - 1; i >= 0; i--) {

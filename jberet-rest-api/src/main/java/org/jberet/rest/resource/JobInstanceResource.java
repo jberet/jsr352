@@ -38,7 +38,6 @@ public class JobInstanceResource {
                                     final @Context UriInfo uriInfo) {
         if (jobExecutionId > 0) {
             final JobInstanceEntity jobInstanceData = JobService.getInstance().getJobInstance(jobExecutionId);
-            JobExecutionResource.setJobExecutionEntityHref(uriInfo, jobInstanceData.getJobExecutions());
             return Response.ok(jobInstanceData).build();
         } else if (jobExecutionId < 0) {
             throw RestAPIMessages.MESSAGES.invalidQueryParamValue("jobExecutionId", String.valueOf(jobExecutionId));
@@ -55,10 +54,6 @@ public class JobInstanceResource {
         final JobInstanceEntity[] jobInstanceData =
                 JobService.getInstance().getJobInstances(jobName == null ? "*" : jobName, start,
                         count == 0 ? Integer.MAX_VALUE : count);
-
-        for (final JobInstanceEntity e : jobInstanceData) {
-            JobExecutionResource.setJobExecutionEntityHref(uriInfo, e.getJobExecutions());
-        }
 
         return Response.ok(jobInstanceData).build();
     }
