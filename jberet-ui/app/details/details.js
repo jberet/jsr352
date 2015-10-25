@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('jberetUI.details',
-    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'modal-module'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('details', {
@@ -18,8 +18,8 @@ angular.module('jberetUI.details',
         });
     }])
 
-    .controller('DetailsCtrl', ['$scope', '$http', '$stateParams', '$state', '$location',
-        function ($scope, $http, $stateParams, $state, $location) {
+    .controller('DetailsCtrl', ['$scope', '$http', '$stateParams', '$state', '$location', 'modalService',
+        function ($scope, $http, $stateParams, $state, $location, modalService) {
             var stepExecutionLinkCell =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="stepexecution({stepExecutionId: COL_FIELD, stepExecutionEntity: row.entity, jobExecutionEntity: grid.appScope.jobExecutionEntity, jobExecutionId: grid.appScope.jobExecutionEntity.executionId, jobTrace: grid.appScope.jobTrace})">{{COL_FIELD}}</a></div>';
 
@@ -95,85 +95,110 @@ angular.module('jberetUI.details',
             $scope.stopJobExecution = function () {
                 var idToStop = $scope.jobExecutionEntity.executionId;
                 $scope.alerts.length = 0; //clear alerts
-                if (confirm('Really stop job execution ' + idToStop + '?')) {
-                    $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToStop + '/stop', null)
-                        .then(function () {
-                            $scope.jobExecutionEntity.batchStatus = 'STOPPING';
-                            $scope.alerts.push({
-                                type: 'success',
-                                msg: 'Submitted stop request for job execution ' + idToStop
+
+                var modalOptions = {
+                    bodyText: 'Stop job execution ' + idToStop + '?',
+                    actionButtonText: 'Stop Job Execution'
+                };
+
+                modalService.showModal({}, modalOptions).then(function (result) {
+                    if (result) {
+                        $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToStop + '/stop', null)
+                            .then(function () {
+                                $scope.jobExecutionEntity.batchStatus = 'STOPPING';
+                                $scope.alerts.push({
+                                    type: 'success',
+                                    msg: 'Submitted stop request for job execution ' + idToStop
+                                });
+                            }, function (responseData) {
+                                console.log(responseData);
+                                $scope.alerts.push({
+                                    type: 'danger',
+                                    msg: 'Failed to stop job execution ' + idToStop
+                                });
                             });
-                        }, function (responseData) {
-                            console.log(responseData);
-                            $scope.alerts.push({
-                                type: 'danger',
-                                msg: 'Failed to stop job execution ' + idToStop
-                            });
-                        });
-                }
+                    }
+                });
             };
 
             $scope.restartJobExecution = function () {
                 var idToRestart = $scope.jobExecutionEntity.executionId;
                 $scope.alerts.length = 0; //clear alerts
                 $scope.stateTransitionParams = null;
-                if (confirm('Really restart job execution ' + idToRestart + '?')) {
-                    var jobParams = jberetui.parseJobParameters($scope.jobParameters);
-                    $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToRestart + '/restart', jobParams)
-                        .then(function (responseData) {
-                            $scope.restartJobExecutionEntity = responseData.data;
-                            $scope.restartDisabled = true;
-                            $scope.stateTransitionParams = {jobExecutionId: $scope.restartJobExecutionEntity.executionId,
-                                                            jobExecutionEntity: $scope.restartJobExecutionEntity,
-                                                            jobName: $scope.restartJobExecutionEntity.jobName,
-                                                            jobInstanceId: $scope.restartJobExecutionEntity.jobInstanceId,
-                                                            jobExecutionId1: $scope.restartJobExecutionEntity.executionId
-                            };
-                            $scope.alerts.push({
-                                type: 'success',
-                                msg: 'Restarted job execution ' + idToRestart +
-                                (jobParams == null ? '.' : ', with additional parameters: ' + JSON.stringify(jobParams) + '.')
+
+                var modalOptions = {
+                    bodyText: 'Restart job execution ' + idToRestart + '?',
+                    actionButtonText: 'Restart Job Execution'
+                };
+
+                modalService.showModal({}, modalOptions).then(function (result) {
+                    if (result) {
+                        var jobParams = jberetui.parseJobParameters($scope.jobParameters);
+                        $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToRestart + '/restart', jobParams)
+                            .then(function (responseData) {
+                                $scope.restartJobExecutionEntity = responseData.data;
+                                $scope.restartDisabled = true;
+                                $scope.stateTransitionParams = {
+                                    jobExecutionId: $scope.restartJobExecutionEntity.executionId,
+                                    jobExecutionEntity: $scope.restartJobExecutionEntity,
+                                    jobName: $scope.restartJobExecutionEntity.jobName,
+                                    jobInstanceId: $scope.restartJobExecutionEntity.jobInstanceId,
+                                    jobExecutionId1: $scope.restartJobExecutionEntity.executionId
+                                };
+                                $scope.alerts.push({
+                                    type: 'success',
+                                    msg: 'Restarted job execution ' + idToRestart +
+                                    (jobParams == null ? '.' : ', with additional parameters: ' + JSON.stringify(jobParams) + '.')
+                                });
+                                $scope.jobParameters = '';
+                            }, function (responseData) {
+                                console.log(responseData);
+                                $scope.alerts.push({
+                                    type: 'danger',
+                                    msg: 'Failed to restart job execution ' + idToRestart + '.'
+                                });
                             });
-                            $scope.jobParameters = '';
-                        }, function (responseData) {
-                            console.log(responseData);
-                            $scope.alerts.push({
-                                type: 'danger',
-                                msg: 'Failed to restart job execution ' + idToRestart + '.'
-                            });
-                        });
-                }
+                    }
+                });
             };
 
             $scope.abandonJobExecution = function () {
                 var idToAbandon = $scope.jobExecutionEntity.executionId;
                 $scope.alerts.length = 0; //clear alerts
-                if (confirm('Really abandon job execution ' + idToAbandon + '?')) {
-                    $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToAbandon + '/abandon', null)
-                        .then(function () {
-                            $scope.jobExecutionEntity.batchStatus = 'ABANDONED';
-                            $scope.abandonDisabled = $scope.stopDisabled = $scope.restartDisabled = true;
-                            $scope.alerts.push({
-                                type: 'success',
-                                msg: 'Abandoned job execution ' + idToAbandon
+
+                var modalOptions = {
+                    bodyText: 'Abandon job execution ' + idToAbandon + '?',
+                    actionButtonText: 'Abandon Job Execution'
+                };
+
+                modalService.showModal({}, modalOptions).then(function (result) {
+                    if (result) {
+                        $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToAbandon + '/abandon', null)
+                            .then(function () {
+                                $scope.jobExecutionEntity.batchStatus = 'ABANDONED';
+                                $scope.abandonDisabled = $scope.stopDisabled = $scope.restartDisabled = true;
+                                $scope.alerts.push({
+                                    type: 'success',
+                                    msg: 'Abandoned job execution ' + idToAbandon
+                                });
+                            }, function (responseData) {
+                                console.log(responseData);
+                                $scope.alerts.push({
+                                    type: 'danger',
+                                    msg: 'Failed to abandon job execution ' + idToAbandon
+                                });
                             });
-                        }, function (responseData) {
-                            console.log(responseData);
-                            $scope.alerts.push({
-                                type: 'danger',
-                                msg: 'Failed to abandon job execution ' + idToAbandon
-                            });
-                        });
-                }
+                    }
+                })
             };
 
-            $scope.refreshJobExecution = function() {
+            $scope.refreshJobExecution = function () {
                 var idToRefresh = $scope.jobExecutionEntity.executionId;
                 $scope.alerts.length = 0;  //clear alerts
                 getJobExecution(idToRefresh);
             };
 
-            $scope.backToJobExecutions = function() {
+            $scope.backToJobExecutions = function () {
                 $state.go('jobexecutions', {
                     jobName: $scope.jobTrace.jobName,
                     jobInstanceId: $scope.jobTrace.jobInstanceId,
@@ -188,8 +213,8 @@ angular.module('jberetUI.details',
 
             $scope.getColor = function (data) {
                 return data == 'COMPLETED' ? 'text-success' :
-                        data == 'FAILED' || data == 'ABANDONED'? 'text-danger' :
+                    data == 'FAILED' || data == 'ABANDONED' ? 'text-danger' :
                         data == 'STOPPED' || data == 'STOPPING' ? 'text-warning' :
-                                'text-primary';
+                            'text-primary';
             };
         }]);
