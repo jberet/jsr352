@@ -60,7 +60,7 @@ angular.module('jberetUI.jobs',
                     $scope.alerts.push({
                         type: 'success',
                         msg: 'Started job: ' + $scope.jobName +
-                        (jobParams == null ? '.' : ', with parameters: ' + JSON.stringify(jobParams) + '.')
+                        (jobParams == null ? '.' : ', with parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
                     });
 
                     getJobRecentJobs();

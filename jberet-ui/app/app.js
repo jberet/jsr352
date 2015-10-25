@@ -6,8 +6,8 @@ angular.module('jberetUI',
         'jberetUI.stepexecution', 'jberetUI.version']).
 
     config(['$urlRouterProvider', function ($urlRouterProvider) {
-            $urlRouterProvider.otherwise('/jobs');
-        }]);
+        $urlRouterProvider.otherwise('/jobs');
+    }]);
 
 var jberetui = {
     parseJobParameters: function (keyValues) {
@@ -33,16 +33,39 @@ var jberetui = {
         return result;
     },
 
-    getIdFromUrl: function(url, tokenBeforeId) {
+    getIdFromUrl: function (url, tokenBeforeId) {
         var result = null;
         var tokenStartPos = url.lastIndexOf(tokenBeforeId);
-        if(tokenStartPos >= 0) {
+        if (tokenStartPos >= 0) {
             var startOfId = tokenStartPos + tokenBeforeId.length;
             var stopPos = url.indexOf('/', startOfId + 1);
-            if(stopPos < 0) {
+            if (stopPos < 0) {
                 stopPos = url.length;
             }
             result = url.substring(startOfId, stopPos);
+        }
+        return result;
+    },
+
+    getColor: function (data) {
+        return data == 'COMPLETED' ? 'text-success' :
+            data == 'FAILED' || data == 'ABANDONED' ? 'text-danger' :
+                data == 'STOPPED' || data == 'STOPPING' ? 'text-warning' :
+                    'text-primary';
+    },
+
+    formatAsKeyValuePairs: function (obj) {
+        var result = '';
+        if (!obj) {
+            return result;
+        }
+        for (var p in obj) {
+            if(obj.hasOwnProperty(p)) {
+                result = result + p + ' = ' + obj[p] + ', ';
+            }
+        }
+        if (result.length > 1) {
+            result = result.substring(0, result.length - 2);
         }
         return result;
     }

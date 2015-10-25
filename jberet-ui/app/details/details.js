@@ -148,7 +148,7 @@ angular.module('jberetUI.details',
                                 $scope.alerts.push({
                                     type: 'success',
                                     msg: 'Restarted job execution ' + idToRestart +
-                                    (jobParams == null ? '.' : ', with additional parameters: ' + JSON.stringify(jobParams) + '.')
+                                    (jobParams == null ? '.' : ', with additional parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
                                 });
                                 $scope.jobParameters = '';
                             }, function (responseData) {
@@ -211,10 +211,7 @@ angular.module('jberetUI.details',
                 $scope.alerts.splice(index, 1);
             };
 
-            $scope.getColor = function (data) {
-                return data == 'COMPLETED' ? 'text-success' :
-                    data == 'FAILED' || data == 'ABANDONED' ? 'text-danger' :
-                        data == 'STOPPED' || data == 'STOPPING' ? 'text-warning' :
-                            'text-primary';
-            };
+            $scope.getColor = jberetui.getColor;
+
+            $scope.formatAsKeyValuePairs = jberetui.formatAsKeyValuePairs;
         }]);

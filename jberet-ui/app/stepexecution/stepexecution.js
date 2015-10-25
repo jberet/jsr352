@@ -125,11 +125,6 @@ angular.module('jberetUI.stepexecution',
                 $scope.alerts.splice(index, 1);
             };
 
-            $scope.getColor = function (data) {
-                return data == 'COMPLETED' ? 'text-success' :
-                        data == 'FAILED' || data == 'ABANDONED'? 'text-danger' :
-                        data == 'STOPPED' || data == 'STOPPING' ? 'text-warning' :
-                                'text-primary';
-            };
+            $scope.getColor = jberetui.getColor;
 
         }]);
