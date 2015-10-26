@@ -126,7 +126,7 @@ public class JacksonCsvItemReaderWriterTest extends CsvItemReaderWriterTest {
 
     //test will print out the path of output file from CsvItemWriter, which can then be verified.
     //e.g., CSV resource to read:
-    //person.csv,
+    //fake-person.csv,
     //to write:
     //        /var/folders/s3/2m3bc7_n0550tp44h4bcgwtm0000gn/T/testMapType.out
     private void testReadWrite0(final String resource, final String writeResource, final String start, final String end,

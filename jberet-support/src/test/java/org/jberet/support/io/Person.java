@@ -16,12 +16,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.hibernate.validator.constraints.Email;
 
 /**
- * A bean class for person.csv.
+ * A bean class for fake-person.csv.
  */
 
 //let jackson directly access property fields so it always gets the correct property names without any uppercase or
