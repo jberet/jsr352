@@ -1,6 +1,6 @@
 (function () {
-    var injectParams = ['$modal'];
-    var modalService = function ($modal) {
+    var injectParams = ['$uibModal'];
+    var modalService = function ($uibModal) {
         var modalDefaults = {
             backdrop: true,
             keyboard: true,
@@ -50,7 +50,7 @@
                 }
 
             }
-            return $modal.open(tempModalDefaults).result;
+            return $uibModal.open(tempModalDefaults).result;
         };
     };
     modalService.$inject = injectParams;

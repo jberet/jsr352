@@ -18,8 +18,8 @@ angular.module('jberetUI.details',
         });
     }])
 
-    .controller('DetailsCtrl', ['$scope', '$http', '$stateParams', '$state', '$location', 'modalService',
-        function ($scope, $http, $stateParams, $state, $location, modalService) {
+    .controller('DetailsCtrl', ['$scope', '$stateParams', '$state', '$location', 'modalService', 'batchRestService',
+        function ($scope, $stateParams, $state, $location, modalService, batchRestService) {
             var stepExecutionLinkCell =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="stepexecution({stepExecutionId: COL_FIELD, stepExecutionEntity: row.entity, jobExecutionEntity: grid.appScope.jobExecutionEntity, jobExecutionId: grid.appScope.jobExecutionEntity.executionId, jobTrace: grid.appScope.jobTrace})">{{COL_FIELD}}</a></div>';
 
@@ -56,7 +56,7 @@ angular.module('jberetUI.details',
             };
 
             var handleJobExecutionEntity = function () {
-                $http.get($scope.jobExecutionEntity.href + '/stepexecutions')
+                batchRestService.getStepExecutions($scope.jobExecutionEntity.href)
                     .then(function (responseData) {
                         $scope.gridOptions.data = responseData.data;
                     }, function (responseData) {
@@ -74,8 +74,7 @@ angular.module('jberetUI.details',
             };
 
             var getJobExecution = function (idPart) {
-                $http.get('http://localhost:8080/restAPI/api/jobexecutions/' + idPart)
-                    .then(function (responseData) {
+                batchRestService.getJobExecution(idPart).then(function (responseData) {
                         $scope.jobExecutionEntity = responseData.data;
                         handleJobExecutionEntity();
                     }, function (responseData) {
@@ -103,9 +102,8 @@ angular.module('jberetUI.details',
 
                 modalService.showModal({}, modalOptions).then(function (result) {
                     if (result) {
-                        $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToStop + '/stop', null)
-                            .then(function () {
-                                $scope.jobExecutionEntity.batchStatus = 'STOPPING';
+                        batchRestService.stopJobExecution(idToStop).then(function () {
+                            $scope.jobExecutionEntity.batchStatus = 'STOPPING';
                                 $scope.alerts.push({
                                     type: 'success',
                                     msg: 'Submitted stop request for job execution ' + idToStop
@@ -134,7 +132,7 @@ angular.module('jberetUI.details',
                 modalService.showModal({}, modalOptions).then(function (result) {
                     if (result) {
                         var jobParams = jberetui.parseJobParameters($scope.jobParameters);
-                        $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToRestart + '/restart', jobParams)
+                        batchRestService.restartJobExecution(idToRestart, jobParams)
                             .then(function (responseData) {
                                 $scope.restartJobExecutionEntity = responseData.data;
                                 $scope.restartDisabled = true;
@@ -173,7 +171,7 @@ angular.module('jberetUI.details',
 
                 modalService.showModal({}, modalOptions).then(function (result) {
                     if (result) {
-                        $http.post('http://localhost:8080/restAPI/api/jobexecutions/' + idToAbandon + '/abandon', null)
+                        batchRestService.abandonJobExecution(idToAbandon)
                             .then(function () {
                                 $scope.jobExecutionEntity.batchStatus = 'ABANDONED';
                                 $scope.abandonDisabled = $scope.stopDisabled = $scope.restartDisabled = true;

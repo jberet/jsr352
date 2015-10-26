@@ -11,20 +11,12 @@ angular.module('jberetUI.jobs',
         });
     }])
 
-    .controller('JobsCtrl', ['$scope', '$http', function ($scope, $http) {
+    .controller('JobsCtrl', ['$scope', 'batchRestService', function ($scope, batchRestService) {
         var jobInstancesLinkCell =
             '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobinstances({jobName: row.entity.jobName})">{{COL_FIELD}}</a></div>';
 
         var jobExecutionsLinkCell =
             '<div class="ngCellText" ng-class="col.colIndex()"><a ng-class="grid.appScope.getLinkActiveClass(COL_FIELD)" ui-sref="jobexecutions({jobName: row.entity.jobName, running: true})">{{COL_FIELD}}</a></div>';
-
-        var getJobRecentJobs = function() {
-            $http.get('http://localhost:8080/restAPI/api/jobs/').then(function (responseData) {
-                $scope.gridOptions.data = responseData.data;
-            }, function (responseData) {
-                console.log(responseData);
-            });
-        };
 
         $scope.alerts = [];
         $scope.gridOptions = {
@@ -42,14 +34,14 @@ angular.module('jberetUI.jobs',
             ]
         };
 
-        getJobRecentJobs();
+        getRecentJobs();
 
         $scope.startJob = function () {
             $scope.alerts.length = 0; //clear alerts
             $scope.stateTransitionParams = null;
             if ($scope.jobName) {
                 var jobParams = jberetui.parseJobParameters($scope.jobParameters);
-                $http.post('http://localhost:8080/restAPI/api/jobs/' + $scope.jobName + '/start', jobParams).then(function (responseData) {
+                batchRestService.startJob($scope.jobName, jobParams).then(function (responseData) {
                     $scope.jobExecutionEntity = responseData.data;
                     $scope.stateTransitionParams = {jobExecutionId: $scope.jobExecutionEntity.executionId,
                                                 jobExecutionEntity: $scope.jobExecutionEntity,
@@ -63,7 +55,7 @@ angular.module('jberetUI.jobs',
                         (jobParams == null ? '.' : ', with parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
                     });
 
-                    getJobRecentJobs();
+                    getRecentJobs();
                     $scope.jobName = '';
                     $scope.jobParameters = '';
                 }, function (responseData) {
@@ -87,4 +79,12 @@ angular.module('jberetUI.jobs',
         $scope.getLinkActiveClass = function(value) {
             return value > 0 ? '' : 'not-active';
         };
+
+        function getRecentJobs() {
+            batchRestService.getJobs().then(function (responseData) {
+                $scope.gridOptions.data = responseData.data;
+            }, function (responseData) {
+                console.log(responseData);
+            });
+        }
     }]);

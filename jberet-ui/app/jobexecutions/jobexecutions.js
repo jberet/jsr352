@@ -11,7 +11,8 @@ angular.module('jberetUI.jobexecutions',
         });
     }])
 
-    .controller('JobexecutionsCtrl', ['$scope', '$http', '$state', '$stateParams', function ($scope, $http, $state, $stateParams) {
+    .controller('JobexecutionsCtrl', ['$scope', '$state', '$stateParams', 'batchRestService',
+                                    function ($scope, $state, $stateParams, batchRestService) {
         var detailsLinkCell =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: COL_FIELD, jobExecutionEntity: row.entity, jobName: grid.appScope.jobTrace.jobName, jobInstanceId: grid.appScope.jobTrace.jobInstanceId, jobExecutionId1: grid.appScope.jobTrace.jobExecutionId1, running: grid.appScope.jobTrace.running})">{{COL_FIELD}}</a></div>';
 
@@ -52,23 +53,12 @@ angular.module('jberetUI.jobexecutions',
             ]
         };
 
-        var getJobInstancesUrl = function (params) {
-            var url = 'http://localhost:8080/restAPI/api/jobexecutions';
-            if(params.running && params.jobName) {
-                url = url + '/running?jobName=' + params.jobName;
-            } else if(params.jobExecutionId1) {
-                url = url + '?jobExecutionId1=' + params.jobExecutionId1 + '&jobInstanceId=' +
-                    (params.jobInstanceId ? params.jobInstanceId : 0);
-            }
-            return url;
-        };
-
         //set pageTitle depending on query params
         $scope.pageTitle = $stateParams.jobInstanceId && $stateParams.jobExecutionId1 ? 'Job Executions in Job Instance ' + $stateParams.jobInstanceId :
                             $stateParams.running && $stateParams.jobName ? 'Running Job Executions for Job ' + $stateParams.jobName :
                                 'Job Executions';
 
-        $http.get(getJobInstancesUrl($stateParams))
+        batchRestService.getJobExecutions($stateParams.running, $stateParams.jobName, $stateParams.jobInstanceId, $stateParams.jobExecutionId1)
             .then(function (responseData) {
                 $scope.gridOptions.data = responseData.data;
             }, function (responseData) {

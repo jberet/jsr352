@@ -11,8 +11,8 @@ angular.module('jberetUI.jobinstances',
         });
     }])
 
-    .controller('JobInstancesCtrl', ['$scope', '$http', '$stateParams',
-        function ($scope, $http, $stateParams) {
+    .controller('JobInstancesCtrl', ['$scope', '$stateParams', 'batchRestService',
+        function ($scope, $stateParams, batchRestService) {
             var jobExecutionsLinkCell =
                 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobexecutions({jobName: row.entity.jobName, jobInstanceId: row.entity.instanceId, jobExecutionId1: row.entity.latestJobExecutionId})">{{COL_FIELD}}</a></div>';
 
@@ -35,17 +35,9 @@ angular.module('jberetUI.jobinstances',
                 ]
             };
 
-            var jobInstancesUrl = null;
-            if($stateParams.jobName) {
-                jobInstancesUrl = 'http://localhost:8080/restAPI/api/jobinstances?jobName=' + $stateParams.jobName;
-            } else {
-                jobInstancesUrl = 'http://localhost:8080/restAPI/api/jobinstances';
-            }
-
             $scope.pageTitle = $stateParams.jobName ? 'Job Instances for Job ' + $stateParams.jobName : 'Job Instances';
 
-            $http.get(jobInstancesUrl)
-                .then(function (responseData) {
+            batchRestService.getJobInstances($stateParams.jobName).then(function (responseData) {
                     $scope.gridOptions.data = responseData.data;
                 }, function (responseData) {
                     console.log(responseData);

@@ -15,8 +15,8 @@ angular.module('jberetUI.stepexecution',
         });
     }])
 
-    .controller('StepExecutionCtrl', ['$scope', '$http', '$stateParams', '$state', '$location',
-        function ($scope, $http, $stateParams, $state, $location) {
+    .controller('StepExecutionCtrl', ['$scope', '$stateParams', '$state', '$location', 'batchRestService',
+        function ($scope, $stateParams, $state, $location, batchRestService) {
             $scope.alerts = [];
 
             var createChartData = function () {
@@ -70,8 +70,8 @@ angular.module('jberetUI.stepexecution',
                 }
             };
 
-            var getStepExecution = function (jobExecutionId, stepExecutionId) {
-                $http.get('http://localhost:8080/restAPI/api/jobexecutions/' + jobExecutionId + '/stepexecutions/' + stepExecutionId)
+            function getCurrentStepExecution(jobExecutionId, stepExecutionId) {
+                batchRestService.getStepExecution(jobExecutionId, stepExecutionId)
                     .then(function (responseData) {
                         $scope.stepExecutionEntity = responseData.data;
                         createChartData();
@@ -83,14 +83,14 @@ angular.module('jberetUI.stepexecution',
                             ', step execution id ' + stepExecutionId
                         });
                     });
-            };
+            }
 
             if ($stateParams.stepExecutionEntity) {
                 $scope.stepExecutionEntity = $stateParams.stepExecutionEntity;
                 createChartData();
             } else {
                 var url = $location.path();
-                getStepExecution(jberetui.getIdFromUrl(url, '/jobexecutions/'), jberetui.getIdFromUrl(url, '/stepexecutions/'));
+                getCurrentStepExecution(jberetui.getIdFromUrl(url, '/jobexecutions/'), jberetui.getIdFromUrl(url, '/stepexecutions/'));
             }
 
             if ($stateParams.jobExecutionEntity) {
@@ -99,7 +99,7 @@ angular.module('jberetUI.stepexecution',
 
             $scope.refreshStepExecution = function() {
                 $scope.alerts.length = 0;  //clear alerts
-                getStepExecution($scope.jobExecutionEntity.executionId, $scope.stepExecutionEntity.stepExecutionId);
+                getCurrentStepExecution($scope.jobExecutionEntity.executionId, $scope.stepExecutionEntity.stepExecutionId);
             };
 
             $scope.backToJobExecution = function() {
