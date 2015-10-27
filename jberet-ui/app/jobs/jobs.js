@@ -11,6 +11,16 @@ angular.module('jberetUI.jobs',
         });
     }])
 
+    .directive('customOnChange', function () {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                var onChangeFunc = scope.$eval(attrs.customOnChange);
+                element.bind('change', onChangeFunc);
+            }
+        };
+    })
+
     .controller('JobsCtrl', ['$scope', 'batchRestService', function ($scope, batchRestService) {
         var jobInstancesLinkCell =
             '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobinstances({jobName: row.entity.jobName})">{{COL_FIELD}}</a></div>';
@@ -54,16 +64,14 @@ angular.module('jberetUI.jobs',
                     });
 
                     getRecentJobs();
-                    $scope.jobName = '';
-                    $scope.jobParameters = '';
+                    resetFields();
                 }, function (responseData) {
                     console.log(responseData);
                     $scope.alerts.push({
                         type: 'danger',
                         msg: 'Failed to start job: ' + $scope.jobName + '.'
                     });
-                    $scope.jobName = '';
-                    $scope.jobParameters = '';
+                    resetFields();
                 });
             } else {
                 $scope.alerts.push({type: 'danger', msg: 'Enter a valid job XML name.'});
@@ -78,12 +86,29 @@ angular.module('jberetUI.jobs',
             return value > 0 ? '' : 'not-active';
         };
 
+        $scope.uploadFile = function(event){
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function(){
+                $scope.$apply(function () {
+                    $scope.jobParameters = reader.result;
+                });
+            };
+            reader.readAsText(file);
+        };
+
         function getRecentJobs() {
             batchRestService.getJobs().then(function (responseData) {
                 $scope.gridOptions.data = responseData.data;
             }, function (responseData) {
                 console.log(responseData);
             });
+        }
+
+        function resetFields() {
+            $scope.jobName = '';
+            $scope.jobParameters = '';
+            document.getElementById('jobParametersImport').value = null;
         }
 
         getRecentJobs();

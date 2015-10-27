@@ -3,26 +3,45 @@
 
     <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 
-    <form>
-        <div class="form-group required">
-            <div>
-                <label class='control-label' for="tbJobName">Job XML Name</label>
-                <input id="tbJobName" type="text" title="Job Xml Name" size="68" autocomplete="off" required
-                       ng-model="jobName"
-                       uib-typeahead="jobNameEntity.jobName for jobNameEntity in gridOptions.data | filter:{jobName:$viewValue}"
-                       placeholder="Job XML name, without '.xml' extension"/>
-                <button type="button" class="btn btn-default" title="Start a Job Execution" ng-click="startJob()">
-                    <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start Job</button>
+    <div>
+        <form>
+            <div class="form-group required">
+                <table width="100%">
+                    <tr>
+                        <td width="10%">
+                            <label class='control-label' for="tbJobName">Job XML Name</label>
+                        </td>
+                        <td width="80%">
+                            <input id="tbJobName" type="text" title="Job Xml Name" size="68" autocomplete="off" required
+                                   ng-model="jobName"
+                                   uib-typeahead="jobNameEntity.jobName for jobNameEntity in gridOptions.data | filter:{jobName:$viewValue}"
+                                   placeholder="Job XML name, without '.xml' extension"/>
+                            <button type="button" class="btn btn-default" title="Start a Job Execution"
+                                    ng-click="startJob()">
+                                <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start Job
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%">
+                            <label for="taJobParams">Job Parameters</label>
+                        </td>
+                        <td width="80%" rowspan="8">
+                        <textarea id="taJobParams" title="Job Parameters" data-ng-model="jobParameters"
+                                  rows="5" cols="80"
+                                  placeholder="key = value pairs, each pair in its own line"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="10%" title="Import job parameters from file">
+                            <input id="jobParametersImport" type="file" accept="text/*" custom-on-change="uploadFile">
+                        </td>
+                    </tr>
+                </table>
             </div>
-            <div>
-                <label>Job Parameters
-                    <textarea title="Job Parameters" data-ng-model="jobParameters"
-                              rows="5" cols="80"
-                              placeholder="key = value pairs, each pair in its own line"></textarea>
-                </label>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
+
     <div>
         <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)"
                    template-url="template/alert/alert-x-right.html">
