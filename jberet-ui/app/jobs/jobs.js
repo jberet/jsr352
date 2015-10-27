@@ -34,8 +34,6 @@ angular.module('jberetUI.jobs',
             ]
         };
 
-        getRecentJobs();
-
         $scope.startJob = function () {
             $scope.alerts.length = 0; //clear alerts
             $scope.stateTransitionParams = null;
@@ -52,7 +50,7 @@ angular.module('jberetUI.jobs',
                     $scope.alerts.push({
                         type: 'success',
                         msg: 'Started job: ' + $scope.jobName +
-                        (jobParams == null ? '.' : ', with parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
+                        ((!jobParams) ? '.' : ', with parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
                     });
 
                     getRecentJobs();
@@ -87,4 +85,6 @@ angular.module('jberetUI.jobs',
                 console.log(responseData);
             });
         }
+
+        getRecentJobs();
     }]);

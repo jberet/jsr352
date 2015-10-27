@@ -19,7 +19,7 @@ angular.module('jberetUI.stepexecution',
         function ($scope, $stateParams, $state, $location, batchRestService) {
             $scope.alerts = [];
 
-            var createChartData = function () {
+            function createChartData() {
                 $scope.chartData = {
                     terms: []
 
@@ -68,7 +68,7 @@ angular.module('jberetUI.stepexecution',
                         $scope.chartData.terms[7] = {'term': m.type, 'count': m.value};
                     }
                 }
-            };
+            }
 
             function getCurrentStepExecution(jobExecutionId, stepExecutionId) {
                 batchRestService.getStepExecution(jobExecutionId, stepExecutionId)
@@ -83,18 +83,6 @@ angular.module('jberetUI.stepexecution',
                             ', step execution id ' + stepExecutionId
                         });
                     });
-            }
-
-            if ($stateParams.stepExecutionEntity) {
-                $scope.stepExecutionEntity = $stateParams.stepExecutionEntity;
-                createChartData();
-            } else {
-                var url = $location.path();
-                getCurrentStepExecution(jberetui.getIdFromUrl(url, '/jobexecutions/'), jberetui.getIdFromUrl(url, '/stepexecutions/'));
-            }
-
-            if ($stateParams.jobExecutionEntity) {
-                $scope.jobExecutionEntity = $stateParams.jobExecutionEntity;
             }
 
             $scope.refreshStepExecution = function() {
@@ -127,4 +115,17 @@ angular.module('jberetUI.stepexecution',
 
             $scope.getColor = jberetui.getColor;
 
+            (function() {
+                if ($stateParams.stepExecutionEntity) {
+                    $scope.stepExecutionEntity = $stateParams.stepExecutionEntity;
+                    createChartData();
+                } else {
+                    var url = $location.path();
+                    getCurrentStepExecution(jberetui.getIdFromUrl(url, '/jobexecutions/'), jberetui.getIdFromUrl(url, '/stepexecutions/'));
+                }
+
+                if ($stateParams.jobExecutionEntity) {
+                    $scope.jobExecutionEntity = $stateParams.jobExecutionEntity;
+                }
+            })();
         }]);

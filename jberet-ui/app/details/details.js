@@ -55,7 +55,7 @@ angular.module('jberetUI.details',
                 ]
             };
 
-            var handleJobExecutionEntity = function () {
+            function handleJobExecutionEntity() {
                 batchRestService.getStepExecutions($scope.jobExecutionEntity.href)
                     .then(function (responseData) {
                         $scope.gridOptions.data = responseData.data;
@@ -70,25 +70,18 @@ angular.module('jberetUI.details',
                 $scope.stopDisabled = batchStatus != 'STARTING' && batchStatus != 'STARTED';
                 $scope.restartDisabled = batchStatus != 'STOPPED' && batchStatus != 'FAILED';
                 $scope.abandonDisabled = batchStatus == 'STARTING' || batchStatus == 'STARTED'
-                                        || batchStatus == 'STOPPING' || batchStatus == 'ABANDONED';
-            };
+                    || batchStatus == 'STOPPING' || batchStatus == 'ABANDONED';
+            }
 
-            var getJobExecution = function (idPart) {
+            function getJobExecution(idPart) {
                 batchRestService.getJobExecution(idPart).then(function (responseData) {
-                        $scope.jobExecutionEntity = responseData.data;
-                        handleJobExecutionEntity();
-                    }, function (responseData) {
-                        console.log(responseData);
-                        $scope.stopDisabled = $scope.restartDisabled = $scope.abandonDisabled = true;
-                        $scope.alerts.push({type: 'danger', msg: 'Failed to get job execution with id ' + idPart});
-                    });
-            };
-
-            if ($stateParams.jobExecutionEntity) {
-                $scope.jobExecutionEntity = $stateParams.jobExecutionEntity;
-                handleJobExecutionEntity();
-            } else {
-                getJobExecution(jberetui.getIdFromUrl($location.path(), '/jobexecutions/'));
+                    $scope.jobExecutionEntity = responseData.data;
+                    handleJobExecutionEntity();
+                }, function (responseData) {
+                    console.log(responseData);
+                    $scope.stopDisabled = $scope.restartDisabled = $scope.abandonDisabled = true;
+                    $scope.alerts.push({type: 'danger', msg: 'Failed to get job execution with id ' + idPart});
+                });
             }
 
             $scope.stopJobExecution = function () {
@@ -146,7 +139,7 @@ angular.module('jberetUI.details',
                                 $scope.alerts.push({
                                     type: 'success',
                                     msg: 'Restarted job execution ' + idToRestart +
-                                    (jobParams == null ? '.' : ', with additional parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
+                                    ((!jobParams) ? '.' : ', with additional parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
                                 });
                                 $scope.jobParameters = '';
                             }, function (responseData) {
@@ -212,4 +205,13 @@ angular.module('jberetUI.details',
             $scope.getColor = jberetui.getColor;
 
             $scope.formatAsKeyValuePairs = jberetui.formatAsKeyValuePairs;
+
+            (function() {
+                if ($stateParams.jobExecutionEntity) {
+                    $scope.jobExecutionEntity = $stateParams.jobExecutionEntity;
+                    handleJobExecutionEntity();
+                } else {
+                    getJobExecution(jberetui.getIdFromUrl($location.path(), '/jobexecutions/'));
+                }
+            })();
         }]);

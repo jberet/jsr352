@@ -79,7 +79,7 @@ var jberetui = {
     restApiUrl: 'http://localhost:8080/restAPI/api',
 
     parseJobParameters: function (keyValues) {
-        if (keyValues == null) {
+        if (!keyValues) {
             return null;
         }
         keyValues = keyValues.trim();
