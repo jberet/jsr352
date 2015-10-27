@@ -76,7 +76,8 @@
 <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 
 <div>
-    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)"
+               template-url="template/alert/alert-x-right.html">
         <span ng-if="alert.type == 'danger'" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
         <span ng-if="alert.type == 'success'" class="glyphicon glyphicon-ok" aria-hidden="true"></span> {{alert.msg}}
         <span ng-if="stateTransitionParams"><a ui-sref="details({{stateTransitionParams}})">View the new job execution {{restartJobExecutionEntity.executionId}}.</a></span>

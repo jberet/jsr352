@@ -50,3 +50,8 @@ button {
   cursor: default;
 }
 
+.close-x-right {
+  text-align: right;
+  color: black;
+  opacity: 0.8;
+}
