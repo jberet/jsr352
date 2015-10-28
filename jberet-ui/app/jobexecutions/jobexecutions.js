@@ -65,8 +65,9 @@ angular.module('jberetUI.jobexecutions',
             };
 
             //set pageTitle depending on query params
-            $scope.pageTitle = $stateParams.jobInstanceId && $stateParams.jobExecutionId1 ? 'Job Executions in Job Instance ' + $stateParams.jobInstanceId :
+            $scope.pageTitle =
                 $stateParams.running && $stateParams.jobName ? 'Running Job Executions for Job ' + $stateParams.jobName :
+                $stateParams.jobInstanceId && $stateParams.jobExecutionId1 ? 'Job Executions in Job Instance ' + $stateParams.jobInstanceId :
                     'Job Executions';
 
             $scope.backToJobInstances = function () {

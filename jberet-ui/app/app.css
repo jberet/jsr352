@@ -55,3 +55,8 @@ button {
   color: black;
   opacity: 0.8;
 }
+
+.top-align {
+  vertical-align: top;
+  font-size: small;
+}

@@ -108,7 +108,7 @@ angular.module('jberetUI.jobs',
         function resetFields() {
             $scope.jobName = '';
             $scope.jobParameters = '';
-            document.getElementById('jobParametersImport').value = null;
+            document.getElementById('jobParametersLoad').value = null;
         }
 
         getRecentJobs();

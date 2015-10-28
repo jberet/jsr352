@@ -24,17 +24,23 @@
                     </tr>
                     <tr>
                         <td width="10%">
-                            <label for="taJobParams">Job Parameters</label>
+                            <label for="taJobParams">Enter Job Parameters</label>
                         </td>
                         <td width="80%" rowspan="8">
                         <textarea id="taJobParams" title="Job Parameters" data-ng-model="jobParameters"
                                   rows="5" cols="80"
-                                  placeholder="key = value pairs, each pair in its own line"></textarea>
+                                  placeholder="key = value pairs, each pair in its own line.  Or load job parameters from a text file"></textarea>
                         </td>
                     </tr>
                     <tr>
-                        <td width="10%" title="Import job parameters from file">
-                            <input id="jobParametersImport" type="file" accept="text/*" custom-on-change="uploadFile">
+                        <td><label>OR</label></td>
+                    </tr>
+                    <tr>
+                        <td><label for="jobParametersLoad">Load Job Parameters</label></td>
+                    </tr>
+                    <tr>
+                        <td width="10%" title="load job parameters from file" class="top-align">
+                            <input id="jobParametersLoad" type="file" accept="text/*" custom-on-change="uploadFile">
                         </td>
                     </tr>
                 </table>
