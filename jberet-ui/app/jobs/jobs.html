@@ -4,7 +4,7 @@
     <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 
     <div>
-        <form>
+        <form name="startJobForm">
             <div class="form-group required">
                 <table width="100%">
                     <tr>
@@ -13,10 +13,11 @@
                         </td>
                         <td width="80%">
                             <input id="tbJobName" type="text" title="Job Xml Name" size="68" autocomplete="off" required
-                                   ng-model="jobName"
+                                   ng-model="jobName" autofocus
                                    uib-typeahead="jobNameEntity.jobName for jobNameEntity in gridOptions.data | filter:{jobName:$viewValue}"
                                    placeholder="Job XML name, without '.xml' extension"/>
                             <button type="button" class="btn btn-default" title="Start a Job Execution"
+                                    ng-disabled="startJobForm.$invalid"
                                     ng-click="startJob()">
                                 <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start Job
                             </button>

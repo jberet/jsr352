@@ -47,35 +47,32 @@ angular.module('jberetUI.jobs',
         $scope.startJob = function () {
             $scope.alerts.length = 0; //clear alerts
             $scope.stateTransitionParams = null;
-            if ($scope.jobName) {
-                var jobParams = jberetui.parseJobParameters($scope.jobParameters);
-                batchRestService.startJob($scope.jobName, jobParams).then(function (responseData) {
-                    $scope.jobExecutionEntity = responseData.data;
-                    $scope.stateTransitionParams = {jobExecutionId: $scope.jobExecutionEntity.executionId,
-                                                jobExecutionEntity: $scope.jobExecutionEntity,
-                                                jobName: $scope.jobName,
-                                                jobInstanceId: $scope.jobExecutionEntity.jobInstanceId,
-                                                jobExecutionId1: $scope.jobExecutionEntity.executionId
-                    };
-                    $scope.alerts.push({
-                        type: 'success',
-                        msg: 'Started job: ' + $scope.jobName +
-                        ((!jobParams) ? '.' : ', with parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
-                    });
-
-                    getRecentJobs();
-                    resetFields();
-                }, function (responseData) {
-                    console.log(responseData);
-                    $scope.alerts.push({
-                        type: 'danger',
-                        msg: 'Failed to start job: ' + $scope.jobName + '.'
-                    });
-                    resetFields();
+            var jobParams = jberetui.parseJobParameters($scope.jobParameters);
+            batchRestService.startJob($scope.jobName, jobParams).then(function (responseData) {
+                $scope.jobExecutionEntity = responseData.data;
+                $scope.stateTransitionParams = {
+                    jobExecutionId: $scope.jobExecutionEntity.executionId,
+                    jobExecutionEntity: $scope.jobExecutionEntity,
+                    jobName: $scope.jobName,
+                    jobInstanceId: $scope.jobExecutionEntity.jobInstanceId,
+                    jobExecutionId1: $scope.jobExecutionEntity.executionId
+                };
+                $scope.alerts.push({
+                    type: 'success',
+                    msg: 'Started job: ' + $scope.jobName +
+                    ((!jobParams) ? '.' : ', with parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
                 });
-            } else {
-                $scope.alerts.push({type: 'danger', msg: 'Enter a valid job XML name.'});
-            }
+
+                getRecentJobs();
+                resetFields();
+            }, function (responseData) {
+                console.log(responseData);
+                $scope.alerts.push({
+                    type: 'danger',
+                    msg: 'Failed to start job: ' + $scope.jobName + '.'
+                });
+                resetFields();
+            });
         };
 
         $scope.closeAlert = function (index) {

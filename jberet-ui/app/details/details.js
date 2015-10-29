@@ -164,6 +164,9 @@ angular.module('jberetUI.details',
 
                 modalService.showModal({}, modalOptions).then(function (result) {
                     if (result) {
+                        //to clear the "view the new restart job execution..." message that may be left from
+                        // previous restart operation
+                        $scope.stateTransitionParams = null;
                         batchRestService.abandonJobExecution(idToAbandon)
                             .then(function () {
                                 $scope.jobExecutionEntity.batchStatus = 'ABANDONED';
