@@ -473,9 +473,9 @@ public final class MongoRepository extends AbstractPersistentRepository {
                             stepExecution.getStepName(),
                             BatchStatus.valueOf(batchStatusValue),
                             (String) next.get(TableColumns.EXITSTATUS),
-                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.PERSISTENTUSERDATA), classLoader),
-                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.READERCHECKPOINTINFO), classLoader),
-                            BatchUtil.bytesToSerializableObject((byte[]) next.get(TableColumns.WRITERCHECKPOINTINFO), classLoader)
+                            (byte[]) next.get(TableColumns.PERSISTENTUSERDATA),
+                            (byte[]) next.get(TableColumns.READERCHECKPOINTINFO),
+                            (byte[]) next.get(TableColumns.WRITERCHECKPOINTINFO)
                     ));
                 }
             }
@@ -503,7 +503,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
                     (Date) dbObject.get(TableColumns.ENDTIME),
                     (String) dbObject.get(TableColumns.BATCHSTATUS),
                     (String) dbObject.get(TableColumns.EXITSTATUS),
-                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.PERSISTENTUSERDATA), classLoader),
+                    (byte[]) dbObject.get(TableColumns.PERSISTENTUSERDATA),
                     numberObjectToLong(dbObject.get(TableColumns.READCOUNT)),
                     numberObjectToLong(dbObject.get(TableColumns.WRITECOUNT)),
                     numberObjectToLong(dbObject.get(TableColumns.COMMITCOUNT)),
@@ -512,8 +512,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
                     numberObjectToLong(dbObject.get(TableColumns.PROCESSSKIPCOUNT)),
                     numberObjectToLong(dbObject.get(TableColumns.FILTERCOUNT)),
                     numberObjectToLong(dbObject.get(TableColumns.WRITESKIPCOUNT)),
-                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.READERCHECKPOINTINFO), classLoader),
-                    BatchUtil.bytesToSerializableObject((byte[]) dbObject.get(TableColumns.WRITERCHECKPOINTINFO), classLoader)
+                    (byte[]) dbObject.get(TableColumns.READERCHECKPOINTINFO),
+                    (byte[]) dbObject.get(TableColumns.WRITERCHECKPOINTINFO)
             );
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, "createStepExecutionFromDBObject");

@@ -49,6 +49,9 @@ class SerializableData implements Serializable {
         if (data instanceof SerializableData) {
             return (SerializableData) data;
         }
+        if (data instanceof byte[]) {
+            return new SerializableData((byte[]) data, null);
+        }
         if (data == null) {
             return new SerializableData(null, null);
         }

@@ -836,9 +836,9 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                             stepExecution.getStepName(),
                             BatchStatus.valueOf(batchStatusValue),
                             rs.getString(TableColumns.EXITSTATUS),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.PERSISTENTUSERDATA), classLoader),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.READERCHECKPOINTINFO), classLoader),
-                            BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.WRITERCHECKPOINTINFO), classLoader)
+                            rs.getBytes(TableColumns.PERSISTENTUSERDATA),
+                            rs.getBytes(TableColumns.READERCHECKPOINTINFO),
+                            rs.getBytes(TableColumns.WRITERCHECKPOINTINFO)
                     ));
                 }
             }
@@ -863,7 +863,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                     rs.getTimestamp(TableColumns.ENDTIME),
                     rs.getString(TableColumns.BATCHSTATUS),
                     rs.getString(TableColumns.EXITSTATUS),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.PERSISTENTUSERDATA), classLoader),
+                    rs.getBytes(TableColumns.PERSISTENTUSERDATA),
                     rs.getInt(TableColumns.READCOUNT),
                     rs.getInt(TableColumns.WRITECOUNT),
                     rs.getInt(TableColumns.COMMITCOUNT),
@@ -872,8 +872,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                     rs.getInt(TableColumns.PROCESSSKIPCOUNT),
                     rs.getInt(TableColumns.FILTERCOUNT),
                     rs.getInt(TableColumns.WRITESKIPCOUNT),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.READERCHECKPOINTINFO), classLoader),
-                    BatchUtil.bytesToSerializableObject(rs.getBytes(TableColumns.WRITERCHECKPOINTINFO), classLoader)
+                    rs.getBytes(TableColumns.READERCHECKPOINTINFO),
+                    rs.getBytes(TableColumns.WRITERCHECKPOINTINFO)
             );
             result.add(e);
             if (top1) {
