@@ -1,7 +1,13 @@
 'use strict';
 
+var angular = require('angular');
+var utils = require('../common/utils');
+require('d3');
+require('dangle.module');
+require('dangle.bar');
+
 angular.module('jberetUI.stepexecution',
-    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'dangle'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'dangle', 'jberetUI.common'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('stepexecution', {
@@ -92,7 +98,7 @@ angular.module('jberetUI.stepexecution',
 
             $scope.backToJobExecution = function() {
                 var jobExecutionId = $scope.jobExecutionEntity ? $scope.jobExecutionEntity.executionId :
-                    jberetui.getIdFromUrl($location.path(), '/jobexecutions/');
+                    utils.getIdFromUrl($location.path(), '/jobexecutions/');
                 var transitionParams = $stateParams.jobTrace ?
                 {
                     jobExecutionId: jobExecutionId,
@@ -113,7 +119,7 @@ angular.module('jberetUI.stepexecution',
                 $scope.alerts.splice(index, 1);
             };
 
-            $scope.getColor = jberetui.getColor;
+            $scope.getColor = utils.getColor;
 
             (function() {
                 if ($stateParams.stepExecutionEntity) {
@@ -121,7 +127,7 @@ angular.module('jberetUI.stepexecution',
                     createChartData();
                 } else {
                     var url = $location.path();
-                    getCurrentStepExecution(jberetui.getIdFromUrl(url, '/jobexecutions/'), jberetui.getIdFromUrl(url, '/stepexecutions/'));
+                    getCurrentStepExecution(utils.getIdFromUrl(url, '/jobexecutions/'), utils.getIdFromUrl(url, '/stepexecutions/'));
                 }
 
                 if ($stateParams.jobExecutionEntity) {

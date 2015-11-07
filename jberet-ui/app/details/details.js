@@ -1,7 +1,10 @@
 'use strict';
 
+var angular = require('angular');
+var utils = require('../common/utils');
+
 angular.module('jberetUI.details',
-    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'modal-module'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'jberetUI.common'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('details', {
@@ -124,7 +127,7 @@ angular.module('jberetUI.details',
 
                 modalService.showModal({}, modalOptions).then(function (result) {
                     if (result) {
-                        var jobParams = jberetui.parseJobParameters($scope.jobParameters);
+                        var jobParams = utils.parseJobParameters($scope.jobParameters);
                         batchRestService.restartJobExecution(idToRestart, jobParams)
                             .then(function (responseData) {
                                 $scope.restartJobExecutionEntity = responseData.data;
@@ -139,7 +142,7 @@ angular.module('jberetUI.details',
                                 $scope.alerts.push({
                                     type: 'success',
                                     msg: 'Restarted job execution ' + idToRestart +
-                                    ((!jobParams) ? '.' : ', with additional parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
+                                    ((!jobParams) ? '.' : ', with additional parameters: ' + utils.formatAsKeyValuePairs(jobParams) + '.')
                                 });
                                 $scope.jobParameters = '';
                             }, function (responseData) {
@@ -183,7 +186,7 @@ angular.module('jberetUI.details',
                                 });
                             });
                     }
-                })
+                });
             };
 
             $scope.refreshJobExecution = function () {
@@ -205,16 +208,16 @@ angular.module('jberetUI.details',
                 $scope.alerts.splice(index, 1);
             };
 
-            $scope.getColor = jberetui.getColor;
+            $scope.getColor = utils.getColor;
 
-            $scope.formatAsKeyValuePairs = jberetui.formatAsKeyValuePairs;
+            $scope.formatAsKeyValuePairs = utils.formatAsKeyValuePairs;
 
             (function() {
                 if ($stateParams.jobExecutionEntity) {
                     $scope.jobExecutionEntity = $stateParams.jobExecutionEntity;
                     handleJobExecutionEntity();
                 } else {
-                    getJobExecution(jberetui.getIdFromUrl($location.path(), '/jobexecutions/'));
+                    getJobExecution(utils.getIdFromUrl($location.path(), '/jobexecutions/'));
                 }
             })();
         }]);

@@ -11,14 +11,17 @@
   <title>JBeret UI</title>
   <meta name="description" content="JBeret Batch Job Management">
   <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
-  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="app.css">
-  <link rel="stylesheet" href="ui-grid-sky-theme.css">
-  <link rel="stylesheet" type="text/css" href="bower_components/angular-ui-grid/ui-grid.css">
-  <link rel="stylesheet" href="bower_components/dangle/css/dangle.css">
-  <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+
+  <!--<link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">-->
+  <!--<link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">-->
+  <!--<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">-->
+  <!--<link rel="stylesheet" href="app.css">-->
+  <!--<link rel="stylesheet" href="ui-grid-sky-theme.css">-->
+  <!--<link rel="stylesheet" type="text/css" href="bower_components/angular-ui-grid/ui-grid.css">-->
+  <!--<link rel="stylesheet" href="bower_components/dangle/css/dangle.css">-->
+
+  <link rel="stylesheet" href="css/bundle.css">
+  <!--<script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>-->
 </head>
 <body>
   <img src="img/jberet_banner_1180px.png" width="100%">
@@ -37,33 +40,6 @@
 
   <div ui-view></div>
 
-  <!--<div class="app-footer">jberet-ui: v<span app-version></span></div>-->
-
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
-  -->
-  <script src="bower_components/angular/angular.min.js"></script>
-  <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
-  <script src="bower_components/angular-touch/angular-touch.min.js"></script>
-  <script src="bower_components/angular-animate/angular-animate.min.js"></script>
-  <script src="bower_components/angular-ui-grid/ui-grid.min.js"></script>
-  <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
-  <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-  <script src="bower_components/csv/lib/csv.min.js"></script>
-  <script src="bower_components/pdfmake/build/pdfmake.min.js"></script>
-  <script src="bower_components/pdfmake/build/vfs_fonts.js"></script>
-  <script src="bower_components/d3/d3.min.js"></script>
-  <script src="bower_components/dangle/dist/dangle.module.min.js"></script>
-  <script src="bower_components/dangle/dist/dangle.bar.min.js"></script>
-  <script src="app.js"></script>
-  <script src="modalService.js"></script>
-  <script src="jobs/jobs.js"></script>
-  <script src="jobinstances/jobinstances.js"></script>
-  <script src="jobexecutions/jobexecutions.js"></script>
-  <script src="details/details.js"></script>
-  <script src="stepexecution/stepexecution.js"></script>
-  <script src="components/version/version.js"></script>
-  <script src="components/version/version-directive.js"></script>
-  <script src="components/version/interpolate-filter.js"></script>
+  <script src="bundle.js"></script>
 </body>
 </html>

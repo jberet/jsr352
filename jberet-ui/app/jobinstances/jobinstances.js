@@ -1,7 +1,9 @@
 'use strict';
 
+var angular = require('angular');
+
 angular.module('jberetUI.jobinstances',
-    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'jberetUI.common'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('jobinstances', {

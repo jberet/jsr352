@@ -1,5 +1,10 @@
 'use strict';
 
+var angular = require('angular');
+//require('angular-ui-router');
+//require('../common/index');
+var utils = require('../common/utils');
+
 angular.module('jberetUI.jobs',
     ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
@@ -47,7 +52,7 @@ angular.module('jberetUI.jobs',
         $scope.startJob = function () {
             $scope.alerts.length = 0; //clear alerts
             $scope.stateTransitionParams = null;
-            var jobParams = jberetui.parseJobParameters($scope.jobParameters);
+            var jobParams = utils.parseJobParameters($scope.jobParameters);
             batchRestService.startJob($scope.jobName, jobParams).then(function (responseData) {
                 $scope.jobExecutionEntity = responseData.data;
                 $scope.stateTransitionParams = {
@@ -60,7 +65,7 @@ angular.module('jberetUI.jobs',
                 $scope.alerts.push({
                     type: 'success',
                     msg: 'Started job: ' + $scope.jobName +
-                    ((!jobParams) ? '.' : ', with parameters: ' + jberetui.formatAsKeyValuePairs(jobParams) + '.')
+                    ((!jobParams) ? '.' : ', with parameters: ' + utils.formatAsKeyValuePairs(jobParams) + '.')
                 });
 
                 getRecentJobs();
@@ -110,3 +115,7 @@ angular.module('jberetUI.jobs',
 
         getRecentJobs();
     }]);
+
+if (typeof module !== "undefined" && typeof exports !== "undefined" && module.exports === exports){
+    module.exports = 'jberetUI.jobs';
+}
