@@ -24,11 +24,14 @@ gulp.task('js', function () {
 
     return b.bundle()
         .pipe(source('bundle.js'))
-        //.pipe(buffer())
-        //.pipe(plugins.sourcemaps.init({loadMaps: true}))
-        //.pipe(plugins.uglify())
-        //.on('error', plugins.util.log)
-        //.pipe(plugins.sourcemaps.write('./'))
+
+        //minify with source map file
+        .pipe(buffer())
+        .pipe(plugins.sourcemaps.init({loadMaps: true}))
+        .pipe(plugins.uglify())
+        .on('error', plugins.util.log)
+        .pipe(plugins.sourcemaps.write('./'))
+
         .pipe(gulp.dest(distDir));
 });
 
@@ -79,6 +82,7 @@ gulp.task('font', function () {
       'app/bower_components/bootstrap/dist/fonts/*'
     ];
 
+    //bootstrap css (bundled in css/bundle.css) references font files in a sibling dir (../fonts)
     gulp.src(bootstrapFontFiles)
         .pipe(gulp.dest(distDir + 'fonts'));
 
