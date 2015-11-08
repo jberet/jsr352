@@ -24,8 +24,6 @@ require('./stepexecution/stepexecution');
 angular.module('jberetUI',
     ['ui.router', 'jberetUI.jobs', 'jberetUI.jobinstances', 'jberetUI.jobexecutions', 'jberetUI.details',
         'jberetUI.common', 'jberetUI.stepexecution'])
-        //'jberetUI.common', 'jberetUI.stepexecution', 'jberetUI.version'])
-
     .config(['$urlRouterProvider', function ($urlRouterProvider) {
         $urlRouterProvider.otherwise('/jobs');
     }]);

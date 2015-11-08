@@ -3,7 +3,7 @@
 var angular = require('angular');
 
 angular.module('jberetUI.jobexecutions',
-    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'jberetUI.common'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('jobexecutions', {

@@ -4,7 +4,7 @@ var angular = require('angular');
 var utils = require('../common/utils');
 
 angular.module('jberetUI.details',
-    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'jberetUI.common'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('details', {

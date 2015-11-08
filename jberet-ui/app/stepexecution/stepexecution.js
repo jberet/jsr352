@@ -7,7 +7,7 @@ require('dangle.module');
 require('dangle.bar');
 
 angular.module('jberetUI.stepexecution',
-    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'dangle', 'jberetUI.common'])
+    ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter', 'dangle'])
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('stepexecution', {
