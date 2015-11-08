@@ -34,29 +34,19 @@ angular.module('jberetUI.details',
                 running: $stateParams.running
             };
 
-            $scope.gridOptions = {
-                enableGridMenu: true,
-                enableSelectAll: true,
-                exporterCsvFilename: 'step-execution.csv',
-
-                enableFiltering: true,
-                //showGridFooter: true,
-                minRowsToShow: 5,
-                //rowHeight: 30,
-
-                //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
-                columnDefs: [
+            $scope.gridOptions = new utils.DefaultGridOptions(5, false, 'step-execution.csv',
+                [
                     {name: 'stepExecutionId', type: 'number', cellTemplate: stepExecutionLinkCell, headerTooltip: true},
                     {name: 'stepName', cellTooltip: true, headerTooltip: true},
                     {name: 'batchStatus', headerTooltip: true},
                     {name: 'exitStatus', cellTooltip: true, headerTooltip: true},
-                    {name: 'startTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
-                        headerTooltip: 'Start Time HH:mm:ss MM-dd-yyyy'},
-                    {name: 'endTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
-                        headerTooltip: 'End Time HH:mm:ss MM-dd-yyyy'},
+                    {name: 'startTime', cellFilter: utils.dateCellFilter, cellTooltip: false, type: 'date',
+                        headerTooltip: 'Start Time ' + utils.dateFormat},
+                    {name: 'endTime', cellFilter: utils.dateCellFilter, cellTooltip: false, type: 'date',
+                        headerTooltip: 'End Time ' + utils.dateFormat},
                     {name: 'metrics', cellTooltip: true, headerTooltip: true}
                 ]
-            };
+            );
 
             function handleJobExecutionEntity() {
                 batchRestService.getStepExecutions($scope.jobExecutionEntity.href)

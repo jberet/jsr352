@@ -1,6 +1,7 @@
 'use strict';
 
 var angular = require('angular');
+var utils = require('../common/utils');
 
 angular.module('jberetUI.jobexecutions',
     ['ui.router', 'ui.bootstrap', 'ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.selection', 'ui.grid.exporter'])
@@ -26,18 +27,8 @@ angular.module('jberetUI.jobexecutions',
                 running: $stateParams.running
             };
 
-            $scope.gridOptions = {
-                enableGridMenu: true,
-                enableSelectAll: true,
-                exporterCsvFilename: 'job-executions.csv',
-
-                enableFiltering: true,
-                showGridFooter: true,
-                minRowsToShow: 15,
-                //rowHeight:40,
-
-                //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
-                columnDefs: [
+            $scope.gridOptions = new utils.DefaultGridOptions(15, true, 'job-executions.csv',
+                [
                     {name: 'executionId', type: 'number', cellTemplate: detailsLinkCell, headerTooltip: true},
                     {name: 'jobInstanceId', type: 'number', headerTooltip: true},
                     {name: 'jobName', cellTooltip: true, headerTooltip: true},
@@ -45,26 +36,28 @@ angular.module('jberetUI.jobexecutions',
                     {name: 'batchStatus', headerTooltip: true},
                     {name: 'exitStatus', cellTooltip: true, headerTooltip: true},
                     {
-                        name: 'createTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
-                        headerTooltip: 'Create Time HH:mm:ss MM-dd-yyyy'
+                        name: 'createTime', cellFilter: utils.dateCellFilter, cellTooltip: false, type: 'date',
+                        headerTooltip: 'Create Time ' + utils.dateFormat
                     },
                     {
-                        name: 'startTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
-                        headerTooltip: 'Start Time HH:mm:ss MM-dd-yyyy'
+                        name: 'startTime', cellFilter: utils.dateCellFilter, cellTooltip: false, type: 'date',
+                        headerTooltip: 'Start Time ' + utils.dateFormat
                     },
                     {
                         name: 'lastUpdatedTime',
-                        cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "',
+                        cellFilter: utils.dateCellFilter,
                         cellTooltip: false,
                         type: 'date',
-                        headerTooltip: 'Last Updated Time HH:mm:ss MM-dd-yyyy'
+                        headerTooltip: 'Last Updated Time ' + utils.dateFormat
                     },
                     {
-                        name: 'endTime', cellFilter: 'date:"HH:mm:ss MM-dd-yyyy "', cellTooltip: false, type: 'date',
-                        headerTooltip: 'End Time HH:mm:ss MM-dd-yyyy'
+                        name: 'endTime', cellFilter: utils.dateCellFilter, cellTooltip: false, type: 'date',
+                        headerTooltip: 'End Time ' + utils.dateFormat
                     }
                 ]
-            };
+            );
+            //rowHeight:40,
+            //when cellFilter: date is used, cellTooltip shows unresolved expression, so not to show it
 
             //set pageTitle depending on query params
             $scope.pageTitle =

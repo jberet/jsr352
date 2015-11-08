@@ -1,8 +1,6 @@
 'use strict';
 
 var angular = require('angular');
-//require('angular-ui-router');
-//require('../common/index');
 var utils = require('../common/utils');
 
 angular.module('jberetUI.jobs',
@@ -34,20 +32,13 @@ angular.module('jberetUI.jobs',
             '<div class="ngCellText" ng-class="col.colIndex()"><a ng-class="grid.appScope.getLinkActiveClass(COL_FIELD)" ui-sref="jobexecutions({jobName: row.entity.jobName, running: true})">{{COL_FIELD}}</a></div>';
 
         $scope.alerts = [];
-        $scope.gridOptions = {
-            enableGridMenu: true,
-            enableSelectAll: true,
-            exporterCsvFilename: 'jobs.csv',
-
-            enableFiltering: true,
-            showGridFooter: true,
-            minRowsToShow: 8,
-            columnDefs: [
+        $scope.gridOptions = new utils.DefaultGridOptions(8, true, 'jobs.csv',
+            [
                 {name: 'jobName'},
                 {name: 'numberOfJobInstances', type: 'number', cellTemplate: jobInstancesLinkCell},
                 {name: 'numberOfRunningJobExecutions', type: 'number', cellTemplate: jobExecutionsLinkCell}
             ]
-        };
+        );
 
         $scope.startJob = function () {
             $scope.alerts.length = 0; //clear alerts
@@ -115,7 +106,3 @@ angular.module('jberetUI.jobs',
 
         getRecentJobs();
     }]);
-
-if (typeof module !== "undefined" && typeof exports !== "undefined" && module.exports === exports){
-    module.exports = 'jberetUI.jobs';
-}
