@@ -73,7 +73,7 @@ var DefaultGridOptions = function (minRowsToShow, showGridFooter, exporterCsvFil
 };
 
 var dateFormat = 'HH:mm:ss MM-dd-yyyy';
-var dateCellFilter = 'date:"HH:mm:ss MM-dd-yyyy "';
+var dateCellFilter = 'date:"HH:mm:ss MM-dd-yyyy"';
 
 exports.parseJobParameters = parseJobParameters;
 exports.getIdFromUrl = getIdFromUrl;
