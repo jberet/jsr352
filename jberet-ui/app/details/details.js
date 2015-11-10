@@ -34,7 +34,7 @@ angular.module('jberetUI.details',
                 running: $stateParams.running
             };
 
-            $scope.gridOptions = new utils.DefaultGridOptions(5, false, 'step-execution.csv',
+            $scope.gridOptions = new utils.DefaultGridOptions(8, false, 'step-execution.csv',
                 [
                     {name: 'stepExecutionId', type: 'number', cellTemplate: stepExecutionLinkCell, headerTooltip: true},
                     {name: 'stepName', cellTooltip: true, headerTooltip: true},

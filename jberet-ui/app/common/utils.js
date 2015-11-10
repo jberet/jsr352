@@ -63,7 +63,9 @@ var formatAsKeyValuePairs = function (obj) {
 var DefaultGridOptions = function (minRowsToShow, showGridFooter, exporterCsvFilename, columnDefs) {
     this.enableGridMenu = true;
     this.enableSelectAll = true;
-    this.enableFiltering = true;
+
+    //if footer is off, also turn off filtering menu to reduce clutter
+    this.enableFiltering = showGridFooter;
     this.minRowsToShow = minRowsToShow;
     this.showGridFooter = showGridFooter;
 
