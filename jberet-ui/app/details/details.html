@@ -64,14 +64,6 @@
     </table>
 </div>
 
-<div ng-hide="restartDisabled">
-    <label>Override/Add to Previous Job Parameters
-        <textarea title="Override/Add to Previous Job Parameters" data-ng-model="jobParameters"
-            rows="4" cols="80"
-      placeholder="Previous execution parameters will still be used in restart. You can override and add parameters here, as key = value pairs, each pair in its own line."></textarea>
-    </label>
-</div>
-
 <h4 style="text-align: center">Step Executions</h4>
 <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 

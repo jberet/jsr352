@@ -112,12 +112,13 @@ angular.module('jberetUI.details',
 
                 var modalOptions = {
                     bodyText: 'Restart job execution ' + idToRestart + '?',
-                    actionButtonText: 'Restart Job Execution'
+                    actionButtonText: 'Restart Job Execution',
+                    isRestart: true
                 };
 
                 modalService.showModal({}, modalOptions).then(function (result) {
                     if (result) {
-                        var jobParams = utils.parseJobParameters($scope.jobParameters);
+                        var jobParams = (result == true) ? null : utils.parseJobParameters(result);
                         batchRestService.restartJobExecution(idToRestart, jobParams)
                             .then(function (responseData) {
                                 $scope.restartJobExecutionEntity = responseData.data;
@@ -134,7 +135,6 @@ angular.module('jberetUI.details',
                                     msg: 'Restarted job execution ' + idToRestart +
                                     ((!jobParams) ? '.' : ', with additional parameters: ' + utils.formatAsKeyValuePairs(jobParams) + '.')
                                 });
-                                $scope.jobParameters = '';
                             }, function (responseData) {
                                 console.log(responseData);
                                 $scope.alerts.push({

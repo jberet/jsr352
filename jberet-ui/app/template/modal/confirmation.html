@@ -5,7 +5,15 @@
 </div>
 <div class="modal-body">
     <!--<p ng-bind-html="modalOptions.bodyText"></p>-->
-    {{modalOptions.bodyText}}
+    <p>{{modalOptions.bodyText}}</p>
+
+    <div ng-show="modalOptions.isRestart">
+        <label>Override/Add to Previous Job Parameters
+        <textarea title="Override/Add to Previous Job Parameters" data-ng-model="modalOptions.item"
+                  rows="10" cols="70"
+                  placeholder="Previous execution parameters will still be used in restart. You can override and add parameters here, as key = value pairs, each pair in its own line."></textarea>
+        </label>
+    </div>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn" data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>

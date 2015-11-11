@@ -38,7 +38,7 @@ var modalService = function ($uibModal) {
                     if (item && Object.keys(item).length > 0) {
                         $modalInstance.close($scope.modalOptions.item);
                     } else {
-                        $modalInstance.close('ok');
+                        $modalInstance.close(true);
                     }
                 };
                 $scope.modalOptions.close = function (result) {
