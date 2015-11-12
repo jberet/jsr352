@@ -27,48 +27,43 @@ folders in your project.
 *Note that the `bower_components` folder would normally be installed in the root folder but this location was changed
 through the `.bowerrc` file.  Putting it in the app folder makes it easier to serve the files by a webserver.*
 
-### Run the Application
+### Configure the Application
+Users need to configure the URL for connecting the the backend JBeret REST API.  It can be done in one of the following
+ways, in order of precedence:
 
-We have preconfigured the project with a simple development web server.  The simplest way to start
-this server is:
+* Pass it as gulp argument, for example, `gulp --restUrl http://localhost:8080/myapp/api/` 
+* Configure it in `./config.json`
+* Set environment variable, for example, 
+    * In bash/sh/ksh: `export JBERET_REST_URL="http://localhost:8080/restAPI/api"`, or add to `~/.profile` so it's
+    always available when opening a new terminal.
+    * In csh/tcsh: `setenv JBERET_REST_URL "http://localhost:8080/restAPI/api"`, or add to `~/.cshrc` or `~/.tcshrc`
+    so it's always available when opening a new terminal.
+    * In Windows: `set JBERET_REST_URL="http://localhost:8080/restAPI/api"`, or add to Control Panel environment variable
+     so it's always available when opening a new terminal.
+* If all the above fails, the default value `/api` is used.
 
-```
-npm start
-```
+The javascript file `./common/batchRestService.js` contains a replacement token for the REST API URL, which is substituted
+with real value during gulp build process.  The final javascript is in `./dist/bundle.js`.
 
-Now browse to the app at `http://localhost:8000/app/index.html`.
+### Build, Assembly and Run the Application
 
+Running command `gulp`, or `gulp start`, or `npm start` in project root directory will serve the app, 
+watch any updates and automatically refresh browser.  The browser will automatically open at `http://localhost:3000`.
 
+gulp tasks include:
 
-## Directory Layout
-
-```
-app/                    --> all of the source files for the application
-  app.css               --> default stylesheet
-  components/           --> all app specific modules
-    version/              --> version related components
-      version.js                 --> version module declaration and basic "version" value service
-      version_test.js            --> "version" value service tests
-      version-directive.js       --> custom directive that returns the current app version
-      version-directive_test.js  --> version directive tests
-      interpolate-filter.js      --> custom interpolation filter
-      interpolate-filter_test.js --> interpolate filter tests
-  view1/                --> the view1 view template and logic
-    view1.html            --> the partial template
-    jobs.js              --> the controller logic
-    jobs-test.js         --> tests of the controller
-  view2/                --> the view2 view template and logic
-    view2.html            --> the partial template
-    jobinstances.js              --> the controller logic
-    jobinstances-test.js         --> tests of the controller
-  app.js                --> main application module
-  index.html            --> app layout file (the main html template file of the app)
-  index-async.html      --> just like index.html, but loads js files asynchronously
-karma.conf.js         --> config file for running unit tests with Karma
-e2e-tests/            --> end-to-end tests
-  protractor-conf.js    --> Protractor config file
-  scenarios.js          --> end-to-end scenarios to be run by Protractor
-```
+* `default`: default to start task
+* `start`: build, watch, and start `browser-sync` server
+* `build`: build the app, including steps like lint, js, css, html, font, img
+* `lint`: check quality of js and css
+* `jshint`: lint task for js
+* `csslint`: lint task for css
+* `js`: combine all javascript files including all transitive dependencies, minify and bundle into `dist/bundle.js`
+* `css`: combine all css files, minify and bundle into `dist/css/bundle.css`
+* `img`: optimize all image files and place them in `dist/img`
+* `html`: copy all html files into appropriate directories under `dist/`
+* `font`: copy all required font files into appropriate directories under `dist/`
+* `clean`: delete `dist/`
 
 ## Testing
 
@@ -186,7 +181,19 @@ etc to function properly when an html page is opened via `file://` scheme instea
 
 ### Running the App during Development
 
-This project comes preconfigured with a local development webserver.  It is a node.js
+This project uses `browser-sync` to serve the app, watch any updates and automatically refresh browser. 
+Running `gulp` with default task, or `gulp start`task will start it.  `gulp start` task builds the whole app
+and assemble it under `/dist` directory.
+
+Note that this command will block the terminal.  To stop `browser-sync`, just press `Ctrl-C`.
+
+```
+/Users/cfang/dev/jsr352/jberet-ui > gulp
+```
+
+`npm start` command is configured to just call `gulp`, so `npm start` is equivalent to `gulp` command.
+
+This project also comes preconfigured with a local development webserver.  It is a node.js
 tool called [http-server][http-server].  You can start this webserver with `npm start` but you may choose to
 install the tool globally:
 
@@ -202,13 +209,13 @@ http-server -a localhost -p 8000
 ```
 
 Alternatively, you can choose to configure your own webserver, such as apache or nginx. Just
-configure your server to serve the files under the `app/` directory.
+configure your server to serve the files under the `dist/` directory.
 
 
 ### Running the App in Production
 
 This really depends on how complex your app is and the overall infrastructure of your system, but
-the general rule is that all you need in production are all the files under the `app/` directory.
+the general rule is that all you need in production are all the files under the `dist/` directory.
 Everything else should be omitted.
 
 Angular apps are really just a bunch of static html, css and js files that just need to be hosted
