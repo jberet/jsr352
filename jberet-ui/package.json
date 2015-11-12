@@ -31,11 +31,13 @@
     "karma-jasmine": "^0.3.5",
     "karma-junit-reporter": "^0.2.2",
     "lodash.assign": "^3.2.0",
+    "preprocessify": "0.0.6",
     "protractor": "^2.1.0",
     "shelljs": "^0.2.6",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.6.0"
+    "watchify": "^3.6.0",
+    "yargs": "^3.29.0"
   },
   "browserify": {
     "transform": [

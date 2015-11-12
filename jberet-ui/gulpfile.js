@@ -12,6 +12,9 @@ var browserify = require('browserify');
 var browserSync = require('browser-sync');
 var watchify = require('watchify');
 var assign = require('lodash.assign');
+var preprocessify = require('preprocessify');
+var argv = require('yargs').argv;
+var config = require('./config.json');
 
 var files = {
     myjs: ['app/**/*.js', '!app/bower_components/**', '!app/**/*test.js', '!app/**/e2e-tests/**'],
@@ -44,14 +47,23 @@ var files = {
     dist: ['dist/**/*.html', 'dist/css/**', 'dist/fonts/**', 'dist/img/**', 'dist/*.js']
 };
 
+/**
+ * JBeret REST API URL is obtained in the following order:
+ * 1, from gulp command line args, e.g., gulp --restUrl "http://example.com/myapp/api";
+ * 2, from ./config.json restUrl property;
+ * 3, from environment variable JBERET_REST_URL;
+ * 4, default value '/jberet-api'
+ */
+function getRestUrl() {
+    return argv.restUrl || config.restUrl || process.env.JBERET_REST_URL || '/api';
+}
+
 var customOpts = {
     entries: ['app/app.js'],
     debug: true
 };
 var opts = assign({}, watchify.args, customOpts);
 var b = watchify(browserify(opts));
-
-// add transformations here i.e. b.transform(coffeeify);
 
 gulp.task('js', bundle);
 
@@ -60,6 +72,9 @@ b.on('update', bundle);
 b.on('log', plugins.util.log);
 
 function bundle() {
+    //This will replace "/* @echo __REST_URL__ */" with real value
+    b.transform(preprocessify({'__REST_URL__': getRestUrl()}));
+
     return b.bundle()
         .on('error', plugins.util.log.bind(plugins.util, 'Browserify Error'))
         .pipe(source('bundle.js'))

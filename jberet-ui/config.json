@@ -1,0 +1,4 @@
+{
+  "description": "restUrl specifies the URL for connecting to JBeret REST API, e.g., http://localhost:8080/myapp/api. See gulpfile.js for details",
+  "restUrl": null
+}

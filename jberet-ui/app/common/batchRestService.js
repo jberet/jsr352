@@ -2,11 +2,13 @@
 
 var batchRestService = function($http) {
     /**
-     * URL for JBeret REST API.
+     * Token for the URL for JBeret REST API. Its value is obtained from either gulp command line args,
+     * application config.json file, environment variable, or default value.
+     * See gulpfile.js for more details.
      * The URL string includes hostname, port number, application context path, and REST API path.
      * Users need to modify this property for their environment.
      */
-    var restApiUrl = 'http://localhost:8080/restAPI/api';
+    var restApiUrl = '/* @echo __REST_URL__ */';
 
     var jobsUrl = restApiUrl + '/jobs';
     var jobInstancesUrl = restApiUrl + '/jobinstances';
