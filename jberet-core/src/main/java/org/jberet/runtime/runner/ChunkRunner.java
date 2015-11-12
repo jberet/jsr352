@@ -1,16 +1,17 @@
 /*
  * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
- *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
 
 package org.jberet.runtime.runner;
+
+import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.batch.api.chunk.CheckpointAlgorithm;
 import javax.batch.api.chunk.ItemProcessor;
 import javax.batch.api.chunk.ItemReader;
@@ -51,12 +53,9 @@ import org.jberet.runtime.metric.StepMetrics;
 import org.jberet.spi.JobTask;
 import org.jboss.logging.Logger;
 
-import static org.jberet._private.BatchLogger.LOGGER;
-import static org.jberet._private.BatchMessages.MESSAGES;
-
 /**
- * This runner class is responsible for running a chunk-type step (not just a chunk range of a step).  In a partitioned
- * step execution, multiple ChunkRunner instances are created, one for each partition.  The StepContextImpl and
+ * This runner class is responsible for running a chunk-type step (not just a chunk range of a step). In a partitioned
+ * step execution, multiple ChunkRunner instances are created, one for each partition. The StepContextImpl and
  * StepExecutionImpl associated with each ChunkRunner in a partition are cloned from the original counterparts.
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -89,9 +88,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private String checkpointPolicy = "item";
     private CheckpointAlgorithm checkpointAlgorithm;
     private int itemCount = 10;
-    private int timeLimit;  //in seconds
-    private final int skipLimit;  //default no limit
-    private final int retryLimit;  //default no limit
+    private int timeLimit; // in seconds
+    private final int skipLimit; // default no limit
+    private final int retryLimit; // default no limit
 
     private final ExceptionClassFilter skippableExceptionClasses;
     private final ExceptionClassFilter retryableExceptionClasses;
@@ -107,14 +106,14 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private final AtomicBoolean itemWriterClosed = new AtomicBoolean(false);
 
     public ChunkRunner(final StepContextImpl stepContext,
-                       final CompositeExecutionRunner enclosingRunner,
-                       final StepExecutionRunner stepRunner,
-                       final Chunk chunk) throws Exception {
+            final CompositeExecutionRunner enclosingRunner,
+            final StepExecutionRunner stepRunner,
+            final Chunk chunk) throws Exception {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
         this.chunk = chunk;
-        this.stepOrPartitionExecution = stepContext.getStepExecution();
-        this.stepMetrics = this.stepOrPartitionExecution.getStepMetrics();
+        stepOrPartitionExecution = stepContext.getStepExecution();
+        stepMetrics = stepOrPartitionExecution.getStepMetrics();
 
         String attrVal = chunk.getSkipLimit();
         skipLimit = attrVal == null ? -1 : Integer.parseInt(attrVal);
@@ -125,7 +124,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         skippableExceptionClasses = chunk.getSkippableExceptionClasses();
         retryableExceptionClasses = chunk.getRetryableExceptionClasses();
         noRollbackExceptionClasses = chunk.getNoRollbackExceptionClasses();
-        this.tm = stepRunner.tm;
+        tm = stepRunner.tm;
     }
 
     @Override
@@ -172,11 +171,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
             createChunkRelatedListeners();
 
-
-            //When running in EE environment, set global transaction timeout for the current thread
+            // When running in EE environment, set global transaction timeout for the current thread
             // from javax.transaction.global.timeout property at step level
             final Properties stepProps = stepRunner.step.getProperties();
-            int globalTimeout = 180; //default 180 seconds defined by spec
+            int globalTimeout = 180; // default 180 seconds defined by spec
             if (stepProps != null) {
                 final String globalTimeoutProp = stepProps.get("javax.transaction.global.timeout");
                 if (globalTimeoutProp != null) {
@@ -211,13 +209,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 safeClose();
                 throw e;
             }
-            //collect data at the end of the partition
+            // collect data at the end of the partition
             if (collector != null) {
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
-            //set batch status to indicate that either the main step, or a partition has completed successfully.
-            //note that when a chunk range is completed, we should not set batch status as completed.
-            //make sure the step has not been set to STOPPED.
+            // set batch status to indicate that either the main step, or a partition has completed successfully.
+            // note that when a chunk range is completed, we should not set batch status as completed.
+            // make sure the step has not been set to STOPPED.
             if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
                 batchContext.setBatchStatus(BatchStatus.COMPLETED);
             }
@@ -235,7 +233,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
                 }
             } catch (final InterruptedException e) {
-                //ignore
+                // ignore
             }
             if (stepRunner.completedPartitionThreads != null) {
                 stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
@@ -254,17 +252,16 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
      */
     private void readProcessWriteItems() throws Exception {
         final ProcessingInfo processingInfo = new ProcessingInfo();
-        //if input has not been depleted, or even if depleted, but still need to retry the last item
-        //if stopped, exit the loop
+        // if input has not been depleted, or even if depleted, but still need to retry the last item
+        // if stopped, exit the loop
         while ((processingInfo.chunkState != ChunkState.JOB_STOPPED) &&
 
                 (processingInfo.chunkState != ChunkState.DEPLETED ||
                         processingInfo.itemState == ItemState.TO_RETRY_READ ||
                         processingInfo.itemState == ItemState.TO_RETRY_PROCESS ||
-                        processingInfo.itemState == ItemState.TO_RETRY_WRITE)
-                ) {
+                processingInfo.itemState == ItemState.TO_RETRY_WRITE)) {
             try {
-                //reset state for the next iteration
+                // reset state for the next iteration
                 switch (processingInfo.itemState) {
                     case TO_SKIP:
                         processingInfo.itemState = ItemState.RUNNING;
@@ -287,7 +284,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     if (processingInfo.chunkState == ChunkState.TO_START_NEW || processingInfo.chunkState == ChunkState.TO_END_RETRY) {
                         processingInfo.reset();
                     }
-                    //if during Chunk RETRYING, and an item is skipped, the ut is still active so no need to begin a new one
+                    // if during Chunk RETRYING, and an item is skipped, the ut is still active so no need to begin a new one
                     if (tm.getStatus() != Status.STATUS_ACTIVE) {
                         if (checkpointAlgorithm != null) {
                             tm.setTransactionTimeout(checkpointAlgorithm.checkpointTimeout());
@@ -316,16 +313,16 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 if (isReadyToCheckpoint(processingInfo)) {
                     doCheckpoint(processingInfo);
 
-                    //errors may happen during the above doCheckpoint (e.g., in writer.write method).  If so, need
-                    //to skip the remainder of the current loop.  If retry with rollback, chunkState has been set to
-                    //TO_RETRY; if retry with no rollback, itemState has been set to TO_RETRY_WRITE; if skip,
-                    //itemState has been set to TO_SKIP
+                    // errors may happen during the above doCheckpoint (e.g., in writer.write method). If so, need
+                    // to skip the remainder of the current loop. If retry with rollback, chunkState has been set to
+                    // TO_RETRY; if retry with no rollback, itemState has been set to TO_RETRY_WRITE; if skip,
+                    // itemState has been set to TO_SKIP
 
                     // end of a chunk, so the following block is no longer needed
-                    //if (processingInfo.chunkState == ChunkState.TO_RETRY || processingInfo.itemState == ItemState.TO_RETRY_WRITE ||
-                    //        processingInfo.itemState == ItemState.TO_SKIP) {
-                    //    continue;
-                    //}
+                    // if (processingInfo.chunkState == ChunkState.TO_RETRY || processingInfo.itemState == ItemState.TO_RETRY_WRITE ||
+                    // processingInfo.itemState == ItemState.TO_SKIP) {
+                    // continue;
+                    // }
                 }
             } catch (final Exception e) {
                 final int txStatus = tm.getStatus();
@@ -333,6 +330,11 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
                         txStatus == Status.STATUS_COMMITTING || txStatus == Status.STATUS_ROLLING_BACK) {
                     tm.rollback();
+                    stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
+                } else if (txStatus == Status.STATUS_ROLLEDBACK || txStatus == Status.STATUS_NO_TRANSACTION) {
+                    // the transaction might have been cancelled by a reaper thread, but has not been disassociated from
+                    // the current thread, so call tm.suspend() to safely disassociate it.
+                    tm.suspend();
                     stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
                 }
                 for (final ChunkListener l : chunkListeners) {
@@ -351,7 +353,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
             processingInfo.readPosition++;
             itemRead = itemReader.readItem();
-            if (itemRead != null) {  //only count successful read
+            if (itemRead != null) { // only count successful read
                 stepMetrics.increment(Metric.MetricType.READ_COUNT, 1);
                 processingInfo.count++;
             } else {
@@ -360,7 +362,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             for (final ItemReadListener l : itemReadListeners) {
                 l.afterRead(itemRead);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             for (final ItemReadListener l : itemReadListeners) {
                 l.onReadError(e);
             }
@@ -407,7 +409,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 if (output == null) {
                     stepMetrics.increment(Metric.MetricType.FILTER_COUNT, 1);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 for (final ItemProcessListener l : itemProcessListeners) {
                     l.onProcessError(itemRead, e);
                 }
@@ -437,7 +439,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         } else {
             output = itemRead;
         }
-        //a normal processing can also return null to exclude the processing result from writer.
+        // a normal processing can also return null to exclude the processing result from writer.
         if (output != null) {
             outputList.add(output);
         }
@@ -456,7 +458,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 processingInfo.itemState != ItemState.TO_RETRY_PROCESS &&
                 processingInfo.itemState != ItemState.TO_RETRY_WRITE &&
                 processingInfo.readPosition == processingInfo.failurePoint) {
-            //if failurePoint is null, should fail with NPE
+            // if failurePoint is null, should fail with NPE
             processingInfo.chunkState = ChunkState.TO_END_RETRY;
         }
     }
@@ -473,7 +475,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }, timeLimit * 1000);
             }
         }
-        //if chunk is already RETRYING, do not change it to RUNNING
+        // if chunk is already RETRYING, do not change it to RUNNING
         if (processingInfo.chunkState == ChunkState.TO_RETRY) {
             processingInfo.chunkState = ChunkState.RETRYING;
         } else if (processingInfo.chunkState != ChunkState.RETRYING) {
@@ -510,8 +512,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         final int outputSize = outputList.size();
         final boolean nothingToWrite = outputSize == 0 && processingInfo.chunkState == ChunkState.DEPLETED;
 
-        //to back up reader and writer checkpointInfo, and if tx commit fails, restore to previous valid state
-        //ChunkState.TO_START_NEW and ChunkState.RUNNING here are used to indicate values not set by application.
+        // to back up reader and writer checkpointInfo, and if tx commit fails, restore to previous valid state
+        // ChunkState.TO_START_NEW and ChunkState.RUNNING here are used to indicate values not set by application.
         Serializable backupReaderCheckpointInfo = ChunkState.TO_START_NEW;
         Serializable backupWriterCheckpointInfo = ChunkState.TO_START_NEW;
         try {
@@ -558,7 +560,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
         } catch (final Exception e) {
             if (backupWriterCheckpointInfo != ChunkState.TO_START_NEW && backupWriterCheckpointInfo != ChunkState.RUNNING) {
-                //restore reader and writer checkpointInfo to previous valid state
+                // restore reader and writer checkpointInfo to previous valid state
                 stepOrPartitionExecution.setReaderCheckpointInfo(backupReaderCheckpointInfo);
                 stepOrPartitionExecution.setWriterCheckpointInfo(backupWriterCheckpointInfo);
             }
@@ -568,7 +570,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
             toSkipOrRetry(e, processingInfo);
             if (processingInfo.itemState == ItemState.TO_SKIP) {
-                //if requested to stop the job, do not skip to the next item
+                // if requested to stop the job, do not skip to the next item
                 if (processingInfo.chunkState == ChunkState.JOB_STOPPING) {
                     processingInfo.chunkState = ChunkState.JOB_STOPPED;
                     batchContext.setBatchStatus(BatchStatus.STOPPED);
@@ -580,17 +582,17 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     skipCount++;
                     outputList.clear();
 
-                    //usually the transaction should not be rolled back upon skippable exception, but if the transaction
-                    //is marked rollback only by other parties, it's no longer usable and so roll it back.
+                    // usually the transaction should not be rolled back upon skippable exception, but if the transaction
+                    // is marked rollback only by other parties, it's no longer usable and so roll it back.
                     if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
                         tm.rollback();
                     }
 
-                    //during normal processing, upon a skippable exception in writer that is not configured to be
-                    //retryable at the same time (i.e., the exception resolved to skip), skip all items in the chunk,
-                    //and on to a new chunk
+                    // during normal processing, upon a skippable exception in writer that is not configured to be
+                    // retryable at the same time (i.e., the exception resolved to skip), skip all items in the chunk,
+                    // and on to a new chunk
                     if (processingInfo.chunkState == ChunkState.RUNNING) {
-                        //processingInfo.itemState = ItemState.RUNNING;
+                        // processingInfo.itemState = ItemState.RUNNING;
                         processingInfo.chunkState = ChunkState.TO_START_NEW;
                     }
                 }
@@ -619,7 +621,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         outputList.clear();
         processingInfo.failurePoint = processingInfo.readPosition;
 
-        //when chunk commit failed, the transaction was already rolled back and its status is STATUS_NO_TRANSACTION (6)
+        // when chunk commit failed, the transaction was already rolled back and its status is STATUS_NO_TRANSACTION (6)
         if (tm.getStatus() != Status.STATUS_NO_TRANSACTION) {
             tm.rollback();
         }
@@ -629,7 +631,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         try {
             closeItemWriter();
             closeItemReader();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // An error occurred, safely close the reader and writer
             safeClose();
             throw e;
@@ -675,7 +677,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 processingInfo.itemState == ItemState.RETRYING_READ ||
                 processingInfo.itemState == ItemState.RETRYING_PROCESS ||
                 processingInfo.itemState == ItemState.RETRYING_WRITE) {
-            //during retry, skip has precedence over retry
+            // during retry, skip has precedence over retry
             if (needSkip(e)) {
                 processingInfo.itemState = ItemState.TO_SKIP;
                 return;
@@ -684,7 +686,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 return;
             }
         } else {
-            //during normal processing, retry has precedence over skip
+            // during normal processing, retry has precedence over skip
             if (needRetry(e)) {
                 processingInfo.itemState = ItemState.TO_RETRY;
                 return;
@@ -695,10 +697,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         }
     }
 
-    //already know need to retry, call this method to check if need to rollback before retry the current chunk
+    // already know need to retry, call this method to check if need to rollback before retry the current chunk
     private boolean needRollbackBeforeRetry(final Exception e) {
-        //if no-rollback-exceptions not configured, by default need to rollback the current chunk
-        //else if the current exception does not match the configured no-rollback-exceptions, need to rollback
+        // if no-rollback-exceptions not configured, by default need to rollback the current chunk
+        // else if the current exception does not match the configured no-rollback-exceptions, need to rollback
         return noRollbackExceptionClasses == null || !noRollbackExceptionClasses.matches(e.getClass());
     }
 
@@ -755,13 +757,17 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
      */
     private void safeClose() {
         try {
-            if (itemWriter != null) closeItemWriter();
-        } catch (Exception e) {
+            if (itemWriter != null) {
+                closeItemWriter();
+            }
+        } catch (final Exception e) {
             LOGGER.trace("Error closing ItemWriter.", e);
         }
         try {
-            if (itemReader != null) closeItemReader();
-        } catch (Exception e) {
+            if (itemReader != null) {
+                closeItemReader();
+            }
+        } catch (final Exception e) {
             LOGGER.trace("Error closing ItemReader.", e);
         }
     }
@@ -777,7 +783,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             itemWriter.close();
         }
     }
-
 
     private static final class ProcessingInfo {
         /**
@@ -800,7 +805,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         int readPosition = -1;
 
         /**
-         * Where the failure occurred that caused the current retry.  The retry should stop after the item at failurePoint
+         * Where the failure occurred that caused the current retry. The retry should stop after the item at failurePoint
          * has been retried.
          */
         Integer failurePoint;
@@ -835,29 +840,29 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private enum ItemState {
-        RUNNING,       //normal item processing
-        TO_SKIP,        //need to skip the remainder of the current iteration
-        TO_RETRY,       //a super-type value for TO_RETRY_*, used to indicate whether to skip or retry current item
+        RUNNING, // normal item processing
+        TO_SKIP, // need to skip the remainder of the current iteration
+        TO_RETRY, // a super-type value for TO_RETRY_*, used to indicate whether to skip or retry current item
 
-        TO_RETRY_READ,  //need to retry the current item read operation, upon starting next iteration => RETRYING_READ
-        RETRYING_READ,  //the current item is being re-read, when successful or result in a skip => normal RUNNING
+        TO_RETRY_READ, // need to retry the current item read operation, upon starting next iteration => RETRYING_READ
+        RETRYING_READ, // the current item is being re-read, when successful or result in a skip => normal RUNNING
 
-        TO_RETRY_PROCESS, //need to retry the current item process operation, upon starting next iteration => RETRYING_PROCESS
-        RETRYING_PROCESS, //the current item is being re-processed, when successful or result in a skip => normal RUNNING
+        TO_RETRY_PROCESS, // need to retry the current item process operation, upon starting next iteration => RETRYING_PROCESS
+        RETRYING_PROCESS, // the current item is being re-processed, when successful or result in a skip => normal RUNNING
 
-        TO_RETRY_WRITE, //need to retry the current item write operation, upon starting next items => RETRYING_WRITE
-        RETRYING_WRITE  //the current item is being re-written, when successful or result in a skip => normal RUNNING
+        TO_RETRY_WRITE, // need to retry the current item write operation, upon starting next items => RETRYING_WRITE
+        RETRYING_WRITE // the current item is being re-written, when successful or result in a skip => normal RUNNING
     }
 
     private enum ChunkState {
-        RUNNING,      //normal running of chunk
-        TO_RETRY,     //need to retry the current chunk
-        RETRYING,     //chunk being retried
-        TO_END_RETRY, //need to end retrying the current chunk
-        TO_START_NEW, //the current chunk is done and need to start a new chunk next
-        DEPLETED,      //no more input items, the processing can still go to next iteration so this last item can be retried
+        RUNNING, // normal running of chunk
+        TO_RETRY, // need to retry the current chunk
+        RETRYING, // chunk being retried
+        TO_END_RETRY, // need to end retrying the current chunk
+        TO_START_NEW, // the current chunk is done and need to start a new chunk next
+        DEPLETED, // no more input items, the processing can still go to next iteration so this last item can be retried
 
-        JOB_STOPPING,  //the job has been requested to stop
+        JOB_STOPPING, // the job has been requested to stop
         JOB_STOPPED
     }
 
