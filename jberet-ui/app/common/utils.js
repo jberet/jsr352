@@ -5,7 +5,7 @@ var parseJobParameters = function (keyValues) {
         return null;
     }
     keyValues = keyValues.trim();
-    if (keyValues.length == 0) {
+    if (keyValues.length === 0) {
         return null;
     }
     var result = {};
@@ -13,7 +13,7 @@ var parseJobParameters = function (keyValues) {
     var x;
     for (x in lines) {
         var line = lines[x].trim();
-        if (line.length == 0) {
+        if (line.length === 0) {
             continue;
         }
         var pair = line.split('=');

@@ -62,8 +62,8 @@ angular.module('jberetUI.details',
                 var batchStatus = $scope.jobExecutionEntity.batchStatus;
                 $scope.stopDisabled = batchStatus != 'STARTING' && batchStatus != 'STARTED';
                 $scope.restartDisabled = batchStatus != 'STOPPED' && batchStatus != 'FAILED';
-                $scope.abandonDisabled = batchStatus == 'STARTING' || batchStatus == 'STARTED'
-                    || batchStatus == 'STOPPING' || batchStatus == 'ABANDONED';
+                $scope.abandonDisabled = batchStatus == 'STARTING' || batchStatus == 'STARTED' ||
+                    batchStatus == 'STOPPING' || batchStatus == 'ABANDONED';
             }
 
             function getJobExecution(idPart) {
@@ -118,7 +118,7 @@ angular.module('jberetUI.details',
 
                 modalService.showModal({}, modalOptions).then(function (result) {
                     if (result) {
-                        var jobParams = (result == true) ? null : utils.parseJobParameters(result);
+                        var jobParams = (result === true) ? null : utils.parseJobParameters(result);
                         batchRestService.restartJobExecution(idToRestart, jobParams)
                             .then(function (responseData) {
                                 $scope.restartJobExecutionEntity = responseData.data;

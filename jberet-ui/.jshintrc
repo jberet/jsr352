@@ -1,5 +1,6 @@
 {
   "globalstrict": true,
+  "node": true,
   "globals": {
     "define": false,
     "angular": true,
@@ -11,7 +12,6 @@
     "module": false,
     "inject": false,
     "browserify": true,
-    "node": true,
     "require": false
   }
 }
