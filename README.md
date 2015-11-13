@@ -24,12 +24,14 @@ cause memory errors in some machines:
 
 Increase `ulimit` to avoid such errors. For example,
 
-    ulimit -u 2048
+    ulimit -u 2048add
 
 ####Sub-modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
 * [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, PDF, etc) for batch applications, and JNDI support
+* [jberet-rest-api](https://github.com/jberet/jsr352/tree/master/jberet-rest-api): REST API for batch job management
+* [jberet-ui](https://github.com/jberet/jsr352/tree/master/jberet-ui): front-end UI web app for batch job management
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
