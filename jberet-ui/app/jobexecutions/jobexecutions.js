@@ -14,8 +14,8 @@ angular.module('jberetUI.jobexecutions',
         });
     }])
 
-    .controller('JobexecutionsCtrl', ['$scope', '$state', '$stateParams', 'batchRestService',
-        function ($scope, $state, $stateParams, batchRestService) {
+    .controller('JobexecutionsCtrl', ['$scope', '$state', '$stateParams', '$log', 'batchRestService',
+        function ($scope, $state, $stateParams, $log, batchRestService) {
             var detailsLinkCell =
                 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: COL_FIELD, jobExecutionEntity: row.entity, jobName: grid.appScope.jobTrace.jobName, jobInstanceId: grid.appScope.jobTrace.jobInstanceId, jobExecutionId1: grid.appScope.jobTrace.jobExecutionId1, running: grid.appScope.jobTrace.running})">{{COL_FIELD}}</a></div>';
 
@@ -75,6 +75,6 @@ angular.module('jberetUI.jobexecutions',
                 .then(function (responseData) {
                     $scope.gridOptions.data = responseData.data;
                 }, function (responseData) {
-                    console.log(responseData);
+                    $log.debug(responseData);
                 });
         }]);

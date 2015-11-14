@@ -21,8 +21,8 @@ angular.module('jberetUI.stepexecution',
         });
     }])
 
-    .controller('StepExecutionCtrl', ['$scope', '$stateParams', '$state', '$location', 'batchRestService',
-        function ($scope, $stateParams, $state, $location, batchRestService) {
+    .controller('StepExecutionCtrl', ['$scope', '$stateParams', '$state', '$location', '$log', 'batchRestService',
+        function ($scope, $stateParams, $state, $location, $log, batchRestService) {
             $scope.alerts = [];
 
             function createChartData() {
@@ -82,7 +82,7 @@ angular.module('jberetUI.stepexecution',
                         $scope.stepExecutionEntity = responseData.data;
                         createChartData();
                     }, function (responseData) {
-                        console.log(responseData);
+                        $log.debug(responseData);
                         $scope.alerts.push({
                             type: 'danger',
                             msg: 'Failed to get step execution with job execution id ' + jobExecutionId +

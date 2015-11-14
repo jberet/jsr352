@@ -58,9 +58,24 @@ function getRestUrl() {
     return argv.restUrl || config.restUrl || process.env.JBERET_REST_URL || '/api';
 }
 
+/**
+ * debug should be false for production build.  Development build may choose to turn it on.
+ * When debug is set to true, Angular $log debug is enabled, and javascript and css are not minified.
+ * When debug is false, Angular $log is disabled, images are optimized, and javascript and css are uglified and minified.
+ *
+ * debug can be configured in one of the following ways, in order of precedence:
+ * 1, from gulp command line args, e.g., gulp --debug
+ * 2, from ./config.json debug property
+ * 3, defaults to false.
+ */
+function isDebug() {
+    return argv.debug || config.debug || false;
+}
+
 var customOpts = {
-    entries: ['app/app.js'],
-    debug: true
+    entries: ['app/app.js']
+    //debug when creating bundles to have Browserify automatically include Source Maps for easy debugging.
+    //debug: true
 };
 var opts = assign({}, watchify.args, customOpts);
 var b = watchify(browserify(opts));
@@ -72,8 +87,12 @@ b.on('update', bundle);
 b.on('log', plugins.util.log);
 
 function bundle() {
-    //This will replace "/* @echo __REST_URL__ */" with real value
-    b.transform(preprocessify({'__REST_URL__': getRestUrl()}));
+    //This will replace /* @echo __REST_URL__ */ with real value
+    //and replace __DEBUG__ with real value
+    b.transform(preprocessify({
+        '__REST_URL__': getRestUrl(),
+        '__DEBUG__': isDebug()
+    }));
 
     return b.bundle()
         .on('error', plugins.util.log.bind(plugins.util, 'Browserify Error'))
@@ -81,17 +100,17 @@ function bundle() {
 
         //minify with source map file
         .pipe(buffer())
-        .pipe(plugins.sourcemaps.init({loadMaps: true}))
-        .pipe(plugins.uglify())
+        //.pipe(plugins.sourcemaps.init({loadMaps: true}))
+        .pipe(plugins.if(!isDebug(), plugins.uglify()))
         // Add transformation tasks to the pipeline here.
-        .pipe(plugins.sourcemaps.write('./'))
+        //.pipe(plugins.sourcemaps.write('./'))
 
         .pipe(gulp.dest(distDir));
 }
 
 gulp.task('img', function () {
     return gulp.src(files.img)
-        .pipe(plugins.imagemin())
+        .pipe(plugins.if(!isDebug(), plugins.imagemin()))
         .pipe(gulp.dest(distDir + '/img'));
 });
 
@@ -113,10 +132,10 @@ gulp.task('csslint', function () {
 
 gulp.task('css', function () {
     return gulp.src(files.css)
-        .pipe(plugins.sourcemaps.init({loadMaps: true}))
+        //.pipe(plugins.sourcemaps.init({loadMaps: true}))
         .pipe(plugins.concat('bundle.css'))
-        .pipe(plugins.minifyCss())
-        .pipe(plugins.sourcemaps.write('./'))
+        .pipe(plugins.if(!isDebug(), plugins.minifyCss()))
+        //.pipe(plugins.sourcemaps.write('./'))
         .pipe(gulp.dest(distCssDir));
 });
 

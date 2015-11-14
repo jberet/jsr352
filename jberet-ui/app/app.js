@@ -26,4 +26,8 @@ angular.module('jberetUI',
         'jberetUI.common', 'jberetUI.stepexecution'])
     .config(['$urlRouterProvider', function ($urlRouterProvider) {
         $urlRouterProvider.otherwise('/jobs');
+    }])
+    .config(['$logProvider', function ($logProvider) {
+        //to be substituted by gulp with configured debug value
+        $logProvider.debugEnabled(/* @echo __DEBUG__ */);
     }]);

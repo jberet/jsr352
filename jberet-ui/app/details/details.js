@@ -21,8 +21,8 @@ angular.module('jberetUI.details',
         });
     }])
 
-    .controller('DetailsCtrl', ['$scope', '$stateParams', '$state', '$location', 'modalService', 'batchRestService',
-        function ($scope, $stateParams, $state, $location, modalService, batchRestService) {
+    .controller('DetailsCtrl', ['$scope', '$stateParams', '$state', '$location', '$log', 'modalService', 'batchRestService',
+        function ($scope, $stateParams, $state, $location, $log, modalService, batchRestService) {
             var stepExecutionLinkCell =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="stepexecution({stepExecutionId: COL_FIELD, stepExecutionEntity: row.entity, jobExecutionEntity: grid.appScope.jobExecutionEntity, jobExecutionId: grid.appScope.jobExecutionEntity.executionId, jobTrace: grid.appScope.jobTrace})">{{COL_FIELD}}</a></div>';
 
@@ -53,7 +53,7 @@ angular.module('jberetUI.details',
                     .then(function (responseData) {
                         $scope.gridOptions.data = responseData.data;
                     }, function (responseData) {
-                        console.log(responseData);
+                        $log.debug(responseData);
                         $scope.alerts.push({
                             type: 'danger',
                             msg: 'Failed to get step executions for job execution ' + $scope.jobExecutionEntity.executionId
@@ -71,7 +71,7 @@ angular.module('jberetUI.details',
                     $scope.jobExecutionEntity = responseData.data;
                     handleJobExecutionEntity();
                 }, function (responseData) {
-                    console.log(responseData);
+                    $log.debug(responseData);
                     $scope.stopDisabled = $scope.restartDisabled = $scope.abandonDisabled = true;
                     $scope.alerts.push({type: 'danger', msg: 'Failed to get job execution with id ' + idPart});
                 });
@@ -95,7 +95,7 @@ angular.module('jberetUI.details',
                                     msg: 'Submitted stop request for job execution ' + idToStop
                                 });
                             }, function (responseData) {
-                                console.log(responseData);
+                                $log.debug(responseData);
                                 $scope.alerts.push({
                                     type: 'danger',
                                     msg: 'Failed to stop job execution ' + idToStop
@@ -136,7 +136,7 @@ angular.module('jberetUI.details',
                                     ((!jobParams) ? '.' : ', with additional parameters: ' + utils.formatAsKeyValuePairs(jobParams) + '.')
                                 });
                             }, function (responseData) {
-                                console.log(responseData);
+                                $log.debug(responseData);
                                 $scope.alerts.push({
                                     type: 'danger',
                                     msg: 'Failed to restart job execution ' + idToRestart + '.'
@@ -169,7 +169,7 @@ angular.module('jberetUI.details',
                                     msg: 'Abandoned job execution ' + idToAbandon
                                 });
                             }, function (responseData) {
-                                console.log(responseData);
+                                $log.debug(responseData);
                                 $scope.alerts.push({
                                     type: 'danger',
                                     msg: 'Failed to abandon job execution ' + idToAbandon

@@ -24,7 +24,7 @@ angular.module('jberetUI.jobs',
         };
     })
 
-    .controller('JobsCtrl', ['$scope', 'batchRestService', function ($scope, batchRestService) {
+    .controller('JobsCtrl', ['$scope', '$log', 'batchRestService', function ($scope, $log, batchRestService) {
         var jobInstancesLinkCell =
             '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobinstances({jobName: row.entity.jobName})">{{COL_FIELD}}</a></div>';
 
@@ -62,7 +62,7 @@ angular.module('jberetUI.jobs',
                 getRecentJobs();
                 resetFields();
             }, function (responseData) {
-                console.log(responseData);
+                $log.debug(responseData);
                 $scope.alerts.push({
                     type: 'danger',
                     msg: 'Failed to start job: ' + $scope.jobName + '.'
@@ -94,7 +94,7 @@ angular.module('jberetUI.jobs',
             batchRestService.getJobs().then(function (responseData) {
                 $scope.gridOptions.data = responseData.data;
             }, function (responseData) {
-                console.log(responseData);
+                $log.debug(responseData);
             });
         }
 
