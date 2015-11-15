@@ -119,8 +119,6 @@ angular.module('jberetUI.stepexecution',
                 $scope.alerts.splice(index, 1);
             };
 
-            $scope.getColor = utils.getColor;
-
             (function() {
                 if ($stateParams.stepExecutionEntity) {
                     $scope.stepExecutionEntity = $stateParams.stepExecutionEntity;

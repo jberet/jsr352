@@ -198,8 +198,6 @@ angular.module('jberetUI.details',
                 $scope.alerts.splice(index, 1);
             };
 
-            $scope.getColor = utils.getColor;
-
             $scope.formatAsKeyValuePairs = utils.formatAsKeyValuePairs;
 
             (function() {

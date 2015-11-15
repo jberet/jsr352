@@ -1,0 +1,16 @@
+<div>
+    <span ng-if="batchStatus == 'COMPLETED'" class="glyphicon glyphicon-ok text-success"
+          aria-hidden="true"> {{batchStatus}}</span>
+    <span ng-if="batchStatus == 'FAILED'" class="glyphicon glyphicon-exclamation-sign text-danger"
+          aria-hidden="true"> {{batchStatus}}</span>
+    <span ng-if="batchStatus == 'STOPPED'" class="glyphicon glyphicon-stop text-warning"
+          aria-hidden="true"> {{batchStatus}}</span>
+    <span ng-if="batchStatus == 'ABANDONED'" class="glyphicon glyphicon-ban-circle text-danger"
+          aria-hidden="true"> {{batchStatus}}</span>
+    <span ng-if="batchStatus == 'STOPPING'" class="glyphicon glyphicon-pause text-warning"
+          aria-hidden="true"> {{batchStatus}}</span>
+    <span ng-if="batchStatus == 'STARTING'" class="glyphicon glyphicon-star-empty, text-primary"
+          aria-hidden="true"> {{batchStatus}}</span>
+    <span ng-if="batchStatus == 'STARTED'" class="glyphicon glyphicon-star text-primary"
+          aria-hidden="true"> {{batchStatus}}</span>
+</div>

@@ -37,13 +37,6 @@ var getIdFromUrl = function (url, tokenBeforeId) {
     return result;
 };
 
-var getColor = function (data) {
-    return data == 'COMPLETED' ? 'text-success' :
-        data == 'FAILED' || data == 'ABANDONED' ? 'text-danger' :
-            data == 'STOPPED' || data == 'STOPPING' ? 'text-warning' :
-                'text-primary';
-};
-
 var formatAsKeyValuePairs = function (obj) {
     var result = '';
     if (!obj) {
@@ -79,7 +72,6 @@ var dateCellFilter = 'date:"HH:mm:ss MM-dd-yyyy"';
 
 exports.parseJobParameters = parseJobParameters;
 exports.getIdFromUrl = getIdFromUrl;
-exports.getColor = getColor;
 exports.formatAsKeyValuePairs = formatAsKeyValuePairs;
 exports.DefaultGridOptions = DefaultGridOptions;
 exports.dateFormat = dateFormat;

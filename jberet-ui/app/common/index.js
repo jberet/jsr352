@@ -1,8 +1,18 @@
 'use strict';
 
 var angular = require('angular');
-require('./utils');
+var utils = require('./utils');
 
 angular.module('jberetUI.common', [])
     .service('batchRestService', ['$http', require('./batchRestService')])
-    .service('modalService', ['$uibModal', require('./modalService')]);
+    .service('modalService', ['$uibModal', require('./modalService')])
+    .directive('batchStatus', function () {
+        return {
+            restrict: 'A',
+            scope: {
+                batchStatus: '@'
+            },
+            templateUrl: 'template/directive/batch-status.html'
+        }
+    });
+;

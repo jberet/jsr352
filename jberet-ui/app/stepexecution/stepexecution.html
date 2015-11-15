@@ -17,15 +17,7 @@
         </tr>
         <tr>
             <td class="table-data-key-cell">Batch Status:</td>
-            <td class="table-data-value-cell" ng-class="getColor(stepExecutionEntity.batchStatus)">
-                <span ng-if="stepExecutionEntity.batchStatus == 'COMPLETED'" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span ng-if="stepExecutionEntity.batchStatus == 'FAILED'" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span ng-if="stepExecutionEntity.batchStatus == 'STOPPED'" class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-                <span ng-if="stepExecutionEntity.batchStatus == 'ABANDONED'" class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
-                <span ng-if="stepExecutionEntity.batchStatus == 'STOPPING'" class="glyphicon glyphicon-pause" aria-hidden="true"></span>
-                <span ng-if="stepExecutionEntity.batchStatus == 'STARTING'" class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
-                <span ng-if="stepExecutionEntity.batchStatus == 'STARTED'" class="glyphicon glyphicon-star" aria-hidden="true"></span>
-                {{stepExecutionEntity.batchStatus}}</td>
+            <td class="table-data-value-cell" batch-status="{{stepExecutionEntity.batchStatus}}"></td>
             <td class="table-data-key-cell">Exit Status:</td>
             <td class="table-data-value-cell">{{stepExecutionEntity.exitStatus}}</td>
         </tr>
