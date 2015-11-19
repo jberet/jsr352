@@ -14,6 +14,7 @@ var watchify = require('watchify');
 var assign = require('lodash.assign');
 var preprocessify = require('preprocessify');
 var argv = require('yargs').argv;
+var runSequence = require('run-sequence');
 var config = require('./config.json');
 
 var files = {
@@ -140,7 +141,7 @@ gulp.task('css', function () {
 });
 
 gulp.task('html', function () {
-    gulp.src(files.html, {base: './app'})
+    return gulp.src(files.html, {base: './app'})
         .pipe(gulp.dest(distDir))
 });
 
@@ -149,7 +150,7 @@ gulp.task('font', ['bootstrap-font', 'ui-grid-font']);
 
 gulp.task('bootstrap-font', function () {
     //bootstrap css (bundled in css/bundle.css) references font files in a sibling dir (../fonts)
-    gulp.src(files.bootstrapFont)
+    return gulp.src(files.bootstrapFont)
         .pipe(gulp.dest(distDir + 'fonts'));
 });
 
@@ -167,8 +168,17 @@ gulp.task('ui-grid-font', function () {
  * 3, browser-sync watches for any updates in dist dir, and push the new content to browser, including performing
  * css injection.
  */
-gulp.task('start', ['watch'], function () {
-    browserSync.init(files.dist, {
+gulp.task('serve', function(done) {
+   runSequence('watch', 'serve-only', done);
+});
+
+/**
+ * Just start browser-sync server, without running the 'build' task. This task is typically used when you know there is
+ * no new changes to be built. Any javascript file changes will still be automatically sync'ed to browser, but other
+ * files (html, image, css) will not.
+ */
+gulp.task('serve-only', function () {
+    return browserSync.init(files.dist, {
         server: {
             baseDir: distDir
         }
@@ -191,4 +201,4 @@ gulp.task('build', ['lint', 'img', 'js', 'css', 'html', 'font'], function () {
 
 });
 
-gulp.task('default', ['start']);
+gulp.task('default', ['serve']);

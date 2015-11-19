@@ -34,6 +34,7 @@
     "lodash.assign": "^3.2.0",
     "preprocessify": "0.0.6",
     "protractor": "^2.1.0",
+    "run-sequence": "^1.1.4",
     "shelljs": "^0.2.6",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",

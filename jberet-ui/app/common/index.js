@@ -13,6 +13,6 @@ angular.module('jberetUI.common', [])
                 batchStatus: '@'
             },
             templateUrl: 'template/directive/batch-status.html'
-        }
+        };
     });
-;
+

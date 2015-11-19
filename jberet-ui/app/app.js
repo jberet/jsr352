@@ -5,7 +5,6 @@ require('angular-ui-router');
 require('angular-touch');
 require('angular-animate');
 require('ui-grid');
-require('ui-bootstrap');
 require('ui-bootstrap-tpls');
 require('csv');
 //

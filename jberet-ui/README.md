@@ -47,13 +47,14 @@ with real value during gulp build process.  The final javascript is in `./dist/b
 
 ### Build, Assembly and Run the Application
 
-Running command `gulp`, or `gulp start`, or `npm start` in project root directory will serve the app, 
+Running command `gulp`, or `gulp serve`, or `npm start` in project root directory will serve the app, 
 watch any updates and automatically refresh browser.  The browser will automatically open at `http://localhost:3000`.
 
 gulp tasks include:
 
 * `default`: default to start task
-* `start`: build, watch, and start `browser-sync` server
+* `serve`: build, watch, and start `browser-sync` server
+* `serve-only`: start `browser-sync` server without `build` step
 * `build`: build the app, including steps like lint, js, css, html, font, img
 * `lint`: check quality of js and css
 * `jshint`: lint task for js
@@ -182,7 +183,7 @@ etc to function properly when an html page is opened via `file://` scheme instea
 ### Running the App during Development
 
 This project uses `browser-sync` to serve the app, watch any updates and automatically refresh browser. 
-Running `gulp` with default task, or `gulp start`task will start it.  `gulp start` task builds the whole app
+Running `gulp` with default task, or `gulp serve`task will start it.  `gulp serve` task builds the whole app
 and assemble it under `/dist` directory.
 
 Note that this command will block the terminal.  To stop `browser-sync`, just press `Ctrl-C`.

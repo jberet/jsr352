@@ -1,6 +1,5 @@
 'use strict';
 
-require('ui-bootstrap');
 require('ui-bootstrap-tpls');
 
 var modalService = function ($uibModal) {
