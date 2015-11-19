@@ -2,6 +2,7 @@
 
 var distDir = 'dist/';
 var distCssDir = distDir + 'css';
+var thirdPartyLicenseFile = '3rd-party-LICENSE.txt';
 
 var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')();
@@ -45,7 +46,11 @@ var files = {
 
     bootstrapFont: ['app/bower_components/bootstrap/dist/fonts/*'],
 
-    dist: ['dist/**/*.html', 'dist/css/**', 'dist/fonts/**', 'dist/img/**', 'dist/*.js']
+    dist: ['dist/**/*.html', 'dist/css/**', 'dist/fonts/**', 'dist/img/**', 'dist/*.js'],
+
+    license: 'app/LICENSE.txt',
+
+    thirdPartyLicense: 'app/bower_components/**/LICENSE*'
 };
 
 /**
@@ -160,6 +165,17 @@ gulp.task('ui-grid-font', function () {
         .pipe(gulp.dest(distCssDir));
 });
 
+/**
+ * Copy project LICENSE.txt and 3rd party license files to dist directory.
+ */
+gulp.task('license', function() {
+    gulp.src(files.thirdPartyLicense)
+        .pipe(plugins.concat(thirdPartyLicenseFile))
+        .pipe(gulp.dest(distDir));
+
+   return gulp.src(files.license)
+       .pipe(gulp.dest(distDir));
+});
 
 /**
  * To achieve live update and reload:
@@ -197,7 +213,7 @@ gulp.task('clean', function () {
     return del([distDir + '/**']);
 });
 
-gulp.task('build', ['lint', 'img', 'js', 'css', 'html', 'font'], function () {
+gulp.task('build', ['lint', 'img', 'js', 'css', 'html', 'font', 'license'], function () {
 
 });
 
