@@ -19,7 +19,7 @@ var batchRestService = function($http) {
     };
 
     this.startJob = function (jobXmlName, jobParameters) {
-        return $http.post(jobsUrl + '/' + jobXmlName + '/start', jobParameters);
+        return $http.post(jobsUrl + '/' + encodeURIComponent(jobXmlName) + '/start', jobParameters);
     };
 
     this.getJobInstances = function (jobName, start, count) {
@@ -27,7 +27,7 @@ var batchRestService = function($http) {
         var sep = '?';
 
         if (jobName) {
-            url += sep + 'jobName=' + jobName;
+            url += sep + 'jobName=' + encodeURIComponent(jobName);
             sep = '&';
         }
         if(start) {
@@ -42,7 +42,7 @@ var batchRestService = function($http) {
 
     this.getJobExecutions = function (running, jobName, jobInstanceId, jobExecutionId1) {
         if (running && jobName) {
-            return $http.get(jobExecutionsUrl + '/running?jobName=' + jobName);
+            return $http.get(jobExecutionsUrl + '/running?jobName=' + encodeURIComponent(jobName));
         } else if (jobExecutionId1) {
             return $http.get(jobExecutionsUrl + '?jobExecutionId1=' + jobExecutionId1 + '&jobInstanceId=' +
                 (jobInstanceId ? jobInstanceId : 0));
