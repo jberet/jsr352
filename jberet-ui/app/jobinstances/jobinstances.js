@@ -8,7 +8,7 @@ angular.module('jberetUI.jobinstances',
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('jobinstances', {
-            url: '/jobinstances?jobName',
+            url: '/jobinstances?jobName&start&count',
             templateUrl: 'jobinstances/jobinstances.html',
             controller: 'JobInstancesCtrl'
         });
@@ -33,7 +33,8 @@ angular.module('jberetUI.jobinstances',
 
             $scope.pageTitle = $stateParams.jobName ? 'Job Instances for Job ' + $stateParams.jobName : 'Job Instances';
 
-            batchRestService.getJobInstances($stateParams.jobName).then(function (responseData) {
+            batchRestService.getJobInstances($stateParams.jobName, $stateParams.start, $stateParams.count)
+                .then(function (responseData) {
                     $scope.gridOptions.data = responseData.data;
                 }, function (responseData) {
                     $log.debug(responseData);

@@ -22,11 +22,22 @@ var batchRestService = function($http) {
         return $http.post(jobsUrl + '/' + jobXmlName + '/start', jobParameters);
     };
 
-    this.getJobInstances = function (jobName) {
+    this.getJobInstances = function (jobName, start, count) {
+        var url = jobInstancesUrl;
+        var sep = '?';
+
         if (jobName) {
-            return $http.get(jobInstancesUrl + '?jobName=' + jobName);
+            url += sep + 'jobName=' + jobName;
+            sep = '&';
         }
-        return $http.get(jobInstancesUrl);
+        if(start) {
+            url += sep + 'start=' + start;
+            sep = '&';
+        }
+        if(count) {
+            url += sep + 'count=' + count;
+        }
+        return $http.get(url);
     };
 
     this.getJobExecutions = function (running, jobName, jobInstanceId, jobExecutionId1) {

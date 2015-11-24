@@ -50,7 +50,7 @@ var files = {
 
     license: 'app/LICENSE.txt',
 
-    thirdPartyLicense: 'app/bower_components/**/LICENSE*'
+    thirdPartyLicense: 'app/bower_components/**/*LICENSE*'
 };
 
 /**

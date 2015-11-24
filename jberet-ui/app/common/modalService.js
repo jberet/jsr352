@@ -29,22 +29,22 @@ var modalService = function ($uibModal) {
         angular.extend(tempModalDefaults, modalDefaults, customModalDefaults);
         angular.extend(tempModalOptions, modalOptions, customModalOptions);
         if (!tempModalDefaults.controller) {
-            tempModalDefaults.controller = function ($scope, $modalInstance) {
+            tempModalDefaults.controller = function ($scope, $uibModalInstance) {
                 $scope.modalOptions = tempModalOptions;
                 $scope.modalOptions.ok = function (result) {
                     var item = $scope.modalOptions.item;
 
                     if (item && Object.keys(item).length > 0) {
-                        $modalInstance.close($scope.modalOptions.item);
+                        $uibModalInstance.close($scope.modalOptions.item);
                     } else {
-                        $modalInstance.close(true);
+                        $uibModalInstance.close(true);
                     }
                 };
                 $scope.modalOptions.close = function (result) {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             };
-            tempModalDefaults.controller.$inject = ['$scope', '$modalInstance'];
+            tempModalDefaults.controller.$inject = ['$scope', '$uibModalInstance'];
         } else {
             tempModalDefaults.resolve.modalOptions = function () {
                 return tempModalOptions;
