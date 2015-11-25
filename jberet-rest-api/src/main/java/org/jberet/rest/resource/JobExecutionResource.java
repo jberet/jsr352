@@ -35,10 +35,11 @@ import org.jberet.rest.entity.StepExecutionEntity;
 public class JobExecutionResource {
 
     @GET
-    public JobExecutionEntity[] getJobExecutions(final @QueryParam("jobInstanceId") long jobInstanceId,
+    public JobExecutionEntity[] getJobExecutions(final @QueryParam("count") int count,
+                                                 final @QueryParam("jobInstanceId") long jobInstanceId,
                                                  final @QueryParam("jobExecutionId1") long jobExecutionId1,
                                                  final @Context UriInfo uriInfo) {
-        final JobExecutionEntity[] jobExecutionEntities = JobService.getInstance().getJobExecutions(jobInstanceId, jobExecutionId1);
+        final JobExecutionEntity[] jobExecutionEntities = JobService.getInstance().getJobExecutions(count, jobInstanceId, jobExecutionId1);
         setJobExecutionEntityHref(uriInfo, jobExecutionEntities);
         return jobExecutionEntities;
     }
