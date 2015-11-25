@@ -22,13 +22,6 @@ angular.module('jberetUI.jobinstances',
             var detailsLinkCell =
                 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="details({jobExecutionId: row.entity.latestJobExecutionId, jobName: row.entity.jobName, jobInstanceId: row.entity.instanceId, jobExecutionId1: row.entity.latestJobExecutionId})">{{COL_FIELD}}</a></div>';
 
-            $scope.dropdown = {
-                jobName: null,
-                start: 0,
-                count : 10,
-                isOpen : true
-            };
-
             $scope.gridOptions = new utils.DefaultGridOptions(15, true, 'job-instances.csv',
                 [
                     {name: 'instanceId', type: 'number'},

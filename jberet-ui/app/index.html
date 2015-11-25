@@ -18,51 +18,53 @@
   <img src="img/jberet_banner_1180px.png" width="100%">
 
   <ul class="nav nav-tabs nav-justified">
-      <li ui-sref-active="active"><a ui-sref="jobs">Jobs</a></li>
+      <li ui-sref-active="active">
+          <a ui-sref="jobs" ng-click="jobInstancesDropdown.isOpen=false; jobExecutionsDropdown.isOpen=false">Jobs</a>
+      </li>
 
       <li ui-sref-active="active">
-          <div on-toggle="toggled(open)" uib-dropdown auto-close="disabled" is-open="dropdown.isOpen">
-              <a href="#/jobinstances">Job Instances</a>
+          <div on-toggle="toggled(open)" uib-dropdown auto-close="disabled" is-open="jobInstancesDropdown.isOpen">
+              <a href="#/jobinstances" ng-click="jobInstancesDropdown.isOpen=false; jobExecutionsDropdown.isOpen=false">Job Instances</a>
               <span class="caret" uib-dropdown-toggle></span>
               <ul role="menu" class="col-md-12" uib-dropdown-menu>
                   <li role="menuitem">
                       <form class="form-horizontal">
                           <div class="form-group">
-                              <label for="dropdownJobNameInput" class="col-sm-3 control-label">Job Name</label>
+                              <label for="jobInstancesDropdownJobName" class="col-sm-4 control-label">Job Name</label>
 
-                              <div class="col-sm-8">
+                              <div class="col-sm-7">
                                   <input type="text" class="form-control input-small"
-                                         id="dropdownJobNameInput" ng-model="dropdown.jobName" placeholder="Job Name">
+                                         id="jobInstancesDropdownJobName" ng-model="jobInstancesDropdown.jobName" placeholder="Job Name">
                               </div>
                           </div>
                           <div class="form-group">
-                              <label for="dropdownStartInput" class="col-sm-3 control-label">Start from</label>
+                              <label for="jobInstancesDropdownStart" class="col-sm-4 control-label">Start from</label>
 
-                              <div class="col-sm-8">
+                              <div class="col-sm-7">
                                   <input type="number" min="0" class="form-control input-small"
-                                         id="dropdownStartInput" ng-model="dropdown.start"
+                                         id="jobInstancesDropdownStart" ng-model="jobInstancesDropdown.start"
                                          placeholder="Start Index in Results">
                               </div>
                           </div>
                           <div class="form-group">
-                              <label for="dropdownCountInput" class="col-sm-3 control-label">Count</label>
+                              <label for="jobInstancesDropdownCount" class="col-sm-4 control-label">Count</label>
 
-                              <div class="col-sm-8">
+                              <div class="col-sm-7">
                                   <input type="number" min="1" class="form-control input-small"
-                                         id="dropdownCountInput" ng-model="dropdown.count"
+                                         id="jobInstancesDropdownCount" ng-model="jobInstancesDropdown.count"
                                          placeholder="Count of Results">
                               </div>
                           </div>
 
                           <div class="form-group">
-                              <div class="col-sm-offset-5 col-sm-2">
-                                  <button type="button" class="btn btn-warning btn-sm" ng-click="dropdown.isOpen=false">
+                              <div class="col-sm-offset-4 col-sm-2">
+                                  <button type="button" class="btn btn-warning btn-sm" ng-click="jobInstancesDropdown.isOpen=false">
                                       Cancel
                                   </button>
                               </div>
                               <div class="col-sm-offset-1 col-sm-2">
-                                  <button type="button" class="btn btn-primary btn-sm" ng-click="dropdown.isOpen=false"
-                                          ui-sref="jobinstances({jobName: dropdown.jobName, start: dropdown.start, count:dropdown.count})">
+                                  <button type="button" class="btn btn-primary btn-sm" ng-click="jobInstancesDropdown.isOpen=false"
+                                          ui-sref="jobinstances({jobName: jobInstancesDropdown.jobName, start: jobInstancesDropdown.start, count:jobInstancesDropdown.count})">
                                       OK
                                   </button>
                               </div>
@@ -73,7 +75,58 @@
           </div>
       </li>
 
-      <li ui-sref-active="active"><a ui-sref="jobexecutions">Job Executions</a></li>
+      <li ui-sref-active="active">
+          <div on-toggle="toggled(open)" uib-dropdown auto-close="disabled" is-open="jobExecutionsDropdown.isOpen">
+              <a href="#/jobexecutions" ng-click="jobInstancesDropdown.isOpen=false; jobExecutionsDropdown.isOpen=false">Job Executions</a>
+              <span class="caret" uib-dropdown-toggle></span>
+              <ul role="menu" class="col-md-12" uib-dropdown-menu>
+                  <li role="menuitem">
+                      <form class="form-horizontal">
+                          <div class="form-group">
+                              <label for="jobExecutionsDropdownJobName" class="col-sm-5 control-label">Running Executions by Job Name</label>
+
+                              <div class="col-sm-6">
+                                  <input type="text" class="form-control input-small"
+                                         id="jobExecutionsDropdownJobName" ng-model="jobExecutionsDropdown.jobName" placeholder="Job Name">
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <label for="jobExecutionsDropdownCount" class="col-sm-5 control-label">Count</label>
+
+                              <div class="col-sm-6">
+                                  <input type="number" min="1" class="form-control input-small"
+                                         id="jobExecutionsDropdownCount" ng-model="jobExecutionsDropdown.count"
+                                         placeholder="Count of Results">
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <label for="jobExecutionsDropdownExecutionId" class="col-sm-5 control-label">Job Execution by Id</label>
+
+                              <div class="col-sm-6">
+                                  <input type="number" min="0" class="form-control input-small"
+                                         id="jobExecutionsDropdownExecutionId" ng-model="jobExecutionsDropdown.jobExecutionId"
+                                         placeholder="Job Execution Id">
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <div class="col-sm-offset-5 col-sm-2">
+                                  <button type="button" class="btn btn-warning btn-sm" ng-click="jobExecutionsDropdown.isOpen=false">
+                                      Cancel
+                                  </button>
+                              </div>
+                              <div class="col-sm-offset-1 col-sm-2">
+                                  <button type="button" class="btn btn-primary btn-sm" ng-click="jobExecutionsDropdown.isOpen=false"
+                                          ui-sref="jobexecutions({jobName: jobExecutionsDropdown.jobName, running: jobExecutionsDropdown.running, count: jobExecutionsDropdown.count, jobExecutionId: jobExecutionsDropdown.jobExecutionId})">
+                                      OK
+                                  </button>
+                              </div>
+                          </div>
+                      </form>
+                  </li>
+              </ul>
+          </div>
+      </li>
   </ul>
 
   <!--[if lt IE 7]>

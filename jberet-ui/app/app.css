@@ -60,3 +60,7 @@ button {
   vertical-align: top;
   font-size: small;
 }
+
+.caret {
+  border-width: 6px;
+}
