@@ -19,10 +19,62 @@
 
   <ul class="nav nav-tabs nav-justified">
       <li ui-sref-active="active"><a ui-sref="jobs">Jobs</a></li>
-      <li ui-sref-active="active"><a ui-sref="jobinstances">Job Instances</a></li>
+
+      <li ui-sref-active="active">
+          <div on-toggle="toggled(open)" uib-dropdown auto-close="disabled" is-open="dropdown.isOpen">
+              <a href="#/jobinstances">Job Instances</a>
+              <span class="caret" uib-dropdown-toggle></span>
+              <ul role="menu" class="col-md-12" uib-dropdown-menu>
+                  <li role="menuitem">
+                      <form class="form-horizontal">
+                          <div class="form-group">
+                              <label for="dropdownJobNameInput" class="col-sm-3 control-label">Job Name</label>
+
+                              <div class="col-sm-8">
+                                  <input type="text" class="form-control input-small"
+                                         id="dropdownJobNameInput" ng-model="dropdown.jobName" placeholder="Job Name">
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <label for="dropdownStartInput" class="col-sm-3 control-label">Start from</label>
+
+                              <div class="col-sm-8">
+                                  <input type="number" min="0" class="form-control input-small"
+                                         id="dropdownStartInput" ng-model="dropdown.start"
+                                         placeholder="Start Index in Results">
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <label for="dropdownCountInput" class="col-sm-3 control-label">Count</label>
+
+                              <div class="col-sm-8">
+                                  <input type="number" min="1" class="form-control input-small"
+                                         id="dropdownCountInput" ng-model="dropdown.count"
+                                         placeholder="Count of Results">
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <div class="col-sm-offset-5 col-sm-2">
+                                  <button type="button" class="btn btn-warning btn-sm" ng-click="dropdown.isOpen=false">
+                                      Cancel
+                                  </button>
+                              </div>
+                              <div class="col-sm-offset-1 col-sm-2">
+                                  <button type="button" class="btn btn-primary btn-sm" ng-click="dropdown.isOpen=false"
+                                          ui-sref="jobinstances({jobName: dropdown.jobName, start: dropdown.start, count:dropdown.count})">
+                                      OK
+                                  </button>
+                              </div>
+                          </div>
+                      </form>
+                  </li>
+              </ul>
+          </div>
+      </li>
+
       <li ui-sref-active="active"><a ui-sref="jobexecutions">Job Executions</a></li>
   </ul>
-
 
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
