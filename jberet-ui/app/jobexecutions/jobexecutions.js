@@ -8,9 +8,17 @@ angular.module('jberetUI.jobexecutions',
 
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider.state('jobexecutions', {
-            url: '/jobexecutions?jobName&running&jobExecutionId1&jobInstanceId',
+            url: '/jobexecutions?count&jobName&running&jobExecutionId1&jobInstanceId&jobExecutionId',
             templateUrl: 'jobexecutions/jobexecutions.html',
-            controller: 'JobexecutionsCtrl'
+            controller: 'JobexecutionsCtrl',
+
+            onEnter: ['$state', '$stateParams', function($state, $stateParams) {
+                if($stateParams.jobExecutionId && $stateParams.jobExecutionId > 0) {
+                    $state.go('details', {
+                        jobExecutionId: $stateParams.jobExecutionId
+                    })
+                }
+            }]
         });
     }])
 
@@ -71,7 +79,7 @@ angular.module('jberetUI.jobexecutions',
                 });
             };
 
-            batchRestService.getJobExecutions($stateParams.running, $stateParams.jobName, $stateParams.jobInstanceId, $stateParams.jobExecutionId1)
+            batchRestService.getJobExecutions($stateParams.count, $stateParams.running, $stateParams.jobName, $stateParams.jobInstanceId, $stateParams.jobExecutionId1)
                 .then(function (responseData) {
                     $scope.gridOptions.data = responseData.data;
                 }, function (responseData) {

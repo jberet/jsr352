@@ -40,15 +40,21 @@ var batchRestService = function($http) {
         return $http.get(url);
     };
 
-    this.getJobExecutions = function (running, jobName, jobInstanceId, jobExecutionId1) {
+    this.getJobExecutions = function (count, running, jobName, jobInstanceId, jobExecutionId1) {
+        var url = jobExecutionsUrl;
         if (running && jobName) {
-            return $http.get(jobExecutionsUrl + '/running?jobName=' + encodeURIComponent(jobName));
-        } else if (jobExecutionId1) {
-            return $http.get(jobExecutionsUrl + '?jobExecutionId1=' + jobExecutionId1 + '&jobInstanceId=' +
-                (jobInstanceId ? jobInstanceId : 0));
-        } else {
-            return $http.get(jobExecutionsUrl);
+            url += '/running?jobName=' + encodeURIComponent(jobName);
+            return $http.get(url);
         }
+        if (jobExecutionId1) {
+            url += '?jobExecutionId1=' + jobExecutionId1 + '&jobInstanceId=' + (jobInstanceId ? jobInstanceId : 0);
+            if(count && count > 0) {
+                url += '&count=' + count;
+            }
+        } else if (count && count > 0) {
+            url += '?count=' + count;
+        }
+        return $http.get(url);
     };
 
     this.getJobExecution = function (jobExecutionId) {

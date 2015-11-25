@@ -38,6 +38,15 @@
                               </div>
                           </div>
                           <div class="form-group">
+                              <label for="jobInstancesDropdownCount" class="col-sm-4 control-label">Count</label>
+
+                              <div class="col-sm-7">
+                                  <input type="number" min="1" class="form-control input-small"
+                                         id="jobInstancesDropdownCount" ng-model="jobInstancesDropdown.count"
+                                         placeholder="Count of Results">
+                              </div>
+                          </div>
+                          <div class="form-group">
                               <label for="jobInstancesDropdownStart" class="col-sm-4 control-label">Start from</label>
 
                               <div class="col-sm-7">
@@ -47,17 +56,12 @@
                               </div>
                           </div>
                           <div class="form-group">
-                              <label for="jobInstancesDropdownCount" class="col-sm-4 control-label">Count</label>
-
-                              <div class="col-sm-7">
-                                  <input type="number" min="1" class="form-control input-small"
-                                         id="jobInstancesDropdownCount" ng-model="jobInstancesDropdown.count"
-                                         placeholder="Count of Results">
+                              <div class="col-sm-offset-2 col-sm-2">
+                                  <button type="reset" class="btn btn-danger btn-sm" ng-click="jobInstancesDropdown={isOpen: true}">
+                                      Reset
+                                  </button>
                               </div>
-                          </div>
-
-                          <div class="form-group">
-                              <div class="col-sm-offset-4 col-sm-2">
+                              <div class="col-sm-offset-1 col-sm-2">
                                   <button type="button" class="btn btn-warning btn-sm" ng-click="jobInstancesDropdown.isOpen=false">
                                       Cancel
                                   </button>
@@ -110,13 +114,19 @@
                           </div>
 
                           <div class="form-group">
-                              <div class="col-sm-offset-5 col-sm-2">
+                              <div class="col-sm-offset-2 col-sm-2">
+                                  <button type="reset" class="btn btn-danger btn-sm" ng-click="jobExecutionsDropdown={isOpen: true}">
+                                      Reset
+                                  </button>
+                              </div>
+                              <div class="col-sm-offset-1 col-sm-2">
                                   <button type="button" class="btn btn-warning btn-sm" ng-click="jobExecutionsDropdown.isOpen=false">
                                       Cancel
                                   </button>
                               </div>
                               <div class="col-sm-offset-1 col-sm-2">
-                                  <button type="button" class="btn btn-primary btn-sm" ng-click="jobExecutionsDropdown.isOpen=false"
+                                  <button type="button" class="btn btn-primary btn-sm"
+                                          ng-click="jobExecutionsDropdown.isOpen=false; jobExecutionsDropdown.running = (jobExecutionsDropdown.jobName) ? true : null"
                                           ui-sref="jobexecutions({jobName: jobExecutionsDropdown.jobName, running: jobExecutionsDropdown.running, count: jobExecutionsDropdown.count, jobExecutionId: jobExecutionsDropdown.jobExecutionId})">
                                       OK
                                   </button>
