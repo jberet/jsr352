@@ -1,13 +1,20 @@
-<h4 class="text-center">Step Execution {{stepExecutionEntity.stepExecutionId}}</h4>
-<div class="btn-group pull-right" role="group">
-    <button type="button" class="btn btn-default " title="Back to Job Execution" ng-click="backToJobExecution()">
-        <span class="glyphicon glyphicon-backward" aria-hidden="true"></span> Back to Job Execution</button>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4 class="panel-title text-center">Step Execution {{stepExecutionEntity.stepExecutionId}}</h4>
+    </div>
+    <div class="panel-body">
+        <div class="btn-group pull-right" role="group">
+            <button type="button" class="btn btn-default " title="Back to Job Execution"
+                    ng-click="backToJobExecution()">
+                <span class="glyphicon glyphicon-backward" aria-hidden="true"></span> Back to Job Execution
+            </button>
 
-    <button type="button" class="btn btn-default" title="Refresh Current Step Execution" ng-click="refreshStepExecution()">
-        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</button>
-</div>
-<br/><br/>
-<div>
+            <button type="button" class="btn btn-default" title="Refresh Current Step Execution"
+                    ng-click="refreshStepExecution()">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh
+            </button>
+        </div>
+    </div>
     <table style="width: 85%" title="Step Execution {{stepExecutionEntity.stepExecutionId}} Details">
         <tr>
             <td class="table-data-key-cell">Step Name:</td>
@@ -37,12 +44,12 @@
                 height="175"
                 duration="150"
                 bind="chartData"
-                ></fs-bar>
+        ></fs-bar>
     </div>
 </div>
 
 <div>
     <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
-       close="closeAlert($index)">{{alert.msg}}
+               close="closeAlert($index)">{{alert.msg}}
     </uib-alert>
 </div>
