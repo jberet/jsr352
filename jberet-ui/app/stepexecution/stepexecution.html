@@ -1,40 +1,42 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h4 class="panel-title text-center">Step Execution {{stepExecutionEntity.stepExecutionId}}</h4>
-    </div>
-    <div class="panel-body">
-        <div class="btn-group pull-right" role="group">
-            <button type="button" class="btn btn-default " title="Back to Job Execution"
-                    ng-click="backToJobExecution()">
-                <span class="glyphicon glyphicon-backward" aria-hidden="true"></span> Back to Job Execution
-            </button>
-
-            <button type="button" class="btn btn-default" title="Refresh Current Step Execution"
-                    ng-click="refreshStepExecution()">
-                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh
-            </button>
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title text-center">Step Execution {{stepExecutionEntity.stepExecutionId}}</h4>
         </div>
+        <div class="panel-body">
+            <div class="btn-group pull-right" role="group">
+                <button type="button" class="btn btn-default " title="Back to Job Execution"
+                        ng-click="backToJobExecution()">
+                    <span class="glyphicon glyphicon-backward" aria-hidden="true"></span> Back to Job Execution
+                </button>
+
+                <button type="button" class="btn btn-default" title="Refresh Current Step Execution"
+                        ng-click="refreshStepExecution()">
+                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh
+                </button>
+            </div>
+        </div>
+        <table style="width: 85%" title="Step Execution {{stepExecutionEntity.stepExecutionId}} Details">
+            <tr>
+                <td class="table-data-key-cell">Step Name:</td>
+                <td class="table-data-value-cell">{{stepExecutionEntity.stepName}}</td>
+                <td class="table-data-key-cell">Job Name:</td>
+                <td class="table-data-value-cell">{{jobExecutionEntity.jobName}}</td>
+            </tr>
+            <tr>
+                <td class="table-data-key-cell">Batch Status:</td>
+                <td class="table-data-value-cell" batch-status="{{stepExecutionEntity.batchStatus}}"></td>
+                <td class="table-data-key-cell">Exit Status:</td>
+                <td class="table-data-value-cell">{{stepExecutionEntity.exitStatus}}</td>
+            </tr>
+            <tr>
+                <td class="table-data-key-cell">Start Time:</td>
+                <td class="table-data-value-cell">{{stepExecutionEntity.startTime | date:'medium'}}</td>
+                <td class="table-data-key-cell">End Time:</td>
+                <td class="table-data-value-cell">{{stepExecutionEntity.endTime | date:'medium'}}</td>
+            </tr>
+        </table>
     </div>
-    <table style="width: 85%" title="Step Execution {{stepExecutionEntity.stepExecutionId}} Details">
-        <tr>
-            <td class="table-data-key-cell">Step Name:</td>
-            <td class="table-data-value-cell">{{stepExecutionEntity.stepName}}</td>
-            <td class="table-data-key-cell">Job Name:</td>
-            <td class="table-data-value-cell">{{jobExecutionEntity.jobName}}</td>
-        </tr>
-        <tr>
-            <td class="table-data-key-cell">Batch Status:</td>
-            <td class="table-data-value-cell" batch-status="{{stepExecutionEntity.batchStatus}}"></td>
-            <td class="table-data-key-cell">Exit Status:</td>
-            <td class="table-data-value-cell">{{stepExecutionEntity.exitStatus}}</td>
-        </tr>
-        <tr>
-            <td class="table-data-key-cell">Start Time:</td>
-            <td class="table-data-value-cell">{{stepExecutionEntity.startTime | date:'medium'}}</td>
-            <td class="table-data-key-cell">End Time:</td>
-            <td class="table-data-value-cell">{{stepExecutionEntity.endTime | date:'medium'}}</td>
-        </tr>
-    </table>
 </div>
 
 <div id="step-metrics-chart" class="row-fluid">
