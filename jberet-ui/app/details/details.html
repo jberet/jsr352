@@ -1,75 +1,77 @@
 <div class="container-fluid">
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title text-center">Job Execution {{jobExecutionEntity.executionId}}</h4>
+        <div class="panel-heading" ng-click="isCollapsed = !isCollapsed">
+            <h4 class="panel-title text-center">Job Execution {{jobExecutionEntity.executionId}}
+                <span ng-class="isCollapsed ? 'glyphicon glyphicon-chevron-down pull-right': 'glyphicon glyphicon-chevron-up pull-right'"></span>
+            </h4>
         </div>
-        <div class="panel-body">
-            <div class="btn-group pull-right" role="group">
-                <button type="button" class="btn btn-default " title="Back to Job Executions"
-                        ng-click="backToJobExecutions()">
-                    <span class="glyphicon glyphicon-backward" aria-hidden="true"></span> Back to Job Executions
-                </button>
+        <div class="panel-collapse collapse" uib-collapse="isCollapsed">
+            <div class="panel-body">
+                <div class="btn-group pull-right" role="group">
+                    <button type="button" class="btn btn-default " title="Back to Job Executions"
+                            ng-click="backToJobExecutions()">
+                        <span class="glyphicon glyphicon-backward" aria-hidden="true"></span> Back to Job Executions
+                    </button>
 
-                <button type="button" class="btn btn-default " title="Stop a Running Job Execution"
-                        ng-disabled="stopDisabled" ng-click="stopJobExecution()">
-                    <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Stop
-                </button>
+                    <button type="button" class="btn btn-default " title="Stop a Running Job Execution"
+                            ng-disabled="stopDisabled" ng-click="stopJobExecution()">
+                        <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Stop
+                    </button>
 
-                <button type="button" class="btn btn-default" title="Restart a Failed or Stopped Job Execution"
-                        ng-disabled="restartDisabled" ng-click="restartJobExecution()">
-                    <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Restart
-                </button>
+                    <button type="button" class="btn btn-default" title="Restart a Failed or Stopped Job Execution"
+                            ng-disabled="restartDisabled" ng-click="restartJobExecution()">
+                        <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Restart
+                    </button>
 
-                <button type="button" class="btn btn-default" title="Abandon an Inactive Job Execution"
-                        ng-disabled="abandonDisabled" ng-click="abandonJobExecution()">
-                    <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> Abandon
-                </button>
+                    <button type="button" class="btn btn-default" title="Abandon an Inactive Job Execution"
+                            ng-disabled="abandonDisabled" ng-click="abandonJobExecution()">
+                        <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> Abandon
+                    </button>
 
-                <button type="button" class="btn btn-default" title="Refresh Current Job Execution"
-                        ng-click="refreshJobExecution()">
-                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh
-                </button>
+                    <button type="button" class="btn btn-default" title="Refresh Current Job Execution"
+                            ng-click="refreshJobExecution()">
+                        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh
+                    </button>
+                </div>
+
+                <table style="width: 85%" title="Job Execution {{jobExecutionEntity.executionId}} Details">
+                    <tr>
+                        <td class="table-data-key-cell">Job Name</td>
+                        <td class="table-data-value-cell">{{jobExecutionEntity.jobName}}</td>
+                        <td class="table-data-key-cell">Job Instance</td>
+                        <td class="table-data-value-cell">{{jobExecutionEntity.jobInstanceId}}</td>
+                    </tr>
+                    <tr>
+                        <td class="table-data-key-cell">Batch Status</td>
+                        <td class="table-data-value-cell" batch-status="{{jobExecutionEntity.batchStatus}}"></td>
+                        <td class="table-data-key-cell">Exit Status</td>
+                        <td class="table-data-value-cell">{{jobExecutionEntity.exitStatus}}</td>
+                    </tr>
+                    <tr>
+                        <td class="table-data-key-cell">Create Time</td>
+                        <td class="table-data-value-cell">{{jobExecutionEntity.createTime | date:'medium'}}</td>
+                        <td class="table-data-key-cell">Start Time</td>
+                        <td class="table-data-value-cell">{{jobExecutionEntity.startTime | date:'medium'}}</td>
+                    </tr>
+                    <tr>
+                        <td class="table-data-key-cell">Updated Time</td>
+                        <td class="table-data-value-cell">{{jobExecutionEntity.lastUpdatedTime | date:'medium'}}</td>
+                        <td class="table-data-key-cell">End Time</td>
+                        <td class="table-data-value-cell">{{jobExecutionEntity.endTime | date:'medium'}}</td>
+                    </tr>
+                </table>
+                <table style="table-layout: fixed; width: 85%">
+                    <tr>
+                        <td class="table-data-key-cell">Job Parameters</td>
+                        <td class="table-data-value-cell-long">{{formatAsKeyValuePairs(jobExecutionEntity.jobParameters)}}</td>
+                    </tr>
+                </table>
             </div>
-        </div>
-        <div>
-            <table style="width: 85%" title="Job Execution {{jobExecutionEntity.executionId}} Details">
-                <tr>
-                    <td class="table-data-key-cell">Job Name:</td>
-                    <td class="table-data-value-cell">{{jobExecutionEntity.jobName}}</td>
-                    <td class="table-data-key-cell">Job Instance Id:</td>
-                    <td class="table-data-value-cell">{{jobExecutionEntity.jobInstanceId}}</td>
-                </tr>
-                <tr>
-                    <td class="table-data-key-cell">Batch Status:</td>
-                    <td class="table-data-value-cell" batch-status="{{jobExecutionEntity.batchStatus}}"></td>
-                    <td class="table-data-key-cell">Exit Status:</td>
-                    <td class="table-data-value-cell">{{jobExecutionEntity.exitStatus}}</td>
-                </tr>
-                <tr>
-                    <td class="table-data-key-cell">Create Time:</td>
-                    <td class="table-data-value-cell">{{jobExecutionEntity.createTime | date:'medium'}}</td>
-                    <td class="table-data-key-cell">Start Time:</td>
-                    <td class="table-data-value-cell">{{jobExecutionEntity.startTime | date:'medium'}}</td>
-                </tr>
-                <tr>
-                    <td class="table-data-key-cell">Updated Time:</td>
-                    <td class="table-data-value-cell">{{jobExecutionEntity.lastUpdatedTime | date:'medium'}}</td>
-                    <td class="table-data-key-cell">End Time:</td>
-                    <td class="table-data-value-cell">{{jobExecutionEntity.endTime | date:'medium'}}</td>
-                </tr>
-            </table>
-            <table style="table-layout: fixed; width: 85%">
-                <tr>
-                    <td class="table-data-key-cell">Job Parameters:</td>
-                    <td class="table-data-value-cell-long">{{formatAsKeyValuePairs(jobExecutionEntity.jobParameters)}}
-                    </td>
-                </tr>
-            </table>
         </div>
     </div>
 </div>
 
-<h4 class="text-center">Step Executions</h4>
+<h5 class="text-center">Step Executions</h5>
 <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 
 <div>
