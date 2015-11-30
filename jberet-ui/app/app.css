@@ -26,7 +26,7 @@
   word-wrap: break-word;
 }
 
-.form-group.required .control-label:after {
+.label-for-required:after {
   content:"*";
   color:red;
 }
@@ -63,4 +63,9 @@ button {
 
 .caret {
   border-width: 6px;
+}
+
+.caret.caret-reversed {
+  border-top-width: 0;
+  border-bottom: 6px solid #000000;
 }

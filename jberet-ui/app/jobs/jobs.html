@@ -3,59 +3,67 @@
 
     <div ui-grid="gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 
-    <div>
-        <form name="startJobForm">
-            <div class="form-group required">
-                <table width="100%">
-                    <tr>
-                        <td width="10%">
-                            <label class='control-label' for="tbJobName">Job XML Name</label>
-                        </td>
-                        <td width="80%">
-                            <input id="tbJobName" type="text" title="Job Xml Name" size="68" autocomplete="off" required
-                                   ng-model="jobName" autofocus
-                                   uib-typeahead="jobNameEntity.jobName for jobNameEntity in gridOptions.data | filter:{jobName:$viewValue}"
-                                   placeholder="Job XML name, without '.xml' extension"/>
-                            <button type="button" class="btn btn-default" title="Start a Job Execution"
-                                    ng-disabled="startJobForm.$invalid"
-                                    ng-click="startJob()">
-                                <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start Job
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="10%">
-                            <label for="taJobParams">Enter Job Parameters</label>
-                        </td>
-                        <td width="80%" rowspan="8">
-                        <textarea id="taJobParams" title="Job Parameters" data-ng-model="jobParameters"
-                                  rows="5" cols="80"
-                                  placeholder="key = value pairs, each pair in its own line.  Or load job parameters from a text file"></textarea>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label>OR</label></td>
-                    </tr>
-                    <tr>
-                        <td><label for="jobParametersLoad">Load Job Parameters</label></td>
-                    </tr>
-                    <tr>
-                        <td width="10%" title="load job parameters from file" class="top-align">
-                            <input id="jobParametersLoad" type="file" accept="text/*" custom-on-change="uploadFile">
-                        </td>
-                    </tr>
-                </table>
+    <div class="container-fluid">
+        <div class="pane panel-default">
+            <div class="panel-body">
+                <form name="startJobForm">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label class='control-label label-for-required' for="tbJobName">Job XML Name</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <input id="tbJobName" class="form-control" type="text" title="Job Xml Name"
+                                       autocomplete="off"
+                                       required
+                                       ng-model="jobName" autofocus
+                                       uib-typeahead="jobNameEntity.jobName for jobNameEntity in gridOptions.data | filter:{jobName:$viewValue}"
+                                       placeholder="Job XML name, without '.xml' extension"/>
+                                <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" title="Start a Job Execution"
+                                        ng-disabled="startJobForm.$invalid"
+                                        ng-click="startJob()">
+                                    <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start Job
+                                </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <div class="row">
+                                <label class="control-label" for="taJobParams">Enter Job Parameters</label>
+                            </div>
+                            <div class="row">Or</div>
+                            <div class="row">
+                                <label class="control-label" for="jobParametersLoad">Load Job Parameters</label>
+                            </div>
+                            <div class="row">
+                                <input id="jobParametersLoad" type="file" accept="text/*"
+                                       custom-on-change="uploadFile">
+                            </div>
+                        </div>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" id="taJobParams" title="Job Parameters" data-ng-model="jobParameters"
+                                      rows="5"
+                                      placeholder="key = value pairs, each pair in its own line.  Or load job parameters from a text file">
+                            </textarea>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 
     <div>
         <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)"
                    template-url="template/alert/alert-x-right.html">
             <span ng-if="alert.type == 'danger'" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span ng-if="alert.type == 'success'" class="glyphicon glyphicon-ok" aria-hidden="true"></span> {{alert.msg}}
+            <span ng-if="alert.type == 'success'" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            {{alert.msg}}
             <span ng-if="stateTransitionParams">
-                <a ui-sref="details({{stateTransitionParams}})">View the new job execution {{jobExecutionEntity.executionId}}.</a>
+                <a ui-sref="details({{stateTransitionParams}})">View the new job execution
+                    {{jobExecutionEntity.executionId}}.</a>
             </span>
         </uib-alert>
     </div>

@@ -25,7 +25,7 @@
       <li ui-sref-active="active">
           <div on-toggle="toggled(open)" uib-dropdown auto-close="disabled" is-open="jobInstancesDropdown.isOpen">
               <a href="#/jobinstances" ng-click="jobInstancesDropdown.isOpen=false; jobExecutionsDropdown.isOpen=false">Job Instances</a>
-              <span class="caret" uib-dropdown-toggle></span>
+              <span ng-class="jobInstancesDropdown.isOpen ? 'caret caret-reversed' : 'caret'" uib-dropdown-toggle></span>
               <ul role="menu" class="col-md-12" uib-dropdown-menu>
                   <li role="menuitem">
                       <form class="form-horizontal">
@@ -82,7 +82,7 @@
       <li ui-sref-active="active">
           <div on-toggle="toggled(open)" uib-dropdown auto-close="disabled" is-open="jobExecutionsDropdown.isOpen">
               <a href="#/jobexecutions" ng-click="jobInstancesDropdown.isOpen=false; jobExecutionsDropdown.isOpen=false">Job Executions</a>
-              <span class="caret" uib-dropdown-toggle></span>
+              <span ng-class="jobExecutionsDropdown.isOpen ? 'caret caret-reversed' : 'caret'" uib-dropdown-toggle></span>
               <ul role="menu" class="col-md-12" uib-dropdown-menu>
                   <li role="menuitem">
                       <form class="form-horizontal">
