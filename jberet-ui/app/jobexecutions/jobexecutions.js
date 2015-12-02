@@ -16,7 +16,7 @@ angular.module('jberetUI.jobexecutions',
                 if($stateParams.jobExecutionId && $stateParams.jobExecutionId > 0) {
                     $state.go('details', {
                         jobExecutionId: $stateParams.jobExecutionId
-                    })
+                    });
                 }
             }]
         });
