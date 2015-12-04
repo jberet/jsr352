@@ -69,3 +69,7 @@ button {
   border-top-width: 0;
   border-bottom: 6px solid #000000;
 }
+
+.panel .panel-body form {
+  padding-left: 10px;
+}
