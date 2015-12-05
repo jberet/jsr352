@@ -73,3 +73,9 @@ button {
 .panel .panel-body form {
   padding-left: 10px;
 }
+
+.alert {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
