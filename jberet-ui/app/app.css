@@ -40,11 +40,6 @@ button {
   min-width: 11ch;
 }
 
-#step-metrics-chart {
-  margin-left: 5em;
-  margin-top: 2em;
-}
-
 .not-active {
   pointer-events: none;
   cursor: default;
