@@ -101,6 +101,17 @@ class SerializableData implements Serializable {
         return null;
     }
 
+    byte[] getSerialized() throws BatchRuntimeException {
+        if (serialized != null) {
+            return serialized;
+        }
+        try {
+            return BatchUtil.objectToBytes(raw);
+        } catch (final IOException e) {
+            throw BatchMessages.MESSAGES.failedToSerialize(e, raw);
+        }
+    }
+
     @Override
     public int hashCode() {
         int hash = 17;

@@ -83,6 +83,10 @@ public abstract class AbstractStepExecution extends AbstractExecution implements
         return deserialize(persistentUserData);
     }
 
+    public byte[] getPersistentUserDataSerialized() {
+        return persistentUserData == null ? null : persistentUserData.getSerialized();
+    }
+
     public void setPersistentUserData(final Serializable persistentUserData) {
         this.persistentUserData = SerializableData.of(persistentUserData);
     }
@@ -118,12 +122,20 @@ public abstract class AbstractStepExecution extends AbstractExecution implements
         return deserialize(readerCheckpointInfo);
     }
 
+    public byte[] getReaderCheckpointInfoSerialized() {
+        return readerCheckpointInfo == null ? null : readerCheckpointInfo.getSerialized();
+    }
+
     public void setReaderCheckpointInfo(final Serializable readerCheckpointInfo) {
         this.readerCheckpointInfo = SerializableData.of(readerCheckpointInfo);
     }
 
     public Serializable getWriterCheckpointInfo() {
         return deserialize(writerCheckpointInfo);
+    }
+
+    public byte[] getWriterCheckpointInfoSerialized() {
+        return writerCheckpointInfo == null ? null : writerCheckpointInfo.getSerialized();
     }
 
     public void setWriterCheckpointInfo(final Serializable writerCheckpointInfo) {

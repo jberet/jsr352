@@ -331,7 +331,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             update.put(TableColumns.BATCHSTATUS, stepExecution.getBatchStatus().name());
             update.put(TableColumns.EXITSTATUS, stepExecution.getExitStatus());
             update.put(TableColumns.EXECUTIONEXCEPTION, TableColumns.formatException(stepExecutionImpl.getException()));
-            update.put(TableColumns.PERSISTENTUSERDATA, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
+            update.put(TableColumns.PERSISTENTUSERDATA, stepExecutionImpl.getPersistentUserDataSerialized());
             update.put(TableColumns.READCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
             update.put(TableColumns.WRITECOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
             update.put(TableColumns.COMMITCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
@@ -340,8 +340,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
             update.put(TableColumns.PROCESSSKIPCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
             update.put(TableColumns.FILTERCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
             update.put(TableColumns.WRITESKIPCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
-            update.put(TableColumns.READERCHECKPOINTINFO, BatchUtil.objectToBytes(stepExecutionImpl.getReaderCheckpointInfo()));
-            update.put(TableColumns.WRITERCHECKPOINTINFO, BatchUtil.objectToBytes(stepExecutionImpl.getWriterCheckpointInfo()));
+            update.put(TableColumns.READERCHECKPOINTINFO, stepExecutionImpl.getReaderCheckpointInfoSerialized());
+            update.put(TableColumns.WRITERCHECKPOINTINFO, stepExecutionImpl.getWriterCheckpointInfoSerialized());
 
             db.getCollection(TableColumns.STEP_EXECUTION).update(
                     new BasicDBObject(TableColumns.STEPEXECUTIONID, stepExecution.getStepExecutionId()),
@@ -372,9 +372,9 @@ public final class MongoRepository extends AbstractPersistentRepository {
                 final DBObject update = new BasicDBObject(TableColumns.BATCHSTATUS, partitionExecution.getBatchStatus().name());
                 update.put(TableColumns.EXITSTATUS, partitionExecution.getExitStatus());
                 update.put(TableColumns.EXECUTIONEXCEPTION, TableColumns.formatException(partitionExecution.getException()));
-                update.put(TableColumns.PERSISTENTUSERDATA, BatchUtil.objectToBytes(partitionExecution.getPersistentUserData()));
-                update.put(TableColumns.READERCHECKPOINTINFO, BatchUtil.objectToBytes(partitionExecution.getReaderCheckpointInfo()));
-                update.put(TableColumns.WRITERCHECKPOINTINFO, BatchUtil.objectToBytes(partitionExecution.getWriterCheckpointInfo()));
+                update.put(TableColumns.PERSISTENTUSERDATA, partitionExecution.getPersistentUserDataSerialized());
+                update.put(TableColumns.READERCHECKPOINTINFO, partitionExecution.getReaderCheckpointInfoSerialized());
+                update.put(TableColumns.WRITERCHECKPOINTINFO, partitionExecution.getWriterCheckpointInfoSerialized());
 
                 db.getCollection(TableColumns.PARTITION_EXECUTION).update(query, new BasicDBObject("$set", update));
             } catch (final Exception e) {

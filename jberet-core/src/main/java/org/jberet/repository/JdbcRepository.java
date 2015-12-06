@@ -655,7 +655,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             preparedStatement.setString(2, stepExecution.getBatchStatus().name());
             preparedStatement.setString(3, stepExecution.getExitStatus());
             preparedStatement.setString(4, TableColumns.formatException(stepExecutionImpl.getException()));
-            preparedStatement.setBytes(5, BatchUtil.objectToBytes(stepExecution.getPersistentUserData()));
+            preparedStatement.setBytes(5, stepExecutionImpl.getPersistentUserDataSerialized());
             preparedStatement.setLong(6, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
             preparedStatement.setLong(7, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
             preparedStatement.setLong(8, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
@@ -664,8 +664,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             preparedStatement.setLong(11, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
             preparedStatement.setLong(12, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
             preparedStatement.setLong(13, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
-            preparedStatement.setBytes(14, BatchUtil.objectToBytes(stepExecutionImpl.getReaderCheckpointInfo()));
-            preparedStatement.setBytes(15, BatchUtil.objectToBytes(stepExecutionImpl.getWriterCheckpointInfo()));
+            preparedStatement.setBytes(14, stepExecutionImpl.getReaderCheckpointInfoSerialized());
+            preparedStatement.setBytes(15, stepExecutionImpl.getWriterCheckpointInfoSerialized());
 
             preparedStatement.setLong(16, stepExecution.getStepExecutionId());
 
@@ -695,9 +695,9 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 preparedStatement.setString(1, partitionExecution.getBatchStatus().name());
                 preparedStatement.setString(2, partitionExecution.getExitStatus());
                 preparedStatement.setString(3, TableColumns.formatException(partitionExecution.getException()));
-                preparedStatement.setBytes(4, BatchUtil.objectToBytes(partitionExecution.getPersistentUserData()));
-                preparedStatement.setBytes(5, BatchUtil.objectToBytes(partitionExecution.getReaderCheckpointInfo()));
-                preparedStatement.setBytes(6, BatchUtil.objectToBytes(partitionExecution.getWriterCheckpointInfo()));
+                preparedStatement.setBytes(4, partitionExecution.getPersistentUserDataSerialized());
+                preparedStatement.setBytes(5, partitionExecution.getReaderCheckpointInfoSerialized());
+                preparedStatement.setBytes(6, partitionExecution.getWriterCheckpointInfoSerialized());
                 preparedStatement.setInt(7, partitionExecution.getPartitionId());
                 preparedStatement.setLong(8, partitionExecution.getStepExecutionId());
 
