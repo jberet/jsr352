@@ -4,36 +4,13 @@
   font-size: small;
 }
 
-/*.app-footer {*/
-  /*position: absolute;*/
-  /*bottom: 10px;*/
-  /*right: 10px;*/
-/*}*/
-
-.table-data-key-cell {
-  width: 14%;
-  font-weight: bold;
-  text-align: right;
-  padding-right: 8px;
-}
-
-.table-data-value-cell {
-  width: 36%;
-}
-
-.table-data-value-cell-long {
-  width: 86%;
+.break-word {
   word-wrap: break-word;
 }
 
 .label-for-required:after {
   content:"*";
   color:red;
-}
-
-label textarea{
-  vertical-align: text-top;
-  font-weight: normal;
 }
 
 button {
@@ -51,11 +28,6 @@ button {
   opacity: 0.8;
 }
 
-.top-align {
-  vertical-align: top;
-  font-size: small;
-}
-
 .caret {
   border-width: 6px;
 }
@@ -63,6 +35,14 @@ button {
 .caret.caret-reversed {
   border-top-width: 0;
   border-bottom: 6px solid #000000;
+}
+
+.dl-panel-body {
+  padding-bottom: 0;
+}
+
+.dl-row {
+  margin-top: 10px;
 }
 
 .panel .panel-body form {
