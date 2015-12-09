@@ -41,6 +41,8 @@
                         <dl class="dl-horizontal">
                             <dt>Job Name</dt>
                             <dd>{{jobExecutionEntity.jobName}}</dd>
+                            <dt>Job Instance</dt>
+                            <dd>{{jobExecutionEntity.jobInstanceId}}</dd>
                             <dt>Create Time</dt>
                             <dd>{{jobExecutionEntity.createTime | date:'medium'}}</dd>
                             <dt>Updated Time</dt>
@@ -54,8 +56,6 @@
 
                     <div class="col-sm-6">
                         <dl class="dl-horizontal">
-                            <dt>Job Instance</dt>
-                            <dd>{{jobExecutionEntity.jobInstanceId}}</dd>
                             <dt>Batch Status</dt>
                             <dd batch-status="{{jobExecutionEntity.batchStatus}}"></dd>
                             <dt>Exit Status</dt>

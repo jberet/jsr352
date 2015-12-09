@@ -27,6 +27,8 @@
                         <dl class="dl-horizontal">
                             <dt>Step Name</dt>
                             <dd>{{stepExecutionEntity.stepName}}</dd>
+                            <dt>Job Name</dt>
+                            <dd>{{jobExecutionEntity.jobName}}</dd>
                             <dt>Start Time</dt>
                             <dd>{{stepExecutionEntity.startTime | date:'medium'}}</dd>
                             <dt>End Time</dt>
@@ -35,13 +37,10 @@
                     </div>
                     <div class="col-sm-6">
                         <dl class="dl-horizontal">
-                            <dt>Job Name</dt>
-                            <dd>{{jobExecutionEntity.jobName}}</dd>
                             <dt>Batch Status</dt>
                             <dd batch-status="{{stepExecutionEntity.batchStatus}}"></dd>
                             <dt>Exit Status</dt>
                             <dd>{{stepExecutionEntity.exitStatus}}</dd>
-
                         </dl>
                     </div>
                 </div>
