@@ -14,7 +14,7 @@
 }
 
 button {
-  min-width: 11ch;
+  min-width: 10ch;
 }
 
 .not-active {
@@ -32,7 +32,7 @@ button {
   border-width: 6px;
 }
 
-.caret.caret-reversed {
+.caret-reversed {
   border-top-width: 0;
   border-bottom: 6px solid #000000;
 }

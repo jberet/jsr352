@@ -46,28 +46,28 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="panel panel-default">
-            <div class="panel-heading" ng-click="metricsCollapsed = !metricsCollapsed">
-                <h4 class="panel-title text-center">Step Metrics
-                    <span ng-class="metricsCollapsed ? 'glyphicon glyphicon-chevron-down pull-right': 'glyphicon glyphicon-chevron-up pull-right'"></span>
-                </h4>
-            </div>
-            <div class="panel-collapse collapse" uib-collapse="metricsCollapsed">
-                <div class="panel-body">
-                    <fs-bar
-                            width="900"
-                            height="175"
-                            duration="150"
-                            bind="chartData"
-                    ></fs-bar>
-                </div>
+    <div class="panel panel-default">
+        <div class="panel-heading" ng-click="metricsCollapsed = !metricsCollapsed">
+            <h4 class="panel-title text-center">Step Metrics
+                <span ng-class="metricsCollapsed ? 'glyphicon glyphicon-chevron-down pull-right': 'glyphicon glyphicon-chevron-up pull-right'"></span>
+            </h4>
+        </div>
+        <div class="panel-collapse collapse" uib-collapse="metricsCollapsed">
+            <div class="panel-body">
+                <fs-bar
+                        width="900"
+                        height="175"
+                        duration="150"
+                        bind="chartData"
+                ></fs-bar>
             </div>
         </div>
     </div>
-
-    <div>
-        <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
-                   close="closeAlert($index)">{{alert.msg}}
-        </uib-alert>
-    </div>
+</div>
+<div>
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}"
+               close="closeAlert($index)">{{alert.msg}}
+    </uib-alert>
+</div>
