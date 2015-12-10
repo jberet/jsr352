@@ -14,12 +14,21 @@ angular.module('jberetUI.jobs',
         });
     }])
 
-    .directive('customOnChange', function () {
+    .directive('bindContentTo', function () {
         return {
             restrict: 'A',
+
             link: function (scope, element, attrs) {
-                var onChangeFunc = scope.$eval(attrs.customOnChange);
-                element.bind('change', onChangeFunc);
+                element.bind('change', function(event) {
+                    var file = event.target.files[0];
+                    var reader = new FileReader();
+                    reader.onload = function(){
+                        scope.$apply(function () {
+                            scope[attrs.bindContentTo] = reader.result;
+                        });
+                    };
+                    reader.readAsText(file);
+                });
             }
         };
     })
@@ -77,17 +86,6 @@ angular.module('jberetUI.jobs',
 
         $scope.getLinkActiveClass = function(value) {
             return value > 0 ? '' : 'not-active';
-        };
-
-        $scope.uploadFile = function(event){
-            var file = event.target.files[0];
-            var reader = new FileReader();
-            reader.onload = function(){
-                $scope.$apply(function () {
-                    $scope.jobParameters = reader.result;
-                });
-            };
-            reader.readAsText(file);
         };
 
         function getRecentJobs() {

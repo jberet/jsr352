@@ -39,12 +39,11 @@
                                 <label class="control-label" for="jobParametersLoad">Load Job Parameters</label>
                             </div>
                             <div class="row">
-                                <input id="jobParametersLoad" type="file" accept="text/*"
-                                       custom-on-change="uploadFile">
+                                <input id="jobParametersLoad" type="file" accept="text/*" bind-content-to="jobParameters">
                             </div>
                         </div>
                         <div class="col-sm-8">
-                            <textarea class="form-control" id="taJobParams" title="Job Parameters" data-ng-model="jobParameters"
+                            <textarea class="form-control" id="taJobParams" title="Job Parameters" ng-model="jobParameters"
                                       rows="5"
                                       placeholder="key = value pairs, each pair in its own line.  Or load job parameters from a text file">
                             </textarea>
