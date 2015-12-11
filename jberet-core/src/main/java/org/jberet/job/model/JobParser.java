@@ -448,23 +448,26 @@ public final class JobParser {
     private static Script parseScript(final XMLStreamReader reader) throws XMLStreamException {
         final Script script = new Script(getAttributeValue(reader, XmlAttribute.TYPE, false),
                 getAttributeValue(reader, XmlAttribute.SRC, false));
-        String characters = "";
+        StringBuilder charactersBuilder = new StringBuilder();
+        StringBuilder scriptBuilder = new StringBuilder();
         while (reader.hasNext()) {
             final int eventType = reader.next();
             switch (eventType) {
                 case CHARACTERS:
-                    characters = reader.getText();
+                	charactersBuilder.append(reader.getText());
                     break;
                 case CDATA:
-                    script.content = reader.getText();
+                	scriptBuilder.append(reader.getText());
                     break;
                 case END_ELEMENT:
                     if (XmlElement.forName(reader.getLocalName()) == XmlElement.SCRIPT) {
-                        if (script.content == null) {
-                            characters = characters.trim();
+                    	if (scriptBuilder.length() == 0) {
+                    		String characters = charactersBuilder.toString().trim();
                             if(!characters.isEmpty()) {
                                 script.content = characters;
                             }
+                        } else {
+                        	script.content = scriptBuilder.toString();
                         }
                         return script;
                     } else {
