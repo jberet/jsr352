@@ -19,6 +19,11 @@ import org.junit.Test;
 import javax.batch.runtime.BatchStatus;
 
 public class FileInfinispanRepositoryIT extends AbstractIT {
+	
+	static {
+		System.setProperty("jberet.infinispan.file.store", System.getProperty("java.io.tmpdir"));
+	}
+	
     @Test
     public void partitionWithInfinispanFile() throws Exception {
         startJobAndWait(infinispanRepositoryJobXml);

@@ -20,32 +20,32 @@ Cheng Fang - Initial API and implementation
 
         <distributed-cache name="JOB_INSTANCE" mode="ASYNC" l1-lifespan="0">
             <persistence>
-                <file-store path="/tmp/jberet.infinispan.file.store"/>
+                <file-store path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
         </distributed-cache>
 
         <distributed-cache name="JOB_EXECUTION" mode="ASYNC" l1-lifespan="0">
             <persistence>
-                <file-store path="/tmp/jberet.infinispan.file.store"/>
+                <file-store path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
         </distributed-cache>
 
         <distributed-cache name="STEP_EXECUTION" mode="ASYNC" l1-lifespan="0">
             <persistence>
-                <file-store path="/tmp/jberet.infinispan.file.store"/>
+                <file-store path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
         </distributed-cache>
 
         <distributed-cache name="PARTITION_EXECUTION" mode="ASYNC" l1-lifespan="0">
             <persistence>
-                <file-store path="/tmp/jberet.infinispan.file.store"/>
+                <file-store path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
         </distributed-cache>
 
         <distributed-cache name="seq" mode="SYNC" l1-lifespan="0">
             <transaction mode="BATCH" locking="PESSIMISTIC"/>
             <persistence>
-                <file-store preload="true" fetch-state="true" path="/tmp/jberet.infinispan.file.store"/>
+                <file-store preload="true" fetch-state="true" path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
         </distributed-cache>
     </cache-container>

@@ -16,9 +16,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
@@ -115,7 +117,11 @@ public class ExcelEventItemReader extends ExcelUserModelItemReader implements It
         documentInputStream = poifs.createDocumentInputStream("Workbook");
         final HSSFRequest req = new HSSFRequest();
         final MissingRecordAwareHSSFListener missingRecordAwareHSSFListener = new MissingRecordAwareHSSFListener(new HSSFListenerImpl(this));
-        formatListener = new FormatTrackingHSSFListener(missingRecordAwareHSSFListener);
+        /*
+         * Need to use English locale her because Jackson double parsing might break in certain regions
+         * where ',' is used as decimal separator instead of '.'.
+         */
+        formatListener = new FormatTrackingHSSFListener(missingRecordAwareHSSFListener, Locale.ENGLISH);
         req.addListenerForAllRecords(formatListener);
         final HSSFEventFactory factory = new HSSFEventFactory();
 
