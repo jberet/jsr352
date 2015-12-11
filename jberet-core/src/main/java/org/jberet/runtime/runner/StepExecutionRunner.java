@@ -62,9 +62,6 @@ import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
 
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements JobTask {
-	
-	public static final String ANALYZER_TX_PROPERTY = "org.jberet.transaction.analyzerTxDisabled";
-	
     Step step;
     private final List<StepListener> stepListeners = new ArrayList<StepListener>();
     Map<String, Class<?>> chunkRelatedListeners;
@@ -85,8 +82,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     final TransactionManager tm;
     final StepExecutionImpl stepExecution;
-    
-    private boolean analyzerTxEnabled;
 
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
@@ -98,11 +93,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         } else {
             tm = jobContext.getBatchEnvironment().getTransactionManager();
         }
-        
-        if (step.getProperties() != null) {
-        	analyzerTxEnabled = !Boolean.parseBoolean(step.getProperties().get(ANALYZER_TX_PROPERTY));
-        }
-        
         createStepListeners();
         initPartitionConfig();
     }
@@ -352,7 +342,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
         final List<PartitionExecutionImpl> fromAllPartitions = new ArrayList<PartitionExecutionImpl>();
 
-        if (analyzer != null && analyzerTxEnabled) {
+        if (analyzer != null) {
             tm.begin();
         }
         try {
@@ -387,14 +377,14 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 }
             }
 
-            if (analyzer != null && analyzerTxEnabled &&
+            if (analyzer != null &&
                     (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED)) {
                 tm.rollback();
             } else {
                 if (reducer != null) {
                     reducer.beforePartitionedStepCompletion();
                 }
-                if (analyzer != null && analyzerTxEnabled) {
+                if (analyzer != null) {
                     tm.commit();
                 }
             }
@@ -410,7 +400,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), step);
             consolidatedBatchStatus = BatchStatus.FAILED;
 
-            if (analyzer != null && analyzerTxEnabled) {
+            if (analyzer != null) {
                 try {
                     tm.rollback();
                 } catch (final Exception ee) {
