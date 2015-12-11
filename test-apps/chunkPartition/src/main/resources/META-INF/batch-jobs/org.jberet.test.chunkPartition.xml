@@ -15,6 +15,9 @@
 <job id="org.jberet.test.chunkPartition" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="org.jberet.test.chunkPartition.step1"
           parent="org.jberet.test.chunkPartition.step0" jsl-name="org.jberet.test.chunkPartitionFailComplete">
+        <properties>
+			<property name="org.jberet.transaction.analyzerTxDisabled" value="true"/>
+		</properties>
         <partition>
             <plan partitions="10" threads="#{jobParameters['thread.count']}">
                 <properties partition="0">
