@@ -9,8 +9,6 @@
 
 package org.jberet.spi;
 
-import javax.batch.api.partition.PartitionAnalyzer;
-
 /**
  * Keys used for JBeret specific configuration and job properties.
  *
