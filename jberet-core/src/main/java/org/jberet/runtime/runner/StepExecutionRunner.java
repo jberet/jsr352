@@ -83,7 +83,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     final TransactionManager tm;
     final StepExecutionImpl stepExecution;
 
-    private boolean analyzerTxEnabled;
+    private boolean analyzerTxEnabled = true;
 
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
