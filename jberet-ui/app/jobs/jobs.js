@@ -33,7 +33,8 @@ angular.module('jberetUI.jobs',
         };
     })
 
-    .controller('JobsCtrl', ['$scope', '$log', 'batchRestService', function ($scope, $log, batchRestService) {
+    .controller('JobsCtrl', ['$scope', '$log', 'batchRestService', 'localRecentJobsService',
+        function ($scope, $log, batchRestService, localRecentJobsService) {
         var jobInstancesLinkCell =
             '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobinstances({jobName: row.entity.jobName})">{{COL_FIELD}}</a></div>';
 
@@ -90,7 +91,24 @@ angular.module('jberetUI.jobs',
 
         function getRecentJobs() {
             batchRestService.getJobs().then(function (responseData) {
-                $scope.gridOptions.data = responseData.data;
+                //combine recent jobs list from the REST call with recent jobs saved in local storage
+                var recentJobsFromServer = responseData.data;
+                var recentJobsLocal = localRecentJobsService.getLocalRecentJobs();
+                if(recentJobsLocal) {
+                    for (var i = 0; i < recentJobsLocal.length; i++) {
+                        var localJobAlreadyIncluded = false;
+                        for(var j = 0; j < recentJobsFromServer.length; j++) {
+                            if(recentJobsLocal[i] === recentJobsFromServer[j].jobName) {
+                                localJobAlreadyIncluded = true;
+                                break;
+                            }
+                        }
+                        if(!localJobAlreadyIncluded) {
+                            recentJobsFromServer.push({jobName: recentJobsLocal[i]});
+                        }
+                    }
+                }
+                $scope.gridOptions.data = recentJobsFromServer;
             }, function (responseData) {
                 $log.debug(responseData);
             });

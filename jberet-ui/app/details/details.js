@@ -21,8 +21,9 @@ angular.module('jberetUI.details',
         });
     }])
 
-    .controller('DetailsCtrl', ['$scope', '$stateParams', '$state', '$location', '$log', 'modalService', 'batchRestService',
-        function ($scope, $stateParams, $state, $location, $log, modalService, batchRestService) {
+    .controller('DetailsCtrl', ['$scope', '$stateParams', '$state', '$location', '$log', 'modalService',
+        'batchRestService', 'localRecentJobsService',
+        function ($scope, $stateParams, $state, $location, $log, modalService, batchRestService, localRecentJobsService) {
             var stepExecutionLinkCell =
 '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="stepexecution({stepExecutionId: COL_FIELD, stepExecutionEntity: row.entity, jobExecutionEntity: grid.appScope.jobExecutionEntity, jobExecutionId: grid.appScope.jobExecutionEntity.executionId, jobTrace: grid.appScope.jobTrace})">{{COL_FIELD}}</a></div>';
 
@@ -64,6 +65,8 @@ angular.module('jberetUI.details',
                 $scope.restartDisabled = batchStatus != 'STOPPED' && batchStatus != 'FAILED';
                 $scope.abandonDisabled = batchStatus == 'STARTING' || batchStatus == 'STARTED' ||
                     batchStatus == 'STOPPING' || batchStatus == 'ABANDONED';
+
+                localRecentJobsService.saveToLocalRecentJobs($scope.jobExecutionEntity.jobName);
             }
 
             function getJobExecution(idPart) {
