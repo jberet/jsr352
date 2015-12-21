@@ -6,7 +6,7 @@ var localRecentJobsService = function () {
     var jobSeparator = '|';
 
     this.saveToLocalRecentJobs = function(jobName) {
-        if (jobName && typeof(Storage) !== "undefined") {
+        if (jobName && typeof(Storage) !== "undefined" && recentJobsLimit > 0) {
             var existingEntries = localStorage.getItem(recentJobsKey);
             if(existingEntries) {
                 var tokens = existingEntries.split(jobSeparator);
@@ -19,8 +19,7 @@ var localRecentJobsService = function () {
                     }
                     //and add the new job name to the head
                     tokens.unshift(jobName);
-                    var data = tokens.join(jobSeparator);
-                    localStorage.setItem(recentJobsKey, data);
+                    localStorage.setItem(recentJobsKey, tokens.join(jobSeparator));
                 }
             } else {
                 localStorage.setItem(recentJobsKey, jobName);
@@ -29,7 +28,7 @@ var localRecentJobsService = function () {
     };
 
     this.getLocalRecentJobs = function() {
-        if (typeof(Storage) !== "undefined") {
+        if (typeof(Storage) !== "undefined" && recentJobsLimit > 0) {
             var existingEntries = localStorage.getItem(recentJobsKey);
             if(existingEntries) {
                 return existingEntries.split(jobSeparator);

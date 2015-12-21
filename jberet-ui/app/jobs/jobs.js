@@ -45,7 +45,7 @@ angular.module('jberetUI.jobs',
         $scope.gridOptions = new utils.DefaultGridOptions(8, true, 'jobs.csv',
             [
                 {name: 'jobName'},
-                {name: 'numberOfJobInstances', type: 'number', cellTemplate: jobInstancesLinkCell},
+                {name: 'numberOfJobInstances', cellTemplate: jobInstancesLinkCell},
                 {name: 'numberOfRunningJobExecutions', type: 'number', cellTemplate: jobExecutionsLinkCell}
             ]
         );
@@ -104,7 +104,10 @@ angular.module('jberetUI.jobs',
                             }
                         }
                         if(!localJobAlreadyIncluded) {
-                            recentJobsFromServer.push({jobName: recentJobsLocal[i]});
+                            recentJobsFromServer.push({
+                                jobName: recentJobsLocal[i],
+                                numberOfJobInstances: 'View'
+                            });
                         }
                     }
                 }
