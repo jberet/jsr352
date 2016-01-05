@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,10 +23,13 @@ import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class ChunkPartitionIT extends AbstractIT {
     static final String jobXml = "org.jberet.test.chunkPartition";
     static final String jobChunkPartitionFailComplete = "org.jberet.test.chunkPartitionFailComplete";
     static final String jobChunkPartitionMetricsCombined = "org.jberet.test.chunkPartitionMetricsCombined";
+    static final String jobChunkPartitionRestart2StepsMapper = "org.jberet.test.chunkPartitionRestart2StepsMapper";
 
     @Test
     public void partitionThreads() throws Exception {
@@ -121,5 +124,28 @@ public class ChunkPartitionIT extends AbstractIT {
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_SKIP_COUNT));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_SKIP_COUNT));
         Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.FILTER_COUNT));
+    }
+
+    /**
+     * Runs the job {@link #jobChunkPartitionRestart2StepsMapper},
+     * which includes 2 partitioned steps with
+     * partition mappers. The job execution should fail at step1, and hence step2 will not be executed.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void failPartition2StepsMapper() throws Exception {
+        this.params = new Properties();
+        this.params.setProperty("writer.sleep.time", "0");
+
+        this.params.setProperty("reader.fail.on.values", String.valueOf(15));
+        startJobAndWait(jobChunkPartitionRestart2StepsMapper);
+
+        //no skippable or retryable exceptions are configured, so this job execution will just fail
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+
+        //step1 failed, and step2 did not get to run
+        assertEquals(1, jobExecution.getStepExecutions().size());
     }
 }
