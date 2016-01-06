@@ -41,7 +41,7 @@ public class IntegerArrayReader extends IntegerArrayReaderWriterProcessorBase im
         if (failOnValues != null && Arrays.binarySearch(failOnValues, result) >= 0 &&
                 (repeatFailure || !failedValues.contains(result))) {
             failedValues.add(result);
-            throw new ArithmeticException("Failing on value " + failOnValues);
+            throw new ArithmeticException("Failing on value " + Arrays.toString(failOnValues));
         }
 
         return result;

@@ -31,6 +31,13 @@ public class ChunkPartitionMapper implements PartitionMapper {
     @BatchProperty(name = "reader.fail.on.values")
     private String readerFailValues;
 
+    /**
+     * to configure mapper override setting
+     */
+    @Inject
+    @BatchProperty(name = "override")
+    private boolean override;
+
     @Override
     public PartitionPlan mapPartitions() throws Exception {
         final Properties[] partitionPropsArray = new Properties[partitionCount];
@@ -42,6 +49,11 @@ public class ChunkPartitionMapper implements PartitionMapper {
         plan.setPartitions(partitionCount);
         plan.setThreads(partitionCount);
         plan.setPartitionProperties(partitionPropsArray);
+
+        if (override) {
+            plan.setPartitionsOverride(true);
+        }
+
         return plan;
     }
 
