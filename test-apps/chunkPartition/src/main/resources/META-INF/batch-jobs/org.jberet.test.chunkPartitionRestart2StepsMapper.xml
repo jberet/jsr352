@@ -24,6 +24,7 @@
             <mapper ref="chunkPartitionMapper">
                 <properties>
                     <property name="reader.fail.on.values" value="#{jobParameters['reader.fail.on.values']}"/>
+                    <property name="override" value="#{jobParameters['override']}"/>
                 </properties>
             </mapper>
         </partition>
@@ -37,6 +38,9 @@
 
         <partition>
             <mapper ref="chunkPartitionMapper">
+                <properties>
+                    <property name="override" value="#{jobParameters['override']}"/>
+                </properties>
             </mapper>
         </partition>
     </step>

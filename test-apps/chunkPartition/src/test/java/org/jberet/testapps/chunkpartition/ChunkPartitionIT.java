@@ -30,6 +30,7 @@ public class ChunkPartitionIT extends AbstractIT {
     static final String jobChunkPartitionFailComplete = "org.jberet.test.chunkPartitionFailComplete";
     static final String jobChunkPartitionMetricsCombined = "org.jberet.test.chunkPartitionMetricsCombined";
     static final String jobChunkPartitionRestart2StepsMapper = "org.jberet.test.chunkPartitionRestart2StepsMapper";
+    static final String jobChunkPartitionRestart2StepsMapperOverride = "org.jberet.test.chunkPartitionRestart2StepsMapperOverride";
 
     @Test
     public void partitionThreads() throws Exception {
@@ -146,6 +147,24 @@ public class ChunkPartitionIT extends AbstractIT {
         assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
 
         //step1 failed, and step2 did not get to run
+        assertEquals(1, jobExecution.getStepExecutions().size());
+    }
+
+    /**
+     * Similar to {@link #failPartition2StepsMapper()}, except that in this test partition mapper override is set to true.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void failPartition2StepsMapperOverride() throws Exception {
+        this.params = new Properties();
+        this.params.setProperty("writer.sleep.time", "0");
+        this.params.setProperty("override", String.valueOf(true));
+        this.params.setProperty("reader.fail.on.values", String.valueOf(15));
+        startJobAndWait(jobChunkPartitionRestart2StepsMapperOverride);
+
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
         assertEquals(1, jobExecution.getStepExecutions().size());
     }
 }
