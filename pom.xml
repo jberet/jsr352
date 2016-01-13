@@ -96,6 +96,8 @@
 
         <version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>
 
+        <version.org.apache.kafka>0.9.0.0</version.org.apache.kafka>
+
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
     </properties>
@@ -493,6 +495,14 @@
                 <groupId>org.jboss.spec.javax.jms</groupId>
                 <artifactId>jboss-jms-api_2.0_spec</artifactId>
                 <version>${version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Kafka ItemReader & ItemWriter dependencies -->
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${version.org.apache.kafka}</version>
                 <scope>provided</scope>
             </dependency>
 

@@ -124,6 +124,12 @@
             <artifactId>jboss-jms-api_2.0_spec</artifactId>
         </dependency>
 
+        <!-- Kafka ItemReader & ItemWriter dependencies -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
+
         <!-- HornetQ ItemReader & ItemWriter dependencies -->
         <dependency>
             <groupId>org.hornetq</groupId>
