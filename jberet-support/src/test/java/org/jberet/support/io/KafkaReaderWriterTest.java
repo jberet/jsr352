@@ -21,8 +21,21 @@ import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
+/**
+ * Tests to verify {@link KafkaItemReader} and {@link KafkaItemWriter}.
+ * Before running tests, need to start Zookeeper and Kafka server, in their own terminals:
+ * <p>
+ * cd $KAFKA_HOME
+ * bin/zookeeper-server-start.sh config/zookeeper.properties
+ * bin/kafka-server-start.sh config/server.properties
+ * <p>
+ * For debugging purpose, sometimes you may want to manually view messages in a topic:
+ * bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic t1 --from-beginning
+ */
+@Ignore("Need to start Zookeeper and Kafka server before running these tests.")
 public class KafkaReaderWriterTest {
     private static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String writerTestJobName = "org.jberet.support.io.KafkaWriterTest.xml";
@@ -31,12 +44,17 @@ public class KafkaReaderWriterTest {
     static final String ibmStockTradeExpected1_10 = "09:30, 67040, 09:31, 10810,    09:39, 2500";
     static final String ibmStockTradeForbid1_10 = "09:40";
 
-    static final String ibmStockTradeCellProcessorsDateAsString =
-            "null; null; ParseDouble; ParseDouble; ParseDouble; ParseDouble; ParseDouble";
-
     static final String producerRecordKey = null;
-    static final String pollTimeout = String.valueOf(10000);
+    static final String pollTimeout = String.valueOf(1000);
 
+    /**
+     * First runs job {@link #writerTestJobName} that reads data from CSV file and sends to Kafka server with
+     * {@link KafkaItemWriter}.
+     * Then runs job {@link #readerTestJobName} that reads messages from Kafka server with
+     * {@link KafkaItemReader} and writes to output file with {@link CsvItemWriter}.
+     *
+     * @throws Exception
+     */
     @Test
     public void readIBMStockTradeCsvWriteKafkaBeanType() throws Exception {
         String topicPartition = "readIBMStockTradeCsvWriteKafkaBeanType" + System.currentTimeMillis() + ":0";
