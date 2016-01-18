@@ -12,12 +12,10 @@
 
 package org.jberet.support.io;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
@@ -37,20 +35,12 @@ import org.apache.kafka.common.TopicPartition;
  */
 @Named
 @Dependent
-public class KafkaItemReader implements ItemReader {
-    /**
-     * The file path or URL to the Kafka configuration properties file. See Kafka docs for valid keys and values.
-     *
-     * @see "org.apache.kafka.clients.consumer.ConsumerConfig"
-     */
-    @Inject
-    @BatchProperty
-    protected String configFile;
-
+public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemReader {
     /**
      * A list of topic-and-partition in the form of "topicName1:partitionNumber1, topicName2:partitionNumber2, ".
      * For example, "orders:0, orders:1, returns:0, returns:1".
      *
+     * @see org.jberet.support.io.KafkaItemReaderWriterBase#topicPartitionDelimiter
      * @see "org.apache.kafka.common.TopicPartition"
      */
     @Inject
@@ -75,7 +65,6 @@ public class KafkaItemReader implements ItemReader {
     public void open(final Serializable checkpoint) throws Exception {
         consumer = new KafkaConsumer(createConfigProperties());
         consumer.assign(createTopicPartitions());
-
     }
 
     @Override
@@ -91,12 +80,6 @@ public class KafkaItemReader implements ItemReader {
             final ConsumerRecord rec = recordsBuffer.next();
             return rec == null ? null : rec.value();
         }
-
-        return null;
-    }
-
-    @Override
-    public Serializable checkpointInfo() throws Exception {
         return null;
     }
 
@@ -108,19 +91,11 @@ public class KafkaItemReader implements ItemReader {
         }
     }
 
-    private Properties createConfigProperties() throws IOException {
-        final Properties configProps = new Properties();
-        if (configFile != null) {
-            configProps.load(ItemReaderWriterBase.getInputStream(configFile, false));
-        }
-        return configProps;
-    }
-
-    private List<TopicPartition> createTopicPartitions() {
+    protected List<TopicPartition> createTopicPartitions() {
         final List<TopicPartition> tps = new ArrayList<TopicPartition>();
         if (topicPartitions != null) {
             for (final String e : topicPartitions) {
-                final int colonPos = e.lastIndexOf(':');
+                final int colonPos = e.lastIndexOf(topicPartitionDelimiter);
                 if (colonPos > 0) {
                     tps.add(new TopicPartition(e.substring(0, colonPos), Integer.parseInt(e.substring(colonPos + 1))));
                 } else if (colonPos < 0) {
@@ -132,5 +107,4 @@ public class KafkaItemReader implements ItemReader {
         }
         return tps;
     }
-
 }
