@@ -13,7 +13,6 @@
 package org.jberet.support.io;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Properties;
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
@@ -35,10 +34,6 @@ public abstract class KafkaItemReaderWriterBase {
     @Inject
     @BatchProperty
     protected String configFile;
-
-    public Serializable checkpointInfo() throws Exception {
-        return null;
-    }
 
     protected Properties createConfigProperties() throws IOException {
         final Properties configProps = new Properties();

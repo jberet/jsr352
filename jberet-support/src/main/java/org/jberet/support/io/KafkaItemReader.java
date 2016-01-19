@@ -14,8 +14,10 @@ package org.jberet.support.io;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
@@ -25,8 +27,8 @@ import javax.inject.Named;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
+import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from Kafka topics.
@@ -61,12 +63,41 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
 
     protected Iterator<ConsumerRecord> recordsBuffer;
 
+    protected HashMap<String, Long> topicPartitionOffset = new HashMap<String, Long>();
+
+    @SuppressWarnings("unchecked")
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         consumer = new KafkaConsumer(createConfigProperties());
         consumer.assign(createTopicPartitions());
+
+        if (checkpoint != null) {
+            final HashMap<String, Long> chkp = (HashMap<String, Long>) checkpoint;
+            for (final Map.Entry<String, Long> e : chkp.entrySet()) {
+                final String key = e.getKey();
+                final String topic;
+                final int partition;
+                final int colonPos = key.lastIndexOf(topicPartitionDelimiter);
+                if (colonPos > 0) {
+                    topic = key.substring(0, colonPos);
+                    partition = Integer.parseInt(key.substring(colonPos + 1));
+                } else if (colonPos < 0) {
+                    topic = key;
+                    partition = 0;
+                } else {
+                    throw SupportMessages.MESSAGES.invalidCheckpoint(checkpoint);
+                }
+                consumer.seek(new TopicPartition(topic, partition), chkp.get(key));
+            }
+        }
     }
 
+    @Override
+    public Serializable checkpointInfo() throws Exception {
+        return topicPartitionOffset;
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public Object readItem() throws Exception {
         if (recordsBuffer == null || !recordsBuffer.hasNext()) {
@@ -78,7 +109,12 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
         }
         if (recordsBuffer.hasNext()) {
             final ConsumerRecord rec = recordsBuffer.next();
-            return rec == null ? null : rec.value();
+            if (rec == null) {
+                return null;
+            }
+            final Object val = rec.value();
+            topicPartitionOffset.put(rec.topic() + topicPartitionDelimiter + rec.partition(), rec.offset());
+            return val;
         }
         return null;
     }
@@ -101,9 +137,11 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
                 } else if (colonPos < 0) {
                     tps.add(new TopicPartition(e, 0));
                 } else {
-                    throw new KafkaException(topicPartitions.toString());
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, topicPartitions.toString(), "topicPartitions");
                 }
             }
+        } else {
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "topicPartitions");
         }
         return tps;
     }

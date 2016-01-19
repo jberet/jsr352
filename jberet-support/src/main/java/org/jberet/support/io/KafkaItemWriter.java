@@ -84,6 +84,11 @@ public class KafkaItemWriter extends KafkaItemReaderWriterBase implements ItemWr
     }
 
     @Override
+    public Serializable checkpointInfo() throws Exception {
+        return null;
+    }
+
+    @Override
     public void close() {
         if (producer != null) {
             producer.close();

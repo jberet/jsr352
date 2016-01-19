@@ -83,4 +83,7 @@ public interface SupportMessages {
     @Message(id = 60021, value = "Failed to determine parameterNames due to a complex SQL was supplied. please specify parameterNames explicitly")
     BatchRuntimeException failedToDetermineParameterNames();
 
+    @Message(id = 60022, value = "Invalid checkpoint data: %s")
+    BatchRuntimeException invalidCheckpoint(Object data);
+
 }

@@ -41,8 +41,8 @@ public class KafkaReaderWriterTest {
     static final String writerTestJobName = "org.jberet.support.io.KafkaWriterTest.xml";
     static final String readerTestJobName = "org.jberet.support.io.KafkaReaderTest.xml";
 
-    static final String ibmStockTradeExpected1_10 = "09:30, 67040, 09:31, 10810,    09:39, 2500";
-    static final String ibmStockTradeForbid1_10 = "09:40";
+    static final String ibmStockTradeExpected1_50 = "09:30, 67040, 09:31, 10810,    09:39, 2500, 10:18, 10:19";
+    static final String ibmStockTradeForbid1_50 = "10:20, 10:21, 10:22";
 
     static final String producerRecordKey = null;
     static final String pollTimeout = String.valueOf(1000);
@@ -60,7 +60,7 @@ public class KafkaReaderWriterTest {
         String topicPartition = "readIBMStockTradeCsvWriteKafkaBeanType" + System.currentTimeMillis() + ":0";
         testWrite0(writerTestJobName, StockTrade.class,
                 ExcelWriterTest.ibmStockTradeHeader, ExcelWriterTest.ibmStockTradeCellProcessors,
-                "1", "10", topicPartition, producerRecordKey);
+                "1", "50", topicPartition, producerRecordKey);
 
         // CsvItemReaderWriter uses header "Date, Time, Open, ..."
         // CsvItemReaderWriter has nameMapping "date, time, open, ..." to match java fields in StockTrade. CsvItemReaderWriter
@@ -69,7 +69,7 @@ public class KafkaReaderWriterTest {
         testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteJmsBeanType.out",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
                 topicPartition, pollTimeout,
-                ibmStockTradeExpected1_10, ibmStockTradeForbid1_10);
+                ibmStockTradeExpected1_50, ibmStockTradeForbid1_50);
     }
 
 
