@@ -23,6 +23,12 @@
                 </properties>
             </reader>
 
+            <processor ref="stockTradeFailureProcessor">
+                <properties>
+                    <property name="failOnTimes" value="#{jobParameters['failOnTimes']}"/>
+                </properties>
+            </processor>
+
             <!-- this writer configuration is the same as the writer in JdbcReaderTest.xml -->
             <writer ref="csvItemWriter">
                 <properties>

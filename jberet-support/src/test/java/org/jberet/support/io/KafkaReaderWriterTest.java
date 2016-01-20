@@ -20,9 +20,10 @@ import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests to verify {@link KafkaItemReader} and {@link KafkaItemWriter}.
@@ -43,6 +44,12 @@ public class KafkaReaderWriterTest {
 
     static final String ibmStockTradeExpected1_50 = "09:30, 67040, 09:31, 10810,    09:39, 2500, 10:18, 10:19";
     static final String ibmStockTradeForbid1_50 = "10:20, 10:21, 10:22";
+
+    static final String ibmStockTradeExpected1_20 = "09:30, 67040, 09:31,    09:49, 09:48, 09:47";
+    static final String ibmStockTradeForbid1_20 = "09:50, 09:51, 09:52";
+
+    static final String ibmStockTradeExpected21_50 = ibmStockTradeForbid1_20 + ", 10:19, 10:18, 10:17";
+    static final String ibmStockTradeForbid21_50 = ibmStockTradeExpected1_20 + ", " + ibmStockTradeForbid1_50;
 
     static final String producerRecordKey = null;
     static final String pollTimeout = String.valueOf(1000);
@@ -68,8 +75,45 @@ public class KafkaReaderWriterTest {
 
         testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteJmsBeanType.out",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
-                topicPartition, pollTimeout,
-                ibmStockTradeExpected1_50, ibmStockTradeForbid1_50);
+                topicPartition, pollTimeout, null,
+                ibmStockTradeExpected1_50, ibmStockTradeForbid1_50, BatchStatus.COMPLETED);
+    }
+
+    /**
+     * Tests {@link KafkaItemReader} checkpoint and offset management, and restart behavior.
+     * The test first reads data from CSV with {@link CsvItemReader}, and writes to Kafka server with {@link KafkaItemWriter}.
+     * Then, the test reads records from Kafka server with {@link KafkaItemReader}, and writes to CSV. This step is
+     * configured to fail inside the processor.
+     * Finally, the test restarts the previous failed job execution, and verifies that all remaining records left over
+     * from previous failed job execution are read, processed and written, and any records that were already successfully
+     * processed should not appear in this restart job execution.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void readIBMStockTradeCsvWriteKafkaRestart() throws Exception {
+        String topicPartition = "readIBMStockTradeCsvWriteKafkaRestart" + System.currentTimeMillis() + ":0";
+        testWrite0(writerTestJobName, StockTrade.class,
+                ExcelWriterTest.ibmStockTradeHeader, ExcelWriterTest.ibmStockTradeCellProcessors,
+                "1", "50", topicPartition, producerRecordKey);
+
+        final String writeResource = "readIBMStockTradeCsvWriteKafkaRestart.out";
+        final String failOnTimes = "09:52";
+        final long executionId =
+                testRead0(readerTestJobName, StockTrade.class, writeResource,
+                ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
+                topicPartition, pollTimeout, failOnTimes,
+                ibmStockTradeExpected1_20, ibmStockTradeForbid1_20, BatchStatus.FAILED);
+
+         final Properties restartJobParams = new Properties();
+         restartJobParams.setProperty("failOnTimes", "-1");
+         final long restartId = jobOperator.restart(executionId, restartJobParams);
+         final JobExecutionImpl restartExecutioin = (JobExecutionImpl) jobOperator.getJobExecution(restartId);
+         restartExecutioin.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.HOURS);
+         assertEquals(BatchStatus.COMPLETED, restartExecutioin.getBatchStatus());
+
+         CsvItemReaderWriterTest.validate(getWriteResourceFile(writeResource),
+                 ibmStockTradeExpected21_50, ibmStockTradeForbid21_50);
     }
 
 
@@ -100,18 +144,18 @@ public class KafkaReaderWriterTest {
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.HOURS);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
-    static void testRead0(final String jobName, final Class<?> beanType, final String writeResource,
+    static long testRead0(final String jobName, final Class<?> beanType, final String writeResource,
                    final String csvNameMapping, final String csvHeader,
-                   final String topicPartitions, final String pollTimeout,
-                   final String expect, final String forbid) throws Exception {
+                   final String topicPartitions, final String pollTimeout, final String failOnTimes,
+                   final String expect, final String forbid, final BatchStatus expectedStatus) throws Exception {
         final Properties params = CsvItemReaderWriterTest.createParams(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
 
         final File writeResourceFile;
         if (writeResource != null) {
-            writeResourceFile = new File(CsvItemReaderWriterTest.tmpdir, writeResource);
+            writeResourceFile = getWriteResourceFile(writeResource);
             params.setProperty("writeResource", writeResourceFile.getPath());
         } else {
             throw new RuntimeException("writeResource is null");
@@ -128,11 +172,20 @@ public class KafkaReaderWriterTest {
         if (pollTimeout != null) {
             params.setProperty("pollTimeout", pollTimeout);
         }
+        if (failOnTimes != null) {
+            params.setProperty("failOnTimes", failOnTimes);
+        }
 
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.HOURS);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(expectedStatus, jobExecution.getBatchStatus());
         CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
+
+        return jobExecutionId;
+    }
+
+    private static File getWriteResourceFile(final String writeResource) {
+        return new File(CsvItemReaderWriterTest.tmpdir, writeResource);
     }
 }

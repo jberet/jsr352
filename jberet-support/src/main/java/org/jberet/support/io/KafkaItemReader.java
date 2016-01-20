@@ -63,6 +63,12 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
 
     protected Iterator<ConsumerRecord> recordsBuffer;
 
+    /**
+     * A mapping of topic-partition and its offset to track the progress of each
+     * {@code TopicPartition}. The mapping key is of the form "&lt;topicName&gt;:&lt;partitionNumber&gt;, and the value
+     * is the offset of that {@code TopicPartition} as a {@code Long} number.
+     * This field serves as this item reader's checkpoint data, and must be serializable.
+     */
     protected HashMap<String, Long> topicPartitionOffset = new HashMap<String, Long>();
 
     @SuppressWarnings("unchecked")
@@ -87,7 +93,8 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
                 } else {
                     throw SupportMessages.MESSAGES.invalidCheckpoint(checkpoint);
                 }
-                consumer.seek(new TopicPartition(topic, partition), chkp.get(key));
+                final long newStartPosition = chkp.get(key) + 1;
+                consumer.seek(new TopicPartition(topic, partition), newStartPosition);
             }
         }
     }
