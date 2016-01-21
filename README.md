@@ -38,6 +38,7 @@ Increase `ulimit` to avoid such errors. For example,
 * [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [JSR 352 TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
 
 ####3rd-party & Community Extensions:
+* [JBoss Tools for Batch (Eclipse extensions, Wizards, Visual editing, etc)](http://tools.jboss.org/features/batch.html)
 * [jberet-eap6](https://github.com/fcorneli/jberet-eap6)
 * [jberetweb, job repository viewer](https://github.com/lbtc-xxx/jberetweb)
 * [jBatch Suite, Visual Modeling](https://java.net/projects/jbatchsuite)
@@ -45,6 +46,7 @@ Increase `ulimit` to avoid such errors. For example,
 ####Project Resources:
 * [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET), [Issues Awaiting Volunteers](https://issues.jboss.org/browse/JBERET-143?jql=project%20%3D%20JBERET%20AND%20fixVersion%20%3D%20%22Awaiting%20Volunteers%22)
 * [JBeret Documentation](http://docs.jboss.org/jberet/)
+* [JBoss EAP Quickstarts for Batch Processing](https://github.com/jboss-developer/jboss-eap-quickstarts)
 * [JBeret-dev Mailing List](https://lists.jboss.org/mailman/listinfo/jberet-dev)
 * [WildFly Forum](https://community.jboss.org/en/wildfly?view=discussions)
 * [JBeret Forum](https://community.jboss.org/en/jberet/)
