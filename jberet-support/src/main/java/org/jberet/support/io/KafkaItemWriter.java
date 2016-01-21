@@ -25,17 +25,21 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.jberet.support._private.SupportMessages;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemWriter} that sends data items to Kafka topics.
+ * An implementation of {@code ItemWriter} that sends data items to Kafka {@code TopicPartition} as specified in batch
+ * property {@link #topicPartition}.
  *
  * @see KafkaItemReader
+ * @see KafkaItemReaderWriterBase
+ *
  * @since 1.3.0
  */
 @Named
 @Dependent
 public class KafkaItemWriter extends KafkaItemReaderWriterBase implements ItemWriter {
     /**
-     * A topic partition in the form of "topicName:partitionNumber".
-     * For example, "orders:0".
+     * A topic partition in the form of {@code <topicName>:<partitionNumber>}. For example, "orders:0".
+     * Unlike {@link KafkaItemReader}, which accepts multiple {@code TopicPartition} as source, this writer class only
+     * accepts 1 {@code TopicPartition} as destination.
      *
      * @see KafkaItemReaderWriterBase#topicPartitionDelimiter
      * @see "org.apache.kafka.common.TopicPartition"
@@ -53,10 +57,31 @@ public class KafkaItemWriter extends KafkaItemReaderWriterBase implements ItemWr
     @BatchProperty
     protected String recordKey;
 
+    /**
+     * The Kafka producer responsible for sending the records.
+     */
     protected KafkaProducer producer;
+
+    /**
+     * The topic name extracted from {@link #topicPartition}. This field is used as the default destination topic name.
+     * Subclass may override method {@link #getTopic(Object)} to provide the topic name differently.
+     */
     private String topic;
+
+    /**
+     * The partition number extracted from {@link #topicPartition}. This field is used as the default destination
+     * partition number. Subclass may override method {@link #getPartition(Object)} to provide the partition number
+     * differently.
+     */
     private Integer partition;
 
+    /**
+     * During the writer opening, the Kafka producer is instantiated, based on the configuration properties as specified
+     * in the batch property {@link #configFile}.
+     *
+     * @param checkpoint item writer checkpoint data, currently not used
+     * @throws Exception if error occurs
+     */
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         producer = new KafkaProducer(createConfigProperties());
@@ -75,6 +100,13 @@ public class KafkaItemWriter extends KafkaItemReaderWriterBase implements ItemWr
         }
     }
 
+    /**
+     * Creates Kafka {@code ProducerRecord} and sends it to Kafka topic partition for each item in data {@code items}.
+     *
+     * @param items data items to be sent to Kafka server
+     *
+     * @throws Exception if error occurs
+     */
     @Override
     @SuppressWarnings("unchecked")
     public void writeItems(final List<Object> items) throws Exception {
@@ -83,11 +115,19 @@ public class KafkaItemWriter extends KafkaItemReaderWriterBase implements ItemWr
         }
     }
 
+    /**
+     * Returns null checkpoint info for this writer.
+     *
+     * @return null checkpoint info
+     */
     @Override
-    public Serializable checkpointInfo() throws Exception {
+    public Serializable checkpointInfo() {
         return null;
     }
 
+    /**
+     * Closes the Kafka producer.
+     */
     @Override
     public void close() {
         if (producer != null) {

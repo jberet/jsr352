@@ -23,6 +23,10 @@ import javax.inject.Inject;
  * @since 1.3.0
  */
 public abstract class KafkaItemReaderWriterBase {
+    /**
+     * Delimiter to separate topic name and partition number in a concatenated string.
+     * For example, {@code ordersTopic:5}.
+     */
     final static char topicPartitionDelimiter = ':';
 
     /**
@@ -35,6 +39,12 @@ public abstract class KafkaItemReaderWriterBase {
     @BatchProperty
     protected String configFile;
 
+    /**
+     * Loads properties from the path or URL specified in batch property {@link #configFile}, and returns the properties.
+     *
+     * @return {@code java.util.Properties} loaded from {@code configFile}
+     * @throws IOException if error occurs
+     */
     protected Properties createConfigProperties() throws IOException {
         final Properties configProps = new Properties();
         if (configFile != null) {

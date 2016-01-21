@@ -31,7 +31,18 @@ import org.apache.kafka.common.TopicPartition;
 import org.jberet.support._private.SupportMessages;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from Kafka topics.
+ * An implementation of {@code ItemReader} that reads data items from Kafka topics.
+ * This reader class keeps track of the current read position, including current topic name, topic partition number,
+ * and topic partition offset. Therefore, it is recommended to disable Kafka auto commit in Kafka consumer properties,
+ * e.g., {@code enable.auto.commit=false}. Kafka consumer properties are specified in batch property {@link #configFile}.
+ * <p>
+ * This reader class supports retry and restart, using the tracked read position as checkpoint info.
+ * <p>
+ * It is also recommended to turn off Kafka consumer automatic group management; instead manually assign topics and
+ * partitions for the consumer. See batch property {@link #topicPartitions}.
+ *
+ * @see KafkaItemWriter
+ * @see KafkaItemReaderWriterBase
  *
  * @since 1.3.0
  */
@@ -59,8 +70,18 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
     @BatchProperty
     protected long pollTimeout;
 
+    /**
+     * Kafka consumer instance based on configuration properties specified in {@link #configFile}.
+     * It is created in {@link #open(Serializable)} method, and closed in {@link #close()} method.
+     *
+     */
     protected KafkaConsumer consumer;
 
+    /**
+     * Holds records obtained from polling Kafka server, and feeds to {@link #readItem()} method one record a time.
+     * When it is null, or contains no more element, {@link #readItem()} method polls Kafka server to obtain more
+     * records.
+     */
     protected Iterator<ConsumerRecord> recordsBuffer;
 
     /**
@@ -71,6 +92,15 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
      */
     protected HashMap<String, Long> topicPartitionOffset = new HashMap<String, Long>();
 
+    /**
+     * During the reader opening, the Kafka consumer is instantiated, and {@code checkpoint}, if any, is analyzed to
+     * position the reader properly. The Kafka consumer is created based on the configuration properties as specified
+     * in the batch property {@link #configFile}. The consumer is then assigned topic partitions as specified in the
+     * batch property {@link #topicPartitions}.
+     *
+     * @param checkpoint checkpoint info, null for the first invocation in a new job execution
+     * @throws Exception if error occurs
+     */
     @SuppressWarnings("unchecked")
     @Override
     public void open(final Serializable checkpoint) throws Exception {
@@ -99,11 +129,28 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
         }
     }
 
+    /**
+     * Returns reader checkpoint info that includes topic name, partition number and partition offset for each
+     * topic partition assigned to current Kafka consumer.
+     *
+     * @return reader checkpoint info as {@code HashMap<String, Long>}
+     */
     @Override
-    public Serializable checkpointInfo() throws Exception {
+    public Serializable checkpointInfo() {
         return topicPartitionOffset;
     }
 
+    /**
+     * Reads 1 record and return its value object, and updates the current read position.
+     * Since Kafka consumer poll operation retrieves a collection of records, which are cached in this reader class to
+     * mimic the read-one-item-at-a-time behavior. Therefore, Kafka consumer poll operation is only invoked when the
+     * local cache does not exist or contains no more entry. If no more record can be retrieved from Kafka server, null
+     * is returned.
+     *
+     * @return the value object of the read record from Kafka server
+     *
+     * @throws Exception if error occurs
+     */
     @SuppressWarnings("unchecked")
     @Override
     public Object readItem() throws Exception {
@@ -126,6 +173,9 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
         return null;
     }
 
+    /**
+     * Closes the Kafka consumer.
+     */
     @Override
     public void close() {
         if (consumer != null) {
@@ -134,6 +184,11 @@ public class KafkaItemReader extends KafkaItemReaderWriterBase implements ItemRe
         }
     }
 
+    /**
+     * Creates and returns a list of {@code TopicPartition} based on the injected batch property {@link #topicPartitions}.
+     *
+     * @return a list of {@code org.apache.kafka.common.TopicPartition}
+     */
     protected List<TopicPartition> createTopicPartitions() {
         final List<TopicPartition> tps = new ArrayList<TopicPartition>();
         if (topicPartitions != null) {
