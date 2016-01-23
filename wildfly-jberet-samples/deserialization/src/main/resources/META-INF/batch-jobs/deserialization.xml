@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job id="deserialization" restartable="#{jobParameters['restartable']}" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="deserialization.step1">
+        <chunk item-count="3">
+            <reader ref="itemReader1">
+                <properties>
+                    <property name="fail.on" value="#{jobParameters['fail.on']}"/>
+                    <property name="number.limit" value="#{jobParameters['number.limit']}?:10;"/>
+                </properties>
+            </reader>
+            <writer ref="itemWriter1">
+            </writer>
+        </chunk>
+    </step>
+</job>

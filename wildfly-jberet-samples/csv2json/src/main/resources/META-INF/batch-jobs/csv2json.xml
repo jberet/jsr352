@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job id="csv2json" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="csv2json.step1" parent="csvItemReaderStep" jsl-name="csvItemReader">
+        <chunk>
+            <writer ref="jsonItemWriter">
+                <properties>
+                    <property name="resource" value="#{systemProperties['java.io.tmpdir']}/movies.csv.json"/>
+                    <property name="writeMode" value="overwrite"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>

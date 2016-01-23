@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job id="csv2mongoLookup" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="csv2mongoLookup.step1" parent="csvItemReaderStep" jsl-name="csvItemReader">
+        <chunk>
+            <writer ref="mongoItemWriter">
+                <properties>
+                    <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>
+                    <property name="database" value="testData"/>
+                    <property name="collection" value="movies.out"/>
+                    <property name="mongoClientLookup" value="java:global/env/MongoClient"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>

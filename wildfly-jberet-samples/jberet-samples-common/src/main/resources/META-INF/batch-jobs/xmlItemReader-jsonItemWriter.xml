@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job id="xmlItemReader-jsonItemWriter" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="xmlItemReader-jsonItemWriter-step" abstract="true">
+        <chunk>
+            <reader ref="xmlItemReader">
+                <properties>
+                    <property name="resource" value="https://raw.githubusercontent.com/jberet/jsr352/master/jberet-support/src/test/resources/movies-2012.xml"/>
+                    <property name="beanType" value="org.samples.wildfly.jberet.common.Movie"/>
+                    <property name="xmlFactoryLookup" value="#{jobProperties['xmlFactoryLookup']}"/>
+                </properties>
+            </reader>
+            <writer ref="jsonItemWriter">
+                <properties>
+                    <property name="resource" value="#{systemProperties['java.io.tmpdir']}/movies.xml.json"/>
+                    <property name="writeMode" value="overwrite"/>
+                    <property name="jsonFactoryLookup" value="#{jobProperties['jsonFactoryLookup']}"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>
