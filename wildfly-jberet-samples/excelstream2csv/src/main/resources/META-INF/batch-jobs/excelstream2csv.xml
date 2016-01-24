@@ -6,7 +6,7 @@
             <reader ref="excelEventItemReader">
                 <properties>
                     <property name="resource" value="IBM_unadjusted.xls"/>
-                    <property name="beanType" value="org.samples.wildfly.jberet.common.StockTrade"/>
+                    <property name="beanType" value="org.jberet.samples.wildfly.common.StockTrade"/>
                     <property name="sheetName" value="IBM Stock Minute Date (1998 - 2"/>
                     <property name="start" value="1"/>
                     <property name="headerRow" value="0"/>
@@ -17,7 +17,7 @@
                     <property name="resource" value="#{systemProperties['java.io.tmpdir']}/excelstream2csv.csv"/>
                     <property name="writeMode" value="overwrite"/>
                     <property name="header" value="date,time,open,high,low,close,volume"/>
-                    <property name="beanType" value="org.samples.wildfly.jberet.common.StockTrade"/>
+                    <property name="beanType" value="org.jberet.samples.wildfly.common.StockTrade"/>
                 </properties>
             </writer>
         </chunk>

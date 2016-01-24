@@ -4,7 +4,7 @@
     <step id="batchproperty.step1">
         <batchlet ref="batchPropertyBatchlet">
             <properties>
-                <property name="class" value="org.samples.wildfly.jberet.batchproperty.BatchPropertyBatchlet"/>
+                <property name="class" value="org.jberet.samples.wildfly.batchproperty.BatchPropertyBatchlet"/>
                 <property name="file" value="/tmp"/>
                 <property name="jar.files"
                           value="#{systemProperties['java.home']}/lib/jce.jar, #{systemProperties['java.home']}/lib/management-agent.jar"/>
