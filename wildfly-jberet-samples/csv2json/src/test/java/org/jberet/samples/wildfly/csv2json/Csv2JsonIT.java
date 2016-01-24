@@ -9,24 +9,22 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.samples.wildfly.csv2json;
 
-import javax.batch.runtime.BatchStatus;
-
-import com.gargoylesoftware.htmlunit.TextPage;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Test;
 
 public final class Csv2JsonIT extends BatchTestBase {
-    static final String CONTEXT_PATH = "csv2json";
-    static final String SERVLET_PATH = null;
-    static final String JOB_COMMAND = "start " + CONTEXT_PATH;
+    private static final String jobName = "csv2json";
 
     @Test
     public void testCsv2Json() throws Exception {
-        final TextPage page = runJob(CONTEXT_PATH, SERVLET_PATH, JOB_COMMAND);
-        final String content = page.getContent();
-        assertContainsBatchStatus(content, BatchStatus.COMPLETED);
+        startJobShouldComplete(jobName, null, 5000);
+    }
+
+    @Override
+    protected String getRestUrl() {
+        return BASE_URL + "csv2json/api";
     }
 }

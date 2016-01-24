@@ -14,6 +14,7 @@ package org.jberet.samples.wildfly.common;
 
 import java.net.URI;
 import java.util.Properties;
+import javax.batch.runtime.BatchStatus;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -26,6 +27,7 @@ import org.jberet.rest.entity.StepExecutionEntity;
 import org.jberet.rest.resource.JobExecutionResource;
 import org.jberet.rest.resource.JobInstanceResource;
 import org.jberet.rest.resource.JobResource;
+import org.junit.Assert;
 
 /**
  * Base class to be extended by concrete batch test cases.
@@ -42,6 +44,14 @@ public abstract class BatchTestBase {
      * @return the full REST API URL
      */
     protected abstract String getRestUrl();
+
+    protected void startJobShouldComplete(final String jobName, final Properties queryParams, final long waitMillis)
+            throws Exception {
+        final JobExecutionEntity jobExecution = startJob(jobName, queryParams);
+        Thread.sleep(waitMillis);
+        final JobExecutionEntity jobExecution2 = getJobExecution(jobExecution.getExecutionId());
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution2.getBatchStatus());
+    }
 
     protected JobExecutionEntity startJob(final String jobXmlName, final Properties queryParams) throws Exception {
         final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();

@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.jberet</groupId>
+        <groupId>org.jberet.samples</groupId>
         <artifactId>wildfly-jberet-samples</artifactId>
         <version>1.3.0.Beta1-SNAPSHOT</version>
     </parent>
@@ -34,30 +34,36 @@
         <dependency>
             <groupId>net.sf.supercsv</groupId>
             <artifactId>super-csv</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml</groupId>
             <artifactId>aalto-xml</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>stax2-api</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.jberet</groupId>
+            <groupId>org.jberet.samples</groupId>
             <artifactId>jberet-samples-common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -88,9 +94,9 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.samples.wildfly.jberet</groupId>
+                                    <groupId>org.jberet.samples</groupId>
                                     <artifactId>jberet-samples-common</artifactId>
-                                    <version>1.0-SNAPSHOT</version>
+                                    <version>${project.version}</version>
                                     <includes>**/batch-jobs/*</includes>
                                 </artifactItem>
                             </artifactItems>

@@ -12,11 +12,7 @@
 
 package org.jberet.samples.wildfly.batchproperty;
 
-import javax.batch.runtime.BatchStatus;
-
-import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class BatchPropertyIT extends BatchTestBase {
@@ -24,10 +20,7 @@ public class BatchPropertyIT extends BatchTestBase {
 
     @Test
     public void testBatchProperty() throws Exception {
-        final JobExecutionEntity jobExecution = startJob(jobName, null);
-        Thread.sleep(500);
-        final JobExecutionEntity jobExecution2 = getJobExecution(jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution2.getBatchStatus());
+        startJobShouldComplete(jobName, null, 500);
     }
 
     @Override
