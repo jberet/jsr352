@@ -51,16 +51,6 @@
             <artifactId>jackson-annotations</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml</groupId>
-            <artifactId>aalto-xml</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>stax2-api</artifactId>
-            <scope>runtime</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.jberet.samples</groupId>

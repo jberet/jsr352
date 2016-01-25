@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <job id="xml2json" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="csv2json.step1" parent="xmlItemReader-jsonItemWriter-step" jsl-name="xmlItemReader-jsonItemWriter"/>
+    <step id="xml2json.step1" parent="xmlItemReader-jsonItemWriter-step" jsl-name="xmlItemReader-jsonItemWriter"/>
 </job>
