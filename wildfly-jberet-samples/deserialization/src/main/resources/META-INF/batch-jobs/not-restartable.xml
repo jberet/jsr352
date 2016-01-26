@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job id="not-restartable" restartable="#{jobParameters['restartable']}?:true"
+     xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="not-restartable.step1" parent="deserialization.step1" jsl-name="deserialization" />
+</job>

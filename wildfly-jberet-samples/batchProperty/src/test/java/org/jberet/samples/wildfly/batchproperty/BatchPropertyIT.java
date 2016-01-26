@@ -12,6 +12,8 @@
 
 package org.jberet.samples.wildfly.batchproperty;
 
+import javax.batch.runtime.BatchStatus;
+
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Test;
 
@@ -20,7 +22,7 @@ public class BatchPropertyIT extends BatchTestBase {
 
     @Test
     public void testBatchProperty() throws Exception {
-        startJobShouldComplete(jobName, null, 500);
+        startJobCheckStatus(jobName, null, 500, BatchStatus.COMPLETED);
     }
 
     @Override
