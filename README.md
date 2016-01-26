@@ -36,6 +36,7 @@ Increase `ulimit` to avoid such errors. For example,
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
 * [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [JSR 352 TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
+* [wildfly-jberet-samples](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples): Sample batch processing apps that can be deployed to WildFly or JBoss EAP 7
 
 ####3rd-party & Community Extensions:
 * [JBoss Tools for Batch (Eclipse extensions, Wizards, Visual editing, etc)](http://tools.jboss.org/features/batch.html)

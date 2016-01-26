@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,24 +9,27 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.samples.wildfly.excelstream2csv;
 
 import javax.batch.runtime.BatchStatus;
 
-import com.gargoylesoftware.htmlunit.TextPage;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Test;
 
 public final class ExcelStream2CsvIT extends BatchTestBase {
-    static final String CONTEXT_PATH = "excelstream2csv";
-    static final String SERVLET_PATH = null;
-    static final String JOB_COMMAND = "start " + CONTEXT_PATH;
+    /**
+     * Job id and job xml name for job in excelstream2csv.xml
+     */
+    private static final String jobName = "excelstream2csv";
 
     @Test
-    public void testCsv2Json() throws Exception {
-        final TextPage page = runJob(CONTEXT_PATH, SERVLET_PATH, JOB_COMMAND);
-        final String content = page.getContent();
-        assertContainsBatchStatus(content, BatchStatus.COMPLETED);
+    public void testExcelStream2Csv() throws Exception {
+        startJobCheckStatus(jobName, null, 10000, BatchStatus.COMPLETED);
+    }
+
+    @Override
+    protected String getRestUrl() {
+        return BASE_URL + "excelstream2csv/api";
     }
 }

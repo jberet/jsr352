@@ -34,7 +34,11 @@
         <dependency>
             <groupId>net.sf.supercsv</groupId>
             <artifactId>super-csv</artifactId>
+            <scope>runtime</scope>
         </dependency>
+
+        <!-- the following jackson jars are provided in WildFly modules, so do not package them -->
+        <!-- see WEB-INF/jboss-deployment-structure.xml -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -47,17 +51,9 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml</groupId>
-            <artifactId>aalto-xml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>stax2-api</artifactId>
-        </dependency>
 
         <dependency>
-            <groupId>org.jberet</groupId>
+            <groupId>org.jberet.samples</groupId>
             <artifactId>jberet-samples-common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -66,10 +62,12 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

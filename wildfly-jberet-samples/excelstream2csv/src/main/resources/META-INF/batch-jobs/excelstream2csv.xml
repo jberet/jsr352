@@ -14,6 +14,7 @@
             </reader>
             <writer ref="csvItemWriter">
                 <properties>
+                    <!-- the app deployed to WildFly should have permission to write to tmpdir -->
                     <property name="resource" value="#{systemProperties['java.io.tmpdir']}/excelstream2csv.csv"/>
                     <property name="writeMode" value="overwrite"/>
                     <property name="header" value="date,time,open,high,low,close,volume"/>
