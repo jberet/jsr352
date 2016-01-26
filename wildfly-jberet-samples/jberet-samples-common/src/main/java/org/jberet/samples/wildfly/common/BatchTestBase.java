@@ -51,46 +51,80 @@ public abstract class BatchTestBase {
      * Starts a job, waits for it to finish, verifies the job execution batch status, and returns the
      * job execution id.
      *
-     * @param jobName the job name
-     * @param queryParams any query parameters to be passed as part of the REST request query parameters
-     * @param waitMillis number of milliseconds to wait for the job execution to finish
+     * @param jobName             the job name
+     * @param queryParams         any query parameters to be passed as part of the REST request query parameters
+     * @param waitMillis          number of milliseconds to wait for the job execution to finish
      * @param expectedBatchStatus expected job execution batch status
-     *
      * @return the job execution entity
      * @throws Exception if errors occurs
      */
     protected JobExecutionEntity startJobCheckStatus(final String jobName,
-                                               final Properties queryParams,
-                                               final long waitMillis,
-                                               final BatchStatus expectedBatchStatus) throws Exception {
+                                                     final Properties queryParams,
+                                                     final long waitMillis,
+                                                     final BatchStatus expectedBatchStatus) throws Exception {
         final JobExecutionEntity jobExecution = startJob(jobName, queryParams);
-        Thread.sleep(waitMillis);
-        final JobExecutionEntity jobExecution2 = getJobExecution(jobExecution.getExecutionId());
-        Assert.assertEquals(expectedBatchStatus, jobExecution2.getBatchStatus());
-        return jobExecution2;
+        return getCheckJobExecution(jobExecution.getExecutionId(), waitMillis, expectedBatchStatus);
     }
 
     /**
      * Restarts a job execution, waits for it to finish, and verifies the job execution batch status.
      *
-     * @param jobExecutionId the job execution id to restart
+     * @param jobExecutionId      the job execution id to restart
+     * @param queryParams         any query parameters to be passed as part of the REST request query parameters
+     * @param waitMillis          number of milliseconds to wait for the job execution to finish
+     * @param expectedBatchStatus expected job execution batch status
+     * @throws Exception if errors occurs
+     *
+     * @see #restartJobCheckStatus(String, Properties, long, BatchStatus)
+     */
+    protected void restartJobCheckStatus(final long jobExecutionId,
+                                         final Properties queryParams,
+                                         final long waitMillis,
+                                         final BatchStatus expectedBatchStatus) throws Exception {
+        final JobExecutionEntity jobExecution = restartJobExecution(jobExecutionId, queryParams);
+        getCheckJobExecution(jobExecution.getExecutionId(), waitMillis, expectedBatchStatus);
+    }
+
+    /**
+     * Finds the latest job execution for a job id, restarts it, waits for it to finish, and verifies the
+     * job execution batch status.
+     *
+     * @param jobName job Id
      * @param queryParams any query parameters to be passed as part of the REST request query parameters
      * @param waitMillis number of milliseconds to wait for the job execution to finish
      * @param expectedBatchStatus expected job execution batch status
-     *
      * @throws Exception if errors occurs
+     *
+     * @see #restartJobCheckStatus(long, Properties, long, BatchStatus)
      */
-    protected void restartJobCheckStatus(final long jobExecutionId,
-                                       final Properties queryParams,
-                                       final long waitMillis,
-                                       final BatchStatus expectedBatchStatus) throws Exception {
-        final JobExecutionEntity jobExecution = restartJobExecution(jobExecutionId, queryParams);
-        Thread.sleep(waitMillis);
-        final JobExecutionEntity jobExecution2 = getJobExecution(jobExecution.getExecutionId());
-        Assert.assertEquals(expectedBatchStatus, jobExecution2.getBatchStatus());
+    protected void restartJobCheckStatus(final String jobName,
+                                         final Properties queryParams,
+                                         final long waitMillis,
+                                         final BatchStatus expectedBatchStatus) throws Exception {
+        //get the latest job instance for the job id (name)
+        final JobInstanceEntity[] jobInstances = getJobInstances(jobName, 0, 1);
+        final long jobExecutionId = jobInstances[0].getLatestJobExecutionId();
+        restartJobCheckStatus(jobExecutionId, queryParams, waitMillis, expectedBatchStatus);
     }
 
-
+    /**
+     * Waits for milliseconds specified in {@code waitMillis}, retrieves the job execution, and checks its
+     * batch status against {@code expectedBatchStatus}.
+     *
+     * @param jobExecutionId      job execution id
+     * @param waitMillis          number of milliseconds to wait for the job execution to finish
+     * @param expectedBatchStatus expected job execution batch status
+     * @return the retrieves job execution
+     * @throws Exception if errors occurs
+     */
+    private JobExecutionEntity getCheckJobExecution(final long jobExecutionId,
+                                                    final long waitMillis,
+                                                    final BatchStatus expectedBatchStatus) throws Exception {
+        Thread.sleep(waitMillis);
+        final JobExecutionEntity jobExecution2 = getJobExecution(jobExecutionId);
+        Assert.assertEquals(expectedBatchStatus, jobExecution2.getBatchStatus());
+        return jobExecution2;
+    }
 
     protected JobExecutionEntity startJob(final String jobXmlName, final Properties queryParams) throws Exception {
         final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();

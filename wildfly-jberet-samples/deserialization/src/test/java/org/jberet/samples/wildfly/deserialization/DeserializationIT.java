@@ -15,12 +15,9 @@ package org.jberet.samples.wildfly.deserialization;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 
-import org.jberet.rest.entity.JobInstanceEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
-import org.junit.Ignore;
 import org.junit.Test;
 
-//@Ignore
 public class DeserializationIT extends BatchTestBase {
     /**
      * Job id and job xml name for deserialization tests (deserialization.xml)
@@ -72,13 +69,9 @@ public class DeserializationIT extends BatchTestBase {
      */
     @Test
     public void deserializationJobRestart() throws Exception {
-        //get the latest job instance for the job id (name)
-        final JobInstanceEntity[] jobInstances = getJobInstances(deserializationJobName, 0, 1);
-        final long jobExecutionId = jobInstances[0].getLatestJobExecutionId();
-
         final Properties params = new Properties();
         params.setProperty("fail.on", String.valueOf(-1));
-        restartJobCheckStatus(jobExecutionId, params, 500, BatchStatus.COMPLETED);
+        restartJobCheckStatus(deserializationJobName, params, 500, BatchStatus.COMPLETED);
     }
 
     /**
@@ -90,7 +83,6 @@ public class DeserializationIT extends BatchTestBase {
      * @see #startNotRestartableRestart()
      */
     @Test
-    @Ignore
     public void startNotRestartable() throws Exception {
         final Properties params = new Properties();
         params.setProperty("fail.on", String.valueOf(8));
@@ -109,19 +101,14 @@ public class DeserializationIT extends BatchTestBase {
      * @throws Exception
      * @see #startNotRestartable()
      */
-    @Ignore
     @Test(expected = javax.ws.rs.WebApplicationException.class)
     public void startNotRestartableRestart() throws Exception {
-        //get the latest job instance for the job id (name)
-        final JobInstanceEntity[] jobInstances = getJobInstances(notRestartableJobName, 0, 1);
-        final long jobExecutionId = jobInstances[0].getLatestJobExecutionId();
-
         final Properties params = new Properties();
         params.setProperty("fail.on", String.valueOf(-1));
 
         //the expected BatchStatus.FAILED will not be used here, since the restart operation will cause
         //internal server error, and no new restart job execution is ever created or run.
-        restartJobCheckStatus(jobExecutionId, params, 500, BatchStatus.FAILED);
+        restartJobCheckStatus(notRestartableJobName, params, 500, BatchStatus.FAILED);
     }
 
 
@@ -135,7 +122,6 @@ public class DeserializationIT extends BatchTestBase {
      * @throws Exception
      * @see #startJobNameDifferentRestart()
      */
-    @Ignore
     @Test
     public void startJobNameDifferent() throws Exception {
         final Properties params = new Properties();
@@ -151,15 +137,10 @@ public class DeserializationIT extends BatchTestBase {
      * @throws Exception
      * @see #startJobNameDifferent()
      */
-    @Ignore
     @Test
     public void startJobNameDifferentRestart() throws Exception {
-        //get the latest job instance for the job id (name)
-        final JobInstanceEntity[] jobInstances = getJobInstances(jobIdDifferentFromXmlName, 0, 1);
-        final long jobExecutionId = jobInstances[0].getLatestJobExecutionId();
-
         final Properties params = new Properties();
         params.setProperty("fail.on", String.valueOf(-1));
-        restartJobCheckStatus(jobExecutionId, params, 500, BatchStatus.COMPLETED);
+        restartJobCheckStatus(jobIdDifferentFromXmlName, params, 500, BatchStatus.COMPLETED);
     }
 }

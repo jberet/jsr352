@@ -29,7 +29,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jberet</groupId>
+            <groupId>org.jberet.samples</groupId>
             <artifactId>jberet-samples-common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -62,9 +62,9 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.samples.wildfly.jberet</groupId>
+                                    <groupId>org.jberet.samples</groupId>
                                     <artifactId>jberet-samples-common</artifactId>
-                                    <version>1.0-SNAPSHOT</version>
+                                    <version>${project.version}</version>
                                     <includes>**/batch-jobs/*</includes>
                                 </artifactItem>
                             </artifactItems>
