@@ -9,9 +9,9 @@ This sample webapp demonstrates the following features in jberet and jberet-supp
 
 * jberet-support and its dependencies are installed in WildFly server, and referenced by webapp via `MANIFEST.MF`
 
-While in wildfly-samples/jberet directory, to build:
+While in `wildfly-jberet-samples` directory, to build:
 
-    mvn clean install -pl csv2mongoLookup
+    mvn clean install -pl csv2mongoLookup,jberet-samples-common,.
 
 To start MongoDB instance and drop collection (movies.out) to avoid data conflict during insertion:
 
@@ -29,9 +29,9 @@ To deploy to WildFly:
 
 To run the webapp and start the batch job:
 
-    curl http://localhost:8080/csv2mongoLookup/\?jobName=csv2mongoLookup
+    curl http://localhost:8080/csv2mongoLookup/api/jobs/csv2mongoLookup/start
 
-(csv2mongoLookup after 8080/ is the context path, which is the war file name without .war extension.
-csv2mongoLookup after jobName= is the job name, which is the base name of `META-INF/batch-jobs/csv2mongoLookup.xml`)
+(`csv2mongoLookup` after 8080/ is the context path, which is the war file name without `.war` extension.
+`csv2mongoLookup` after `jobs` is the job name, which is the base name of `META-INF/batch-jobs/csv2mongoLookup.xml`)
 
 See WildFly server log for more details.

@@ -13,16 +13,24 @@ To more thoroughly verify serialization and deserialization behavior, configure 
 instead of the default in-memory job repository, through WildFly CLI.  The standalone.xml (or other server configuration
 file) should look like:
 
-    <subsystem xmlns="urn:jboss:domain:batch:1.0">
-        <job-repository>
-            <jdbc jndi-name="java:/jdbc/orderDB"/>
+    <subsystem xmlns="urn:jboss:domain:batch-jberet:1.0">
+        <default-job-repository name="jdbc"/>
+        <default-thread-pool name="batch"/>
+        <job-repository name="jdbc">
+            <jdbc data-source="ExampleDS"/>
         </job-repository>
-        <thread-pool>
-            <max-threads count="50"/>
-            <keepalive-time time="100" unit="milliseconds"/>
+        <thread-pool name="batch">
+            <max-threads count="10"/>
+            <keepalive-time time="30" unit="seconds"/>
         </thread-pool>
     </subsystem>
 
+
+To build this sample app, deploy to WildFly, and run all tests:
+
+```
+mvn clean install -Pwildfly
+```
 
 The following is the detailed steps for running such test:
 
@@ -30,20 +38,24 @@ The following is the detailed steps for running such test:
 * start WildFly
 * mvn package
 * deploy to WildFly
-* run org.jberet.testapps.deserialization.DeserializationIT.startJob test, and the job execution will fail
-* restart WildFly
-* run org.jberet.testapps.deserialization.DeserializationIT.restartJob test, and the job execution will complete
+* run `org.jberet.samples.wildfly.deserialization.DeserializationIT.deserializationJob` test, 
+and the job execution will fail
+* optionally, restart WildFly
+* run `org.jberet.samples.wildfly.deserialization.DeserializationIT.deserializationJobRestart` test, 
+and the job execution will complete
+
 
 This test app can also verify the restartable job attribute. The value of restartable attribute in job xml is controlled
 by the job parameter named "restartable". When a job is initially started with job parameter restartable=false, it cannot
 be restarted after the initial execution failed or stopped.
 
 * deploy to WildFly
-* run startNotRestartable, the job execution will fail as the test app
-throws exception, and the test will pass with the expected job failure.
-* restart WildFly to make sure the previous decision to ban restart was persisted and retrieved upon the next restart.
-* run org.jberet.testapps.deserialization.DeserializationIT.restartNotRestartable, the restart will fail with JobRestartException,
-since the initial job execution was configured not restartable.
+* run `org.jberet.samples.wildfly.deserialization.DeserializationIT.startNotRestartable`, 
+the job execution will fail as the test app throws exception, and the test will pass with the expected job failure.
+* optionally, restart WildFly to make sure the previous decision to ban restart was persisted and retrieved upon the next restart.
+* run `org.jberet.samples.wildfly.deserialization.DeserializationIT.startNotRestartableRestart`, 
+the restart will fail with JobRestartException, since the initial job execution was configured not restartable.
+
 
 This test app can also verify that a job whose job id differs from job xml file name can be started and restarted.
 When the job is first started, it is started with job xml name, and is configured to fail. When it is restarted with
@@ -51,7 +63,8 @@ the previous job execution id after WildFly server restart, the batch runtime sh
 from job xml name (the job cache is gone after WildFly restart), even though job id differs from job xml name.
 
 * deploy to WildFly
-* run org.jberet.testapps.deserialization.DeserializationIT.startJobNameDifferent, the job execution will fail as the test app
-throws exception, and the test will pass with the expected job failure.
-* restart WildFly
-* run org.jberet.testapps.deserialization.DeserializationIT.restartJobNameDifferent, which should complete successfully.
+* run `org.jberet.samples.wildfly.deserialization.DeserializationIT.startJobNameDifferent`, 
+the job execution will fail as the test app throws exception, and the test will pass with the expected job failure.
+* optionally, restart WildFly
+* run `org.jberet.samples.wildfly.deserialization.DeserializationIT.startJobNameDifferentRestart`, 
+which should complete successfully.
