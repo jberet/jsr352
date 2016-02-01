@@ -28,6 +28,12 @@ import javax.ws.rs.ext.Provider;
 import org.jberet.rest._private.RestAPILogger;
 import org.jberet.rest.entity.BatchExceptionEntity;
 
+/**
+ * Exception mapper for {@code BatchRuntimeException}, and maps various sub-types of {@code BatchRuntimeException}
+ * to appropriate response status.
+ *
+ * @since 1.3.0
+ */
 @Provider
 public class BatchExceptionMapper implements ExceptionMapper<BatchRuntimeException> {
 

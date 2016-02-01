@@ -17,6 +17,15 @@ import javax.batch.runtime.StepExecution;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+/**
+ * Represents a step execution, which includes fields such as step execution id,
+ * step name, and those fields inherited from {@link AbstractExecutionEntity}
+ * (start time, end time, batch status, and exit status).
+ *
+ * @see AbstractExecutionEntity
+ *
+ * @since 1.3.0
+ */
 @XmlRootElement
 @XmlType(propOrder =
         "stepExecutionId, stepName, batchStatus, exitStatus, startTime, endTime, metrics")

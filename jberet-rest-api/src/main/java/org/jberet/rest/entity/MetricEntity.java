@@ -15,6 +15,13 @@ package org.jberet.rest.entity;
 import java.io.Serializable;
 import javax.batch.runtime.Metric;
 
+/**
+ * Represents a step execution metric, which includes metric type and metric value.
+ *
+ * @see javax.batch.runtime.Metric
+ *
+ * @since 1.3.0
+ */
 public class MetricEntity implements Serializable, Metric {
     private static final long serialVersionUID = 717668174913816112L;
     private MetricType type;

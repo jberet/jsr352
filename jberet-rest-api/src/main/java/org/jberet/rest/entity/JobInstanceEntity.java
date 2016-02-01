@@ -19,6 +19,12 @@ import javax.batch.runtime.JobInstance;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+/**
+ * Represents a job instance, which includes job instance id, job name (id),
+ * number of job executions, and latest job execution id.
+ *
+ * @since 1.3.0
+ */
 @XmlRootElement
 @XmlType(propOrder = "instanceId, jobName, jobExecutions, latestJobExecutionId")
 public final class JobInstanceEntity implements JobInstance, Serializable {

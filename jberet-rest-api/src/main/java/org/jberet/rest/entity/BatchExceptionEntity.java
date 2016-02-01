@@ -19,6 +19,12 @@ import javax.xml.bind.annotation.XmlType;
 
 import com.google.common.base.Throwables;
 
+/**
+ * Represents a batch exception, {@code BatchRuntimeException}, which includes
+ * exception type (class), message, and stack trace text.
+ *
+ * @since 1.3.0
+ */
 @XmlRootElement
 @XmlType(propOrder = "type, message, stackTrace")
 public final class BatchExceptionEntity implements Serializable {

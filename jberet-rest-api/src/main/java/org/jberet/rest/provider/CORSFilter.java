@@ -19,6 +19,13 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
+/**
+ * A response filter that adds response headers to allow cross-origin resource sharing.
+ * This filter should be disabled for security-senstive applications, or where cross-origin resource sharing is
+ * enabled through other means.
+ *
+ * @since 1.3.0
+ */
 @Provider
 public class CORSFilter implements ContainerResponseFilter {
     @Override

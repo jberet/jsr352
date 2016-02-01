@@ -16,6 +16,16 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.batch.runtime.BatchStatus;
 
+/**
+ * The base class for {@link JobExecutionEntity} and {@link StepExecutionEntity},
+ * and includes common fields such as start time, end time, batch status,
+ * and exit status.
+ *
+ * @see JobExecutionEntity
+ * @see StepExecutionEntity
+ *
+ * @since 1.3.0
+ */
 public abstract class AbstractExecutionEntity implements Serializable {
     private static final long serialVersionUID = -6861630889634554990L;
 

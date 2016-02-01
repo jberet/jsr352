@@ -21,6 +21,16 @@ import javax.batch.runtime.JobExecution;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+/**
+ * Represents a job execution, which includes fields such as its href,
+ * job execution id, job name (id), create time, last update time,
+ * job parameters, job instance id, and those fields inherited from
+ * {@link AbstractExecutionEntity} (start time, end time, batch status, and exit status).
+ *
+ * @see AbstractExecutionEntity
+ *
+ * @since 1.3.0
+ */
 @XmlRootElement
 //@XmlType(propOrder =
 //"executionId, href, jobName, jobInstanceId, jobParameters, batchStatus, exitStatus, createTime, startTime, lastUpdatedTime, endTime")

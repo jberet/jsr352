@@ -16,6 +16,12 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+/**
+ * Represents a batch job, which includes information such as job name (id),
+ * number of job instances, and number of running job executions.
+ *
+ * @since 1.3.0
+ */
 @XmlRootElement
 @XmlType(propOrder = "jobName, numberOfJobInstances, numberOfRunningJobExecutions")
 public final class JobEntity implements Serializable {
