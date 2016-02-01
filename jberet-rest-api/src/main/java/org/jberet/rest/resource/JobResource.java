@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,8 +28,10 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.jberet.rest._private.RestAPIMessages;
 import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
+import org.jberet.rest.entity.JobInstanceEntity;
 
 @Path("jobs")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -48,6 +50,23 @@ public class JobResource {
                 build();
         jobExecutionData.setHref(jobExecutionDataUri.toString());
         return Response.created(jobExecutionDataUri).entity(jobExecutionData).build();
+    }
+
+    @Path("{jobXmlName}/restart")
+    @POST
+    public JobExecutionEntity restart(final @PathParam("jobXmlName") String jobXmlName,
+                          final @Context UriInfo uriInfo,
+                          final Properties jobParamsAsProps) {
+        final JobInstanceEntity[] jobInstances = JobService.getInstance().getJobInstances(jobXmlName, 0, 1);
+        if (jobInstances.length > 0) {
+            final long latestJobExecutionId = jobInstances[0].getLatestJobExecutionId();
+            final JobExecutionEntity jobExecutionEntity = JobService.getInstance().restart(
+                    latestJobExecutionId, JobResource.jobParametersFromUriInfoAndProps(uriInfo, jobParamsAsProps));
+            JobExecutionResource.setJobExecutionEntityHref(uriInfo, jobExecutionEntity);
+            return jobExecutionEntity;
+        } else {
+            throw RestAPIMessages.MESSAGES.invalidQueryParamValue("jobXmlName", jobXmlName);
+        }
     }
 
     @GET

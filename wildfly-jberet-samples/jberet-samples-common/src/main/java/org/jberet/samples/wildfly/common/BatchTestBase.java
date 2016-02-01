@@ -67,25 +67,6 @@ public abstract class BatchTestBase {
     }
 
     /**
-     * Restarts a job execution, waits for it to finish, and verifies the job execution batch status.
-     *
-     * @param jobExecutionId      the job execution id to restart
-     * @param queryParams         any query parameters to be passed as part of the REST request query parameters
-     * @param waitMillis          number of milliseconds to wait for the job execution to finish
-     * @param expectedBatchStatus expected job execution batch status
-     * @throws Exception if errors occurs
-     *
-     * @see #restartJobCheckStatus(String, Properties, long, BatchStatus)
-     */
-    protected void restartJobCheckStatus(final long jobExecutionId,
-                                         final Properties queryParams,
-                                         final long waitMillis,
-                                         final BatchStatus expectedBatchStatus) throws Exception {
-        final JobExecutionEntity jobExecution = restartJobExecution(jobExecutionId, queryParams);
-        getCheckJobExecution(jobExecution.getExecutionId(), waitMillis, expectedBatchStatus);
-    }
-
-    /**
      * Finds the latest job execution for a job id, restarts it, waits for it to finish, and verifies the
      * job execution batch status.
      *
@@ -95,16 +76,13 @@ public abstract class BatchTestBase {
      * @param expectedBatchStatus expected job execution batch status
      * @throws Exception if errors occurs
      *
-     * @see #restartJobCheckStatus(long, Properties, long, BatchStatus)
      */
     protected void restartJobCheckStatus(final String jobName,
                                          final Properties queryParams,
                                          final long waitMillis,
                                          final BatchStatus expectedBatchStatus) throws Exception {
-        //get the latest job instance for the job id (name)
-        final JobInstanceEntity[] jobInstances = getJobInstances(jobName, 0, 1);
-        final long jobExecutionId = jobInstances[0].getLatestJobExecutionId();
-        restartJobCheckStatus(jobExecutionId, queryParams, waitMillis, expectedBatchStatus);
+        final JobExecutionEntity jobExecution = restartJobExecution(jobName, queryParams);
+        getCheckJobExecution(jobExecution.getExecutionId(), waitMillis, expectedBatchStatus);
     }
 
     /**
@@ -133,8 +111,8 @@ public abstract class BatchTestBase {
         return target.request().post(emptyJsonEntity(), JobExecutionEntity.class);
     }
 
-    protected JobExecutionEntity restartJobExecution(final long jobExecutionId, final Properties queryParams) throws Exception {
-        final URI uri = getJobExecutionUriBuilder("restart").resolveTemplate("jobExecutionId", jobExecutionId).build();
+    protected JobExecutionEntity restartJobExecution(final String jobXmlName, final Properties queryParams) throws Exception {
+        final URI uri = getJobUriBuilder("restart").resolveTemplate("jobXmlName", jobXmlName).build();
         WebTarget target = getTarget(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
         return target.request().post(emptyJsonEntity(), JobExecutionEntity.class);
