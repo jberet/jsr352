@@ -36,6 +36,11 @@ import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
 
+/**
+ * Facade class to {@code JobOperator} interface.
+ *
+ * @since 1.3.0
+ */
 final class JobService {
     private static final JobService instance = new JobService();
 

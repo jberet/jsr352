@@ -33,11 +33,32 @@ import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
 
+/**
+ * REST resource class for batch job. This class supports job-related operations
+ * such as starting by job XML name, restarting the latest job execution of a
+ * job name (id), and listing currently known jobs.
+ *
+ * @since 1.3.0
+ */
 @Path("jobs")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class JobResource {
-
+    /**
+     * Starts a new job execution for the specified {@code jobXmlName}.
+     * Job parameters can be taken from query parameters, obtained from {@code uriInfo},
+     * or {@code jobParamsAsProps} as {@code java.util.Properties}, or both.
+     * When extracting query parameters from {@code uriInfo}, only the first value of
+     * each key is used. When a key exists in both query parameters and {@code props},
+     * the latter takes precedence.
+     *
+     * @param jobXmlName job xml name, which usually is the same as job id
+     * @param uriInfo {@code javax.ws.rs.core.UriInfo} that contains query parameters and other info
+     * @param jobParamsAsProps job parameters properties
+     *
+     * @return {@code javax.ws.rs.core.Response}, which includes response status and newly
+     * started job execution of type {@link JobExecutionEntity}
+     */
     @Path("{jobXmlName}/start")
     @POST
     public Response start(final @PathParam("jobXmlName") String jobXmlName,
@@ -52,6 +73,30 @@ public class JobResource {
         return Response.created(jobExecutionDataUri).entity(jobExecutionData).build();
     }
 
+    /**
+     * Restarts the most recent job execution of a job name/id, with optional restart
+     * job parameters.
+     * <p>
+     * Job parameters can be taken from query parameters, obtained from {@code uriInfo},
+     * or {@code jobParamsAsProps} as {@code java.util.Properties}, or both.
+     * When extracting query parameters from {@code uriInfo}, only the first value of
+     * each key is used. When a key exists in both query parameters and {@code props},
+     * the latter takes precedence.
+     * <p>
+     * Job parameters in the previous job execution that is to be restarted will continue
+     * to be used in the restart job execution. Job parameters (as query parameters or
+     * {@code java.util.Properties}) in the current invocation will complement and
+     * override any same-keyed job parameters.
+     *
+     * @param jobXmlName job name/id, whose most recent job execution will be restarted
+     * @param uriInfo {@code javax.ws.rs.core.UriInfo} that contains additional query parameters and other info
+     * @param jobParamsAsProps additional job parameters properties
+     *
+     * @return {@code org.jberet.rest.entity.JobExecutionEntity} for the new job execution
+     *
+     * @see #start(String, UriInfo, Properties)
+     * @see JobExecutionResource#restart(long, UriInfo, Properties)
+     */
     @Path("{jobXmlName}/restart")
     @POST
     public JobExecutionEntity restart(final @PathParam("jobXmlName") String jobXmlName,
@@ -69,12 +114,29 @@ public class JobResource {
         }
     }
 
+    /**
+     * Gets all jobs known to the current batch runtime.
+     * Note that historical jobs that are not currently loaded in the batch runtime
+     * will not be included in the result.
+     *
+     * @return array of {@code org.jberet.rest.entity.JobEntity} known to the batch runtime
+     */
     @GET
     public JobEntity[] getJobs() {
-        final JobEntity[] jobEntities = JobService.getInstance().getJobs();
-        return jobEntities;
+        return JobService.getInstance().getJobs();
     }
 
+    /**
+     * Combines the properties from query parameters in {@code uriInfo} with the
+     * {@code java.util.Properties} object {@code props}. When extracting
+     * query parameters from {@code uriInfo}, only the first value of each key is
+     * used. When a key exists in both query parameters and {@code props}, the latter
+     * takes precedence.
+     *
+     * @param uriInfo the {@code javax.ws.rs.core.UriInfo} to extract query parameters
+     * @param props the {@code java.util.Properties} object
+     * @return a combined {@code java.util.Properties}
+     */
     static Properties jobParametersFromUriInfoAndProps(final UriInfo uriInfo, final Properties props) {
         final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
         if (queryParameters.isEmpty()) {
