@@ -12,6 +12,7 @@
 
 package org.jberet.samples.wildfly.restreader;
 
+import java.util.Collection;
 import java.util.List;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -31,13 +32,35 @@ public class MoviesResource {
     @Context
     private ServletContext servletContext;
 
-    @SuppressWarnings("unchecked")
     @GET
     public Movie[] getMovies(final @QueryParam("offset") int offset,
-                            final @QueryParam("limit") int limit) {
-        final List<Movie> allMovies = (List<Movie>) servletContext.getAttribute(ServletContextListener1.moviesKey);
-        final List<Movie> resultList = allMovies.subList(offset, Math.min(offset + limit, allMovies.size()));
-        System.out.printf("## resultList: %s  %s%n", resultList.size(), resultList);
+                             final @QueryParam("limit") int limit) {
+        final List<Movie> resultList = getMoviesList0(offset, limit);
+        System.out.printf("Returning Movie[]: %s elements%n%s%n", resultList.size(), resultList);
         return resultList.toArray(new Movie[resultList.size()]);
+    }
+
+    @Path("list")
+    @GET
+    public List<Movie> getMoviesList(final @QueryParam("offset") int offset,
+                                     final @QueryParam("limit") int limit) {
+        final List<Movie> resultList = getMoviesList0(offset, limit);
+        System.out.printf("Returning List<Movie>: %s elements%n%s%n", resultList.size(), resultList);
+        return resultList;
+    }
+
+    @Path("collection")
+    @GET
+    public Collection<Movie> getMoviesCollection(final @QueryParam("offset") int offset,
+                                                 final @QueryParam("limit") int limit) {
+        final List<Movie> resultList = getMoviesList0(offset, limit);
+        System.out.printf("Returning Collection<Movie>: %s elements%n%s%n", resultList.size(), resultList);
+        return resultList;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Movie> getMoviesList0(final int offset, final int limit) {
+        final List<Movie> allMovies = (List<Movie>) servletContext.getAttribute(ServletContextListener1.moviesKey);
+        return allMovies.subList(offset, Math.min(offset + limit, allMovies.size()));
     }
 }

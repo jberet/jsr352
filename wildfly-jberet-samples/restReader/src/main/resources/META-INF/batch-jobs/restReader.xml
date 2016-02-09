@@ -18,7 +18,16 @@
             <reader ref="restItemReader">
                 <properties>
                     <property name="restUrl" value="#{jobParameters['restUrl']}"/>
-                    <property name="entityType" value="[Lorg.jberet.samples.wildfly.common.Movie;"/>
+
+                    <!-- starts from item 3 for the initial reading, skipping the first 3 elements (0, 1, 2) -->
+                    <!-- if offset not set, will start reading from the beginning -->
+                    <property name="offset" value="3"/>
+
+                    <!-- configure each REST call to return a maximum 20 items -->
+                    <property name="limit" value="20"/>
+
+                    <!-- type of each element in REST response entity -->
+                    <property name="beanType" value="org.jberet.samples.wildfly.common.Movie"/>
                 </properties>
             </reader>
             <writer ref="csvItemWriter">

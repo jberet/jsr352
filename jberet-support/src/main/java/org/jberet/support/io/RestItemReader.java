@@ -15,10 +15,7 @@ package org.jberet.support.io;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
@@ -39,43 +36,86 @@ import org.jberet.support._private.SupportMessages;
 @Dependent
 public class RestItemReader implements ItemReader {
     public static final String DEFAULT_OFFSET_KEY = "offset";
-    public static final String DEFAULT_OFFSET_VALUE = "0";
+    public static final String DEFAULT_OFFSET = "0";
     public static final String DEFAULT_LIMIT_KEY = "limit";
-    public static final String DEFAULT_LIMIT_VALUE = "10";
+    public static final String DEFAULT_LIMIT = "10";
 
+    /**
+     * The base URI for the REST call. It usually points to a collection resource URI,
+     * from which resources may be retrieved via HTTP GET method. The URI may include
+     * additional query parameters other than offset (starting position to read) and
+     * limit (maximum number of items to return in each response). Query parameter
+     * offset and limit are specified by their own batch properties.
+     * <p>
+     * For example, {@code http://localhost:8080/restReader/api/movies}
+     * <p>
+     * This is a required batch property.
+     *
+     * @see #offset
+     * @see #limit
+     */
     @Inject
     @BatchProperty
     protected URI restUrl;
 
+    /**
+     * Configures the key of the query parameter that specifies the starting
+     * position to read in the target REST resource. For example, some REST
+     * resource may require {@code start} instead of {@code offset} query
+     * parameter for the same purpose.
+     * <p>
+     * This batch property is optional. If not set, the default key
+     * {@value #DEFAULT_OFFSET_KEY} is used.
+     */
     @Inject
     @BatchProperty
     protected String offsetKey;
 
+    /**
+     *
+     */
+    @Inject
     @BatchProperty
-    protected String offsetValue;
+    protected String offset;
 
+    /**
+     * Configures the key of the query parameter that specifies the maximum
+     * number of items to return in the REST response. For example, some REST
+     * resource may require {@code count} instead of {@code limit} query
+     * parameter for the same purpose.
+     * <p>
+     * This batch property is optional. If not set, the default key
+     * {@value #DEFAULT_LIMIT_KEY} is used.
+     */
     @Inject
     @BatchProperty
     protected String limitKey;
 
     @Inject
     @BatchProperty
-    protected String limitValue;
+    protected String limit;
 
     /**
-     * The class of the reponse message entity.
-     * It can be array types, or java collection types. For example,
+     * The class of individual element of the response message entity. For example,
      * <ul>
-     *     <li>{@code [Ljava.lang.String;}
-     *     <li>{@code java.util.Collection}
-     *     <li>{@code java.util.List}
+     * <li>{@code java.lang.String}
+     * <li>{@code org.jberet.samples.wildfly.common.Movie}
      * </ul>
      */
     @Inject
     @BatchProperty
-    protected Class entityType;
+    protected Class beanType;
 
-    protected boolean isEntityCollection;
+    /**
+     * The class of the REST response message entity, and is a array of collection
+     * type whose component type is {@link #beanType}. For example,
+     * <ul>
+     *     <li>{@code Movie[]}
+     *     <li>{@code java.util.List<Movie>}
+     *     <li>{@code java.util.Collection<Movie>}
+     * </ul>
+     */
+    protected Class entityType;
 
     /**
      * REST client {@code javax.ws.rs.client.Client}, which is instantiated
@@ -83,8 +123,16 @@ public class RestItemReader implements ItemReader {
      */
     protected Client client;
 
+    /**
+     * Current reading position in the target resource, and is returned as
+     * the current checkpoint in {@link #checkpointInfo()} method.
+     */
     protected int readerPosition;
 
+    /**
+     * Internal buffer to hold multiple items retrieved as the {@link #readItem()}
+     * method only returns 1 item at a time.
+     */
     protected List<Object> recordsBuffer = new ArrayList<Object>();
 
     /**
@@ -106,29 +154,27 @@ public class RestItemReader implements ItemReader {
         if (offsetKey == null) {
             offsetKey = DEFAULT_OFFSET_KEY;
         }
-        if (offsetValue == null) {
-            offsetValue = DEFAULT_OFFSET_VALUE;
+        if (offset == null) {
+            offset = DEFAULT_OFFSET;
         }
 
         if (checkpoint != null) {
             readerPosition = (Integer) checkpoint;
         } else {
-            readerPosition = Integer.parseInt(offsetValue) - 1;
+            readerPosition = Integer.parseInt(offset) - 1;
         }
 
         if (limitKey == null) {
             limitKey = DEFAULT_LIMIT_KEY;
         }
-        if (limitValue == null) {
-            limitValue = DEFAULT_LIMIT_VALUE;
+        if (limit == null) {
+            limit = DEFAULT_LIMIT;
         }
 
-        if (entityType == null) {
+        if (beanType == null) {
             entityType = Object[].class;
-        } else if (Collection.class.isAssignableFrom(entityType)) {
-            isEntityCollection = true;
-        } else if(!entityType.isArray()){
-            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, entityType.toString(), "entityType");
+        } else {
+            entityType = (java.lang.reflect.Array.newInstance(beanType, 0)).getClass();
         }
     }
 
@@ -161,43 +207,23 @@ public class RestItemReader implements ItemReader {
         if (size > 0) {
             // take 1 item from the end of the buffer
             // items were added to the buffer in the reverse order, so the end is the oldest item
-            return removeLastFromBuffer();
+            return recordsBuffer.remove(size - 1);
         }
 
         final WebTarget target = client.target(restUrl)
                 .queryParam(offsetKey, readerPosition)
-                .queryParam(limitKey, limitValue);
+                .queryParam(limitKey, limit);
 
-        final Object responseRecords = target.request().get(entityType);
-        if (isEntityCollection) {
-            Collection recordsCollection = (Collection) responseRecords;
-            final int recordsCount = recordsCollection.size();
-            if (recordsCount == 0) {
-                return null;
-            }
-            if (List.class.isAssignableFrom(recordsCollection.getClass())) {
-                final ListIterator lit = ((List) recordsCollection).listIterator(recordsCount);
-                while (lit.hasPrevious()) {
-                    recordsBuffer.add(lit.previous());
-                }
-            } else {
-                for (final Iterator it = recordsCollection.iterator(); it.hasNext(); ) {
-                    recordsBuffer.add(it.next());
-                }
-            }
-            return removeLastFromBuffer();
-        } else {
-            Object[] recordsArray = (Object[]) responseRecords;
-            if (recordsArray.length == 0) {
-                return null;
-            }
-
-            // add items to the buffer in reverse order
-            for (int i = recordsArray.length - 1; i >= 0; i--) {
-                recordsBuffer.add(recordsArray[i]);
-            }
-            return removeLastFromBuffer();
+        Object[] recordsArray = (Object[]) target.request().get(entityType);
+        if (recordsArray.length == 0) {
+            return null;
         }
+
+        // add (n-1) items to the buffer in reverse order, and directly return the first element
+        for (int i = recordsArray.length - 1; i > 0; i--) {
+            recordsBuffer.add(recordsArray[i]);
+        }
+        return recordsArray[0];
     }
 
     /**
@@ -210,16 +236,5 @@ public class RestItemReader implements ItemReader {
             client = null;
         }
         recordsBuffer.clear();
-    }
-
-    /**
-     * Removes the last element from {@link #recordsBuffer}, and increment
-     * {@link #readerPosition}.
-     * When calling this method, {@link #recordsBuffer} must not be empty.
-     *
-     * @return the removed element from {@link #recordsBuffer}
-     */
-    private Object removeLastFromBuffer() {
-        return recordsBuffer.remove(recordsBuffer.size() - 1);
     }
 }

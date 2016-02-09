@@ -71,5 +71,7 @@ public class ServletContextListener1 implements ServletContextListener {
          (the Web application) is undeployed or 
          Application Server shuts down.
       */
+        final ServletContext servletContext = sce.getServletContext();
+        servletContext.removeAttribute(moviesKey);
     }
 }
