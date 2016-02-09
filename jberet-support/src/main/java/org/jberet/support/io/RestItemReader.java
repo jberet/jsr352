@@ -29,15 +29,52 @@ import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code ItemReader} that reads data items from REST resource.
+ * <p>
+ * Usage example:
+ * <pre>
+ * &lt;chunk&gt;
+ *   &lt;reader ref="restItemReader"&gt;
+ *     &lt;properties&gt;
+ *       &lt;property name="restUrl" value="http://localhost:8080/appName/rest-api/movies"/&gt;
+ *
+ *       &lt;!-- starts from item 3 for the initial reading, skipping the first 3 elements (0, 1, 2) --&gt;
+ *       &lt;!-- if offset not set, will start reading from the beginning --&gt;
+ *       &lt;property name="offset" value="3"/&gt;
+ *
+ *       &lt;!-- configure each REST call to return a maximum 20 items --&gt;
+ *       &lt;property name="limit" value="20"/&gt;
+ *
+ *       &lt;!-- type of each element in REST response entity --&gt;
+ *       &lt;property name="beanType" value="org.jberet.samples.wildfly.common.Movie"/&gt;
+ *     &lt;/properties&gt;
+ *   &lt;/reader&gt;
+ *   ...
+ * &lt;chunk&gt;
+ * </pre>
  *
  * @since 1.3.0
  */
 @Named
 @Dependent
 public class RestItemReader implements ItemReader {
+    /**
+     * Default key for offset query parameter.
+     */
     public static final String DEFAULT_OFFSET_KEY = "offset";
+
+    /**
+     * Default value for offset query parameter.
+     */
     public static final String DEFAULT_OFFSET = "0";
+
+    /**
+     * Default key for limit query parameter.
+     */
     public static final String DEFAULT_LIMIT_KEY = "limit";
+
+    /**
+     * Default value for limit query parameter.
+     */
     public static final String DEFAULT_LIMIT = "10";
 
     /**

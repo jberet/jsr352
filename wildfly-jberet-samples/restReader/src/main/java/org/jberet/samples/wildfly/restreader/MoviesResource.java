@@ -25,13 +25,29 @@ import javax.ws.rs.core.MediaType;
 
 import org.jberet.samples.wildfly.common.Movie;
 
+/**
+ * REST resource class for {@link Movie}.
+ */
 @Path("/movies")
 @Consumes({MediaType.APPLICATION_JSON})
 @Produces({MediaType.APPLICATION_JSON})
 public class MoviesResource {
+    /**
+     * {@code javax.servlet.ServletContext} from which to retrieve all movie data.
+     */
     @Context
     private ServletContext servletContext;
 
+    /**
+     * Gets movies matching {@code offset} and {@code limit} criteria.
+     *
+     * @param offset where to start reading
+     * @param limit maximum number of records to read
+     * @return movies as array
+     *
+     * @see #getMoviesList(int, int)
+     * @see #getMoviesCollection(int, int)
+     */
     @GET
     public Movie[] getMovies(final @QueryParam("offset") int offset,
                              final @QueryParam("limit") int limit) {
@@ -40,6 +56,16 @@ public class MoviesResource {
         return resultList.toArray(new Movie[resultList.size()]);
     }
 
+    /**
+     * Gets movies matching {@code offset} and {@code limit} criteria.
+     *
+     * @param offset where to start reading
+     * @param limit maximum number of records to read
+     * @return movies as list
+     *
+     * @see #getMovies(int, int)
+     * @see #getMoviesCollection(int, int)
+     */
     @Path("list")
     @GET
     public List<Movie> getMoviesList(final @QueryParam("offset") int offset,
@@ -49,6 +75,16 @@ public class MoviesResource {
         return resultList;
     }
 
+    /**
+     * Gets movies matching {@code offset} and {@code limit} criteria.
+     *
+     * @param offset where to start reading
+     * @param limit maximum number of records to read
+     * @return movies as collection
+     *
+     * @see #getMovies(int, int)
+     * @see #getMoviesList(int, int)
+     */
     @Path("collection")
     @GET
     public Collection<Movie> getMoviesCollection(final @QueryParam("offset") int offset,
