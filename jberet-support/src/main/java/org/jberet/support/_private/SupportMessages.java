@@ -86,4 +86,7 @@ public interface SupportMessages {
     @Message(id = 60022, value = "Invalid checkpoint data: %s")
     BatchRuntimeException invalidCheckpoint(Object data);
 
+    @Message(id = 60023, value = "REST API invocation failed with status code: %s, reason: %s, and entity: %s")
+    BatchRuntimeException restApiFailure(int statusCode, String reason, Object responseEntity);
+
 }
