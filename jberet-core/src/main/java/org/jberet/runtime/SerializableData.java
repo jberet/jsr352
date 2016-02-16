@@ -16,6 +16,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import javax.batch.operations.BatchRuntimeException;
 
+import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.util.BatchUtil;
 import org.wildfly.security.manager.WildFlySecurityManager;
@@ -65,6 +66,19 @@ class SerializableData implements Serializable {
             try {
                 return new SerializableData(BatchUtil.objectToBytes(data), null);
             } catch (IOException e) {
+                if (data instanceof Throwable) {
+                    //if failed to serialize step exception data, try to preserve original
+                    //step exception message and stack trace
+                    final Throwable exceptionData = (Throwable) data;
+                    BatchLogger.LOGGER.failedToSerializeException(e, exceptionData);
+                    final BatchRuntimeException replacementException = new BatchRuntimeException(exceptionData.getMessage());
+                    replacementException.setStackTrace(exceptionData.getStackTrace());
+                    try {
+                        return new SerializableData(BatchUtil.objectToBytes(replacementException), null);
+                    } catch (final IOException e1) {
+                        throw BatchMessages.MESSAGES.failedToSerialize(e1, replacementException);
+                    }
+                }
                 throw BatchMessages.MESSAGES.failedToSerialize(e, data);
             }
         }

@@ -13,7 +13,6 @@
 package org.jberet._private;
 
 import java.sql.Connection;
-
 import javax.batch.runtime.BatchStatus;
 
 import org.jboss.logging.BasicLogger;
@@ -137,4 +136,7 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage
     void resubmitedQueuedJob(Object jobTask);
 
+    @Message(id = 28, value = "Failed to serialize exception: %s")
+    @LogMessage
+    void failedToSerializeException(@Cause Throwable cause, Throwable exception);
 }

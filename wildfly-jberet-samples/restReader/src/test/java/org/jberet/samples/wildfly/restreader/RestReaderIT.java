@@ -37,6 +37,9 @@ import org.junit.runner.Description;
  * </ul>
  */
 public final class RestReaderIT extends BatchTestBase {
+    /**
+     * The job name defined in {@code META-INF/batch-jobs/restReader.xml}
+     */
     private static final String jobName = "restReader";
 
     @Rule
@@ -90,6 +93,10 @@ public final class RestReaderIT extends BatchTestBase {
      * Verifies that the message of the original exception the caused the step
      * and the job to fail is preserved in step exception (i.e., not lost or
      * replaced by some other exception message).
+     * <p>
+     * Even if the step exception is not implemented to be fully serializable,
+     * it should still be preserved ({@code java.io.NotSerializableException}
+     * shouldn't take place of the original step exception).
      *
      * @throws Exception if test verification fails
      */
@@ -100,7 +107,7 @@ public final class RestReaderIT extends BatchTestBase {
         jobParams.setProperty("restUrl", getRestUrl() + "/movies/error");
         final JobExecutionEntity jobExecutionEntity =
                 startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.FAILED);
-        Assert.assertEquals(MoviesResource.EXCEPTION_MESSAGE, jobExecutionEntity.getExitStatus());
+        Assert.assertEquals("HTTP 500 Internal Server Error", jobExecutionEntity.getExitStatus());
     }
 
     @Override
