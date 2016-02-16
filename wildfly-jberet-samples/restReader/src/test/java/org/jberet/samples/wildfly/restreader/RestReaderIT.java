@@ -15,7 +15,9 @@ package org.jberet.samples.wildfly.restreader;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -82,6 +84,23 @@ public final class RestReaderIT extends BatchTestBase {
         final Properties jobParams = new Properties();
         jobParams.setProperty("restUrl", getRestUrl() + "/movies/collection");
         startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.COMPLETED);
+    }
+
+    /**
+     * Verifies that the message of the original exception the caused the step
+     * and the job to fail is preserved in step exception (i.e., not lost or
+     * replaced by some other exception message).
+     *
+     * @throws Exception if test verification fails
+     */
+    @Test
+    public void testError() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("testName", "testError");
+        jobParams.setProperty("restUrl", getRestUrl() + "/movies/error");
+        final JobExecutionEntity jobExecutionEntity =
+                startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.FAILED);
+        Assert.assertEquals(MoviesResource.EXCEPTION_MESSAGE, jobExecutionEntity.getExitStatus());
     }
 
     @Override

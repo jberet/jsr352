@@ -33,6 +33,12 @@ import org.jberet.samples.wildfly.common.Movie;
 @Produces({MediaType.APPLICATION_JSON})
 public class MoviesResource {
     /**
+     * An exception message shared by the REST resource and client in order
+     * to verify that exception message is preserved in step exception.
+     */
+    public static final String EXCEPTION_MESSAGE = "Designed to throw exception for testing purpose.";
+
+    /**
      * {@code javax.servlet.ServletContext} from which to retrieve all movie data.
      */
     @Context
@@ -92,6 +98,17 @@ public class MoviesResource {
         final List<Movie> resultList = getMoviesList0(offset, limit);
         System.out.printf("Returning Collection<Movie>: %s elements%n%s%n", resultList.size(), resultList);
         return resultList;
+    }
+
+    /**
+     * Throws {@code RuntimeException} for testing purpsoe.
+     *
+     * @return always throws {@code RuntimeException}
+     */
+    @Path("error")
+    @GET
+    public Movie[] error() {
+        throw new RuntimeException(EXCEPTION_MESSAGE);
     }
 
     @SuppressWarnings("unchecked")
