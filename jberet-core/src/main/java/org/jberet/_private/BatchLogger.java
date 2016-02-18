@@ -137,6 +137,6 @@ public interface BatchLogger extends BasicLogger {
     void resubmitedQueuedJob(Object jobTask);
 
     @Message(id = 28, value = "Failed to serialize exception: %s")
-    @LogMessage
+    @LogMessage(level = Logger.Level.WARN)
     void failedToSerializeException(@Cause Throwable cause, Throwable exception);
 }
