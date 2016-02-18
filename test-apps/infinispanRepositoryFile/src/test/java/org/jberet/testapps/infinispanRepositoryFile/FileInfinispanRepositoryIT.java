@@ -12,16 +12,16 @@
 
 package org.jberet.testapps.infinispanRepositoryFile;
 
+import javax.batch.runtime.BatchStatus;
+
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.batch.runtime.BatchStatus;
-
 public class FileInfinispanRepositoryIT extends AbstractIT {
 	
 	static {
-		System.setProperty("jberet.infinispan.file.store", System.getProperty("java.io.tmpdir"));
+		System.setProperty("jberet.infinispan.file.store", System.getProperty("jberet.tmp.dir"));
 	}
 	
     @Test
