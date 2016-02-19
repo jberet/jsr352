@@ -33,14 +33,20 @@ import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code ItemWriter} that posts data items to REST resource.
- * <p/>
+ * <p>
  * Usage example:
  * <pre>
  * &lt;chunk&gt;
- *   ...
- * &lt;chunk&gt;
+ *      ...
+ *      &lt;writer ref="restItemWriter"&gt;
+ *          &lt;properties&gt;
+ *              &lt;property name="restUrl" value="http://localhost:8080/appName/rest-api/movies?param1=value1"/&gt;
+ *          &lt;/properties&gt;
+ *      &lt;/writer&gt;
+ *  &lt;/chunk&gt;
  * </pre>
  *
+ * @see RestItemReader
  * @since 1.3.0
  */
 @Named
@@ -48,12 +54,10 @@ import org.jberet.support._private.SupportMessages;
 public class RestItemWriter implements ItemWriter {
     /**
      * The base URI for the REST call. It usually points to a collection resource URI,
-     * from which resources may be retrieved via HTTP GET method. The URI may include
-     * additional query parameters other than offset (starting position to read) and
-     * limit (maximum number of items to return in each response). Query parameter
-     * offset and limit are specified by their own batch properties.
+     * to which data may be submitted via HTTP POST or PUT method. The URI may include
+     * additional query parameters.
      * <p/>
-     * For example, {@code http://localhost:8080/restReader/api/movies}
+     * For example, {@code http://localhost:8080/restReader/api/movies?param1=value1}
      * <p/>
      * This is a required batch property.
      */
@@ -86,27 +90,16 @@ public class RestItemWriter implements ItemWriter {
     protected MediaType mediaTypeInstance;
 
     /**
-     * The class of individual element of the response message entity. For example,
-     * <ul>
-     * <li>{@code java.lang.String}
-     * <li>{@code org.jberet.samples.wildfly.common.Movie}
-     * </ul>
-     */
-    @Inject
-    @BatchProperty
-    protected Class beanType;
-
-    /**
      * REST client {@code javax.ws.rs.client.Client}, which is instantiated
      * in {@link #open(Serializable)} and closed in {@link #close()}.
      */
     protected Client client;
 
     /**
-     * During the reader opening, the REST client is instantiated, and
-     * {@code checkpoint}, if any, is used to position the reader properly.
+     * During the writer opening, the REST client is instantiated, and
+     * {@code checkpoint} is ignored.
      *
-     * @param checkpoint checkpoint info, null for the first invocation in a new job execution
+     * @param checkpoint checkpoint info ignored
      * @throws Exception if error occurs
      */
     @Override
@@ -151,9 +144,9 @@ public class RestItemWriter implements ItemWriter {
     }
 
     /**
-     * Returns reader checkpoint info (int number), which is the last successfully read position.
+     * Returns writer checkpoint info, always null.
      *
-     * @return reader checkpoint info as int
+     * @return writer checkpoint info, always null
      */
     @Override
     public Serializable checkpointInfo() {

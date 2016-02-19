@@ -18,11 +18,7 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
 
 /**
  * Tests for {@link org.jberet.support.io.RestItemReader}, which reads data
@@ -41,13 +37,6 @@ public final class RestReaderIT extends BatchTestBase {
      * The job name defined in {@code META-INF/batch-jobs/restReader.xml}
      */
     private static final String jobName = "restReader";
-
-    @Rule
-    public TestRule watcher = new TestWatcher() {
-        protected void starting(Description description) {
-            System.out.printf("Starting test: %s%n", description.getMethodName());
-        }
-    };
 
     /**
      * {@link org.jberet.support.io.RestItemReader} will call the REST resource method
