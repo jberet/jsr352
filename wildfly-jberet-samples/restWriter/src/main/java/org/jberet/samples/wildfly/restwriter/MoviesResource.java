@@ -30,7 +30,9 @@ import javax.ws.rs.core.MediaType;
 import org.jberet.samples.wildfly.common.Movie;
 
 /**
- * REST resource class for {@link Movie}.
+ * REST resource class for {@link Movie}. Operations including getting all movies,
+ * adding movies to specific group identified by {@code testName}, and removing
+ * movies.
  */
 @Path("/movies")
 @Consumes({MediaType.APPLICATION_JSON})
@@ -44,17 +46,38 @@ public class MoviesResource {
     @Context
     private ServletContext servletContext;
 
+    /**
+     * Returns all movies in group identified by {@code testName}.
+     *
+     * @param testName movie group name
+     * @return all movies for {@code testName}
+     */
     @SuppressWarnings("unchecked")
     @GET
     public List<Movie> getMovies(final @QueryParam("testName") String testName) {
         return (List<Movie>) servletContext.getAttribute(getMoviesKey(testName));
     }
 
+    /**
+     * Remove all movies in group identified by {@code testName}.
+     *
+     * @param testName movie group name
+     */
+
     @DELETE
     public void removeMovies(final @QueryParam("testName") String testName) {
         servletContext.removeAttribute(getMoviesKey(testName));
     }
 
+    /**
+     * Adds an array of movies to the group identified by {@code testName}.
+     *
+     * @param testName movie group name
+     * @param movies array of movies to add
+     *
+     * @see #addMoviesList(String, List)
+     * @see #addMoviesCollection(String, Collection)
+     */
     @POST
     public void addMovies(final @QueryParam("testName") String testName,
                           final Movie[] movies) {
@@ -63,6 +86,15 @@ public class MoviesResource {
                 testName, movies.length, Arrays.toString(movies));
     }
 
+    /**
+     * Adds a list of movies to the group identified by {@code testName}.
+     *
+     * @param testName movie group name
+     * @param movies list of movies to add
+     *
+     * @see #addMovies(String, Movie[])
+     * @see #addMoviesCollection(String, Collection)
+     */
     @Path("list")
     @POST
     public void addMoviesList(final @QueryParam("testName") String testName,
@@ -72,6 +104,15 @@ public class MoviesResource {
                 testName, movies.size(), movies);
     }
 
+    /**
+     * Adds a collection of movies to the group identified by {@code testName}.
+     *
+     * @param testName movie group name
+     * @param movies collection of movies to add
+     *
+     * @see #addMovies(String, Movie[])
+     * @see #addMoviesList(String, List)
+     */
     @Path("collection")
     @POST
     public void addMoviesCollection(final @QueryParam("testName") String testName,
@@ -98,7 +139,7 @@ public class MoviesResource {
         existingMovies.addAll(movies);
     }
 
-    private String getMoviesKey(final String testName) {
+    private static String getMoviesKey(final String testName) {
         return moviesKey + testName;
     }
 }
