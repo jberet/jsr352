@@ -1,7 +1,10 @@
- This sample application demonstrates the use of `org.jberet.support.io.RestItemWriter`,
+# Overview
+
+This sample application demonstrates the use of `org.jberet.support.io.RestItemWriter`,
  which writes batch data via REST API to remote resources.
  
- 
+## Batch Job Definision 
+
  The batch job used in this application is defined in `restWriter.xml`, which
  inherits from a super JSL file `csvItemReader.xml`. The batch job performs the
  following:
@@ -15,6 +18,8 @@
  `POST` or `PUT` opertions.
  
   
+## Writer Configuration
+
  `restItemWriter` can be configured with the following batch properties:
  
  * `restUrl`: The base URI for the REST call
@@ -22,6 +27,7 @@
  * `mediaType`: Media type to use in the REST call to write data
  
  
+## Build and Run
  
 To clean and build the application, deploy it to WildFly or JBoss EAP, and 
  run all tests:
