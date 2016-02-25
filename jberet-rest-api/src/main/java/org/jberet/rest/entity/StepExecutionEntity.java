@@ -14,8 +14,11 @@ package org.jberet.rest.entity;
 
 import java.io.Serializable;
 import javax.batch.runtime.StepExecution;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Represents a step execution, which includes fields such as step execution id,
@@ -27,20 +30,25 @@ import javax.xml.bind.annotation.XmlType;
  * @since 1.3.0
  */
 @XmlRootElement
-@XmlType(propOrder =
-        "stepExecutionId, stepName, batchStatus, exitStatus, startTime, endTime, metrics")
+@XmlAccessorType(XmlAccessType.FIELD)
+//@XmlType(propOrder =
+//        {"stepExecutionId", "stepName", "batchStatus", "exitStatus", "startTime", "endTime", "metrics"})
 public class StepExecutionEntity extends AbstractExecutionEntity implements StepExecution, Serializable {
     private static final long serialVersionUID = -8528930845788535109L;
 
+    @XmlElement
     private long stepExecutionId;
 
+    @XmlElement
     private String stepName;
 
     //unused property, kept here to satisfy Jackson mapping.  Otherwise will get error:
     //UnrecognizedPropertyException: Unrecognized field "persistentUserData"
     //we don't want to annotate Jackson-specific annotations either (@JsonIgnoreProperties(ignoreUnknown = true)
+    @XmlTransient
     private Serializable persistentUserData;
 
+    @XmlElement
     private MetricEntity[] metrics;
 
     public StepExecutionEntity() {

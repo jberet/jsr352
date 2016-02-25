@@ -16,6 +16,9 @@ import java.io.Serializable;
 import java.util.List;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -26,13 +29,21 @@ import javax.xml.bind.annotation.XmlType;
  * @since 1.3.0
  */
 @XmlRootElement
-@XmlType(propOrder = "instanceId, jobName, jobExecutions, latestJobExecutionId")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(propOrder = {"instanceId", "jobName", "numberOfJobExecutions", "latestJobExecutionId"})
 public final class JobInstanceEntity implements JobInstance, Serializable {
     private static final long serialVersionUID = 2427272964201557394L;
 
+    @XmlElement
     private long instanceId;
+
+    @XmlElement
     private String jobName;
+
+    @XmlElement
     private int numberOfJobExecutions;
+
+    @XmlElement
     private long latestJobExecutionId;
 
     public JobInstanceEntity() {

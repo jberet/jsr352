@@ -14,6 +14,9 @@ package org.jberet.rest.entity;
 
 import java.io.Serializable;
 import javax.batch.operations.BatchRuntimeException;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -26,12 +29,18 @@ import com.google.common.base.Throwables;
  * @since 1.3.0
  */
 @XmlRootElement
-@XmlType(propOrder = "type, message, stackTrace")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(propOrder = {"type", "message", "stackTrace"})
 public final class BatchExceptionEntity implements Serializable {
     private static final long serialVersionUID = 810435611118287431L;
 
+    @XmlElement
     private final Class<? extends BatchRuntimeException> type;
+
+    @XmlElement
     private final String message;
+
+    @XmlElement
     private final String stackTrace;
 
     public BatchExceptionEntity(final BatchRuntimeException ex) {

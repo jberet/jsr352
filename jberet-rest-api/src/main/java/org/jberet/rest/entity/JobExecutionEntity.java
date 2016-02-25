@@ -18,6 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import javax.batch.runtime.JobExecution;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -32,20 +35,35 @@ import javax.xml.bind.annotation.XmlTransient;
  * @since 1.3.0
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 //@XmlType(propOrder =
-//"executionId, href, jobName, jobInstanceId, jobParameters, batchStatus, exitStatus, createTime, startTime, lastUpdatedTime, endTime")
+//        {"executionId", "href", "jobName", "jobInstanceId", "jobParameters", "batchStatus", "exitStatus", "createTime", "startTime", "lastUpdatedTime", "endTime"})
 public final class JobExecutionEntity extends AbstractExecutionEntity implements JobExecution, Serializable {
     private static final long serialVersionUID = -8566764098276314827L;
 
+    @XmlElement
     private long executionId;
+
+    @XmlElement
     private String href;
+
+    @XmlElement
     private Date createTime;
+
+    @XmlElement
     private Date lastUpdatedTime;
+
+    @XmlElement
     private Properties jobParameters;
+
+    @XmlElement
     private String jobName;
+
+    @XmlElement
     private long jobInstanceId;
 
-    private  List<StepExecutionEntity> stepExecutions = new ArrayList<StepExecutionEntity>();
+    @XmlTransient
+    private List<StepExecutionEntity> stepExecutions = new ArrayList<StepExecutionEntity>();
 
     public JobExecutionEntity() {
     }
@@ -111,7 +129,6 @@ public final class JobExecutionEntity extends AbstractExecutionEntity implements
         this.jobName = jobName;
     }
 
-    @XmlTransient
     public List<StepExecutionEntity> getStepExecutions() {
         return stepExecutions;
     }

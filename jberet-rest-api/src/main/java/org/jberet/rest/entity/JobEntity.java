@@ -13,6 +13,9 @@
 package org.jberet.rest.entity;
 
 import java.io.Serializable;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -23,11 +26,18 @@ import javax.xml.bind.annotation.XmlType;
  * @since 1.3.0
  */
 @XmlRootElement
-@XmlType(propOrder = "jobName, numberOfJobInstances, numberOfRunningJobExecutions")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(propOrder = {"jobName", "numberOfJobInstances", "numberOfRunningJobExecutions"})
 public final class JobEntity implements Serializable {
     private static final long serialVersionUID = -7252231657018200476L;
+
+    @XmlElement
     private String jobName;
+
+    @XmlElement
     private int numberOfJobInstances;
+
+    @XmlElement
     private int numberOfRunningJobExecutions;
 
     public JobEntity() {

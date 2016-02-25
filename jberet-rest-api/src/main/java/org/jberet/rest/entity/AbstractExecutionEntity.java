@@ -15,6 +15,9 @@ package org.jberet.rest.entity;
 import java.io.Serializable;
 import java.util.Date;
 import javax.batch.runtime.BatchStatus;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * The base class for {@link JobExecutionEntity} and {@link StepExecutionEntity},
@@ -26,12 +29,20 @@ import javax.batch.runtime.BatchStatus;
  *
  * @since 1.3.0
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public abstract class AbstractExecutionEntity implements Serializable {
     private static final long serialVersionUID = -6861630889634554990L;
 
+    @XmlElement
     Date startTime;
+
+    @XmlElement
     Date endTime;
+
+    @XmlElement
     BatchStatus batchStatus;
+
+    @XmlElement
     String exitStatus;
 
     public AbstractExecutionEntity() {
