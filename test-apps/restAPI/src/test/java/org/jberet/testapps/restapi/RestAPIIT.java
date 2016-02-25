@@ -64,7 +64,9 @@ public class RestAPIIT {
                 .queryParam("jobParam1", "jobParam1 value")
                 .queryParam("jobParam2", "jobParam2 value");
         System.out.printf("uri: %s%n", uri);
-        final Response response = target.request().post(emptyJsonEntity());
+
+        //accepts XML to test XML response content type
+        final Response response = target.request().accept(MediaType.APPLICATION_XML_TYPE).post(emptyJsonEntity());
 
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
     }
@@ -107,7 +109,9 @@ public class RestAPIIT {
         final URI uri = getJobUriBuilder(null).build();
         final WebTarget target = client.target(uri);
         System.out.printf("uri: %s%n", uri);
-        final JobEntity[] response = target.request().get(JobEntity[].class);
+
+        //accepts XML to test XML response content type
+        final JobEntity[] response = target.request().accept(MediaType.APPLICATION_XML_TYPE).get(JobEntity[].class);
 
         boolean foundJobName1 = false;
         for (final JobEntity e : response) {
@@ -129,7 +133,9 @@ public class RestAPIIT {
                 .queryParam("start", 0)
                 .queryParam("count", 99999999);
         System.out.printf("uri: %s%n", uri);
-        final JobInstanceEntity[] data = target.request().get(JobInstanceEntity[].class);
+
+        //accepts XML to test XML response content type
+        final JobInstanceEntity[] data = target.request().accept(MediaType.APPLICATION_XML_TYPE).get(JobInstanceEntity[].class);
 
         System.out.printf("Got JobInstanceData[]: %s%n", Arrays.toString(data));
         assertEquals(jobName1, data[0].getJobName());

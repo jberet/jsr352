@@ -106,6 +106,15 @@
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- add resteasy-jaxb-provider to test client to support receiving XML content type
+        in response. -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxb-provider</artifactId>
+            <version>${version.org.jboss.resteasy}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
