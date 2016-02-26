@@ -48,7 +48,7 @@ To undeploy the application from WildFly or JBoss EAP:
  mvn wildfly:undeploy
  ```
  
- ## Include Job Data Front-end Module jberet-ui into WAR File
+## Include Job Data Front-end Module jberet-ui into WAR File
   
  First, you will need to build `jberet-ui` module with `--restUrl` for your
  `restWriter` application deployment:
