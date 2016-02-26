@@ -48,6 +48,16 @@ To undeploy the application from WildFly or JBoss EAP:
  mvn wildfly:undeploy
  ```
  
+ ## Include Job Data Front-end Module jberet-ui into WAR File
+  
+ First, you will need to build `jberet-ui` module with `--restUrl` for your
+ `restWriter` application deployment:
+ 
+ ```
+ cd /Users/cfang/dev/jsr352/jberet-ui
+ gulp --restUrl http://localhost:8080/restWriter/api/
+ ```
+ 
  To incluee `jberet-ui` module into the WAR archive, run with `includeUI`
  maven profile. `jberet-ui` module adds a front-end UI for interacting with 
  batch job data.
@@ -56,5 +66,5 @@ To undeploy the application from WildFly or JBoss EAP:
  mvn clean install -PincludeUI
  ```
  
- To access `jberet-ui` web pages, go to http://localhost:8080/restWriter/#/jobs
+ To access `jberet-ui` web pages, go to http://localhost:8080/restWriter/
  
