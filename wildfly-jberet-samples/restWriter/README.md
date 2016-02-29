@@ -3,7 +3,7 @@
 This sample application demonstrates the use of `org.jberet.support.io.RestItemWriter`,
  which writes batch data via REST API to remote resources.
  
-## Batch Job Definision 
+## Batch Job Definition 
 
  The batch job used in this application is defined in `restWriter.xml`, which
  inherits from a super JSL file `csvItemReader.xml`. The batch job performs the

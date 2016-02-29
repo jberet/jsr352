@@ -33,12 +33,15 @@ import org.jberet.rest.resource.JobExecutionResource;
 import org.jberet.rest.resource.JobInstanceResource;
 import org.jberet.rest.resource.JobResource;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore("Need to have a running WildFly server and deploy the test app before running tests")
+/**
+ * Tests to verify REST API defined in {@code jberet-rest-api} module.
+ * This test class uses JAX-RS client API to access a test web app
+ * ({@code restAPI.war}) deployed to WildFly or JBoss EAP 7.
+ */
 public class RestAPIIT {
     private static final String jobName1 = "restJob1";
     private static final String jobName2 = "restJob2";
@@ -137,7 +140,8 @@ public class RestAPIIT {
         //accepts XML to test XML response content type
         final JobInstanceEntity[] data = target.request().accept(MediaType.APPLICATION_XML_TYPE).get(JobInstanceEntity[].class);
 
-        System.out.printf("Got JobInstanceData[]: %s%n", Arrays.toString(data));
+        //all JobInstanceEntity data may be too long, so just display its length
+        System.out.printf("Got JobInstanceData[]: %s items%n", data.length);
         assertEquals(jobName1, data[0].getJobName());
     }
 
