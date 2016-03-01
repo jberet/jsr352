@@ -13,7 +13,6 @@
 package org.jberet.support.io;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import javax.batch.api.BatchProperty;
@@ -22,8 +21,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -47,33 +44,13 @@ import org.jberet.support._private.SupportMessages;
  * </pre>
  *
  * @see RestItemReader
+ * @see RestItemReaderWriterBase
+ *
  * @since 1.3.0
  */
 @Named
 @Dependent
-public class RestItemWriter implements ItemWriter {
-    /**
-     * The base URI for the REST call. It usually points to a collection resource URI,
-     * to which data may be submitted via HTTP POST or PUT method. The URI may include
-     * additional query parameters.
-     * <p/>
-     * For example, {@code http://localhost:8080/restReader/api/movies?param1=value1}
-     * <p/>
-     * This is a required batch property.
-     */
-    @Inject
-    @BatchProperty
-    protected URI restUrl;
-
-    /**
-     * HTTP method to use in the REST call to write data. Valid values are
-     * {@code POST} and {@code PUT}. If not specified, this property defaults to
-     * {@value HttpMethod#POST}.
-     */
-    @Inject
-    @BatchProperty
-    protected String httpMethod;
-
+public class RestItemWriter extends RestItemReaderWriterBase implements ItemWriter {
     /**
      * Media type to use in the REST call to write data. Its value should be valid
      * for the target REST resource. If not specified, this property defaults to
@@ -90,12 +67,6 @@ public class RestItemWriter implements ItemWriter {
     protected MediaType mediaTypeInstance;
 
     /**
-     * REST client {@code javax.ws.rs.client.Client}, which is instantiated
-     * in {@link #open(Serializable)} and closed in {@link #close()}.
-     */
-    protected Client client;
-
-    /**
      * During the writer opening, the REST client is instantiated, and
      * {@code checkpoint} is ignored.
      *
@@ -104,11 +75,7 @@ public class RestItemWriter implements ItemWriter {
      */
     @Override
     public void open(final Serializable checkpoint) throws Exception {
-        client = ClientBuilder.newClient();
-
-        if (restUrl == null) {
-            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "restUrl");
-        }
+        super.open(checkpoint);
         if(httpMethod == null) {
             httpMethod = HttpMethod.POST;
         } else {
@@ -151,16 +118,5 @@ public class RestItemWriter implements ItemWriter {
     @Override
     public Serializable checkpointInfo() {
         return null;
-    }
-
-    /**
-     * closes the REST client and sets it to null.
-     */
-    @Override
-    public void close() {
-        if (client != null) {
-            client.close();
-            client = null;
-        }
     }
 }

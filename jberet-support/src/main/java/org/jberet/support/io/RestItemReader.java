@@ -13,16 +13,15 @@
 package org.jberet.support.io;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.WebTarget;
 
 import org.jberet.support._private.SupportMessages;
@@ -52,11 +51,14 @@ import org.jberet.support._private.SupportMessages;
  * &lt;chunk&gt;
  * </pre>
  *
+ * @see RestItemWriter
+ * @see RestItemReaderWriterBase
+ *
  * @since 1.3.0
  */
 @Named
 @Dependent
-public class RestItemReader implements ItemReader {
+public class RestItemReader extends RestItemReaderWriterBase implements ItemReader {
     /**
      * Default key for offset query parameter.
      */
@@ -78,24 +80,6 @@ public class RestItemReader implements ItemReader {
     public static final String DEFAULT_LIMIT = "10";
 
     /**
-     * The base URI for the REST call. It usually points to a collection resource URI,
-     * from which resources may be retrieved via HTTP GET method. The URI may include
-     * additional query parameters other than offset (starting position to read) and
-     * limit (maximum number of items to return in each response). Query parameter
-     * offset and limit are specified by their own batch properties.
-     * <p>
-     * For example, {@code http://localhost:8080/restReader/api/movies}
-     * <p>
-     * This is a required batch property.
-     *
-     * @see #offset
-     * @see #limit
-     */
-    @Inject
-    @BatchProperty
-    protected URI restUrl;
-
-    /**
      * Configures the key of the query parameter that specifies the starting
      * position to read in the target REST resource. For example, some REST
      * resource may require {@code start} instead of {@code offset} query
@@ -109,7 +93,8 @@ public class RestItemReader implements ItemReader {
     protected String offsetKey;
 
     /**
-     *
+     * The value of the {@code offset} property, which specifies the starting
+     * point for reading. If not specified, it defaults to {@value #DEFAULT_OFFSET}.
      */
     @Inject
     @BatchProperty
@@ -128,6 +113,10 @@ public class RestItemReader implements ItemReader {
     @BatchProperty
     protected String limitKey;
 
+    /**
+     * The value of the {@code limit} property, which specifies the maximum
+     * number of items to read. If not specified, it defaults to {@value #DEFAULT_LIMIT}.
+     */
     @Inject
     @BatchProperty
     protected String limit;
@@ -155,12 +144,6 @@ public class RestItemReader implements ItemReader {
     protected Class entityType;
 
     /**
-     * REST client {@code javax.ws.rs.client.Client}, which is instantiated
-     * in {@link #open(Serializable)} and closed in {@link #close()}.
-     */
-    protected Client client;
-
-    /**
      * Current reading position in the target resource, and is returned as
      * the current checkpoint in {@link #checkpointInfo()} method.
      */
@@ -182,10 +165,14 @@ public class RestItemReader implements ItemReader {
     @SuppressWarnings("unchecked")
     @Override
     public void open(final Serializable checkpoint) throws Exception {
-        client = ClientBuilder.newClient();
-
-        if (restUrl == null) {
-            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, null, "restUrl");
+        super.open(checkpoint);
+        if(httpMethod == null) {
+            httpMethod = HttpMethod.GET;
+        } else {
+            httpMethod = httpMethod.toUpperCase(Locale.ENGLISH);
+            if (!HttpMethod.GET.equals(httpMethod) && !HttpMethod.DELETE.equals(httpMethod)) {
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, httpMethod, "httpMethod");
+            }
         }
 
         if (offsetKey == null) {
@@ -251,7 +238,9 @@ public class RestItemReader implements ItemReader {
                 .queryParam(offsetKey, readerPosition)
                 .queryParam(limitKey, limit);
 
-        Object[] recordsArray = (Object[]) target.request().get(entityType);
+        final Object[] recordsArray = HttpMethod.GET.equals(httpMethod) ?
+                (Object[]) target.request().get(entityType) :
+                (Object[]) target.request().delete(entityType);
         if (recordsArray.length == 0) {
             return null;
         }
@@ -268,10 +257,7 @@ public class RestItemReader implements ItemReader {
      */
     @Override
     public void close() {
-        if (client != null) {
-            client.close();
-            client = null;
-        }
+        super.close();
         recordsBuffer.clear();
     }
 }
