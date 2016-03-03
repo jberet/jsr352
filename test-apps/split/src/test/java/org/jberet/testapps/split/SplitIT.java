@@ -40,7 +40,7 @@ public class SplitIT extends AbstractIT {
     @Test
     public void splitTimeoutProperty() throws Exception {
         //use the split timeout property configured in job.xml, which is shorter than
-        //bathclet2 sleep time, and so the split and job execution will timeout and fail
+        //batchlet2 sleep time, and so the split and job execution will timeout and fail
         params = null;
         startJobAndWait(splitTimeoutPropertyXml);
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());

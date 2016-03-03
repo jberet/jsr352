@@ -5,7 +5,7 @@
  apps use batch components in `jberet-support` to simplify accessing common data
  sources and formats.
  
- In all sample applications, the test client performs bath job tasks via REST API
+ In all sample applications, the test client performs batch job tasks via REST API
  defined and implemented in `jberet-rest-api` module. 
  
  ```
@@ -18,6 +18,8 @@
     * uses `restItemWriter` to write batch data to destination resource via REST API.
     * uses `csvItemReader` to read data from online resource (movies-2012).
     * `restWriter` job inherits from reusable segments in parent JSL.
+    * optionally include [jberet-ui](https://github.com/jberet/jsr352/tree/master/jberet-ui) in
+    application package to provide a web front end for accessing batch job data.
 * [restReader](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples/restReader)
     * uses `restItemReader` to read data from online resource (movies-2012).
     * uses `csvItemWriter` to write data to CSV format.
