@@ -6,7 +6,7 @@ job instances, job executions, step executions and metrics.
 ### Documentation
 
 Detailed REST API docs are available at 
-[JBeret Docs Site](http://docs.jboss.org/jberet/1.3.0.Beta1-SNAPSHOT/rest-api/)
+[JBeret Docs Site](http://docs.jboss.org/jberet/latest/javadoc/jberet-rest-api/)
 
 ### Build and Tests
 
