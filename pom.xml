@@ -98,6 +98,8 @@
 
         <version.org.apache.kafka>0.9.0.0</version.org.apache.kafka>
 
+        <version.org.jboss.spec.javax.ejb.jboss-ejb-api_3.2_spec>1.0.0.Final</version.org.jboss.spec.javax.ejb.jboss-ejb-api_3.2_spec>
+
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
     </properties>
@@ -112,6 +114,7 @@
         <module>jberet-support</module>
         <module>jberet-rest-api</module>
         <module>wildfly-jberet-samples</module>
+        <module>jberet-schedule</module>
     </modules>
 
     <build>
@@ -631,6 +634,14 @@
                 <groupId>org.jboss.spec.javax.ws.rs</groupId>
                 <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
                 <version>${version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- jberet-support dependencies -->
+            <dependency>
+                <groupId>org.jboss.spec.javax.ejb</groupId>
+                <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+                <version>${version.org.jboss.spec.javax.ejb.jboss-ejb-api_3.2_spec}</version>
                 <scope>provided</scope>
             </dependency>
 
