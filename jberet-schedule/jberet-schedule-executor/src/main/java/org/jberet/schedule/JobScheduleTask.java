@@ -13,20 +13,21 @@
 package org.jberet.schedule;
 
 public class JobScheduleTask implements Runnable {
-    private final JobScheduleInfo jobScheduleInfo;
+    private final JobSchedule jobSchedule;
 
-    public JobScheduleTask(final JobScheduleInfo jobScheduleInfo) {
-        this.jobScheduleInfo = jobScheduleInfo;
+    public JobScheduleTask(final JobSchedule jobSchedule) {
+        this.jobSchedule = jobSchedule;
     }
 
     @Override
     public void run() {
-        if (jobScheduleInfo.jobExecutionId > 0) {
-            jobScheduleInfo.result =
-                JobScheduler.getJobOperator().restart(jobScheduleInfo.jobExecutionId, jobScheduleInfo.jobParameters);
+        final JobScheduleConfig config = jobSchedule.getJobScheduleConfig();
+        if (config.jobExecutionId > 0) {
+            jobSchedule.addJobExecutionIds(
+                JobScheduler.getJobOperator().restart(config.jobExecutionId, config.jobParameters));
         } else {
-            jobScheduleInfo.result =
-                JobScheduler.getJobOperator().start(jobScheduleInfo.jobName, jobScheduleInfo.jobParameters);
+            jobSchedule.addJobExecutionIds(
+                JobScheduler.getJobOperator().start(config.jobName, config.jobParameters));
         }
     }
 }

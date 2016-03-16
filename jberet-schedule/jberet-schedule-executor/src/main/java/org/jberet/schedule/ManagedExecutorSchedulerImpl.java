@@ -13,7 +13,6 @@
 package org.jberet.schedule;
 
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class ManagedExecutorSchedulerImpl extends ExecutorSchedulerImpl {
@@ -21,7 +20,7 @@ public class ManagedExecutorSchedulerImpl extends ExecutorSchedulerImpl {
         this(null, null);
     }
 
-    public ManagedExecutorSchedulerImpl(final ConcurrentMap<JobScheduleInfo, Future<?>> schedules,
+    public ManagedExecutorSchedulerImpl(final ConcurrentMap<String, JobSchedule> schedules,
                                         final ScheduledExecutorService executorService) {
         super(schedules, executorService);
     }

@@ -12,9 +12,8 @@
 
 package org.jberet.schedule;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.BatchRuntimeException;
@@ -26,7 +25,7 @@ import javax.naming.NamingException;
 public abstract class JobScheduler {
     protected static final TimeUnit timeUnit = TimeUnit.MINUTES;
 
-    protected static final String TIMER_SERVICE_LOOKUP = "java:comp/TimerService";
+    protected static final String TIMER_SCHEDULER_LOOKUP = "java:module/TimerSchedulerBean";
     protected static final String MANAGED_EXECUTOR_SERVICE_LOOKUP =
             "java:comp/DefaultManagedScheduledExecutorService";
 
@@ -43,12 +42,12 @@ public abstract class JobScheduler {
         return getJobScheduler(schedulerType, null);
     }
 
-    public static JobScheduler getJobScheduler(final ConcurrentMap<JobScheduleInfo, Future<?>> schedules) {
+    public static JobScheduler getJobScheduler(final ConcurrentMap<String, JobSchedule> schedules) {
         return getJobScheduler(null, schedules);
     }
 
     public static JobScheduler getJobScheduler(final Class<? extends JobScheduler> schedulerType,
-                                               final ConcurrentMap<JobScheduleInfo, Future<?>> schedules) {
+                                               final ConcurrentMap<String, JobSchedule> schedules) {
         JobScheduler result = jobScheduler;
         if (result == null) {
             synchronized (JobScheduler.class) {
@@ -65,8 +64,7 @@ public abstract class JobScheduler {
                         try {
                             ic = new InitialContext();
                             try {
-                                ic.lookup(TIMER_SERVICE_LOOKUP);
-                                return jobScheduler = new TimerServiceSchedulerImpl();
+                                return jobScheduler = (JobScheduler) ic.lookup(TIMER_SCHEDULER_LOOKUP);
                             } catch (final NamingException e) {
                                 try {
                                     final ScheduledExecutorService mexe =
@@ -103,9 +101,13 @@ public abstract class JobScheduler {
         private static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     }
 
-    public abstract JobScheduleInfo schedule(final JobScheduleInfo scheduleInfo);
 
-    public abstract Collection<JobScheduleInfo> getJobSchedules();
 
-    public abstract boolean cancel(final JobScheduleInfo scheduleInfo);
+    public abstract JobSchedule schedule(final JobScheduleConfig scheduleConfig);
+
+    public abstract List<JobSchedule> getJobSchedules();
+
+    public abstract boolean cancel(final String scheduleId);
+
+    public abstract JobSchedule.Status getStatus(final String scheduleId);
 }

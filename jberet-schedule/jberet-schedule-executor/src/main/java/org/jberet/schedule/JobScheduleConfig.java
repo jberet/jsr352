@@ -12,9 +12,11 @@
 
 package org.jberet.schedule;
 
+import java.io.Serializable;
 import java.util.Properties;
 
-public final class JobScheduleInfo {
+public final class JobScheduleConfig implements Serializable {
+    private static final long serialVersionUID = 7225109864510680914L;
 
     final String jobName;
 
@@ -24,44 +26,43 @@ public final class JobScheduleInfo {
 
     final String scheduleExpression;
 
+    final long initialDelay;
+
     final long delay;
 
-    final long period;
+    final long interval;
 
-    public JobScheduleInfo(final String jobName,
-                           final long jobExecutionId,
-                           final Properties jobParameters,
-                           final String scheduleExpression,
-                           final long delay,
-                           final long period) {
+    public JobScheduleConfig(final String jobName,
+                             final long jobExecutionId,
+                             final Properties jobParameters,
+                             final String scheduleExpression,
+                             final long initialDelay,
+                             final long delay,
+                             final long interval) {
         this.jobName = jobName;
         this.jobExecutionId = jobExecutionId;
         this.jobParameters = jobParameters;
-        this.scheduleExpression = scheduleExpression;
+        this.scheduleExpression = scheduleExpression == null ? null : scheduleExpression.trim();
+        this.initialDelay = initialDelay;
         this.delay = delay;
-        this.period = period;
+        this.interval = interval;
     }
 
-    /**
-     * Result of the job schedule. It can be one of the following values:
-     * <ul>
-     *     <li>-1: cancelled
-     *     <li> 0: scheduled
-     *     <li> positive long number: the new job execution id after the job is started
-     * </ul>
-     */
-    long result;
+    public boolean isRepeating() {
+        return delay > 0 || interval > 0 || (scheduleExpression != null && scheduleExpression.length() > 0);
+    }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final JobScheduleInfo that = (JobScheduleInfo) o;
+        final JobScheduleConfig that = (JobScheduleConfig) o;
 
         if (jobExecutionId != that.jobExecutionId) return false;
+        if (initialDelay != that.initialDelay) return false;
         if (delay != that.delay) return false;
-        if (period != that.period) return false;
+        if (interval != that.interval) return false;
         if (jobName != null ? !jobName.equals(that.jobName) : that.jobName != null) return false;
         if (jobParameters != null ? !jobParameters.equals(that.jobParameters) : that.jobParameters != null)
             return false;
@@ -75,8 +76,9 @@ public final class JobScheduleInfo {
         result = 31 * result + (int) (jobExecutionId ^ (jobExecutionId >>> 32));
         result = 31 * result + (jobParameters != null ? jobParameters.hashCode() : 0);
         result = 31 * result + (scheduleExpression != null ? scheduleExpression.hashCode() : 0);
+        result = 31 * result + (int) (initialDelay ^ (initialDelay >>> 32));
         result = 31 * result + (int) (delay ^ (delay >>> 32));
-        result = 31 * result + (int) (period ^ (period >>> 32));
+        result = 31 * result + (int) (interval ^ (interval >>> 32));
         return result;
     }
 
@@ -87,9 +89,9 @@ public final class JobScheduleInfo {
                 ", jobExecutionId=" + jobExecutionId +
                 ", jobParameters=" + jobParameters +
                 ", scheduleExpression='" + scheduleExpression + '\'' +
+                ", initialDelay=" + initialDelay +
                 ", delay=" + delay +
-                ", period=" + period +
-                ", result=" + result +
+                ", interval=" + interval +
                 '}';
     }
 }
