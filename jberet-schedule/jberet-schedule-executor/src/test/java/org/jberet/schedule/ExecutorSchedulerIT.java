@@ -15,6 +15,7 @@ package org.jberet.schedule;
 import java.util.List;
 import java.util.Properties;
 import javax.batch.operations.JobOperator;
+import javax.batch.operations.NoSuchJobException;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
@@ -26,29 +27,23 @@ import static org.junit.Assert.assertEquals;
 public class ExecutorSchedulerIT {
     private static final String jobName = "executor-scheduler-job1";
     private static final String testNameKey = "testName";
+    private static final int initialDelayMinute = 1;
+    private static final int intervalMinute = 1;
+    private static final long sleepTimeMillis = initialDelayMinute * 60 * 1000 + 1000;
 
     private final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
     @Test
-    public void singleAction() throws Exception {
-        List<JobSchedule> schedules = jobScheduler.getJobSchedules();
-        assertEquals(0, schedules.size());
-
+    public void singleActionInitialDelay() throws Exception {
         final Properties params = new Properties();
-        params.setProperty(testNameKey, "singleAction");
-        final JobScheduleConfig info = new JobScheduleConfig(jobName, 0, params, null, 1, 0, 0);
+        params.setProperty(testNameKey, "singleActionInitialDelay");
+        final JobScheduleConfig info = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
         JobSchedule schedule = jobScheduler.schedule(info);
-
         assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getStatus(schedule.getId()));
 
-        schedules = jobScheduler.getJobSchedules();
-        assertEquals(1, schedules.size());
-        assertEquals(schedule, schedules.get(0));
-
-        Thread.sleep(60 * 1000 + 1000);
-        schedule = jobScheduler.getJobSchedules().get(0);
-        assertEquals(JobSchedule.Status.DONE, schedule.getStatus());
+        Thread.sleep(sleepTimeMillis);
+        assertEquals(JobSchedule.Status.DONE, jobScheduler.getStatus(schedule.getId()));
         final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
 
         final JobExecution jobExecution = jobOperator.getJobExecution(jobExecutionIds.get(0));
@@ -58,5 +53,49 @@ public class ExecutorSchedulerIT {
         System.out.printf("exit status: %s%n", jobExecution.getExitStatus());
     }
 
+    @Test
+    public void interval() throws Exception {
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "interval");
+        final JobScheduleConfig info =
+                new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, intervalMinute);
+        JobSchedule schedule = jobScheduler.schedule(info);
+
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getStatus(schedule.getId()));
+
+        Thread.sleep(sleepTimeMillis * 2);
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getStatus(schedule.getId()));
+
+        final boolean cancelStatus = jobScheduler.cancel(schedule.getId());
+        assertEquals(true, cancelStatus);
+        assertEquals(JobSchedule.Status.CANCELLED, jobScheduler.getStatus(schedule.getId()));
+        System.out.printf("interval schedule successfully cancelled: %s%n", schedule);
+
+        final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
+        assertEquals(2, jobExecutionIds.size());
+        System.out.printf("jobExecutionIds from scheduled job: %s%n", jobExecutionIds);
+    }
+
+    @Test
+    public void cancel() throws Exception {
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "cancel");
+        final JobScheduleConfig info = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
+        JobSchedule schedule = jobScheduler.schedule(info);
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getStatus(schedule.getId()));
+
+        final boolean cancelResult = jobScheduler.cancel(schedule.getId());
+        assertEquals(JobSchedule.Status.CANCELLED, jobScheduler.getStatus(schedule.getId()));
+        assertEquals(true, cancelResult);
+
+        Thread.sleep(sleepTimeMillis);
+
+        try {
+            final int jobInstanceCount = jobOperator.getJobInstanceCount(jobName);
+            assertEquals(0, jobInstanceCount);
+        } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+    }
 
 }

@@ -126,4 +126,9 @@ public class ExecutorSchedulerImpl extends JobScheduler {
             return JobSchedule.Status.UNKNOWN;
         }
     }
+
+    @Override
+    public String toString() {
+        return  getClass().getName() + "{executorService=" + executorService + '}';
+    }
 }
