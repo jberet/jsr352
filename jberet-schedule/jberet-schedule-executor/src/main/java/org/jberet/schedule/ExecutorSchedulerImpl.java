@@ -37,8 +37,8 @@ public class ExecutorSchedulerImpl extends JobScheduler {
         this(schedules, null);
     }
 
-    protected ExecutorSchedulerImpl(final ConcurrentMap<String, JobSchedule> schedules,
-                                    final ScheduledExecutorService executorService) {
+    public ExecutorSchedulerImpl(final ConcurrentMap<String, JobSchedule> schedules,
+                                 final ScheduledExecutorService executorService) {
         this.schedules = schedules == null ?
                 new ConcurrentHashMap<String, JobSchedule>() : schedules;
         this.executorService = executorService == null ?
@@ -103,28 +103,22 @@ public class ExecutorSchedulerImpl extends JobScheduler {
     }
 
     @Override
-    public JobSchedule.Status getStatus(final String scheduleId) {
+    public JobSchedule getJobSchedule(final String scheduleId) {
         final JobSchedule jobSchedule = schedules.get(scheduleId);
         if (jobSchedule != null) {
-            final JobSchedule.Status result = jobSchedule.getStatus();
-            if (result == JobSchedule.Status.CANCELLED || result == JobSchedule.Status.DONE) {
-                return result;
-            }
-            final Future<?> future = jobSchedule.getFuture();
-            if (future != null) {
-                if (future.isCancelled()) {
-                    jobSchedule.setStatus(JobSchedule.Status.CANCELLED);
-                    return JobSchedule.Status.CANCELLED;
-                }
-                if (future.isDone()) {
-                    jobSchedule.setStatus(JobSchedule.Status.DONE);
-                    return JobSchedule.Status.DONE;
+            final JobSchedule.Status status = jobSchedule.getStatus();
+            if (status != JobSchedule.Status.CANCELLED && status != JobSchedule.Status.DONE) {
+                final Future<?> future = jobSchedule.getFuture();
+                if (future != null) {
+                    if (future.isCancelled()) {
+                        jobSchedule.setStatus(JobSchedule.Status.CANCELLED);
+                    } else if (future.isDone()) {
+                        jobSchedule.setStatus(JobSchedule.Status.DONE);
+                    }
                 }
             }
-            return result;
-        } else {
-            return JobSchedule.Status.UNKNOWN;
         }
+        return jobSchedule;
     }
 
     @Override

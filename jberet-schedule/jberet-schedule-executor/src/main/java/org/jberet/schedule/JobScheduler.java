@@ -69,7 +69,7 @@ public abstract class JobScheduler {
                                 try {
                                     final ScheduledExecutorService mexe =
                                             (ScheduledExecutorService) ic.lookup(MANAGED_EXECUTOR_SERVICE_LOOKUP);
-                                    return jobScheduler = new ManagedExecutorSchedulerImpl(schedules, mexe);
+                                    return jobScheduler = new ExecutorSchedulerImpl(schedules, mexe);
                                 } catch (final NamingException e2) {
                                     return jobScheduler = new ExecutorSchedulerImpl(schedules);
                                 }
@@ -109,5 +109,5 @@ public abstract class JobScheduler {
 
     public abstract boolean cancel(final String scheduleId);
 
-    public abstract JobSchedule.Status getStatus(final String scheduleId);
+    public abstract JobSchedule getJobSchedule(final String scheduleId);
 }

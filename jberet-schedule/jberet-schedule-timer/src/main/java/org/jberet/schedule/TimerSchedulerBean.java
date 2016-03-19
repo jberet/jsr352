@@ -33,21 +33,21 @@ public class TimerSchedulerBean extends JobScheduler {
     private TimerService timerService;
 
     @Override
-    public JobSchedule schedule(final JobScheduleConfig scheduleInfo) {
+    public JobSchedule schedule(final JobScheduleConfig scheduleConfig) {
         Timer timer = null;
-        final JobSchedule jobSchedule = new JobSchedule(null, scheduleInfo);
-        if (scheduleInfo.initialDelay > 0) {
-            if (scheduleInfo.interval > 0) {
-                timer = timerService.createIntervalTimer(toMillis(scheduleInfo.initialDelay),
-                        toMillis(scheduleInfo.interval),
-                        new TimerConfig((scheduleInfo), isPersistent));
-            } else if (scheduleInfo.delay > 0) {
-                timer = timerService.createIntervalTimer(toMillis(scheduleInfo.initialDelay),
-                        toMillis(scheduleInfo.delay),
-                        new TimerConfig(scheduleInfo, isPersistent));
+        final JobSchedule jobSchedule = new JobSchedule(null, scheduleConfig);
+        if (scheduleConfig.initialDelay > 0) {
+            if (scheduleConfig.interval > 0) {
+                timer = timerService.createIntervalTimer(toMillis(scheduleConfig.initialDelay),
+                        toMillis(scheduleConfig.interval),
+                        new TimerConfig(jobSchedule, isPersistent));
+            } else if (scheduleConfig.delay > 0) {
+                timer = timerService.createIntervalTimer(toMillis(scheduleConfig.initialDelay),
+                        toMillis(scheduleConfig.delay),
+                        new TimerConfig(jobSchedule, isPersistent));
             } else {
-                timer = timerService.createSingleActionTimer(toMillis(scheduleInfo.initialDelay),
-                        new TimerConfig(scheduleInfo, isPersistent));
+                timer = timerService.createSingleActionTimer(toMillis(scheduleConfig.initialDelay),
+                        new TimerConfig(jobSchedule, isPersistent));
             }
         } else {
             System.out.printf("Need to check for ScheduledExpression");
@@ -83,14 +83,15 @@ public class TimerSchedulerBean extends JobScheduler {
     }
 
     @Override
-    public JobSchedule.Status getStatus(final String scheduleId) {
+    public JobSchedule getJobSchedule(final String scheduleId) {
         final Collection<Timer> timers = timerService.getTimers();
         for (final Timer e : timers) {
-            if (scheduleId.equals(getTimerId(e))) {
-                return JobSchedule.Status.SCHEDULED;
+            final JobSchedule js = (JobSchedule) e.getInfo();
+            if (scheduleId.equals(js.getId())) {
+                return js;
             }
         }
-        return JobSchedule.Status.UNKNOWN;
+        return null;
     }
 
     private static long toMillis(final long t) {

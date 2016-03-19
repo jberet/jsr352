@@ -29,6 +29,7 @@ public class ExecutorSchedulerIT {
     private static final String testNameKey = "testName";
     private static final int initialDelayMinute = 1;
     private static final int intervalMinute = 1;
+    private static final int delaylMinute = 1;
     private static final long sleepTimeMillis = initialDelayMinute * 60 * 1000 + 1000;
 
     private final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
@@ -40,10 +41,10 @@ public class ExecutorSchedulerIT {
         params.setProperty(testNameKey, "singleActionInitialDelay");
         final JobScheduleConfig info = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
         JobSchedule schedule = jobScheduler.schedule(info);
-        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getStatus(schedule.getId()));
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
         Thread.sleep(sleepTimeMillis);
-        assertEquals(JobSchedule.Status.DONE, jobScheduler.getStatus(schedule.getId()));
+        assertEquals(JobSchedule.Status.DONE, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
         final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
 
         final JobExecution jobExecution = jobOperator.getJobExecution(jobExecutionIds.get(0));
@@ -61,15 +62,38 @@ public class ExecutorSchedulerIT {
                 new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, intervalMinute);
         JobSchedule schedule = jobScheduler.schedule(info);
 
-        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getStatus(schedule.getId()));
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
         Thread.sleep(sleepTimeMillis * 2);
-        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getStatus(schedule.getId()));
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
         final boolean cancelStatus = jobScheduler.cancel(schedule.getId());
         assertEquals(true, cancelStatus);
-        assertEquals(JobSchedule.Status.CANCELLED, jobScheduler.getStatus(schedule.getId()));
+        assertEquals(JobSchedule.Status.CANCELLED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
         System.out.printf("interval schedule successfully cancelled: %s%n", schedule);
+
+        final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
+        assertEquals(2, jobExecutionIds.size());
+        System.out.printf("jobExecutionIds from scheduled job: %s%n", jobExecutionIds);
+    }
+
+    @Test
+    public void delayRepeat() throws Exception {
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "delayRepeat");
+        final JobScheduleConfig info =
+                new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, delaylMinute, 0);
+        JobSchedule schedule = jobScheduler.schedule(info);
+
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
+
+        Thread.sleep(sleepTimeMillis * 2);
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
+
+        final boolean cancelStatus = jobScheduler.cancel(schedule.getId());
+        assertEquals(true, cancelStatus);
+        assertEquals(JobSchedule.Status.CANCELLED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
+        System.out.printf("delayRepeat schedule successfully cancelled: %s%n", schedule);
 
         final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
         assertEquals(2, jobExecutionIds.size());
@@ -82,10 +106,10 @@ public class ExecutorSchedulerIT {
         params.setProperty(testNameKey, "cancel");
         final JobScheduleConfig info = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
         JobSchedule schedule = jobScheduler.schedule(info);
-        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getStatus(schedule.getId()));
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
         final boolean cancelResult = jobScheduler.cancel(schedule.getId());
-        assertEquals(JobSchedule.Status.CANCELLED, jobScheduler.getStatus(schedule.getId()));
+        assertEquals(JobSchedule.Status.CANCELLED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
         assertEquals(true, cancelResult);
 
         Thread.sleep(sleepTimeMillis);
