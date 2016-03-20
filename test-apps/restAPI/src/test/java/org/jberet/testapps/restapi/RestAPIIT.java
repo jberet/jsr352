@@ -32,6 +32,9 @@ import org.jberet.rest.entity.StepExecutionEntity;
 import org.jberet.rest.resource.JobExecutionResource;
 import org.jberet.rest.resource.JobInstanceResource;
 import org.jberet.rest.resource.JobResource;
+import org.jberet.rest.resource.JobScheduleResource;
+import org.jberet.schedule.JobSchedule;
+import org.jberet.schedule.JobScheduleConfig;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -47,6 +50,11 @@ public class RestAPIIT {
     private static final String jobName2 = "restJob2";
     private static final String jobWithParams = "restJobWithParams";
     private static final String jobNameBad = "xxxxxxx";
+
+    private static final int initialDelayMinute = 1;
+    private static final int intervalMinute = 1;
+    private static final int delaylMinute = 1;
+    private static final long sleepTimeMillis = initialDelayMinute * 60 * 1000 + 1000;
 
     // context-path: use war file base name as the default context root
     // rest api mapping url: configured in web.xml servlet-mapping
@@ -360,6 +368,50 @@ public class RestAPIIT {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    @Test
+    public void scheduleSingleAction() throws Exception {
+        final JobScheduleConfig scheduleConfig =
+                new JobScheduleConfig(jobName1, 0, null, null, initialDelayMinute, 0, 0);
+        final URI uri = getJobUriBuilder("schedule").resolveTemplate("jobXmlName", jobName1).build();
+        WebTarget target = getTarget(uri, null);
+        System.out.printf("uri: %s%n", uri);
+
+        JobSchedule jobSchedule = target.request().post(Entity.json(scheduleConfig), JobSchedule.class);
+        System.out.printf("Scheduled job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
+        Thread.sleep(sleepTimeMillis);
+
+        jobSchedule = getJobSchedule(jobSchedule.getId());
+        assertEquals(JobSchedule.Status.DONE, jobSchedule.getStatus());
+        assertEquals(1, jobSchedule.getJobExecutionIds().size());
+        assertEquals(BatchStatus.COMPLETED, getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
+    }
+
+    @Test
+    public void scheduleInterval() throws Exception {
+        final JobScheduleConfig scheduleConfig =
+                new JobScheduleConfig(jobName1, 0, null, null, initialDelayMinute, 0, intervalMinute);
+        final URI uri = getJobUriBuilder("schedule").resolveTemplate("jobXmlName", jobName1).build();
+        WebTarget target = getTarget(uri, null);
+        System.out.printf("uri: %s%n", uri);
+
+        JobSchedule jobSchedule = target.request().post(Entity.json(scheduleConfig), JobSchedule.class);
+        System.out.printf("Scheduled job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
+        Thread.sleep(sleepTimeMillis * 2);
+
+        jobSchedule = getJobSchedule(jobSchedule.getId());
+        assertEquals(JobSchedule.Status.SCHEDULED, jobSchedule.getStatus());
+        assertEquals(2, jobSchedule.getJobExecutionIds().size());
+        assertEquals(BatchStatus.COMPLETED, getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
+
+        final boolean cancelStatus = cancelJobSchedule(jobSchedule.getId());
+        System.out.printf("Cancelled job schedule %s?%s%n", jobSchedule.getId(), cancelStatus);
+        assertEquals(true, cancelStatus);
+        assertEquals(JobSchedule.Status.CANCELLED, getJobSchedule(jobSchedule.getId()).getStatus());
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private JobExecutionEntity startJob(final String jobXmlName, final Properties queryParams) throws Exception {
         final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();
         WebTarget target = getTarget(uri, queryParams);
@@ -402,6 +454,22 @@ public class RestAPIIT {
         return target.request().get(StepExecutionEntity[].class);
     }
 
+    private JobSchedule getJobSchedule(final String scheduleId) {
+        final URI uri = getJobScheduleUriBuilder("getJobSchedule")
+                .resolveTemplate("scheduleId", scheduleId).build();
+        WebTarget target = getTarget(uri, null);
+        System.out.printf("uri: %s%n", uri);
+        return target.request().accept(MediaType.APPLICATION_JSON_TYPE).get(JobSchedule.class);
+    }
+
+    private boolean cancelJobSchedule(final String scheduleId) {
+        final URI uri = getJobScheduleUriBuilder("cancel")
+                .resolveTemplate("scheduleId", scheduleId).build();
+        WebTarget target = getTarget(uri, null);
+        System.out.printf("uri: %s%n", uri);
+        return target.request().accept(MediaType.APPLICATION_JSON_TYPE).post(emptyJsonEntity(), boolean.class);
+    }
+
     private Entity<Object> emptyJsonEntity() {
         return Entity.entity(null, MediaType.APPLICATION_JSON_TYPE);
     }
@@ -426,6 +494,14 @@ public class RestAPIIT {
         UriBuilder uriBuilder = UriBuilder.fromPath(restUrl).path(JobExecutionResource.class);
         if (methodName != null) {
             uriBuilder = uriBuilder.path(JobExecutionResource.class, methodName);
+        }
+        return uriBuilder;
+    }
+
+    private UriBuilder getJobScheduleUriBuilder(final String methodName) {
+        UriBuilder uriBuilder = UriBuilder.fromPath(restUrl).path(JobScheduleResource.class);
+        if (methodName != null) {
+            uriBuilder = uriBuilder.path(JobScheduleResource.class, methodName);
         }
         return uriBuilder;
     }

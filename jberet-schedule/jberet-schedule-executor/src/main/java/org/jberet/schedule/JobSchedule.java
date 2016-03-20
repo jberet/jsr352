@@ -18,7 +18,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public final class JobSchedule implements Serializable, Comparable<JobSchedule> {
     private static final long serialVersionUID = 5759369754976526021L;
 
@@ -39,7 +45,12 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
 
     private List<Long> jobExecutionIds = new CopyOnWriteArrayList<Long>();
 
+    @XmlTransient
     private transient Future<?> future;
+
+    public JobSchedule() {
+        this(null, null);
+    }
 
     public JobSchedule(final String id, final JobScheduleConfig jobScheduleConfig) {
         this.id = id;

@@ -34,6 +34,12 @@
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
             <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-schedule-executor</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <pluginRepositories>

@@ -28,6 +28,9 @@ import javax.ws.rs.core.UriInfo;
 import org.jberet.rest._private.RestAPIMessages;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
+import org.jberet.schedule.JobSchedule;
+import org.jberet.schedule.JobScheduleConfig;
+import org.jberet.schedule.JobScheduler;
 
 /**
  * REST resource class for job execution. This class supports job-execution- and
@@ -149,6 +152,13 @@ public class JobExecutionResource {
                 jobExecutionId, JobResource.jobParametersFromUriInfoAndProps(uriInfo, jobParamsAsProps));
         setJobExecutionEntityHref(uriInfo, jobExecutionEntity);
         return jobExecutionEntity;
+    }
+
+    @Path("{jobExecutionId}/schedule")
+    @POST
+    public JobSchedule schedule(final JobScheduleConfig scheduleConfig) {
+        final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
+        return jobScheduler.schedule(scheduleConfig);
     }
 
     /**

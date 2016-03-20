@@ -45,6 +45,12 @@
 
         <dependency>
             <groupId>org.jberet</groupId>
+            <artifactId>jberet-schedule-executor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jberet</groupId>
             <artifactId>jberet-core</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

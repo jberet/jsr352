@@ -93,7 +93,7 @@ public class ExecutorSchedulerImpl extends JobScheduler {
         if (jobSchedule != null) {
             final Future<?> future = jobSchedule.getFuture();
             if (future != null) {
-                result = future.cancel(false);
+                result = future.cancel(true);
                 if (result) {
                     jobSchedule.setStatus(JobSchedule.Status.CANCELLED);
                 }

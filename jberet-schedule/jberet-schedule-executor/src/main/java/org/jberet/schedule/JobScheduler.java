@@ -16,11 +16,13 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.BatchRuntimeException;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import org.jberet.schedule._private.ScheduleExecutorLogger;
+import org.jberet.schedule._private.ScheduleExecutorMessages;
 
 public abstract class JobScheduler {
     protected static final TimeUnit timeUnit = TimeUnit.MINUTES;
@@ -55,28 +57,28 @@ public abstract class JobScheduler {
                 if (result == null) {
                     if (schedulerType != null) {
                         try {
-                            return jobScheduler = schedulerType.newInstance();
+                            jobScheduler = result = schedulerType.newInstance();
                         } catch (final Throwable e) {
-                            throw new BatchRuntimeException(e);
+                            throw ScheduleExecutorMessages.MESSAGES.failToCreateJobScheduler(e, schedulerType);
                         }
                     } else {
                         InitialContext ic = null;
                         try {
                             ic = new InitialContext();
                             try {
-                                return jobScheduler = (JobScheduler) ic.lookup(TIMER_SCHEDULER_LOOKUP);
+                                jobScheduler = result = (JobScheduler) ic.lookup(TIMER_SCHEDULER_LOOKUP);
                             } catch (final NamingException e) {
                                 try {
                                     final ScheduledExecutorService mexe =
                                             (ScheduledExecutorService) ic.lookup(MANAGED_EXECUTOR_SERVICE_LOOKUP);
-                                    return jobScheduler = new ExecutorSchedulerImpl(schedules, mexe);
+                                    jobScheduler = result = new ExecutorSchedulerImpl(schedules, mexe);
                                 } catch (final NamingException e2) {
-                                    return jobScheduler = new ExecutorSchedulerImpl(schedules);
+                                    jobScheduler = result = new ExecutorSchedulerImpl(schedules);
                                 }
                             }
                         } catch (final NamingException e) {
                             //log warning
-                            return jobScheduler = new ExecutorSchedulerImpl();
+                            jobScheduler = result = new ExecutorSchedulerImpl();
                         } finally {
                             if (ic != null) {
                                 try {
@@ -87,6 +89,7 @@ public abstract class JobScheduler {
                             }
                         }
                     }
+                    ScheduleExecutorLogger.LOGGER.createdJobScheduler(result);
                 }
             }
         }

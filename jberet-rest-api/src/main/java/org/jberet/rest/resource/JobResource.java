@@ -32,6 +32,9 @@ import org.jberet.rest._private.RestAPIMessages;
 import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
+import org.jberet.schedule.JobSchedule;
+import org.jberet.schedule.JobScheduleConfig;
+import org.jberet.schedule.JobScheduler;
 
 /**
  * REST resource class for batch job. This class supports job-related operations
@@ -71,6 +74,13 @@ public class JobResource {
                 build();
         jobExecutionData.setHref(jobExecutionDataUri.toString());
         return Response.created(jobExecutionDataUri).entity(jobExecutionData).build();
+    }
+
+    @Path("{jobXmlName}/schedule")
+    @POST
+    public JobSchedule schedule(final JobScheduleConfig scheduleConfig) {
+        final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
+        return jobScheduler.schedule(scheduleConfig);
     }
 
     /**
