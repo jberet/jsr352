@@ -46,7 +46,7 @@ public class DeserializationIT extends BatchTestBase {
      */
     private static final String restUrl = BASE_URL + "deserialization/api";
 
-    private BatchClient batchClient = new BatchClient(client, restUrl);
+    private BatchClient batchClient = new BatchClient(restUrl);
 
     @Override
     protected BatchClient getBatchClient() {

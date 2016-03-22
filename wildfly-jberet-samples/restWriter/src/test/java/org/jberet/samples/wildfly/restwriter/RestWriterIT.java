@@ -12,6 +12,7 @@
 
 package org.jberet.samples.wildfly.restwriter;
 
+import java.net.URI;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.ws.rs.client.WebTarget;
@@ -45,7 +46,7 @@ public final class RestWriterIT extends BatchTestBase {
      */
     private static final String restUrl = BASE_URL + "restWriter/api";
 
-    private BatchClient batchClient = new BatchClient(client, restUrl);
+    private BatchClient batchClient = new BatchClient(restUrl);
 
     @Override
     protected BatchClient getBatchClient() {
@@ -100,19 +101,19 @@ public final class RestWriterIT extends BatchTestBase {
         getAndVerifyMovies(testName);
     }
 
-    private Movie[] getMovies(final String testName) {
-        final WebTarget target = client.target(restUrl + "/movies")
+    private Movie[] getMovies(final String testName) throws Exception {
+        final WebTarget target = batchClient.target(new URI(restUrl + "/movies"))
                 .queryParam("testName", testName);
         return target.request().get(Movie[].class);
     }
 
-    private void removeMovies(final String testName) {
-        final WebTarget target = client.target(restUrl + "/movies")
+    private void removeMovies(final String testName) throws Exception {
+        final WebTarget target = batchClient.target(new URI(restUrl + "/movies"))
                 .queryParam("testName", testName);
         target.request().delete();
     }
 
-    private void getAndVerifyMovies(final String testName) {
+    private void getAndVerifyMovies(final String testName) throws Exception {
         final Movie[] movies = getMovies(testName);
         Assert.assertEquals(100, movies.length);
         System.out.printf("Movie 1  : %s%nMovie 100: %s%n", movies[0], movies[99]);

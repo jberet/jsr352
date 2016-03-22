@@ -27,7 +27,7 @@ public final class Csv2JsonIT extends BatchTestBase {
      */
     private static final String restUrl = BASE_URL + "csv2json/api";
 
-    private BatchClient batchClient = new BatchClient(client, restUrl);
+    private BatchClient batchClient = new BatchClient(restUrl);
 
     @Override
     protected BatchClient getBatchClient() {

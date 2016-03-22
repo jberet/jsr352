@@ -30,7 +30,7 @@ public final class ExcelStream2CsvIT extends BatchTestBase {
      */
     private static final String restUrl = BASE_URL + "excelstream2csv/api";
 
-    private BatchClient batchClient = new BatchClient(client, restUrl);
+    private BatchClient batchClient = new BatchClient(restUrl);
 
     @Override
     protected BatchClient getBatchClient() {

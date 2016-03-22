@@ -16,8 +16,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -44,8 +42,6 @@ public abstract class BatchTestBase {
             System.out.printf("Starting test: %s%n", description.getMethodName());
         }
     };
-
-    protected Client client = ClientBuilder.newClient();
 
     protected abstract BatchClient getBatchClient();
 
@@ -121,7 +117,7 @@ public abstract class BatchTestBase {
     }
 
     protected WebTarget getTarget(final URI uri, final Properties props) {
-        WebTarget result = client.target(uri);
+        WebTarget result = getBatchClient().target(uri);
 
         if (props == null) {
             return result;
@@ -136,14 +132,14 @@ public abstract class BatchTestBase {
     protected JobExecutionEntity getJobExecution(final long jobExecutionId) {
         final URI uri = getBatchClient().getJobExecutionUriBuilder(null).path(String.valueOf(jobExecutionId)).build();
         System.out.printf("uri: %s%n", uri);
-        final WebTarget target = client.target(uri);
+        final WebTarget target = getBatchClient().target(uri);
         return target.request().get(JobExecutionEntity.class);
     }
 
     protected JobInstanceEntity[] getJobInstances(final String jobName, final int start, final int count)
             throws Exception {
         final URI uri = getBatchClient().getJobInstanceUriBuilder(null).build();
-        final WebTarget target = client.target(uri)
+        final WebTarget target = getBatchClient().target(uri)
                 .queryParam("jobName", jobName)
                 .queryParam("start", start)
                 .queryParam("count", count);

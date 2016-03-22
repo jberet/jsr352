@@ -45,7 +45,7 @@ public final class RestReaderIT extends BatchTestBase {
      */
     private static final String restUrl = BASE_URL + "restReader/api";
 
-    private BatchClient batchClient = new BatchClient(client, restUrl);
+    private BatchClient batchClient = new BatchClient(restUrl);
 
     @Override
     protected BatchClient getBatchClient() {

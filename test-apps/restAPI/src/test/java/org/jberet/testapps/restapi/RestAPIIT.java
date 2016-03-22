@@ -17,8 +17,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -55,8 +53,7 @@ public class RestAPIIT {
     // context-path: use war file base name as the default context root
     // rest api mapping url: configured in web.xml servlet-mapping
     private static final String restUrl = "http://localhost:8080/restAPI/api";
-    private Client client = ClientBuilder.newClient();
-    private BatchClient batchClient = new BatchClient(client, restUrl);
+    private BatchClient batchClient = new BatchClient(restUrl);
 
     @Test
     public void start() throws Exception {
@@ -68,7 +65,7 @@ public class RestAPIIT {
     @Test
     public void startWithJobParams() throws Exception {
         final URI uri = batchClient.getJobUriBuilder("start").resolveTemplate("jobXmlName", jobName2).build();
-        final WebTarget target = client.target(uri)
+        final WebTarget target = batchClient.target(uri)
                 .queryParam("jobParam1", "jobParam1 value")
                 .queryParam("jobParam2", "jobParam2 value");
         System.out.printf("uri: %s%n", uri);
@@ -86,7 +83,7 @@ public class RestAPIIT {
         jobParams.setProperty("jobParam2", "jobParam2 value");
 
         final URI uri = batchClient.getJobUriBuilder("start").resolveTemplate("jobXmlName", jobName2).build();
-        final WebTarget target = client.target(uri);
+        final WebTarget target = batchClient.target(uri);
         System.out.printf("uri: %s%n", uri);
         final Response response = target.request().post(Entity.entity(jobParams, MediaType.APPLICATION_JSON_TYPE));
 
@@ -95,7 +92,7 @@ public class RestAPIIT {
         System.out.printf("location of the created: %s%n", location);
         response.close();
 
-        final WebTarget target2 = client.target(location);
+        final WebTarget target2 = batchClient.target(new URI(location));
         final JobExecutionEntity data = target2.request().get(JobExecutionEntity.class);
         assertEquals(jobParams, data.getJobParameters());
     }
@@ -103,7 +100,7 @@ public class RestAPIIT {
     @Test
     public void startWithBadJobXmlName() throws Exception {
         final URI uri = batchClient.getJobUriBuilder("start").resolveTemplate("jobXmlName", jobNameBad).build();
-        final WebTarget target = client.target(uri);
+        final WebTarget target = batchClient.target(uri);
         System.out.printf("uri: %s%n", uri);
         final Response response = target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE));
 
@@ -115,7 +112,7 @@ public class RestAPIIT {
         batchClient.startJob(jobName1, null);
 
         final URI uri = batchClient.getJobUriBuilder(null).build();
-        final WebTarget target = client.target(uri);
+        final WebTarget target = batchClient.target(uri);
         System.out.printf("uri: %s%n", uri);
 
         //accepts XML to test XML response content type
@@ -136,7 +133,7 @@ public class RestAPIIT {
     public void getJobInstances() throws Exception {
         final JobExecutionEntity jobExecutionData = batchClient.startJob(jobName1, null);// to have at least 1 job instance
         final URI uri = batchClient.getJobInstanceUriBuilder(null).build();
-        final WebTarget target = client.target(uri)
+        final WebTarget target = batchClient.target(uri)
                 .queryParam("jobName", jobExecutionData.getJobName())
                 .queryParam("start", 0)
                 .queryParam("count", 99999999);
@@ -154,7 +151,7 @@ public class RestAPIIT {
     public void getJobInstanceCount() throws Exception {
         batchClient.startJob(jobName1, null);  // to have at least 1 job instance
         final URI uri = batchClient.getJobInstanceUriBuilder("getJobInstanceCount").build();
-        final WebTarget target = client.target(uri).queryParam("jobName", jobName1);
+        final WebTarget target = batchClient.target(uri).queryParam("jobName", jobName1);
         System.out.printf("uri: %s%n", uri);
         final Integer count = target.request().get(int.class);
 
@@ -164,7 +161,7 @@ public class RestAPIIT {
     @Test
     public void getJobInstanceCountBadJobName() throws Exception {
         final URI uri = batchClient.getJobInstanceUriBuilder("getJobInstanceCount").build();
-        final WebTarget target = client.target(uri).queryParam("jobName", jobNameBad);
+        final WebTarget target = batchClient.target(uri).queryParam("jobName", jobNameBad);
         System.out.printf("uri: %s%n", uri);
         final Response response = target.request().get();
 
@@ -174,7 +171,7 @@ public class RestAPIIT {
     @Test
     public void getJobInstanceCountMissingJobName() throws Exception {
         final URI uri = batchClient.getJobInstanceUriBuilder("getJobInstanceCount").build();
-        final WebTarget target = client.target(uri);
+        final WebTarget target = batchClient.target(uri);
         System.out.printf("uri: %s%n", uri);
         final Response response = target.request().get();
 
@@ -185,7 +182,7 @@ public class RestAPIIT {
     public void getJobInstance() throws Exception {
         final JobExecutionEntity jobExecutionData = batchClient.startJob(jobName1, null);// to have at least 1 job instance
         final URI uri = batchClient.getJobInstanceUriBuilder(null).build();
-        final WebTarget target = client.target(uri).queryParam("jobExecutionId", jobExecutionData.getExecutionId());
+        final WebTarget target = batchClient.target(uri).queryParam("jobExecutionId", jobExecutionData.getExecutionId());
         System.out.printf("uri: %s%n", uri);
         final JobInstanceEntity data = target.request().get(JobInstanceEntity.class);
 
@@ -201,7 +198,7 @@ public class RestAPIIT {
         final JobExecutionEntity jobExecutionData = batchClient.startJob(jobName1, null);
         final URI uri = batchClient.getJobExecutionUriBuilder(null).path(String.valueOf(jobExecutionData.getExecutionId())).build();
         System.out.printf("uri: %s%n", uri);
-        final WebTarget target = client.target(uri);
+        final WebTarget target = batchClient.target(uri);
         final JobExecutionEntity data = target.request().get(JobExecutionEntity.class);
 
         System.out.printf("Got JobExecutionData: %s%n", data);
@@ -212,7 +209,7 @@ public class RestAPIIT {
     public void getJobExecutionBadId() throws Exception {
         final URI uri = batchClient.getJobExecutionUriBuilder(null).path(String.valueOf(Long.MAX_VALUE)).build();
         System.out.printf("uri: %s%n", uri);
-        final WebTarget target = client.target(uri);
+        final WebTarget target = batchClient.target(uri);
         final Response response = target.request().get();
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -228,18 +225,18 @@ public class RestAPIIT {
         final URI uri = batchClient.getJobExecutionUriBuilder("abandon")
                 .resolveTemplate("jobExecutionId", String.valueOf(jobExecutionData.getExecutionId())).build();
         System.out.printf("uri: %s%n", uri);
-        final WebTarget target = client.target(uri);
+        final WebTarget target = batchClient.target(uri);
         final Response response = target.request().post(null);
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
 
         //abandon it again (should be idempotent)
-        final Response response2 = client.target(uri).request().post(null);
+        final Response response2 = batchClient.target(uri).request().post(null);
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response2.getStatus());
 
         final URI abandonedJobExecutionUri = batchClient.getJobExecutionUriBuilder(null).
                 path(String.valueOf(jobExecutionData.getExecutionId())).build();
         System.out.printf("uri: %s%n", abandonedJobExecutionUri);
-        final WebTarget jobExecutionTarget = client.target(abandonedJobExecutionUri);
+        final WebTarget jobExecutionTarget = batchClient.target(abandonedJobExecutionUri);
         final JobExecutionEntity data = jobExecutionTarget.request().get(JobExecutionEntity.class);
         assertEquals(BatchStatus.ABANDONED, data.getBatchStatus());
     }
@@ -271,7 +268,7 @@ public class RestAPIIT {
         assertEquals(queryParams, jobExecution.getJobParameters());
 
         final URI uri = batchClient.getJobExecutionUriBuilder("stop").resolveTemplate("jobExecutionId", jobExecution.getExecutionId()).build();
-        final WebTarget target = client.target(uri);
+        final WebTarget target = batchClient.target(uri);
         System.out.printf("uri: %s%n", uri);
         final Response response = target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE));
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
@@ -292,7 +289,7 @@ public class RestAPIIT {
         final URI uri = batchClient.getJobExecutionUriBuilder("getRunningExecutions").build();
         queryParams.clear();
         queryParams.setProperty("jobName", jobWithParams);
-        WebTarget target = batchClient.getTarget(uri, queryParams);
+        WebTarget target = batchClient.target(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
         final JobExecutionEntity[] jobExecutionData = target.request().get(JobExecutionEntity[].class);
         assertEquals(2, jobExecutionData.length);
@@ -307,7 +304,7 @@ public class RestAPIIT {
         Thread.sleep(500);
         final URI uri = batchClient.getJobExecutionUriBuilder("getRunningExecutions").build();
         queryParams.setProperty("jobName", jobWithParams);
-        WebTarget target = batchClient.getTarget(uri, queryParams);
+        WebTarget target = batchClient.target(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
         final JobExecutionEntity[] data = target.request().get(JobExecutionEntity[].class);
         assertEquals(0, data.length);
@@ -337,7 +334,7 @@ public class RestAPIIT {
         final URI uri = batchClient.getJobExecutionUriBuilder("getStepExecution")
                 .resolveTemplate("jobExecutionId", jobExecution1.getExecutionId())
                 .resolveTemplate("stepExecutionId", stepExecutionId).build();
-        WebTarget target = batchClient.getTarget(uri, null);
+        WebTarget target = batchClient.target(uri, null);
         System.out.printf("uri: %s%n", uri);
         final StepExecutionEntity stepExecutionData = target.request().get(StepExecutionEntity.class);
         assertEquals(BatchStatus.COMPLETED, stepExecutionData.getBatchStatus());
@@ -354,7 +351,7 @@ public class RestAPIIT {
         final URI uri = batchClient.getJobExecutionUriBuilder("getStepExecution")
                 .resolveTemplate("jobExecutionId", jobExecution1.getExecutionId())
                 .resolveTemplate("stepExecutionId", stepExecutionId).build();
-        WebTarget target = batchClient.getTarget(uri, null);
+        WebTarget target = batchClient.target(uri, null);
         System.out.printf("uri: %s%n", uri);
 
         try {
@@ -372,7 +369,7 @@ public class RestAPIIT {
         final JobScheduleConfig scheduleConfig =
                 new JobScheduleConfig(jobName1, 0, null, null, initialDelayMinute, 0, 0);
         final URI uri = batchClient.getJobUriBuilder("schedule").resolveTemplate("jobXmlName", jobName1).build();
-        WebTarget target = batchClient.getTarget(uri, null);
+        WebTarget target = batchClient.target(uri, null);
         System.out.printf("uri: %s%n", uri);
 
         JobSchedule jobSchedule = target.request().post(Entity.json(scheduleConfig), JobSchedule.class);
@@ -391,7 +388,7 @@ public class RestAPIIT {
         final JobScheduleConfig scheduleConfig =
                 new JobScheduleConfig(jobName1, 0, null, null, initialDelayMinute, 0, intervalMinute);
         final URI uri = batchClient.getJobUriBuilder("schedule").resolveTemplate("jobXmlName", jobName1).build();
-        WebTarget target = batchClient.getTarget(uri, null);
+        WebTarget target = batchClient.target(uri, null);
         System.out.printf("uri: %s%n", uri);
 
         JobSchedule jobSchedule = target.request().post(Entity.json(scheduleConfig), JobSchedule.class);
