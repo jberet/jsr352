@@ -15,6 +15,7 @@ package org.jberet.rest.client;
 import java.net.URI;
 import java.util.Properties;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -32,26 +33,40 @@ public class BatchClient {
     protected final Client client;
     protected final String restUrl;
 
+    public BatchClient(final String restUrl) {
+        this(ClientBuilder.newClient(), restUrl);
+    }
+
     public BatchClient(final Client client, final String restUrl) {
         this.client = client;
         this.restUrl = restUrl;
     }
 
+    public Client getClient() {
+        return client;
+    }
+
+    public String getRestUrl() {
+        return restUrl;
+    }
+
     public JobExecutionEntity startJob(final String jobXmlName, final Properties queryParams) throws Exception {
         final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();
-        WebTarget target = getTarget(uri, queryParams);
-        System.out.printf("uri: %s%n", uri);
+        WebTarget target = target(uri, queryParams);
         return target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
     }
 
     public JobExecutionEntity restartJobExecution(final long jobExecutionId, final Properties queryParams) throws Exception {
         final URI uri = getJobExecutionUriBuilder("restart").resolveTemplate("jobExecutionId", jobExecutionId).build();
-        WebTarget target = getTarget(uri, queryParams);
-        System.out.printf("uri: %s%n", uri);
+        WebTarget target = target(uri, queryParams);
         return target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
     }
 
-    public WebTarget getTarget(final URI uri, final Properties props) {
+    public WebTarget target(final URI uri) {
+        return client.target(uri);
+    }
+
+    public WebTarget target(final URI uri, final Properties props) {
         WebTarget result = client.target(uri);
 
         if (props == null) {
@@ -73,21 +88,21 @@ public class BatchClient {
     public StepExecutionEntity[] getStepExecutions(final long jobExecutionId) {
         final URI uri = getJobExecutionUriBuilder("getStepExecutions")
                 .resolveTemplate("jobExecutionId", jobExecutionId).build();
-        WebTarget target = getTarget(uri, null);
+        WebTarget target = target(uri);
         return target.request().get(StepExecutionEntity[].class);
     }
 
     public JobSchedule getJobSchedule(final String scheduleId) {
         final URI uri = getJobScheduleUriBuilder("getJobSchedule")
                 .resolveTemplate("scheduleId", scheduleId).build();
-        WebTarget target = getTarget(uri, null);
+        WebTarget target = target(uri);
         return target.request().accept(MediaType.APPLICATION_JSON_TYPE).get(JobSchedule.class);
     }
 
     public boolean cancelJobSchedule(final String scheduleId) {
         final URI uri = getJobScheduleUriBuilder("cancel")
                 .resolveTemplate("scheduleId", scheduleId).build();
-        WebTarget target = getTarget(uri, null);
+        WebTarget target = target(uri);
         return target.request().accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), boolean.class);
     }
