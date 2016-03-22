@@ -14,19 +14,28 @@ package org.jberet.samples.wildfly.batchproperty;
 
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet.rest.client.BatchClient;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Test;
 
 public class BatchPropertyIT extends BatchTestBase {
     private static final String jobName = "batchproperty";
 
+    /**
+     * The full REST API URL, including scheme, hostname, port number, context path, servlet path for REST API.
+     * For example, "http://localhost:8080/testApp/api"
+     */
+    private static final String restUrl = BASE_URL + "batchproperty/api";
+
+    private BatchClient batchClient = new BatchClient(client, restUrl);
+
+    @Override
+    protected BatchClient getBatchClient() {
+        return batchClient;
+    }
+
     @Test
     public void testBatchProperty() throws Exception {
         startJobCheckStatus(jobName, null, 500, BatchStatus.COMPLETED);
-    }
-
-    @Override
-    protected String getRestUrl() {
-        return BASE_URL + "batchproperty/api";
     }
 }

@@ -21,14 +21,11 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriBuilder;
 
+import org.jberet.rest.client.BatchClient;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
-import org.jberet.rest.resource.JobExecutionResource;
-import org.jberet.rest.resource.JobInstanceResource;
-import org.jberet.rest.resource.JobResource;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -50,13 +47,7 @@ public abstract class BatchTestBase {
 
     protected Client client = ClientBuilder.newClient();
 
-    /**
-     * Gets the full REST API URL, including scheme, hostname, port number, context path, servlet path for REST API.
-     * For example, "http://localhost:8080/testApp/api"
-     *
-     * @return the full REST API URL
-     */
-    protected abstract String getRestUrl();
+    protected abstract BatchClient getBatchClient();
 
     /**
      * Starts a job, waits for it to finish, verifies the job execution batch status, and returns the
@@ -116,17 +107,17 @@ public abstract class BatchTestBase {
     }
 
     protected JobExecutionEntity startJob(final String jobXmlName, final Properties queryParams) throws Exception {
-        final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();
+        final URI uri = getBatchClient().getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();
         WebTarget target = getTarget(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
-        return target.request().post(emptyJsonEntity(), JobExecutionEntity.class);
+        return target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
     }
 
     protected JobExecutionEntity restartJobExecution(final String jobXmlName, final Properties queryParams) throws Exception {
-        final URI uri = getJobUriBuilder("restart").resolveTemplate("jobXmlName", jobXmlName).build();
+        final URI uri = getBatchClient().getJobUriBuilder("restart").resolveTemplate("jobXmlName", jobXmlName).build();
         WebTarget target = getTarget(uri, queryParams);
         System.out.printf("uri: %s%n", uri);
-        return target.request().post(emptyJsonEntity(), JobExecutionEntity.class);
+        return target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
     }
 
     protected WebTarget getTarget(final URI uri, final Properties props) {
@@ -143,7 +134,7 @@ public abstract class BatchTestBase {
     }
 
     protected JobExecutionEntity getJobExecution(final long jobExecutionId) {
-        final URI uri = getJobExecutionUriBuilder(null).path(String.valueOf(jobExecutionId)).build();
+        final URI uri = getBatchClient().getJobExecutionUriBuilder(null).path(String.valueOf(jobExecutionId)).build();
         System.out.printf("uri: %s%n", uri);
         final WebTarget target = client.target(uri);
         return target.request().get(JobExecutionEntity.class);
@@ -151,7 +142,7 @@ public abstract class BatchTestBase {
 
     protected JobInstanceEntity[] getJobInstances(final String jobName, final int start, final int count)
             throws Exception {
-        final URI uri = getJobInstanceUriBuilder(null).build();
+        final URI uri = getBatchClient().getJobInstanceUriBuilder(null).build();
         final WebTarget target = client.target(uri)
                 .queryParam("jobName", jobName)
                 .queryParam("start", start)
@@ -164,38 +155,10 @@ public abstract class BatchTestBase {
     }
 
     protected StepExecutionEntity[] getStepExecutions(final long jobExecutionId) {
-        final URI uri = getJobExecutionUriBuilder("getStepExecutions")
+        final URI uri = getBatchClient().getJobExecutionUriBuilder("getStepExecutions")
                 .resolveTemplate("jobExecutionId", jobExecutionId).build();
         WebTarget target = getTarget(uri, null);
         System.out.printf("uri: %s%n", uri);
         return target.request().get(StepExecutionEntity[].class);
-    }
-
-    protected Entity<Object> emptyJsonEntity() {
-        return Entity.entity(null, MediaType.APPLICATION_JSON_TYPE);
-    }
-
-    protected UriBuilder getJobUriBuilder(final String methodName) {
-        UriBuilder uriBuilder = UriBuilder.fromPath(getRestUrl()).path(JobResource.class);
-        if (methodName != null) {
-            uriBuilder = uriBuilder.path(JobResource.class, methodName);
-        }
-        return uriBuilder;
-    }
-
-    protected UriBuilder getJobInstanceUriBuilder(final String methodName) {
-        UriBuilder uriBuilder = UriBuilder.fromPath(getRestUrl()).path(JobInstanceResource.class);
-        if (methodName != null) {
-            uriBuilder = uriBuilder.path(JobInstanceResource.class, methodName);
-        }
-        return uriBuilder;
-    }
-
-    protected UriBuilder getJobExecutionUriBuilder(final String methodName) {
-        UriBuilder uriBuilder = UriBuilder.fromPath(getRestUrl()).path(JobExecutionResource.class);
-        if (methodName != null) {
-            uriBuilder = uriBuilder.path(JobExecutionResource.class, methodName);
-        }
-        return uriBuilder;
     }
 }

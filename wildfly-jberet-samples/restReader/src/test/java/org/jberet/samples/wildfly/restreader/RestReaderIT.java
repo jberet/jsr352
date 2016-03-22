@@ -15,6 +15,7 @@ package org.jberet.samples.wildfly.restreader;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet.rest.client.BatchClient;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Assert;
@@ -39,6 +40,19 @@ public final class RestReaderIT extends BatchTestBase {
     private static final String jobName = "restReader";
 
     /**
+     * The full REST API URL, including scheme, hostname, port number, context path, servlet path for REST API.
+     * For example, "http://localhost:8080/testApp/api"
+     */
+    private static final String restUrl = BASE_URL + "restReader/api";
+
+    private BatchClient batchClient = new BatchClient(client, restUrl);
+
+    @Override
+    protected BatchClient getBatchClient() {
+        return batchClient;
+    }
+
+    /**
      * {@link org.jberet.support.io.RestItemReader} will call the REST resource method
      * that returns {@code Movie[]}.
      *
@@ -48,7 +62,7 @@ public final class RestReaderIT extends BatchTestBase {
     public void testRestReader() throws Exception {
         //set restUrl job parameters, which is referenced by restItemReader in job xml
         final Properties jobParams = new Properties();
-        jobParams.setProperty("restUrl", getRestUrl() + "/movies");
+        jobParams.setProperty("restUrl", restUrl + "/movies");
         startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.COMPLETED);
     }
 
@@ -61,7 +75,7 @@ public final class RestReaderIT extends BatchTestBase {
     @Test
     public void testRestReaderList() throws Exception {
         final Properties jobParams = new Properties();
-        jobParams.setProperty("restUrl", getRestUrl() + "/movies/list");
+        jobParams.setProperty("restUrl", restUrl + "/movies/list");
         startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.COMPLETED);
     }
 
@@ -74,7 +88,7 @@ public final class RestReaderIT extends BatchTestBase {
     @Test
     public void testRestReaderCollection() throws Exception {
         final Properties jobParams = new Properties();
-        jobParams.setProperty("restUrl", getRestUrl() + "/movies/collection");
+        jobParams.setProperty("restUrl", restUrl + "/movies/collection");
         startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.COMPLETED);
     }
 
@@ -93,14 +107,9 @@ public final class RestReaderIT extends BatchTestBase {
     public void testError() throws Exception {
         final Properties jobParams = new Properties();
         jobParams.setProperty("testName", "testError");
-        jobParams.setProperty("restUrl", getRestUrl() + "/movies/error");
+        jobParams.setProperty("restUrl", restUrl + "/movies/error");
         final JobExecutionEntity jobExecutionEntity =
                 startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.FAILED);
         Assert.assertEquals("HTTP 500 Internal Server Error", jobExecutionEntity.getExitStatus());
-    }
-
-    @Override
-    protected String getRestUrl() {
-        return BASE_URL + "restReader/api";
     }
 }

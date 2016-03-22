@@ -30,7 +30,7 @@ public class ExecutorSchedulerIT {
     private static final int initialDelayMinute = 1;
     private static final int intervalMinute = 1;
     private static final int delaylMinute = 1;
-    private static final long sleepTimeMillis = initialDelayMinute * 60 * 1000 + 1000;
+    private static final long sleepTimeMillis = initialDelayMinute * 60 * 1000 + 3000;
 
     private final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();

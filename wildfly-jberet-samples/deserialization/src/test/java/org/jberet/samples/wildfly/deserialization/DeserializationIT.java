@@ -15,6 +15,7 @@ package org.jberet.samples.wildfly.deserialization;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet.rest.client.BatchClient;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Test;
 
@@ -39,10 +40,17 @@ public class DeserializationIT extends BatchTestBase {
      */
     private static final String notRestartableJobName = "not-restartable";
 
+    /**
+     * The full REST API URL, including scheme, hostname, port number, context path, servlet path for REST API.
+     * For example, "http://localhost:8080/testApp/api"
+     */
+    private static final String restUrl = BASE_URL + "deserialization/api";
+
+    private BatchClient batchClient = new BatchClient(client, restUrl);
 
     @Override
-    protected String getRestUrl() {
-        return BASE_URL + "deserialization/api";
+    protected BatchClient getBatchClient() {
+        return batchClient;
     }
 
     /**

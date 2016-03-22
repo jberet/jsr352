@@ -14,6 +14,7 @@ package org.jberet.samples.wildfly.excelstream2csv;
 
 import javax.batch.runtime.BatchStatus;
 
+import org.jberet.rest.client.BatchClient;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Test;
 
@@ -23,13 +24,21 @@ public final class ExcelStream2CsvIT extends BatchTestBase {
      */
     private static final String jobName = "excelstream2csv";
 
+    /**
+     * The full REST API URL, including scheme, hostname, port number, context path, servlet path for REST API.
+     * For example, "http://localhost:8080/testApp/api"
+     */
+    private static final String restUrl = BASE_URL + "excelstream2csv/api";
+
+    private BatchClient batchClient = new BatchClient(client, restUrl);
+
+    @Override
+    protected BatchClient getBatchClient() {
+        return batchClient;
+    }
+
     @Test
     public void testExcelStream2Csv() throws Exception {
         startJobCheckStatus(jobName, null, 10000, BatchStatus.COMPLETED);
-    }
-
-    @Override
-    protected String getRestUrl() {
-        return BASE_URL + "excelstream2csv/api";
     }
 }
