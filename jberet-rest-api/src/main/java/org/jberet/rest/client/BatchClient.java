@@ -22,16 +22,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
 import org.jberet.rest.entity.JobExecutionEntity;
+import org.jberet.rest.entity.JobInstanceEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
 import org.jberet.rest.resource.JobExecutionResource;
 import org.jberet.rest.resource.JobInstanceResource;
 import org.jberet.rest.resource.JobResource;
 import org.jberet.rest.resource.JobScheduleResource;
 import org.jberet.schedule.JobSchedule;
+import org.jberet.schedule.JobScheduleConfig;
 
 public class BatchClient {
-    protected final Client client;
-    protected final String restUrl;
+    private final Client client;
+    private final String restUrl;
 
     public BatchClient(final String restUrl) {
         this(ClientBuilder.newClient(), restUrl);
@@ -60,6 +62,22 @@ public class BatchClient {
         final URI uri = getJobExecutionUriBuilder("restart").resolveTemplate("jobExecutionId", jobExecutionId).build();
         WebTarget target = target(uri, queryParams);
         return target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
+    }
+
+    public JobExecutionEntity restartJobExecution(final String jobXmlName, final Properties queryParams) throws Exception {
+        final URI uri = getJobUriBuilder("restart").resolveTemplate("jobXmlName", jobXmlName).build();
+        WebTarget target = target(uri, queryParams);
+        return target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
+    }
+
+    public JobInstanceEntity[] getJobInstances(final String jobName, final int start, final int count)
+            throws Exception {
+        final URI uri = getJobInstanceUriBuilder(null).build();
+        final WebTarget target = target(uri)
+                .queryParam("jobName", jobName)
+                .queryParam("start", start)
+                .queryParam("count", count);
+        return target.request().get(JobInstanceEntity[].class);
     }
 
     public WebTarget target(final URI uri) {
@@ -105,6 +123,18 @@ public class BatchClient {
         WebTarget target = target(uri);
         return target.request().accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), boolean.class);
+    }
+
+    public JobSchedule schedule(final JobScheduleConfig scheduleConfig) {
+        final URI uri;
+        if (scheduleConfig.getJobName() != null) {
+            uri = getJobUriBuilder("schedule").resolveTemplate("jobXmlName", scheduleConfig.getJobName()).build();
+        } else {
+            uri = getJobExecutionUriBuilder("schedule")
+                    .resolveTemplate("jobExecutionId", scheduleConfig.getJobExecutionId()).build();
+        }
+        WebTarget target = target(uri);
+        return target.request().post(Entity.json(scheduleConfig), JobSchedule.class);
     }
 
 

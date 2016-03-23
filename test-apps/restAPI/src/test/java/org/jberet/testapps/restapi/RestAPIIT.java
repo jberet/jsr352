@@ -334,7 +334,7 @@ public class RestAPIIT {
         final URI uri = batchClient.getJobExecutionUriBuilder("getStepExecution")
                 .resolveTemplate("jobExecutionId", jobExecution1.getExecutionId())
                 .resolveTemplate("stepExecutionId", stepExecutionId).build();
-        WebTarget target = batchClient.target(uri, null);
+        WebTarget target = batchClient.target(uri);
         System.out.printf("uri: %s%n", uri);
         final StepExecutionEntity stepExecutionData = target.request().get(StepExecutionEntity.class);
         assertEquals(BatchStatus.COMPLETED, stepExecutionData.getBatchStatus());
@@ -368,11 +368,7 @@ public class RestAPIIT {
     public void scheduleSingleAction() throws Exception {
         final JobScheduleConfig scheduleConfig =
                 new JobScheduleConfig(jobName1, 0, null, null, initialDelayMinute, 0, 0);
-        final URI uri = batchClient.getJobUriBuilder("schedule").resolveTemplate("jobXmlName", jobName1).build();
-        WebTarget target = batchClient.target(uri, null);
-        System.out.printf("uri: %s%n", uri);
-
-        JobSchedule jobSchedule = target.request().post(Entity.json(scheduleConfig), JobSchedule.class);
+        JobSchedule jobSchedule = batchClient.schedule(scheduleConfig);
         System.out.printf("Scheduled job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
         Thread.sleep(sleepTimeMillis);
 
@@ -387,11 +383,7 @@ public class RestAPIIT {
     public void scheduleInterval() throws Exception {
         final JobScheduleConfig scheduleConfig =
                 new JobScheduleConfig(jobName1, 0, null, null, initialDelayMinute, 0, intervalMinute);
-        final URI uri = batchClient.getJobUriBuilder("schedule").resolveTemplate("jobXmlName", jobName1).build();
-        WebTarget target = batchClient.target(uri, null);
-        System.out.printf("uri: %s%n", uri);
-
-        JobSchedule jobSchedule = target.request().post(Entity.json(scheduleConfig), JobSchedule.class);
+        JobSchedule jobSchedule = batchClient.schedule(scheduleConfig);
         System.out.printf("Scheduled job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
         Thread.sleep(sleepTimeMillis * 2);
 

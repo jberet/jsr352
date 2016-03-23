@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="executor-scheduler-job1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="executor-scheduler-job1.step1">
+        <batchlet>
+            <properties>
+                <property name="testName" value="#{jobParameters['testName']}"/>
+            </properties>
+            <script type="javascript">
+                function process() {
+                    var testName = batchProperties.get('testName');
+                    var stepName = stepContext.getStepName();
+                    var d = new Date();
+                    var msg = d + ', testName: ' + testName + ', stepName: ' + stepName;
+                    print(msg + '\n');
+                    jobContext.setExitStatus(msg);
+                    return msg;
+                }
+            </script>
+        </batchlet>
+    </step>
+</job>

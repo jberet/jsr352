@@ -44,7 +44,8 @@ public class ExecutorSchedulerIT {
         assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
         Thread.sleep(sleepTimeMillis);
-        assertEquals(JobSchedule.Status.DONE, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
+        schedule = jobScheduler.getJobSchedule(schedule.getId());
+        assertEquals(JobSchedule.Status.DONE, schedule.getStatus());
         final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
 
         final JobExecution jobExecution = jobOperator.getJobExecution(jobExecutionIds.get(0));

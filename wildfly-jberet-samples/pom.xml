@@ -40,6 +40,7 @@
         <module>deserialization</module>
         <module>restReader</module>
         <module>restWriter</module>
+        <module>scheduleExecutor</module>
     </modules>
 
     <properties>
@@ -61,6 +62,12 @@
                 <artifactId>jberet-rest-api</artifactId>
                 <version>${project.version}</version>
                 <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jberet</groupId>
+                <artifactId>jberet-schedule-executor</artifactId>
+                <version>${project.version}</version>
+                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>org.jberet</groupId>

@@ -61,6 +61,34 @@ public final class JobScheduleConfig implements Serializable {
         return delay > 0 || interval > 0 || (scheduleExpression != null && scheduleExpression.length() > 0);
     }
 
+    public String getJobName() {
+        return jobName;
+    }
+
+    public long getJobExecutionId() {
+        return jobExecutionId;
+    }
+
+    public Properties getJobParameters() {
+        return jobParameters;
+    }
+
+    public String getScheduleExpression() {
+        return scheduleExpression;
+    }
+
+    public long getInitialDelay() {
+        return initialDelay;
+    }
+
+    public long getDelay() {
+        return delay;
+    }
+
+    public long getInterval() {
+        return interval;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
