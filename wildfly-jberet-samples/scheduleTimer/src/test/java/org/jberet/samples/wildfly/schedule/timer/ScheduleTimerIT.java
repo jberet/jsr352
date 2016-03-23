@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,32 +10,30 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.samples.wildfly.schedule.executor;
+package org.jberet.samples.wildfly.schedule.timer;
 
-import java.util.List;
 import java.util.Properties;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.JobExecution;
 
 import org.jberet.rest.client.BatchClient;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public final class ScheduleExecutorIT extends BatchTestBase {
+public final class ScheduleTimerIT extends BatchTestBase {
     /**
      * The job name defined in {@code META-INF/batch-jobs/executor-scheduler-job1.xml}
      */
-    private static final String jobName = "executor-scheduler-job1";
+    private static final String jobName = "timer-scheduler-job1";
 
     /**
      * The full REST API URL, including scheme, hostname, port number, context path, servlet path for REST API.
      * For example, "http://localhost:8080/testApp/api"
      */
-    private static final String restUrl = BASE_URL + "scheduleExecutor/api";
+    private static final String restUrl = BASE_URL + "scheduleTimer/api";
 
     private static final String testNameKey = "testName";
     private static final int initialDelayMinute = 1;
@@ -60,13 +58,17 @@ public final class ScheduleExecutorIT extends BatchTestBase {
 
         Thread.sleep(sleepTimeMillis);
         schedule = batchClient.getJobSchedule(schedule.getId());
-        assertEquals(JobSchedule.Status.DONE, schedule.getStatus());
-        final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
+        Assert.assertEquals(null, schedule);
 
-        final JobExecution jobExecution = batchClient.getJobExecution(jobExecutionIds.get(0));
-        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        System.out.printf("jobExecutionIds from scheduled job: %s%n", jobExecutionIds);
-        System.out.printf("exit status: %s%n", jobExecution.getExitStatus());
+//        once an ejb timer expires, it is removed from ejb timer service.
+//
+//        assertEquals(JobSchedule.Status.DONE, schedule.getStatus());
+//        final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
+
+//        final JobExecution jobExecution = batchClient.getJobExecution(jobExecutionIds.get(0));
+//        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+//        System.out.printf("jobExecutionIds from scheduled job: %s%n", jobExecutionIds);
+//        System.out.printf("exit status: %s%n", jobExecution.getExitStatus());
     }
 
 }

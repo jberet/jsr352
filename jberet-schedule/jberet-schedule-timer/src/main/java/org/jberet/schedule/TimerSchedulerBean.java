@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.batch.operations.BatchRuntimeException;
 import javax.ejb.Singleton;
+import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
@@ -92,6 +93,19 @@ public class TimerSchedulerBean extends JobScheduler {
             }
         }
         return null;
+    }
+
+    @Timeout
+    protected void timeout(final Timer timer) {
+        final JobSchedule jobSchedule = (JobSchedule) timer.getInfo();
+        final JobScheduleConfig scheduleConfig = jobSchedule.getJobScheduleConfig();
+        if (scheduleConfig.getJobExecutionId() > 0) {
+            jobSchedule.addJobExecutionIds(
+            JobScheduler.getJobOperator().restart(scheduleConfig.jobExecutionId, scheduleConfig.jobParameters));
+        } else {
+            jobSchedule.addJobExecutionIds(
+            JobScheduler.getJobOperator().start(scheduleConfig.jobName, scheduleConfig.jobParameters));
+        }
     }
 
     private static long toMillis(final long t) {

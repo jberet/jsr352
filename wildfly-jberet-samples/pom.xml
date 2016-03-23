@@ -41,6 +41,7 @@
         <module>restReader</module>
         <module>restWriter</module>
         <module>scheduleExecutor</module>
+        <module>scheduleTimer</module>
     </modules>
 
     <properties>
@@ -66,6 +67,12 @@
             <dependency>
                 <groupId>org.jberet</groupId>
                 <artifactId>jberet-schedule-executor</artifactId>
+                <version>${project.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jberet</groupId>
+                <artifactId>jberet-schedule-timer</artifactId>
                 <version>${project.version}</version>
                 <scope>runtime</scope>
             </dependency>
