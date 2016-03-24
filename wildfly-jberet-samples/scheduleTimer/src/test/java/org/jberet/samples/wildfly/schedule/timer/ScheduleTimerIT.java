@@ -13,12 +13,12 @@
 package org.jberet.samples.wildfly.schedule.timer;
 
 import java.util.Properties;
+import javax.batch.runtime.BatchStatus;
 
 import org.jberet.rest.client.BatchClient;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -55,10 +55,11 @@ public final class ScheduleTimerIT extends BatchTestBase {
         final JobScheduleConfig scheduleConfig = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
         JobSchedule schedule = batchClient.schedule(scheduleConfig);
         assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
+        System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
 
         Thread.sleep(sleepTimeMillis);
         schedule = batchClient.getJobSchedule(schedule.getId());
-        Assert.assertEquals(null, schedule);
+        assertEquals(null, schedule);
 
 //        once an ejb timer expires, it is removed from ejb timer service.
 //
@@ -71,4 +72,40 @@ public final class ScheduleTimerIT extends BatchTestBase {
 //        System.out.printf("exit status: %s%n", jobExecution.getExitStatus());
     }
 
+    @Test
+    public void scheduleInterval() throws Exception {
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "scheduleInterval");
+        final JobScheduleConfig scheduleConfig =
+                new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, intervalMinute);
+        final JobScheduleConfig scheduleConfig2 =
+                new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute * 10, 0, intervalMinute);
+
+        JobSchedule jobSchedule = batchClient.schedule(scheduleConfig);
+        JobSchedule jobSchedule2 = batchClient.schedule(scheduleConfig2);
+        System.out.printf("Scheduled job schedule: %s%n", jobSchedule.getId());
+        System.out.printf("Scheduled job schedule 2: %s%n", jobSchedule2.getId());
+        Thread.sleep(sleepTimeMillis * 2);
+
+        try {
+            jobSchedule = batchClient.getJobSchedule(jobSchedule.getId());
+            assertEquals(JobSchedule.Status.SCHEDULED, jobSchedule.getStatus());
+            assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(jobSchedule2.getId()).getStatus());
+
+            assertEquals(true, batchClient.getJobSchedules().length >= 2);
+            assertEquals(2, jobSchedule.getJobExecutionIds().size());
+            assertEquals(BatchStatus.COMPLETED,
+                    batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
+
+        } finally {
+            cancelSchedule(jobSchedule);
+            cancelSchedule(jobSchedule2);
+        }
+    }
+
+    private void cancelSchedule(final JobSchedule schedule) {
+        final String id = schedule.getId();
+        batchClient.cancelJobSchedule(id);
+        System.out.printf("Cancelled job schedule %s%n", id);
+    }
 }

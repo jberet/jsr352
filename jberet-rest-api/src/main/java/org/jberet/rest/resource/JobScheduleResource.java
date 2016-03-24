@@ -34,6 +34,7 @@ import org.jberet.schedule.JobScheduler;
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class JobScheduleResource {
     @GET
+    @Path("")
     public JobSchedule[] getJobSchedules() {
         final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
         final List<JobSchedule> jobScheduleList = jobScheduler.getJobSchedules();
