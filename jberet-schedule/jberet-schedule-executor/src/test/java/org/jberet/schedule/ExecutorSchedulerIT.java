@@ -20,10 +20,12 @@ import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore("These tests each take several minutes to complete, so ignore them from default build")
 public class ExecutorSchedulerIT {
     private static final String jobName = "executor-scheduler-job1";
     private static final String testNameKey = "testName";
