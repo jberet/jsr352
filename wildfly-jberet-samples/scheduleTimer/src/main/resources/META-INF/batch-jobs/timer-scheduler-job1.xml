@@ -24,7 +24,7 @@
                     var stepName = stepContext.getStepName();
                     var d = new Date();
                     var msg = d + ', testName: ' + testName + ', stepName: ' + stepName;
-                    print(msg + '\n');
+                    print(msg);
                     jobContext.setExitStatus(msg);
                     return msg;
                 }

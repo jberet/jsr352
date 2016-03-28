@@ -12,7 +12,9 @@
 
 package org.jberet.samples.wildfly.schedule.timer;
 
+import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.batch.runtime.BatchStatus;
 import javax.ejb.ScheduleExpression;
 
@@ -51,6 +53,7 @@ public final class ScheduleTimerIT extends BatchTestBase {
 
     @Test
     public void singleActionInitialDelay() throws Exception {
+        cancelAllSchedules();
         final Properties params = new Properties();
         params.setProperty(testNameKey, "singleActionInitialDelay");
         final JobScheduleConfig scheduleConfig = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
@@ -61,22 +64,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         Thread.sleep(sleepTimeMillis);
         schedule = batchClient.getJobSchedule(schedule.getId());
         assertEquals(null, schedule);
-
-//        once an ejb timer expires, it is removed from ejb timer service.
-//
-//        assertEquals(JobSchedule.Status.DONE, schedule.getStatus());
-//        final List<Long> jobExecutionIds = schedule.getJobExecutionIds();
-
-//        final JobExecution jobExecution = batchClient.getJobExecution(jobExecutionIds.get(0));
-//        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-//        System.out.printf("jobExecutionIds from scheduled job: %s%n", jobExecutionIds);
-//        System.out.printf("exit status: %s%n", jobExecution.getExitStatus());
     }
 
     @Test
-    public void scheduleExpression1() throws Exception {
+    public void scheduleExpressionSecond() throws Exception {
+        cancelAllSchedules();
         final Properties params = new Properties();
-        params.setProperty(testNameKey, "scheduleExpression1");
+        params.setProperty(testNameKey, "scheduleExpressionSecond");
         final ScheduleExpression exp = new ScheduleExpression();
         exp.hour("*").minute("*").second("0/20");
 
@@ -92,12 +86,58 @@ public final class ScheduleTimerIT extends BatchTestBase {
         System.out.printf("Job executions from above schedule: %s%n", schedule.getJobExecutionIds());
         assertEquals(true, schedule.getJobExecutionIds().size() >= 2);
 
-        final boolean cancelled = batchClient.cancelJobSchedule(schedule.getId());
+        final boolean cancelled = cancelJobSchedule(schedule);
         assertEquals(true, cancelled);
+        assertEquals(null, batchClient.getJobSchedule(schedule.getId()));
+    }
+
+    @Test
+    public void scheduleExpressionEnd() throws Exception {
+        cancelAllSchedules();
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "scheduleExpressionEnd");
+        final ScheduleExpression exp = new ScheduleExpression();
+        exp.hour("*").minute("*").second("0/20").end(new Date(System.currentTimeMillis() + 60*1000));
+
+        final JobScheduleConfig scheduleConfig =
+                new JobScheduleConfig(jobName, 0, params, exp, 0, 0, 0);
+        JobSchedule schedule = batchClient.schedule(scheduleConfig);
+        assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
+        System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
+
+        //the job schedule should have ended due to the end attribute in ScheduleExpression
+        Thread.sleep(sleepTimeMillis);
+        schedule = batchClient.getJobSchedule(schedule.getId());
+        assertEquals(null, schedule);
+    }
+
+    @Test
+    public void scheduleExpressionStart() throws Exception {
+        cancelAllSchedules();
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "scheduleExpressionStart");
+
+        final ScheduleExpression exp = new ScheduleExpression();
+        exp.hour("*").minute("*").second("0/1")
+                .start(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)));
+
+        final JobScheduleConfig scheduleConfig =
+                new JobScheduleConfig(jobName, 0, params, exp, 0, 0, 0);
+        JobSchedule schedule = batchClient.schedule(scheduleConfig);
+        assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
+        System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
+
+        //the job schedule have not started due to the start attribute in ScheduleExpression
+        Thread.sleep(sleepTimeMillis);
+        schedule = batchClient.getJobSchedule(schedule.getId());
+        assertEquals(0, schedule.getJobExecutionIds().size());
+
+        assertEquals(true, cancelJobSchedule(schedule));
     }
 
     @Test
     public void scheduleInterval() throws Exception {
+        cancelAllSchedules();
         final Properties params = new Properties();
         params.setProperty(testNameKey, "scheduleInterval");
         final JobScheduleConfig scheduleConfig =
@@ -122,14 +162,25 @@ public final class ScheduleTimerIT extends BatchTestBase {
                     batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
 
         } finally {
-            cancelSchedule(jobSchedule);
-            cancelSchedule(jobSchedule2);
+            cancelJobSchedule(jobSchedule);
+            cancelJobSchedule(jobSchedule2);
         }
     }
 
-    private void cancelSchedule(final JobSchedule schedule) {
+    private boolean cancelJobSchedule(final JobSchedule schedule) {
         final String id = schedule.getId();
-        batchClient.cancelJobSchedule(id);
-        System.out.printf("Cancelled job schedule %s%n", id);
+        final boolean cancelled = batchClient.cancelJobSchedule(id);
+        if (cancelled) {
+            System.out.printf("Cancelled job schedule %s%n", id);
+        } else {
+            System.out.printf("Tried to cancel schedule %s, but failed.", id);
+        }
+        return cancelled;
+    }
+
+    private void cancelAllSchedules() {
+        for (final JobSchedule e : batchClient.getJobSchedules()) {
+            cancelJobSchedule(e);
+        }
     }
 }
