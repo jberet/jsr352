@@ -14,6 +14,7 @@ package org.jberet.samples.wildfly.schedule.timer;
 
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
+import javax.ejb.ScheduleExpression;
 
 import org.jberet.rest.client.BatchClient;
 import org.jberet.samples.wildfly.common.BatchTestBase;
@@ -70,6 +71,29 @@ public final class ScheduleTimerIT extends BatchTestBase {
 //        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
 //        System.out.printf("jobExecutionIds from scheduled job: %s%n", jobExecutionIds);
 //        System.out.printf("exit status: %s%n", jobExecution.getExitStatus());
+    }
+
+    @Test
+    public void scheduleExpression1() throws Exception {
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "scheduleExpression1");
+        final ScheduleExpression exp = new ScheduleExpression();
+        exp.hour("*").minute("*").second("0/20");
+
+        final JobScheduleConfig scheduleConfig =
+                new JobScheduleConfig(jobName, 0, params, exp, 0, 0, 0);
+        JobSchedule schedule = batchClient.schedule(scheduleConfig);
+        assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
+        System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
+
+        Thread.sleep(sleepTimeMillis);
+        schedule = batchClient.getJobSchedule(schedule.getId());
+        assertEquals(JobSchedule.Status.SCHEDULED, schedule.getStatus());
+        System.out.printf("Job executions from above schedule: %s%n", schedule.getJobExecutionIds());
+        assertEquals(true, schedule.getJobExecutionIds().size() >= 2);
+
+        final boolean cancelled = batchClient.cancelJobSchedule(schedule.getId());
+        assertEquals(true, cancelled);
     }
 
     @Test

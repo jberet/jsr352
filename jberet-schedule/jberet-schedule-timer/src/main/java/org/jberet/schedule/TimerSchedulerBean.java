@@ -25,6 +25,8 @@ import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 
+import org.jberet.schedule._private.ScheduleExecutorMessages;
+
 @Singleton()
 public class TimerSchedulerBean extends JobScheduler {
     //TODO need to handle non-persistent timer.
@@ -50,9 +52,13 @@ public class TimerSchedulerBean extends JobScheduler {
                 timer = timerService.createSingleActionTimer(toMillis(scheduleConfig.initialDelay),
                         new TimerConfig(jobSchedule, isPersistent));
             }
+        } else if (scheduleConfig.scheduleExpression != null) {
+            timer = timerService.createCalendarTimer(scheduleConfig.scheduleExpression,
+                    new TimerConfig(jobSchedule, isPersistent));
         } else {
-            System.out.printf("Need to check for ScheduledExpression");
+            throw ScheduleExecutorMessages.MESSAGES.invalidJobScheduleConfig(scheduleConfig);
         }
+
         jobSchedule.setId(getTimerId(timer));
         return jobSchedule;
     }

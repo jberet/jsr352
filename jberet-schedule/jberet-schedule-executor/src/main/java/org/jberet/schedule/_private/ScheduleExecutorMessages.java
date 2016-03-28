@@ -14,6 +14,7 @@ package org.jberet.schedule._private;
 
 import javax.batch.operations.BatchRuntimeException;
 
+import org.jberet.schedule.JobScheduleConfig;
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
@@ -27,5 +28,8 @@ public interface ScheduleExecutorMessages {
 
     @Message(id = 72000, value = "Failed to create JobScheduler of type %s")
     BatchRuntimeException failToCreateJobScheduler(@Cause Throwable th, Class<?> schedulerType);
+
+    @Message(id = 72001, value = "Invalid job schedule config %s")
+    BatchRuntimeException invalidJobScheduleConfig(JobScheduleConfig config);
 
 }

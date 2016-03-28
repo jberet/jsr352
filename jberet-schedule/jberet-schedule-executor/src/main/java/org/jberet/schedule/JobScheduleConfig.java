@@ -14,6 +14,7 @@ package org.jberet.schedule;
 
 import java.io.Serializable;
 import java.util.Properties;
+import javax.ejb.ScheduleExpression;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -29,7 +30,7 @@ public final class JobScheduleConfig implements Serializable {
 
     final Properties jobParameters;
 
-    final String scheduleExpression;
+    final ScheduleExpression scheduleExpression;
 
     final long initialDelay;
 
@@ -44,21 +45,21 @@ public final class JobScheduleConfig implements Serializable {
     public JobScheduleConfig(final String jobName,
                              final long jobExecutionId,
                              final Properties jobParameters,
-                             final String scheduleExpression,
+                             final ScheduleExpression scheduleExpression,
                              final long initialDelay,
                              final long delay,
                              final long interval) {
         this.jobName = jobName;
         this.jobExecutionId = jobExecutionId;
         this.jobParameters = jobParameters;
-        this.scheduleExpression = scheduleExpression == null ? null : scheduleExpression.trim();
+        this.scheduleExpression = scheduleExpression;
         this.initialDelay = initialDelay;
         this.delay = delay;
         this.interval = interval;
     }
 
     public boolean isRepeating() {
-        return delay > 0 || interval > 0 || (scheduleExpression != null && scheduleExpression.length() > 0);
+        return delay > 0 || interval > 0 || scheduleExpression != null;
     }
 
     public String getJobName() {
@@ -73,7 +74,7 @@ public final class JobScheduleConfig implements Serializable {
         return jobParameters;
     }
 
-    public String getScheduleExpression() {
+    public ScheduleExpression getScheduleExpression() {
         return scheduleExpression;
     }
 
@@ -125,10 +126,10 @@ public final class JobScheduleConfig implements Serializable {
                 "jobName='" + jobName + '\'' +
                 ", jobExecutionId=" + jobExecutionId +
                 ", jobParameters=" + jobParameters +
-                ", scheduleExpression='" + scheduleExpression + '\'' +
                 ", initialDelay=" + initialDelay +
                 ", delay=" + delay +
                 ", interval=" + interval +
+                ", scheduleExpression='" + scheduleExpression + '\'' +
                 '}';
     }
 }

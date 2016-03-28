@@ -12,7 +12,7 @@
 
 package org.jberet.schedule;
 
-public class JobScheduleTask implements Runnable {
+class JobScheduleTask implements Runnable {
     private final JobSchedule jobSchedule;
 
     public JobScheduleTask(final JobSchedule jobSchedule) {
