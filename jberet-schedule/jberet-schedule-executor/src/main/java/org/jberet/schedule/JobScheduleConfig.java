@@ -38,17 +38,20 @@ public final class JobScheduleConfig implements Serializable {
 
     final long interval;
 
+    final boolean persistent;
+
     public JobScheduleConfig() {
-        this(null, 0, null, null, 0, 0, 0);
+        this(null, 0, null, null, 0, 0, 0, true);
     }
 
-    public JobScheduleConfig(final String jobName,
+    JobScheduleConfig(final String jobName,
                              final long jobExecutionId,
                              final Properties jobParameters,
                              final ScheduleExpression scheduleExpression,
                              final long initialDelay,
                              final long delay,
-                             final long interval) {
+                             final long interval,
+                             final boolean persistent) {
         this.jobName = jobName;
         this.jobExecutionId = jobExecutionId;
         this.jobParameters = jobParameters;
@@ -56,6 +59,7 @@ public final class JobScheduleConfig implements Serializable {
         this.initialDelay = initialDelay;
         this.delay = delay;
         this.interval = interval;
+        this.persistent = persistent;
     }
 
     public boolean isRepeating() {
@@ -90,6 +94,10 @@ public final class JobScheduleConfig implements Serializable {
         return interval;
     }
 
+    public boolean isPersistent() {
+        return persistent;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -101,6 +109,7 @@ public final class JobScheduleConfig implements Serializable {
         if (initialDelay != that.initialDelay) return false;
         if (delay != that.delay) return false;
         if (interval != that.interval) return false;
+        if (persistent != that.persistent) return false;
         if (jobName != null ? !jobName.equals(that.jobName) : that.jobName != null) return false;
         if (jobParameters != null ? !jobParameters.equals(that.jobParameters) : that.jobParameters != null)
             return false;
@@ -117,6 +126,7 @@ public final class JobScheduleConfig implements Serializable {
         result = 31 * result + (int) (initialDelay ^ (initialDelay >>> 32));
         result = 31 * result + (int) (delay ^ (delay >>> 32));
         result = 31 * result + (int) (interval ^ (interval >>> 32));
+        result = 31 * result + (persistent ? 1 : 0);
         return result;
     }
 
@@ -129,6 +139,7 @@ public final class JobScheduleConfig implements Serializable {
                 ", initialDelay=" + initialDelay +
                 ", delay=" + delay +
                 ", interval=" + interval +
+                ", persistent=" + persistent +
                 ", scheduleExpression='" + scheduleExpression + '\'' +
                 '}';
     }

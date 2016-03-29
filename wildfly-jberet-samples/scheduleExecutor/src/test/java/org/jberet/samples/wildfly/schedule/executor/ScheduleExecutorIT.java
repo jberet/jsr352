@@ -21,6 +21,7 @@ import org.jberet.rest.client.BatchClient;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
+import org.jberet.schedule.JobScheduleConfigBuilder;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -54,7 +55,12 @@ public final class ScheduleExecutorIT extends BatchTestBase {
     public void singleActionInitialDelay() throws Exception {
         final Properties params = new Properties();
         params.setProperty(testNameKey, "singleActionInitialDelay");
-        final JobScheduleConfig scheduleConfig = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .build();
+
         JobSchedule schedule = batchClient.schedule(scheduleConfig);
         assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
 

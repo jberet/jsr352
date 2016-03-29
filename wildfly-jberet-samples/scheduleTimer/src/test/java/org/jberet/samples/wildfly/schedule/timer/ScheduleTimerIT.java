@@ -22,6 +22,7 @@ import org.jberet.rest.client.BatchClient;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
+import org.jberet.schedule.JobScheduleConfigBuilder;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -56,7 +57,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         cancelAllSchedules();
         final Properties params = new Properties();
         params.setProperty(testNameKey, "singleActionInitialDelay");
-        final JobScheduleConfig scheduleConfig = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
+
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .build();
+
         JobSchedule schedule = batchClient.schedule(scheduleConfig);
         assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
         System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
@@ -74,8 +81,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         final ScheduleExpression exp = new ScheduleExpression();
         exp.hour("*").minute("*").second("0/20");
 
-        final JobScheduleConfig scheduleConfig =
-                new JobScheduleConfig(jobName, 0, params, exp, 0, 0, 0);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .scheduleExpression(exp)
+                .persistent(false)
+                .build();
+
         JobSchedule schedule = batchClient.schedule(scheduleConfig);
         assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
         System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
@@ -99,8 +111,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         final ScheduleExpression exp = new ScheduleExpression();
         exp.hour("*").minute("*").second("0/20").end(new Date(System.currentTimeMillis() + 60*1000));
 
-        final JobScheduleConfig scheduleConfig =
-                new JobScheduleConfig(jobName, 0, params, exp, 0, 0, 0);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .scheduleExpression(exp)
+                .persistent(false)
+                .build();
+
         JobSchedule schedule = batchClient.schedule(scheduleConfig);
         assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
         System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
@@ -121,8 +138,12 @@ public final class ScheduleTimerIT extends BatchTestBase {
         exp.hour("*").minute("*").second("0/1")
                 .start(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)));
 
-        final JobScheduleConfig scheduleConfig =
-                new JobScheduleConfig(jobName, 0, params, exp, 0, 0, 0);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .scheduleExpression(exp)
+                .build();
+
         JobSchedule schedule = batchClient.schedule(scheduleConfig);
         assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
         System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
@@ -140,10 +161,19 @@ public final class ScheduleTimerIT extends BatchTestBase {
         cancelAllSchedules();
         final Properties params = new Properties();
         params.setProperty(testNameKey, "scheduleInterval");
-        final JobScheduleConfig scheduleConfig =
-                new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, intervalMinute);
-        final JobScheduleConfig scheduleConfig2 =
-                new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute * 10, 0, intervalMinute);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .interval(intervalMinute)
+                .build();
+
+        final JobScheduleConfig scheduleConfig2 = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute * 10)
+                .interval(intervalMinute)
+                .build();
 
         JobSchedule jobSchedule = batchClient.schedule(scheduleConfig);
         JobSchedule jobSchedule2 = batchClient.schedule(scheduleConfig2);

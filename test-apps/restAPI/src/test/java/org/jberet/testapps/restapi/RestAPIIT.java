@@ -29,6 +29,7 @@ import org.jberet.rest.entity.JobInstanceEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
+import org.jberet.schedule.JobScheduleConfigBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -366,8 +367,11 @@ public class RestAPIIT {
 
     @Test
     public void scheduleSingleAction() throws Exception {
-        final JobScheduleConfig scheduleConfig =
-                new JobScheduleConfig(jobName1, 0, null, null, initialDelayMinute, 0, 0);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName1)
+                .initialDelay(initialDelayMinute)
+                .build();
+
         JobSchedule jobSchedule = batchClient.schedule(scheduleConfig);
         System.out.printf("Scheduled job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
         Thread.sleep(sleepTimeMillis);
@@ -381,8 +385,12 @@ public class RestAPIIT {
 
     @Test
     public void scheduleInterval() throws Exception {
-        final JobScheduleConfig scheduleConfig =
-                new JobScheduleConfig(jobName1, 0, null, null, initialDelayMinute, 0, intervalMinute);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName1)
+                .initialDelay(initialDelayMinute)
+                .interval(intervalMinute)
+                .build();
+
         JobSchedule jobSchedule = batchClient.schedule(scheduleConfig);
         System.out.printf("Scheduled job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
         Thread.sleep(sleepTimeMillis * 2);

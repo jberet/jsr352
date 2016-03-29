@@ -41,8 +41,13 @@ public class ExecutorSchedulerIT {
     public void singleActionInitialDelay() throws Exception {
         final Properties params = new Properties();
         params.setProperty(testNameKey, "singleActionInitialDelay");
-        final JobScheduleConfig info = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
-        JobSchedule schedule = jobScheduler.schedule(info);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .build();
+
+        JobSchedule schedule = jobScheduler.schedule(scheduleConfig);
         assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
         Thread.sleep(sleepTimeMillis);
@@ -61,9 +66,13 @@ public class ExecutorSchedulerIT {
     public void interval() throws Exception {
         final Properties params = new Properties();
         params.setProperty(testNameKey, "interval");
-        final JobScheduleConfig info =
-                new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, intervalMinute);
-        JobSchedule schedule = jobScheduler.schedule(info);
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .interval(intervalMinute)
+                .build();
+        JobSchedule schedule = jobScheduler.schedule(scheduleConfig);
 
         assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
@@ -84,9 +93,14 @@ public class ExecutorSchedulerIT {
     public void delayRepeat() throws Exception {
         final Properties params = new Properties();
         params.setProperty(testNameKey, "delayRepeat");
-        final JobScheduleConfig info =
-                new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, delaylMinute, 0);
-        JobSchedule schedule = jobScheduler.schedule(info);
+
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .delay(delaylMinute)
+                .build();
+        JobSchedule schedule = jobScheduler.schedule(scheduleConfig);
 
         assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
@@ -107,8 +121,14 @@ public class ExecutorSchedulerIT {
     public void cancel() throws Exception {
         final Properties params = new Properties();
         params.setProperty(testNameKey, "cancel");
-        final JobScheduleConfig info = new JobScheduleConfig(jobName, 0, params, null, initialDelayMinute, 0, 0);
-        JobSchedule schedule = jobScheduler.schedule(info);
+
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .build();
+        JobSchedule schedule = jobScheduler.schedule(scheduleConfig);
+
         assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
 
         final boolean cancelResult = jobScheduler.cancel(schedule.getId());

@@ -29,9 +29,6 @@ import org.jberet.schedule._private.ScheduleExecutorMessages;
 
 @Singleton()
 public class TimerSchedulerBean extends JobScheduler {
-    //TODO need to handle non-persistent timer.
-    private static final boolean isPersistent = true;
-
     @Resource
     private TimerService timerService;
 
@@ -43,18 +40,18 @@ public class TimerSchedulerBean extends JobScheduler {
             if (scheduleConfig.interval > 0) {
                 timer = timerService.createIntervalTimer(toMillis(scheduleConfig.initialDelay),
                         toMillis(scheduleConfig.interval),
-                        new TimerConfig(jobSchedule, isPersistent));
+                        new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
             } else if (scheduleConfig.delay > 0) {
                 timer = timerService.createIntervalTimer(toMillis(scheduleConfig.initialDelay),
                         toMillis(scheduleConfig.delay),
-                        new TimerConfig(jobSchedule, isPersistent));
+                        new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
             } else {
                 timer = timerService.createSingleActionTimer(toMillis(scheduleConfig.initialDelay),
-                        new TimerConfig(jobSchedule, isPersistent));
+                        new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
             }
         } else if (scheduleConfig.scheduleExpression != null) {
             timer = timerService.createCalendarTimer(scheduleConfig.scheduleExpression,
-                    new TimerConfig(jobSchedule, isPersistent));
+                    new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
         } else {
             throw ScheduleExecutorMessages.MESSAGES.invalidJobScheduleConfig(scheduleConfig);
         }
