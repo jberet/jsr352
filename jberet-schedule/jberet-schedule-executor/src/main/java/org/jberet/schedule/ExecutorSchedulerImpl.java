@@ -51,14 +51,14 @@ public class ExecutorSchedulerImpl extends JobScheduler {
         final JobScheduleTask task = new JobScheduleTask(jobSchedule);
 
         final Future<?> future;
-        if (scheduleConfig.interval <= 0 && scheduleConfig.delay <= 0) {
+        if (scheduleConfig.interval <= 0 && scheduleConfig.afterDelay <= 0) {
             future = executorService.schedule(task, scheduleConfig.initialDelay, timeUnit);
         } else if (scheduleConfig.interval > 0) {
             future = executorService.scheduleAtFixedRate(
                     task, scheduleConfig.initialDelay, scheduleConfig.interval, timeUnit);
         } else {
             future = executorService.scheduleWithFixedDelay(
-                    task, scheduleConfig.initialDelay, scheduleConfig.delay, timeUnit);
+                    task, scheduleConfig.initialDelay, scheduleConfig.afterDelay, timeUnit);
         }
         jobSchedule.setFuture(future);
         schedules.put(jobSchedule.getId(), jobSchedule);

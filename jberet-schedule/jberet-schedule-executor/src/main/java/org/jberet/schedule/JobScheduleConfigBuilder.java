@@ -9,7 +9,7 @@ public final class JobScheduleConfigBuilder {
     private Properties jobParameters;
     private ScheduleExpression scheduleExpression;
     private long initialDelay;
-    private long delay;
+    private long afterDelay;
     private long interval;
     private boolean persistent = true;
 
@@ -22,7 +22,7 @@ public final class JobScheduleConfigBuilder {
 
     public JobScheduleConfig build() {
         return new JobScheduleConfig(jobName, jobExecutionId, jobParameters, scheduleExpression,
-                initialDelay, delay, interval, persistent);
+                initialDelay, afterDelay, interval, persistent);
     }
 
     public JobScheduleConfigBuilder jobName(final String jobName) {
@@ -50,8 +50,8 @@ public final class JobScheduleConfigBuilder {
         return this;
     }
 
-    public JobScheduleConfigBuilder delay(final long delay) {
-        this.delay = delay;
+    public JobScheduleConfigBuilder afterDelay(final long afterDelay) {
+        this.afterDelay = afterDelay;
         return this;
     }
 

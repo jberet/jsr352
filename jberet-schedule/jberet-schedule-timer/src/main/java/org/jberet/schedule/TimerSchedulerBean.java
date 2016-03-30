@@ -41,9 +41,9 @@ public class TimerSchedulerBean extends JobScheduler {
                 timer = timerService.createIntervalTimer(toMillis(scheduleConfig.initialDelay),
                         toMillis(scheduleConfig.interval),
                         new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
-            } else if (scheduleConfig.delay > 0) {
+            } else if (scheduleConfig.afterDelay > 0) {
                 timer = timerService.createIntervalTimer(toMillis(scheduleConfig.initialDelay),
-                        toMillis(scheduleConfig.delay),
+                        toMillis(scheduleConfig.afterDelay),
                         new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
             } else {
                 timer = timerService.createSingleActionTimer(toMillis(scheduleConfig.initialDelay),
