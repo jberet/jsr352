@@ -23,6 +23,11 @@
 * [restReader](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples/restReader)
     * uses `restItemReader` to read data from online resource (movies-2012).
     * uses `csvItemWriter` to write data to CSV format.
+* [scheduleExecutor](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples/scheduleExecutor)
+    * schedules single-action or recurring job executions using Java EE Concurrency Utils.
+* [scheduleTimer](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples/scheduleTimer)
+    * schedules single-action, recurring, or calendar-based job executions using Java EE Timer Service.
+    * persistent or non-persistent job schedules.
 * [batchProperty](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples/batchProperty)
     * demonstrates the injection of batch properties of common java types, such as `int`, `long`, `List`,
     `Date`, `BigInteger`, `Map`, `Set`, arrays, etc.

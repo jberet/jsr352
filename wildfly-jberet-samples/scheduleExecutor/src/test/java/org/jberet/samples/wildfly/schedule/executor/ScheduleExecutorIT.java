@@ -75,4 +75,27 @@ public final class ScheduleExecutorIT extends BatchTestBase {
         System.out.printf("exit status: %s%n", jobExecution.getExitStatus());
     }
 
+    @Test
+    public void scheduleInterval() throws Exception {
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "scheduleInterval");
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .interval(intervalMinute)
+                .build();
+
+        JobSchedule jobSchedule = batchClient.schedule(scheduleConfig);
+        System.out.printf("Scheduled job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
+        Thread.sleep(sleepTimeMillis * 2);
+
+        jobSchedule = batchClient.getJobSchedule(jobSchedule.getId());
+        assertEquals(JobSchedule.Status.SCHEDULED, jobSchedule.getStatus());
+        assertEquals(2, jobSchedule.getJobExecutionIds().size());
+        assertEquals(BatchStatus.COMPLETED,
+                batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
+        assertEquals(true, batchClient.cancelJobSchedule(jobSchedule.getId()));
+    }
+
 }
