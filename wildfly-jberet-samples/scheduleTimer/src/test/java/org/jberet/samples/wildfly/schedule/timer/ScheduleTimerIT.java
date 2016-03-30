@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 
 public final class ScheduleTimerIT extends BatchTestBase {
     /**
-     * The job name defined in {@code META-INF/batch-jobs/executor-scheduler-job1.xml}
+     * The job name defined in {@code META-INF/batch-jobs/timer-scheduler-job1.xml}
      */
     private static final String jobName = "timer-scheduler-job1";
 
@@ -78,14 +78,12 @@ public final class ScheduleTimerIT extends BatchTestBase {
         cancelAllSchedules();
         final Properties params = new Properties();
         params.setProperty(testNameKey, "scheduleExpressionSecond");
-        final ScheduleExpression exp = new ScheduleExpression();
-        exp.hour("*").minute("*").second("0/20");
+        final ScheduleExpression exp = new ScheduleExpression().hour("*").minute("*").second("0/20");
 
         final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
                 .jobName(jobName)
                 .jobParameters(params)
                 .scheduleExpression(exp)
-                .persistent(false)
                 .build();
 
         JobSchedule schedule = batchClient.schedule(scheduleConfig);
@@ -97,10 +95,33 @@ public final class ScheduleTimerIT extends BatchTestBase {
         assertEquals(JobSchedule.Status.SCHEDULED, schedule.getStatus());
         System.out.printf("Job executions from above schedule: %s%n", schedule.getJobExecutionIds());
         assertEquals(true, schedule.getJobExecutionIds().size() >= 2);
+        assertEquals(true, cancelJobSchedule(schedule));
+    }
 
-        final boolean cancelled = cancelJobSchedule(schedule);
-        assertEquals(true, cancelled);
-        assertEquals(null, batchClient.getJobSchedule(schedule.getId()));
+    @Test
+    public void scheduleExpressionPersistent() throws Exception {
+        cancelAllSchedules();
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "scheduleExpressionPersistent");
+        final ScheduleExpression exp = new ScheduleExpression().hour("*").minute("*").second("0/20");
+
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .scheduleExpression(exp)
+                .persistent(true)
+                .build();
+
+        JobSchedule schedule = batchClient.schedule(scheduleConfig);
+        assertEquals(JobSchedule.Status.SCHEDULED, batchClient.getJobSchedule(schedule.getId()).getStatus());
+        System.out.printf("Scheduled job schedule: %s%n", schedule.getId());
+
+        Thread.sleep(sleepTimeMillis);
+        schedule = batchClient.getJobSchedule(schedule.getId());
+        assertEquals(JobSchedule.Status.SCHEDULED, schedule.getStatus());
+        System.out.printf("Job executions from above schedule: %s%n", schedule.getJobExecutionIds());
+        assertEquals(true, schedule.getJobExecutionIds().size() >= 2);
+        assertEquals(true, cancelJobSchedule(schedule));
     }
 
     @Test
@@ -108,14 +129,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         cancelAllSchedules();
         final Properties params = new Properties();
         params.setProperty(testNameKey, "scheduleExpressionEnd");
-        final ScheduleExpression exp = new ScheduleExpression();
-        exp.hour("*").minute("*").second("0/20").end(new Date(System.currentTimeMillis() + 60*1000));
+        final ScheduleExpression exp = new ScheduleExpression().hour("*").minute("*").second("0/20")
+                .end(new Date(System.currentTimeMillis() + 60*1000));
 
         final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
                 .jobName(jobName)
                 .jobParameters(params)
                 .scheduleExpression(exp)
-                .persistent(false)
                 .build();
 
         JobSchedule schedule = batchClient.schedule(scheduleConfig);
@@ -134,8 +154,7 @@ public final class ScheduleTimerIT extends BatchTestBase {
         final Properties params = new Properties();
         params.setProperty(testNameKey, "scheduleExpressionStart");
 
-        final ScheduleExpression exp = new ScheduleExpression();
-        exp.hour("*").minute("*").second("0/1")
+        final ScheduleExpression exp = new ScheduleExpression().hour("*").minute("*").second("0/1")
                 .start(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)));
 
         final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
@@ -152,7 +171,6 @@ public final class ScheduleTimerIT extends BatchTestBase {
         Thread.sleep(sleepTimeMillis);
         schedule = batchClient.getJobSchedule(schedule.getId());
         assertEquals(0, schedule.getJobExecutionIds().size());
-
         assertEquals(true, cancelJobSchedule(schedule));
     }
 

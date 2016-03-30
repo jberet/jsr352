@@ -41,7 +41,7 @@ public final class JobScheduleConfig implements Serializable {
     final boolean persistent;
 
     public JobScheduleConfig() {
-        this(null, 0, null, null, 0, 0, 0, true);
+        this(null, 0, null, null, 0, 0, 0, false);
     }
 
     JobScheduleConfig(final String jobName,
