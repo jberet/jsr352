@@ -18,10 +18,12 @@ import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 
 import org.jberet.rest.client.BatchClient;
+import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduleConfigBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -96,6 +98,35 @@ public final class ScheduleExecutorIT extends BatchTestBase {
         assertEquals(BatchStatus.COMPLETED,
                 batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
         assertEquals(true, batchClient.cancelJobSchedule(jobSchedule.getId()));
+    }
+
+    @Test
+    public void scheduleRestart() throws Exception {
+        Properties params = new Properties();
+        params.setProperty(testNameKey, "fail");
+        JobExecutionEntity jobExecutionEntity = batchClient.startJob(jobName, params);
+        Thread.sleep(3000);
+        jobExecutionEntity = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
+        Assert.assertEquals(BatchStatus.FAILED, jobExecutionEntity.getBatchStatus());
+
+        params = new Properties();
+        params.setProperty(testNameKey, "scheduleRestart");
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobExecutionId(jobExecutionEntity.getExecutionId())
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .build();
+
+        JobSchedule jobSchedule = batchClient.schedule(scheduleConfig);
+        System.out.printf("Scheduled restart job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
+        Thread.sleep(sleepTimeMillis);
+
+        jobSchedule = batchClient.getJobSchedule(jobSchedule.getId());
+        assertEquals(JobSchedule.Status.DONE, jobSchedule.getStatus());
+        assertEquals(1, jobSchedule.getJobExecutionIds().size());
+        assertEquals(BatchStatus.COMPLETED,
+                batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
+        assertEquals(false, batchClient.cancelJobSchedule(jobSchedule.getId()));
     }
 
 }

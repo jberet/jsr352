@@ -91,6 +91,11 @@ public class ExecutorSchedulerImpl extends JobScheduler {
         boolean result = false;
         final JobSchedule jobSchedule = schedules.get(scheduleId);
         if (jobSchedule != null) {
+            final JobSchedule.Status status = jobSchedule.getStatus();
+            if (status == JobSchedule.Status.DONE || status == JobSchedule.Status.CANCELLED) {
+                return false;
+            }
+
             final Future<?> future = jobSchedule.getFuture();
             if (future != null) {
                 result = future.cancel(true);
