@@ -1,0 +1,176 @@
+<div class="modal-header">
+    <button aria-hidden="true" data-dismiss="modal" ng-click="modalOptions.close()" class="close close-x-right" type="button">&times;</button>
+    <h4 class="modal-title">{{modalOptions.headerText}}</h4>
+</div>
+<div class="modal-body">
+    <p>{{modalOptions.bodyText}}</p>
+
+    <form name="outerForm">
+        <uib-tabset>
+            <uib-tab index="0" heading="One-time Schedule">
+                <ng-form name="onetimeScheduleForm">
+                    <p class="help-block">
+                        To schedule a one-time, single-action job execution, choose either <i>Delay Minutes</i>
+                        or <i>Date & Time</i>.
+                    </p>
+                    <div class="form-group">
+                        <label>Delay Minutes:</label>
+                        <input type="number" class="form-control" required ng-model="modalOptions.item.initialDelay"/>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Date & Time:</label>
+                                <p class="input-group">
+                                    <input type="text" class="form-control" uib-datepicker-popup
+                                           ng-model="modalOptions.item.date"
+                                           ng-required="true" close-text="Close"
+                                           is-open="onetimeScheduleDatepicker.opened"/>
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default"
+                                                ng-click="onetimeScheduleDatepicker.opened=true">
+                                            <i class="glyphicon glyphicon-calendar"></i></button>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <uib-timepicker ng-model="modalOptions.item.time">
+                            </uib-timepicker>
+                        </div>
+                    </div>
+                </ng-form>
+            </uib-tab>
+
+            <uib-tab index="1" heading="Repeating Schedule">
+                <ng-form name="repeatingScheduleForm">
+                    <p class="help-block">
+                        To schedule a repeating job execution, specify <i>Initial Delay</i>,
+                        and either <i>Subsequent Delay</i> or <i>Interval</i>.
+                    </p>
+                    <div class="form-group">
+                        <label>Initial Delay Minutes:</label>
+                        <input type="number" class="form-control" required ng-model="modalOptions.item.initialDelay"/>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Subsequent Delay Minutes:</label>
+                                <input type="number" class="form-control" ng-model="modalOptions.item.afterDelay"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Interval Minutes:</label>
+                                <input type="number" class="form-control" ng-model="modalOptions.item.interval"/>
+                            </div>
+                        </div>
+                    </div>
+                </ng-form>
+            </uib-tab>
+
+            <uib-tab index="2" heading="Calendar-based Schedule">
+                <ng-form name="calendarBasedScheduleForm">
+                    <p class="help-block">
+                        To schedule a calendar-based job execution, specify the following schedule expression attributes.
+                    </p>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Year:</label>
+                                <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.year"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Month:</label>
+                                <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.month"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Day of Month:</label>
+                                <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.dayOfMonth"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Day of Week:</label>
+                                <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.dayOfWeek"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Hour:</label>
+                                <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.hour"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Minute:</label>
+                                <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.minute"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Start:</label>
+                                <p class="input-group">
+                                    <input type="text" class="form-control" uib-datepicker-popup
+                                           ng-model="modalOptions.item.scheduleExpression.start.date" close-text="Close"
+                                           is-open="calendarBasedScheduleStartDatepicker.opened"/>
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default"
+                                                ng-click="calendarBasedScheduleStartDatepicker.opened=true">
+                                            <i class="glyphicon glyphicon-calendar"></i></button>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <uib-timepicker ng-model="modalOptions.item.scheduleExpression.start.time">
+                            </uib-timepicker>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>End:</label>
+                                <p class="input-group">
+                                    <input type="text" class="form-control" uib-datepicker-popup
+                                           ng-model="modalOptions.item.scheduleExpression.end.date" close-text="Close"
+                                           is-open="calendarBasedScheduleEndDatepicker.opened"/>
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default"
+                                                ng-click="calendarBasedScheduleEndDatepicker.opened=true">
+                                            <i class="glyphicon glyphicon-calendar"></i></button>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <uib-timepicker ng-model="modalOptions.item.scheduleExpression.end.time">
+                            </uib-timepicker>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label>Timezone:</label>
+                            <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.timezone"/>
+                        </div>
+                    </div>
+                </ng-form>
+            </uib-tab>
+        </uib-tabset>
+    </form>
+
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-warning" data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>
+    <button class="btn btn-primary" data-ng-click="modalOptions.ok()">{{modalOptions.actionButtonText}}</button>
+</div>

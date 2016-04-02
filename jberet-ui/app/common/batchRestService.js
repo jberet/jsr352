@@ -22,6 +22,52 @@ var batchRestService = function($http) {
         return $http.post(jobsUrl + '/' + encodeURIComponent(jobXmlName) + '/start', jobParameters);
     };
 
+    this.scheduleJobExecution = function (jobName, jobExecutionId, jobParameters, jobScheduleConfig) {
+        console.log('jobName:' + jobName + ", jobExecutionId: " + jobExecutionId + ", jobParams: " + jobParameters
+        + ", initialDelay: " + jobScheduleConfig.initialDelay);
+        console.log("jobScheduleConfig.date: ", jobScheduleConfig.date);
+        console.log("jobScheduleConfig.time: ", jobScheduleConfig.time);
+        jobScheduleConfig.jobName = jobName;
+        jobScheduleConfig.jobExecutionId = jobExecutionId;
+        jobScheduleConfig.jobParameters = jobParameters;
+
+        if(!jobScheduleConfig.initialDelay && jobScheduleConfig.date != null) {
+            jobScheduleConfig.date.setHours(jobScheduleConfig.time.getHours(), jobScheduleConfig.time.getMinutes());
+            var diffInMinutes = Math.ceil((jobScheduleConfig.date - new Date()) / (1000 * 60));
+            console.log("diffInMinutes: " + diffInMinutes);
+            jobScheduleConfig.initialDelay = diffInMinutes;
+        }
+
+        if(jobScheduleConfig.scheduleExpression) {
+            if(jobScheduleConfig.scheduleExpression.start && jobScheduleConfig.scheduleExpression.start.date) {
+                var startDateTime = jobScheduleConfig.scheduleExpression.start.date;
+                if(jobScheduleConfig.scheduleExpression.start.time) {
+                    startDateTime.setHours(jobScheduleConfig.scheduleExpression.start.time.getHours(),
+                        jobScheduleConfig.scheduleExpression.start.time.getMinutes());
+                }
+                jobScheduleConfig.scheduleExpression.start = startDateTime;
+            }
+            if(jobScheduleConfig.scheduleExpression.end && jobScheduleConfig.scheduleExpression.end.date) {
+                var endDateTime = jobScheduleConfig.scheduleExpression.end.date;
+                if(jobScheduleConfig.scheduleExpression.end.time) {
+                    endDateTime.setHours(jobScheduleConfig.scheduleExpression.end.time.getHours(),
+                        jobScheduleConfig.scheduleExpression.end.time.getMinutes());
+                }
+                jobScheduleConfig.scheduleExpression.end = endDateTime;
+            }
+        }
+
+        console.log("jobScheduleConfig.scheduleExpression: ", jobScheduleConfig.scheduleExpression);
+
+        delete jobScheduleConfig.date;
+        delete jobScheduleConfig.time;
+        
+        if(jobExecutionId > 0) {
+            return $http.post(this.urlForJobExecution(jobExecutionId) + '/schedule', jobScheduleConfig);
+        }
+        return $http.post(jobsUrl + '/' + encodeURIComponent(jobName) + '/schedule', jobScheduleConfig);
+    };
+
     this.getJobInstances = function (jobName, start, count) {
         var url = jobInstancesUrl;
         var sep = '?';

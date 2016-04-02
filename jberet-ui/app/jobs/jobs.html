@@ -25,6 +25,11 @@
                                         ng-click="startJob()">
                                     <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start Job
                                 </button>
+                                <button type="button" class="btn btn-default" title="Schedule a Job Execution"
+                                        ng-disabled="startJobForm.$invalid"
+                                        ng-click="scheduleJob()">
+                                    <span class="glyphicon glyphicon-time" aria-hidden="true"></span> Schedule...
+                                </button>
                                 </span>
                             </div>
                         </div>

@@ -33,8 +33,8 @@ angular.module('jberetUI.jobs',
         };
     })
 
-    .controller('JobsCtrl', ['$scope', '$log', 'batchRestService', 'localRecentJobsService',
-        function ($scope, $log, batchRestService, localRecentJobsService) {
+    .controller('JobsCtrl', ['$scope', '$log', 'modalService', 'batchRestService', 'localRecentJobsService',
+        function ($scope, $log, modalService, batchRestService, localRecentJobsService) {
         var jobInstancesLinkCell =
             '<div class="ngCellText" ng-class="col.colIndex()"><a ui-sref="jobinstances({jobName: row.entity.jobName})">{{COL_FIELD}}</a></div>';
 
@@ -78,6 +78,39 @@ angular.module('jberetUI.jobs',
                     msg: 'Failed to start job: ' + $scope.jobName + '.'
                 });
                 resetFields();
+            });
+        };
+
+        $scope.scheduleJob = function () {
+            $scope.alerts.length = 0; //clear alerts
+            $scope.stateTransitionParams = null;
+            var jobParams = utils.parseJobParameters($scope.jobParameters);
+
+            var modalDefaults = {
+                templateUrl: 'template/modal/schedule.html'
+            };
+            var modalOptions = {
+                headerText: 'Schedule Job Execution for Job ' + $scope.jobName,
+                bodyText: null
+            };
+
+            modalService.showModal(modalDefaults, modalOptions).then(function (result) {
+                if (result) {
+                    batchRestService.scheduleJobExecution($scope.jobName, 0, jobParams, result)
+                        .then(function (responseData) {
+                            $scope.alerts.push({
+                                type: 'success',
+                                msg: 'Scheduled job execution with schedule id: ' + responseData.data.id +
+                                ', for job: ' + $scope.jobName + '.'
+                            });
+                        }, function (responseData) {
+                            $log.debug(responseData);
+                            $scope.alerts.push({
+                                type: 'danger',
+                                msg: 'Failed to schedule job execution for job: ' + $scope.jobName + '.'
+                            });
+                        });
+                }
             });
         };
 
