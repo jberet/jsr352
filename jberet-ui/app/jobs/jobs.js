@@ -91,7 +91,6 @@ angular.module('jberetUI.jobs',
             };
             var modalOptions = {
                 headerText: 'Schedule Job Execution for Job ' + $scope.jobName,
-                bodyText: null
             };
 
             modalService.showModal(modalDefaults, modalOptions).then(function (result) {

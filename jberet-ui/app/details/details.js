@@ -121,30 +121,48 @@ angular.module('jberetUI.details',
 
                 modalService.showModal({}, modalOptions).then(function (result) {
                     if (result) {
-                        var jobParams = (result === true) ? null : utils.parseJobParameters(result);
-                        batchRestService.restartJobExecution(idToRestart, jobParams)
-                            .then(function (responseData) {
-                                $scope.restartJobExecutionEntity = responseData.data;
-                                $scope.restartDisabled = true;
-                                $scope.stateTransitionParams = {
-                                    jobExecutionId: $scope.restartJobExecutionEntity.executionId,
-                                    jobExecutionEntity: $scope.restartJobExecutionEntity,
-                                    jobName: $scope.restartJobExecutionEntity.jobName,
-                                    jobInstanceId: $scope.restartJobExecutionEntity.jobInstanceId,
-                                    jobExecutionId1: $scope.restartJobExecutionEntity.executionId
-                                };
-                                $scope.alerts.push({
-                                    type: 'success',
-                                    msg: 'Restarted job execution ' + idToRestart +
-                                    ((!jobParams) ? '.' : ', with additional parameters: ' + utils.formatAsKeyValuePairs(jobParams) + '.')
+                        var jobParams = (result === true) ? null : utils.parseJobParameters(result.jobParameters);
+
+                        if (result.initialDelay || result.date) {
+                            batchRestService.scheduleJobExecution(null, idToRestart, jobParams, result)
+                                .then(function (responseData) {
+                                    $scope.alerts.push({
+                                        type: 'success',
+                                        msg: 'Scheduled restart job execution with schedule id: ' + responseData.data.id +
+                                        ', for job execution: ' + idToRestart + '.'
+                                    });
+                                }, function (responseData) {
+                                    $log.debug(responseData);
+                                    $scope.alerts.push({
+                                        type: 'danger',
+                                        msg: 'Failed to schedule restart job execution for job execution id: ' + idToRestart + '.'
+                                    });
                                 });
-                            }, function (responseData) {
-                                $log.debug(responseData);
-                                $scope.alerts.push({
-                                    type: 'danger',
-                                    msg: 'Failed to restart job execution ' + idToRestart + '.'
+                        } else {
+                            batchRestService.restartJobExecution(idToRestart, jobParams)
+                                .then(function (responseData) {
+                                    $scope.restartJobExecutionEntity = responseData.data;
+                                    $scope.restartDisabled = true;
+                                    $scope.stateTransitionParams = {
+                                        jobExecutionId: $scope.restartJobExecutionEntity.executionId,
+                                        jobExecutionEntity: $scope.restartJobExecutionEntity,
+                                        jobName: $scope.restartJobExecutionEntity.jobName,
+                                        jobInstanceId: $scope.restartJobExecutionEntity.jobInstanceId,
+                                        jobExecutionId1: $scope.restartJobExecutionEntity.executionId
+                                    };
+                                    $scope.alerts.push({
+                                        type: 'success',
+                                        msg: 'Restarted job execution ' + idToRestart +
+                                        ((!jobParams) ? '.' : ', with additional parameters: ' + utils.formatAsKeyValuePairs(jobParams) + '.')
+                                    });
+                                }, function (responseData) {
+                                    $log.debug(responseData);
+                                    $scope.alerts.push({
+                                        type: 'danger',
+                                        msg: 'Failed to restart job execution ' + idToRestart + '.'
+                                    });
                                 });
-                            });
+                        }
                     }
                 });
             };

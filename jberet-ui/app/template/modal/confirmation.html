@@ -9,9 +9,50 @@
 
     <div ng-show="modalOptions.isRestart">
         <label for="taRestartParams" class="control-label">Override/Add to Previous Job Parameters</label>
-        <textarea id="taRestartParams" title="Override/Add to Previous Job Parameters" data-ng-model="modalOptions.item"
-          rows="10" cols="70" class="form-control"
+        <textarea id="taRestartParams" title="Override/Add to Previous Job Parameters"
+                  data-ng-model="modalOptions.item.jobParameters"
+          rows="8" cols="70" class="form-control"
           placeholder="Previous execution parameters will still be used in restart. You can override and add parameters here, as key = value pairs, each pair in its own line."></textarea>
+
+        <label>
+            <input type="checkbox" name="scheduleRestart" value="true" ng-model="modalOptions.isSchedule"/> Schedule Restart
+        </label>
+
+        <ng-form name="onetimeScheduleForm" ng-show="modalOptions.isSchedule">
+            <p class="help-block">
+                To schedule a restart, choose either <i>Delay Minutes</i> or <i>Date &amp; Time</i>.
+            </p>
+            <div class="form-group">
+                <label>Delay Minutes:</label>
+                <input type="number" class="form-control" required ng-model="modalOptions.item.initialDelay"/>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Date &amp; Time:</label>
+                        <p class="input-group">
+                            <input type="text" class="form-control" uib-datepicker-popup
+                                   ng-model="modalOptions.item.date"
+                                   ng-required="true" close-text="Close"
+                                   is-open="onetimeScheduleDatepicker.opened"/>
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default"
+                                                ng-click="onetimeScheduleDatepicker.opened=true">
+                                            <i class="glyphicon glyphicon-calendar"></i></button>
+                                    </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <uib-timepicker ng-model="modalOptions.item.time">
+                    </uib-timepicker>
+                </div>
+            </div>
+            <label>
+                <input type="checkbox" name="persistentSchedule" value="true" ng-model="modalOptions.item.persistent"/>
+                Persistent Schedule
+            </label>
+        </ng-form>
     </div>
 </div>
 <div class="modal-footer">

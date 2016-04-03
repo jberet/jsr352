@@ -3,15 +3,13 @@
     <h4 class="modal-title">{{modalOptions.headerText}}</h4>
 </div>
 <div class="modal-body">
-    <p>{{modalOptions.bodyText}}</p>
-
     <form name="outerForm">
         <uib-tabset>
             <uib-tab index="0" heading="One-time Schedule">
                 <ng-form name="onetimeScheduleForm">
                     <p class="help-block">
                         To schedule a one-time, single-action job execution, choose either <i>Delay Minutes</i>
-                        or <i>Date & Time</i>.
+                        or <i>Date &amp; Time</i>.
                     </p>
                     <div class="form-group">
                         <label>Delay Minutes:</label>
@@ -20,7 +18,7 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label>Date & Time:</label>
+                                <label>Date &amp; Time:</label>
                                 <p class="input-group">
                                     <input type="text" class="form-control" uib-datepicker-popup
                                            ng-model="modalOptions.item.date"
@@ -39,6 +37,10 @@
                             </uib-timepicker>
                         </div>
                     </div>
+                    <label>
+                        <input type="checkbox" name="persistentSchedule" value="true" ng-model="modalOptions.item.persistent"/>
+                        Persistent Schedule
+                    </label>
                 </ng-form>
             </uib-tab>
 
@@ -52,6 +54,7 @@
                         <label>Initial Delay Minutes:</label>
                         <input type="number" class="form-control" required ng-model="modalOptions.item.initialDelay"/>
                     </div>
+
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="form-group">
@@ -66,6 +69,10 @@
                             </div>
                         </div>
                     </div>
+                    <label>
+                        <input type="checkbox" name="persistentSchedule" value="true" ng-model="modalOptions.item.persistent"/>
+                        Persistent Schedule
+                    </label>
                 </ng-form>
             </uib-tab>
 
@@ -158,10 +165,19 @@
                             </uib-timepicker>
                         </div>
                     </div>
-                    <div>
-                        <div class="form-group">
-                            <label>Timezone:</label>
-                            <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.timezone"/>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Timezone:</label>
+                                <input type="text" class="form-control" ng-model="modalOptions.item.scheduleExpression.timezone"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <p>&nbsp;</p>
+                            <label>
+                                <input type="checkbox" name="persistentSchedule" value="true" ng-model="modalOptions.item.persistent"/>
+                                Persistent Schedule
+                            </label>
                         </div>
                     </div>
                 </ng-form>
