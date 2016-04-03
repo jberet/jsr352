@@ -21,6 +21,11 @@
             <script type="javascript">
                 function process() {
                     var testName = batchProperties.get('testName');
+
+                    if(testName === 'fail') {
+                        throw 'This job is designed to fail.';
+                    }
+
                     var stepName = stepContext.getStepName();
                     var d = new Date();
                     var msg = d + ', testName: ' + testName + ', stepName: ' + stepName;
