@@ -82,7 +82,7 @@ public class ExecutorSchedulerImpl extends JobScheduler {
             }
             result.add(e);
         }
-        Collections.sort(result);
+        Collections.sort(result, Collections.<JobSchedule>reverseOrder());
         return result;
     }
 

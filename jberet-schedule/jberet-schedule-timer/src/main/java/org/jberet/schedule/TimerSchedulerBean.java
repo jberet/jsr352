@@ -70,7 +70,7 @@ public class TimerSchedulerBean extends JobScheduler {
                 result.add((JobSchedule) info);
             }
         }
-        Collections.sort(result);
+        Collections.sort(result, Collections.<JobSchedule>reverseOrder());
         return result;
     }
 
