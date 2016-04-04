@@ -22,6 +22,10 @@
           <a ui-sref="jobs" ng-click="jobInstancesDropdown.isOpen=false; jobExecutionsDropdown.isOpen=false">Jobs</a>
       </li>
 
+      <li ui-sref-active="active">
+          <a ui-sref="schedules" ng-click="jobInstancesDropdown.isOpen=false; jobExecutionsDropdown.isOpen=false">Schedules</a>
+      </li>
+
       <li>
           <div on-toggle="toggled(open)" uib-dropdown auto-close="disabled" is-open="jobInstancesDropdown.isOpen">
               <a href="#/jobinstances" ng-click="jobInstancesDropdown.isOpen=false; jobExecutionsDropdown.isOpen=false">Job Instances</a>

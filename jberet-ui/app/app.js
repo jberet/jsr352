@@ -18,11 +18,12 @@ require('./jobinstances/jobinstances');
 require('./jobexecutions/jobexecutions');
 require('./details/details');
 require('./stepexecution/stepexecution');
+require('./schedules/schedules');
 
 // Declare app level module which depends on views, and components
 angular.module('jberetUI',
     ['ui.router', 'jberetUI.jobs', 'jberetUI.jobinstances', 'jberetUI.jobexecutions', 'jberetUI.details',
-        'jberetUI.common', 'jberetUI.stepexecution'])
+        'jberetUI.common', 'jberetUI.stepexecution', 'jberetUI.schedules'])
     .config(['$urlRouterProvider', function ($urlRouterProvider) {
         $urlRouterProvider.otherwise('/jobs');
     }])

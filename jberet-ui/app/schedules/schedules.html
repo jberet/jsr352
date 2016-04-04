@@ -1,0 +1,93 @@
+<div>
+    <h4 class="text-center">Job Execution Schedules</h4>
+
+    <div>
+        <uib-accordion close-others="false">
+            <uib-accordion-group ng-repeat="sch in schedules" is-open="true">
+                <uib-accordion-heading>
+                    {{sch.id}}
+                    <span class="pull-right">
+                        <a title="Refresh Schedules" ng-click="getAllSchedules()">
+                            <span class="glyphicon glyphicon-refresh" aria-hidden="true">&nbsp;</span>
+                        </a>
+                        <a title="Cancel Schedule" ng-click="cancelSchedule(sch.id)">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true">&nbsp;</span>
+                        </a>
+                    </span>
+                </uib-accordion-heading>
+                <div class="row dl-row">
+                    <div class="col-sm-6">
+                        <dl class="dl-horizontal">
+                            <dt>Status</dt>
+                            <dd>{{sch.status}}</dd>
+
+                            <dt>Schedule is for</dt>
+                            <dd>{{sch.jobScheduleConfig.jobName ? 'Job: ' : 'Job Execution Id: '}}
+                                {{sch.jobScheduleConfig.jobName ? sch.jobScheduleConfig.jobName : sch.jobScheduleConfig.jobExecutionId}}</dd>
+
+                            <dt>Create Time</dt>
+                            <dd>{{sch.createTime | date:'medium'}}</dd>
+
+                            <dt>Job Executions So Far</dt>
+                            <dd>{{sch.jobExecutionIds}}</dd>
+
+                            <!--<dt>Job Parameters</dt>-->
+                            <!--<dd>{{sch.jobScheduleConfig.jobParameters}}</dd>-->
+
+                            <dt>Initial Delay</dt>
+                            <dd>{{sch.jobScheduleConfig.initialDelay}} minutes</dd>
+
+                            <dt>Subsequent Delay</dt>
+                            <dd>{{sch.jobScheduleConfig.afterDelay}} minutes</dd>
+
+                            <dt>Interval</dt>
+                            <dd>{{sch.jobScheduleConfig.interval}} minutes</dd>
+
+                            <dt>Is Persistent</dt>
+                            <dd>{{sch.jobScheduleConfig.persistent}}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-sm-6">
+                        <dl class="dl-horizontal">
+                            <dt>Year</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.year}}</dd>
+
+                            <dt>Month</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.month}}</dd>
+
+                            <dt>Day of Month</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.dayOfMonth}}</dd>
+
+                            <dt>Day of Week</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.dayOfWeek}}</dd>
+
+                            <dt>Hour</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.hour}}</dd>
+
+                            <dt>Minute</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.minute}}</dd>
+
+                            <dt>Start</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.start | date:'medium'}}</dd>
+
+                            <dt>End</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.end | date:'medium'}}</dd>
+
+                            <dt>Timezone</dt>
+                            <dd>{{sch.jobScheduleConfig.scheduleExpression.timezone}}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </uib-accordion-group>
+        </uib-accordion>
+    </div>
+
+    <div>
+        <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)"
+                   template-url="template/alert/alert-x-right.html">
+            <span ng-if="alert.type == 'danger'" class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span ng-if="alert.type == 'success'" class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            {{alert.msg}}
+        </uib-alert>
+    </div>
+</div>

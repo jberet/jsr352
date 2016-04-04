@@ -13,6 +13,7 @@ var batchRestService = function($http) {
     var jobsUrl = restApiUrl + '/jobs';
     var jobInstancesUrl = restApiUrl + '/jobinstances';
     var jobExecutionsUrl = restApiUrl + '/jobexecutions';
+    var jobSchedulesUrl = restApiUrl + '/schedules';
 
     this.getJobs = function () {
         return $http.get(jobsUrl);
@@ -31,7 +32,13 @@ var batchRestService = function($http) {
         jobScheduleConfig.jobExecutionId = jobExecutionId;
         jobScheduleConfig.jobParameters = jobParameters;
 
-        if(!jobScheduleConfig.initialDelay && jobScheduleConfig.date != null) {
+        // angular-ui timepicker shows currrent time when the model is actually null or cleared.
+        // so when user sees the default, current time in timepicker, the model may be null.
+        // so here we set the time to current time when the model is null, as a workaround.
+        if(!jobScheduleConfig.initialDelay && jobScheduleConfig.date) {
+            if(!jobScheduleConfig.time) {
+                jobScheduleConfig.time = new Date();
+            }
             jobScheduleConfig.date.setHours(jobScheduleConfig.time.getHours(), jobScheduleConfig.time.getMinutes());
             var diffInMinutes = Math.ceil((jobScheduleConfig.date - new Date()) / (1000 * 60));
             console.log("diffInMinutes: " + diffInMinutes);
@@ -41,18 +48,20 @@ var batchRestService = function($http) {
         if(jobScheduleConfig.scheduleExpression) {
             if(jobScheduleConfig.scheduleExpression.start && jobScheduleConfig.scheduleExpression.start.date) {
                 var startDateTime = jobScheduleConfig.scheduleExpression.start.date;
-                if(jobScheduleConfig.scheduleExpression.start.time) {
-                    startDateTime.setHours(jobScheduleConfig.scheduleExpression.start.time.getHours(),
-                        jobScheduleConfig.scheduleExpression.start.time.getMinutes());
+                if(!jobScheduleConfig.scheduleExpression.start.time) {
+                    jobScheduleConfig.scheduleExpression.start.time = new Date();
                 }
+                startDateTime.setHours(jobScheduleConfig.scheduleExpression.start.time.getHours(),
+                    jobScheduleConfig.scheduleExpression.start.time.getMinutes());
                 jobScheduleConfig.scheduleExpression.start = startDateTime;
             }
             if(jobScheduleConfig.scheduleExpression.end && jobScheduleConfig.scheduleExpression.end.date) {
                 var endDateTime = jobScheduleConfig.scheduleExpression.end.date;
-                if(jobScheduleConfig.scheduleExpression.end.time) {
-                    endDateTime.setHours(jobScheduleConfig.scheduleExpression.end.time.getHours(),
-                        jobScheduleConfig.scheduleExpression.end.time.getMinutes());
+                if(!jobScheduleConfig.scheduleExpression.end.time) {
+                    jobScheduleConfig.scheduleExpression.end.time = new Date();
                 }
+                endDateTime.setHours(jobScheduleConfig.scheduleExpression.end.time.getHours(),
+                    jobScheduleConfig.scheduleExpression.end.time.getMinutes());
                 jobScheduleConfig.scheduleExpression.end = endDateTime;
             }
         }
@@ -101,6 +110,14 @@ var batchRestService = function($http) {
             url += '?count=' + count;
         }
         return $http.get(url);
+    };
+
+    this.getJobSchedules = function () {
+        return $http.get(jobSchedulesUrl);
+    };
+    
+    this.cancelJobSchedule = function (schedulesId) {
+        return $http.post(jobSchedulesUrl + '/' + encodeURIComponent(schedulesId) + '/cancel');  
     };
 
     this.getJobExecution = function (jobExecutionId) {

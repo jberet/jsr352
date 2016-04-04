@@ -14,10 +14,13 @@
           rows="8" cols="70" class="form-control"
           placeholder="Previous execution parameters will still be used in restart. You can override and add parameters here, as key = value pairs, each pair in its own line."></textarea>
 
-        <label>
-            <input type="checkbox" name="scheduleRestart" value="true" ng-model="modalOptions.isSchedule"
-           ng-click="modalOptions.item.initialDelay=null; modalOptions.item.date=null; modalOptions.item.time=null; modalOptions.item.persistent=false;"/> Schedule Restart
-        </label>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" ng-model="modalOptions.isSchedule"
+               ng-click="modalOptions.item.initialDelay=null; modalOptions.item.date=null; modalOptions.item.time=null; modalOptions.item.persistent=false;">
+                Schedule Restart
+            </label>
+        </div>
 
         <ng-form name="onetimeScheduleForm" ng-show="modalOptions.isSchedule">
             <p class="help-block">

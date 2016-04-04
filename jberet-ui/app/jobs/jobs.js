@@ -90,7 +90,7 @@ angular.module('jberetUI.jobs',
                 templateUrl: 'template/modal/schedule.html'
             };
             var modalOptions = {
-                headerText: 'Schedule Job Execution for Job ' + $scope.jobName,
+                headerText: 'Schedule Job Execution for Job ' + $scope.jobName
             };
 
             modalService.showModal(modalDefaults, modalOptions).then(function (result) {
@@ -102,12 +102,14 @@ angular.module('jberetUI.jobs',
                                 msg: 'Scheduled job execution with schedule id: ' + responseData.data.id +
                                 ', for job: ' + $scope.jobName + '.'
                             });
+                            resetFields();
                         }, function (responseData) {
                             $log.debug(responseData);
                             $scope.alerts.push({
                                 type: 'danger',
                                 msg: 'Failed to schedule job execution for job: ' + $scope.jobName + '.'
                             });
+                            resetFields();
                         });
                 }
             });
