@@ -15,6 +15,10 @@ var batchRestService = function($http) {
     var jobExecutionsUrl = restApiUrl + '/jobexecutions';
     var jobSchedulesUrl = restApiUrl + '/schedules';
 
+    var timezones = {
+        entries: null
+    };
+
     this.getJobs = function () {
         return $http.get(jobsUrl);
     };
@@ -114,6 +118,16 @@ var batchRestService = function($http) {
 
     this.getJobSchedules = function () {
         return $http.get(jobSchedulesUrl);
+    };
+    
+    this.getTimezoneIds = function () {
+        if(timezones.entries == null) {
+            $http.get(jobSchedulesUrl + '/timezones').then(function (responseData) {
+                    timezones.entries = responseData.data;
+                }, function (responseData) {
+            });
+        }
+        return timezones;
     };
     
     this.cancelJobSchedule = function (schedulesId) {

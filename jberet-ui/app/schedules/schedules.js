@@ -35,6 +35,7 @@ angular.module('jberetUI.schedules', ['ui.router', 'ui.bootstrap', 'ngAnimate', 
                     batchRestService.cancelJobSchedule(idToCancel)
                         .then(function (responseData) {
                             if(responseData.data) {
+                                getSchedules();  // refresh the page 
                                 $scope.alerts.push({
                                     type: 'success',
                                     msg: 'Cancelled job schedule: ' + idToCancel

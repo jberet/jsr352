@@ -21,9 +21,8 @@
                             <dt>Status</dt>
                             <dd>{{sch.status}}</dd>
 
-                            <dt>Schedule is for</dt>
-                            <dd>{{sch.jobScheduleConfig.jobName ? 'Job: ' : 'Job Execution Id: '}}
-                                {{sch.jobScheduleConfig.jobName ? sch.jobScheduleConfig.jobName : sch.jobScheduleConfig.jobExecutionId}}</dd>
+                            <dt>For {{sch.jobScheduleConfig.jobName ? 'Job: ' : 'Job Execution: '}}</dt>
+                            <dd>{{sch.jobScheduleConfig.jobName ? sch.jobScheduleConfig.jobName : sch.jobScheduleConfig.jobExecutionId}}</dd>
 
                             <dt>Create Time</dt>
                             <dd>{{sch.createTime | date:'medium'}}</dd>

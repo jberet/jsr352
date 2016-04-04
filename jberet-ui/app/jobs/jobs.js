@@ -90,7 +90,8 @@ angular.module('jberetUI.jobs',
                 templateUrl: 'template/modal/schedule.html'
             };
             var modalOptions = {
-                headerText: 'Schedule Job Execution for Job ' + $scope.jobName
+                headerText: 'Schedule Job Execution for Job ' + $scope.jobName,
+                timezones: batchRestService.getTimezoneIds()
             };
 
             modalService.showModal(modalDefaults, modalOptions).then(function (result) {

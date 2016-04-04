@@ -12,7 +12,9 @@
 
 package org.jberet.rest.resource;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -53,5 +55,19 @@ public class JobScheduleResource {
     public JobSchedule getJobSchedule(final @PathParam("scheduleId") String scheduleId) {
         final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
         return jobScheduler.getJobSchedule(scheduleId);
+    }
+
+    @GET
+    @Path("timezones")
+    public String[] getTimezoneIds() {
+        final String[] availableIDs = TimeZone.getAvailableIDs();
+        Arrays.sort(availableIDs);
+        final int i = Arrays.binarySearch(availableIDs, TimeZone.getDefault().getID());
+        final String[] result = new String[availableIDs.length];
+        result[0] = availableIDs[i];
+        System.arraycopy(availableIDs, 0, result, 1, i);
+        System.arraycopy(availableIDs, i + 1, result, i + 1, availableIDs.length - (i + 1));
+
+        return result;
     }
 }
