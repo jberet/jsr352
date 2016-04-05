@@ -22,7 +22,14 @@
                             <dd>{{sch.status}}</dd>
 
                             <dt>For {{sch.jobScheduleConfig.jobName ? 'Job: ' : 'Job Execution: '}}</dt>
-                            <dd>{{sch.jobScheduleConfig.jobName ? sch.jobScheduleConfig.jobName : sch.jobScheduleConfig.jobExecutionId}}</dd>
+                            <dd ng-if="sch.jobScheduleConfig.jobName">
+                                <a ui-sref="jobinstances({jobName: sch.jobScheduleConfig.jobName})">
+                                    {{sch.jobScheduleConfig.jobName}}</a>
+                            </dd>
+                            <dd ng-if="!sch.jobScheduleConfig.jobName">
+                                <a ui-sref="details({jobExecutionId: sch.jobScheduleConfig.jobExecutionId})">
+                                    {{sch.jobScheduleConfig.jobExecutionId}}</a>
+                            </dd>
 
                             <dt>Create Time</dt>
                             <dd>{{sch.createTime | date:'medium'}}</dd>
