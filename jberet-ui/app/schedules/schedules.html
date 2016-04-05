@@ -21,7 +21,7 @@
                             <dt>Status</dt>
                             <dd>{{sch.status}}</dd>
 
-                            <dt>For {{sch.jobScheduleConfig.jobName ? 'Job: ' : 'Job Execution: '}}</dt>
+                            <dt>For {{sch.jobScheduleConfig.jobName ? 'Starting Job: ' : 'Restarting: '}}</dt>
                             <dd ng-if="sch.jobScheduleConfig.jobName">
                                 <a ui-sref="jobinstances({jobName: sch.jobScheduleConfig.jobName})">
                                     {{sch.jobScheduleConfig.jobName}}</a>
@@ -33,9 +33,6 @@
 
                             <dt>Create Time</dt>
                             <dd>{{sch.createTime | date:'medium'}}</dd>
-
-                            <dt>Job Executions So Far</dt>
-                            <dd>{{sch.jobExecutionIds}}</dd>
 
                             <!--<dt>Job Parameters</dt>-->
                             <!--<dd>{{sch.jobScheduleConfig.jobParameters}}</dd>-->
@@ -51,6 +48,13 @@
 
                             <dt>Is Persistent</dt>
                             <dd>{{sch.jobScheduleConfig.persistent}}</dd>
+
+                            <dt>Realized Executions</dt>
+                            <dd>
+                                <a ng-repeat="e in sch.jobExecutionIds" ui-sref="details({jobExecutionId: e})">
+                                    {{e}}
+                                </a>
+                            </dd>
                         </dl>
                     </div>
                     <div class="col-sm-6">
