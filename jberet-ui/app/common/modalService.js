@@ -32,6 +32,12 @@ var modalService = function ($uibModal) {
             tempModalDefaults.controller = function ($scope, $uibModalInstance) {
                 $scope.modalOptions = tempModalOptions;
                 $scope.modalOptions.ok = function (result) {
+                    if(customModalOptions.validate) {
+                        $scope.modalOptions.invalid = {};
+                        if(!customModalOptions.validate($scope.modalOptions)) {
+                            return;
+                        }
+                    }
                     var item = $scope.modalOptions.item;
 
                     if (item && Object.keys(item).length > 0) {

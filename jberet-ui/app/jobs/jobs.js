@@ -91,7 +91,37 @@ angular.module('jberetUI.jobs',
             };
             var modalOptions = {
                 headerText: 'Schedule Job Execution for Job ' + $scope.jobName,
-                timezones: batchRestService.getTimezoneIds()
+                timezones: batchRestService.getTimezoneIds(),
+                validate: function (modalOptions) { //passed from modalService
+                    var fail = false;
+                    if(modalOptions.tab === 0) {
+                        if(!modalOptions.item.date) {
+                            if(!modalOptions.item.initialDelay || modalOptions.item.initialDelay <= 0) {
+                                modalOptions.invalid.initialDelay0 = fail = true;
+                            }
+                        } else {
+                            if(modalOptions.item.initialDelay && modalOptions.item.initialDelay < 0) {
+                                modalOptions.invalid.initialDelay0 = fail = true;
+                            }
+                        }
+                    } else if(modalOptions.tab === 1) {
+                        if(!modalOptions.item.initialDelay || modalOptions.item.initialDelay <= 0) {
+                            modalOptions.invalid.initialDelay1 = fail = true;
+                        }
+                        if(!modalOptions.item.afterDelay || modalOptions.item.afterDelay <= 0) {
+                            if(!modalOptions.item.interval || modalOptions.item.interval <= 0) {
+                                modalOptions.invalid.interval = fail = true;
+                                modalOptions.invalid.afterDelay = true;
+                            }
+                        }
+                    } else if(modalOptions.tab == 2 && !modalOptions.item.scheduleExpression) {
+                        modalOptions.invalid.scheduleExpression = fail = true;
+                    }
+                    if(!fail) {
+                        delete modalOptions.invalid;
+                    }
+                    return !fail;
+                }
             };
 
             modalService.showModal(modalDefaults, modalOptions).then(function (result) {

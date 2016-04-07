@@ -28,17 +28,19 @@
             </p>
             <div class="form-group">
                 <label>Delay Minutes:</label>
-                <input type="number" class="form-control" required ng-model="modalOptions.item.initialDelay"/>
+                <input type="number" class="form-control" required ng-model="modalOptions.item.initialDelay"
+                       ng-class="{ 'invalid-schedule': modalOptions.item.initialDelay < 0 }"
+                >
             </div>
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label>Date &amp; Time:</label>
                         <p class="input-group">
-                            <input type="text" class="form-control" uib-datepicker-popup
-                                   ng-model="modalOptions.item.date"
-                                   ng-required="true" close-text="Close"
-                                   is-open="onetimeScheduleDatepicker.opened"/>
+                            <input type="text" name="dateInput" class="form-control" uib-datepicker-popup
+                                   ng-model="modalOptions.item.date" close-text="Close"
+                                   is-open="onetimeScheduleDatepicker.opened"
+                                   ng-class="{ 'invalid-schedule': !onetimeScheduleForm.dateInput.$valid }">
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-default"
                                                 ng-click="onetimeScheduleDatepicker.opened=true">
@@ -52,10 +54,13 @@
                     </uib-timepicker>
                 </div>
             </div>
-            <label>
-                <input type="checkbox" name="persistentSchedule" value="true" ng-model="modalOptions.item.persistent"/>
-                Persistent Schedule
-            </label>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="persistentSchedule" value="true"
+                           ng-model="modalOptions.item.persistent"/>
+                    Persistent Schedule
+                </label>
+            </div>
         </ng-form>
     </div>
 </div>

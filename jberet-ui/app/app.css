@@ -54,3 +54,7 @@ button {
   bottom: 0;
   width: 100%;
 }
+
+.invalid-schedule {
+  border: 1px solid red !important;
+}
