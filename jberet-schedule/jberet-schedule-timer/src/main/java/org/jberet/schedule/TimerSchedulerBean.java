@@ -24,17 +24,20 @@ import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import org.jberet.schedule._private.ScheduleExecutorMessages;
 
 @Singleton()
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class TimerSchedulerBean extends JobScheduler {
     @Resource
     private TimerService timerService;
 
     @Override
     public JobSchedule schedule(final JobScheduleConfig scheduleConfig) {
-        Timer timer = null;
+        final Timer timer;
         final JobSchedule jobSchedule = new JobSchedule(null, scheduleConfig);
         if (scheduleConfig.initialDelay > 0) {
             if (scheduleConfig.interval > 0) {
