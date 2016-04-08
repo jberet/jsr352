@@ -24,7 +24,8 @@
                                 <label>Date &amp; Time:</label>
                                 <p class="input-group">
                                     <input type="text" name="dateInput" class="form-control" uib-datepicker-popup
-                                           ng-model="modalOptions.item.date" close-text="Close"
+                                           ng-model="modalOptions.item.date"
+                                           close-text="Close" placeholder="yyyy-MM-dd"
                                            ng-class="{ 'invalid-schedule': !onetimeScheduleForm.dateInput.$valid}"
                                            is-open="onetimeScheduleDatepicker.opened"/>
                                     <span class="input-group-btn">
@@ -151,7 +152,7 @@
                                         <input type="text" name="startDateInput" class="form-control"
                                                uib-datepicker-popup
                                                ng-model="modalOptions.item.scheduleExpression.start.date"
-                                               close-text="Close"
+                                               close-text="Close" placeholder="yyyy-MM-dd"
                                                ng-class="{ 'invalid-schedule': !calendarBasedScheduleForm.startDateInput.$valid }"
                                                is-open="calendarBasedScheduleStartDatepicker.opened"/>
                                     <span class="input-group-btn">
@@ -175,7 +176,7 @@
                                     <p class="input-group">
                                         <input type="text" name="endDateInput" class="form-control" uib-datepicker-popup
                                                ng-model="modalOptions.item.scheduleExpression.end.date"
-                                               close-text="Close"
+                                               close-text="Close" placeholder="yyyy-MM-dd"
                                                ng-class="{ 'invalid-schedule': !calendarBasedScheduleForm.endDateInput.$valid }"
                                                is-open="calendarBasedScheduleEndDatepicker.opened"/>
                                     <span class="input-group-btn">
