@@ -25,6 +25,10 @@ import org.jberet.schedule._private.ScheduleExecutorLogger;
 import org.jberet.schedule._private.ScheduleExecutorMessages;
 
 public abstract class JobScheduler {
+    public static final String[] EMPTY_STRING_ARRAY = new String[0];
+    public static final String PERSISTENT = "persistent";
+    public static final String CALENDAR = "calendar";
+
     protected static final TimeUnit timeUnit = TimeUnit.MINUTES;
 
     protected static final String TIMER_SCHEDULER_LOOKUP = "java:module/TimerSchedulerBean";
@@ -113,4 +117,8 @@ public abstract class JobScheduler {
     public abstract boolean cancel(final String scheduleId);
 
     public abstract JobSchedule getJobSchedule(final String scheduleId);
+
+    public String[] getFeatures() {
+        return EMPTY_STRING_ARRAY;
+    }
 }

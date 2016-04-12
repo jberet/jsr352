@@ -123,6 +123,12 @@ public class BatchClient {
         return target.request().accept(MediaType.APPLICATION_JSON_TYPE).get(JobSchedule[].class);
     }
 
+    public String[] getJobScheduleFeatures() {
+        final URI uri = getJobScheduleUriBuilder("getFeatures").build();
+        final WebTarget target = target(uri);
+        return target.request().accept(MediaType.APPLICATION_JSON_TYPE).get(String[].class);
+    }
+
     public boolean cancelJobSchedule(final String scheduleId) {
         final URI uri = getJobScheduleUriBuilder("cancel")
                 .resolveTemplate("scheduleId", scheduleId).build();

@@ -70,4 +70,11 @@ public class JobScheduleResource {
 
         return result;
     }
+
+    @GET
+    @Path("features")
+    public String[] getFeatures() {
+        return JobScheduler.getJobScheduler().getFeatures();
+    }
 }
+

@@ -14,6 +14,7 @@ package org.jberet.testapps.restapi;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.ws.rs.WebApplicationException;
@@ -30,6 +31,7 @@ import org.jberet.rest.entity.StepExecutionEntity;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduleConfigBuilder;
+import org.jberet.schedule.JobScheduler;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -405,5 +407,13 @@ public class RestAPIIT {
         System.out.printf("Cancelled job schedule %s?%s%n", jobSchedule.getId(), cancelStatus);
         assertEquals(true, cancelStatus);
         assertEquals(JobSchedule.Status.CANCELLED, batchClient.getJobSchedule(jobSchedule.getId()).getStatus());
+    }
+
+    @Test
+    public void scheduleFeatures() throws Exception {
+        final String[] features = batchClient.getJobScheduleFeatures();
+        final List<String> featureList = Arrays.asList(features);
+        assertEquals(false, featureList.contains(JobScheduler.PERSISTENT));
+        assertEquals(false, featureList.contains(JobScheduler.CALENDAR));
     }
 }

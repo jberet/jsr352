@@ -101,6 +101,11 @@ public class TimerSchedulerBean extends JobScheduler {
         return null;
     }
 
+    @Override
+    public String[] getFeatures() {
+        return new String[]{PERSISTENT, CALENDAR};
+    }
+
     @Timeout
     protected void timeout(final Timer timer) {
         final JobSchedule jobSchedule = (JobSchedule) timer.getInfo();
