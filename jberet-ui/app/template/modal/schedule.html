@@ -199,13 +199,13 @@
                                     <select class="form-control"
                                             ng-model="modalOptions.item.scheduleExpression.timezone">
                                         <option value="{{modalOptions.timezones.entries[0]}}" ng-selected>
-                                            {{modalOptions.timezones.entries[0]}} (default)
+                                            {{modalOptions.timezones.entries[0]}} - default
                                         </option>
                                         <option ng-repeat="tz in modalOptions.timezones.entries" ng-if="$index > 0">{{tz}}</option>
                                     </select>
                                     <input type="text" class="form-control"
                                            ng-model="modalOptions.item.scheduleExpression.timezone"
-                                           ng-if="modalOptions.timezones.entries == null">
+                                           ng-if="modalOptions.timezones.entries === null">
                                 </div>
                             </div>
                             <div class="col-sm-6">

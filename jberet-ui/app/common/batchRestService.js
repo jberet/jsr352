@@ -36,7 +36,7 @@ var batchRestService = function($http) {
         jobScheduleConfig.jobExecutionId = jobExecutionId;
         jobScheduleConfig.jobParameters = jobParameters;
 
-        // angular-ui timepicker shows currrent time when the model is actually null or cleared.
+        // angular-ui timepicker shows the current time when the model is actually null or cleared.
         // so when user sees the default, current time in timepicker, the model may be null.
         // so here we set the time to current time when the model is null, as a workaround.
         if(!jobScheduleConfig.initialDelay && jobScheduleConfig.date) {
@@ -121,7 +121,7 @@ var batchRestService = function($http) {
     };
     
     this.getTimezoneIds = function () {
-        if(timezones.entries == null) {
+        if(timezones.entries === null) {
             $http.get(jobSchedulesUrl + '/timezones').then(function (responseData) {
                     timezones.entries = responseData.data;
                 }, function (responseData) {
