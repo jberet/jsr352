@@ -43,7 +43,8 @@
                     </div>
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" ng-model="modalOptions.item.persistent">
+                            <input type="checkbox" ng-model="modalOptions.item.persistent"
+                                   ng-disabled="modalOptions.features.entries !== null && modalOptions.features.entries.indexOf('persistent') < 0">
                             Persistent Schedule
                         </label>
                     </div>
@@ -82,7 +83,8 @@
                     </div>
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" ng-model="modalOptions.item.persistent">
+                            <input type="checkbox" ng-model="modalOptions.item.persistent"
+                                   ng-disabled="modalOptions.features.entries !== null && modalOptions.features.entries.indexOf('persistent') < 0">
                             Persistent Schedule
                         </label>
                     </div>
@@ -90,6 +92,7 @@
             </uib-tab>
 
             <uib-tab index="2" heading="Calendar-based Schedule"
+                     disable="modalOptions.features.entries !== null && modalOptions.features.entries.indexOf('calendar') < 0"
                      select="modalOptions.tab = 2"
              deselect="modalOptions.item.scheduleExpression=null;modalOptions.item.persistent=false; modalOptions.invalid=null">
                 <ng-form name="calendarBasedScheduleForm">
@@ -212,7 +215,8 @@
                                 <p>&nbsp;</p>
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" ng-model="modalOptions.item.persistent">
+                                        <input type="checkbox" ng-model="modalOptions.item.persistent"
+                                               ng-disabled="modalOptions.features.entries !== null && modalOptions.features.entries.indexOf('persistent') < 0">
                                         Persistent Schedule
                                     </label>
                                 </div>

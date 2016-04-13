@@ -116,7 +116,8 @@ angular.module('jberetUI.details',
                 var modalOptions = {
                     bodyText: 'Restart job execution ' + idToRestart + '?',
                     actionButtonText: 'Restart Job Execution',
-                    isRestart: true
+                    isRestart: true,
+                    features: batchRestService.getJobScheduleFeatures()
                 };
 
                 modalService.showModal({}, modalOptions).then(function (result) {

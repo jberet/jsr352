@@ -57,6 +57,7 @@
             <div class="checkbox">
                 <label>
                     <input type="checkbox" name="persistentSchedule" value="true"
+                           ng-disabled="modalOptions.features.entries !== null && modalOptions.features.entries.indexOf('persistent') < 0"
                            ng-model="modalOptions.item.persistent"/>
                     Persistent Schedule
                 </label>
