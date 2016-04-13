@@ -93,6 +93,7 @@ angular.module('jberetUI.jobs',
                 headerText: 'Schedule Job Execution for Job ' + $scope.jobName,
                 timezones: batchRestService.getTimezoneIds(),
                 features: batchRestService.getJobScheduleFeatures(),
+                datepickerOptions: {minDate: new Date()},
                 validate: function (modalOptions) { //passed from modalService
                     var fail = false;
                     if(modalOptions.tab === 0) {

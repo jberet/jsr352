@@ -27,6 +27,7 @@
                                            ng-model="modalOptions.item.date"
                                            close-text="Close" placeholder="yyyy-MM-dd"
                                            ng-class="{ 'invalid-schedule': !onetimeScheduleForm.dateInput.$valid}"
+                                           min-date="modalOptions.datepickerOptions.minDate"
                                            is-open="onetimeScheduleDatepicker.opened"/>
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-default"
@@ -181,6 +182,7 @@
                                                ng-model="modalOptions.item.scheduleExpression.end.date"
                                                close-text="Close" placeholder="yyyy-MM-dd"
                                                ng-class="{ 'invalid-schedule': !calendarBasedScheduleForm.endDateInput.$valid }"
+                                               min-date="modalOptions.datepickerOptions.minDate"
                                                is-open="calendarBasedScheduleEndDatepicker.opened"/>
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-default"

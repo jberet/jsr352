@@ -40,6 +40,7 @@
                             <input type="text" name="dateInput" class="form-control" uib-datepicker-popup
                                    ng-model="modalOptions.item.date" close-text="Close"
                                    is-open="onetimeScheduleDatepicker.opened"
+                                   min-date="modalOptions.datepickerOptions.minDate"
                                    ng-class="{ 'invalid-schedule': !onetimeScheduleForm.dateInput.$valid }">
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-default"

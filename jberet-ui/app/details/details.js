@@ -117,6 +117,7 @@ angular.module('jberetUI.details',
                     bodyText: 'Restart job execution ' + idToRestart + '?',
                     actionButtonText: 'Restart Job Execution',
                     isRestart: true,
+                    datepickerOptions: {minDate: new Date()},
                     features: batchRestService.getJobScheduleFeatures()
                 };
 
