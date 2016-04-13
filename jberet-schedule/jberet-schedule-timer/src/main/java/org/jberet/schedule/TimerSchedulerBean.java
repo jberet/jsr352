@@ -70,7 +70,11 @@ public class TimerSchedulerBean extends JobScheduler {
         for (final Timer t : timers) {
             Serializable info = t.getInfo();
             if (info instanceof JobSchedule) {
-                result.add((JobSchedule) info);
+                final JobSchedule jobSchedule = (JobSchedule) info;
+                if (jobSchedule.getId() == null) {
+                    jobSchedule.setId(getTimerId(t));
+                }
+                result.add(jobSchedule);
             }
         }
         Collections.sort(result, Collections.<JobSchedule>reverseOrder());
