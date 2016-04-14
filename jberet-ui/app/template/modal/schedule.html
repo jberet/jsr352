@@ -48,6 +48,9 @@
                                    ng-disabled="modalOptions.features.entries !== null && modalOptions.features.entries.indexOf('persistent') < 0">
                             Persistent Schedule
                         </label>
+                        <span class="glyphicon glyphicon-question-sign"
+                              uib-popover="whether the schedule is saved after server shutdown"
+                              popover-trigger="mouseenter" popover-placement="bottom"></span>
                     </div>
                 </ng-form>
             </uib-tab>
@@ -62,6 +65,9 @@
                     </p>
                     <div class="form-group">
                         <label>Initial Delay Minutes:</label>
+                        <span class="glyphicon glyphicon-question-sign"
+                              uib-popover="minutes for initial delay"
+                              popover-trigger="mouseenter"></span>
                         <input type="number" class="form-control" required ng-model="modalOptions.item.initialDelay"
                                ng-class="{ 'invalid-schedule': modalOptions.item.initialDelay < 0 || modalOptions.invalid.initialDelay1 }">
                     </div>
@@ -70,6 +76,9 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Subsequent Delay Minutes:</label>
+                                <span class="glyphicon glyphicon-question-sign"
+                                      uib-popover="minutes to delay after finishing each job execution"
+                                      popover-trigger="mouseenter"></span>
                                 <input type="number" class="form-control" ng-model="modalOptions.item.afterDelay"
                                        ng-class="{ 'invalid-schedule': modalOptions.item.afterDelay < 0 || modalOptions.invalid.afterDelay }">
                             </div>
@@ -77,6 +86,9 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Interval Minutes:</label>
+                                <span class="glyphicon glyphicon-question-sign"
+                                      uib-popover="the period (in minutes) between successive executions"
+                                      popover-trigger="mouseenter"></span>
                                 <input type="number" class="form-control" ng-model="modalOptions.item.interval"
                                        ng-class="{ 'invalid-schedule': modalOptions.item.interval < 0 || modalOptions.invalid.interval }">
                             </div>
@@ -88,6 +100,9 @@
                                    ng-disabled="modalOptions.features.entries !== null && modalOptions.features.entries.indexOf('persistent') < 0">
                             Persistent Schedule
                         </label>
+                        <span class="glyphicon glyphicon-question-sign"
+                              uib-popover="whether the schedule is saved after server shutdown"
+                              popover-trigger="mouseenter" popover-placement="bottom"></span>
                     </div>
                 </ng-form>
             </uib-tab>
@@ -105,6 +120,10 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>Year:</label>
+                                    <span class="glyphicon glyphicon-question-sign"
+                                          uib-popover-template="'template/popover/year.html'"
+                                          popover-placement="bottom"
+                                          popover-trigger="mouseenter"></span>
                                     <input type="text" class="form-control"
                                            ng-model="modalOptions.item.scheduleExpression.year"/>
                                 </div>
@@ -112,6 +131,10 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>Month:</label>
+                                    <span class="glyphicon glyphicon-question-sign"
+                                          uib-popover-template="'template/popover/month.html'"
+                                          popover-placement="bottom"
+                                          popover-trigger="mouseenter"></span>
                                     <input type="text" class="form-control"
                                            ng-model="modalOptions.item.scheduleExpression.month"/>
                                 </div>
@@ -119,6 +142,10 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>Day of Month:</label>
+                                    <span class="glyphicon glyphicon-question-sign"
+                                          uib-popover-template="'template/popover/dayOfMonth.html'"
+                                          popover-placement="left-bottom"
+                                          popover-trigger="mouseenter"></span>
                                     <input type="text" class="form-control"
                                            ng-model="modalOptions.item.scheduleExpression.dayOfMonth"/>
                                 </div>
@@ -129,6 +156,10 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>Day of Week:</label>
+                                    <span class="glyphicon glyphicon-question-sign"
+                                          uib-popover-template="'template/popover/dayOfWeek.html'"
+                                          popover-placement="bottom"
+                                          popover-trigger="mouseenter"></span>
                                     <input type="text" class="form-control"
                                            ng-model="modalOptions.item.scheduleExpression.dayOfWeek"/>
                                 </div>
@@ -136,6 +167,10 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>Hour:</label>
+                                    <span class="glyphicon glyphicon-question-sign"
+                                          uib-popover-template="'template/popover/hour.html'"
+                                          popover-placement="bottom"
+                                          popover-trigger="mouseenter"></span>
                                     <input type="text" class="form-control"
                                            ng-model="modalOptions.item.scheduleExpression.hour"/>
                                 </div>
@@ -143,6 +178,10 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>Minute:</label>
+                                    <span class="glyphicon glyphicon-question-sign"
+                                          uib-popover-template="'template/popover/minute.html'"
+                                          popover-placement="bottom"
+                                          popover-trigger="mouseenter"></span>
                                     <input type="text" class="form-control"
                                            ng-model="modalOptions.item.scheduleExpression.minute"/>
                                 </div>
@@ -151,7 +190,7 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <label>Start:</label>
+                                    <label>Start Date &amp; Time:</label>
                                     <p class="input-group">
                                         <input type="text" name="startDateInput" class="form-control"
                                                uib-datepicker-popup
@@ -176,7 +215,7 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <label>End:</label>
+                                    <label>End Date &amp; Time:</label>
                                     <p class="input-group">
                                         <input type="text" name="endDateInput" class="form-control" uib-datepicker-popup
                                                ng-model="modalOptions.item.scheduleExpression.end.date"
@@ -201,6 +240,9 @@
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>Timezone:</label>
+                                    <span class="glyphicon glyphicon-question-sign"
+                                          uib-popover="timezone with which to execute the schedule"
+                                          popover-trigger="mouseenter" popover-placement="bottom"></span>
                                     <select class="form-control"
                                             ng-model="modalOptions.item.scheduleExpression.timezone">
                                         <option value="{{modalOptions.timezones.entries[0]}}" ng-selected>
@@ -221,6 +263,9 @@
                                                ng-disabled="modalOptions.features.entries !== null && modalOptions.features.entries.indexOf('persistent') < 0">
                                         Persistent Schedule
                                     </label>
+                                    <span class="glyphicon glyphicon-question-sign"
+                                          uib-popover="whether the schedule is saved after server shutdown"
+                                          popover-trigger="mouseenter" popover-placement="left-bottom"></span>
                                 </div>
                             </div>
                         </div>

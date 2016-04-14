@@ -58,3 +58,8 @@ button {
 .invalid-schedule {
   border: 1px solid red !important;
 }
+
+.popover-ul {
+  list-style-position: inside;
+  padding-left:0;
+}
