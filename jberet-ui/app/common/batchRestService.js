@@ -54,8 +54,7 @@ var batchRestService = function($http) {
                 jobScheduleConfig.time = new Date();
             }
             jobScheduleConfig.date.setHours(jobScheduleConfig.time.getHours(), jobScheduleConfig.time.getMinutes());
-            var diffInMinutes = Math.ceil((jobScheduleConfig.date - new Date()) / (1000 * 60));
-            jobScheduleConfig.initialDelay = diffInMinutes;
+            jobScheduleConfig.initialDelay = Math.ceil((jobScheduleConfig.date - new Date()) / (1000 * 60));
         }
 
         if(jobScheduleConfig.scheduleExpression) {

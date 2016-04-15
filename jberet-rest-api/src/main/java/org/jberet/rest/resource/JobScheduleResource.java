@@ -35,6 +35,11 @@ import org.jberet.schedule.JobScheduler;
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class JobScheduleResource {
+    /**
+     * Gets all job schedules.
+     *
+     * @return all job schedules as array
+     */
     @GET
     @Path("")
     public JobSchedule[] getJobSchedules() {
@@ -43,6 +48,12 @@ public class JobScheduleResource {
         return jobScheduleList.toArray(new JobSchedule[jobScheduleList.size()]);
     }
 
+    /**
+     * Cancels a job schedule.
+     *
+     * @param scheduleId the job schedule id to cancel
+     * @return true if the job schedule is cancelled successfully; false otherwise
+     */
     @POST
     @Path("{scheduleId}/cancel")
     public boolean cancel(final @PathParam("scheduleId") String scheduleId) {
@@ -50,6 +61,12 @@ public class JobScheduleResource {
         return jobScheduler.cancel(scheduleId);
     }
 
+    /**
+     * Gets a job schedule by its id.
+     *
+     * @param scheduleId the job schedule id to get
+     * @return the job schedule, and null if the job schedule is not found
+     */
     @GET
     @Path("{scheduleId}")
     public JobSchedule getJobSchedule(final @PathParam("scheduleId") String scheduleId) {
@@ -57,6 +74,11 @@ public class JobScheduleResource {
         return jobScheduler.getJobSchedule(scheduleId);
     }
 
+    /**
+     * Gets all available timezone ids, and the first element of the result is the default timezone id.
+     *
+     * @return timezone ids as a string array
+     */
     @GET
     @Path("timezones")
     public String[] getTimezoneIds() {
@@ -71,6 +93,11 @@ public class JobScheduleResource {
         return result;
     }
 
+    /**
+     * Gets the scheduling features supported by the current job scheduler.
+     *
+     * @return supported features as a string array
+     */
     @GET
     @Path("features")
     public String[] getFeatures() {
