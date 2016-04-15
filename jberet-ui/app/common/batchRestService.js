@@ -42,10 +42,6 @@ var batchRestService = function($http) {
     };
 
     this.scheduleJobExecution = function (jobName, jobExecutionId, jobParameters, jobScheduleConfig) {
-        console.log('jobName:' + jobName + ", jobExecutionId: " + jobExecutionId + ", jobParams: " + jobParameters
-        + ", initialDelay: " + jobScheduleConfig.initialDelay);
-        console.log("jobScheduleConfig.date: ", jobScheduleConfig.date);
-        console.log("jobScheduleConfig.time: ", jobScheduleConfig.time);
         jobScheduleConfig.jobName = jobName;
         jobScheduleConfig.jobExecutionId = jobExecutionId;
         jobScheduleConfig.jobParameters = jobParameters;
@@ -59,7 +55,6 @@ var batchRestService = function($http) {
             }
             jobScheduleConfig.date.setHours(jobScheduleConfig.time.getHours(), jobScheduleConfig.time.getMinutes());
             var diffInMinutes = Math.ceil((jobScheduleConfig.date - new Date()) / (1000 * 60));
-            console.log("diffInMinutes: " + diffInMinutes);
             jobScheduleConfig.initialDelay = diffInMinutes;
         }
 
@@ -83,8 +78,6 @@ var batchRestService = function($http) {
                 jobScheduleConfig.scheduleExpression.end = endDateTime;
             }
         }
-
-        console.log("jobScheduleConfig.scheduleExpression: ", jobScheduleConfig.scheduleExpression);
 
         delete jobScheduleConfig.date;
         delete jobScheduleConfig.time;
