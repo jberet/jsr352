@@ -29,6 +29,14 @@ import javax.ejb.TransactionAttributeType;
 
 import org.jberet.schedule._private.ScheduleExecutorMessages;
 
+/**
+ * EJB-Timer-based job scheduler, as a singleton session bean.
+ * This job scheduler class supports single action, repeatable, and
+ * calendar-based job schedule. Persistent job schedule is also supported.
+ *
+ * @since 1.3.0
+ * @see JobScheduler
+ */
 @Singleton()
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class TimerSchedulerBean extends JobScheduler {
@@ -110,6 +118,12 @@ public class TimerSchedulerBean extends JobScheduler {
         return new String[]{PERSISTENT, CALENDAR};
     }
 
+    /**
+     * Timeout method, which starts the job, or restarts the job execution, and
+     * saves the new job execution id to {@link JobSchedule}.
+     *
+     * @param timer the current timer which has just expired
+     */
     @Timeout
     protected void timeout(final Timer timer) {
         final JobSchedule jobSchedule = (JobSchedule) timer.getInfo();

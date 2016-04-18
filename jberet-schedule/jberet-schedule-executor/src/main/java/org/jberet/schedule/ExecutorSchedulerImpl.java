@@ -22,21 +22,59 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Job scheduler implementation based on {@code java.util.concurrent.ScheduledExecutorService}.
+ * It supports single action and repeatable job schedule, but does not support calendar-based
+ * repeatable job schedule, or persistent job schedule.
+ *
+ * @since 1.3.0
+ */
 public class ExecutorSchedulerImpl extends JobScheduler {
+    /**
+     * Scheduled executor used for job scheduling.
+     */
     protected final ScheduledExecutorService executorService;
 
+    /**
+     * Keeps all job schedules.
+     */
     private final ConcurrentMap<String, JobSchedule> schedules;
 
+    /**
+     * For generating job schedule ids.
+     */
     private final AtomicInteger ids = new AtomicInteger(1);
 
+    /**
+     * Default no-arg constructor.
+     *
+     * @see #ExecutorSchedulerImpl(ConcurrentMap)
+     * @see #ExecutorSchedulerImpl(ConcurrentMap, ScheduledExecutorService)
+     */
     public ExecutorSchedulerImpl() {
         this(null);
     }
 
+    /**
+     * Constructs {@code ExecutorSchedulerImpl}, specifying
+     * {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules.
+     *
+     * @param schedules {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules
+     *
+     * @see #ExecutorSchedulerImpl(ConcurrentMap, ScheduledExecutorService)
+     */
     public ExecutorSchedulerImpl(final ConcurrentMap<String, JobSchedule> schedules) {
         this(schedules, null);
     }
 
+    /**
+     * Constructs {@code ExecutorSchedulerImpl}, specifying both the
+     * {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules,
+     * and the scheduled executor service.
+     *
+     * @param schedules {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules
+     * @param executorService scheduled executor service
+     */
     public ExecutorSchedulerImpl(final ConcurrentMap<String, JobSchedule> schedules,
                                  final ScheduledExecutorService executorService) {
         this.schedules = schedules == null ?

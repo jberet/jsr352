@@ -12,13 +12,29 @@
 
 package org.jberet.schedule;
 
+/**
+ * A task that is submitted to the job scheduler, and when the schedule matures,
+ * starts the job or restarts the job execution based on {@link JobSchedule}.
+ *
+ * @see JobSchedule
+ * @see JobScheduler
+ * @since 1.3.0
+ */
 class JobScheduleTask implements Runnable {
     private final JobSchedule jobSchedule;
 
-    public JobScheduleTask(final JobSchedule jobSchedule) {
+    /**
+     * Creates {@code JobScheduleTask} with {@link JobSchedule} passed in.
+     * @param jobSchedule
+     */
+    JobScheduleTask(final JobSchedule jobSchedule) {
         this.jobSchedule = jobSchedule;
     }
 
+    /**
+     * Runs the task by starting the job or restarting the job execution,
+     * and saving the new job execution id in {@link JobSchedule}.
+     */
     @Override
     public void run() {
         final JobScheduleConfig config = jobSchedule.getJobScheduleConfig();
