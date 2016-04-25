@@ -31,7 +31,7 @@
 
     <modules>
         <module>jberet-samples-common</module>
-        <module>batchproperty</module>
+        <module>batchProperty</module>
         <module>csv2json</module>
         <module>xml2json</module>
         <module>xml2jsonLookup</module>
