@@ -25,18 +25,52 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Tests for batch job scheduling in Java SE environment,
+ * where the job scheduler impl {@link ExecutorSchedulerImpl} will be used.
+ * <p>
+ * A similar set of tests for Java EE, JBoss EAP and WildFly environment are in
+ * wildfly-jberet-samples/scheduleExecutor/src/test/java/org/jberet/samples/wildfly/schedule/executor/ScheduleExecutorIT.java
+ */
 @Ignore("These tests each take several minutes to complete, so ignore them from default build")
 public class ExecutorSchedulerIT {
     private static final String jobName = "executor-scheduler-job1";
     private static final String testNameKey = "testName";
+
+    /**
+     * Number of minutes for a job schedule.
+     * @see JobScheduleConfig#initialDelay
+     */
     private static final int initialDelayMinute = 1;
+
+    /**
+     * Number of minutes for interval or period in a repeatable job schedule.
+     * @see JobScheduleConfig#interval
+     */
     private static final int intervalMinute = 1;
-    private static final int afterDelaylMinute = 1;
+
+    /**
+     * Number of minutes for subsequent delay in a repeatable job schedule.
+     * @see JobScheduleConfig#afterDelay
+     */
+    private static final int afterDelayMinute = 1;
+
+    /**
+     * Number of milliseconds to sleep, to wait for the job schedule to run.
+     * Currently set to 3 seconds longer than {@link #initialDelayMinute}.
+     */
     private static final long sleepTimeMillis = initialDelayMinute * 60 * 1000 + 3000;
 
     private final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
+    /**
+     * Tests single-action job schedule specified with an initial delay.
+     * Verifies job schedule status and realized job execution status after
+     * sleeping for {@link #sleepTimeMillis}.
+     *
+     * @throws Exception if errors occur
+     */
     @Test
     public void singleActionInitialDelay() throws Exception {
         final Properties params = new Properties();
@@ -62,6 +96,14 @@ public class ExecutorSchedulerIT {
         System.out.printf("exit status: %s%n", jobExecution.getExitStatus());
     }
 
+    /**
+     * Tests repeatable job schedule specified with an initial delay and an interval or period.
+     * Verifies job schedule status after certain sleep time.
+     * Cancels the above schedule, and verifies the cancelled status of the schedule.
+     * Verifies the number of realized job executions.
+     *
+     * @throws Exception if errors occur
+     */
     @Test
     public void interval() throws Exception {
         final Properties params = new Properties();
@@ -89,6 +131,14 @@ public class ExecutorSchedulerIT {
         System.out.printf("jobExecutionIds from scheduled job: %s%n", jobExecutionIds);
     }
 
+    /**
+     * Tests repeatable job schedule specified with an initial delay and a subsequent delay.
+     * Verifies job schedule status after certain sleep time.
+     * Cancels the above schedule, and verifies the cancelled status of the schedule.
+     * Verifies the number of realized job executions.
+     *
+     * @throws Exception if errors occur
+     */
     @Test
     public void delayRepeat() throws Exception {
         final Properties params = new Properties();
@@ -98,7 +148,7 @@ public class ExecutorSchedulerIT {
                 .jobName(jobName)
                 .jobParameters(params)
                 .initialDelay(initialDelayMinute)
-                .afterDelay(afterDelaylMinute)
+                .afterDelay(afterDelayMinute)
                 .build();
         JobSchedule schedule = jobScheduler.schedule(scheduleConfig);
 
@@ -117,6 +167,14 @@ public class ExecutorSchedulerIT {
         System.out.printf("jobExecutionIds from scheduled job: %s%n", jobExecutionIds);
     }
 
+    /**
+     * Tests cancelling a job schedule.
+     * A single-action job schedule is submitted and cancelled immediately.
+     * Verifies the job schedule is cancelled successfully, and no job executions
+     * have realized.
+     *
+     * @throws Exception if errors occur
+     */
     @Test
     public void cancel() throws Exception {
         final Properties params = new Properties();

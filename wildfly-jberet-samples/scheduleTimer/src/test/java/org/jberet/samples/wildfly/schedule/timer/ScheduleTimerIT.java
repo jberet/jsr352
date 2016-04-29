@@ -27,6 +27,16 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Tests for batch job scheduling in Java EE, JBoss EAP and WildFly environment,
+ * where the job scheduler impl {@link org.jberet.schedule.TimerSchedulerBean} will be used.
+ * <p>
+ * A similar set of tests using {@link org.jberet.schedule.ExecutorSchedulerImpl} are in
+ * wildfly-jberet-samples/scheduleExecutor/src/test/java/org/jberet/samples/wildfly/schedule/executor/ScheduleExecutorIT.java
+ * <p>
+ * A similar set of tests for Java SE environment are in
+ * jberet-schedule/jberet-schedule-executor/src/test/java/org/jberet/schedule/ExecutorSchedulerIT.java
+ */
 public final class ScheduleTimerIT extends BatchTestBase {
     /**
      * The job name defined in {@code META-INF/batch-jobs/timer-scheduler-job1.xml}
@@ -42,7 +52,6 @@ public final class ScheduleTimerIT extends BatchTestBase {
     private static final String testNameKey = "testName";
     private static final int initialDelayMinute = 1;
     private static final int intervalMinute = 1;
-    private static final int delaylMinute = 1;
     private static final long sleepTimeMillis = initialDelayMinute * 60 * 1000 + 3000;
 
     private BatchClient batchClient = new BatchClient(restUrl);
@@ -52,6 +61,12 @@ public final class ScheduleTimerIT extends BatchTestBase {
         return batchClient;
     }
 
+    /**
+     * Tests single-action job scheudle specified with an initial delay.
+     * This tests first cancels all job schedules to avoid left-over schedules.
+     *
+     * @throws Exception if errors occur
+     */
     @Test
     public void singleActionInitialDelay() throws Exception {
         cancelAllSchedules();
@@ -73,6 +88,12 @@ public final class ScheduleTimerIT extends BatchTestBase {
         assertEquals(null, schedule);
     }
 
+    /**
+     * Tests repeatable job schedule specified with {@code javax.ejb.ScheduleExpression#second}.
+     * This tests first cancels all job schedules to avoid left-over schedules.
+     *
+     * @throws Exception if errors occur
+     */
     @Test
     public void scheduleExpressionSecond() throws Exception {
         cancelAllSchedules();
@@ -98,6 +119,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         assertEquals(true, cancelJobSchedule(schedule));
     }
 
+    /**
+     * Tests repeatable job schedule specified with {@code javax.ejb.ScheduleExpression#second}
+     * and {@code javax.ejb.ScheduleExpression#persistent}.
+     *
+     * This tests first cancels all job schedules to avoid left-over schedules.
+     * @throws Exception if errors occur
+     */
     @Test
     public void scheduleExpressionPersistent() throws Exception {
         cancelAllSchedules();
@@ -124,6 +152,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         assertEquals(true, cancelJobSchedule(schedule));
     }
 
+    /**
+     * Tests repeatable job schedule specified with
+     * {@code javax.ejb.ScheduleExpression#end} date.
+     *
+     * This tests first cancels all job schedules to avoid left-over schedules.
+     * @throws Exception if errors occur
+     */
     @Test
     public void scheduleExpressionEnd() throws Exception {
         cancelAllSchedules();
@@ -147,6 +182,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         schedule = batchClient.getJobSchedule(schedule.getId());
         assertEquals(null, schedule);
     }
+    /**
+     * Tests repeatable job schedule specified with
+     * {@code javax.ejb.ScheduleExpression#start} date.
+     *
+     * This tests first cancels all job schedules to avoid left-over schedules.
+     * @throws Exception if errors occur
+     */
 
     @Test
     public void scheduleExpressionStart() throws Exception {
@@ -174,6 +216,12 @@ public final class ScheduleTimerIT extends BatchTestBase {
         assertEquals(true, cancelJobSchedule(schedule));
     }
 
+    /**
+     * Tests repeatable job schedule specified with an initial delay and interval.
+     * This tests first cancels all job schedules to avoid left-over schedules.
+     *
+     * @throws Exception if errors occur
+     */
     @Test
     public void scheduleInterval() throws Exception {
         cancelAllSchedules();
@@ -215,6 +263,13 @@ public final class ScheduleTimerIT extends BatchTestBase {
         }
     }
 
+    /**
+     * Cancels the job schedule, logs the cancellation status, and
+     * returns the status (true or false).
+     *
+     * @param schedule the job schedule to cancel
+     * @return true if cancelled successfully; false otherwise
+     */
     private boolean cancelJobSchedule(final JobSchedule schedule) {
         final String id = schedule.getId();
         final boolean cancelled = batchClient.cancelJobSchedule(id);
@@ -226,6 +281,9 @@ public final class ScheduleTimerIT extends BatchTestBase {
         return cancelled;
     }
 
+    /**
+     * Retrieves all job schedules and cancel them one by one.
+     */
     private void cancelAllSchedules() {
         for (final JobSchedule e : batchClient.getJobSchedules()) {
             cancelJobSchedule(e);
