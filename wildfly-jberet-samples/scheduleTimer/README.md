@@ -49,3 +49,6 @@ and [jberet-schedule-timer](https://github.com/jberet/jsr352/tree/master/jberet-
  To access `jberet-ui` web pages, go to http://localhost:8080/scheduleTimer/, where you can 
  view, manage, or schedule job executions.
  
+## Screenshot:
+
+![timerExecutor sample screenshot](https://cloud.githubusercontent.com/assets/2079251/14944318/6edf9558-0fbd-11e6-95f2-efaf97e8706a.png)
