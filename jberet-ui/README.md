@@ -253,3 +253,14 @@ reverse-proxying the backend server(s) and webserver(s).
 
 [Step Execution with Metrics Chart](https://cloud.githubusercontent.com/assets/2079251/13342506/2e6754e2-dc10-11e5-8666-19842e6d5c3a.png)
 
+[Schedule a One-time Job Execution](https://cloud.githubusercontent.com/assets/2079251/14944314/6edd6e40-0fbd-11e6-936b-370b53669c05.png)
+
+[Schedule a Repeating Job Execution](https://cloud.githubusercontent.com/assets/2079251/14944316/6ede6638-0fbd-11e6-923a-ab843ef23efc.png)
+
+[Schedule a Calendar-based Job Execution](https://cloud.githubusercontent.com/assets/2079251/14944318/6edf9558-0fbd-11e6-95f2-efaf97e8706a.png)
+
+[List All Batch Job Schedules](https://cloud.githubusercontent.com/assets/2079251/14944319/6ee063c0-0fbd-11e6-90ba-5366ff550d8f.png)
+
+[Schedule Restarting a Job Execution](https://cloud.githubusercontent.com/assets/2079251/14944321/6ee7c8b8-0fbd-11e6-9320-33eb03045cef.png)
+
+[Cancel a Job Execution Schedule](https://cloud.githubusercontent.com/assets/2079251/14944322/6ee8323a-0fbd-11e6-8299-df19bd308d06.png)

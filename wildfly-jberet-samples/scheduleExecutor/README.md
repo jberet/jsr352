@@ -48,6 +48,6 @@ The WAR package includes [jberet-schedule-executor module](https://github.com/jb
  To access `jberet-ui` web pages, go to http://localhost:8080/scheduleExecutor/, where you can 
  view, manage, or schedule job executions.
  
-## Screenshot:
+## Screenshot ([more](https://github.com/jberet/jsr352/issues/71#issuecomment-216072257)):
 
 ![scheduleExecutor sample screenshot](https://cloud.githubusercontent.com/assets/2079251/14944316/6ede6638-0fbd-11e6-923a-ab843ef23efc.png)
