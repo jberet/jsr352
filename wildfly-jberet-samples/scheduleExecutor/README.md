@@ -3,6 +3,16 @@
 This is a sample webapp that demonstrates batch job scheduling using Java EE Concurrency Utils.
 The WAR package includes [jberet-schedule-executor module](https://github.com/jberet/jsr352/tree/master/jberet-schedule/jberet-schedule-executor)
 
+This app also demonstrates how to configure the `JobScheduler` through `context-param` in 
+[web.xml](https://github.com/jberet/jsr352/blob/master/wildfly-jberet-samples/scheduleExecutor/src/main/webapp/WEB-INF/web.xml) 
+and a [ServletContextListener class](https://github.com/jberet/jsr352/blob/master/wildfly-jberet-samples/scheduleExecutor/src/main/java/org/jberet/samples/wildfly/schedule/executor/ContextListener1.java)
+
+ScheduledExecutorService-based `JobScheduler` can be configured with:
+
+ * a custom `ManagedScheduledExecutorService` JNDI lookup name (Java EE app only);
+ * a `java.util.concurrent.ConcurrentMap<String, JobSchedule>` to store all job schedules;
+ * fully-qualified name of the implementation class of `JobSchedue`.
+
 ## How to Build
 
     mvn clean install
