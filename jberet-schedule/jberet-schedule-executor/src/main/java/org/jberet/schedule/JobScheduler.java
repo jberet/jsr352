@@ -79,57 +79,10 @@ public abstract class JobScheduler {
      * Gets the job scheduler without passing any parameters.
      * @return job scheduler
      *
-     * @see #getJobScheduler(Class, ConcurrentMap)
+     * @see #getJobScheduler(Class, ConcurrentMap, String)
      */
     public static JobScheduler getJobScheduler() {
-        return getJobScheduler(null, null);
-    }
-
-    /**
-     * Gets the job scheduler of the specified {@code schedulerType}.
-     * @param schedulerType fully-qualified class name of job scheduler
-     * @return job scheduler of the specified
-     *
-     * @see #getJobScheduler(Class, ConcurrentMap)
-     */
-    public static JobScheduler getJobScheduler(final Class<? extends JobScheduler> schedulerType) {
-        return getJobScheduler(schedulerType, null);
-    }
-
-    /**
-     * Gets the job scheduler, specifying a {@code ConcurrentMap<String, JobSchedule>}
-     * for storing all job schedules.
-     *
-     * @param schedules {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules
-     * @return job scheduler
-     *
-     * @see #getJobScheduler(Class, ConcurrentMap)
-     */
-    public static JobScheduler getJobScheduler(final ConcurrentMap<String, JobSchedule> schedules) {
-        return getJobScheduler(null, schedules);
-    }
-
-    /**
-     * Gets the job scheduler, specifying both the scheduler type and
-     * {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules.
-     *
-     * This method determines which type of job scheduler to use as follows:
-     * <ul>
-     *   <li>If {@code schedulerType} is specified, instantiate the specified type.
-     *   <li>Else if lookup of {@value #TIMER_SCHEDULER_LOOKUP} succeeds,
-     *      use the job scheduler obtained from that lookup.
-     *   <li>Else if lookup of {@value #MANAGED_EXECUTOR_SERVICE_LOOKUP} succeeds,
-     *      creates {@link ExecutorSchedulerImpl} with the executor from that lookup.
-     *   <li>Else creates {@link ExecutorSchedulerImpl}.
-     * </ul>
-     *
-     * @param schedulerType rully-qualified class name of job scheduler type
-     * @param schedules {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules
-     * @return job scheduler
-     */
-    public static JobScheduler getJobScheduler(final Class<? extends JobScheduler> schedulerType,
-                                               final ConcurrentMap<String, JobSchedule> schedules) {
-        return getJobScheduler(schedulerType, schedules, null);
+        return getJobScheduler(null, null, null);
     }
 
     /**
@@ -149,7 +102,7 @@ public abstract class JobScheduler {
      *   <li>Else creates {@link ExecutorSchedulerImpl}.
      * </ul>
      *
-     * @param schedulerType rully-qualified class name of job scheduler type
+     * @param schedulerType fully-qualified class name of job scheduler type
      * @param schedules {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules
      * @param managedScheduledExecutorServiceLookup lookup name of {@code ManagedScheduledExecutorService} resource
      * @return job scheduler
