@@ -129,6 +129,34 @@ public abstract class JobScheduler {
      */
     public static JobScheduler getJobScheduler(final Class<? extends JobScheduler> schedulerType,
                                                final ConcurrentMap<String, JobSchedule> schedules) {
+        return getJobScheduler(schedulerType, schedules, null);
+    }
+
+    /**
+     * Gets the job scheduler, specifying scheduler type,
+     * {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules, and the lookup
+     * name of {@code ManagedScheduledExecutorService} resource.
+     *
+     * This method determines which type of job scheduler to use as follows:
+     * <ul>
+     *   <li>If {@code schedulerType} is specified, instantiate the specified type.
+     *   <li>Else if lookup of {@value #TIMER_SCHEDULER_LOOKUP} succeeds,
+     *      use the job scheduler obtained from that lookup.
+     *   <li>Else if lookup of the resource specified by {@code managedScheduledExecutorServiceLookup} succeeds,
+     *      creates {@link ExecutorSchedulerImpl} with the executor from that lookup.
+     *   <li>Else if lookup of {@value #MANAGED_EXECUTOR_SERVICE_LOOKUP} succeeds,
+     *      creates {@link ExecutorSchedulerImpl} with the executor from that lookup.
+     *   <li>Else creates {@link ExecutorSchedulerImpl}.
+     * </ul>
+     *
+     * @param schedulerType rully-qualified class name of job scheduler type
+     * @param schedules {@code ConcurrentMap<String, JobSchedule>} for storing all job schedules
+     * @param managedScheduledExecutorServiceLookup lookup name of {@code ManagedScheduledExecutorService} resource
+     * @return job scheduler
+     */
+    public static JobScheduler getJobScheduler(final Class<? extends JobScheduler> schedulerType,
+                                               final ConcurrentMap<String, JobSchedule> schedules,
+                                               final String managedScheduledExecutorServiceLookup) {
         JobScheduler result = jobScheduler;
         if (result == null) {
             synchronized (JobScheduler.class) {
@@ -137,6 +165,7 @@ public abstract class JobScheduler {
                     if (schedulerType != null) {
                         try {
                             jobScheduler = result = schedulerType.newInstance();
+                            ScheduleExecutorLogger.LOGGER.createdJobScheduler(result, null);
                         } catch (final Throwable e) {
                             throw ScheduleExecutorMessages.MESSAGES.failToCreateJobScheduler(e, schedulerType);
                         }
@@ -146,18 +175,29 @@ public abstract class JobScheduler {
                             ic = new InitialContext();
                             try {
                                 jobScheduler = result = (JobScheduler) ic.lookup(TIMER_SCHEDULER_LOOKUP);
+                                ScheduleExecutorLogger.LOGGER.createdJobScheduler(result, TIMER_SCHEDULER_LOOKUP);
                             } catch (final NamingException e) {
-                                try {
-                                    final ScheduledExecutorService mexe =
-                                            (ScheduledExecutorService) ic.lookup(MANAGED_EXECUTOR_SERVICE_LOOKUP);
+                                ScheduledExecutorService mexe;
+                                if (managedScheduledExecutorServiceLookup != null) {
+                                    try {
+                                        mexe = (ScheduledExecutorService) ic.lookup(managedScheduledExecutorServiceLookup);
+                                        jobScheduler = result = new ExecutorSchedulerImpl(schedules, mexe);
+                                        ScheduleExecutorLogger.LOGGER.createdJobScheduler(result, managedScheduledExecutorServiceLookup);
+                                    } catch (final NamingException e2) {
+                                        ScheduleExecutorLogger.LOGGER.failToLookupManagedScheduledExecutorService(managedScheduledExecutorServiceLookup);
+                                        mexe = (ScheduledExecutorService) ic.lookup(MANAGED_EXECUTOR_SERVICE_LOOKUP);
+                                        jobScheduler = result = new ExecutorSchedulerImpl(schedules, mexe);
+                                        ScheduleExecutorLogger.LOGGER.createdJobScheduler(result, MANAGED_EXECUTOR_SERVICE_LOOKUP);
+                                    }
+                                } else {
+                                    mexe = (ScheduledExecutorService) ic.lookup(MANAGED_EXECUTOR_SERVICE_LOOKUP);
                                     jobScheduler = result = new ExecutorSchedulerImpl(schedules, mexe);
-                                } catch (final NamingException e2) {
-                                    jobScheduler = result = new ExecutorSchedulerImpl(schedules);
+                                    ScheduleExecutorLogger.LOGGER.createdJobScheduler(result, MANAGED_EXECUTOR_SERVICE_LOOKUP);
                                 }
                             }
                         } catch (final NamingException e) {
-                            //log warning
-                            jobScheduler = result = new ExecutorSchedulerImpl();
+                            jobScheduler = result = new ExecutorSchedulerImpl(schedules);
+                            ScheduleExecutorLogger.LOGGER.createdJobScheduler(result, null);
                         } finally {
                             if (ic != null) {
                                 try {
@@ -168,7 +208,6 @@ public abstract class JobScheduler {
                             }
                         }
                     }
-                    ScheduleExecutorLogger.LOGGER.createdJobScheduler(result);
                 }
             }
         }

@@ -26,8 +26,12 @@ public interface ScheduleExecutorLogger extends BasicLogger {
     ScheduleExecutorLogger LOGGER = Logger.getMessageLogger(
             ScheduleExecutorLogger.class, "org.jberet.schedule-executor");
 
-    @Message(id = 72500, value = "Created JobScheduler: %s")
+    @Message(id = 72500, value = "Created JobScheduler: %s, based on resource: %s")
     @LogMessage(level = Logger.Level.INFO)
-    void createdJobScheduler(JobScheduler jobScheduler);
+    void createdJobScheduler(JobScheduler jobScheduler, String resourceName);
+
+    @Message(id = 72501, value = "Failed to look up the ManagedScheduledExecutorService: %s, and will use the default resource.")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToLookupManagedScheduledExecutorService(String lookupName);
 
 }
