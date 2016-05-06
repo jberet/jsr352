@@ -79,6 +79,18 @@ public final class PurgeJdbcRepository2IT extends BatchTestBase {
 //        assertEquals(null, prepurgeJobExecution);
     }
 
+    @Test
+    public void withSqlFile() throws Exception {
+        final long prepurgeExecutionId = prepurge();
+        JobExecutionEntity prepurgeJobExecution = batchClient.getJobExecution(prepurgeExecutionId);
+        assertEquals(BatchStatus.COMPLETED, prepurgeJobExecution.getBatchStatus());
+
+        final String sqlFile = "purgeJdbcRepository2.sql";
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("sqlFile", sqlFile);
+        startJobCheckStatus(jobName, jobParams, 3000, BatchStatus.COMPLETED);
+    }
+
     private long prepurge() throws Exception {
         final JobExecutionEntity jobExecutionEntity = batchClient.startJob(prepurge2JobName, null);
         Thread.sleep(1000);

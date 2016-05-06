@@ -185,7 +185,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         this.dataSource = dataSource;
         dbUrl = null;
         String sqlFile = DEFAULT_SQL_FILE;
-        final InputStream sqlResource = getClassLoader().getResourceAsStream(sqlFile);
+        final InputStream sqlResource = getClassLoader(false).getResourceAsStream(sqlFile);
         try {
             if (sqlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadSqlProperties(null, sqlFile);
@@ -213,7 +213,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         if (sqlFile == null || sqlFile.isEmpty()) {
             sqlFile = DEFAULT_SQL_FILE;
         }
-        final InputStream sqlResource = getClassLoader().getResourceAsStream(sqlFile);
+        final InputStream sqlResource = getClassLoader(false).getResourceAsStream(sqlFile);
         try {
             if (sqlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadSqlProperties(null, sqlFile);
@@ -258,7 +258,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             rs = countPartitionExecutionStatement.executeQuery();
         } catch (final SQLException e) {
             final String ddlFile = getDDLLocation(databaseProductName);
-            ddlResource = getClassLoader().getResourceAsStream(ddlFile);
+            ddlResource = getClassLoader(false).getResourceAsStream(ddlFile);
             if (ddlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
             }
@@ -921,7 +921,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         if (statements == null) {
             InputStream statementsResource = null;
             try {
-                statementsResource = getClassLoader().getResourceAsStream(statementsResourcePath);
+                statementsResource = getClassLoader(true).getResourceAsStream(statementsResourcePath);
                 if (statementsResource != null) {
                     statementList = new ArrayList<String>();
                 } else {
@@ -1054,16 +1054,18 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         return ddlFile;
     }
 
-    private static ClassLoader getClassLoader() {
+    private static ClassLoader getClassLoader(final boolean isContextClassLoader) {
         if (WildFlySecurityManager.isChecking()) {
             return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
                 @Override
                 public ClassLoader run() {
-                    return JdbcRepository.class.getClassLoader();
+                    return isContextClassLoader ? Thread.currentThread().getContextClassLoader() :
+                            JdbcRepository.class.getClassLoader();
                 }
             });
         }
-        return JdbcRepository.class.getClassLoader();
+        return isContextClassLoader ? Thread.currentThread().getContextClassLoader() :
+                JdbcRepository.class.getClassLoader();
     }
 
     private static Timestamp createTimestamp(final Date date) {
