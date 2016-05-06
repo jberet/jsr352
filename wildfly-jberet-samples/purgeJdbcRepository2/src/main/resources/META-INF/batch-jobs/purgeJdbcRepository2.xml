@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="purgeJdbcRepository2" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="purgeJdbcRepository2.step1">
+        <batchlet ref="org.jberet.repository.PurgeBatchlet">
+            <properties>
+                <property name="sql" value="#{jobParameters['sql']}"/>
+                <property name="sqlFile" value="#{jobParameters['sqlFile']}"/>
+
+                <property name="jobExecutionSelector" value="#{jobParameters['jobExecutionSelector']}"/>
+                <property name="keepRunningJobExecutions" value="#{jobParameters['keepRunningJobExecutions']}"/>
+                <property name="purgeJobsByNames" value="#{jobParameters['purgeJobsByNames']}"/>
+                <property name="jobExecutionIds" value="#{jobParameters['jobExecutionIds']}"/>
+                <property name="numberOfRecentJobExecutionsToKeep"
+                          value="#{jobParameters['numberOfRecentJobExecutionsToKeep']}"/>
+                <property name="jobExecutionIdFrom" value="#{jobParameters['jobExecutionIdFrom']}"/>
+                <property name="jobExecutionIdTo" value="#{jobParameters['jobExecutionIdTo']}"/>
+                <property name="withinPastMinutes" value="#{jobParameters['withinPastMinutes']}"/>
+                <property name="jobExecutionEndTimeFrom" value="#{jobParameters['jobExecutionEndTimeFrom']}"/>
+                <property name="jobExecutionEndTimeTo" value="#{jobParameters['jobExecutionEndTimeTo']}"/>
+                <property name="batchStatuses" value="#{jobParameters['batchStatuses']}"/>
+                <property name="exitStatuses" value="#{jobParameters['exitStatuses']}"/>
+                <property name="jobExecutionsByJobNames" value="#{jobParameters['jobExecutionsByJobNames']}"/>
+            </properties>
+        </batchlet>
+    </step>
+</job>

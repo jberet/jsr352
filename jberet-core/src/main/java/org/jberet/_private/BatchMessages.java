@@ -195,5 +195,7 @@ public interface BatchMessages {
     @Message(id = 653, value = "Failed to deserialize: %s")
     BatchRuntimeException failedToDeserialize(@Cause Throwable cause, Serializable value);
 
+    @Message(id = 654, value = "Failed to get JdbcRepository.")
+    BatchRuntimeException failedToGetJdbcRepository(@Cause Throwable cause);
 
 }

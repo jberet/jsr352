@@ -42,6 +42,7 @@
         <module>restWriter</module>
         <module>scheduleExecutor</module>
         <module>scheduleTimer</module>
+        <module>purgeJdbcRepository2</module>
     </modules>
 
     <properties>
@@ -110,6 +111,10 @@
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-rest-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-schedule-executor</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->

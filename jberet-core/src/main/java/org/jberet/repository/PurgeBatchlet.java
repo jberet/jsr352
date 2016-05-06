@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
 
 package org.jberet.repository;
 
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Set;
 import javax.batch.api.BatchProperty;
@@ -20,9 +21,10 @@ import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.runtime.context.JobContextImpl;
 
-public final class PurgeBatchlet implements Batchlet {
+public class PurgeBatchlet implements Batchlet {
     @Inject
     private JobContext jobContext;
 
@@ -131,16 +133,27 @@ public final class PurgeBatchlet implements Batchlet {
             jobRepository.removeJobExecutions(selector);
         }
 
-        if (jobRepository instanceof JdbcRepository) {
-            if (sql != null) {
-                ((JdbcRepository) jobRepository).executeStatements(sql, null);
-            } else if (sqlFile != null) {
-                ((JdbcRepository) jobRepository).executeStatements(null, sqlFile);
+        if (sql != null) {
+            sql = sql.trim();
+            if (sql.isEmpty()) {
+                sql = null;
             }
-        } else if (jobRepository instanceof MongoRepository) {
-            if (mongoRemoveQueries != null) {
-                ((MongoRepository) jobRepository).executeRemoveQueries(mongoRemoveQueries);
+        }
+        if (sqlFile != null) {
+            sqlFile = sqlFile.trim();
+            if (sqlFile.isEmpty()) {
+                sqlFile = null;
             }
+        }
+        if (sql != null || sqlFile != null) {
+            final JdbcRepository jdbcRepository = getJdbcRepository(jobRepository);
+            if (jdbcRepository != null) {
+                jdbcRepository.executeStatements(sql, sqlFile);
+            }
+        }
+
+        if (mongoRemoveQueries != null && jobRepository instanceof MongoRepository) {
+            ((MongoRepository) jobRepository).executeRemoveQueries(mongoRemoveQueries);
         }
 
         return null;
@@ -148,6 +161,36 @@ public final class PurgeBatchlet implements Batchlet {
 
     @Override
     public void stop() throws Exception {
+    }
 
+    /**
+     * Gets the {@code org.jberet.repository.JdbcRepository} from the
+     * {@code org.jberet.repository.JobRepository} passed in, in order to
+     * perform operations specific to {@code org.jberet.repository.JdbcRepository}.
+     *
+     * @param repo {@code JobRepository}
+     * @return {@code org.jberet.repository.JdbcRepository}
+     */
+    protected JdbcRepository getJdbcRepository(final JobRepository repo) {
+        if (repo instanceof JdbcRepository) {
+            return (JdbcRepository) repo;
+        }
+        if (repo instanceof InMemoryRepository || repo instanceof MongoRepository
+                || repo instanceof InfinispanRepository) {
+            return null;
+        }
+
+        try {
+            final Method getDelegateMethod = repo.getClass().getDeclaredMethod("getDelegate");
+            if (!getDelegateMethod.isAccessible()) {
+                getDelegateMethod.setAccessible(true);
+            }
+            final Object result = getDelegateMethod.invoke(repo);
+            return (result instanceof JdbcRepository) ? (JdbcRepository) result : null;
+        } catch (final NoSuchMethodException e) {
+            return null;
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failedToGetJdbcRepository(e);
+        }
     }
 }
