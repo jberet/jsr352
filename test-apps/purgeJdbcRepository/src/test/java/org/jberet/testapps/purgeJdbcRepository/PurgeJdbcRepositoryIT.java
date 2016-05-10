@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -167,9 +167,8 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
                         "(select JOBEXECUTIONID from JOB_EXECUTION, JOB_INSTANCE " +
                         "where JOB_EXECUTION.JOBINSTANCEID = JOB_INSTANCE.JOBINSTANCEID and JOB_INSTANCE.JOBNAME like 'prepurge%'); " +
 
-                        "delete from JOB_EXECUTION where JOBEXECUTIONID in " +
-                        "(select JOBEXECUTIONID from JOB_EXECUTION, JOB_INSTANCE " +
-                        "where JOB_EXECUTION.JOBINSTANCEID = JOB_INSTANCE.JOBINSTANCEID and JOB_INSTANCE.JOBNAME like 'prepurge%');"
+                        "delete from JOB_EXECUTION where JOBINSTANCEID in " +
+                        "(select DISTINCT JOBINSTANCEID from JOB_INSTANCE where JOBNAME like 'prepurge%');"
         );
 
         params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
@@ -198,9 +197,8 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
                         "(select JOBEXECUTIONID from JOB_EXECUTION, JOB_INSTANCE " +
                         "where JOB_EXECUTION.JOBINSTANCEID = JOB_INSTANCE.JOBINSTANCEID and JOB_INSTANCE.JOBNAME like 'prepurge%'); " +
 
-                        "delete from JOB_EXECUTION where JOBEXECUTIONID in " +
-                        "(select JOBEXECUTIONID from JOB_EXECUTION, JOB_INSTANCE " +
-                        "where JOB_EXECUTION.JOBINSTANCEID = JOB_INSTANCE.JOBINSTANCEID and JOB_INSTANCE.JOBNAME like 'prepurge%'); " +
+                        "delete from JOB_EXECUTION where JOBINSTANCEID in " +
+                        "(select DISTINCT JOBINSTANCEID from JOB_INSTANCE where JOBNAME like 'prepurge%'); " +
 
                         "delete from JOB_INSTANCE where JOBNAME like 'prepurge%' "
         );
@@ -293,9 +291,8 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         final long prepurge2JobExecutionId = prepurge(prepurge2JobName);
 
         params.setProperty("sql",
-                "delete from JOB_EXECUTION where JOBEXECUTIONID in " +
-                        "(select JOBEXECUTIONID from JOB_EXECUTION, JOB_INSTANCE " +
-                        "where JOB_EXECUTION.JOBINSTANCEID = JOB_INSTANCE.JOBINSTANCEID and JOB_INSTANCE.JOBNAME like 'prepurge%'); ");
+                "delete from JOB_EXECUTION where JOBINSTANCEID in " +
+                    "(select DISTINCT JOBINSTANCEID from JOB_INSTANCE where JOBNAME like 'prepurge%'); ");
 
         params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
 
