@@ -54,6 +54,9 @@
     to verify that they can be properly serialized and deserialized between job restart.
     * verifies the restartable job attribute.
     * verifies that a job whose job id differs from job xml file name can be started and restarted.
+* [purgeJdbcRepository2](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples/purgeJdbcRepository2)
+    * how to remove unwanted job data from a Jdbc job repository.
+    * uses `org.jberet.repository.PurgeBatchlet`.
  
 ## Build, Deploy and Run
  
