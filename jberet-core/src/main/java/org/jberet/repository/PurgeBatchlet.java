@@ -24,76 +24,244 @@ import javax.inject.Inject;
 import org.jberet._private.BatchMessages;
 import org.jberet.runtime.context.JobContextImpl;
 
+/**
+ * A batchlet that removes unwanted job data, such as step executions, job execution,
+ * job instances, etc, based on various criteria specified as batch properties.
+ * <p>
+ * Most batch properties in this class work with all types of batch job repositories.
+ * Some batch properties are specific to certain type of job repository. For instance,
+ * {@link #sql} and {@link #sqlFile} only work with jdbc job repository,
+ * {@link #mongoRemoveQueries} only works with MongoDB job repository.
+ */
 public class PurgeBatchlet implements Batchlet {
+    /**
+     * Injected job context of the current job execution.
+     */
     @Inject
-    private JobContext jobContext;
+    protected JobContext jobContext;
 
+    /**
+     * Injected step context of the current step execution.
+     */
     @Inject
-    private StepContext stepContext;
+    protected StepContext stepContext;
 
+    /**
+     * One or more sql statements for removing certain job data. Multiple sql statements
+     * are separated by semi-colon (;). This property is only applicable for jdbc
+     * job repository.
+     *
+     * @see #sqlFile
+     */
     @Inject
     @BatchProperty
-    String sql;
+    protected String sql;
 
+    /**
+     * Path to the resource file that contains one or more sql statements for removing
+     * certain job data. Multiple sql statements are separated by semi-colon (;). This
+     * property is only applicable for jdbc job repository.
+     * <p>
+     * This property is similar to {@link #sql}, except that the sql statements are in
+     * a separate resource file. Therefore, only one of them should be configured in a
+     * given step. When both are present, {@link #sql} property is used and {@link #sqlFile}
+     * is ignored.
+     *
+     * @see #sql
+     */
     @Inject
     @BatchProperty
-    String sqlFile;
+    protected String sqlFile;
 
+    /**
+     * One or more MongoDB remove queries delimited by semi-colon (;) for removing
+     * certain job data.
+     * This property is for MongoDB job repository only. For example,
+     * <pre>
+     *     db.PARTITION_EXECUTION.remove({ STEPEXECUTIONID: { $gt: 100 } });
+     *     db.STEP_EXECUTION.remove({ STEPEXECUTIONID: { $gt: 100 } });
+     *     db.JOB_EXECUTION.remove({ JOBEXECUTIONID: { $gt: 10 } });
+     *     db.JOB_INSTANCE.remove({ JOBINSTANCEID: { $gt: 10 } })
+     * </pre>
+     */
     @Inject
     @BatchProperty
-    String mongoRemoveQueries;
+    protected String mongoRemoveQueries;
 
+    /**
+     * Fully-qualified name of a class implementing
+     * {@code org.jberet.repository.JobExecutionSelector}, which gives
+     * application flexibility in filtering job execution data.
+     * <p>
+     * If this property is present, other batch properties related to job execution
+     * in this class are ignored.
+     */
     @Inject
     @BatchProperty
-    Class jobExecutionSelector;
+    protected Class jobExecutionSelector;
 
+    /**
+     * Whether or not to keep job data belonging to all running job executions.
+     * If set to true, job data belonging to all running job executions will not be
+     * removed (this is the default behavior).
+     * If set to false, any running job executions will be treated the same
+     * as finished job executions.
+     */
     @Inject
     @BatchProperty
-    Boolean keepRunningJobExecutions;
+    protected Boolean keepRunningJobExecutions;
 
+    /**
+     * Specifies one or more job executions ids, and job data for these job executions
+     * will be removed. Multiple values are separate by comma (,). For example,
+     * <ul>
+     *     <li>100, 90, 200
+     *     <li>100
+     *     <li>500, 501, 502
+     * </ul>
+     */
     @Inject
     @BatchProperty
-    Set<Long> jobExecutionIds;
+    protected Set<Long> jobExecutionIds;
 
+    /**
+     * Specifies the number of most recent job executions to keep, and other
+     * job executions will be removed. The order is determined by the job execution
+     * id numeric value. For example,
+     * <ul>
+     *     <li>100
+     *     <li>10
+     * </ul>
+     */
     @Inject
     @BatchProperty
-    Integer numberOfRecentJobExecutionsToKeep;
+    protected Integer numberOfRecentJobExecutionsToKeep;
 
+    /**
+     * Specifies the starting value of job execution id, and all job executions whose id
+     * equals to or is greater than this starting value will be removed. This property
+     * is typically used along with {@link #jobExecutionIdTo} to form a range of
+     * job execution ids. If {@link #jobExecutionIdTo} is not specified, the range
+     * is up to the maximum job execution id.
+     *
+     * @see #jobExecutionIdTo
+     */
     @Inject
     @BatchProperty
-    Long jobExecutionIdFrom;
+    protected Long jobExecutionIdFrom;
 
+    /**
+     * Specifies the end value of job execution id, and all job executions whose id
+     * equals to or is less than this end value will be removed. This property
+     * is typically used along with {@link #jobExecutionIdFrom} to form a range of
+     * job execution ids. If {@link #jobExecutionIdFrom} is not specified, the range
+     * starts from 1.
+     *
+     * @see #jobExecutionIdFrom
+     */
     @Inject
     @BatchProperty
-    Long jobExecutionIdTo;
+    protected Long jobExecutionIdTo;
 
+    /**
+     * Specifies the number of minutes after the end time of a job execution, and
+     * any job executions that end within that number of minutes will be removed.
+     */
     @Inject
     @BatchProperty
-    Integer withinPastMinutes;
+    protected Integer withinPastMinutes;
 
+    /**
+     * Specifies the starting value of the end time of a job execution, and any
+     * job executions whose end time is equal to or later than that starting value
+     * will be removed. This property is typically used along with
+     * {@link #jobExecutionEndTimeTo} to form a range of job execution end time.
+     * For example,
+     * <ul>
+     *     <li>05/30/2013 7:03 AM
+     *     <li>June 09, 2013 7:03:47 AM PDT
+     * </ul>
+     *
+     * @see #jobExecutionEndTimeTo
+     */
     @Inject
     @BatchProperty
-    Date jobExecutionEndTimeFrom;
+    protected Date jobExecutionEndTimeFrom;
 
+    /**
+     * Specifies the end value of the end time of a job execution, and any
+     * job executions whose end time is equal to or earlier than that end value
+     * will be removed. This property is typically used along with
+     * {@link #jobExecutionEndTimeFrom} to form a range of job execution end time.
+     * For example,
+     * <ul>
+     *     <li>05/30/2013 7:03 AM
+     *     <li>June 09, 2013 7:03:47 AM PDT
+     * </ul>
+     *
+     * @see #jobExecutionEndTimeFrom
+     */
     @Inject
     @BatchProperty
-    Date jobExecutionEndTimeTo;
+    protected Date jobExecutionEndTimeTo;
 
+    /**
+     * Specifies one or more batch status values separated by comma (,), and job executions
+     * whose batch status matches (case sensitive) any of the specified values will be removed.
+     * For example,
+     * <ul>
+     * <li>FAILED, STOPPED
+     * <li>STARTED
+     * </ul>
+     */
     @Inject
     @BatchProperty
-    Set<String> batchStatuses;
+    protected Set<String> batchStatuses;
 
+    /**
+     * Specifies one or more exit status values separated by comma (,), and job executions
+     * whose exit status matches (case sensitive) any of the specified values will be removed.
+     * For example,
+     * <ul>
+     * <li>fail now, FAIL
+     * <li>stop here
+     * </ul>
+     */
     @Inject
     @BatchProperty
-    Set<String> exitStatuses;
+    protected Set<String> exitStatuses;
 
+    /**
+     * Specifies one or more job names separated by comma (,), and job executions
+     * belonging to any of the specified job names will be removed.
+     * For example,
+     * <ul>
+     *     <li>accountingJob1
+     *     <li>BillingJob1, BillingJob2, survey-job-3
+     * </ul>
+     */
     @Inject
     @BatchProperty
-    Set<String> jobExecutionsByJobNames;
+    protected Set<String> jobExecutionsByJobNames;
 
+    /**
+     * Specifies one or more job names separated by comma (,), and job information
+     * for those job names in the batch runtime will be removed.
+     * You can also use the wildcard (*) to represent all job names minus the
+     * current job (you cannot remove the job information for the current job).
+     * Wildcard can only be used as a single value, and may not be combined with
+     * other job names.
+     * <p>
+     * For example,
+     * <ul>
+     *     <li>*
+     *     <li>accoutingJob1
+     *     <li>BillingJob1, BillingJob2, survey-job-3
+     * </ul>
+     */
     @Inject
     @BatchProperty
-    Set<String> purgeJobsByNames;
+    protected Set<String> purgeJobsByNames;
 
     @Override
     public String process() throws Exception {
