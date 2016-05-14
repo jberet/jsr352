@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,6 +21,11 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 
+/**
+ * Default implementation of {@link JobExecutionSelector}.
+ *
+ * @since 1.1.0
+ */
 public final class DefaultJobExecutionSelector implements JobExecutionSelector {
     private JobContext jobContext;
     private StepContext stepContext;
@@ -45,6 +50,17 @@ public final class DefaultJobExecutionSelector implements JobExecutionSelector {
 
     Set<String> jobExecutionsByJobNames;
 
+    /**
+     * Constructs {@code DefaultJobExecutionSelector} with
+     * {@code excludeRunningJobExecutions} Boolean flag.
+     *
+     * @param excludeRunningJobExecutions if true, this selector will not operate on any running
+     *                                    job executions, and this selector's {@link #select(JobExecution, Collection)}
+     *                                    method will return false for any running job executions. This is the default
+     *                                    behavior.
+     *                                    If false, running job executions will be treated no differently than other
+     *                                    job executions.
+     */
     public DefaultJobExecutionSelector(final Boolean excludeRunningJobExecutions) {
         if (Boolean.FALSE.equals(excludeRunningJobExecutions)) {
             this.excludeRunningJobExecutions = Boolean.FALSE;
