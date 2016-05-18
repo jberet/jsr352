@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.jberet.creation.AbstractArtifactFactory;
+import org.jboss.weld.bootstrap.api.helpers.RegistrySingletonProvider;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 
@@ -26,7 +27,10 @@ public final class SEArtifactFactory extends AbstractArtifactFactory {
     private final BeanManager beanManager;
 
     public SEArtifactFactory() {
-        final WeldContainer weldContainer = new Weld().initialize();
+        WeldContainer weldContainer = WeldContainer.instance(RegistrySingletonProvider.STATIC_INSTANCE);
+        if (weldContainer == null) {
+            weldContainer = new Weld(RegistrySingletonProvider.STATIC_INSTANCE).initialize();
+        }
         beanManager = weldContainer.getBeanManager();
     }
 
