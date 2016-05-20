@@ -40,24 +40,24 @@
         <version.javadoc.plugin>2.10.3</version.javadoc.plugin>
         <version.org.jboss.apiviz>1.3.2.GA</version.org.jboss.apiviz>
 
-        <version.com.fasterxml.aalto-xml>0.9.11</version.com.fasterxml.aalto-xml>
+        <version.com.fasterxml.aalto-xml>1.0.0</version.com.fasterxml.aalto-xml>
         <version.com.google.guava>18.0</version.com.google.guava>
         <version.com.h2database>1.3.173</version.com.h2database>
-        <version.javax.enterprise>1.1</version.javax.enterprise>
+        <version.javax.enterprise>1.2</version.javax.enterprise>
         <version.javax.inject>1</version.javax.inject>
         <version.junit>4.12</version.junit>
         <version.org.codehaus.woodstox.stax2-api>4.0.0</version.org.codehaus.woodstox.stax2-api>
         <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
         <version.org.jboss.logging.jboss-logging>3.3.0.Final</version.org.jboss.logging.jboss-logging>
-        <version.org.jboss.logging.jboss-logging-tools>2.0.0.Final</version.org.jboss.logging.jboss-logging-tools>
+        <version.org.jboss.logging.jboss-logging-tools>2.0.1.Final</version.org.jboss.logging.jboss-logging-tools>
         <version.org.jboss.marshalling>1.4.10.Final</version.org.jboss.marshalling>
         <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final
         </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
         <version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>1.0.0.Final
         </version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>
-        <version.org.jboss.weld.weld>2.3.0.Beta3</version.org.jboss.weld.weld>
-        <version.org.jboss.weld.weld-se>2.3.0.Beta3</version.org.jboss.weld.weld-se>
-        <version.org.jboss.jandex>2.0.0.Beta3</version.org.jboss.jandex>
+        <version.org.jboss.weld.weld>2.3.4.Final</version.org.jboss.weld.weld>
+        <version.org.jboss.weld.weld-se>2.3.4.Final</version.org.jboss.weld.weld-se>
+        <version.org.jboss.jandex>2.0.2.Final</version.org.jboss.jandex>
         <version.net.sf.supercsv>2.3.1</version.net.sf.supercsv>
         <version.com.fasterxml.jackson>2.5.4</version.com.fasterxml.jackson>
         <version.org.mongodb.mongo-java-driver>3.0.3</version.org.mongodb.mongo-java-driver>
@@ -65,8 +65,8 @@
         <version.org.beanio>2.1.0</version.org.beanio>
         <version.org.ow2.asm>5.0.4</version.org.ow2.asm>
 
-        <version.org.infinispan>7.2.3.Final</version.org.infinispan>
-        <version.org.jgroups>3.6.4.Final</version.org.jgroups>
+        <version.org.infinispan>8.1.2.Final</version.org.infinispan>
+        <version.org.jgroups>3.6.9.Final</version.org.jgroups>
         <version.org.apache.poi>3.12</version.org.apache.poi>
         <version.commons-codec>1.10</version.commons-codec>
         <version.dom4j>1.6.1</version.dom4j>
