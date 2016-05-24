@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,6 +20,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class PostConstructIT extends AbstractIT {
     @BeforeClass
     public static void beforeClass() {
@@ -36,8 +38,8 @@ public class PostConstructIT extends AbstractIT {
         final String expected = "PostConstructPreDestroyBase.ps JobListener1.ps JobListener1.beforeJob PostConstructPreDestroyBase.ps StepListener1.ps StepListener1.beforeStep PostConstructPreDestroyBase.ps Batchlet0.ps Batchlet1.ps Batchlet1.process Batchlet1.pd Batchlet0.pd PostConstructPreDestroyBase.pd StepListener1.afterStep StepListener1.pd PostConstructPreDestroyBase.pd PostConstructPreDestroyBase.ps Decider1.ps Decider1.decide Decider1.pd PostConstructPreDestroyBase.pd JobListener1.afterJob JobListener1.pd PostConstructPreDestroyBase.pd";
         startJobAndWait("postConstruct");
         final String jobExitStatus = jobExecution.getExitStatus();
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(expected, jobExitStatus);
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(expected, jobExitStatus);
     }
 
     /**
@@ -55,8 +57,34 @@ public class PostConstructIT extends AbstractIT {
     @Test
     public void afterJobBatchStatus() throws Exception {
         startJobAndWait("afterJobBatchStatus");
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+    }
+
+    /**
+     * When a job listener has wrong ref name in job xml, the job execution should
+     * fail with {@code FAILED} batch status.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void wrongJobListenerName() throws Exception {
+        startJobAndWait("wrongJobListenerName");
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        System.out.printf("Job exit status: %s%n", jobExecution.getExitStatus());
+    }
+
+    /**
+     * Verifies that a step listener with wrong ref name in job xml should
+     * cause the job execution to fail.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void wrongStepListenerName() throws Exception {
+        startJobAndWait("wrongStepListenerName");
+        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        System.out.printf("Job exit status: %s%n", jobExecution.getExitStatus());
     }
 
     @Override
