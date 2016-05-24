@@ -24,18 +24,18 @@ import javax.batch.runtime.BatchStatus;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 
-import org.hornetq.api.core.TransportConfiguration;
-import org.hornetq.core.config.Configuration;
-import org.hornetq.core.config.impl.ConfigurationImpl;
-import org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory;
-import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
-import org.hornetq.jms.server.config.ConnectionFactoryConfiguration;
-import org.hornetq.jms.server.config.JMSConfiguration;
-import org.hornetq.jms.server.config.JMSQueueConfiguration;
-import org.hornetq.jms.server.config.impl.ConnectionFactoryConfigurationImpl;
-import org.hornetq.jms.server.config.impl.JMSConfigurationImpl;
-import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
-import org.hornetq.jms.server.embedded.EmbeddedJMS;
+import org.apache.activemq.artemis.api.core.TransportConfiguration;
+import org.apache.activemq.artemis.core.config.Configuration;
+import org.apache.activemq.artemis.core.config.impl.ConfigurationImpl;
+import org.apache.activemq.artemis.core.remoting.impl.netty.NettyAcceptorFactory;
+import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
+import org.apache.activemq.artemis.jms.server.config.ConnectionFactoryConfiguration;
+import org.apache.activemq.artemis.jms.server.config.JMSConfiguration;
+import org.apache.activemq.artemis.jms.server.config.JMSQueueConfiguration;
+import org.apache.activemq.artemis.jms.server.config.impl.ConnectionFactoryConfigurationImpl;
+import org.apache.activemq.artemis.jms.server.config.impl.JMSConfigurationImpl;
+import org.apache.activemq.artemis.jms.server.config.impl.JMSQueueConfigurationImpl;
+import org.apache.activemq.artemis.jms.server.embedded.EmbeddedJMS;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -78,11 +78,13 @@ public class JmsReaderWriterTest {
         // Step 3. Configure the JMS ConnectionFactory
         final ArrayList<String> connectorNames = new ArrayList<String>();
         connectorNames.add("connector");
-        final ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl("cf", false, connectorNames, connectionFactoryLookupName);
+        final ConnectionFactoryConfiguration cfConfig = new ConnectionFactoryConfigurationImpl().setName("cf")
+                .setConnectorNames(connectorNames).setBindings(connectionFactoryLookupName);
         jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
         // Step 4. Configure the JMS Queue
-        final JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl("queue1", null, false, destinationLookupName);
+        final JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl().setName("queue1")
+                .setDurable(false).setBindings(destinationLookupName);
         jmsConfig.getQueueConfigurations().add(queueConfig);
 
         // Step 5. Start the JMS Server using the HornetQ core server and the JMS configuration
@@ -95,7 +97,6 @@ public class JmsReaderWriterTest {
         // Step 6. Lookup JMS resources defined in the configuration
         MessagingResourceProducer.connectionFactory = (ConnectionFactory) jmsServer.lookup(connectionFactoryLookupName);
         MessagingResourceProducer.queue = (Queue) jmsServer.lookup(destinationLookupName);
-
     }
 
     @AfterClass

@@ -81,7 +81,8 @@
 
         <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
         <version.org.hornetq>2.4.7.Final</version.org.hornetq>
-        <version.io.netty>4.0.26.Final</version.io.netty>
+        <version.org.apache.activemq.artemis>1.2.0</version.org.apache.activemq.artemis>
+        <version.io.netty>4.0.33.Final</version.io.netty>
 
         <version.javax.validation>1.1.0.Final</version.javax.validation>
         <version.org.hibernate.validator>5.1.2.Final</version.org.hibernate.validator>
@@ -623,9 +624,15 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.hornetq</groupId>
-                <artifactId>hornetq-jms-server</artifactId>
-                <version>${version.org.hornetq}</version>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-server</artifactId>
+                <version>${version.org.apache.activemq.artemis}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-jms-server</artifactId>
+                <version>${version.org.apache.activemq.artemis}</version>
                 <scope>test</scope>
             </dependency>
 
