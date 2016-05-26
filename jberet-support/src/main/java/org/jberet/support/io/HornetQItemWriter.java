@@ -25,6 +25,8 @@ import org.hornetq.api.core.client.ClientMessage;
 import org.hornetq.api.core.client.ClientProducer;
 import org.jberet.support._private.SupportLogger;
 
+import static org.jberet.support.io.ArtemisItemReaderWriterBase.objectToBytes;
+
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that sends data items to a HornetQ address.
  * It can send the following HornetQ message types:

@@ -12,11 +12,6 @@
 
 package org.jberet.support.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -35,6 +30,8 @@ import org.hornetq.api.core.client.ServerLocator;
 import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
+import static org.jberet.support.io.ArtemisItemReaderWriterBase.*;
+
 /**
  * The base class for {@link org.jberet.support.io.HornetQItemReader} and {@link org.jberet.support.io.HornetQItemWriter}.
  *
@@ -45,16 +42,6 @@ import org.jberet.support._private.SupportMessages;
  */
 @Deprecated
 public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
-    protected static final String QUEUE_NAME_KEY = "name";
-    protected static final String QUEUE_ADDRESS_KEY = "address";
-    protected static final String QUEUE_FILTER_KEY = "filter";
-    protected static final String QUEUE_DURABLE_KEY = "durable";
-    protected static final String QUEUE_SHARED_KEY = "shared";
-    protected static final String QUEUE_TEMPORARY_KEY = "temporary";
-
-    protected static final String SERVER_LOCATOR_HA_KEY = "HA";
-    protected static final String NAME_KEY = "name";
-    protected static final String FACTORY_CLASS_KEY = "factory-class";
 
     /**
      * This field holds an optional injection of HornetQ {@code ServerLocator}. When {@link #connectorFactoryParams} is
@@ -80,7 +67,8 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
      * {@link #serverLocatorInstance} and {@link #sessionFactoryInstance} will be ignored. Valid keys and values are:
      * <p>
      * <ul>
-     *     <li>{@value #FACTORY_CLASS_KEY}, the fully-qualified class name of a HornetQ connector factory, required if this property is present
+     *     <li>{@value org.jberet.support.io.ArtemisItemReaderWriterBase#FACTORY_CLASS_KEY},
+     *     the fully-qualified class name of a HornetQ connector factory, required if this property is present
      *     <li>any param keys and values appropriate for the above-named HornetQ connector factory class
      * </ul>
      * <p>
@@ -120,12 +108,12 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
      * The following keys are supported:
      * <p>
      * <ul>
-     * <li>{@value #QUEUE_ADDRESS_KEY}, required
-     * <li>{@value #QUEUE_DURABLE_KEY}, optional
-     * <li>{@value #QUEUE_FILTER_KEY}, optional
-     * <li>{@value #QUEUE_NAME_KEY}, optional
-     * <li>{@value #QUEUE_SHARED_KEY}, optional
-     * <li>{@value #QUEUE_TEMPORARY_KEY}, optional
+     * <li>{@value org.jberet.support.io.ArtemisItemReaderWriterBase#QUEUE_ADDRESS_KEY}, required
+     * <li>{@value org.jberet.support.io.ArtemisItemReaderWriterBase#QUEUE_DURABLE_KEY}, optional
+     * <li>{@value org.jberet.support.io.ArtemisItemReaderWriterBase#QUEUE_FILTER_KEY}, optional
+     * <li>{@value org.jberet.support.io.ArtemisItemReaderWriterBase#QUEUE_NAME_KEY}, optional
+     * <li>{@value org.jberet.support.io.ArtemisItemReaderWriterBase#QUEUE_SHARED_KEY}, optional
+     * <li>{@value org.jberet.support.io.ArtemisItemReaderWriterBase#QUEUE_TEMPORARY_KEY}, optional
      * </ul>
      * <p>
      * An example of {@code queueParams} property in job xml:
@@ -261,49 +249,6 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
         if (serverLocator != null && toCloseServerLocator) {
             serverLocator.close();
             serverLocator = null;
-        }
-    }
-
-    protected static byte[] objectToBytes(final Object obj) throws IOException {
-        if (obj == null) {
-            return null;
-        }
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream out = null;
-        try {
-            out = new ObjectOutputStream(bos);
-            out.writeObject(obj);
-            return bos.toByteArray();
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-                bos.close();
-            } catch (IOException e2) {
-                //ignore
-            }
-        }
-    }
-
-    protected static Serializable bytesToSerializableObject(final byte[] bytes) throws IOException, ClassNotFoundException {
-        if (bytes == null) {
-            return null;
-        }
-        final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        ObjectInputStream in = null;
-        try {
-            in = new ObjectInputStream(bis);
-            return (Serializable) in.readObject();
-        } finally {
-            try {
-                bis.close();
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException e2) {
-                //ignore
-            }
         }
     }
 }

@@ -24,6 +24,8 @@ import org.hornetq.api.core.client.ClientConsumer;
 import org.hornetq.api.core.client.ClientMessage;
 import org.jberet.support._private.SupportLogger;
 
+import static org.jberet.support.io.ArtemisItemReaderWriterBase.bytesToSerializableObject;
+
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from a HornetQ address.
  * It handles the following types of HornetQ messages:
