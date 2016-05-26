@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,27 +24,25 @@ import javax.batch.api.BatchProperty;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.hornetq.api.core.HornetQException;
-import org.hornetq.api.core.SimpleString;
-import org.hornetq.api.core.TransportConfiguration;
-import org.hornetq.api.core.client.ClientSession;
-import org.hornetq.api.core.client.ClientSessionFactory;
-import org.hornetq.api.core.client.HornetQClient;
-import org.hornetq.api.core.client.SendAcknowledgementHandler;
-import org.hornetq.api.core.client.ServerLocator;
+import org.apache.activemq.artemis.api.core.ActiveMQException;
+import org.apache.activemq.artemis.api.core.SimpleString;
+import org.apache.activemq.artemis.api.core.TransportConfiguration;
+import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
+import org.apache.activemq.artemis.api.core.client.ClientSession;
+import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
+import org.apache.activemq.artemis.api.core.client.SendAcknowledgementHandler;
+import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 /**
- * The base class for {@link org.jberet.support.io.HornetQItemReader} and {@link org.jberet.support.io.HornetQItemWriter}.
+ * The base class for {@link ArtemisItemReader} and {@link ArtemisItemWriter}.
  *
- * @see     HornetQItemReader
- * @see     HornetQItemWriter
+ * @see     ArtemisItemReader
+ * @see     ArtemisItemWriter
  * @since   1.1.0
- * @deprecated  As of 1.3.0, replaced by {@link ArtemisItemReaderWriterBase}
  */
-@Deprecated
-public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
+public abstract class ArtemisItemReaderWriterBase extends ItemReaderWriterBase {
     protected static final String QUEUE_NAME_KEY = "name";
     protected static final String QUEUE_ADDRESS_KEY = "address";
     protected static final String QUEUE_FILTER_KEY = "filter";
@@ -57,16 +55,16 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
     protected static final String FACTORY_CLASS_KEY = "factory-class";
 
     /**
-     * This field holds an optional injection of HornetQ {@code ServerLocator}. When {@link #connectorFactoryParams} is
+     * This field holds an optional injection of Artemis {@code ServerLocator}. When {@link #connectorFactoryParams} is
      * not specified, and {@link #sessionFactoryInstance} is not satisfied, this field will be queried to obtain an
-     * instance of HornetQ {@code ServerLocator}. The application may implement a
+     * instance of Artemis {@code ServerLocator}. The application may implement a
      * {@code javax.enterprise.inject.Produces} method to satisfy this dependency injection.
      */
     @Inject
     protected Instance<ServerLocator> serverLocatorInstance;
 
     /**
-     * This field holds an optional injection of HornetQ {@code ClientSessionFactory}. If this injection is satisfied,
+     * This field holds an optional injection of Artemis {@code ClientSessionFactory}. If this injection is satisfied,
      * {@link #serverLocatorInstance} will be ignored. The application may implement a
      * {@code javax.enterprise.inject.Produces} method to satisfy this dependency injection.
      */
@@ -74,27 +72,27 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
     protected Instance<ClientSessionFactory> sessionFactoryInstance;
 
     /**
-     * Key-value pairs to identify and configure HornetQ {@code org.hornetq.api.core.TransportConfiguration}, which is
-     * used to create HornetQ {@code ServerLocator}. Optional property and defaults to null. When this property is
-     * present, it will be used to create HornetQ {@code ServerLocator}, and the injection fields
+     * Key-value pairs to identify and configure Artemis {@code org.apache.activemq.artemis.api.core.TransportConfiguration}, which is
+     * used to create Artemis {@code ServerLocator}. Optional property and defaults to null. When this property is
+     * present, it will be used to create Artemis {@code ServerLocator}, and the injection fields
      * {@link #serverLocatorInstance} and {@link #sessionFactoryInstance} will be ignored. Valid keys and values are:
      * <p>
      * <ul>
-     *     <li>{@value #FACTORY_CLASS_KEY}, the fully-qualified class name of a HornetQ connector factory, required if this property is present
-     *     <li>any param keys and values appropriate for the above-named HornetQ connector factory class
+     *     <li>{@value #FACTORY_CLASS_KEY}, the fully-qualified class name of a Artemis connector factory, required if this property is present
+     *     <li>any param keys and values appropriate for the above-named Artemis connector factory class
      * </ul>
      * <p>
      * An example of this property in job xml:
      * <p>
      *  &lt;property name="connectorFactoryParams"
-     *  value="factory-class=org.hornetq.core.remoting.impl.netty.NettyConnectorFactory, host=localhost, port=5445"/&gt;
+     *  value="factory-class=org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory, host=localhost, port=5445"/&gt;
      */
     @Inject
     @BatchProperty
     protected Map connectorFactoryParams;
 
     /**
-     * Key-value pairs to configure HornetQ {@code ServerLocator}. Optional property and defaults to null.
+     * Key-value pairs to configure Artemis {@code ServerLocator}. Optional property and defaults to null.
      * Valid keys are:
      * <p>
      * <ul>
@@ -103,8 +101,8 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
      * upper or lower case character
      * </ul>
      * <p>
-     * See the current version of HornetQ {@code ServerLocator} javadoc for supported keys and values, e.g.,
-     * <a href="http://docs.jboss.org/hornetq/2.4.0.Final/docs/api/hornetq-client/org/hornetq/api/core/client/ServerLocator.html">ServerLocator</a>
+     * See the current version of Artemis {@code ServerLocator} javadoc for supported keys and values, e.g.,
+     * <a href="http://activemq.apache.org/artemis/docs/javadocs/javadoc-1.2.0/org/apache/activemq/artemis/api/core/client/ServerLocator.html">ServerLocator</a>
      * <p>
      * An example of this property in job xml:
      * <p>
@@ -115,7 +113,7 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
     protected Map serverLocatorParams;
 
     /**
-     * Key-value pairs to identify and configure the target HornetQ queue. Required property.
+     * Key-value pairs to identify and configure the target Artemis queue. Required property.
      * <p>
      * The following keys are supported:
      * <p>
@@ -137,14 +135,14 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
     protected Map queueParams;
 
     /**
-     * The fully-qualified name of a class that implements {@code org.hornetq.api.core.client.SendAcknowledgementHandler}.
+     * The fully-qualified name of a class that implements {@code org.apache.activemq.artemis.api.core.client.SendAcknowledgementHandler}.
      * A SendAcknowledgementHandler notifies a client when an message sent asynchronously has been received by the server.
-     * See current version of HornetQ documentation for details, e.g.,
-     * <a href="https://docs.jboss.org/hornetq/2.4.0.Final/docs/api/hornetq-client/org/hornetq/api/core/client/SendAcknowledgementHandler.html">SendAcknowledgementHandler</a>
+     * See current version of Artemis documentation for details, e.g.,
+     * <a href="http://activemq.apache.org/artemis/docs/javadocs/javadoc-1.2.0/org/apache/activemq/artemis/api/core/client/SendAcknowledgementHandler.html">SendAcknowledgementHandler</a>
      * <p>
      * An example {@code sendAcknowledgementHandler} property in job xml:
      * <p>
-     * &lt;property name="sendAcknowledgementHandler" value="org.jberet.support.io.HornetQReaderWriterTest$HornetQSendAcknowledgementHandler"/&gt;
+     * &lt;property name="sendAcknowledgementHandler" value="org.jberet.support.io.ArtemisReaderWriterTest$ArtemisSendAcknowledgementHandler"/&gt;
      */
     @Inject
     @BatchProperty
@@ -189,12 +187,12 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
             }
             if (withHA) {
                 serverLocator = connectorFactoryParams == null ?
-                        HornetQClient.createServerLocatorWithHA(new TransportConfiguration(connectorFactoryName)) :
-                        HornetQClient.createServerLocatorWithHA(new TransportConfiguration(connectorFactoryName, connectorFactoryParams));
+                        ActiveMQClient.createServerLocatorWithHA(new TransportConfiguration(connectorFactoryName)) :
+                        ActiveMQClient.createServerLocatorWithHA(new TransportConfiguration(connectorFactoryName, connectorFactoryParams));
             } else {
                 serverLocator = connectorFactoryParams == null ?
-                        HornetQClient.createServerLocatorWithoutHA(new TransportConfiguration(connectorFactoryName)) :
-                        HornetQClient.createServerLocatorWithoutHA(new TransportConfiguration(connectorFactoryName, connectorFactoryParams));
+                        ActiveMQClient.createServerLocatorWithoutHA(new TransportConfiguration(connectorFactoryName)) :
+                        ActiveMQClient.createServerLocatorWithoutHA(new TransportConfiguration(connectorFactoryName, connectorFactoryParams));
             }
             toCloseServerLocator = true;
         } else {
@@ -249,8 +247,8 @@ public abstract class HornetQItemReaderWriterBase extends ItemReaderWriterBase {
         if (session != null) {
             try {
                 session.close();
-            } catch (final HornetQException e) {
-                SupportLogger.LOGGER.tracef(e, "Failed to close HornetQ client core session %s%n", session);
+            } catch (final ActiveMQException e) {
+                SupportLogger.LOGGER.tracef(e, "Failed to close Artemis client core session %s%n", session);
             }
             session = null;
         }

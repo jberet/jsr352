@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,35 +20,33 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.hornetq.api.core.HornetQException;
-import org.hornetq.api.core.client.ClientMessage;
-import org.hornetq.api.core.client.ClientProducer;
+import org.apache.activemq.artemis.api.core.ActiveMQException;
+import org.apache.activemq.artemis.api.core.client.ClientMessage;
+import org.apache.activemq.artemis.api.core.client.ClientProducer;
 import org.jberet.support._private.SupportLogger;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemWriter} that sends data items to a HornetQ address.
- * It can send the following HornetQ message types:
+ * An implementation of {@code javax.batch.api.chunk.ItemWriter} that sends data items to an Artemis address.
+ * It can send the following Artemis message types:
  * <p>
  * <ul>
- * <li>if the data item is of type {@code java.lang.String}, a {@code org.hornetq.api.core.client.ClientMessage#TEXT_TYPE}
+ * <li>if the data item is of type {@code java.lang.String}, a {@code org.apache.activemq.artemis.api.core.client.ClientMessage#TEXT_TYPE}
  * message is created with the text content in the data item, and sent;
- * <li>else if the data is of type {@code org.hornetq.api.core.client.ClientMessage}, it is sent as is;
- * <li>else an {@code org.hornetq.api.core.client.ClientMessage#OBJECT_TYPE} message is created with the data item
+ * <li>else if the data is of type {@code org.apache.activemq.artemis.api.core.client.ClientMessage}, it is sent as is;
+ * <li>else an {@code org.apache.activemq.artemis.api.core.client.ClientMessage#OBJECT_TYPE} message is created with the data item
  * object, and sent.
  * </ul>
  * <p>
  * {@link #durableMessage} property can be configured to send either durable or non-durable (default) messages.
  *
- * @see     HornetQItemReader
- * @see     HornetQItemReaderWriterBase
+ * @see     ArtemisItemReader
+ * @see     ArtemisItemReaderWriterBase
  * @see     JmsItemWriter
- * @since   1.1.0
- * @deprecated  As of 1.3.0, replaced by {@link ArtemisItemWriter}
+ * @since   1.3.0
  */
 @Named
 @Dependent
-@Deprecated
-public class HornetQItemWriter extends HornetQItemReaderWriterBase implements ItemWriter {
+public class ArtemisItemWriter extends ArtemisItemReaderWriterBase implements ItemWriter {
     /**
      * Whether the message to be produced is durable or not. Optional property and defaults to false. Valid values are
      * true and false.
@@ -88,8 +86,8 @@ public class HornetQItemWriter extends HornetQItemReaderWriterBase implements It
         if (producer != null) {
             try {
                 producer.close();
-            } catch (final HornetQException e) {
-                SupportLogger.LOGGER.tracef(e, "Failed to close HornetQ consumer %s%n", producer);
+            } catch (final ActiveMQException e) {
+                SupportLogger.LOGGER.tracef(e, "Failed to close Artemis consumer %s%n", producer);
             }
             producer = null;
         }

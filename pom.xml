@@ -512,6 +512,7 @@
             </dependency>
 
             <!-- HornetQ ItemReader & ItemWriter dependencies -->
+            <!-- Artemis ItemReader & ItemWriter dependencies -->
             <dependency>
                 <groupId>org.hornetq</groupId>
                 <artifactId>hornetq-core-client</artifactId>
@@ -522,6 +523,18 @@
                 <groupId>org.hornetq</groupId>
                 <artifactId>hornetq-commons</artifactId>
                 <version>${version.org.hornetq}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-core-client</artifactId>
+                <version>${version.org.apache.activemq.artemis}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-commons</artifactId>
+                <version>${version.org.apache.activemq.artemis}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
