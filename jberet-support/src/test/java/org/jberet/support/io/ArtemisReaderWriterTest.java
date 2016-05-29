@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,15 +15,15 @@ package org.jberet.support.io;
 import java.util.List;
 import java.util.Map;
 
-import org.hornetq.api.core.Message;
-import org.hornetq.api.core.TransportConfiguration;
-import org.hornetq.api.core.client.ClientSession;
-import org.hornetq.api.core.client.HornetQClient;
-import org.hornetq.api.core.client.SendAcknowledgementHandler;
-import org.hornetq.core.config.Configuration;
-import org.hornetq.core.config.impl.ConfigurationImpl;
-import org.hornetq.core.server.HornetQServer;
-import org.hornetq.core.server.HornetQServers;
+import org.apache.activemq.artemis.api.core.Message;
+import org.apache.activemq.artemis.api.core.TransportConfiguration;
+import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
+import org.apache.activemq.artemis.api.core.client.ClientSession;
+import org.apache.activemq.artemis.api.core.client.SendAcknowledgementHandler;
+import org.apache.activemq.artemis.core.config.Configuration;
+import org.apache.activemq.artemis.core.config.impl.ConfigurationImpl;
+import org.apache.activemq.artemis.core.server.ActiveMQServer;
+import org.apache.activemq.artemis.core.server.ActiveMQServers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,19 +34,19 @@ import static org.jberet.support.io.JmsReaderWriterTest.ibmStockTradeForbid1_10;
 import static org.jberet.support.io.JmsReaderWriterTest.testRead0;
 import static org.jberet.support.io.JmsReaderWriterTest.testWrite0;
 
-public class HornetQReaderWriterTest {
-    static final String writerTestJobName = "org.jberet.support.io.HornetQWriterTest.xml";
-    static final String readerTestJobName = "org.jberet.support.io.HornetQReaderTest.xml";
+public class ArtemisReaderWriterTest {
+    static final String writerTestJobName = "org.jberet.support.io.ArtemisWriterTest.xml";
+    static final String readerTestJobName = "org.jberet.support.io.ArtemisReaderTest.xml";
 
-    //static final String connectorFactoryName = "org.hornetq.core.remoting.impl.netty.NettyConnectorFactory";
-    //static final String acceptorFactoryName = "org.hornetq.core.remoting.impl.netty.NettyAcceptorFactory";
+    //static final String connectorFactoryName = "org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory";
+    //static final String acceptorFactoryName = "org.apache.activemq.artemis.core.remoting.impl.netty.NettyAcceptorFactory";
 
-    static final String connectorFactoryName = "org.hornetq.core.remoting.impl.invm.InVMConnectorFactory";
-    static final String acceptorFactoryName = "org.hornetq.core.remoting.impl.invm.InVMAcceptorFactory";
+    static final String connectorFactoryName = "org.apache.activemq.artemis.core.remoting.impl.invm.InVMConnectorFactory";
+    static final String acceptorFactoryName = "org.apache.activemq.artemis.core.remoting.impl.invm.InVMAcceptorFactory";
 
     static final String queueAddress = "example";
 
-    HornetQServer server;
+    ActiveMQServer server;
     ClientSession coreSession;
 
     @Before
@@ -58,16 +58,16 @@ public class HornetQReaderWriterTest {
         configuration.getAcceptorConfigurations().add(new TransportConfiguration(acceptorFactoryName));
 
         //Create and start the server
-        server = HornetQServers.newHornetQServer(configuration);
+        server = ActiveMQServers.newActiveMQServer(configuration);
         server.start();
 
         final TransportConfiguration transportConfiguration = new TransportConfiguration(connectorFactoryName);
-        MessagingResourceProducer.hornetQServerLocator = HornetQClient.createServerLocatorWithoutHA(transportConfiguration);
-        MessagingResourceProducer.hornetQServerLocator.setBlockOnAcknowledge(false);
-        MessagingResourceProducer.hornetQServerLocator.setConfirmationWindowSize(5);
+        MessagingResourceProducer.artemisServerLocator = ActiveMQClient.createServerLocatorWithoutHA(transportConfiguration);
+        MessagingResourceProducer.artemisServerLocator.setBlockOnAcknowledge(false);
+        MessagingResourceProducer.artemisServerLocator.setConfirmationWindowSize(5);
 
-        MessagingResourceProducer.hornetQSessionFactory = MessagingResourceProducer.hornetQServerLocator.createSessionFactory();
-        coreSession = MessagingResourceProducer.hornetQSessionFactory.createSession(false, false, false);
+        MessagingResourceProducer.artemisSessionFactory = MessagingResourceProducer.artemisServerLocator.createSessionFactory();
+        coreSession = MessagingResourceProducer.artemisSessionFactory.createSession(false, false, false);
         coreSession.createQueue(queueAddress, queueAddress);
     }
 
@@ -82,7 +82,7 @@ public class HornetQReaderWriterTest {
     }
 
     @Test
-    public void readIBMStockTradeCsvWriteHornetQBeanType() throws Exception {
+    public void readIBMStockTradeCsvWriteArtemisBeanType() throws Exception {
         testWrite0(writerTestJobName, StockTrade.class, ExcelWriterTest.ibmStockTradeHeader, ExcelWriterTest.ibmStockTradeCellProcessors,
                 "1", "10");
 
@@ -90,32 +90,32 @@ public class HornetQReaderWriterTest {
         // CsvItemReaderWriter has nameMapping "date, time, open, ..." to match java fields in StockTrade. CsvItemReaderWriter
         // does not understand Jackson mapping annotations in POJO.
 
-        testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteHornetQBeanType.out",
+        testRead0(readerTestJobName, StockTrade.class, "readIBMStockTradeCsvWriteArtemisBeanType.out",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
                 ibmStockTradeExpected1_10, ibmStockTradeForbid1_10);
     }
 
     @Test
-    public void readIBMStockTradeCsvWriteHornetQMapType() throws Exception {
+    public void readIBMStockTradeCsvWriteArtemisMapType() throws Exception {
         testWrite0(writerTestJobName, Map.class, ExcelWriterTest.ibmStockTradeHeader, ibmStockTradeCellProcessorsDateAsString,
                 "1", "10");
 
-        testRead0(readerTestJobName, Map.class, "readIBMStockTradeCsvWriteHornetQMapType.out",
+        testRead0(readerTestJobName, Map.class, "readIBMStockTradeCsvWriteArtemisMapType.out",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
                 ibmStockTradeExpected1_10, ibmStockTradeForbid1_10);
     }
 
     @Test
-    public void readIBMStockTradeCsvWriteHornetQListType() throws Exception {
+    public void readIBMStockTradeCsvWriteArtemisListType() throws Exception {
         testWrite0(writerTestJobName, List.class, ExcelWriterTest.ibmStockTradeHeader, ExcelWriterTest.ibmStockTradeCellProcessors,
                 "1", "10");
 
-        testRead0(readerTestJobName, List.class, "readIBMStockTradeCsvWriteHornetQListType.out",
+        testRead0(readerTestJobName, List.class, "readIBMStockTradeCsvWriteArtemisListType.out",
                 ExcelWriterTest.ibmStockTradeNameMapping, ExcelWriterTest.ibmStockTradeHeader,
                 ibmStockTradeExpected1_10, ibmStockTradeForbid1_10);
     }
 
-    public static class HornetQSendAcknowledgementHandler implements SendAcknowledgementHandler {
+    public static class ArtemisSendAcknowledgementHandler implements SendAcknowledgementHandler {
         @Override
         public void sendAcknowledged(final Message message) {
             System.out.printf("sendAcknowledged message: %s in %s%n", message, this);
