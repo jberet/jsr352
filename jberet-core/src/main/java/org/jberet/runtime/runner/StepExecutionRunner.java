@@ -227,7 +227,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (reducer != null) {
             reducer.beginPartitionedStep();
         }
-        final boolean isRestart = jobContext.isRestart();
         boolean isOverride = false;
         if (mapper != null) {
             final javax.batch.api.partition.PartitionPlan partitionPlan = mapper.mapPartitions();
@@ -246,13 +245,15 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 partitionProperties[idx] = org.jberet.job.model.Properties.toJavaUtilProperties(props);
             }
         }
-        final boolean isRestartNotOverride = isRestart && !isOverride;
+
+        final StepExecutionImpl originalStepExecution = batchContext.getOriginalStepExecution();
+        final boolean isStepRestart = originalStepExecution != null;
+        final boolean isRestartNotOverride = isStepRestart && !isOverride;
         List<PartitionExecutionImpl> abortedPartitionExecutionsFromPrevious = null;
         if (isRestartNotOverride) {
             //need to carry over partition execution data from previous run of the same step.
             //for crashed original step execution, some partitions might not have chance to run during the original
             // job execution, and so should be added
-            final StepExecutionImpl originalStepExecution = batchContext.getOriginalStepExecution();
             final BatchStatus oldStatus = originalStepExecution.getBatchStatus();
             final long oldStepExecutionId = originalStepExecution.getStepExecutionId();
             if (oldStatus == BatchStatus.FAILED || oldStatus == BatchStatus.STOPPED || oldStatus == BatchStatus.COMPLETED) {
@@ -323,7 +324,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 stepContext1.getStepExecution().setWriterCheckpointInfo(partitionExecution.getWriterCheckpointInfo());
             }
 
-            if (isRestart && isOverride && reducer != null) {
+            if (isStepRestart && isOverride && reducer != null) {
                 reducer.rollbackPartitionedStep();
             }
             final Chunk ch = step1.getChunk();
