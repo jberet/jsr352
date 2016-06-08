@@ -385,6 +385,47 @@ public class RestAPIIT {
                 batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
     }
 
+    /**
+     * Test that schedules a single-action job execution with XML request and response media type.
+     * This test is similar to {@link #scheduleSingleAction()}, except the request & response
+     * media type.
+     *
+     * @throws Exception if errors occur
+     * @see #scheduleSingleAction()
+     */
+    @Test
+    public void scheduleSingleActionXml() throws Exception {
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName1)
+                .initialDelay(initialDelayMinute)
+                .build();
+
+        URI uri = batchClient.getJobUriBuilder("schedule")
+                .resolveTemplate("jobXmlName", scheduleConfig.getJobName()).build();
+        WebTarget target = batchClient.target(uri);
+        JobSchedule jobSchedule = target.request().accept(MediaType.APPLICATION_XML_TYPE)
+                .post(Entity.entity(scheduleConfig, MediaType.APPLICATION_XML_TYPE), JobSchedule.class);
+
+        System.out.printf("Scheduled job schedule %s: %s%n", jobSchedule.getId(), jobSchedule);
+        Thread.sleep(sleepTimeMillis);
+
+        uri = batchClient.getJobScheduleUriBuilder("getJobSchedule")
+                .resolveTemplate("scheduleId", jobSchedule.getId()).build();
+        target = batchClient.target(uri);
+        jobSchedule = target.request().accept(MediaType.APPLICATION_XML_TYPE).get(JobSchedule.class);
+
+        assertEquals(JobSchedule.Status.DONE, jobSchedule.getStatus());
+        assertEquals(1, jobSchedule.getJobExecutionIds().size());
+
+        uri = batchClient.getJobExecutionUriBuilder(null)
+                .path(String.valueOf(jobSchedule.getJobExecutionIds().get(0))).build();
+        target = batchClient.target(uri);
+        JobExecutionEntity jobExecutionEntity = target.request().accept(MediaType.APPLICATION_XML_TYPE)
+                .get(JobExecutionEntity.class);
+
+        assertEquals(BatchStatus.COMPLETED, jobExecutionEntity.getBatchStatus());
+    }
+
     @Test
     public void scheduleInterval() throws Exception {
         final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()

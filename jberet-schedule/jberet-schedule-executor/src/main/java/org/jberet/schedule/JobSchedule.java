@@ -21,7 +21,6 @@ import java.util.concurrent.Future;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Represents a job schedule. Instances of this class may be transferred
@@ -99,7 +98,6 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
      * Some {@link JobScheduler} implementations may not need or support
      * {@code Future}, and in that case, this field is not used.
      */
-    @XmlTransient
     private transient Future<?> future;
 
     /**
