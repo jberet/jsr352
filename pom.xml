@@ -116,6 +116,7 @@
         <module>jberet-rest-api</module>
         <module>wildfly-jberet-samples</module>
         <module>jberet-schedule</module>
+        <module>jberet-camel</module>
     </modules>
 
     <build>
