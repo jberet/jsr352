@@ -334,7 +334,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         txStatus == Status.STATUS_COMMITTING || txStatus == Status.STATUS_ROLLING_BACK) {
                     tm.rollback();
                     stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
+                } else if (txStatus == Status.STATUS_ROLLEDBACK || txStatus == Status.STATUS_NO_TRANSACTION) {
+                    //the transaction might have been cancelled by a reaper thread, but has not been disassociated from
+                    //the current thread, so call tm.suspend() to safely disassociate it.
+                    tm.suspend();
+                    stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
                 }
+                
                 for (final ChunkListener l : chunkListeners) {
                     l.onError(e);
                 }
