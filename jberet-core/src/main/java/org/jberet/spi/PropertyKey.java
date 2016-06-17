@@ -60,4 +60,11 @@ public interface PropertyKey {
     String RESTART_MODE_FORCE = "force";
     String RESTART_MODE_DETECT = "detect";
 
+    /**
+     * A key used to disable transactions around calls to {@link PartitionAnalyzer}.
+     * Transactions around calls to {@link PartitionAnalyzer} might time out in long running steps which can
+     * be prevented by disabling the transaction using this property.
+     */
+    String ANALYZER_TX_DISABLED = "jberet.analyzer.txDisabled";
+
 }

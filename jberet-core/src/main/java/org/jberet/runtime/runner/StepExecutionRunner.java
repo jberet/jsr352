@@ -83,6 +83,8 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     final TransactionManager tm;
     final StepExecutionImpl stepExecution;
 
+    private boolean analyzerTxEnabled = true;
+
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
@@ -93,6 +95,11 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         } else {
             tm = jobContext.getBatchEnvironment().getTransactionManager();
         }
+
+        if (step.getProperties() != null) {
+            analyzerTxEnabled = !Boolean.parseBoolean(step.getProperties().get(PropertyKey.ANALYZER_TX_DISABLED));
+        }
+
         createStepListeners();
         initPartitionConfig();
     }
@@ -343,7 +350,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
         final List<PartitionExecutionImpl> fromAllPartitions = new ArrayList<PartitionExecutionImpl>();
 
-        if (analyzer != null) {
+        if (analyzer != null && analyzerTxEnabled) {
             tm.begin();
         }
         try {
@@ -378,14 +385,14 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 }
             }
 
-            if (analyzer != null &&
+            if (analyzer != null && analyzerTxEnabled &&
                     (consolidatedBatchStatus == BatchStatus.FAILED || consolidatedBatchStatus == BatchStatus.STOPPED)) {
                 tm.rollback();
             } else {
                 if (reducer != null) {
                     reducer.beforePartitionedStepCompletion();
                 }
-                if (analyzer != null) {
+                if (analyzer != null && analyzerTxEnabled) {
                     tm.commit();
                 }
             }
@@ -401,7 +408,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             BatchLogger.LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), step);
             consolidatedBatchStatus = BatchStatus.FAILED;
 
-            if (analyzer != null) {
+            if (analyzer != null && analyzerTxEnabled) {
                 try {
                     tm.rollback();
                 } catch (final Exception ee) {
