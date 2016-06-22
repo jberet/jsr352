@@ -43,6 +43,7 @@
         <module>scheduleExecutor</module>
         <module>scheduleTimer</module>
         <module>purgeJdbcRepository2</module>
+        <module>camelReaderWriter</module>
     </modules>
 
     <properties>
