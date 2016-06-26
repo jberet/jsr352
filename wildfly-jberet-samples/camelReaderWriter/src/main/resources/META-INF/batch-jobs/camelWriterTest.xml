@@ -18,6 +18,8 @@
             <reader ref="csvItemReader">
                 <properties>
                     <property name="resource" value="https://raw.githubusercontent.com/jberet/jsr352/master/jberet-support/src/test/resources/movies-2012.csv"/>
+                    <property name="start" value="1"/>
+                    <property name="end" value="3"/>
                     <property name="beanType" value="org.jberet.samples.wildfly.common.Movie"/>
                     <property name="nameMapping" value="rank,tit,grs,opn"/>
                     <property name="cellProcessors" value= "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate(YYYY-MM-dd)"/>
