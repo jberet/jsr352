@@ -13,8 +13,14 @@
 package org.jberet.camel;
 
 import java.io.Serializable;
+import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
+import javax.batch.operations.BatchRuntimeException;
+import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.apache.camel.CamelContext;
+import org.apache.camel.ConsumerTemplate;
 
 /**
  * Implementation of {@code javax.batch.api.chunk.ItemReader} that reads batch data
@@ -25,9 +31,31 @@ import javax.inject.Named;
 @Named
 public class CamelItemReader extends CamelArtifactBase implements ItemReader {
 
+    @Inject
+    @BatchProperty
+    protected String endpoint;
+
+    @Inject
+    @BatchProperty
+    protected long timeout;
+
+    @Inject
+    @BatchProperty
+    protected Class beanType;
+
+    @Inject
+    protected CamelContext camelContext;
+
+    protected ConsumerTemplate consumerTemplate;
+
     @Override
     public void open(final Serializable checkpoint) throws Exception {
-
+        if (camelContext == null) {
+            throw new BatchRuntimeException("CamelContext not available in " + this.getClass().getName());
+        }
+        if (consumerTemplate == null) {
+            consumerTemplate = camelContext.createConsumerTemplate();
+        }
     }
 
     @Override
@@ -37,7 +65,13 @@ public class CamelItemReader extends CamelArtifactBase implements ItemReader {
 
     @Override
     public Object readItem() throws Exception {
-        return null;
+        final Object item;
+        if (beanType == null) {
+            item = consumerTemplate.receiveBody(endpoint, timeout);
+        } else {
+            item = consumerTemplate.receiveBody(endpoint, timeout, beanType);
+        }
+        return item;
     }
 
     @Override

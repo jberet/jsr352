@@ -13,6 +13,9 @@
 package org.jberet.samples.wildfly.camelReaderWriter;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
@@ -24,6 +27,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.jberet.samples.wildfly.common.Movie;
 
@@ -37,10 +41,14 @@ public class CamelJobResource {
     static final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
     static final String writerJobName = "camelWriterTest";
+    static final String readerJobName = "camelReaderTest";
 
     static final String saveTo = "file:" + System.getProperty("java.io.tmpdir");
 
-    static final String endpoint = "direct:writer";
+    static final String writerEndpoint = "direct:writer";
+
+    static final long readerTimeoutMillis = 8000;
+    static final String readerEndpoint = "direct:reader";
 
     @Inject
     private CamelContext camelContext;
@@ -53,13 +61,49 @@ public class CamelJobResource {
 
         camelContext.addRoutes(new RouteBuilder() {
             public void configure() {
-                from(endpoint).autoStartup(true).to(saveTo);
+                from(writerEndpoint).autoStartup(true).to(saveTo);
             }
         });
 
         final Properties jobParams = new Properties();
-        jobParams.setProperty("endpoint", endpoint);
+        jobParams.setProperty("endpoint", writerEndpoint);
         return jobOperator.start(writerJobName, jobParams);
+    }
+
+    @Path("reader")
+    @GET
+    public long reader() throws Exception {
+        camelContext.getTypeConverterRegistry().addTypeConverter(
+                InputStream.class, Movie.class, new MovieTypeConverter());
+
+        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
+
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("endpoint", readerEndpoint);
+        jobParams.setProperty("timeout", String.valueOf(readerTimeoutMillis));
+
+        final long jobExecutionId = jobOperator.start(readerJobName, jobParams);
+        Thread.sleep(readerTimeoutMillis / 2);
+
+        for (final Movie m : getMovies()) {
+            producerTemplate.sendBody(readerEndpoint, m);
+        }
+
+        return jobExecutionId;
+    }
+
+    private static List<Movie> getMovies() {
+        final List<Movie> movies = new ArrayList<Movie>();
+        for (int i = 0; i < 3; i++) {
+            final Movie m = new Movie();
+            m.setRank(i);
+            m.setGrs(i * 1000);
+            m.setOpn(new Date());
+            m.setRating(Movie.Rating.G);
+            m.setTit("Season " + i);
+            movies.add(m);
+        }
+        return movies;
     }
 
 }

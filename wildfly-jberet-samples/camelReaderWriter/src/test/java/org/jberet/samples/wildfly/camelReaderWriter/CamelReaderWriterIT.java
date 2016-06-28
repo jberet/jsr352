@@ -48,4 +48,13 @@ public final class CamelReaderWriterIT extends BatchTestBase {
         final Object responseEntity = response.getEntity();
         System.out.printf("Job execution id in response: %s%n", responseEntity);
     }
+
+    @Test
+    public void testCamelReader() throws Exception {
+        final WebTarget target = client.target(new URI(restUrl + "/camel/reader"));
+        final Response response = target.request().get();
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        final Object responseEntity = response.getEntity();
+        System.out.printf("Job execution id in response: %s%n", responseEntity);
+    }
 }

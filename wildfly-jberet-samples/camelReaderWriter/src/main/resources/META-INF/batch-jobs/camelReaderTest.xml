@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="camelReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="camelReaderTest.step1">
+        <chunk>
+            <reader ref="camelItemReader">
+                <properties>
+                    <property name="beanType" value="org.jberet.samples.wildfly.common.Movie"/>
+                    <property name="endpoint" value="#{jobParameters['endpoint']}"/>
+                    <property name="timeout" value="#{jobParameters['timeout']}"/>
+                </properties>
+            </reader>
+            <writer ref="csvItemWriter">
+                <properties>
+                    <property name="resource" value="#{systemProperties['java.io.tmpdir']}/camelReaderTest.csv"/>
+                    <property name="writeMode" value="overwrite"/>
+                    <property name="header" value="rank,tit,grs,opn"/>
+                    <property name="beanType" value="org.jberet.samples.wildfly.common.Movie"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>
