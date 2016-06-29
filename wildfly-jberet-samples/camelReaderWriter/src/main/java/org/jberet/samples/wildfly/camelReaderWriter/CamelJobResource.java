@@ -27,6 +27,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Consumer;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.jberet.samples.wildfly.common.Movie;
@@ -42,6 +45,7 @@ public class CamelJobResource {
 
     static final String writerJobName = "camelWriterTest";
     static final String readerJobName = "camelReaderTest";
+    static final String processorJobName = "camelProcessorTest";
 
     static final String saveTo = "file:" + System.getProperty("java.io.tmpdir");
 
@@ -49,6 +53,8 @@ public class CamelJobResource {
 
     static final long readerTimeoutMillis = 8000;
     static final String readerEndpoint = "direct:reader";
+
+    static final String processorEndpoint = "direct:processor";
 
     @Inject
     private CamelContext camelContext;
@@ -92,6 +98,19 @@ public class CamelJobResource {
         return jobExecutionId;
     }
 
+    @Path("processor")
+    @GET
+    public long processor() throws Exception {
+        final Consumer consumer = camelContext.getEndpoint(processorEndpoint).createConsumer(new MovieProcessor());
+        consumer.start();
+
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("endpoint", processorEndpoint);
+
+        final long jobExecutionId = jobOperator.start(processorJobName, jobParams);
+        return jobExecutionId;
+    }
+
     private static List<Movie> getMovies() {
         final List<Movie> movies = new ArrayList<Movie>();
         for (int i = 0; i < 3; i++) {
@@ -104,6 +123,21 @@ public class CamelJobResource {
             movies.add(m);
         }
         return movies;
+    }
+
+    /**
+     * A camel processor that changes the movie type to uppercase.
+     */
+    private static class MovieProcessor implements Processor {
+        @Override
+        public void process(final Exchange exchange) throws Exception {
+//            exchange.setPattern(ExchangePattern.InOut);
+            final Movie in = (Movie) exchange.getIn().getBody();
+            final String title = in.getTit();
+            if (title != null) {
+                in.setTit(title.toUpperCase());
+            }
+        }
     }
 
 }

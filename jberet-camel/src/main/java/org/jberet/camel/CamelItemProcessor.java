@@ -12,8 +12,15 @@
 
 package org.jberet.camel;
 
+import javax.annotation.PostConstruct;
+import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemProcessor;
+import javax.batch.operations.BatchRuntimeException;
+import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.apache.camel.CamelContext;
+import org.apache.camel.ProducerTemplate;
 
 /**
  * Implementation of {@code javax.batch.api.chunk.ItemProcessor} that processes
@@ -24,8 +31,28 @@ import javax.inject.Named;
 @Named
 public class CamelItemProcessor extends CamelArtifactBase implements ItemProcessor {
 
+    @Inject
+    @BatchProperty
+    protected String endpoint;
+
+    @Inject
+    protected CamelContext camelContext;
+
+    protected ProducerTemplate producerTemplate;
+
+    @PostConstruct
+    private void postConstruct() {
+        if (camelContext == null) {
+            throw new BatchRuntimeException("CamelContext not available in " + this.getClass().getName());
+        }
+        if (producerTemplate == null) {
+            producerTemplate = camelContext.createProducerTemplate();
+        }
+    }
+
     @Override
     public Object processItem(final Object item) throws Exception {
-        return null;
+        final Object result = producerTemplate.requestBody(endpoint, item);
+        return result;
     }
 }
