@@ -14,9 +14,11 @@ package org.jberet.creation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,11 +42,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
     @Override
     public void destroy(final Object instance) {
         if (instance != null) {
-            try {
-                invokeAnnotatedLifecycleMethod(instance, instance.getClass(), PreDestroy.class);
-            } catch (Exception e) {
-                LOGGER.failToDestroyArtifact(e, instance);
-            }
+            invokeAnnotatedLifecycleMethod(instance, instance.getClass(), PreDestroy.class);
         }
     }
 
@@ -54,7 +52,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
                              final StepContextImpl stepContext,
                              final Properties batchProps) throws Exception {
         final boolean hasBatchProps = batchProps != null && batchProps.size() > 0;
-        while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
+        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("javax.batch")) {
             for (final Field f : cls.getDeclaredFields()) {
                 if (!f.isSynthetic()) {
                     Object fieldVal = null;
@@ -94,9 +92,9 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
         }
     }
 
-    protected void invokeAnnotatedLifecycleMethod(final Object obj, Class<?> cls, final Class<? extends Annotation> annCls) throws Exception{
+    protected void invokeAnnotatedLifecycleMethod(final Object obj, Class<?> cls, final Class<? extends Annotation> annCls) {
         final List<Method> lifecycleMethods = new ArrayList<Method>();
-        while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
+        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("javax.batch")) {
             final Method[] methods = cls.getDeclaredMethods();
             for (final Method m : methods) {
                 if (m.getAnnotation(annCls) != null) {  //the lifecyle annotation is present
@@ -132,14 +130,26 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
         if (annCls == PostConstruct.class) {
             Collections.reverse(lifecycleMethods);
         }
+
         for(final Method m : lifecycleMethods) {
             if (WildFlySecurityManager.isChecking()) {
-                AccessController.doPrivileged(new InvokeMethodPrivilegedExceptionAction(m, obj));
+                try {
+                    AccessController.doPrivileged(new InvokeMethodPrivilegedExceptionAction(m, obj));
+                } catch (PrivilegedActionException e) {
+                    LOGGER.failToDestroyArtifact(e, obj);
+                }
             } else {
                 if (!m.isAccessible()) {
                     m.setAccessible(true);
                 }
-                m.invoke(obj);
+                try {
+                    m.invoke(obj);
+                } catch (InvocationTargetException e) {
+                    LOGGER.failToDestroyArtifact(e, obj);
+                } catch (IllegalAccessException e) {
+                    LOGGER.failToDestroyArtifact(e, obj);
+                }
+
             }
         }
     }
