@@ -46,6 +46,7 @@ public class CamelJobResource {
     static final String writerJobName = "camelWriterTest";
     static final String readerJobName = "camelReaderTest";
     static final String processorJobName = "camelProcessorTest";
+    static final String componentJobName = "camelComponentTest";
 
     static final String saveTo = "file:" + System.getProperty("java.io.tmpdir");
 
@@ -53,8 +54,10 @@ public class CamelJobResource {
 
     static final long readerTimeoutMillis = 8000;
     static final String readerEndpoint = "direct:reader";
-
     static final String processorEndpoint = "direct:processor";
+    static final String componentEndpoint = "jberet:" + componentJobName;
+    static final String directStartEndpoint = "direct:start";
+    static final String mockResultEndpoint = "mock:result";
 
     @Inject
     private CamelContext camelContext;
@@ -108,6 +111,21 @@ public class CamelJobResource {
         jobParams.setProperty("endpoint", processorEndpoint);
 
         final long jobExecutionId = jobOperator.start(processorJobName, jobParams);
+        return jobExecutionId;
+    }
+
+    @Path("component")
+    @GET
+    public long component() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("param1 key", "param1 value");
+
+        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
+        producerTemplate.setDefaultEndpointUri(componentEndpoint);
+        producerTemplate.sendBody(componentEndpoint, jobParams);
+
+        Thread.sleep(readerTimeoutMillis);
+        final Long jobExecutionId = producerTemplate.requestBody((Properties) null, Long.class);
         return jobExecutionId;
     }
 
