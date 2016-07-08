@@ -122,10 +122,8 @@ public class CamelJobResource {
 
         final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
         producerTemplate.setDefaultEndpointUri(componentEndpoint);
-        producerTemplate.sendBody(componentEndpoint, jobParams);
-
-        Thread.sleep(readerTimeoutMillis);
-        final Long jobExecutionId = producerTemplate.requestBody((Properties) null, Long.class);
+//        producerTemplate.sendBody(componentEndpoint, jobParams);
+        final Long jobExecutionId = producerTemplate.requestBody(jobParams, Long.class);
         return jobExecutionId;
     }
 

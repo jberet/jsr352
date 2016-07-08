@@ -17,7 +17,8 @@
         <batchlet>
             <script type="javascript">
                 function process() {
-                    msg = 'Batchlet job started via Camel';
+                    msg = 'Batchlet job started via Camel with batchProperties:'
+                        + jobContext.getJobParameters();
                     print(msg);
                     return msg;
                 }
