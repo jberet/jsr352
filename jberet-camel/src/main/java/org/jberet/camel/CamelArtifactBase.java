@@ -12,11 +12,28 @@
 
 package org.jberet.camel;
 
+import javax.batch.api.BatchProperty;
+import javax.batch.operations.BatchRuntimeException;
+import javax.inject.Inject;
+
+import org.apache.camel.CamelContext;
+
 /**
  * Abstract base class for all Camel-related batch artifacts.
  *
  * @since 1.3.0
  */
 public  abstract class CamelArtifactBase {
+    @Inject
+    @BatchProperty
+    protected String endpoint;
 
+    @Inject
+    protected CamelContext camelContext;
+
+    protected void init() {
+        if (camelContext == null) {
+            throw new BatchRuntimeException("CamelContext not available in " + this.getClass().getName());
+        }
+    }
 }

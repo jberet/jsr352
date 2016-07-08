@@ -15,11 +15,9 @@ package org.jberet.camel;
 import java.io.Serializable;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
-import javax.batch.operations.BatchRuntimeException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.camel.CamelContext;
 import org.apache.camel.ConsumerTemplate;
 
 /**
@@ -33,26 +31,17 @@ public class CamelItemReader extends CamelArtifactBase implements ItemReader {
 
     @Inject
     @BatchProperty
-    protected String endpoint;
-
-    @Inject
-    @BatchProperty
     protected long timeout;
 
     @Inject
     @BatchProperty
     protected Class beanType;
 
-    @Inject
-    protected CamelContext camelContext;
-
     protected ConsumerTemplate consumerTemplate;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {
-        if (camelContext == null) {
-            throw new BatchRuntimeException("CamelContext not available in " + this.getClass().getName());
-        }
+        init();
         if (consumerTemplate == null) {
             consumerTemplate = camelContext.createConsumerTemplate();
         }
