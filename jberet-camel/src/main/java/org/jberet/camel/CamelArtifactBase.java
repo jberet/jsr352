@@ -13,9 +13,9 @@
 package org.jberet.camel;
 
 import javax.batch.api.BatchProperty;
-import javax.batch.operations.BatchRuntimeException;
 import javax.inject.Inject;
 
+import _private.JBeretCamelMessages;
 import org.apache.camel.CamelContext;
 
 /**
@@ -33,7 +33,7 @@ public  abstract class CamelArtifactBase {
 
     protected void init() {
         if (camelContext == null) {
-            throw new BatchRuntimeException("CamelContext not available in " + this.getClass().getName());
+            throw JBeretCamelMessages.MESSAGES.noCamelContext(this);
         }
     }
 }

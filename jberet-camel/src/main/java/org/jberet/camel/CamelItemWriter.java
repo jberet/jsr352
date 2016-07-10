@@ -18,6 +18,7 @@ import javax.batch.api.chunk.ItemWriter;
 import javax.enterprise.context.Dependent;
 import javax.inject.Named;
 
+import _private.JBeretCamelLogger;
 import org.apache.camel.ProducerTemplate;
 
 /**
@@ -38,6 +39,7 @@ public class CamelItemWriter extends CamelArtifactBase implements ItemWriter {
         if (producerTemplate == null) {
             producerTemplate = camelContext.createProducerTemplate();
         }
+        JBeretCamelLogger.LOGGER.openWriter(this, endpoint, camelContext, producerTemplate);
     }
 
     @Override

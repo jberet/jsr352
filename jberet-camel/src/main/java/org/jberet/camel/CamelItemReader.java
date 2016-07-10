@@ -18,6 +18,7 @@ import javax.batch.api.chunk.ItemReader;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import _private.JBeretCamelLogger;
 import org.apache.camel.ConsumerTemplate;
 
 /**
@@ -45,6 +46,7 @@ public class CamelItemReader extends CamelArtifactBase implements ItemReader {
         if (consumerTemplate == null) {
             consumerTemplate = camelContext.createConsumerTemplate();
         }
+        JBeretCamelLogger.LOGGER.openReader(this, endpoint, camelContext, consumerTemplate);
     }
 
     @Override

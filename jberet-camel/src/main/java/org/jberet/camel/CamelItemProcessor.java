@@ -16,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.batch.api.chunk.ItemProcessor;
 import javax.inject.Named;
 
+import _private.JBeretCamelLogger;
 import org.apache.camel.ProducerTemplate;
 
 /**
@@ -35,6 +36,7 @@ public class CamelItemProcessor extends CamelArtifactBase implements ItemProcess
         if (producerTemplate == null) {
             producerTemplate = camelContext.createProducerTemplate();
         }
+        JBeretCamelLogger.LOGGER.openProcessor(this, endpoint, camelContext, producerTemplate);
     }
 
     @Override
