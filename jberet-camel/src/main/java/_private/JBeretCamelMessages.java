@@ -27,4 +27,7 @@ public interface JBeretCamelMessages {
     @Message(id = 73000, value = "CamelContext not available in %s")
     BatchRuntimeException noCamelContext(Object requestingObject);
 
+    @Message(id = 73001, value = "Invalid batch property value: '%s' = '%s'")
+    BatchRuntimeException invalidPropertyValue(String name, String value);
+
 }

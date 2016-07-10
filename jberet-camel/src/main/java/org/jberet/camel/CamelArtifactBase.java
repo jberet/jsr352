@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import _private.JBeretCamelMessages;
 import org.apache.camel.CamelContext;
+import org.apache.camel.Endpoint;
 
 /**
  * Abstract base class for all Camel-related batch artifacts.
@@ -25,8 +26,10 @@ import org.apache.camel.CamelContext;
  */
 public  abstract class CamelArtifactBase {
     @Inject
-    @BatchProperty
-    protected String endpoint;
+    @BatchProperty(name = "endpoint")
+    protected String endpointUri;
+
+    protected Endpoint endpoint;
 
     @Inject
     protected CamelContext camelContext;
@@ -35,5 +38,9 @@ public  abstract class CamelArtifactBase {
         if (camelContext == null) {
             throw JBeretCamelMessages.MESSAGES.noCamelContext(this);
         }
+        if (endpointUri == null || endpointUri.isEmpty()) {
+            throw JBeretCamelMessages.MESSAGES.invalidPropertyValue("endpoint", endpointUri);
+        }
+        endpoint = camelContext.getEndpoint(endpointUri);
     }
 }

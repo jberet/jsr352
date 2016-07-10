@@ -36,7 +36,7 @@ public class CamelItemProcessor extends CamelArtifactBase implements ItemProcess
         if (producerTemplate == null) {
             producerTemplate = camelContext.createProducerTemplate();
         }
-        JBeretCamelLogger.LOGGER.openProcessor(this, endpoint, camelContext, producerTemplate);
+        JBeretCamelLogger.LOGGER.openProcessor(this, endpointUri, camelContext, producerTemplate);
     }
 
     @Override

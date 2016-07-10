@@ -46,7 +46,7 @@ public class CamelItemReader extends CamelArtifactBase implements ItemReader {
         if (consumerTemplate == null) {
             consumerTemplate = camelContext.createConsumerTemplate();
         }
-        JBeretCamelLogger.LOGGER.openReader(this, endpoint, camelContext, consumerTemplate);
+        JBeretCamelLogger.LOGGER.openReader(this, endpointUri, camelContext, consumerTemplate);
     }
 
     @Override
