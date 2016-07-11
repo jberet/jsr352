@@ -13,12 +13,13 @@
 package org.jberet.samples.wildfly.camelReaderWriter;
 
 import java.net.URI;
+import javax.batch.runtime.BatchStatus;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 
 import org.jberet.rest.client.BatchClient;
+import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,39 +43,32 @@ public final class CamelReaderWriterIT extends BatchTestBase {
 
     @Test
     public void testCamelWriter() throws Exception {
-        final WebTarget target = client.target(new URI(restUrl + "/camel/writer"));
-        final Response response = target.request().get();
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        final Object responseEntity = response.getEntity();
-        System.out.printf("Job execution id in response: %s%n", responseEntity);
+        runTest("/camel/writer", 3000);
     }
 
     @Test
     public void testCamelReader() throws Exception {
-        final WebTarget target = client.target(new URI(restUrl + "/camel/reader"));
-        final Response response = target.request().get();
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        final Object responseEntity = response.getEntity();
-        System.out.printf("Job execution id in response: %s%n", responseEntity);
+        runTest("/camel/reader", 40000);
     }
 
     @Test
     public void testCamelProcessor() throws Exception {
-        final WebTarget target = client.target(new URI(restUrl + "/camel/processor"));
-        final Response response = target.request().get();
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        final Object responseEntity = response.getEntity();
-        System.out.printf("Job execution id in response: %s%n", responseEntity);
+        runTest("/camel/processor", 3000);
     }
 
     @Test
     public void testCamelComponent() throws Exception {
-        final WebTarget target = client.target(new URI(restUrl + "/camel/component"));
-        final Response response = target.request().get();
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        final Object responseEntity = response.getEntity();
-        System.out.printf("Job execution id in response: %s%n", responseEntity);
+        runTest("/camel/component", 3000);
     }
 
+    private void runTest(final String resourceUrl, final long waitForJobCompletionMillis) throws Exception {
+        final WebTarget target = client.target(new URI(restUrl + resourceUrl));
+        final long jobExecutionId = target.request().get(long.class);
+        System.out.printf("Job execution id in response: %s%n", jobExecutionId);
+
+        Thread.sleep(waitForJobCompletionMillis);
+        final JobExecutionEntity jobExecutionEntity = batchClient.getJobExecution(jobExecutionId);
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecutionEntity.getBatchStatus());
+    }
 
 }
