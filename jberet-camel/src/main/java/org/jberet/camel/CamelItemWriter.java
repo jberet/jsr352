@@ -40,10 +40,14 @@ public class CamelItemWriter extends CamelArtifactBase implements ItemWriter {
             producerTemplate = camelContext.createProducerTemplate();
         }
         JBeretCamelLogger.LOGGER.openWriter(this, endpointUri, camelContext, producerTemplate);
+        producerTemplate.start();
     }
 
     @Override
     public void close() throws Exception {
+        if (producerTemplate != null) {
+            producerTemplate.stop();
+        }
     }
 
     @Override

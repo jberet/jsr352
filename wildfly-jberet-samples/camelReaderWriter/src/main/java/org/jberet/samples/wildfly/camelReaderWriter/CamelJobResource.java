@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Properties;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
+import javax.batch.runtime.BatchStatus;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -56,8 +57,6 @@ public class CamelJobResource {
     static final String readerEndpoint = "direct:reader";
     static final String processorEndpoint = "direct:processor";
     static final String componentEndpoint = "jberet:" + componentJobName;
-    static final String directStartEndpoint = "direct:start";
-    static final String mockResultEndpoint = "mock:result";
 
     @Inject
     private CamelContext camelContext;
@@ -68,11 +67,15 @@ public class CamelJobResource {
         camelContext.getTypeConverterRegistry().addTypeConverter(
                 InputStream.class, Movie.class, new MovieTypeConverter());
 
-        camelContext.addRoutes(new RouteBuilder() {
-            public void configure() {
-                from(writerEndpoint).autoStartup(true).to(saveTo);
-            }
-        });
+        try {
+            camelContext.addRoutes(new RouteBuilder() {
+                public void configure() {
+                    from(writerEndpoint).autoStartup(true).to(saveTo);
+                }
+            });
+        } catch (final Exception e) {
+            System.out.printf("Ignoring exception from adding route: %s%n", e);
+        }
 
         final Properties jobParams = new Properties();
         jobParams.setProperty("endpoint", writerEndpoint);
@@ -97,7 +100,7 @@ public class CamelJobResource {
         for (final Movie m : getMovies()) {
             producerTemplate.sendBody(readerEndpoint, m);
         }
-
+        producerTemplate.stop();
         return jobExecutionId;
     }
 
@@ -111,6 +114,12 @@ public class CamelJobResource {
         jobParams.setProperty("endpoint", processorEndpoint);
 
         final long jobExecutionId = jobOperator.start(processorJobName, jobParams);
+
+        do {
+            Thread.sleep(1000);
+        } while (jobOperator.getJobExecution(jobExecutionId).getBatchStatus() == BatchStatus.STARTED);
+
+        consumer.stop();
         return jobExecutionId;
     }
 
@@ -124,6 +133,7 @@ public class CamelJobResource {
         producerTemplate.setDefaultEndpointUri(componentEndpoint);
 //        producerTemplate.sendBody(componentEndpoint, jobParams);
         final Long jobExecutionId = producerTemplate.requestBody(jobParams, Long.class);
+        producerTemplate.stop();
         return jobExecutionId;
     }
 
