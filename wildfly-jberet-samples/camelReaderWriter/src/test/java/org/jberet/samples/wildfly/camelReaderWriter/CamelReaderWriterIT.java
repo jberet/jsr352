@@ -19,7 +19,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import org.jberet.rest.client.BatchClient;
-import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,32 +42,41 @@ public final class CamelReaderWriterIT extends BatchTestBase {
 
     @Test
     public void testCamelWriter() throws Exception {
-        runTest("/camel/writer", 3000);
+        runTest("/camel/writer");
     }
 
     @Test
     public void testCamelReader() throws Exception {
-        runTest("/camel/reader", 40000);
+        runTest("/camel/reader");
     }
 
     @Test
     public void testCamelProcessor() throws Exception {
-        runTest("/camel/processor", 3000);
+        runTest("/camel/processor");
     }
 
     @Test
     public void testCamelComponent() throws Exception {
-        runTest("/camel/component", 3000);
+        runTest("/camel/component");
     }
 
-    private void runTest(final String resourceUrl, final long waitForJobCompletionMillis) throws Exception {
+    private void runTest(final String resourceUrl) throws Exception {
         final WebTarget target = client.target(new URI(restUrl + resourceUrl));
         final long jobExecutionId = target.request().get(long.class);
         System.out.printf("Job execution id in response: %s%n", jobExecutionId);
-
-        Thread.sleep(waitForJobCompletionMillis);
-        final JobExecutionEntity jobExecutionEntity = batchClient.getJobExecution(jobExecutionId);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecutionEntity.getBatchStatus());
+        Assert.assertEquals(BatchStatus.COMPLETED, waitForJobExecutionDone(jobExecutionId));
     }
 
+    private BatchStatus waitForJobExecutionDone(final long jobExecutionId) throws Exception {
+        BatchStatus batchStatus;
+        int numberOfSeconds = 0;
+        int maxNumberOfSeconds = 200;
+        do {
+            Thread.sleep(1000);
+            numberOfSeconds++;
+            batchStatus = batchClient.getJobExecution(jobExecutionId).getBatchStatus();
+        } while ((batchStatus == BatchStatus.STARTED || batchStatus == BatchStatus.STARTING || batchStatus == null)
+                && numberOfSeconds < maxNumberOfSeconds);
+        return batchStatus;
+    }
 }
