@@ -14,7 +14,6 @@ package org.jberet.camel.component;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import javax.batch.operations.JobOperator;
@@ -46,15 +45,12 @@ public class JBeretProducer extends DefaultProducer {
     public void process(final Exchange exchange) throws Exception {
         final JBeretEndpoint endpoint = (JBeretEndpoint) getEndpoint();
         final JBeretComponent component = (JBeretComponent) endpoint.getComponent();
-
-        runJobOperation(component.getJobOperator(), exchange,
-                endpoint.getRemainingPath(), endpoint.getParameters());
+        runJobOperation(component.getJobOperator(), exchange, endpoint.getRemainingPath());
     }
 
     private void runJobOperation(final JobOperator jobOperator,
                                  final Exchange exchange,
-                                 final String remainingPath,
-                                 final Map<String, Object> parameters) throws Exception {
+                                 final String remainingPath) throws Exception {
         if (remainingPath.isEmpty()) {
             throw JBeretCamelMessages.MESSAGES.invalidJBeretComponentUri(remainingPath);
         }
@@ -66,11 +62,11 @@ public class JBeretProducer extends DefaultProducer {
         } else {
             final String resourceType = parts[0].toLowerCase();
             if (resourceType.equals(JOBS)) {
-                doJobs(jobOperator, exchange, parts, parameters);
+                doJobs(jobOperator, exchange, parts);
             } else if (JOBEXECUTIONS.equals(resourceType)) {
-                doJobExecutions(jobOperator, exchange, parts, parameters);
+                doJobExecutions(jobOperator, exchange, parts);
             } else if (JOBINSTANCES.equals(resourceType)) {
-                doJobInstances(jobOperator, exchange, parts, parameters);
+                doJobInstances(jobOperator, exchange, parts);
             } else {
                 throw JBeretCamelMessages.MESSAGES.invalidJBeretComponentUri(remainingPath);
             }
@@ -79,8 +75,7 @@ public class JBeretProducer extends DefaultProducer {
 
     private void doJobs(final JobOperator jobOperator,
                         final Exchange exchange,
-                        final String[] paths,
-                        final Map<String, Object> parameters) throws Exception {
+                        final String[] paths) throws Exception {
         final Message in = exchange.getIn();
         if (paths.length == 1) {
             //urls like jberet:jobs
@@ -101,9 +96,8 @@ public class JBeretProducer extends DefaultProducer {
     }
 
     private void doJobInstances(final JobOperator jobOperator,
-                        final Exchange exchange,
-                        final String[] paths,
-                        final Map<String, Object> parameters) throws Exception {
+                                final Exchange exchange,
+                                final String[] paths) throws Exception {
         final Message in = exchange.getIn();
         if (paths.length == 1) {
             //urls like jberet:jobinstances?jobName=job1&start=0&count=10
@@ -118,7 +112,7 @@ public class JBeretProducer extends DefaultProducer {
         } else if (paths.length == 2) {
             //urls like jberet:jobinstances/count?jobName=job1
             final String resourceName = paths[1];
-            if(COUNT.equals(resourceName)) {
+            if (COUNT.equals(resourceName)) {
                 final String jobName = ((JBeretEndpoint) getEndpoint()).getJobName();
                 if (jobName == null) {
                     throw JBeretCamelMessages.MESSAGES.invalidOrMissingParameterInJBeretComponentUrk(JOB_NAME, null);
@@ -136,9 +130,8 @@ public class JBeretProducer extends DefaultProducer {
     }
 
     private void doJobExecutions(final JobOperator jobOperator,
-                        final Exchange exchange,
-                        final String[] paths,
-                        final Map<String, Object> parameters) throws Exception {
+                                 final Exchange exchange,
+                                 final String[] paths) throws Exception {
         final Message in = exchange.getIn();
         if (paths.length == 1) {
             //urls like jberet:jobexecutions

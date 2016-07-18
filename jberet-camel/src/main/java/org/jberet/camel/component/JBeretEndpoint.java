@@ -12,8 +12,6 @@
 
 package org.jberet.camel.component;
 
-import java.util.Map;
-
 import org.apache.camel.Component;
 import org.apache.camel.Consumer;
 import org.apache.camel.PollingConsumer;
@@ -23,19 +21,15 @@ import org.apache.camel.impl.DefaultEndpoint;
 
 public class JBeretEndpoint extends DefaultEndpoint {
     private final String remainingPath;
-    private final Map<String, Object> parameters;
-
     private String jobName;
     private int start;
     private int count = 10;
 
     public JBeretEndpoint(final String endpointUri,
                           final Component component,
-                          final String remainingPath,
-                          final Map<String, Object> parameters) {
+                          final String remainingPath) {
         super(endpointUri, component);
         this.remainingPath = remainingPath;
-        this.parameters = parameters;
     }
 
     @Override
@@ -60,10 +54,6 @@ public class JBeretEndpoint extends DefaultEndpoint {
 
     public String getRemainingPath() {
         return remainingPath;
-    }
-
-    public Map<String, Object> getParameters() {
-        return parameters;
     }
 
     @Override

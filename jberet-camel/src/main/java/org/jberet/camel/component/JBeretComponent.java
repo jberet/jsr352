@@ -13,7 +13,6 @@
 package org.jberet.camel.component;
 
 import java.util.Map;
-
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 
@@ -31,12 +30,11 @@ public class JBeretComponent extends DefaultComponent {
     protected Endpoint createEndpoint(final String uri,
                                       final String remainingPath,
                                       final Map<String, Object> parameters) throws Exception {
-        return new JBeretEndpoint(uri, this, remainingPath, parameters);
+        return new JBeretEndpoint(uri, this, remainingPath);
     }
 
     public JobOperator getJobOperator() {
         return jobOperator;
     }
-
 
 }
