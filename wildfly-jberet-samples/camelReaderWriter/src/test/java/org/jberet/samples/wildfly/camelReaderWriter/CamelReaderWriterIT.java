@@ -14,15 +14,19 @@ package org.jberet.samples.wildfly.camelReaderWriter;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Properties;
 import javax.batch.runtime.BatchStatus;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import org.jberet.rest.client.BatchClient;
+import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public final class CamelReaderWriterIT extends BatchTestBase {
 
@@ -83,11 +87,70 @@ public final class CamelReaderWriterIT extends BatchTestBase {
         System.out.printf("Got job instances: %s%n", Arrays.toString(jobInstanceIds));
     }
 
+    @Test
+    public void testCamelComponentJobInstancesStartCount() throws Exception {
+        final long[] jobInstanceIds = runTestResult("/camel/jobinstances?start=1&count=3", long[].class);
+        System.out.printf("Got job instances: %s%n", Arrays.toString(jobInstanceIds));
+    }
+
+    @Test
+    public void testCamelComponentJobInstancesCount() throws Exception {
+        final int jobInstancesCount = runTestResult("/camel/jobinstances/count", int.class);
+        System.out.printf("Got job instances count: %s%n", jobInstancesCount);
+    }
+
+    @Test
+    public void testCamelComponentJobExecutionsRunning() throws Exception {
+        final long[] jobExecutionIds = runTestResult("/camel/jobexecutions/running", long[].class);
+        System.out.printf("Got job executions running: %s%n", Arrays.toString(jobExecutionIds));
+    }
+
+    @Test
+    public void testCamelComponentJobExecutionId() throws Exception {
+        //first run a batch job so we can have a valid job execution id
+        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(CamelJobResource.componentJobName, null);
+
+        final long jobExecutionId = runTestResult("/camel/jobexecutions/" + jobExecutionEntity.getExecutionId(), long.class);
+        System.out.printf("Got job execution id: %s%n", jobExecutionId);
+        assertEquals(jobExecutionEntity.getExecutionId(), jobExecutionId);
+    }
+
+    @Test
+    public void testCamelComponentJobExecutionRestart() throws Exception {
+        //first run a failed batch job so we can restart it
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("fail", "true");
+
+        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(CamelJobResource.componentJobName, jobParams);
+        Assert.assertEquals(BatchStatus.FAILED, waitForJobExecutionDone(jobExecutionEntity.getExecutionId()));
+
+        final long restartJobExecutionId = runTestResult("/camel/jobexecutions/" +
+                jobExecutionEntity.getExecutionId() + "/restart", long.class);
+        System.out.printf("Got restart job execution id: %s%n", restartJobExecutionId);
+        assertEquals(BatchStatus.COMPLETED, waitForJobExecutionDone(restartJobExecutionId));
+    }
+
+    @Test
+    public void testCamelComponentJobExecutionAbandon() throws Exception {
+        //first run a failed batch job so we can abandon it
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("fail", "true");
+
+        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(CamelJobResource.componentJobName, jobParams);
+        final long jobExecutionId = jobExecutionEntity.getExecutionId();
+        Assert.assertEquals(BatchStatus.FAILED, waitForJobExecutionDone(jobExecutionId));
+
+        final boolean abandoned = runTestResult("/camel/jobexecutions/" +
+                jobExecutionId + "/abandon", boolean.class);
+        System.out.printf("job execution id: %s abandoned: %s%n", jobExecutionId, abandoned);
+        assertEquals(BatchStatus.ABANDONED, waitForJobExecutionDone(jobExecutionId));
+    }
+
     private void runTest(final String resourceUrl) throws Exception {
         final WebTarget target = client.target(new URI(restUrl + resourceUrl));
         final long jobExecutionId = target.request().get(long.class);
         System.out.printf("Job execution id in response: %s%n", jobExecutionId);
-        Assert.assertEquals(BatchStatus.COMPLETED, waitForJobExecutionDone(jobExecutionId));
+        assertEquals(BatchStatus.COMPLETED, waitForJobExecutionDone(jobExecutionId));
     }
 
     private <T> T runTestResult(final String resourceUrl, final Class<T> resultType) throws Exception {

@@ -20,6 +20,7 @@ import java.util.Properties;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
+import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -27,6 +28,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -146,7 +148,7 @@ public class CamelJobResource {
     @Path("jobs/{jobName}/start")
     @GET
     public long jobNameStart(final @PathParam("jobName") String jobName,
-                        final @Context UriInfo uriInfo) throws Exception {
+                             final @Context UriInfo uriInfo) throws Exception {
         final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
         producerTemplate.setDefaultEndpointUri(getJBeretComponentUri(uriInfo, null));
         final Long jobExecutionId = producerTemplate.requestBody((Properties) null, long.class);
@@ -166,9 +168,17 @@ public class CamelJobResource {
 
     @Path("jobinstances")
     @GET
-    public long[] jobInstances(final @Context UriInfo uriInfo) throws Exception {
+    public long[] jobInstances(final @Context UriInfo uriInfo,
+                               final @QueryParam(JBeretProducer.START) String start,
+                               final @QueryParam(JBeretProducer.COUNT) String count) throws Exception {
         final Properties queryParams = new Properties();
         queryParams.setProperty(JBeretProducer.JOB_NAME, componentJobName);
+        if (start != null) {
+            queryParams.setProperty(JBeretProducer.START, start);
+        }
+        if (count != null) {
+            queryParams.setProperty(JBeretProducer.COUNT, count);
+        }
 
         final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
         producerTemplate.setDefaultEndpointUri(getJBeretComponentUri(uriInfo, queryParams));
@@ -176,11 +186,80 @@ public class CamelJobResource {
         producerTemplate.stop();
 
         final long[] jobInstanceIds = new long[jobInstances.size()];
-        for(int i = 0; i < jobInstances.size(); i++) {
+        for (int i = 0; i < jobInstances.size(); i++) {
             jobInstanceIds[i] = jobInstances.get(i).getInstanceId();
         }
         return jobInstanceIds;
     }
+
+    @Path("jobinstances/count")
+    @GET
+    public int jobInstancesCount(final @Context UriInfo uriInfo) throws Exception {
+        final Properties queryParams = new Properties();
+        queryParams.setProperty(JBeretProducer.JOB_NAME, componentJobName);
+
+        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
+        producerTemplate.setDefaultEndpointUri(getJBeretComponentUri(uriInfo, queryParams));
+        final int jobInstancesCount = producerTemplate.requestBody((Object) null, int.class);
+        producerTemplate.stop();
+
+        return jobInstancesCount;
+    }
+
+    @Path("jobexecutions/running")
+    @GET
+    public long[] jobExecutionsRunning(final @Context UriInfo uriInfo) throws Exception {
+        final Properties queryParams = new Properties();
+        queryParams.setProperty(JBeretProducer.JOB_NAME, componentJobName);
+
+        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
+        producerTemplate.setDefaultEndpointUri(getJBeretComponentUri(uriInfo, queryParams));
+        final List<JobExecution> jobExecutionsRunning = producerTemplate.requestBody((Object) null, List.class);
+        producerTemplate.stop();
+
+        final long[] jobExecutionIds = new long[jobExecutionsRunning.size()];
+        for (int i = 0; i < jobExecutionsRunning.size(); i++) {
+            jobExecutionIds[i] = jobExecutionsRunning.get(i).getExecutionId();
+        }
+        return jobExecutionIds;
+    }
+
+    @Path("jobexecutions/{jobExecutionId}")
+    @GET
+    public long jobExecutionId(final @Context UriInfo uriInfo,
+                               final @PathParam("jobExecutionId") String jobExecutionId) throws Exception {
+        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
+        producerTemplate.setDefaultEndpointUri(getJBeretComponentUri(uriInfo, null));
+        final JobExecution jobExecution = producerTemplate.requestBody((Object) null, JobExecution.class);
+        producerTemplate.stop();
+        return jobExecution.getExecutionId();
+    }
+
+    @Path("jobexecutions/{jobExecutionId}/restart")
+    @GET
+    public long jobExecutionRestart(final @Context UriInfo uriInfo,
+                                    final @PathParam("jobExecutionId") String jobExecutionId) throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("fail", "false");
+
+        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
+        producerTemplate.setDefaultEndpointUri(getJBeretComponentUri(uriInfo, null));
+        final long restartJobExecutionId = producerTemplate.requestBody(jobParams, long.class);
+        producerTemplate.stop();
+        return restartJobExecutionId;
+    }
+
+    @Path("jobexecutions/{jobExecutionId}/abandon")
+    @GET
+    public boolean jobExecutionAbandon(final @Context UriInfo uriInfo,
+                                    final @PathParam("jobExecutionId") String jobExecutionId) throws Exception {
+        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
+        producerTemplate.setDefaultEndpointUri(getJBeretComponentUri(uriInfo, null));
+        producerTemplate.requestBody(null);
+        producerTemplate.stop();
+        return true;
+    }
+
 
     private static String getJBeretComponentUri(final UriInfo uriInfo, final Properties queryParams) {
         String jberetComponentUri = uriInfo.getPath().substring(leadingUri.length());

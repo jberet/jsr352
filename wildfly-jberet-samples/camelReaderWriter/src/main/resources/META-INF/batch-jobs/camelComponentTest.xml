@@ -15,11 +15,20 @@
 <job id="camelComponentTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
     <step id="camelComponentTest.step1">
         <batchlet>
+            <properties>
+                <property name="fail" value="#{jobParameters['fail']}"/>
+            </properties>
             <script type="javascript">
                 function process() {
                     msg = 'Batchlet job started via Camel with batchProperties:'
                         + jobContext.getJobParameters();
                     print(msg);
+
+                    var fail = batchProperties['fail'];
+                    if(fail === 'true') {
+                        throw 'Configured to fail.'
+                    }
+
                     return msg;
                 }
             </script>
