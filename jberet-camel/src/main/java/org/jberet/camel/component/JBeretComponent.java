@@ -31,7 +31,7 @@ public class JBeretComponent extends DefaultComponent {
     protected Endpoint createEndpoint(final String uri,
                                       final String remainingPath,
                                       final Map<String, Object> parameters) throws Exception {
-        return new JBeretEndpoint(uri, remainingPath, this);
+        return new JBeretEndpoint(uri, this, remainingPath, parameters);
     }
 
     public JobOperator getJobOperator() {

@@ -30,4 +30,10 @@ public interface JBeretCamelMessages {
     @Message(id = 73001, value = "Invalid batch property value: '%s' = '%s'")
     BatchRuntimeException invalidPropertyValue(String name, String value);
 
+    @Message(id = 73002, value = "Invalid JBeret component URI: '%s'")
+    BatchRuntimeException invalidJBeretComponentUri(String remainingPath);
+
+    @Message(id = 73003, value = "Invalid or missing parameter in JBeret component URI, key: '%s', value: '%s'")
+    BatchRuntimeException invalidOrMissingParameterInJBeretComponentUrk(String key, String value);
+
 }

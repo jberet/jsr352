@@ -13,6 +13,7 @@
 package org.jberet.samples.wildfly.camelReaderWriter;
 
 import java.net.URI;
+import java.util.Arrays;
 import javax.batch.runtime.BatchStatus;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -56,8 +57,30 @@ public final class CamelReaderWriterIT extends BatchTestBase {
     }
 
     @Test
-    public void testCamelComponent() throws Exception {
-        runTest("/camel/component");
+    public void testCamelComponentJobs() throws Exception {
+        final String[] result = runTestResult("/camel/jobs", String[].class);
+        System.out.printf("Got jobs: %s%n", Arrays.toString(result));
+    }
+
+    @Test
+    public void testCamelComponentJobName() throws Exception {
+        runTest("/camel/jobs/" + CamelJobResource.componentJobName);
+    }
+
+    @Test
+    public void testCamelComponentJobName2() throws Exception {
+        runTest("/camel/jobs/" + CamelJobResource.componentJobName + "/");
+    }
+
+    @Test
+    public void testCamelComponentJobNameStart() throws Exception {
+        runTest("/camel/jobs/" + CamelJobResource.componentJobName + "/start");
+    }
+
+    @Test
+    public void testCamelComponentJobInstances() throws Exception {
+        final long[] jobInstanceIds = runTestResult("/camel/jobinstances", long[].class);
+        System.out.printf("Got job instances: %s%n", Arrays.toString(jobInstanceIds));
     }
 
     private void runTest(final String resourceUrl) throws Exception {
@@ -65,6 +88,11 @@ public final class CamelReaderWriterIT extends BatchTestBase {
         final long jobExecutionId = target.request().get(long.class);
         System.out.printf("Job execution id in response: %s%n", jobExecutionId);
         Assert.assertEquals(BatchStatus.COMPLETED, waitForJobExecutionDone(jobExecutionId));
+    }
+
+    private <T> T runTestResult(final String resourceUrl, final Class<T> resultType) throws Exception {
+        final WebTarget target = client.target(new URI(restUrl + resourceUrl));
+        return target.request().get(resultType);
     }
 
     private BatchStatus waitForJobExecutionDone(final long jobExecutionId) throws Exception {
