@@ -36,9 +36,13 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Consumer;
 import org.apache.camel.Exchange;
+import org.apache.camel.PollingConsumer;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.direct.DirectEndpoint;
+import org.apache.camel.util.UnitOfWorkHelper;
+import org.jberet.camel.CamelJobListener;
 import org.jberet.camel.component.JBeretProducer;
 import org.jberet.samples.wildfly.common.Movie;
 
@@ -55,6 +59,7 @@ public class CamelJobResource {
     static final String readerJobName = "camelReaderTest";
     static final String processorJobName = "camelProcessorTest";
     static final String componentJobName = "camelComponentTest";
+    static final String jobListenerJobName = "camelJobListenerTest";
 
     static final String saveTo = "file:" + System.getProperty("java.io.tmpdir");
 
@@ -64,6 +69,7 @@ public class CamelJobResource {
     static final long readerTimeoutMillis = 8000;
     static final String readerEndpoint = "direct:reader";
     static final String processorEndpoint = "direct:processor";
+    static final String jobListenerEndpoint = "direct:jobListener";
 
     @Inject
     private CamelContext camelContext;
@@ -230,6 +236,35 @@ public class CamelJobResource {
         producerTemplate.requestBody(null);
         producerTemplate.stop();
         return true;
+    }
+
+    @Path("joblistener")
+    @GET
+    public String jobListener() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("endpoint", jobListenerEndpoint);
+
+        final DirectEndpoint endpoint = camelContext.getEndpoint(jobListenerEndpoint, DirectEndpoint.class);
+        endpoint.start();
+        final PollingConsumer pollingConsumer = endpoint.createPollingConsumer();
+        pollingConsumer.start();
+
+        jobOperator.start(jobListenerJobName, jobParams);
+        final StringBuilder sb = new StringBuilder();
+        Exchange exchange;
+        do {
+            exchange = pollingConsumer.receive(readerTimeoutMillis);
+            if (exchange != null) {
+                JobExecution jobExecution = exchange.getIn().getBody(JobExecution.class);
+                final Object header = exchange.getIn().getHeader(CamelJobListener.HEADER_KEY_EVENT_TYPE);
+                sb.append(header).append('\t').
+                        append(jobExecution.getExecutionId()).append('\t')
+                        .append(jobExecution.getBatchStatus()).append('\t');
+                UnitOfWorkHelper.doneSynchronizations(exchange, null, null);
+            }
+        } while (exchange != null);
+
+        return sb.toString();
     }
 
     private <T> T requestBody(final String jberetComponentUri,

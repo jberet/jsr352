@@ -146,6 +146,12 @@ public final class CamelReaderWriterIT extends BatchTestBase {
         assertEquals(BatchStatus.ABANDONED, waitForJobExecutionDone(jobExecutionId));
     }
 
+    @Test
+    public void testCamelJobListener() throws Exception {
+        final String events = runTestResult("/camel/joblistener", String.class);
+        System.out.printf("Got job listener events: %s%n", events);
+    }
+
     private void runTest(final String resourceUrl) throws Exception {
         final WebTarget target = client.target(new URI(restUrl + resourceUrl));
         final long jobExecutionId = target.request().get(long.class);
