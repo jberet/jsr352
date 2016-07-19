@@ -20,6 +20,7 @@ import org.jberet.camel.CamelItemReader;
 import org.jberet.camel.CamelItemWriter;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
+import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
@@ -52,5 +53,8 @@ public interface JBeretCamelLogger extends BasicLogger {
                     CamelContext camelContext,
                     ProducerTemplate producerTemplate);
 
+    @Message(id = 73503, value = "Failed to stop Camel component: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToStop(@Cause Throwable throwable, Object camelComponent);
 
 }
