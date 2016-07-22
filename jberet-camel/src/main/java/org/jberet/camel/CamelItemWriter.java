@@ -24,13 +24,35 @@ import org.apache.camel.ProducerTemplate;
 /**
  * Implementation of {@code javax.batch.api.chunk.ItemWriter} that writes batch data
  * to Apache Camel endpoint.
+ * <p>
+ * The target Camel endpoint is configured through batch property
+ * {@code endpoint} in job XML. For example,
+ * <pre>
+ * &lt;job id="camelWriterTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0"&gt;
+ *   &lt;step id="camelWriterTest.step1"&gt;
+ *     &lt;chunk&gt;
+ *       ... ...
+ *       &lt;writer ref="camelItemWriter"&gt;
+ *         &lt;properties&gt;
+ *           &lt;property name="endpoint" value="#{jobParameters['endpoint']}"/&gt;
+ *         &lt;/properties&gt;
+ *       &lt;/writer&gt;
+ *     &lt;/chunk&gt;
+ *   &lt;/step&gt;
+ * &lt;/job&gt;
+ * </pre>
  *
+ * @see CamelItemReader
+ * @see CamelItemProcessor
  * @since 1.3.0
  */
 @Named
 @Dependent
 public class CamelItemWriter extends CamelArtifactBase implements ItemWriter {
 
+    /**
+     * The Camel {@code ProducerTemplate} for writing data to the endpoint.
+     */
     protected ProducerTemplate producerTemplate;
 
     @Override

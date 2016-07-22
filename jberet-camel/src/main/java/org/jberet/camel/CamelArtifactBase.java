@@ -25,15 +25,28 @@ import org.apache.camel.Endpoint;
  * @since 1.3.0
  */
 public  abstract class CamelArtifactBase {
+    /**
+     * URI of the Camel endpoint for this artifact type.
+     * This is a required batch property.
+     */
     @Inject
     @BatchProperty(name = "endpoint")
     protected String endpointUri;
 
+    /**
+     * Camel endpoint for this artifact type.
+     */
     protected Endpoint endpoint;
 
+    /**
+     * Injected {@code CamelContext}.
+     */
     @Inject
     protected CamelContext camelContext;
 
+    /**
+     * Performs certain validations and initialization.
+     */
     protected void init() {
         if (camelContext == null) {
             throw JBeretCamelMessages.MESSAGES.noCamelContext(this);

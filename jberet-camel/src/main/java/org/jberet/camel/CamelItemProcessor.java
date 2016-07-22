@@ -22,12 +22,33 @@ import org.apache.camel.ProducerTemplate;
 /**
  * Implementation of {@code javax.batch.api.chunk.ItemProcessor} that processes
  * batch data using Apache Camel component.
+ * <p>
+ * The target Camel endpoint is configured through batch property
+ * {@code endpoint} in job XML. For example,
+ * <pre>
+ * &lt;job id="camelReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0"&gt;
+ *   &lt;step id="camelReaderTest.step1"&gt;
+ *     &lt;chunk&gt;
+ *       ... ...
+ *       &lt;processor ref="camelItemProcessor"&gt;
+ *         &lt;properties&gt;
+ *           &lt;property name="endpoint" value="#{jobParameters['endpoint']}"/&gt;
+ *         &lt;/properties&gt;
+ *       &lt;/processor&gt;
+ *       ... ...
+ * </pre>
  *
+ * @see CamelItemReader
+ * @see CamelItemWriter
  * @since 1.3.0
  */
 @Named
 public class CamelItemProcessor extends CamelArtifactBase implements ItemProcessor {
 
+    /**
+     * The Camel {@code ProducerTemplate} for forwarding the processing request
+     * to Camel endpoint.
+     */
     protected ProducerTemplate producerTemplate;
 
     @PostConstruct
@@ -41,7 +62,6 @@ public class CamelItemProcessor extends CamelArtifactBase implements ItemProcess
 
     @Override
     public Object processItem(final Object item) throws Exception {
-        final Object result = producerTemplate.requestBody(endpoint, item);
-        return result;
+        return producerTemplate.requestBody(endpoint, item);
     }
 }
