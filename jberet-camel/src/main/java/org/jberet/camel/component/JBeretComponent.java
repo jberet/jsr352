@@ -19,6 +19,11 @@ import javax.batch.runtime.BatchRuntime;
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.DefaultComponent;
 
+/**
+ * Camel component class defining JBeret component.
+ *
+ * @since 1.3.0
+ */
 public class JBeretComponent extends DefaultComponent {
     private final JobOperator jobOperator;
 
@@ -33,6 +38,11 @@ public class JBeretComponent extends DefaultComponent {
         return new JBeretEndpoint(uri, this, remainingPath);
     }
 
+    /**
+     * Gets the batch job operator.
+     *
+     * @return batch {@code JobOperator}
+     */
     public JobOperator getJobOperator() {
         return jobOperator;
     }

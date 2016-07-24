@@ -25,18 +25,77 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultProducer;
 
+/**
+ * Camel producer class defining JBeret producer.
+ *
+ * @since 1.3.0
+ */
 public class JBeretProducer extends DefaultProducer {
+    /**
+     * String constant for "jobs", which typically appear in JBeret endpoint URI
+     * to denote job-related operations.
+     */
     public static final String JOBS = "jobs";
+
+    /**
+     * String constant for "jobinstances", which typically appear in JBeret endpoint URI
+     * to denote jobinstance-related operations.
+     */
     public static final String JOBINSTANCES = "jobinstances";
+
+    /**
+     * String constant for "jobexecutions", which typically appear in JBeret endpoint URI
+     * to denote jobexecution-related operations.
+     */
     public static final String JOBEXECUTIONS = "jobexecutions";
+
+    /**
+     * String constant for "start", which typically appear in JBeret endpoint URI
+     * to denote starting a job, or the starting position inside a collection.
+     */
     public static final String START = "start";
+
+    /**
+     * String constant for "restart", which usually appear in JBeret endpoint URI
+     * to denote restarting a job execution.
+     */
     public static final String RESTART = "restart";
+
+    /**
+     * String constant for "stop", which usually appear in JBeret endpoint URI
+     * to denote stopping a running job execution.
+     */
     public static final String STOP = "stop";
+
+    /**
+     * String constant for "abandon", which usually appear in JBeret endpoint URI
+     * to denote abandoning a job execution.
+     */
     public static final String ABANDON = "abandon";
+
+    /**
+     * String constant for "count", which usually appear in JBeret endpoint URI
+     * to denote the query parameter {@code count}.
+     */
     public static final String COUNT = "count";
+
+    /**
+     * String constant for "jobName", which usually appear in JBeret endpoint URI
+     * to denote the query parameter {@code jobName}.
+     */
     public static final String JOB_NAME = "jobName";
+
+    /**
+     * String constant for "running", which usually appear in JBeret endpoint URI
+     * to denote running job executions.
+     */
     public static final String RUNNING = "running";
 
+    /**
+     * Instantiates {@code JBeretProducer}.
+     *
+     * @param endpoint JBeret endpoint
+     */
     public JBeretProducer(final Endpoint endpoint) {
         super(endpoint);
     }
@@ -48,6 +107,15 @@ public class JBeretProducer extends DefaultProducer {
         runJobOperation(component.getJobOperator(), exchange, endpoint.getRemainingPath());
     }
 
+    /**
+     * Runs various {@code JobOperator} operations based on JBeret endpoint URI.
+     *
+     * @param jobOperator batch job operator
+     * @param exchange Camel exchange
+     * @param remainingPath the remaing path of JBeret endpoint URI (without scheme part)
+     *
+     * @throws Exception if any errors occur
+     */
     private void runJobOperation(final JobOperator jobOperator,
                                  final Exchange exchange,
                                  final String remainingPath) throws Exception {
@@ -73,6 +141,15 @@ public class JBeretProducer extends DefaultProducer {
         }
     }
 
+    /**
+     * Performs operations related to "jobs", if "jobs" is the first segment of the URI.
+     *
+     * @param jobOperator batch job operator
+     * @param exchange Camel exchange
+     * @param paths string array containing segments of the URI path (without scheme part)
+     *
+     * @throws Exception if any errors occur
+     */
     private void doJobs(final JobOperator jobOperator,
                         final Exchange exchange,
                         final String[] paths) throws Exception {
@@ -95,6 +172,14 @@ public class JBeretProducer extends DefaultProducer {
         }
     }
 
+    /**
+     * Performs operations related to "jobinstances", if "jobinstances" is the first segment of the URI.
+     *
+     * @param jobOperator batch job operator
+     * @param exchange Camel exchange
+     * @param paths string array containing segments of the URI path (without scheme part)
+     * @throws Exception if any errors occur
+     */
     private void doJobInstances(final JobOperator jobOperator,
                                 final Exchange exchange,
                                 final String[] paths) throws Exception {
@@ -129,6 +214,14 @@ public class JBeretProducer extends DefaultProducer {
         }
     }
 
+    /**
+     * Performs operations related to "jobexecutions", if "jobexecutions" is the first segment of the URI.
+     *
+     * @param jobOperator batch job operator
+     * @param exchange Camel exchange
+     * @param paths string array containing segments of the URI path (without scheme part)
+     * @throws Exception if any errors occur
+     */
     private void doJobExecutions(final JobOperator jobOperator,
                                  final Exchange exchange,
                                  final String[] paths) throws Exception {
