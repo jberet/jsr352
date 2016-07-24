@@ -54,7 +54,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
                              final StepContextImpl stepContext,
                              final Properties batchProps) throws Exception {
         final boolean hasBatchProps = batchProps != null && batchProps.size() > 0;
-        while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
+        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("javax.batch")) {
             for (final Field f : cls.getDeclaredFields()) {
                 if (!f.isSynthetic()) {
                     Object fieldVal = null;
@@ -96,7 +96,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
 
     protected void invokeAnnotatedLifecycleMethod(final Object obj, Class<?> cls, final Class<? extends Annotation> annCls) throws Exception{
         final List<Method> lifecycleMethods = new ArrayList<Method>();
-        while (cls != null && cls != Object.class && !cls.getPackage().getName().startsWith("javax.batch")) {
+        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("javax.batch")) {
             final Method[] methods = cls.getDeclaredMethods();
             for (final Method m : methods) {
                 if (m.getAnnotation(annCls) != null) {  //the lifecyle annotation is present
