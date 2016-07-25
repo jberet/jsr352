@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
@@ -156,7 +157,7 @@ public class CamelJobResource {
     @GET
     public String[] jobs(final @Context UriInfo uriInfo) throws Exception {
         @SuppressWarnings("unchecked")
-        final List<String> jobs = requestBody(getJBeretComponentUri(uriInfo, null), null, List.class);
+        final Set<String> jobs = requestBody(getJBeretComponentUri(uriInfo, null), null, Set.class);
         return jobs.toArray(new String[jobs.size()]);
     }
 
@@ -200,12 +201,12 @@ public class CamelJobResource {
         queryParams.setProperty(JBeretProducer.JOB_NAME, componentJobName);
 
         @SuppressWarnings("unchecked")
-        final List<JobExecution> jobExecutionsRunning =
+        final List<Long> jobExecutionsRunning =
                 requestBody(getJBeretComponentUri(uriInfo, queryParams), null, List.class);
 
         final long[] jobExecutionIds = new long[jobExecutionsRunning.size()];
         for (int i = 0; i < jobExecutionsRunning.size(); i++) {
-            jobExecutionIds[i] = jobExecutionsRunning.get(i).getExecutionId();
+            jobExecutionIds[i] = jobExecutionsRunning.get(i);
         }
         return jobExecutionIds;
     }
