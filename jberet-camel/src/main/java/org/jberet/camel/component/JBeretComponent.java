@@ -22,6 +22,8 @@ import org.apache.camel.impl.DefaultComponent;
 /**
  * Camel component class defining JBeret component.
  *
+ * @see JBeretEndpoint
+ * @see JBeretProducer
  * @since 1.3.0
  */
 public class JBeretComponent extends DefaultComponent {

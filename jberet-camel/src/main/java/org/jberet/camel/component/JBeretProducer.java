@@ -26,8 +26,46 @@ import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultProducer;
 
 /**
- * Camel producer class defining JBeret producer.
+ * Camel producer class defining JBeret producer. This producer supports the
+ * following URI structure (examples are given):
+ * <ul>
+ *   <li>{@code jberet:jobs}<p>
+ *       lists job names. The response type is {@code java.util.Set<String>}.
+ *   <li>{@code jberet:jobs/job1}<p>
+ *       starts the job {@code job1}. any job parameters
+ *       should be passed as message body as {@code java.util.Properties}.
+ *       The response type is {@code long} (job execution id).
+ *   <li>{@code jberet:jobs/job1/start}<p>
+ *       starts the job {@code job1}, same as above. any job parameters
+ *       should be passed as message body as {@code java.util.Properties}.
+ *       The response type is {@code long} (job execution id).
+ *   <li>{@code jberet:jobinstances?jobName=job1&start=0&count=10}<p>
+ *       lists job instances, {@code jobName} query param is required, {@code start}
+ *       and {@code count} query params are both optional, and defaults to 0 and 10,
+ *       respectively. The response type is {@code java.util.List<JobInstance>}.
+ *   <li>{@code jberet:jobinstances/count?jobName=job1}<p>
+ *       counts job instances of the job {@code job1}. {@code jobName} query param is
+ *       required. The response type is {@code int}.
+ *   <li>{@code jberet:jobexecutions/running?jobName=job1}<p>
+ *       lists all running job executions of the job {@code job1}. {@code jobName} query param
+ *       is usually specified, but if omitted, it defaults to {@code *} and lists running
+ *       job executions of all jobs currently known to the batch runtime.
+ *       The response type is {@code java.util.List<Long>} (job execution ids).
+ *   <li>{@code jberet:jobexecutions/123456}<p>
+ *       gets the job execution with id {@code 123456}.
+ *       The response type is {@code JobExecution}.
+ *   <li>{@code jberet:jobexecutions/123456/stop}<p>
+ *       stops the job execution with id {@code 123456}. No response is generated.
+ *   <li>{@code jberet:jobexecutions/123456/restart}<p>
+ *       restarts the job execution with id {@code 123456}. any job parameters
+ *       should be passed as message body as {@code java.util.Properties}.
+ *       The response type is {@code long} (job execution id).
+ *   <li>{@code jberet:jobexecutions/123456/abandon}<p>
+ *       abandons the job execution with id {@code 123456}. No response is generated.
+ * </ul>
  *
+ * @see JBeretComponent
+ * @see JBeretEndpoint
  * @since 1.3.0
  */
 public class JBeretProducer extends DefaultProducer {

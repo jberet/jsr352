@@ -30,6 +30,8 @@ import org.apache.camel.impl.DefaultEndpoint;
  * <p>
  * {@code jberet:jobinstances?jobName=job1&start=0&count=10}
  *
+ * @see JBeretComponent
+ * @see JBeretProducer
  * @since 1.3.0
  */
 public class JBeretEndpoint extends DefaultEndpoint {
