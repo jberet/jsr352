@@ -23,6 +23,7 @@ import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
+import javax.batch.runtime.StepExecution;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -43,7 +44,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.direct.DirectEndpoint;
 import org.apache.camel.util.UnitOfWorkHelper;
-import org.jberet.camel.CamelJobListener;
+import org.jberet.camel.CamelListenerBase;
 import org.jberet.camel.component.JBeretProducer;
 import org.jberet.samples.wildfly.common.Movie;
 
@@ -61,6 +62,7 @@ public class CamelJobResource {
     static final String processorJobName = "camelProcessorTest";
     static final String componentJobName = "camelComponentTest";
     static final String jobListenerJobName = "camelJobListenerTest";
+    static final String stepListenerJobName = "camelStepListenerTest";
 
     static final String saveTo = "file:" + System.getProperty("java.io.tmpdir");
 
@@ -71,6 +73,7 @@ public class CamelJobResource {
     static final String readerEndpoint = "direct:reader";
     static final String processorEndpoint = "direct:processor";
     static final String jobListenerEndpoint = "direct:jobListener";
+    static final String stepListenerEndpoint = "direct:stepListener";
 
     @Inject
     private CamelContext camelContext;
@@ -257,10 +260,40 @@ public class CamelJobResource {
             exchange = pollingConsumer.receive(readerTimeoutMillis);
             if (exchange != null) {
                 JobExecution jobExecution = exchange.getIn().getBody(JobExecution.class);
-                final Object header = exchange.getIn().getHeader(CamelJobListener.HEADER_KEY_EVENT_TYPE);
-                sb.append(header).append('\t').
-                        append(jobExecution.getExecutionId()).append('\t')
+                final Object header = exchange.getIn().getHeader(CamelListenerBase.HEADER_KEY_EVENT_TYPE);
+                sb.append(header).append('\t')
+                        .append(jobExecution.getExecutionId()).append('\t')
                         .append(jobExecution.getBatchStatus()).append('\t');
+                UnitOfWorkHelper.doneSynchronizations(exchange, null, null);
+            }
+        } while (exchange != null);
+
+        return sb.toString();
+    }
+
+    @Path("steplistener")
+    @GET
+    public String stepListener() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("endpoint", stepListenerEndpoint);
+
+        final DirectEndpoint endpoint = camelContext.getEndpoint(stepListenerEndpoint, DirectEndpoint.class);
+        endpoint.start();
+        final PollingConsumer pollingConsumer = endpoint.createPollingConsumer();
+        pollingConsumer.start();
+
+        jobOperator.start(stepListenerJobName, jobParams);
+        final StringBuilder sb = new StringBuilder();
+        Exchange exchange;
+        do {
+            exchange = pollingConsumer.receive(readerTimeoutMillis);
+            if (exchange != null) {
+                StepExecution stepExecution = exchange.getIn().getBody(StepExecution.class);
+                final Object header = exchange.getIn().getHeader(CamelListenerBase.HEADER_KEY_EVENT_TYPE);
+                sb.append(header).append('\t')
+                        .append(stepExecution.getStepExecutionId()).append('\t')
+                        .append(stepExecution.getStepName()).append('\t')
+                        .append(stepExecution.getBatchStatus()).append('\t');
                 UnitOfWorkHelper.doneSynchronizations(exchange, null, null);
             }
         } while (exchange != null);

@@ -152,6 +152,12 @@ public final class CamelReaderWriterIT extends BatchTestBase {
         System.out.printf("Got job listener events: %s%n", events);
     }
 
+    @Test
+    public void testCamelStepListener() throws Exception {
+        final String events = runTestResult("/camel/steplistener", String.class);
+        System.out.printf("Got step listener events: %s%n", events);
+    }
+
     private void runTest(final String resourceUrl) throws Exception {
         final WebTarget target = client.target(new URI(restUrl + resourceUrl));
         final long jobExecutionId = target.request().get(long.class);
