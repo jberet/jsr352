@@ -44,6 +44,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.direct.DirectEndpoint;
 import org.apache.camel.util.UnitOfWorkHelper;
+import org.jberet.camel.ChunkExecutionInfo;
 import org.jberet.camel.EventType;
 import org.jberet.camel.component.JBeretProducer;
 import org.jberet.samples.wildfly.common.Movie;
@@ -63,6 +64,7 @@ public class CamelJobResource {
     static final String componentJobName = "camelComponentTest";
     static final String jobListenerJobName = "camelJobListenerTest";
     static final String stepListenerJobName = "camelStepListenerTest";
+    static final String chunkListenerJobName = "camelChunkListenerTest";
 
     static final String saveTo = "file:" + System.getProperty("java.io.tmpdir");
 
@@ -74,6 +76,9 @@ public class CamelJobResource {
     static final String processorEndpoint = "direct:processor";
     static final String jobListenerEndpoint = "direct:jobListener";
     static final String stepListenerEndpoint = "direct:stepListener";
+    static final String chunkListenerEndpoint = "direct:chunkListener";
+
+    static final String NL = System.getProperty("line.separator");
 
     @Inject
     private CamelContext camelContext;
@@ -294,6 +299,33 @@ public class CamelJobResource {
                         .append(stepExecution.getStepExecutionId()).append('\t')
                         .append(stepExecution.getStepName()).append('\t')
                         .append(stepExecution.getBatchStatus()).append('\t');
+                UnitOfWorkHelper.doneSynchronizations(exchange, null, null);
+            }
+        } while (exchange != null);
+
+        return sb.toString();
+    }
+
+    @Path("chunklistener")
+    @GET
+    public String chunkListener() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("endpoint", chunkListenerEndpoint);
+
+        final DirectEndpoint endpoint = camelContext.getEndpoint(chunkListenerEndpoint, DirectEndpoint.class);
+        endpoint.start();
+        final PollingConsumer pollingConsumer = endpoint.createPollingConsumer();
+        pollingConsumer.start();
+
+        jobOperator.start(chunkListenerJobName, jobParams);
+        final StringBuilder sb = new StringBuilder();
+        Exchange exchange;
+        do {
+            exchange = pollingConsumer.receive(readerTimeoutMillis);
+            if (exchange != null) {
+                ChunkExecutionInfo chunkExecutionInfo = exchange.getIn().getBody(ChunkExecutionInfo.class);
+                final Object header = exchange.getIn().getHeader(EventType.EVENT_TYPE);
+                sb.append(header).append('\t').append(String.valueOf(chunkExecutionInfo)).append(NL).append(NL);
                 UnitOfWorkHelper.doneSynchronizations(exchange, null, null);
             }
         } while (exchange != null);

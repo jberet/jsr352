@@ -47,4 +47,60 @@ public final class EventType {
      */
     public static final String AFTER_STEP = "afterStep";
 
+
+    // ChunkListener methods:
+    public static final String BEFORE_CHUNK = "beforeChunk";
+
+    public static final String ON_CHUNK_ERROR = "onChunkError";
+
+    public static final String AFTER_CHUNK = "afterChunk";
+
+
+    // ItemProcessListener
+    public static final String BEFORE_PROCESS = "beforeProcess";
+
+    public static final String AFTER_PROCESS = "afterProcess";
+
+    public static final String ON_PROCESS_ERROR = "onProcessError";
+
+
+    // ItemReadListener
+    public static final String BEFORE_READ = "beforeRead";
+
+    public static final String AFTER_READ = "afterRead";
+
+    public static final String ON_READ_ERROR = "onReadError";
+
+
+    // ItemWriteListener
+    public static final String BEFORE_WRITE = "beforeWrite";
+
+    public static final String AFTER_WRITE = "afterWrite";
+
+    public static final String ON_WRITE_ERROR = "onWriteError";
+
+
+    // RetryProcessListener
+    public static final String ON_RETRY_PROCESS_EXCEPTION = "onRetryProcessException";
+
+
+    // RetryReadListener
+    public static final String ON_RETRY_READ_EXCEPTION = "onRetryReadException";
+
+
+    // RetryWriteListener
+    public static final String ON_RETRY_WRITE_EXCEPTION = "onRetryWriteException";
+
+
+    // SkipProcessListener
+    public static final String ON_SKIP_PROCESS_ITEM = "onSkipProcessItem";
+
+
+    // SkipReadListener
+    public static final String ON_SKIP_READ_ITEM = "onSkipReadItem";
+
+
+    // SkipWriteListener
+    public static final String ON_SKIP_WRITE_ITEM = "onSkipWriteItem";
+
 }

@@ -149,13 +149,19 @@ public final class CamelReaderWriterIT extends BatchTestBase {
     @Test
     public void testCamelJobListener() throws Exception {
         final String events = runTestResult("/camel/joblistener", String.class);
-        System.out.printf("Got job listener events: %s%n", events);
+        System.out.printf("Got job listener events: %n%s%n", events);
     }
 
     @Test
     public void testCamelStepListener() throws Exception {
         final String events = runTestResult("/camel/steplistener", String.class);
-        System.out.printf("Got step listener events: %s%n", events);
+        System.out.printf("Got step listener events: %n%s%n", events);
+    }
+
+    @Test
+    public void testCamelChunkListener() throws Exception {
+        final String events = runTestResult("/camel/chunklistener", String.class);
+        System.out.printf("Got chunk listener events: %n%s%n", events);
     }
 
     private void runTest(final String resourceUrl) throws Exception {
