@@ -18,17 +18,20 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import static org.jberet.camel.EventType.AFTER_STEP;
+import static org.jberet.camel.EventType.BEFORE_STEP;
+
 /**
  * An implementation of {@code javax.batch.api.listener.StepListener} that sends
  * step execution events to a Camel endpoint. Two types of events are sent:
  * <ul>
- *     <li>{@value #HEADER_VALUE_BEFORE_STEP}: sent before a step execution
- *     <li>{@value #HEADER_VALUE_AFTER_STEP}: sent after a step execution
+ *     <li>{@value EventType#BEFORE_STEP}: sent before a step execution
+ *     <li>{@value EventType#AFTER_STEP}: sent after a step execution
  * </ul>
  * The body of the message sent is the current {@code StepExecution}.
  * Each message also contains a header to indicate the event type:
- * its key is {@value #HEADER_KEY_EVENT_TYPE}, and value is either
- * {@value #HEADER_VALUE_BEFORE_STEP} or {@value #HEADER_VALUE_AFTER_STEP}.
+ * its key is {@value EventType#EVENT_TYPE}, and value is either
+ * {@value EventType#BEFORE_STEP} or {@value EventType#AFTER_STEP}.
  * <p>
  * The target Camel endpoint is configured through batch property
  * {@code endpoint} in job XML. For example,
@@ -53,18 +56,6 @@ import javax.inject.Named;
 @Named
 public class CamelStepListener extends CamelListenerBase implements StepListener {
     /**
-     * The value of the message header to indicate that the event is for
-     * before step execution.
-     */
-    public static final String HEADER_VALUE_BEFORE_STEP = "BEFORE_STEP";
-
-    /**
-     * The value of the message header to indicate that the event is for
-     * after step execution.
-     */
-    public static final String HEADER_VALUE_AFTER_STEP = "AFTER_STEP";
-
-    /**
      * Injection of {@code javax.batch.runtime.context.StepContext} by batch
      * runtime.
      */
@@ -73,12 +64,12 @@ public class CamelStepListener extends CamelListenerBase implements StepListener
 
     @Override
     public void beforeStep() throws Exception {
-        sendBodyAndHeader(HEADER_VALUE_BEFORE_STEP);
+        sendBodyAndHeader(BEFORE_STEP);
     }
 
     @Override
     public void afterStep() throws Exception {
-        sendBodyAndHeader(HEADER_VALUE_AFTER_STEP);
+        sendBodyAndHeader(AFTER_STEP);
     }
 
     /**
@@ -86,7 +77,8 @@ public class CamelStepListener extends CamelListenerBase implements StepListener
      * The message has the current {@code StepExecution} as the body, and
      * a header to indicate the event type.
      *
-     * @param headerValue either {@value #HEADER_VALUE_BEFORE_STEP} or {@value #HEADER_VALUE_AFTER_STEP}
+     * @param headerValue either {@value EventType#BEFORE_STEP}
+     *                    or {@value EventType#AFTER_STEP}
      */
     protected void sendBodyAndHeader(final String headerValue) {
         final long jobExecutionId = jobContext.getExecutionId();
@@ -99,6 +91,6 @@ public class CamelStepListener extends CamelListenerBase implements StepListener
             }
         }
 
-        producerTemplate.sendBodyAndHeader(endpoint, stepExecution, HEADER_KEY_EVENT_TYPE, headerValue);
+        producerTemplate.sendBodyAndHeader(endpoint, stepExecution, EventType.EVENT_TYPE, headerValue);
     }
 }

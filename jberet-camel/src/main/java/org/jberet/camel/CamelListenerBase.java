@@ -31,12 +31,6 @@ import org.apache.camel.ProducerTemplate;
  */
 public abstract class CamelListenerBase extends CamelArtifactBase {
     /**
-     * The key of the message header to indicate whether the event is for
-     * before job or after job execution.
-     */
-    public static final String HEADER_KEY_EVENT_TYPE = "EVENT_TYPE";
-
-    /**
      * Injection of {@code javax.batch.runtime.context.JobContext} by batch
      * runtime.
      */

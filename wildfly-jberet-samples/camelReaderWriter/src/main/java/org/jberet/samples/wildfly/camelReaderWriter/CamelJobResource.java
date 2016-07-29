@@ -44,7 +44,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.direct.DirectEndpoint;
 import org.apache.camel.util.UnitOfWorkHelper;
-import org.jberet.camel.CamelListenerBase;
+import org.jberet.camel.EventType;
 import org.jberet.camel.component.JBeretProducer;
 import org.jberet.samples.wildfly.common.Movie;
 
@@ -260,7 +260,7 @@ public class CamelJobResource {
             exchange = pollingConsumer.receive(readerTimeoutMillis);
             if (exchange != null) {
                 JobExecution jobExecution = exchange.getIn().getBody(JobExecution.class);
-                final Object header = exchange.getIn().getHeader(CamelListenerBase.HEADER_KEY_EVENT_TYPE);
+                final Object header = exchange.getIn().getHeader(EventType.EVENT_TYPE);
                 sb.append(header).append('\t')
                         .append(jobExecution.getExecutionId()).append('\t')
                         .append(jobExecution.getBatchStatus()).append('\t');
@@ -289,7 +289,7 @@ public class CamelJobResource {
             exchange = pollingConsumer.receive(readerTimeoutMillis);
             if (exchange != null) {
                 StepExecution stepExecution = exchange.getIn().getBody(StepExecution.class);
-                final Object header = exchange.getIn().getHeader(CamelListenerBase.HEADER_KEY_EVENT_TYPE);
+                final Object header = exchange.getIn().getHeader(EventType.EVENT_TYPE);
                 sb.append(header).append('\t')
                         .append(stepExecution.getStepExecutionId()).append('\t')
                         .append(stepExecution.getStepName()).append('\t')

@@ -20,13 +20,13 @@ import javax.inject.Named;
  * An implementation of {@code javax.batch.api.listener.JobListener} that sends
  * job execution events to a Camel endpoint. Two types of events are sent:
  * <ul>
- * <li>{@value #HEADER_VALUE_BEFORE_JOB}: sent before a job execution
- * <li>{@value #HEADER_VALUE_AFTER_JOB}: sent after a job execution
+ * <li>{@value EventType#BEFORE_JOB}: sent before a job execution
+ * <li>{@value EventType#AFTER_JOB}: sent after a job execution
  * </ul>
  * The body of the message sent is the current {@code JobExecution}.
  * Each message also contains a header to indicate the event type:
- * its key is {@value #HEADER_KEY_EVENT_TYPE}, and value is either
- * {@value #HEADER_VALUE_BEFORE_JOB} or {@value #HEADER_VALUE_AFTER_JOB}.
+ * its key is {@value EventType#EVENT_TYPE}, and value is either
+ * {@value EventType#BEFORE_JOB} or {@value EventType#AFTER_JOB}.
  * <p>
  * The target Camel endpoint is configured through batch property
  * {@code endpoint} in job XML. For example,
@@ -46,26 +46,15 @@ import javax.inject.Named;
  */
 @Named
 public class CamelJobListener extends CamelListenerBase implements JobListener {
-    /**
-     * The value of the message header to indicate that the event is for
-     * before job execution.
-     */
-    public static final String HEADER_VALUE_BEFORE_JOB = "BEFORE_JOB";
-
-    /**
-     * The value of the message header to indicate that the event is for
-     * after job execution.
-     */
-    public static final String HEADER_VALUE_AFTER_JOB = "AFTER_JOB";
 
     @Override
     public void beforeJob() throws Exception {
-        sendBodyAndHeader(HEADER_VALUE_BEFORE_JOB);
+        sendBodyAndHeader(EventType.BEFORE_JOB);
     }
 
     @Override
     public void afterJob() throws Exception {
-        sendBodyAndHeader(HEADER_VALUE_AFTER_JOB);
+        sendBodyAndHeader(EventType.AFTER_JOB);
     }
 
     /**
@@ -73,11 +62,12 @@ public class CamelJobListener extends CamelListenerBase implements JobListener {
      * The message has the current {@code JobExecution} as the body, and
      * a header to indicate the event type.
      *
-     * @param headerValue either {@value #HEADER_VALUE_BEFORE_JOB} or {@value #HEADER_VALUE_AFTER_JOB}
+     * @param headerValue either {@value EventType#BEFORE_JOB}
+     *                    or {@value EventType#AFTER_JOB}
      */
     protected void sendBodyAndHeader(final String headerValue) {
         final long executionId = jobContext.getExecutionId();
         final JobExecution jobExecution = jobOperator.getJobExecution(executionId);
-        producerTemplate.sendBodyAndHeader(endpoint, jobExecution, HEADER_KEY_EVENT_TYPE, headerValue);
+        producerTemplate.sendBodyAndHeader(endpoint, jobExecution, EventType.EVENT_TYPE, headerValue);
     }
 }
