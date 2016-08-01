@@ -25,7 +25,7 @@ import javax.inject.Named;
  * </ul>
  * The body of the message sent is the current {@code JobExecution}.
  * Each message also contains a header to indicate the event type:
- * its key is {@value EventType#EVENT_TYPE}, and value is either
+ * its key is {@value EventType#KEY}, and value is either
  * {@value EventType#BEFORE_JOB} or {@value EventType#AFTER_JOB}.
  * <p>
  * The target Camel endpoint is configured through batch property
@@ -42,6 +42,7 @@ import javax.inject.Named;
  * </pre>
  *
  * @see CamelStepListener
+ * @see CamelChunkListener
  * @since 1.3.0
  */
 @Named
@@ -68,6 +69,6 @@ public class CamelJobListener extends CamelListenerBase implements JobListener {
     protected void sendBodyAndHeader(final String headerValue) {
         final long executionId = jobContext.getExecutionId();
         final JobExecution jobExecution = jobOperator.getJobExecution(executionId);
-        producerTemplate.sendBodyAndHeader(endpoint, jobExecution, EventType.EVENT_TYPE, headerValue);
+        producerTemplate.sendBodyAndHeader(endpoint, jobExecution, EventType.KEY, headerValue);
     }
 }

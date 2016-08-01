@@ -29,6 +29,85 @@ import javax.inject.Named;
 
 import static org.jberet.camel.EventType.*;
 
+/**
+ * An implementation of batch chunk listeners that sends chunk execution events
+ * to the configured Camel endpoint. The following are the chunk listener
+ * interfaces implemented by this class, and supported types of chunk
+ * execution events:
+ * <ul>
+ *     <li>{@code javax.batch.api.chunk.listener.ChunkListener}
+ *          <ul>
+ *              <li>{@value EventType#BEFORE_CHUNK}
+ *              <li>{@value EventType#ON_CHUNK_ERROR}
+ *              <li>{@value EventType#AFTER_CHUNK}
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.ItemProcessListener}
+ *          <ul>
+ *              <li>{@value EventType#BEFORE_PROCESS}
+ *              <li>{@value EventType#AFTER_PROCESS}
+ *              <li>{@value EventType#ON_PROCESS_ERROR}
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.ItemReadListener}
+ *          <ul>
+ *              <li>{@value EventType#BEFORE_READ}
+ *              <li>{@value EventType#AFTER_READ}
+ *              <li>{@value EventType#ON_READ_ERROR}
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.ItemWriteListener}
+ *          <ul>
+ *              <li>{@value EventType#BEFORE_WRITE}
+ *              <li>{@value EventType#AFTER_WRITE}
+ *              <li>{@value EventType#ON_WRITE_ERROR}
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.RetryProcessListener}
+ *          <ul>
+ *              <li>{@value EventType#ON_RETRY_PROCESS_EXCEPTION}
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.RetryReadListener}
+ *          <ul>
+ *              <li>{@value EventType#ON_RETRY_READ_EXCEPTION}
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.RetryWriteListener}
+ *          <ul>
+ *              <li>{@value EventType#ON_RETRY_WRITE_EXCEPTION}
+ *
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.SkipProcessListener}
+ *          <ul>
+ *              <li>{@value EventType#ON_SKIP_PROCESS_ITEM}
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.SkipReadListener}
+ *          <ul>
+ *              <li>{@value EventType#ON_SKIP_READ_ITEM}
+ *          </ul>
+ *     <li>{@code javax.batch.api.chunk.listener.SkipWriteListener}
+ *          <ul>
+ *              <li>{@value EventType#ON_SKIP_WRITE_ITEM}
+ *          </ul>
+ * </ul>
+ * The body of the message sent is the current {@link ChunkExecutionInfo}.
+ * Each message also contains a header to indicate the event type:
+ * its key is {@value EventType#KEY}, and value is one from the above list.
+ * <p>
+ * The target Camel endpoint is configured through batch property
+ * {@code endpoint} in job XML. For example,
+ * <pre>
+ * &lt;job id="camelChunkListenerTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0"&gt;
+ *   &lt;step id="camelChunkListenerTest.step1"&gt;
+ *     &lt;listeners&gt;
+ *       &lt;listener ref="camelChunkListener"&gt;
+ *         &lt;properties&gt;
+ *           &lt;property name="endpoint" value="#{jobParameters['endpoint']}"/&gt;
+ *         &lt;/properties&gt;
+ *       &lt;/listener&gt;
+ *     &lt;/listeners&gt;
+ *     ... ...
+ * </pre>
+ *
+ * @see CamelJobListener
+ * @see CamelStepListener
+ * @since 1.3.0
+ */
 @Named
 public class CamelChunkListener extends CamelListenerBase
         implements ChunkListener, ItemProcessListener, ItemReadListener, ItemWriteListener,
@@ -144,11 +223,15 @@ public class CamelChunkListener extends CamelListenerBase
 
 
     /**
-     * Sends the step execution event message to the configured Camel endpoint.
-     * The message has the current {@code StepExecution} as the body, and
+     * Sends the chunk execution event message to the configured Camel endpoint.
+     * The message has the current {@link ChunkExecutionInfo} as the body, and
      * a header to indicate the event type.
      *
-     * @param eventType
+     * @param eventType event type as defined in {@link EventType}
+     * @param item the item being processed, if applicable; may be null
+     * @param result the result from processing, if applicable; may be null
+     * @param items the items for writing by the item writer, if applicable; may be null
+     * @param exception any exception during read, write or processing; may be null
      */
     protected void sendBodyAndHeader(final String eventType,
                                      final Object item,
@@ -160,7 +243,7 @@ public class CamelChunkListener extends CamelListenerBase
                         stepContext.getStepExecutionId(), stepContext.getStepName(),
                         item, result, items, exception);
 
-        producerTemplate.sendBodyAndHeader(endpoint, chunkExecutionInfo, EventType.EVENT_TYPE, eventType);
+        producerTemplate.sendBodyAndHeader(endpoint, chunkExecutionInfo, EventType.KEY, eventType);
     }
 
 }

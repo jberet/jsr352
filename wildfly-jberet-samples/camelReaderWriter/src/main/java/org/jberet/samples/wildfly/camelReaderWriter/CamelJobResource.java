@@ -265,7 +265,7 @@ public class CamelJobResource {
             exchange = pollingConsumer.receive(readerTimeoutMillis);
             if (exchange != null) {
                 JobExecution jobExecution = exchange.getIn().getBody(JobExecution.class);
-                final Object header = exchange.getIn().getHeader(EventType.EVENT_TYPE);
+                final Object header = exchange.getIn().getHeader(EventType.KEY);
                 sb.append(header).append('\t')
                         .append(jobExecution.getExecutionId()).append('\t')
                         .append(jobExecution.getBatchStatus()).append('\t');
@@ -294,7 +294,7 @@ public class CamelJobResource {
             exchange = pollingConsumer.receive(readerTimeoutMillis);
             if (exchange != null) {
                 StepExecution stepExecution = exchange.getIn().getBody(StepExecution.class);
-                final Object header = exchange.getIn().getHeader(EventType.EVENT_TYPE);
+                final Object header = exchange.getIn().getHeader(EventType.KEY);
                 sb.append(header).append('\t')
                         .append(stepExecution.getStepExecutionId()).append('\t')
                         .append(stepExecution.getStepName()).append('\t')
@@ -324,7 +324,7 @@ public class CamelJobResource {
             exchange = pollingConsumer.receive(readerTimeoutMillis);
             if (exchange != null) {
                 ChunkExecutionInfo chunkExecutionInfo = exchange.getIn().getBody(ChunkExecutionInfo.class);
-                final Object header = exchange.getIn().getHeader(EventType.EVENT_TYPE);
+                final Object header = exchange.getIn().getHeader(EventType.KEY);
                 sb.append(header).append('\t').append(String.valueOf(chunkExecutionInfo)).append(NL).append(NL);
                 UnitOfWorkHelper.doneSynchronizations(exchange, null, null);
             }

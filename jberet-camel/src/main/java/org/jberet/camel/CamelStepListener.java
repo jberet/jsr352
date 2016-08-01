@@ -30,7 +30,7 @@ import static org.jberet.camel.EventType.BEFORE_STEP;
  * </ul>
  * The body of the message sent is the current {@code StepExecution}.
  * Each message also contains a header to indicate the event type:
- * its key is {@value EventType#EVENT_TYPE}, and value is either
+ * its key is {@value EventType#KEY}, and value is either
  * {@value EventType#BEFORE_STEP} or {@value EventType#AFTER_STEP}.
  * <p>
  * The target Camel endpoint is configured through batch property
@@ -51,6 +51,7 @@ import static org.jberet.camel.EventType.BEFORE_STEP;
  * </pre>
  *
  * @see CamelJobListener
+ * @see CamelChunkListener
  * @since 1.3.0
  */
 @Named
@@ -91,6 +92,6 @@ public class CamelStepListener extends CamelListenerBase implements StepListener
             }
         }
 
-        producerTemplate.sendBodyAndHeader(endpoint, stepExecution, EventType.EVENT_TYPE, headerValue);
+        producerTemplate.sendBodyAndHeader(endpoint, stepExecution, EventType.KEY, headerValue);
     }
 }
