@@ -20,13 +20,14 @@ import javax.inject.Named;
  * An implementation of {@code javax.batch.api.listener.JobListener} that sends
  * job execution events to a Camel endpoint. Two types of events are sent:
  * <ul>
- * <li>{@value EventType#BEFORE_JOB}: sent before a job execution
- * <li>{@value EventType#AFTER_JOB}: sent after a job execution
+ * <li>{@value org.jberet.camel.EventType#BEFORE_JOB}: sent before a job execution
+ * <li>{@value org.jberet.camel.EventType#AFTER_JOB}: sent after a job execution
  * </ul>
  * The body of the message sent is the current {@code JobExecution}.
  * Each message also contains a header to indicate the event type:
- * its key is {@value EventType#KEY}, and value is either
- * {@value EventType#BEFORE_JOB} or {@value EventType#AFTER_JOB}.
+ * its key is {@value org.jberet.camel.EventType#KEY}, and value is either
+ * {@value org.jberet.camel.EventType#BEFORE_JOB} or
+ * {@value org.jberet.camel.EventType#AFTER_JOB}.
  * <p>
  * The target Camel endpoint is configured through batch property
  * {@code endpoint} in job XML. For example,
@@ -63,8 +64,8 @@ public class CamelJobListener extends CamelListenerBase implements JobListener {
      * The message has the current {@code JobExecution} as the body, and
      * a header to indicate the event type.
      *
-     * @param headerValue either {@value EventType#BEFORE_JOB}
-     *                    or {@value EventType#AFTER_JOB}
+     * @param headerValue either {@value org.jberet.camel.EventType#BEFORE_JOB}
+     *                    or {@value org.jberet.camel.EventType#AFTER_JOB}
      */
     protected void sendBodyAndHeader(final String headerValue) {
         final long executionId = jobContext.getExecutionId();

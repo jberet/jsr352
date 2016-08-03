@@ -37,57 +37,58 @@ import static org.jberet.camel.EventType.*;
  * <ul>
  *     <li>{@code javax.batch.api.chunk.listener.ChunkListener}
  *          <ul>
- *              <li>{@value EventType#BEFORE_CHUNK}
- *              <li>{@value EventType#ON_CHUNK_ERROR}
- *              <li>{@value EventType#AFTER_CHUNK}
+ *              <li>{@value org.jberet.camel.EventType#BEFORE_CHUNK}
+ *              <li>{@value org.jberet.camel.EventType#ON_CHUNK_ERROR}
+ *              <li>{@value org.jberet.camel.EventType#AFTER_CHUNK}
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.ItemProcessListener}
  *          <ul>
- *              <li>{@value EventType#BEFORE_PROCESS}
- *              <li>{@value EventType#AFTER_PROCESS}
- *              <li>{@value EventType#ON_PROCESS_ERROR}
+ *              <li>{@value org.jberet.camel.EventType#BEFORE_PROCESS}
+ *              <li>{@value org.jberet.camel.EventType#AFTER_PROCESS}
+ *              <li>{@value org.jberet.camel.EventType#ON_PROCESS_ERROR}
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.ItemReadListener}
  *          <ul>
- *              <li>{@value EventType#BEFORE_READ}
- *              <li>{@value EventType#AFTER_READ}
- *              <li>{@value EventType#ON_READ_ERROR}
+ *              <li>{@value org.jberet.camel.EventType#BEFORE_READ}
+ *              <li>{@value org.jberet.camel.EventType#AFTER_READ}
+ *              <li>{@value org.jberet.camel.EventType#ON_READ_ERROR}
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.ItemWriteListener}
  *          <ul>
- *              <li>{@value EventType#BEFORE_WRITE}
- *              <li>{@value EventType#AFTER_WRITE}
- *              <li>{@value EventType#ON_WRITE_ERROR}
+ *              <li>{@value org.jberet.camel.EventType#BEFORE_WRITE}
+ *              <li>{@value org.jberet.camel.EventType#AFTER_WRITE}
+ *              <li>{@value org.jberet.camel.EventType#ON_WRITE_ERROR}
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.RetryProcessListener}
  *          <ul>
- *              <li>{@value EventType#ON_RETRY_PROCESS_EXCEPTION}
+ *              <li>{@value org.jberet.camel.EventType#ON_RETRY_PROCESS_EXCEPTION}
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.RetryReadListener}
  *          <ul>
- *              <li>{@value EventType#ON_RETRY_READ_EXCEPTION}
+ *              <li>{@value org.jberet.camel.EventType#ON_RETRY_READ_EXCEPTION}
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.RetryWriteListener}
  *          <ul>
- *              <li>{@value EventType#ON_RETRY_WRITE_EXCEPTION}
+ *              <li>{@value org.jberet.camel.EventType#ON_RETRY_WRITE_EXCEPTION}
  *
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.SkipProcessListener}
  *          <ul>
- *              <li>{@value EventType#ON_SKIP_PROCESS_ITEM}
+ *              <li>{@value org.jberet.camel.EventType#ON_SKIP_PROCESS_ITEM}
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.SkipReadListener}
  *          <ul>
- *              <li>{@value EventType#ON_SKIP_READ_ITEM}
+ *              <li>{@value org.jberet.camel.EventType#ON_SKIP_READ_ITEM}
  *          </ul>
  *     <li>{@code javax.batch.api.chunk.listener.SkipWriteListener}
  *          <ul>
- *              <li>{@value EventType#ON_SKIP_WRITE_ITEM}
+ *              <li>{@value org.jberet.camel.EventType#ON_SKIP_WRITE_ITEM}
  *          </ul>
  * </ul>
  * The body of the message sent is the current {@link ChunkExecutionInfo}.
  * Each message also contains a header to indicate the event type:
- * its key is {@value EventType#KEY}, and value is one from the above list.
+ * its key is {@value org.jberet.camel.EventType#KEY}, and value is
+ * one from the above list.
  * <p>
  * The target Camel endpoint is configured through batch property
  * {@code endpoint} in job XML. For example,
