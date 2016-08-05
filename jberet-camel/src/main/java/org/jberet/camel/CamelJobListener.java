@@ -49,11 +49,35 @@ import javax.inject.Named;
 @Named
 public class CamelJobListener extends CamelListenerBase implements JobListener {
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method sends {@value org.jberet.camel.EventType#BEFORE_JOB}
+     * event to the configured Camel endpoint. The message contains a header:
+     * <pre>
+     *     {@value org.jberet.camel.EventType#KEY}={@value org.jberet.camel.EventType#BEFORE_JOB}
+     * </pre>
+     * , and the message body is the current {@code javax.batch.runtime.JobExecution}.
+     *
+     * @throws Exception
+     */
     @Override
     public void beforeJob() throws Exception {
         sendBodyAndHeader(EventType.BEFORE_JOB);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method sends {@value org.jberet.camel.EventType#AFTER_JOB}
+     * event to the configured Camel endpoint. The message contains a header:
+     * <pre>
+     *     {@value org.jberet.camel.EventType#KEY}={@value org.jberet.camel.EventType#AFTER_JOB}
+     * </pre>
+     * , and the message body is the current {@code javax.batch.runtime.JobExecution}.
+     *
+     * @throws Exception
+     */
     @Override
     public void afterJob() throws Exception {
         sendBodyAndHeader(EventType.AFTER_JOB);

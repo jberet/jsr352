@@ -64,11 +64,35 @@ public class CamelStepListener extends CamelListenerBase implements StepListener
     @Inject
     protected StepContext stepContext;
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method sends {@value org.jberet.camel.EventType#BEFORE_STEP}
+     * event to the configured Camel endpoint. The message contains a header:
+     * <pre>
+     *     {@value org.jberet.camel.EventType#KEY}={@value org.jberet.camel.EventType#BEFORE_STEP}
+     * </pre>
+     * , and the message body is the current {@code javax.batch.runtime.StepExecution}.
+     *
+     * @throws Exception
+     */
     @Override
     public void beforeStep() throws Exception {
         sendBodyAndHeader(BEFORE_STEP);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method sends {@value org.jberet.camel.EventType#AFTER_STEP}
+     * event to the configured Camel endpoint. The message contains a header:
+     * <pre>
+     *     {@value org.jberet.camel.EventType#KEY}={@value org.jberet.camel.EventType#AFTER_STEP}
+     * </pre>
+     * , and the message body is the current {@code javax.batch.runtime.StepExecution}.
+     *
+     * @throws Exception
+     */
     @Override
     public void afterStep() throws Exception {
         sendBodyAndHeader(AFTER_STEP);

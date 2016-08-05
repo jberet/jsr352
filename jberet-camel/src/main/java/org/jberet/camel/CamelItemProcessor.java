@@ -60,6 +60,17 @@ public class CamelItemProcessor extends CamelArtifactBase implements ItemProcess
         JBeretCamelLogger.LOGGER.openProcessor(this, endpointUri, camelContext, producerTemplate);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     *
+     * This method forwards the current {@code item} to the configured Camel
+     * endpoint for processing, and also retrieves the processing result.
+     *
+     * @param item the current item to be processed
+     * @return processing result
+     * @throws Exception
+     */
     @Override
     public Object processItem(final Object item) throws Exception {
         return producerTemplate.requestBody(endpoint, item);
