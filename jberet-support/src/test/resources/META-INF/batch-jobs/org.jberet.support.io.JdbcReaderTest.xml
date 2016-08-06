@@ -23,6 +23,8 @@
 
                     <property name="sql" value="#{jobParameters['sql']}"/>
                     <property name="url" value="#{jobParameters['url']}"/>
+                    <property name="user" value="#{jobParameters['user']}"/>
+                    <property name="password" value="#{jobParameters['password']}"/>
                     <property name="columnMapping" value="#{jobParameters['columnMapping']}"/>
                     <property name="columnTypes" value="#{jobParameters['columnTypes']}"/>
                     <property name="start" value="#{jobParameters['start']}"/>

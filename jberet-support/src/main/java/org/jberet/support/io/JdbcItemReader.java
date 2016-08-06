@@ -300,8 +300,8 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
                     result = readValue;
                 }
             }
+            currentRowNumber = resultSet.getRow();
         }
-        currentRowNumber = resultSet.getRow();
         return result;
     }
 

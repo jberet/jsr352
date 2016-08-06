@@ -39,12 +39,16 @@ public class JdbcReaderWriterTest {
 
     static final File dbDir = new File(CsvItemReaderWriterTest.tmpdir, "JdbcReaderWriterTest");
     static final String url = "jdbc:h2:" + dbDir.getPath();
+
+    static final String dbUser = null;
+    static final String dbPassword = null;
+
     static final String dropTable = "drop table STOCK_TRADE";
     static final String deleteAllRows = "delete from STOCK_TRADE";
     static final String createTable =
             "create table STOCK_TRADE (" +
-                    "TRADEDATE TIMESTAMP, " +
-                    "TRADETIME VARCHAR(30), " +
+                    "TRADEDATE TIMESTAMP NOT NULL, " +
+                    "TRADETIME VARCHAR(30) NOT NULL, " +
                     "OPEN DOUBLE, " +
                     "HIGH DOUBLE, " +
                     "LOW DOUBLE, " +
@@ -139,6 +143,24 @@ public class JdbcReaderWriterTest {
                 "09:31, 10810,  09:32, 09:33,  09:34, 4800", "09:35");
     }
 
+    @Test
+    public void readIBMStockTradeCsvWriteJdbcListTypeAllRows() throws Exception {
+        testWrite0(writerTestJobName, List.class, List.class, ExcelWriterTest.ibmStockTradeHeader,
+                "0", "200",
+                writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
+
+        //since beanType is List, data fields go by order, so CsvItemWriter does not need to do any mapping,
+        //and so CsvItemWriter header is just used for display purpose only.
+
+        //this JdbcItemReader reads all rows
+        //use default resultSetProperties
+        testRead0(readerTestJobName, List.class, List.class, "readIBMStockTradeCsvWriteJdbcListType.out",
+                null, null,
+                null, ExcelWriterTest.ibmStockTradeHeader,
+                readerQuery, null, parameterTypes, null,
+                "09:31, 10810,  09:32, 09:33,  09:34, 4800", null);
+    }
+
     void testWrite0(final String jobName, final Class<?> readerBeanType, final Class<?> writerBeanType, final String csvNameMapping,
                     final String start, final String end,
                     final String sql, final String parameterNames, final String parameterTypes) throws Exception {
@@ -159,6 +181,12 @@ public class JdbcReaderWriterTest {
         }
 
         params.setProperty("url", url);
+        if (dbUser != null) {
+            params.setProperty("user", dbUser);
+        }
+        if (dbPassword != null) {
+            params.setProperty("password", dbPassword);
+        }
         if (sql != null) {
             params.setProperty("sql", sql);
         }
@@ -203,6 +231,12 @@ public class JdbcReaderWriterTest {
         }
 
         params.setProperty("url", url);
+        if (dbUser != null) {
+            params.setProperty("user", dbUser);
+        }
+        if (dbPassword != null) {
+            params.setProperty("password", dbPassword);
+        }
         if (start != null) {
             params.setProperty("start", start);
         }
@@ -259,6 +293,7 @@ public class JdbcReaderWriterTest {
     }
 
     static Connection getConnection() throws Exception {
-        return DriverManager.getConnection(url);
+        return dbUser == null ? DriverManager.getConnection(url) :
+                DriverManager.getConnection(url, dbUser, dbPassword);
     }
 }
