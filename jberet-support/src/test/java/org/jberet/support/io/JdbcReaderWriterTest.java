@@ -139,7 +139,8 @@ public class JdbcReaderWriterTest {
         testRead0(readerTestJobName, List.class, List.class, "readIBMStockTradeCsvWriteJdbcListType.out",
                 "2", "5",
                 null, ExcelWriterTest.ibmStockTradeHeader,
-                readerQuery, null, parameterTypes, null,
+                readerQuery, null, parameterTypes,
+                "resultSetType=TYPE_SCROLL_INSENSITIVE",
                 "09:31, 10810,  09:32, 09:33,  09:34, 4800", "09:35");
     }
 
