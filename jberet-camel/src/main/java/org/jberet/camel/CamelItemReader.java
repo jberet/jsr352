@@ -23,8 +23,9 @@ import org.apache.camel.ConsumerTemplate;
 
 /**
  * Implementation of {@code javax.batch.api.chunk.ItemReader} that reads batch data
- * from Apache Camel endpoint. For each read operation, this reader will wait up to
- * the configured timeout milliseconds for data. Users may als configure
+ * from Apache Camel endpoint. The source Camel endpoint is configured through batch property
+ * {@code endpoint} in job XML. For each read operation, this reader will wait up to
+ * the configured {@code timeout} milliseconds for data. Users may also configure
  * {@code beanType} batch property to specify the expected Java type of the
  * data.
  * <p>
