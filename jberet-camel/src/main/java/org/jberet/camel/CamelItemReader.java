@@ -72,6 +72,14 @@ public class CamelItemReader extends CamelArtifactBase implements ItemReader {
      */
     protected ConsumerTemplate consumerTemplate;
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method gets resources ready, such as {@link #consumerTemplate}.
+     *
+     * @param checkpoint the last checkpoint
+     * @throws Exception
+     */
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         init();
@@ -82,6 +90,13 @@ public class CamelItemReader extends CamelArtifactBase implements ItemReader {
         consumerTemplate.start();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method closes any resources used by this class, such as {@link #consumerTemplate}.
+     *
+     * @throws Exception
+     */
     @Override
     public void close() throws Exception {
         if (consumerTemplate != null) {
@@ -89,6 +104,14 @@ public class CamelItemReader extends CamelArtifactBase implements ItemReader {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method reads from the configured Camel endpoint.
+     *
+     * @return next item or {@code null}
+     * @throws Exception is thrown for any errors
+     */
     @Override
     public Object readItem() throws Exception {
         final Object item;
@@ -100,8 +123,15 @@ public class CamelItemReader extends CamelArtifactBase implements ItemReader {
         return item;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method always returns {@code null}.
+     *
+     * @return {@code null}
+     */
     @Override
-    public Serializable checkpointInfo() throws Exception {
+    public Serializable checkpointInfo() {
         return null;
     }
 }

@@ -138,6 +138,15 @@ public class JBeretProducer extends DefaultProducer {
         super(endpoint);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method invokes the appropriate batch job operations as specified in
+     * the message.
+     *
+     * @param exchange the current Camel exchange
+     * @throws Exception if any errors occur
+     */
     @Override
     public void process(final Exchange exchange) throws Exception {
         final JBeretEndpoint endpoint = (JBeretEndpoint) getEndpoint();

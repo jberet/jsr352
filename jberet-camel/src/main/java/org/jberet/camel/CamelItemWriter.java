@@ -55,6 +55,14 @@ public class CamelItemWriter extends CamelArtifactBase implements ItemWriter {
      */
     protected ProducerTemplate producerTemplate;
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method gets resources ready, such as {@link #producerTemplate}.
+     *
+     * @param checkpoint the last checkpoint
+     * @throws Exception if any errors occur
+     */
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         init();
@@ -65,6 +73,13 @@ public class CamelItemWriter extends CamelArtifactBase implements ItemWriter {
         producerTemplate.start();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method closes any resources used by this class, such as {@link #producerTemplate}.
+     *
+     * @throws Exception
+     */
     @Override
     public void close() throws Exception {
         if (producerTemplate != null) {
@@ -72,6 +87,14 @@ public class CamelItemWriter extends CamelArtifactBase implements ItemWriter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method writes the data {@code items} to the configured Camel endpoint.
+     *
+     * @param items the list of items to write
+     * @throws Exception if any errors occur
+     */
     @Override
     public void writeItems(final List<Object> items) throws Exception {
         for (final Object e : items) {
@@ -79,8 +102,15 @@ public class CamelItemWriter extends CamelArtifactBase implements ItemWriter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method always returns null.
+     *
+     * @return {@code null}
+     */
     @Override
-    public Serializable checkpointInfo() throws Exception {
+    public Serializable checkpointInfo() {
         return null;
     }
 }

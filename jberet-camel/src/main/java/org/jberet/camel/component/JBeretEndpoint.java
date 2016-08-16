@@ -36,26 +36,26 @@ import org.apache.camel.impl.DefaultEndpoint;
  */
 public class JBeretEndpoint extends DefaultEndpoint {
     /**
-     * The remaining path in the uri when passing from {@link JBeretComponent}.
-     * For instance, "jobs/job1/start".
+     * The remaining path in the uri when passing from {@link JBeretComponent},
+     * without the scheme part. For instance, {@code jobs/job1/start}.
      */
     private final String remainingPath;
 
     /**
-     * Query parameter named "jobName" in the uri, whose value is automatically
-     * bound to this field. Default value is null.
+     * Query parameter named {@code jobName} in the uri, whose value is automatically
+     * bound to this field. Default value is {@code null}.
      */
     private String jobName;
 
     /**
-     * Query parameter named "start" in the uri, whose value is automatically
-     * bound to this field. Default value is 0.
+     * Query parameter named  {@code start} in the uri, whose value is automatically
+     * bound to this field. Default value is {@code 0}.
      */
     private int start;
 
     /**
-     * Query parameter named "count" in the uri, whose value is automatically
-     * bound to this field. Default value is 10.
+     * Query parameter named {@code count} in the uri, whose value is automatically
+     * bound to this field. Default value is {@code 10}.
      */
     private int count = 10;
 
@@ -73,30 +73,75 @@ public class JBeretEndpoint extends DefaultEndpoint {
         this.remainingPath = remainingPath;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method creates an instance of {@link JBeretProducer}.
+     *
+     * @return an instance of {@code JBeretProducer}
+     * @throws Exception
+     */
     @Override
     public Producer createProducer() throws Exception {
         return new JBeretProducer(this);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method always throws {@code UnsupportedOperationException}, as this
+     * operation is not supported.
+     *
+     * @return N/A
+     * @throws UnsupportedOperationException
+     */
     @Override
-    public Consumer createConsumer(final Processor processor) throws Exception {
+    public Consumer createConsumer(final Processor processor) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method always throws {@code UnsupportedOperationException}, as this
+     * operation is not supported.
+     *
+     * @return N/A
+     * @throws UnsupportedOperationException
+     */
     @Override
-    public PollingConsumer createPollingConsumer() throws Exception {
+    public PollingConsumer createPollingConsumer() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method returns {@code false}, as this endpoint is not a singleton.
+     *
+     * @return {@code false}
+     */
     @Override
     public boolean isSingleton() {
         return false;
     }
 
+    /**
+     * Gets the remaining path in the uri when passing from {@link JBeretComponent}.
+     *
+     * @return the uri without the scheme part. For instance, {@code jobs/job1/start}
+     */
     public String getRemainingPath() {
         return remainingPath;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method turns on lenient properties.
+     *
+     * @return {@code true}
+     */
     @Override
     public boolean isLenientProperties() {
         return true;

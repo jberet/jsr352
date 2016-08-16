@@ -33,6 +33,20 @@ public class JBeretComponent extends DefaultComponent {
         jobOperator = BatchRuntime.getJobOperator();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method creates an instance of {@link JBeretEndpoint}.
+     *
+     * @param uri the full URI of the endpoint
+     * @param remainingPath the remaining part of the URI without the query
+     *                      parameters or component prefix
+     * @param parameters the optional parameters passed in
+     *
+     * @return a newly created {@code JBeretEndpoint} or null if the endpoint cannot be
+     *         created based on the inputs
+     * @throws Exception is thrown if error creating the endpoint
+     */
     @Override
     protected Endpoint createEndpoint(final String uri,
                                       final String remainingPath,
