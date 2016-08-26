@@ -21,6 +21,8 @@ import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.containsString;
+
 /**
  * Tests for {@link org.jberet.support.io.RestItemReader}, which reads data
  * by calling REST GET operations on the configured collection resource
@@ -110,6 +112,6 @@ public final class RestReaderIT extends BatchTestBase {
         jobParams.setProperty("restUrl", restUrl + "/movies/error");
         final JobExecutionEntity jobExecutionEntity =
                 startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.FAILED);
-        Assert.assertEquals("HTTP 500 Internal Server Error", jobExecutionEntity.getExitStatus());
+        Assert.assertThat(jobExecutionEntity.getExitStatus(), containsString("HTTP 500 Internal Server Error"));
     }
 }
