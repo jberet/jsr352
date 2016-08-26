@@ -77,8 +77,10 @@ public class JacksonCsvItemWriter extends JacksonCsvItemReaderWriterBase impleme
      * Optional property and defaults to null. For example,
      * <p/>
      * <pre>
-     * STRICT_CHECK_FOR_QUOTING=false, OMIT_MISSING_TAIL_COLUMNS=false, ALWAYS_QUOTE_STRINGS=false
+     * ALWAYS_QUOTE_STRINGS=false, STRICT_CHECK_FOR_QUOTING=true, OMIT_MISSING_TAIL_COLUMNS=false
      * </pre>
+     * With the above configuration, this writer will quote string values only when necessary,
+     * and will omit columns without matching value when they are the last values of the row.
      *
      * @see "com.fasterxml.jackson.dataformat.csv.CsvGenerator.Feature"
      */

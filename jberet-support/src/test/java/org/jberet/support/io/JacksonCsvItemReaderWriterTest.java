@@ -31,7 +31,7 @@ public class JacksonCsvItemReaderWriterTest extends CsvItemReaderWriterTest {
     private String inputDecorator;
 
     private String jsonGeneratorFeatures;
-    private String csvGeneratorFeatures = "ALWAYS_QUOTE_STRINGS=false";
+    private String csvGeneratorFeatures = "ALWAYS_QUOTE_STRINGS=false, STRICT_CHECK_FOR_QUOTING=true";
     private String outputDecorator;
 
     private String lineSeparator;
