@@ -112,7 +112,6 @@ public final class RestReaderIT extends BatchTestBase {
         jobParams.setProperty("restUrl", restUrl + "/movies/error");
         final JobExecutionEntity jobExecutionEntity =
                 startJobCheckStatus(jobName, jobParams, 5000, BatchStatus.FAILED);
-        //Assert.assertEquals("HTTP 500 Internal Server Error", jobExecutionEntity.getExitStatus());
         Assert.assertThat(jobExecutionEntity.getExitStatus(), containsString("HTTP 500 Internal Server Error"));
     }
 }
