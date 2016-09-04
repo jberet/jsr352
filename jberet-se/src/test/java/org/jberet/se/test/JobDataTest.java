@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -32,8 +33,12 @@ import javax.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
+import org.jberet.spi.PropertyKey;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.jberet.se.test.Batchlet1Test.createParams;
+import static org.junit.Assert.assertEquals;
 
 /**
  * This test verifies the job data in jdbc job repository from executing the previous test class Batchlet1Test.
@@ -45,6 +50,7 @@ import org.junit.Test;
  * @see Batchlet1Test
  */
 public class JobDataTest {
+    static final String restartPositionJob = "org.jberet.se.test.restartPosition";
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
 
     /**
@@ -58,17 +64,17 @@ public class JobDataTest {
         final String stepName = "step2";
         //get the latest JobInstance for job named by jobName
         final List<JobInstance> jobInstances = jobOperator.getJobInstances(Batchlet1Test.jobName, 0, 1);
-        Assert.assertEquals(1, jobInstances.size());
+        assertEquals(1, jobInstances.size());
 
         final JobInstanceImpl jobInstance = (JobInstanceImpl) jobInstances.get(0);
         System.out.printf("In testJobData, jobInstance: %s, id: %s%n", jobInstance, jobInstance.getInstanceId());
 
-        Assert.assertEquals(Batchlet1Test.jobName, jobInstance.getJobName());
+        assertEquals(Batchlet1Test.jobName, jobInstance.getJobName());
         Assert.assertNotEquals(0, jobInstance.getInstanceId());
 
         final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
         //the job was executed 2 times during Batchlet1Test for the latest job instance
-        Assert.assertEquals(2, jobExecutions.size());
+        assertEquals(2, jobExecutions.size());
 
         final JobExecution jobExecution = jobExecutions.get(1);
         System.out.printf("JobInstance id: %s%n", jobInstance.getInstanceId());
@@ -80,10 +86,10 @@ public class JobDataTest {
         final Date lastUpdatedTime = jobExecution.getLastUpdatedTime();
         final Date startTime = jobExecution.getStartTime();
         final Properties jobParameters = jobExecution.getJobParameters();
-        Assert.assertEquals(Batchlet1Test.jobName, jobExecution.getJobName());
+        assertEquals(Batchlet1Test.jobName, jobExecution.getJobName());
         Assert.assertNotEquals(0, jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.STOPPED, batchStatus);
-        Assert.assertEquals(Batchlet1.ACTION_STOP, exitStatus);
+        assertEquals(BatchStatus.STOPPED, batchStatus);
+        assertEquals(Batchlet1.ACTION_STOP, exitStatus);
         Assert.assertNotNull(createTime);
         Assert.assertNotNull(lastUpdatedTime);
         Assert.assertNotNull(endTime);
@@ -93,7 +99,7 @@ public class JobDataTest {
                 jobExecution.getExecutionId(), batchStatus, exitStatus, createTime, endTime, lastUpdatedTime, startTime, jobParameters);
 
         final List<StepExecution> stepExecutions = jobOperator.getStepExecutions(jobExecution.getExecutionId());
-        Assert.assertEquals(1, stepExecutions.size());
+        assertEquals(1, stepExecutions.size());
         final StepExecution stepExecution = stepExecutions.get(0);
         final String stepName1 = stepExecution.getStepName();
         final BatchStatus batchStatus1 = stepExecution.getBatchStatus();
@@ -108,13 +114,13 @@ public class JobDataTest {
                 Arrays.toString(metrics));
 
         Assert.assertNotNull(stepExecution.getStepExecutionId());
-        Assert.assertEquals(stepName, stepName1);
-        Assert.assertEquals(BatchStatus.COMPLETED, batchStatus1);
-        Assert.assertEquals(Batchlet1.ACTION_STOP, exitStatus1);
+        assertEquals(stepName, stepName1);
+        assertEquals(BatchStatus.COMPLETED, batchStatus1);
+        assertEquals(Batchlet1.ACTION_STOP, exitStatus1);
         Assert.assertNotNull(startTime1);
         Assert.assertNotNull(endTime1);
         //Assert.assertEquals(new Integer(1), persistentUserData);
-        Assert.assertEquals("Persistent User Data", persistentUserData);
+        assertEquals("Persistent User Data", persistentUserData);
         Assert.assertNotNull(metrics);
 
         restartJobMatchOther(jobExecution.getExecutionId());
@@ -129,7 +135,7 @@ public class JobDataTest {
     @Test
     public void testRestartPositionFromBatchlet2Test() throws Exception {
         final long previousJobExecutionId = getOriginalJobExecutionIdFromFile(Batchlet1Test.jobName2ExecutionIdSaveTo);
-        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
+        final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
@@ -137,17 +143,17 @@ public class JobDataTest {
 
         final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
-        Assert.assertEquals(2, stepExecutions.size());
-        Assert.assertEquals("stepC", stepExecutions.get(0).getStepName());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(0).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), stepExecutions.get(0).getExitStatus());
+        assertEquals(2, stepExecutions.size());
+        assertEquals("stepC", stepExecutions.get(0).getStepName());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(0).getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED.name(), stepExecutions.get(0).getExitStatus());
 
-        Assert.assertEquals("stepE", stepExecutions.get(1).getStepName());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_OTHER, stepExecutions.get(1).getExitStatus());
+        assertEquals("stepE", stepExecutions.get(1).getStepName());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
+        assertEquals(Batchlet1.ACTION_OTHER, stepExecutions.get(1).getExitStatus());
         Batchlet1Test.jobName2ExecutionIdSaveTo.delete();
     }
 
@@ -155,7 +161,7 @@ public class JobDataTest {
     @Test
     public void testRestartWithLimit() throws Exception {
         final long previousJobExecutionId = getOriginalJobExecutionIdFromFile(Batchlet1Test.jobName3ExecutionIdSaveTo);
-        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
+        final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
@@ -163,10 +169,134 @@ public class JobDataTest {
 
         final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
-        Assert.assertEquals(0, stepExecutions.size());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
+        assertEquals(0, stepExecutions.size());
         Batchlet1Test.jobName3ExecutionIdSaveTo.delete();
+    }
+
+    /**
+     * Tests the normal restart behavior, without passing
+     * {@linkplain PropertyKey#RESTART_POSITION custom restart position}.
+     * This restart should start from the previous failed step
+     * {@code org.jberet.se.test.restartPosition.step2}.
+     *
+     * @throws Exception if error
+     */
+    @Test
+    public void testRestartPosition2() throws Exception {
+        long jobExecutionId = failStep2();
+
+        //restart
+        System.out.printf("About to restart job execution: %s%n", jobExecutionId);
+        final Properties params = createParams("failInProcess2", Boolean.FALSE.toString());
+        jobExecutionId = jobOperator.restart(jobExecutionId, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(Batchlet1Test.waitTimeoutMinutes, TimeUnit.MINUTES);
+
+        final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+        System.out.printf("Step executions in restart: %s%n", stepExecutionsToStepNames(stepExecutions));
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(2, stepExecutions.size());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(0).getBatchStatus());
+        assertEquals("org.jberet.se.test.restartPosition.step2", stepExecutions.get(0).getStepName());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
+        assertEquals("org.jberet.se.test.restartPosition.step3", stepExecutions.get(1).getStepName());
+    }
+
+    /**
+     * Tests restart behavior, passing a {@linkplain PropertyKey#RESTART_POSITION custom restart position}
+     * as restart job parameter, to restart the failed job execution at step
+     * {@code org.jberet.se.test.restartPosition.step1}.
+     * This restart position had completed and was one step before the failed step in the execution sequence.
+     * We need to set the step attribute {@code allow-start-if-complete=true} in order to run it
+     * in the restart execution.
+     *
+     * @throws Exception if error
+     */
+    @Test
+    public void testRestartPosition1() throws Exception {
+        long jobExecutionId = failStep2(createParams("allowStartIfComplete", Boolean.TRUE.toString()));
+
+        //restart
+        System.out.printf("About to restart job execution: %s%n", jobExecutionId);
+        final Properties params = createParams("failInProcess2", Boolean.FALSE.toString());
+        params.setProperty(PropertyKey.RESTART_POSITION, "org.jberet.se.test.restartPosition.step1");
+
+        jobExecutionId = jobOperator.restart(jobExecutionId, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(Batchlet1Test.waitTimeoutMinutes, TimeUnit.MINUTES);
+
+        final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+        System.out.printf("Step executions in restart: %s%n", stepExecutionsToStepNames(stepExecutions));
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(3, stepExecutions.size());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(0).getBatchStatus());
+        assertEquals("org.jberet.se.test.restartPosition.step1", stepExecutions.get(0).getStepName());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(1).getBatchStatus());
+        assertEquals("org.jberet.se.test.restartPosition.step2", stepExecutions.get(1).getStepName());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(2).getBatchStatus());
+        assertEquals("org.jberet.se.test.restartPosition.step3", stepExecutions.get(2).getStepName());
+    }
+
+    /**
+     * Tests restart behavior, passing a {@linkplain PropertyKey#RESTART_POSITION custom restart position}
+     * as restart job parameter, to restart the failed job execution at step
+     * {@code org.jberet.se.test.restartPosition.step3}.
+     * This restart position did not get to run in the previous execution sequence.
+     * This restart execution will skip the previously failed step
+     * {@code org.jberet.se.test.restartPosition.step2}
+     *
+     * @throws Exception if error
+     */
+    @Test
+    public void testRestartPosition3() throws Exception {
+        long jobExecutionId = failStep2();
+
+        //restart
+        System.out.printf("About to restart job execution: %s%n", jobExecutionId);
+        final Properties params = createParams("failInProcess2", Boolean.FALSE.toString());
+        params.setProperty(PropertyKey.RESTART_POSITION, "org.jberet.se.test.restartPosition.step3");
+
+        jobExecutionId = jobOperator.restart(jobExecutionId, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(Batchlet1Test.waitTimeoutMinutes, TimeUnit.MINUTES);
+
+        final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+        System.out.printf("Step executions in restart: %s%n", stepExecutionsToStepNames(stepExecutions));
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(1, stepExecutions.size());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(0).getBatchStatus());
+        assertEquals("org.jberet.se.test.restartPosition.step3", stepExecutions.get(0).getStepName());
+    }
+
+    /**
+     * Starts the job {@link #restartPositionJob}, and fails the 2nd step.
+     *
+     * @param p optional job parameters
+     * @return the job execution id
+     * @throws Exception
+     */
+    private long failStep2(final Properties... p) throws Exception {
+        final Properties params;
+
+        if (p.length > 0) {
+            params = p[0];
+            params.setProperty("failInProcess2", Boolean.TRUE.toString());
+        } else {
+            params = Batchlet1Test.createParams("failInProcess2", Boolean.TRUE.toString());
+        }
+
+        final long jobExecutionId = jobOperator.start(restartPositionJob, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(Batchlet1Test.waitTimeoutMinutes, TimeUnit.MINUTES);
+
+        final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(2, stepExecutions.size());
+        assertEquals(BatchStatus.COMPLETED, stepExecutions.get(0).getBatchStatus());
+        assertEquals(BatchStatus.FAILED, stepExecutions.get(1).getBatchStatus());
+        return jobExecutionId;
     }
 
     /**
@@ -207,18 +337,29 @@ public class JobDataTest {
 
     private long restartJobMatchOther(final long previousJobExecutionId) throws Exception {
         //restart the job and run to complete, not matching any transition elements in step2.
-        final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
+        final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         System.out.printf("Restart JobExecution %s with params %s%n", previousJobExecutionId, params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(Batchlet1Test.waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
-        Assert.assertEquals(1, jobExecution.getStepExecutions().size());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_OTHER, jobExecution.getStepExecutions().get(0).getExitStatus());
+        assertEquals(1, jobExecution.getStepExecutions().size());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
+        assertEquals(Batchlet1.ACTION_OTHER, jobExecution.getStepExecutions().get(0).getExitStatus());
         return jobExecutionId;
+    }
+
+    private static List<String> stepExecutionsToStepNames(final List<StepExecution> stepExecutions) {
+        if (stepExecutions == null) {
+            return null;
+        }
+        final List<String> result = new ArrayList<String>();
+        for (final StepExecution e : stepExecutions) {
+            result.add(e.getStepName());
+        }
+        return result;
     }
 }

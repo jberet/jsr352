@@ -139,4 +139,9 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 28, value = "Failed to serialize exception: %s")
     @LogMessage(level = Logger.Level.WARN)
     void failedToSerializeException(@Cause Throwable cause, Throwable exception);
+
+    @Message(id = 29, value = "Applied custom restart position: %s, instead of the default restart position: %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void customRestartPosition(String customRestartPosition, String defaultRestartPosition);
+
 }

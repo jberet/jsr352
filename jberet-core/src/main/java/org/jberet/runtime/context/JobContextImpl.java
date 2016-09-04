@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,6 +30,7 @@ import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
+import org.jberet.spi.PropertyKey;
 
 public class JobContextImpl extends AbstractContext implements JobContext, Cloneable {
     private static final AbstractContext[] EMPTY_ABSTRACT_CONTEXT_ARRAY = new AbstractContext[0];
@@ -60,6 +61,14 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
         if (originalToRestart != null) {
             this.originalToRestart = originalToRestart;
             this.jobExecution.setRestartPosition(originalToRestart.getRestartPosition());
+
+            if(jobExecution.getJobParameters() != null) {
+                final String customRestartPosition = jobExecution.getJobParameters().getProperty(PropertyKey.RESTART_POSITION);
+                if (customRestartPosition != null) {
+                    this.jobExecution.setRestartPosition(customRestartPosition);
+                    BatchLogger.LOGGER.customRestartPosition(customRestartPosition, originalToRestart.getRestartPosition());
+                }
+            }
         }
 
         final PropertyResolver resolver = new PropertyResolver();

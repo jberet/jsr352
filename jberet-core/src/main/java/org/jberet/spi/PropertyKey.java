@@ -61,10 +61,17 @@ public interface PropertyKey {
     String RESTART_MODE_DETECT = "detect";
 
     /**
-     * A key used to disable transactions around calls to {@link PartitionAnalyzer}.
-     * Transactions around calls to {@link PartitionAnalyzer} might time out in long running steps which can
+     * A key used to specify a custom restart position to override the default
+     * restart position.
+     *
+     * @since 1.3.0
+     */
+    String RESTART_POSITION = "jberet.restart.position";
+
+    /**
+     * A key used to disable transactions around calls to {@code PartitionAnalyzer}.
+     * Transactions around calls to {@code PartitionAnalyzer} might time out in long running steps which can
      * be prevented by disabling the transaction using this property.
      */
     String ANALYZER_TX_DISABLED = "jberet.analyzer.txDisabled";
-
 }

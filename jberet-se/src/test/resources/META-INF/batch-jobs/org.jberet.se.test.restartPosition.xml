@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="org.jberet.se.test.restartPosition" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+
+    <!--
+    allow-start-if-complete is set to true so that a restart with a custom restart position of
+    org.jberet.se.test.restartPosition.step1 will still run this step, even if this step has
+    successfully completed during the prior job execution.
+    -->
+    <step id="org.jberet.se.test.restartPosition.step1" next="org.jberet.se.test.restartPosition.step2"
+          allow-start-if-complete="#{jobParameters['allowStartIfComplete']}?:false;">
+        <batchlet ref="sleepBatchlet">
+            <properties>
+                <property name="failInProcess" value="#{jobParameters['failInProcess1']}"/>
+            </properties>
+        </batchlet>
+    </step>
+    <step id="org.jberet.se.test.restartPosition.step2" next="org.jberet.se.test.restartPosition.step3">
+        <batchlet ref="sleepBatchlet">
+            <properties>
+                <property name="failInProcess" value="#{jobParameters['failInProcess2']}"/>
+            </properties>
+        </batchlet>
+    </step>
+    <step id="org.jberet.se.test.restartPosition.step3">
+        <batchlet ref="sleepBatchlet">
+            <properties>
+                <property name="failInProcess" value="#{jobParameters['failInProcess3']}"/>
+            </properties>
+        </batchlet>
+    </step>
+</job>
