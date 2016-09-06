@@ -19,6 +19,7 @@
 
     <properties>
         <version.org.codehaus.woodstox.woodstox-core-asl>4.4.1</version.org.codehaus.woodstox.woodstox-core-asl>
+        <version.org.apache.qpid>0.10.0</version.org.apache.qpid>
     </properties>
 
     <modules>
@@ -46,6 +47,7 @@
         <module>javaJSL</module>
         <module>throttle</module>
         <module>restAPI</module>
+        <module>amqp</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
@@ -65,6 +67,11 @@
                 <groupId>org.codehaus.woodstox</groupId>
                 <artifactId>woodstox-core-asl</artifactId>
                 <version>${version.org.codehaus.woodstox.woodstox-core-asl}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.qpid</groupId>
+                <artifactId>qpid-jms-client</artifactId>
+                <version>${version.org.apache.qpid}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -118,7 +125,7 @@
                 <configuration>
                     <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
                     <systemPropertyVariables>
-                        <jberet.tmp.dir>${project.build.directory}${file.separator}tmp</jberet.tmp.dir>
+                        <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

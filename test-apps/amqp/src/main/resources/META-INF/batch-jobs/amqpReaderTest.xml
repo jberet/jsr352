@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="amqpReaderTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="amqpReaderTest.step1">
+        <chunk item-count="100">
+            <reader ref="jmsItemReader">
+                <properties>
+                    <!--<property name="connectionFactoryLookupName" value="/cf"/>-->
+                    <!--<property name="destinationLookupName" value="/queue/queue1"/>-->
+                    <!-- wait for 2 seconds for any more messages -->
+                    <property name="receiveTimeout" value="2000"/>
+                    <property name="messageSelector" value=""/>
+                    <property name="sessionMode" value="DUPS_OK_ACKNOWLEDGE"/>
+                </properties>
+            </reader>
+
+            <!-- this writer configuration is the same as the writer in JdbcReaderTest.xml -->
+            <writer ref="csvItemWriter">
+                <properties>
+                    <property name="resource" value="#{jobParameters['writeResource']}"/>
+                    <property name="beanType" value="java.util.Map"/>
+                    <property name="writeMode" value="overwrite"/>
+                    <property name="header" value="Date,Time,Open,High,Low,Close,Volume"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>

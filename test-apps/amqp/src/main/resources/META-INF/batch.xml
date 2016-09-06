@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+    <ref id="csvItemReader" class="org.jberet.support.io.CsvItemReader" />
+    <ref id="csvItemWriter" class="org.jberet.support.io.CsvItemWriter" />
+    <ref id="jmsItemReader" class="org.jberet.support.io.JmsItemReader" />
+    <ref id="jmsItemWriter" class="org.jberet.support.io.JmsItemWriter" />
+</batch-artifacts>
