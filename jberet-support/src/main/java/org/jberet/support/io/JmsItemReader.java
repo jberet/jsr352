@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -109,10 +109,6 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
             return null;
         }
 
-        if (message.getBody(Object.class) == null) {
-            return null;
-        }
-
         if (beanType == Message.class) {
             return message;
         }
@@ -124,12 +120,15 @@ public class JmsItemReader extends JmsItemReaderWriterBase implements ItemReader
                 ItemReaderWriterBase.validate(result);
             }
         } else if (message instanceof MapMessage) {
-            final Map<String, Object> mapResult = new HashMap<String, Object>();
             final MapMessage mapMessage = (MapMessage) message;
+            final Map<String, Object> mapResult = new HashMap<String, Object>();
             final Enumeration mapNames = mapMessage.getMapNames();
-            while (mapNames.hasMoreElements()) {
-                final String k = (String) mapNames.nextElement();
-                mapResult.put(k, mapMessage.getObject(k));
+
+            if (mapNames != null) {
+                while (mapNames.hasMoreElements()) {
+                    final String k = (String) mapNames.nextElement();
+                    mapResult.put(k, mapMessage.getObject(k));
+                }
             }
             result = mapResult;
         } else if (message instanceof TextMessage) {

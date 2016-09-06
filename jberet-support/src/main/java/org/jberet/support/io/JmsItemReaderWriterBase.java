@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -71,13 +71,21 @@ public abstract class JmsItemReaderWriterBase extends ItemReaderWriterBase {
     /**
      * The string name of the sessionMode used to create JMS session from a JMS connection. Optional property, and
      * defaults to null. When not specified, JMS API {@link javax.jms.Connection#createSession()} is invoked to create
-     * the JMS session. When this property is specified, its value must be either {@code AUTO_ACKNOWLEDGE} or
-     * {@code DUPS_OK_ACKNOWLEDGE}.
-     * <p>
-     * An example property in job xml:
-     * <p>
+     * the JMS session. When this property is specified, its value must be one of the following:
+     * <ul>
+     * <li>{@code AUTO_ACKNOWLEDGE}
+     * <li>{@code DUPS_OK_ACKNOWLEDGE}
+     * <li>{@code CLIENT_ACKNOWLEDGE}
+     * <li>{@code SESSION_TRANSACTED}
+     * </ul>
+     * Example properties in job xml:
+     * <pre>
      * &lt;property name="sessionMode" value="DUPS_OK_ACKNOWLEDGE"/&gt;
-     * <p>
+     * </pre>
+     * or,
+     * <pre>
+     * &lt;property name="sessionMode" value="SESSION_TRANSACTED"/&gt;
+     * </pre>
      * See JMS API {@link javax.jms.Connection#createSession(int)} for more details.
      */
     @Inject
@@ -108,18 +116,30 @@ public abstract class JmsItemReaderWriterBase extends ItemReaderWriterBase {
             }
             connection = connectionFactory.createConnection();
 
+            final int jmsMajorVersion = connection.getMetaData().getJMSMajorVersion();
             if (sessionMode != null) {
                 final int sessionModeInt;
                 if (sessionMode.equals("AUTO_ACKNOWLEDGE")) {
                     sessionModeInt = Session.AUTO_ACKNOWLEDGE;
                 } else if (sessionMode.equals("DUPS_OK_ACKNOWLEDGE")) {
                     sessionModeInt = Session.DUPS_OK_ACKNOWLEDGE;
+                } else if (sessionMode.equals("CLIENT_ACKNOWLEDGE")) {
+                    sessionModeInt = Session.CLIENT_ACKNOWLEDGE;
+                } else if (sessionMode.equals("SESSION_TRANSACTED")) {
+                    sessionModeInt = Session.SESSION_TRANSACTED;
                 } else {
                     throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, sessionMode, "sessionMode");
                 }
-                session = connection.createSession(sessionModeInt);
+                if (jmsMajorVersion > 1) {
+                    session = connection.createSession(sessionModeInt);
+                } else {
+                    session = sessionModeInt == Session.SESSION_TRANSACTED ?
+                            connection.createSession(true, Session.AUTO_ACKNOWLEDGE) :
+                            connection.createSession(false, sessionModeInt);
+                }
             } else {
-                session = connection.createSession();
+                session = jmsMajorVersion > 1 ? connection.createSession() :
+                        connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             }
         } finally {
             if (ic != null) {
