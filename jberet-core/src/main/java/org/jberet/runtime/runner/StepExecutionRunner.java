@@ -255,7 +255,8 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
         final StepExecutionImpl originalStepExecution = batchContext.getOriginalStepExecution();
         final boolean isStepRestart = originalStepExecution != null;
-        final boolean isRestartNotOverride = isStepRestart && !isOverride;
+        final boolean isRestartNotOverride = isStepRestart && !isOverride &&
+                                             batchContext.getAllowStartIfComplete() != Boolean.TRUE;
         List<PartitionExecutionImpl> abortedPartitionExecutionsFromPrevious = null;
         if (isRestartNotOverride) {
             //need to carry over partition execution data from previous run of the same step.
