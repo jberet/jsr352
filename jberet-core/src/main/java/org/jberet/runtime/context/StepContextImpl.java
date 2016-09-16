@@ -68,8 +68,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
                 if (originalStepExecution.getBatchStatus() == BatchStatus.COMPLETED) {
                     allowStartIfComplete = Boolean.valueOf(step.getAllowStartIfComplete());
                     if (allowStartIfComplete == Boolean.FALSE) {
-                        setBatchStatus(BatchStatus.COMPLETED);
-                        setExitStatus(originalStepExecution.getExitStatus());
+                        stepExecution = originalStepExecution;
                         return;
                     }
                 }
