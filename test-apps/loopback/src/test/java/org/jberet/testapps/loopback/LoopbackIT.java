@@ -12,8 +12,12 @@
 
 package org.jberet.testapps.loopback;
 
+import javax.batch.runtime.BatchStatus;
+
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Verifies step loopbacks are detected and failed.
@@ -29,6 +33,8 @@ public class LoopbackIT extends AbstractIT {
     @Test
     public void selfNextAttribute() throws Exception {
         startJobAndWait("self-next-attribute.xml");
+        assertEquals(1, stepExecutions.size());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     /**
@@ -37,6 +43,8 @@ public class LoopbackIT extends AbstractIT {
     @Test
     public void selfNextElement() throws Exception {
         startJobAndWait("self-next-element.xml");
+        assertEquals(1, stepExecutions.size());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     /**
@@ -45,6 +53,8 @@ public class LoopbackIT extends AbstractIT {
     @Test
     public void loopbackAttributeElement() throws Exception {
         startJobAndWait("loopback-attribute-element.xml");
+        assertEquals(3, stepExecutions.size());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     /**
@@ -53,6 +63,8 @@ public class LoopbackIT extends AbstractIT {
     @Test
     public void loopbackInFlow() throws Exception {
         startJobAndWait("loopback-in-flow.xml");
+        assertEquals(3, stepExecutions.size());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     /**
@@ -62,6 +74,8 @@ public class LoopbackIT extends AbstractIT {
     @Test
     public void notLoopbackAcrossFlow() throws Exception {
         startJobAndWait("not-loopback-across-flow.xml");
+        assertEquals(3, stepExecutions.size());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
     /**
@@ -72,6 +86,8 @@ public class LoopbackIT extends AbstractIT {
     @Test
     public void loopbackFlowToFlow() throws Exception {
         startJobAndWait("loopback-flow-to-flow.xml");
+        assertEquals(3, stepExecutions.size());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     /**
@@ -80,6 +96,8 @@ public class LoopbackIT extends AbstractIT {
     @Test
     public void loopbackSplitSelf() throws Exception {
         startJobAndWait("loopback-split-self.xml");
+        assertEquals(2, stepExecutions.size());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     /**
@@ -88,5 +106,7 @@ public class LoopbackIT extends AbstractIT {
     @Test
     public void loopbackStepSplit() throws Exception {
         startJobAndWait("loopback-step-split.xml");
+        assertEquals(3, stepExecutions.size());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 }
