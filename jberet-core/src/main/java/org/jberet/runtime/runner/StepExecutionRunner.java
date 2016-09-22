@@ -111,8 +111,11 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             boolean enterBeforeStep = false;
             try {
                 final List<String> executedStepIds = jobContext.getExecutedStepIds();
-                if (executedStepIds.contains(step.getId())) {
-                    throw MESSAGES.loopbackStep(step.getId(), executedStepIds.toString());
+                final boolean loopAllowed = loopAllowed();
+                if(!loopAllowed) {
+                    if (executedStepIds.contains(step.getId())) {
+                        throw MESSAGES.loopbackStep(step.getId(), executedStepIds.toString());
+                    }
                 }
 
                 final int startLimit = step.getStartLimitInt();
@@ -146,8 +149,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 }
                 runBatchletOrChunk(batchlet, chunk);
 
-                //record the fact this step has been executed
-                executedStepIds.add(step.getId());
+                if(!loopAllowed) {
+                    //record the fact this step has been executed
+                    executedStepIds.add(step.getId());
+                }
             } catch (final Throwable e) {
                 LOGGER.failToRunJob(e, jobContext.getJobName(), step.getId(), step);
                 if (e instanceof Exception) {
@@ -497,6 +502,17 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
         }
         // Not found use the standard TransactionManager
+        return false;
+    }
+
+    private boolean loopAllowed() {
+        final java.util.Properties jobParameters = jobContext.getJobParameters();
+        if (jobParameters != null) {
+            final String loopAllowedValue = jobParameters.getProperty(PropertyKey.LOOP_ALLOWED);
+            if (loopAllowedValue != null) {
+                return "true".equalsIgnoreCase(loopAllowedValue);
+            }
+        }
         return false;
     }
 }

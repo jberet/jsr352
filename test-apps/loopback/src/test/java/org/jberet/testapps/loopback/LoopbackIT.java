@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,14 +17,17 @@ import java.nio.charset.Charset;
 import javax.batch.runtime.BatchStatus;
 
 import com.google.common.io.Files;
+import org.jberet.spi.PropertyKey;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Verifies step loopbacks are detected and failed.
+ * In rare cases, loop may be allowed by setting job parameter
+ * {@value org.jberet.spi.PropertyKey#LOOP_ALLOWED} to {@code true},
+ * as in test {@link #allowLoopback()}
  */
 public class LoopbackIT extends AbstractIT {
     public LoopbackIT() {
@@ -37,13 +40,17 @@ public class LoopbackIT extends AbstractIT {
      * and each file is sent to step2 for processing, and then back to step1
      * to scan again for more files.  If there is no more files in step1,
      * the job execution ends.
-     *
+     * <p>
      * step1 -> step2 -> step1 -> step2 ... END
+     * <p>
+     * This test allows loop by setting job parameters
+     * {@value org.jberet.spi.PropertyKey#LOOP_ALLOWED} to {@code true}.
      *
      * @throws Exception if error
+     *
+     * @since 1.3.0
      */
     @Test
-    @Ignore("restore it after loopback is conditionally allowed")
     public void allowLoopback() throws Exception {
         final String allowLoopbackJob = "allow-loopback.xml";
         final int numOfFiles = 10;
@@ -66,6 +73,7 @@ public class LoopbackIT extends AbstractIT {
         try {
             params.setProperty("directory", tmpDir);
             params.setProperty("pattern", pattern);
+            params.setProperty(PropertyKey.LOOP_ALLOWED, Boolean.TRUE.toString());
 
             startJobAndWait(allowLoopbackJob);
             assertEquals(numOfFiles * 2 + 1, stepExecutions.size());

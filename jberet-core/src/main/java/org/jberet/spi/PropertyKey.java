@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -61,12 +61,23 @@ public interface PropertyKey {
     String RESTART_MODE_DETECT = "detect";
 
     /**
-     * A key used to specify a custom restart position to override the default
+     * A job parameter key used to specify a custom restart position to override the default
      * restart position.
      *
      * @since 1.3.0
      */
     String RESTART_POSITION = "jberet.restart.position";
+
+    /**
+     * A job parameter key used to allow loop between steps and other job execution elements.
+     * When its value is set to {@code true}, loop is allowed.
+     * <p>
+     * Note that loop is prohibited by default as per spec requirement. Allowing loop may cause
+     * infinite loop during job execution and should only be used with caution.
+     *
+     * @since 1.3.0
+     */
+    String LOOP_ALLOWED = "jberet.loop.allowed";
 
     /**
      * A key used to disable transactions around calls to {@code PartitionAnalyzer}.
