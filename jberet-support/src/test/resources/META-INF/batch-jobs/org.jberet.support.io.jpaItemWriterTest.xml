@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="org.jberet.support.io.jpaItemWriterTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="org.jberet.support.io.jpaItemWriterTest.step1">
+        <chunk>
+            <reader ref="jacksonCsvItemReader">
+                <properties>
+                    <property name="resource" value="movies-2012.csv"/>
+                    <property name="start" value="#{jobParameters['start']}"/>
+                    <property name="end" value="#{jobParameters['end']}"/>
+                    <property name="beanType" value="org.jberet.support.io.MovieEntity"/>
+                    <property name="columns" value="rank,tit,grs,opn"/>
+                    <property name="useHeader" value="true"/>
+                </properties>
+            </reader>
+            <writer ref="jpaItemWriter">
+                <properties>
+                    <property name="persistenceUnitName" value="JpaItemWriterTest"/>
+                    <property name="entityTransaction" value="true"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>

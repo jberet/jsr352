@@ -12,13 +12,17 @@
 
 package org.jberet.support.io;
 
+import javax.persistence.MappedSuperclass;
+
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+@MappedSuperclass
 public abstract class MovieBase {
     public enum Rating {G, PG, PG13, R}
 
     @javax.persistence.Id
-    String id;
+    @javax.persistence.GeneratedValue
+    long id;
 
     @JacksonXmlProperty(isAttribute = true)
     int rank;
@@ -32,11 +36,11 @@ public abstract class MovieBase {
     @JacksonXmlProperty(isAttribute = true)
     Rating rating;
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(final long id) {
         this.id = id;
     }
 
