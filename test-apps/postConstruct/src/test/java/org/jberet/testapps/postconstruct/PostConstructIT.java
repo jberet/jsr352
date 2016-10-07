@@ -33,6 +33,31 @@ public class PostConstructIT extends AbstractIT {
         restoreDefaultLocale();
     }
 
+    /**
+     * Verifies @PostConstruct and @PreDestroy methods are invoked for item reader,
+     * item processor, and item writer artifacts in a chunk step.
+     * Each of these lifecycle methods adds a string to job exit status to identify
+     * the current method.
+     *
+     * @throws Exception if errors
+     */
+    @Test
+    public void chunkPostConstructPreDestroy() throws Exception {
+        final String expected = "ItemReader1.postConstruct ItemWriter1.postConstruct ItemProcessor1.postConstruct ItemReader1.preDestroy ItemWriter1.preDestroy ItemProcessor1.preDestroy";
+        startJobAndWait("chunkPostConstruct");
+        final String jobExitStatus = jobExecution.getExitStatus();
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(expected, jobExitStatus);
+    }
+
+    /**
+     * Verifies @PostConstruct and @PreDestroy methods are invoked for batchlet,
+     * decider, job listener and step listener artifacts in a batchlet step.
+     * Each of these lifecycle methods adds a string to job exit status to identify
+     * the current method.
+     *
+     * @throws Exception if errors
+     */
     @Test
     public void postConstructAndPreDestroy() throws Exception {
         final String expected = "PostConstructPreDestroyBase.ps JobListener1.ps JobListener1.beforeJob PostConstructPreDestroyBase.ps StepListener1.ps StepListener1.beforeStep PostConstructPreDestroyBase.ps Batchlet0.ps Batchlet1.ps Batchlet1.process Batchlet1.pd Batchlet0.pd PostConstructPreDestroyBase.pd StepListener1.afterStep StepListener1.pd PostConstructPreDestroyBase.pd PostConstructPreDestroyBase.ps Decider1.ps Decider1.decide Decider1.pd PostConstructPreDestroyBase.pd JobListener1.afterJob JobListener1.pd PostConstructPreDestroyBase.pd";
