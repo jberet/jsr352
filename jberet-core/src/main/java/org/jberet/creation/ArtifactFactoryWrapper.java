@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,7 +43,7 @@ public final class ArtifactFactoryWrapper extends AbstractArtifactFactory {
                 obj = c.newInstance();
                 ArtifactCreationContext acc = ArtifactCreationContext.getCurrentArtifactCreationContext();
                 doInjection(obj, c, classLoader, acc.jobContext, acc.stepContext, acc.properties);
-                invokeAnnotatedLifecycleMethod(obj, cls, PostConstruct.class);
+                invokeAnnotatedLifecycleMethod(obj, c, PostConstruct.class);
             }
         }
         return obj;

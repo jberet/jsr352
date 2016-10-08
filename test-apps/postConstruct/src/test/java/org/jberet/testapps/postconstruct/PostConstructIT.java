@@ -38,6 +38,16 @@ public class PostConstructIT extends AbstractIT {
      * item processor, and item writer artifacts in a chunk step.
      * Each of these lifecycle methods adds a string to job exit status to identify
      * the current method.
+     * <p>
+     * The item reader (ref name: itemReader1) is named with its default CDI bean name.
+     * <p>
+     * The item processor (ref name: org.jberet.testapps.postconstruct.ItemProcessor1)
+     * is named with its fully-qualified class name.
+     * <p>
+     * The item writer (ref name: W1) is declared in batch.xml.
+     * <p>
+     * For all 3 artifacts, their @PostConstruct and @PreDestroy methods should be
+     * invoked.
      *
      * @throws Exception if errors
      */

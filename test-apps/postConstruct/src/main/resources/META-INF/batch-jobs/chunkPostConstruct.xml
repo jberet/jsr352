@@ -16,8 +16,8 @@
     <step id="chunkPostConstruct.step1">
         <chunk item-count="3">
             <reader ref="itemReader1"/>
-            <processor ref="itemProcessor1"/>
-            <writer ref="itemWriter1"/>
+            <processor ref="org.jberet.testapps.postconstruct.ItemProcessor1"/>
+            <writer ref="W1"/>
         </chunk>
     </step>
 </job>

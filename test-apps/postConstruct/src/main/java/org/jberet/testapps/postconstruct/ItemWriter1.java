@@ -18,11 +18,12 @@ import javax.annotation.PreDestroy;
 import javax.batch.api.chunk.AbstractItemWriter;
 import javax.batch.runtime.context.JobContext;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import static org.jberet.testapps.postconstruct.ItemProcessor1.setExitStatus;
 
-@Named
+//@Named
+// This class is declared with custom ref name (W1) in batch.xml
+//
 public class ItemWriter1 extends AbstractItemWriter {
     @Inject
     private JobContext jobContext;

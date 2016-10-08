@@ -17,9 +17,10 @@ import javax.annotation.PreDestroy;
 import javax.batch.api.chunk.ItemProcessor;
 import javax.batch.runtime.context.JobContext;
 import javax.inject.Inject;
-import javax.inject.Named;
 
-@Named
+//@Named
+// This class is referenced with its fully-qualified class name in job.xml:
+// chunkPostConstruct.xml
 public class ItemProcessor1 implements ItemProcessor {
 
     @Inject
