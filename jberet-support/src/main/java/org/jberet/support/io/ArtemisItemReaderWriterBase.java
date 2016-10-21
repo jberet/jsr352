@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -40,7 +40,7 @@ import org.jberet.support._private.SupportMessages;
  *
  * @see     ArtemisItemReader
  * @see     ArtemisItemWriter
- * @since   1.1.0
+ * @since   1.3.0
  */
 public abstract class ArtemisItemReaderWriterBase extends ItemReaderWriterBase {
     protected static final String QUEUE_NAME_KEY = "name";
