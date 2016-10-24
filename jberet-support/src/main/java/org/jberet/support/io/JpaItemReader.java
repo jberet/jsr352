@@ -13,6 +13,7 @@
 package org.jberet.support.io;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
@@ -37,7 +38,7 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
 
     @Inject
     @BatchProperty
-    protected String jpaQuery;
+    protected String jpqlQuery;
 
     @Inject
     @BatchProperty
@@ -73,15 +74,28 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
 
     protected Query query;
 
+    protected List<?> resultList;
+
+    protected int currentPosition;
+
     @Override
     public void open(final Serializable checkpoint) throws Exception {
-        super.open(checkpoint);
-        query = getQuery();
+        if (checkpoint == null) {
+            super.open(checkpoint);
+            query = getQuery();
+            resultList = query.getResultList();
+            currentPosition = 0;
+        } else {
+            currentPosition = (Integer) checkpoint;
+        }
     }
 
     @Override
     public Object readItem() throws Exception {
-        return null;
+        if (currentPosition >= resultList.size()) {
+            return null;
+        }
+        return resultList.get(currentPosition++);
     }
 
     protected Query getQuery() {
@@ -90,9 +104,9 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
             q = queryInstance.get();
         }
         if (q == null) {
-            if (jpaQuery != null) {
-                q = beanType != null ? em.createQuery(jpaQuery, beanType) :
-                        em.createQuery(jpaQuery);
+            if (jpqlQuery != null) {
+                q = beanType != null ? em.createQuery(jpqlQuery, beanType) :
+                        em.createQuery(jpqlQuery);
             } else if (namedQuery != null) {
                 q = beanType != null ? em.createNamedQuery(namedQuery, beanType) :
                         em.createNamedQuery(namedQuery);
