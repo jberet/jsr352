@@ -14,6 +14,7 @@ package org.jberet.support.io;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemReader;
 import javax.enterprise.context.Dependent;
@@ -63,6 +64,10 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
     @Inject
     @BatchProperty
     protected String resultSetMapping;
+
+    @Inject
+    @BatchProperty
+    protected Map<String, String> hints;
 
     @Inject
     @BatchProperty
@@ -128,6 +133,12 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
         }
         if (maxResults != 0) {
             q.setMaxResults(maxResults);
+        }
+
+        if (hints != null) {
+            for (final Map.Entry<String, String> e : hints.entrySet()) {
+                q.setHint(e.getKey(), e.getValue());
+            }
         }
 
         return q;

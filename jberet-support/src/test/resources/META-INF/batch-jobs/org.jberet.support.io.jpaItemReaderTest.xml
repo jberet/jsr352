@@ -18,7 +18,7 @@
             <reader ref="jpaItemReader">
                 <properties>
                     <property name="persistenceUnitName" value="JpaItemWriterTest"/>
-                    <property name="nativeQuery" value="select * from MOVIEENTITY"/>
+                    <property name="nativeQuery" value="select * from MOVIEENTITY order by rank"/>
                     <property name="beanType" value="org.jberet.support.io.MovieEntity"/>
                 </properties>
             </reader>
