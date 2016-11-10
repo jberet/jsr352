@@ -26,8 +26,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  */
 
 @JacksonXmlRootElement(localName = "t")
-@JsonPropertyOrder({"rank","tit","grs","opn"})
+@JsonPropertyOrder({"rank", "tit", "grs", "opn"})
 public final class Movie extends MovieBase {
+
+    @javax.persistence.Id
+    String id;
 
     @JacksonXmlProperty(isAttribute = true)
     private Date opn;
@@ -38,6 +41,14 @@ public final class Movie extends MovieBase {
 
     public void setOpn(final Date opn) {
         this.opn = opn;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(final String id) {
+        this.id = id;
     }
 
     @Override

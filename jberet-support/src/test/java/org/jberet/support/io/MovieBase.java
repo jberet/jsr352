@@ -20,10 +20,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 public abstract class MovieBase {
     public enum Rating {G, PG, PG13, R}
 
-    @javax.persistence.Id
-    @javax.persistence.GeneratedValue
-    long id;
-
     @JacksonXmlProperty(isAttribute = true)
     int rank;
 
@@ -35,14 +31,6 @@ public abstract class MovieBase {
 
     @JacksonXmlProperty(isAttribute = true)
     Rating rating;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(final long id) {
-        this.id = id;
-    }
 
     public int getRank() {
         return rank;

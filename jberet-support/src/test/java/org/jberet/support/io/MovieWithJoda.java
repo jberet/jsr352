@@ -25,6 +25,8 @@ import org.joda.time.DateTime;
 
 @JacksonXmlRootElement(localName = "t")
 public final class MovieWithJoda extends MovieBase {
+    @javax.persistence.Id
+    String id;
 
     @JacksonXmlProperty(isAttribute = true)
     private DateTime opn;
@@ -35,6 +37,14 @@ public final class MovieWithJoda extends MovieBase {
 
     public void setOpn(final DateTime opn) {
         this.opn = opn;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(final String id) {
+        this.id = id;
     }
 
     @Override

@@ -25,9 +25,21 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 public class MovieEntity extends MovieBase implements Serializable {
     private static final long serialVersionUID = -8771060045002998154L;
 
+    @javax.persistence.Id
+    @javax.persistence.GeneratedValue
+    long id;
+
     @Basic
     @JacksonXmlProperty(isAttribute = true)
     private Date opn;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(final long id) {
+        this.id = id;
+    }
 
     public Date getOpn() {
         return opn;
