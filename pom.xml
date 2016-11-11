@@ -36,6 +36,7 @@
 
         <!-- the inherited version does not support forkCount or reuseForks, so override with newer version -->
         <version.surefire.plugin>2.18.1</version.surefire.plugin>
+        <version.compiler.plugin>3.3</version.compiler.plugin>
         <version.dependency.plugin>2.10</version.dependency.plugin>
         <version.javadoc.plugin>2.10.3</version.javadoc.plugin>
         <version.org.jboss.apiviz>1.3.2.GA</version.org.jboss.apiviz>
@@ -51,7 +52,7 @@
         <version.org.hibernate>5.0.10.Final</version.org.hibernate>
         <version.org.jboss.logging.jboss-logging>3.3.0.Final</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-tools>2.0.1.Final</version.org.jboss.logging.jboss-logging-tools>
-        <version.org.jboss.marshalling>1.4.10.Final</version.org.jboss.marshalling>
+        <version.org.jboss.marshalling>1.4.11.Final</version.org.jboss.marshalling>
         <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final
         </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
         <version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>1.0.0.Final
@@ -97,6 +98,7 @@
         <version.org.renjin.renjin-script-engine>0.7.0-RC8-SNAPSHOT</version.org.renjin.renjin-script-engine>
 
         <version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>
+        <version.miredot>2.0</version.miredot>
 
         <version.org.apache.kafka>0.9.0.0</version.org.apache.kafka>
 
@@ -106,6 +108,10 @@
 
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
+
+        <!-- Modularized JDK support (various workarounds) - activated via profile -->
+        <modular.jdk.args/>
+        <surefire.system.args>${modular.jdk.args}</surefire.system.args>
     </properties>
 
     <modules>
@@ -129,6 +135,22 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
+                        <argLine>${surefire.system.args}</argLine>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <argLine>${surefire.system.args}</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -166,6 +188,10 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
             </plugin>
             <plugin>
@@ -175,14 +201,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -238,15 +256,11 @@
                 <exclusions>
                     <exclusion>
                         <groupId>javax.el</groupId>
-                        <artifactId>el-api</artifactId>
+                        <artifactId>javax.el-api</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.jboss.spec.javax.interceptor</groupId>
-                        <artifactId>jboss-interceptors-api_1.1_spec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.annotation</groupId>
-                        <artifactId>jsr250-api</artifactId>
+                        <groupId>javax.interceptor</groupId>
+                        <artifactId>javax.interceptor-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -780,6 +794,11 @@
                 <enabled>true</enabled>
             </snapshots>
         </pluginRepository>
+        <pluginRepository>
+            <id>miredot</id>
+            <name>MireDot Releases</name>
+            <url>http://nexus.qmino.com/content/repositories/miredot</url>
+        </pluginRepository>
     </pluginRepositories>
 
     <profiles>
@@ -792,6 +811,50 @@
                         <artifactId>maven-source-plugin</artifactId>
                         <configuration>
                             <skipSource>false</skipSource>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.qmino</groupId>
+                        <artifactId>miredot-plugin</artifactId>
+                        <version>${version.miredot}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>restdoc</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <license>
+                                cHJvamVjdHxvcmcuamJlcmV0LmpiZXJldC1yZXN0LWFwaXwyMDE4LTAyLTE2fHRydWV8LTEjTUMwQ0ZBR1dJc0ZtZGlFc3J3OGhlQXdFRXBmTkJPVkNBaFVBaFE2ekVZM2pLdm9YSkFjM2VQYjNCQ2xNaVh3PQ==
+                            </license>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>modularizedJdk</id>
+            <activation>
+                <jdk>9</jdk>
+            </activation>
+            <properties>
+                <modular.jdk.args>--add-modules java.se.ee</modular.jdk.args>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>${version.compiler.plugin}</version>
+                        <configuration>
+                            <!-- fork is needed so compiler args can be used -->
+                            <fork>true</fork>
+                            <compilerArgs>
+                                <arg>-J--add-modules</arg>
+                                <arg>-Jjava.annotations.common</arg>
+                                <arg>-Aorg.jboss.logging.tools.level=INFO</arg>
+                            </compilerArgs>
                         </configuration>
                     </plugin>
                 </plugins>
