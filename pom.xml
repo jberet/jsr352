@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>10</version>
+        <version>21</version>
     </parent>
 
     <groupId>org.jberet</groupId>
@@ -32,15 +32,10 @@
     <packaging>pom</packaging>
 
     <properties>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
 
-        <!-- the inherited version does not support forkCount or reuseForks, so override with newer version -->
-        <version.surefire.plugin>2.18.1</version.surefire.plugin>
-        <version.compiler.plugin>3.3</version.compiler.plugin>
-        <version.dependency.plugin>2.10</version.dependency.plugin>
-        <version.javadoc.plugin>2.10.3</version.javadoc.plugin>
         <version.org.jboss.apiviz>1.3.2.GA</version.org.jboss.apiviz>
-
         <version.com.fasterxml.aalto-xml>1.0.0</version.com.fasterxml.aalto-xml>
         <version.com.google.guava>18.0</version.com.google.guava>
         <version.com.h2database>1.3.173</version.com.h2database>
@@ -131,6 +126,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${version.war.plugin}</version>
+                </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
@@ -839,7 +839,9 @@
                 <jdk>9</jdk>
             </activation>
             <properties>
-                <modular.jdk.args>--add-modules java.se.ee</modular.jdk.args>
+                <modular.jdk.args>
+                    --add-modules java.activation,java.annotations.common,java.xml.bind,java.xml.ws
+                </modular.jdk.args>
             </properties>
             <build>
                 <plugins>
