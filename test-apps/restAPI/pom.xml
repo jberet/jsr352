@@ -25,7 +25,6 @@
     <name>restAPI Maven Webapp</name>
 
     <properties>
-        <version.maven.war.plugin>2.6</version.maven.war.plugin>
         <version.maven.wildfly.plugin>1.0.2.Final</version.maven.wildfly.plugin>
         <version.org.jboss.resteasy>3.0.12.Final</version.org.jboss.resteasy>
     </properties>
@@ -131,7 +130,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>${version.maven.war.plugin}</version>
+                    <version>${version.war.plugin}</version>
                     <configuration>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
                     </configuration>
