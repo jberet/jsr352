@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -149,11 +149,17 @@ public class CsvItemWriter extends CsvItemReaderWriterBase implements ItemWriter
             final ICsvListWriter writer = (ICsvListWriter) delegateWriter;
             if (cellProcessorInstances.length == 0) {
                 for (final Object e : items) {
-                    writer.write((List<?>) e);
+                    final List<?> asList = (List<?>) e;
+                    if (asList.size() > 0) {
+                        writer.write(asList);
+                    }
                 }
             } else {
                 for (final Object e : items) {
-                    writer.write((List<?>) e, cellProcessorInstances);
+                    final List<?> asList = (List<?>) e;
+                    if (asList.size() > 0) {
+                        writer.write(asList, cellProcessorInstances);
+                    }
                 }
             }
         }
