@@ -90,19 +90,7 @@ public abstract class JobExecutor implements Executor {
             // requiredRemainingPermits == 0, then just use the delegate executor to queue the tasks as it sees fit.
             // Note that if this executor needs to act as a thread-pool then two arrays will be needed for tasks that
             // require permits to stay open and tasks that don't require permits to stay open.
-            if ((usedPermits + requiredRemainingPermits) <= maxPermits) {
-                ++usedPermits;
-                r = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            task.run();
-                        } finally {
-                            release();
-                        }
-                    }
-                };
-            } else if (requiredRemainingPermits == 0) {
+            if ((usedPermits + requiredRemainingPermits) <= maxPermits || requiredRemainingPermits == 0) {
                 ++usedPermits;
                 r = new Runnable() {
                     @Override
