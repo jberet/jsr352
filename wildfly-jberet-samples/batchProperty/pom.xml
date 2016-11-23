@@ -76,6 +76,9 @@
                             <includes>
                                 <include>**/*IT.java</include>
                             </includes>
+                            <systemPropertyVariables>
+                                <test.war>${project.build.directory}${file.separator}${project.build.finalName}.war</test.war>
+                            </systemPropertyVariables>
                         </configuration>
                     </plugin>
                 </plugins>

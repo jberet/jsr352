@@ -7,7 +7,7 @@
                 <property name="class" value="org.jberet.samples.wildfly.batchproperty.BatchPropertyBatchlet"/>
                 <property name="file" value="/tmp"/>
                 <property name="jar.files"
-                          value="#{systemProperties['java.home']}/lib/jce.jar, #{systemProperties['java.home']}/lib/management-agent.jar"/>
+                          value="#{systemProperties['test.war']}, #{systemProperties['test.war']}"/>
                 <property name="int" value="9"/>
                 <property name="booleans" value="true, true"/>
                 <property name="big.integer" value="999"/>

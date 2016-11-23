@@ -33,4 +33,17 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <finalName>propertyInjectionTestApp</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <test.jar>${project.build.directory}${file.separator}${project.build.finalName}.jar</test.jar>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
