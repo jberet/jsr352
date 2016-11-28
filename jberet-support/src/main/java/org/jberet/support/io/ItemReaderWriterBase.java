@@ -51,7 +51,7 @@ public abstract class ItemReaderWriterBase {
 
     /**
      * The resource to read from (for batch readers), or write to (for batch writers). Some reader or writer
-     * implementations may choose to ignore this property and instead use other properties that are more appropritate.
+     * implementations may choose to ignore this property and instead use other properties that are more appropriate.
      *
      */
     @Inject
