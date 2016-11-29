@@ -7,7 +7,7 @@
             <reader ref="itemReader1">
                 <properties>
                     <property name="fail.on" value="#{jobParameters['fail.on']}"/>
-                    <property name="number.limit" value="#{jobParameters['number.limit']}?:10;"/>
+                    <property name="number.limit" value="#{jobParameters['number.limit']}?:30;"/>
                 </properties>
             </reader>
             <writer ref="itemWriter1">

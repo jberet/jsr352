@@ -173,24 +173,6 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
                 return (StepExecutionImpl) stepExecution;
             }
         }
-        StepExecutionImpl result = null;
-        // the same-named StepExecution is not found in the jobExecutionToRestart.  It's still possible the same-named
-        // StepExecution may exit in JobExecution earlier than jobExecutionToRestart for the same JobInstance.
-        final long instanceId = jobExecutionToRestart.getJobInstance().getInstanceId();
-        for (final SoftReference<JobExecutionImpl, Long> e : jobExecutions.values()) {
-            final JobExecutionImpl jobExecutionImpl = e.get();
-            //skip the JobExecution that has already been checked above
-            if (jobExecutionImpl != null && instanceId == jobExecutionImpl.getJobInstance().getInstanceId() &&
-                    jobExecutionImpl.getExecutionId() != jobExecutionToRestart.getExecutionId()) {
-                for (final StepExecution stepExecution : jobExecutionImpl.getStepExecutions()) {
-                    if (stepExecution.getStepName().equals(stepName)) {
-                        if (result == null || result.getStepExecutionId() < stepExecution.getStepExecutionId()) {
-                            result = (StepExecutionImpl) stepExecution;
-                        }
-                    }
-                }
-            }
-        }
-        return result;
+        return null;
     }
 }
