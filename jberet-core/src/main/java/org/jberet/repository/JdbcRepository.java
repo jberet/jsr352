@@ -478,7 +478,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 preparedStatement.setTimestamp(2, createTimestamp(jobExecution.getLastUpdatedTime()));
                 preparedStatement.setString(3, jobExecution.getBatchStatus().name());
                 preparedStatement.setString(4, jobExecution.getExitStatus());
-                preparedStatement.setString(5, jobExecution.getRestartPosition());
+                preparedStatement.setString(5, jobExecution.combineRestartPositionAndUser());
 
                 if (saveJobParameters) {
                     preparedStatement.setString(6, BatchUtil.propertiesToString(jobExecution.getJobParameters()));  //job parameters
