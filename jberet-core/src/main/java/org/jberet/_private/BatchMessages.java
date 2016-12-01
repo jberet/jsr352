@@ -198,4 +198,7 @@ public interface BatchMessages {
     @Message(id = 654, value = "Failed to get JdbcRepository.")
     BatchRuntimeException failedToGetJdbcRepository(@Cause Throwable cause);
 
+    @Message(id = 655, value = "ClassLoader (%s) is already registered to a job operator context")
+    IllegalArgumentException classLoaderAlreadyRegistered(ClassLoader classLoader);
+
 }
