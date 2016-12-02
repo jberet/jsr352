@@ -36,6 +36,8 @@ import org.wildfly.security.manager.WildFlySecurityManager;
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution, Cloneable {
     private static final long serialVersionUID = 3706885354351337764L;
 
+    private static final char RESTART_POSITION_USER_SEP = '"';
+
     private long id;
 
     private final JobInstanceImpl jobInstance;
@@ -53,6 +55,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
      * Which job-level step, flow, decision or split to restart this job execution, if it were to be restarted.
      */
     private String restartPosition;
+
+    private String user;
 
     private transient CountDownLatch jobTerminationLatch = new CountDownLatch(1);
     private final AtomicBoolean stopRequested = new AtomicBoolean();
@@ -84,7 +88,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
                             final Date lastUpdatedTime,
                             final String batchStatus,
                             final String exitStatus,
-                            final String restartPosition) {
+                            final String restartPositionAndUser) {
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
         this.id = id;
@@ -103,7 +107,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         }
         this.batchStatus = BatchStatus.valueOf(batchStatus);
         this.exitStatus = exitStatus;
-        this.restartPosition = restartPosition;
+        splitRestartPositionAndUser(restartPositionAndUser);
     }
 
     public void setId(final long id) {
@@ -199,6 +203,39 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     public String getRestartPosition() {
         return restartPosition;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(final String user) {
+        this.user = user;
+    }
+
+    public String combineRestartPositionAndUser() {
+        final StringBuilder sb = new StringBuilder();
+        if (restartPosition != null) {
+            sb.append(restartPosition);
+        }
+        if (user != null) {
+            sb.append(RESTART_POSITION_USER_SEP).append(user);
+        }
+        return sb.toString();
+    }
+
+    public void splitRestartPositionAndUser(final String restartPositionAndUser) {
+        if (restartPositionAndUser != null) {
+            final int i = restartPositionAndUser.indexOf(RESTART_POSITION_USER_SEP);
+            if (i < 0) {
+                restartPosition = restartPositionAndUser;
+            } else if (i > 0) {
+                restartPosition = restartPositionAndUser.substring(0, i);
+                user = restartPositionAndUser.substring(i + 1);
+            } else {
+                user = restartPositionAndUser.substring(1);
+            }
+        }
     }
 
     public boolean isStopRequested() {
