@@ -1,2 +1,2 @@
-org.jberet.operations.JobOperatorImpl
+org.jberet.operations.DelegatingJobOperator
 

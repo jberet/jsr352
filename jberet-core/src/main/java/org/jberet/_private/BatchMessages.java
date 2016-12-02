@@ -195,5 +195,6 @@ public interface BatchMessages {
     @Message(id = 653, value = "Failed to deserialize: %s")
     BatchRuntimeException failedToDeserialize(@Cause Throwable cause, Serializable value);
 
-
+    @Message(id = 655, value = "ClassLoader (%s) is already registered to a job operator context")
+    IllegalArgumentException classLoaderAlreadyRegistered(ClassLoader classLoader);
 }
