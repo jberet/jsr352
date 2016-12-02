@@ -27,6 +27,7 @@ import org.jberet.job.model.Job;
 import org.jberet.operations.JobOperatorImpl;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.spi.JobOperatorContext;
 import org.junit.Assert;
 import org.junit.Before;
 
@@ -65,7 +66,9 @@ abstract public class AbstractIT {
     @Before
     public void before() throws Exception {
         if (jobOperator == null) {
-            jobOperator = (JobOperatorImpl) BatchRuntime.getJobOperator();
+            // The BatchRuntime.getJobOperator() returns the DelegatingJobOperator, using the context will give us
+            // access to the default JobOperatorImpl.
+            jobOperator = (JobOperatorImpl) JobOperatorContext.getJobOperatorContext().getJobOperator();
         }
     }
 
