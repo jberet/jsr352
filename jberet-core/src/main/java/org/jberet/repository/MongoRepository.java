@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -193,7 +193,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         if (fullUpdate) {
             update.put(TableColumns.ENDTIME, jobExecution.getEndTime());
             update.put(TableColumns.EXITSTATUS, jobExecution.getExitStatus());
-            update.put(TableColumns.RESTARTPOSITION, jobExecution.getRestartPosition());
+            update.put(TableColumns.RESTARTPOSITION, jobExecution.combineRestartPositionAndUser());
             if (saveJobParameters) {
                 update.put(TableColumns.JOBPARAMETERS, BatchUtil.propertiesToString(jobExecution.getJobParameters()));
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,6 +36,9 @@ import org.wildfly.security.manager.WildFlySecurityManager;
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution, Cloneable {
     private static final long serialVersionUID = 3706885354351337764L;
 
+    /**
+     * Separator character placed in front of user when combining user and restart position.
+     */
     private static final char RESTART_POSITION_USER_SEP = '"';
 
     private long id;
@@ -56,6 +59,9 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
      */
     private String restartPosition;
 
+    /**
+     * User name who started this job execution.
+     */
     private String user;
 
     private transient CountDownLatch jobTerminationLatch = new CountDownLatch(1);
@@ -197,23 +203,66 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         lastUpdatedTime = System.currentTimeMillis();
     }
 
+    /**
+     * Sets the restart position for subsequent restart operation.
+     * When set to null, the default restarting behavior is used.
+     *
+     * @param restartPosition the restart position; may be null
+     */
     public void setRestartPosition(final String restartPosition) {
         this.restartPosition = restartPosition;
     }
 
+    /**
+     * Gets the restart position for subsequent restart operation.
+     * If null is returned, the default restarting behavior is used.
+     *
+     * @return the restart position; may be null
+     */
     public String getRestartPosition() {
         return restartPosition;
     }
 
+    /**
+     * Gets the user who started this job execution.
+     *
+     * @return the user who started this job execution; may be null
+     * @since 1.2.2
+     * @since 1.3.0.Beta4
+     */
     public String getUser() {
         return user;
     }
 
+    /**
+     * Sets the user who started this job execution.
+     * @param user the user who started this job execution; may be null
+     * @since 1.2.2
+     * @since 1.3.0.Beta4
+     */
     public void setUser(final String user) {
         this.user = user;
     }
 
+    /**
+     * Combines user and restart position into one single string value.
+     * Both user and restart position may be absent. Example values can be:
+     * <ul>
+     *     <li>null
+     *     <li>step1{@value #RESTART_POSITION_USER_SEP}user1
+     *     <li>step1
+     *     <li>{@value #RESTART_POSITION_USER_SEP}user1
+     * </ul>
+     *
+     * @return the combined value of user and restart position
+     * @since 1.2.2
+     * @since 1.3.0.Beta4
+     */
     public String combineRestartPositionAndUser() {
+        if (restartPosition == null && user == null) {
+            return null;
+        }
+
         final StringBuilder sb = new StringBuilder();
         if (restartPosition != null) {
             sb.append(restartPosition);
@@ -224,7 +273,16 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         return sb.toString();
     }
 
-    public void splitRestartPositionAndUser(final String restartPositionAndUser) {
+    /**
+     * Splits the combined user and restart position value and assigns them
+     * to the corresponding fields.
+     *
+     * @param restartPositionAndUser the combined user and restart position value,
+     *                               typically retrieved from persistence store
+     * @since 1.2.2
+     * @since 1.3.0.Beta4
+     */
+    private void splitRestartPositionAndUser(final String restartPositionAndUser) {
         if (restartPositionAndUser != null) {
             final int i = restartPositionAndUser.indexOf(RESTART_POSITION_USER_SEP);
             if (i < 0) {
