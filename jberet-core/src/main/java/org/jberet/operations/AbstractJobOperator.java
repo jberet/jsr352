@@ -80,10 +80,28 @@ public abstract class AbstractJobOperator implements JobOperator {
 
     @Override
     public long start(final String jobXMLName, final Properties jobParameters) throws JobStartException, JobSecurityException {
+        return start(jobXMLName, jobParameters, null);
+    }
+
+    /**
+     * Creates a new job instance and starts the first execution of that instance.
+     *
+     * @param jobXMLName    specifies the name of the job XML describing the job
+     * @param jobParameters specifies the keyword/value pairs for attribute substitution in the Job XML
+     * @param user          the user to associate with the job execution
+     *
+     * @return executionId for the job execution.
+     *
+     * @throws JobStartException    if the job failed to start
+     * @throws JobSecurityException if there is a security issue with starting the job
+     *
+     * @see #start(String, Properties)
+     */
+    public long start(final String jobXMLName, final Properties jobParameters, final String user) throws JobStartException, JobSecurityException {
         final BatchEnvironment batchEnvironment = getBatchEnvironment();
         final Job jobDefined = ArchiveXmlLoader.loadJobXml(jobXMLName, batchEnvironment.getClassLoader(),
                 new ArrayList<Job>(), batchEnvironment.getJobXmlResolver());
-        return start(jobDefined, jobParameters);
+        return start(jobDefined, jobParameters, user);
     }
 
     /**
@@ -100,6 +118,24 @@ public abstract class AbstractJobOperator implements JobOperator {
      * @since 1.2.0
      */
     public long start(final Job jobDefined, final Properties jobParameters) throws JobStartException, JobSecurityException {
+        return start(jobDefined, jobParameters, null);
+    }
+
+    /**
+     * Starts a pre-configured {@link Job} instance, with job parameters and sets the user on the execution
+     *
+     * @param jobDefined    a pre-configured job
+     * @param jobParameters job parameters for the current job execution
+     * @param user          the user to associate with the job execution
+     *
+     * @return job execution id as a long number
+     *
+     * @throws JobStartException    if failed to start the job
+     * @throws JobSecurityException if failed to start the job due to security permission
+     * @see org.jberet.job.model.JobBuilder
+     * @since 1.2.2
+     */
+    public long start(final Job jobDefined, final Properties jobParameters, final String user) throws JobStartException, JobSecurityException {
         final BatchEnvironment batchEnvironment = getBatchEnvironment();
         final ClassLoader classLoader = batchEnvironment.getClassLoader();
         final String applicationName = getApplicationName();
@@ -109,7 +145,7 @@ public abstract class AbstractJobOperator implements JobOperator {
                 @Override
                 public Long invoke() throws JobStartException, JobSecurityException {
                     final JobInstanceImpl jobInstance = getJobRepository().createJobInstance(jobDefined, applicationName, classLoader);
-                    return startJobExecution(jobInstance, jobParameters, null);
+                    return startJobExecution(jobInstance, jobParameters, null, user);
                 }
             });
         } catch (InvalidTransactionException e) {
@@ -188,6 +224,26 @@ public abstract class AbstractJobOperator implements JobOperator {
     @Override
     public long restart(final long executionId, final Properties restartParameters) throws JobExecutionAlreadyCompleteException,
             NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
+        return restart(executionId, restartParameters, null);
+    }
+
+    /**
+     * Restarts a stopped or failed job with the specified user.
+     *
+     * @param executionId       the execution id used for the restart, this must be the most recent execution
+     * @param restartParameters the new properties used for the restart
+     * @param user              the user to associate with the job execution
+     *
+     * @return the new execution id
+     *
+     * @throws JobExecutionAlreadyCompleteException if the job was already completed
+     * @throws NoSuchJobExecutionException          the job does not exist
+     * @throws JobExecutionNotMostRecentException   if the execution id is not the most recent execution
+     * @throws JobRestartException                  of the job failed to restart
+     * @throws JobSecurityException                 if failed to start the job due to security permission
+     */
+    public long restart(final long executionId, final Properties restartParameters, final String user) throws JobExecutionAlreadyCompleteException,
+            NoSuchJobExecutionException, JobExecutionNotMostRecentException, JobRestartException, JobSecurityException {
         final JobExecutionImpl originalToRestart = getJobExecutionImpl(executionId);
 
         if (Job.UNRESTARTABLE.equals(originalToRestart.getRestartPosition())) {
@@ -196,7 +252,7 @@ public abstract class AbstractJobOperator implements JobOperator {
 
         final BatchStatus previousStatus = originalToRestart.getBatchStatus();
         if (previousStatus == BatchStatus.FAILED || previousStatus == BatchStatus.STOPPED) {
-            return restartFailedOrStopped(executionId, originalToRestart, restartParameters);
+            return restartFailedOrStopped(executionId, originalToRestart, restartParameters, user);
         }
 
         if (previousStatus == BatchStatus.COMPLETED) {
@@ -225,7 +281,7 @@ public abstract class AbstractJobOperator implements JobOperator {
         BatchLogger.LOGGER.markAsFailed(executionId, originalToRestart.getJobName(), previousStatus, restartMode);
         originalToRestart.setBatchStatus(BatchStatus.FAILED);
         getJobRepository().updateJobExecution(originalToRestart, false, false);
-        return restartFailedOrStopped(executionId, originalToRestart, restartParameters);
+        return restartFailedOrStopped(executionId, originalToRestart, restartParameters, user);
     }
 
     @Override
@@ -306,13 +362,14 @@ public abstract class AbstractJobOperator implements JobOperator {
      * @param executionId       the old job execution id to restart
      * @param originalToRestart the old job execution
      * @param restartParameters restart job parameters
+     * @param user              the user to associate with the job execution
      *
      * @return the new job execution id
      *
      * @throws JobExecutionNotMostRecentException
      * @throws JobRestartException
      */
-    private long restartFailedOrStopped(final long executionId, final JobExecutionImpl originalToRestart, final Properties restartParameters)
+    private long restartFailedOrStopped(final long executionId, final JobExecutionImpl originalToRestart, final Properties restartParameters, final String user)
             throws JobExecutionNotMostRecentException, JobRestartException {
         final JobInstanceImpl jobInstance = originalToRestart.getJobInstance();
         final List<JobExecution> executions = getJobExecutions(jobInstance);
@@ -368,7 +425,7 @@ public abstract class AbstractJobOperator implements JobOperator {
             return invokeTransaction(new TransactionInvocation<Long>() {
                 @Override
                 public Long invoke() throws JobStartException, JobSecurityException {
-                    return startJobExecution(jobInstance, combinedProperties, originalToRestart);
+                    return startJobExecution(jobInstance, combinedProperties, originalToRestart, user);
                 }
             });
         } catch (final Exception e) {
@@ -376,10 +433,11 @@ public abstract class AbstractJobOperator implements JobOperator {
         }
     }
 
-    private long startJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters, final JobExecutionImpl originalToRestart) throws JobStartException, JobSecurityException {
+    private long startJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters, final JobExecutionImpl originalToRestart, final String user) throws JobStartException, JobSecurityException {
         final BatchEnvironment batchEnvironment = getBatchEnvironment();
         final JobRepository repository = getJobRepository();
         final JobExecutionImpl jobExecution = repository.createJobExecution(jobInstance, jobParameters);
+        jobExecution.setUser(user);
         final JobContextImpl jobContext = new JobContextImpl(jobExecution, originalToRestart, new ArtifactFactoryWrapper(batchEnvironment.getArtifactFactory()), repository, batchEnvironment);
 
         final JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
