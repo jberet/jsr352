@@ -35,6 +35,7 @@ import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 import static org.jberet.support.io.CsvProperties.APPEND;
+import static org.jberet.support.io.CsvProperties.FAIL_IF_DIRS_NOT_EXIST;
 import static org.jberet.support.io.CsvProperties.FAIL_IF_EXISTS;
 import static org.jberet.support.io.CsvProperties.OVERWRITE;
 import static org.jberet.support.io.CsvProperties.RESOURCE_KEY;
@@ -170,26 +171,65 @@ public abstract class ItemReaderWriterBase {
             //    throw SupportLogger.LOGGER.writerResourceIsDirectory(file);
             //}
             if (writeMode == null || writeMode.equalsIgnoreCase(APPEND)) {
-                final FileOutputStream fos = new FileOutputStream(file, true);
-                if (file.length() > 0) {
-                    skipWritingHeader = true;
-                    fos.write(NEW_LINE.getBytes());
-                }
-                return fos;
+                return newFileOutputStream(file, exists, true, false);
             }
             if (writeMode.equalsIgnoreCase(OVERWRITE)) {
-                return new FileOutputStream(file);
+                return newFileOutputStream(file, exists, false, false);
             }
             if (writeMode.equalsIgnoreCase(FAIL_IF_EXISTS)) {
                 if (exists) {
-                    throw SupportMessages.MESSAGES.writerResourceAlreadyExists(file.getPath());
+                    throw SupportMessages.MESSAGES.writerResourceAlreadyExists(resource);
                 }
-                return new FileOutputStream(file);
+                return newFileOutputStream(file, false, false, false);
+            }
+            if (writeMode.startsWith(FAIL_IF_DIRS_NOT_EXIST)) {
+                // writeMode can be specified as along with overwrite
+                // writeMode = "failIfDirsNotExist"
+                // writeMode = "failIfDirsNotExist overwrite"
+                return newFileOutputStream(file, exists, !writeMode.endsWith(OVERWRITE), true);
             }
             throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, writeMode, WRITE_MODE_KEY);
         } catch (final IOException e) {
             throw SupportMessages.MESSAGES.invalidReaderWriterProperty(e, resource, RESOURCE_KEY);
         }
+    }
+
+    /**
+     * Creates a new {@code FileOutputStream}, depending on the settings in parameters.
+     * If the parent directories of the target {@code file} do not exist, they will be
+     * automatically created, unless {@code failIfDirsNotExist} is true.
+     *
+     * @param file the writer target file
+     * @param exists whether the {@code file} exists
+     * @param append append mode if true; overwrite mode if false
+     * @param failIfDirsNotExist if true and if the parent dirs of {@code file} do not exist, throw exception
+     * @return the created {@code FileOutputStream}
+     * @throws IOException if exception from file operations
+     */
+    private FileOutputStream newFileOutputStream(final File file,
+                                                 final boolean exists,
+                                                 final boolean append,
+                                                 final boolean failIfDirsNotExist) throws IOException {
+        if (!exists) {
+            final File parentFile = file.getParentFile();
+            if (parentFile == null) {
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, resource, RESOURCE_KEY);
+            }
+            if (!parentFile.exists()) {
+                if (failIfDirsNotExist) {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, resource, RESOURCE_KEY);
+                }
+                if (!parentFile.mkdirs()) {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, resource, RESOURCE_KEY);
+                }
+            }
+        }
+        final FileOutputStream fos = new FileOutputStream(file, append);
+        if (append && file.length() > 0) {
+            skipWritingHeader = true;
+            fos.write(NEW_LINE.getBytes());
+        }
+        return fos;
     }
 
 }

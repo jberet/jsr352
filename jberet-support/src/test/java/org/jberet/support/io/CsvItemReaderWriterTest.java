@@ -98,12 +98,6 @@ public class CsvItemReaderWriterTest {
     //content from row 6 & 10
     static final String personResourceForbid = "MarthaEValentine@dayrep.com, CindyNKeyes@jourrapide.com";
 
-    static {
-        if (!tmpdir.exists()) {
-            tmpdir.mkdirs();
-        }
-    }
-
     @Test
     public void testBeanType() throws Exception {
         //override the default quote char ", which is used in feetInches cell

@@ -27,12 +27,6 @@ public final class MovieTestWithJacksonCsv extends MovieTest {
     private static final String jobName = "org.jberet.support.io.MovieTestWithJacksonCsv";
     static final File tmpdir = new File(System.getProperty("jberet.tmp.dir"));
 
-    static {
-        if (!tmpdir.exists()) {
-            tmpdir.mkdirs();
-        }
-    }
-
     //@Test
     @Override
     public void testBeanTypeNoDate2_4() throws Exception {

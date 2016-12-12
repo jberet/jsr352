@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -71,8 +71,14 @@ public final class CsvProperties {
 
     /**
      * The property key to instruct {@code org.jberet.support.io.CsvItemWriter}, when the target CSV resource already
-     * exists, whether to append to, or overwrite the existing resource, or fail. Valid values are {@code append},
-     * {@code overwrite}, and {@code failIfExists}.
+     * exists, whether to append to, or overwrite the existing resource, or fail. Valid values are:
+     * <ul>
+     *  <li>{@value org.jberet.support.io.CsvProperties#APPEND},
+     *  <li>{@value org.jberet.support.io.CsvProperties#OVERWRITE},
+     *  <li>{@value org.jberet.support.io.CsvProperties#FAIL_IF_EXISTS},
+     *  <li>{@value org.jberet.support.io.CsvProperties#FAIL_IF_DIRS_NOT_EXIST}
+     *  <li>{@value org.jberet.support.io.CsvProperties#FAIL_IF_DIRS_NOT_EXIST} {@value org.jberet.support.io.CsvProperties#OVERWRITE}
+     * </ul>
      */
     public static final String WRITE_MODE_KEY = "writeMode";
 
@@ -90,6 +96,15 @@ public final class CsvProperties {
      * The property value to specify writeMode of failIfExists for {@code org.jberet.support.io.CsvItemWriter}.
      */
     public static final String FAIL_IF_EXISTS = "failIfExists";
+
+    /**
+     * The property value to specify writeMode of {@value org.jberet.support.io.CsvProperties#FAIL_IF_DIRS_NOT_EXIST}
+     * for writers. When this value is used, the writer will throw exception if the parent directories
+     * of writer resource do not exist. Otherwise, any non-existent directories will be automatically created.
+     *
+     * @since 1.3.0.Beta4
+     */
+    public static final String FAIL_IF_DIRS_NOT_EXIST = "failIfDirsNotExist";
 
     /**
      * The quote character (used when a cell contains special characters, such as the delimiter char, a quote char,
