@@ -20,7 +20,7 @@
     <parent>
         <artifactId>wildfly-jberet-samples</artifactId>
         <groupId>org.jberet.samples</groupId>
-        <version>1.3.0.Beta4-SNAPSHOT</version>
+        <version>1.3.0.Beta4</version>
     </parent>
 
     <artifactId>scheduleTimer</artifactId>
