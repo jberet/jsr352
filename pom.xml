@@ -813,23 +813,6 @@
                             <skipSource>false</skipSource>
                         </configuration>
                     </plugin>
-                    <plugin>
-                        <groupId>com.qmino</groupId>
-                        <artifactId>miredot-plugin</artifactId>
-                        <version>${version.miredot}</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>restdoc</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <license>
-                                cHJvamVjdHxvcmcuamJlcmV0LmpiZXJldC1yZXN0LWFwaXwyMDE4LTAyLTE2fHRydWV8LTEjTUMwQ0ZBR1dJc0ZtZGlFc3J3OGhlQXdFRXBmTkJPVkNBaFVBaFE2ekVZM2pLdm9YSkFjM2VQYjNCQ2xNaVh3PQ==
-                            </license>
-                        </configuration>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
