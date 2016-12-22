@@ -118,18 +118,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
-                    <systemPropertyVariables>
-                        <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

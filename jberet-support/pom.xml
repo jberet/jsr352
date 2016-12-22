@@ -266,10 +266,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>${jvmArgs}</argLine>
-                    <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
-                    <systemPropertyVariables>
-                        <jberet.tmp.dir>${project.build.directory}${file.separator}tmp</jberet.tmp.dir>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

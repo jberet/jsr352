@@ -136,6 +136,9 @@
                     <configuration>
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
                         <argLine>${surefire.system.args}</argLine>
+                        <systemPropertyVariables>
+                            <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
+                        </systemPropertyVariables>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -150,7 +153,11 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
                         <argLine>${surefire.system.args}</argLine>
+                        <systemPropertyVariables>
+                            <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
+                        </systemPropertyVariables>
                     </configuration>
                 </plugin>
                 <plugin>
