@@ -249,9 +249,9 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
      * Both user and restart position may be absent. Example values can be:
      * <ul>
      *     <li>null
-     *     <li>step1{@value #RESTART_POSITION_USER_SEP}user1
+     *     <li>step1"user1
      *     <li>step1
-     *     <li>{@value #RESTART_POSITION_USER_SEP}user1
+     *     <li>"user1
      * </ul>
      *
      * @return the combined value of user and restart position
