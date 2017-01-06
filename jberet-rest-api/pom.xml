@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
+ Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
@@ -65,6 +65,34 @@
                             <license>
                                 cHJvamVjdHxvcmcuamJlcmV0LmpiZXJldC1yZXN0LWFwaXwyMDE4LTAyLTE2fHRydWV8LTEjTUMwQ0ZBR1dJc0ZtZGlFc3J3OGhlQXdFRXBmTkJPVkNBaFVBaFE2ekVZM2pLdm9YSkFjM2VQYjNCQ2xNaVh3PQ==
                             </license>
+                            <output>
+                                <title>JBeret REST API ${project.version}</title>
+                                <html>
+                                    <hideIssuesTab>true</hideIssuesTab>
+                                </html>
+                            </output>
+                            <restModel>
+                                <restFramework>
+                                    <name>jax-rs</name>
+                                </restFramework>
+                            </restModel>
+                            <analysis>
+                                <checks>
+                                    <JAVADOC_MISSING_SUMMARY>warn</JAVADOC_MISSING_SUMMARY>
+                                    <JAVADOC_MISSING_INTERFACEDOCUMENTATION>warn</JAVADOC_MISSING_INTERFACEDOCUMENTATION>
+                                    <JAVADOC_MISSING_PARAMETER_DOCUMENTATION>warn</JAVADOC_MISSING_PARAMETER_DOCUMENTATION>
+                                    <JAVADOC_MISSING_EXCEPTION_DOCUMENTATION>warn</JAVADOC_MISSING_EXCEPTION_DOCUMENTATION>
+                                    <JAVADOC_MISSING_AUTHORS>ignore</JAVADOC_MISSING_AUTHORS>
+                                    <JAXRS_MISSING_PATH_PARAM>warn</JAXRS_MISSING_PATH_PARAM>
+                                    <JAXRS_MISSING_PRODUCES>warn</JAXRS_MISSING_PRODUCES>
+                                    <JAXRS_MISSING_CONSUMES>warn</JAXRS_MISSING_CONSUMES>
+                                    <REST_UNMAPPED_EXCEPTION>failbuild</REST_UNMAPPED_EXCEPTION>
+                                    <UNREACHABLE_RESOURCE>warn</UNREACHABLE_RESOURCE>
+                                    <PARTIAL_RESOURCE_OVERLAP>warn</PARTIAL_RESOURCE_OVERLAP>
+                                    <INVALID_PATH>warn</INVALID_PATH>
+                                    <JSON_SCHEMA_TOO_LARGE>warn</JSON_SCHEMA_TOO_LARGE>
+                                </checks>
+                            </analysis>
                         </configuration>
                     </plugin>
                 </plugins>
