@@ -9,8 +9,6 @@
 
 package org.jberet.operations;
 
-import static org.jberet._private.BatchMessages.MESSAGES;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,6 +49,8 @@ import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.PropertyKey;
 
+import static org.jberet._private.BatchMessages.MESSAGES;
+
 /**
  * An abstract implementation of a {@link JobOperator}. Subclasses should generally delegate to the super methods of
  * this abstraction.
@@ -69,7 +69,7 @@ public abstract class AbstractJobOperator implements JobOperator {
     protected abstract BatchEnvironment getBatchEnvironment();
 
     /**
-     * This is equivalent to {@link #getBatchEnvironment()#getJobRepository() getBatchEnvironment().getJobRepository()}.
+     * This is equivalent to {@link BatchEnvironment#getJobRepository() getBatchEnvironment().getJobRepository()}.
      *
      * @return the job repository that belongs to the batch environment
      */

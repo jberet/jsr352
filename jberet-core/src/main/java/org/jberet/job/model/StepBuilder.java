@@ -28,9 +28,9 @@ import java.util.concurrent.TimeUnit;
  * <li>batchlet-specific method, {@link #batchlet(String, java.util.Properties)} and
  * {@link #batchlet(String, java.util.Properties)} are directly in {@code StepBuilder};
  * <li>chunk-specific method, {@link #reader(String, java.util.Properties)}, {@link #processor(String, java.util.Properties)},
- * {@link #writer(String, String[]...)}, etc are directly in {@code StepBuilder}, with no intermediary chunk builder;
- * <li>partition-specific method, {@link #partitionPlan(int, int, List)}, {@link #partitionMapper(String, String[]...)},
- * {@link #partitionReducer(String, java.util.Properties)}, {@link #partitionCollector(String, String[]...)}, etc
+ * {@link #writer(java.lang.String, java.util.Properties)}, etc are directly in {@code StepBuilder}, with no intermediary chunk builder;
+ * <li>partition-specific method, {@link #partitionPlan(int, int, List)}, {@link #partitionMapper(java.lang.String, java.util.Properties)},
+ * {@link #partitionReducer(String, java.util.Properties)}, {@link #partitionCollector(java.lang.String, java.util.Properties)}, etc
  * are directly in {@code StepBuilder}, with no intermediary partition builder.
  * </ul>
  * <p/>

@@ -86,7 +86,7 @@ public final class ChunkExecutionInfo {
     /**
      * Gets the current job execution id.
      *
-     * @return
+     * @return the current job execution id
      */
     public long getJobExecutionId() {
         return jobExecutionId;
@@ -94,7 +94,7 @@ public final class ChunkExecutionInfo {
 
     /**
      * Gets the current step execution id.
-     * @return
+     * @return the current step execution id
      */
     public long getStepExecutionId() {
         return stepExecutionId;
@@ -111,7 +111,7 @@ public final class ChunkExecutionInfo {
     /**
      * Gets the item currently being processed. It may be null if the current
      * execution stage (e.g., item reading or writing) does not involve an item.
-     * @return
+     * @return item currently being processed
      */
     public Object getItem() {
         return item;
@@ -120,7 +120,7 @@ public final class ChunkExecutionInfo {
     /**
      * Gets the result object from processing. It may be null if the current
      * execution stage (e.g., item reading or writing) does not involve a result.
-     * @return
+     * @return the result object from processing
      */
     public Object getResult() {
         return result;
@@ -130,7 +130,7 @@ public final class ChunkExecutionInfo {
      * Gets the items being written by the current item writer. It may be null if
      * the current execution stage (e.g., item reading or processing) does not
      * involve such items.
-     * @return
+     * @return the items being written by the writer
      */
     public List<Object> getItems() {
         return items;
@@ -138,7 +138,7 @@ public final class ChunkExecutionInfo {
 
     /**
      * Gets the job name or id, as specified as {@code job id} attribute in job XML file.
-     * @return
+     * @return the job or id
      */
     public String getJobName() {
         return jobName;
@@ -146,7 +146,7 @@ public final class ChunkExecutionInfo {
 
     /**
      * Gets the step name, as specified as {@code step id} attribute in job XML file.
-     * @return
+     * @return the step name
      */
     public String getStepName() {
         return stepName;
