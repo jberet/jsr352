@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.Batchlet;
+import javax.batch.runtime.context.StepContext;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -33,6 +34,9 @@ import org.jberet.support._private.SupportMessages;
 @Named
 @Dependent
 public class OsCommandBatchlet implements Batchlet {
+    @Inject
+    protected StepContext stepContext;
+
     @Inject
     @BatchProperty
     protected String commandLine;
@@ -54,6 +58,8 @@ public class OsCommandBatchlet implements Batchlet {
     protected long timeoutSeconds;
 
     private ExecuteWatchdog watchdog;
+
+    private volatile boolean isStopped;
 
     @Override
     public String process() throws Exception {
@@ -99,7 +105,12 @@ public class OsCommandBatchlet implements Batchlet {
 
         final ExecuteException exception = resultHandler.getException();
         if (exception != null) {
-            throw exception;
+            stepContext.setExitStatus(String.valueOf(resultHandler.getExitValue()));
+            if (!isStopped) {
+                throw exception;
+            } else {
+                SupportLogger.LOGGER.warn("", exception);
+            }
         }
         return String.valueOf(resultHandler.getExitValue());
     }
@@ -107,6 +118,7 @@ public class OsCommandBatchlet implements Batchlet {
     @Override
     public void stop() throws Exception {
         if (watchdog != null) {
+            isStopped = true;
             watchdog.destroyProcess();
         }
     }

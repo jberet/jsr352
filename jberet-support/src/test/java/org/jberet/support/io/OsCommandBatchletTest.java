@@ -21,7 +21,6 @@ import javax.batch.runtime.StepExecution;
 
 import org.jberet.operations.JobOperatorImpl;
 import org.jberet.runtime.JobExecutionImpl;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -45,7 +44,28 @@ public class OsCommandBatchletTest {
         jobParams.clear();
         jobParams.setProperty("commandLine", "cd");
         jobParams.setProperty("commandOkExitValues", String.valueOf(999999));
-        runCommand(jobParams, BatchStatus.FAILED, BatchStatus.FAILED.name());
+        runCommand(jobParams, BatchStatus.FAILED, String.valueOf(0));
+    }
+
+    @Test
+    public void timeout() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("commandLine", "top");
+        jobParams.setProperty("timeoutSeconds", String.valueOf(5));
+        runCommand(jobParams, BatchStatus.FAILED, String.valueOf(143));
+    }
+
+    @Test
+    public void stop() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("commandLine", "top");
+        final long jobExecutionId = jobOperator.start(jobName, jobParams);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+
+        Thread.sleep(3000);
+        jobOperator.stop(jobExecutionId);
+        Thread.sleep(2000);
+        checkJobExecution(jobExecution, BatchStatus.STOPPED, String.valueOf(143));
     }
 
     protected void runCommand(final Properties jobParams,
@@ -54,11 +74,16 @@ public class OsCommandBatchletTest {
         final long jobExecutionId = jobOperator.start(jobName, jobParams);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(5, TimeUnit.MINUTES);
+        checkJobExecution(jobExecution, expectedBatchStatus, expectedExitStatus);
+    }
 
+    protected void checkJobExecution(final JobExecutionImpl jobExecution,
+                                     final BatchStatus expectedBatchStatus,
+                                     final String expectedExitStatus) {
         assertEquals(expectedBatchStatus, jobExecution.getBatchStatus());
         final List<StepExecution> stepExecutions = jobExecution.getStepExecutions();
         assertEquals(1, stepExecutions.size());
         final StepExecution stepExecution = stepExecutions.get(0);
-        Assert.assertEquals(expectedExitStatus, stepExecution.getExitStatus());
+        assertEquals(expectedExitStatus, stepExecution.getExitStatus());
     }
 }
