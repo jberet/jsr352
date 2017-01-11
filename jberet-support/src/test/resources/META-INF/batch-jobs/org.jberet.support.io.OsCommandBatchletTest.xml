@@ -21,6 +21,7 @@
                 <property name="workingDir" value="#{jobParameters['workingDir']}"/>
                 <property name="commandOkExitValues" value="#{jobParameters['commandOkExitValues']}"/>
                 <property name="timeoutSeconds" value="#{jobParameters['timeoutSeconds']}"/>
+                <property name="environment" value="FOO=1, BAR=a"/>
             </properties>
         </batchlet>
     </step>

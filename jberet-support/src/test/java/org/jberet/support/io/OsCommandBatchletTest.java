@@ -42,7 +42,7 @@ public class OsCommandBatchletTest {
         runCommand(jobParams, BatchStatus.COMPLETED, String.valueOf(0));
 
         jobParams.clear();
-        jobParams.setProperty("commandLine", "cd");
+        jobParams.setProperty("commandLine", "cd ..");
         jobParams.setProperty("commandOkExitValues", String.valueOf(999999));
         runCommand(jobParams, BatchStatus.FAILED, String.valueOf(0));
     }

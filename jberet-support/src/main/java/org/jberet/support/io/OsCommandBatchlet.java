@@ -15,6 +15,7 @@ package org.jberet.support.io;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.Batchlet;
 import javax.batch.runtime.context.StepContext;
@@ -56,6 +57,10 @@ public class OsCommandBatchlet implements Batchlet {
     @Inject
     @BatchProperty
     protected long timeoutSeconds;
+
+    @Inject
+    @BatchProperty
+    protected Map<String, String> environment;
 
     private ExecuteWatchdog watchdog;
 
@@ -100,7 +105,7 @@ public class OsCommandBatchlet implements Batchlet {
 
         executor.setProcessDestroyer(new ShutdownHookProcessDestroyer());
         final DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
-        executor.execute(commandLineObj, resultHandler);
+        executor.execute(commandLineObj, environment, resultHandler);
         resultHandler.waitFor();
 
         final ExecuteException exception = resultHandler.getException();
