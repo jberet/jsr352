@@ -32,32 +32,113 @@ import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
+/**
+ * This batchlet runs a native OS command in a sub-process asynchronously.
+ * Main features supported include:
+ * <ul>
+ *     <li>specify command and arguments as a single line;
+ *     <li>specify command and arguments as a comma-separated list of items, for easy handling of spaces in file paths;
+ *     <li>custom working directory;
+ *     <li>specify timeout as seconds so the OS commnad can timeout
+ *     <li>the OS command process can be stopped;
+ *     <li>passing custom environment variables;
+ *     <li>map non-zero exit code from OS command process.
+ * </ul>
+ */
 @Named
 @Dependent
 public class OsCommandBatchlet implements Batchlet {
+    /**
+     * Injected {@code StepContext}.
+     */
     @Inject
     protected StepContext stepContext;
 
+    /**
+     * The OS command and its arguments as a single line.
+     * <p>
+     * For example,
+     * <pre>
+     * "diff out1.txt out2.txt"
+     * "cp out1.txt /tmp"
+     * </pre>
+     *
+     * Either this property or {@link #commandArray} property must be specified.
+     * If both are present, this property takes precedence.
+     * <p>
+     * If a command argument contains whitespaces, the argument must be quoted
+     * to prevent this argument being broken into multiple arguments.
+     * Alternatively, {@link #commandArray} property can be used.
+     *
+     * @see #commandArray
+     */
     @Inject
     @BatchProperty
     protected String commandLine;
 
+    /**
+     * The OS command and its arguments as a list of string values separated by comma (,).
+     * <p>
+     * For example,
+     * <pre>
+     * "diff, out1.txt, out2.txt"
+     * "cp, out1.txt, /tmp"
+     * </pre>
+     *
+     * Either this property or {@link #commandLine} property must be specified.
+     * If both are present, {@link #commandLine} takes precedence.
+     *
+     * @see #commandLine
+     */
     @Inject
     @BatchProperty
     protected List<String> commandArray;
 
+    /**
+     * The working directory for running the OS command. Optional property, and if not set,
+     * it defaults to the current directory.
+     */
     @Inject
     @BatchProperty
     protected File workingDir;
 
+    /**
+     * A comma-separated list of int numbers that signal the successful completion of the
+     * OS command. Optional property, and if not set, it defaults to 0. If the OS command
+     * process is known to return non-zero exit code upon successful execution,
+     * this property must be set as such to mark the command execution as successful.
+     * <p>
+     * For example,
+     * <pre>
+     * "90, 91, 92"
+     * </pre>
+     */
     @Inject
     @BatchProperty
     protected int[] commandOkExitValues;
 
+    /**
+     * The timeout as number of seconds. After the {@code timeoutSeconds} elapses, and the
+     * OS command still has not finished, its process will be destroyed, and the batch
+     * job execution will be marked as failed.
+     * <p>
+     * Optional property, and if not set, it defaults to no timeout.
+     */
     @Inject
     @BatchProperty
     protected long timeoutSeconds;
 
+    /**
+     * Custom environment variables to be used when running the OS command.
+     * Optional property, and if not set, it defaults to using the environment
+     * of parent process. If set, it will represent the entire environment in
+     * the new process, and the parent environment will not be inherited.
+     * <p>
+     * For example,
+     * <pre>
+     * "LANG=UTF-8, TMPDIR=/tmp"
+     * </pre>
+     */
     @Inject
     @BatchProperty
     protected Map<String, String> environment;
@@ -66,10 +147,21 @@ public class OsCommandBatchlet implements Batchlet {
 
     private volatile boolean isStopped;
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method runs the OS command.
+     * If the command completes successfully, its process exit code is returned.
+     * If there is exception while running the OS command, which may be
+     * caused by timeout, the command being stopped, or other errors, the process
+     * exit code is set as the step exit status, and the exception is thrown.
+     *
+     * @return the OS command process exit code
+     *
+     * @throws Exception upon errors
+     */
     @Override
     public String process() throws Exception {
-
-
         final DefaultExecutor executor = new DefaultExecutor();
         final CommandLine commandLineObj;
         if (commandLine != null) {
@@ -120,6 +212,13 @@ public class OsCommandBatchlet implements Batchlet {
         return String.valueOf(resultHandler.getExitValue());
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method tries to destroy the process running the OS command.
+     *
+     * @throws Exception upon errors
+     */
     @Override
     public void stop() throws Exception {
         if (watchdog != null) {

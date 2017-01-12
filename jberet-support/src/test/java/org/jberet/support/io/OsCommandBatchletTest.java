@@ -25,28 +25,53 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Tests for {@link OsCommandBatchlet}.
+ *
+ * @since 1.3.0.Beta5
+ */
 public class OsCommandBatchletTest {
     public static final String jobName = "org.jberet.support.io.OsCommandBatchletTest";
     public static final JobOperator jobOperator = new JobOperatorImpl();
 
+    /**
+     * Runs job {@value #jobName}, where {@link OsCommandBatchlet} executes
+     * simple OS commands.
+     *
+     * @throws Exception upon errors
+     */
     @Test
     public void simpleCommands() throws Exception {
+        // run echo command, and should complete successfully with process exit code 0.
         final Properties jobParams = new Properties();
         jobParams.setProperty("commandLine", "echo This is echo from osCommandBatchlet");
         runCommand(jobParams, BatchStatus.COMPLETED, String.valueOf(0));
 
+        // run echo command, passing the command as comma-separated list,
+        // and setting custom working directory and timeout.
+        // The command should complete successfully with process exit code 0.
         jobParams.clear();
         jobParams.setProperty("commandArray", "echo, abc, xyz, 123");
         jobParams.setProperty("workingDir", System.getProperty("java.io.tmpdir"));
         jobParams.setProperty("timeoutSeconds", String.valueOf(600));
         runCommand(jobParams, BatchStatus.COMPLETED, String.valueOf(0));
 
+        // run cd command, setting the process exit code for successful completion to 999999.
+        // The job execution should fail, since the process exit code 0 does not match 999999.
         jobParams.clear();
         jobParams.setProperty("commandLine", "cd ..");
         jobParams.setProperty("commandOkExitValues", String.valueOf(999999));
         runCommand(jobParams, BatchStatus.FAILED, String.valueOf(0));
     }
 
+    /**
+     * Runs {@code top} command, which continuously displays OS process info.
+     * By setting a timeout, the {@code top} process should be aborted after timeout,
+     * and so the job execution should fail, and the batch exit status is set to
+     * the process exit code (143, interrupted).
+     *
+     * @throws Exception upon errors
+     */
     @Test
     public void timeout() throws Exception {
         final Properties jobParams = new Properties();
@@ -55,6 +80,14 @@ public class OsCommandBatchletTest {
         runCommand(jobParams, BatchStatus.FAILED, String.valueOf(143));
     }
 
+    /**
+     * Runs {@code top} command, which continuously displays OS process info.
+     * The job execution is then stopped, which means the {@code top} command
+     * should also be stopped.  The batch exit status is set to the process
+     * exit code (143).
+     *
+     * @throws Exception upon errors
+     */
     @Test
     public void stop() throws Exception {
         final Properties jobParams = new Properties();
