@@ -1006,10 +1006,12 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             }
         }
 
-        try {
-            conn.close();
-        } catch (final SQLException e) {
-            BatchLogger.LOGGER.failToClose(e, Connection.class, conn);
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (final SQLException e) {
+                BatchLogger.LOGGER.failToClose(e, Connection.class, conn);
+            }
         }
     }
 
