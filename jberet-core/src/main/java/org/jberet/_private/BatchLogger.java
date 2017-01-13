@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -143,5 +143,9 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 29, value = "Applied custom restart position: %s, instead of the default restart position: %s")
     @LogMessage(level = Logger.Level.INFO)
     void customRestartPosition(String customRestartPosition, String defaultRestartPosition);
+
+    @Message(id = 30, value = "Resolved job %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void resolvedJobXml(String location);
 
 }
