@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -89,14 +89,6 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
                 stepRunner.collectorDataQueue.put(collector.collectPartitionData());
             }
         } catch (final Throwable e) {
-            //TODO remove this block.  collector is not called for unhandled exceptions.
-            try {
-                if (collector != null) {
-                    stepRunner.collectorDataQueue.put(collector.collectPartitionData());
-                }
-            } catch (final Exception e1) {
-                //ignore
-            }
             batchContext.setException(e instanceof Exception ? (Exception) e : new BatchRuntimeException(e));
             LOGGER.failToRunBatchlet(e, batchlet);
             batchContext.setBatchStatus(BatchStatus.FAILED);
