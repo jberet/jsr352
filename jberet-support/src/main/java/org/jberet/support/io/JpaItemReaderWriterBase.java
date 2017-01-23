@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,18 +31,37 @@ import javax.persistence.Persistence;
  * @since 1.3.0
  */
 public abstract class JpaItemReaderWriterBase {
-
+    /**
+     * {@code javax.enterprise.inject.Instance} that holds optional injection
+     * of {@code EntityManager}. If {@link #entityManagerLookupName} is not
+     * specified, this field will be checked to obtain {@code EntityManager}.
+     */
     @Inject
     protected Instance<EntityManager> entityManagerInstance;
 
+    /**
+     * JNDI lookup name of {@code EntityManager}. Optional property, and defaults
+     * to null.  If specified, it will be used to perform a JNDI lookup of the
+     * {@code EntityManager}.
+     */
     @Inject
     @BatchProperty
     protected String entityManagerLookupName;
 
+    /**
+     * Persistence unit name. Optional property and defaults to null.
+     * If neither {@link #entityManagerLookupName} nor {@link #entityManagerInstance}
+     * is initialized with injected value, this persistence unit name will be used
+     * to create {@EntityManagerFactory} and {@code EntityManager}.
+     */
     @Inject
     @BatchProperty
     protected String persistenceUnitName;
 
+    /**
+     * Persistence unit properties, as a list of key-value pairs separated by comma (,).
+     * Optional property and defaults to null.
+     */
     @Inject
     @BatchProperty
     protected Map persistenceUnitProperties;
@@ -50,6 +69,20 @@ public abstract class JpaItemReaderWriterBase {
     protected EntityManagerFactory emf;
     protected EntityManager em;
 
+    /**
+     * The open method prepares the writer to write items.
+     *
+     * The input parameter represents the last checkpoint
+     * for this writer in a given job instance. The
+     * checkpoint data is defined by this writer and is
+     * provided by the checkpointInfo method. The checkpoint
+     * data provides the writer whatever information it needs
+     * to resume writing items upon restart. A checkpoint value
+     * of null is passed upon initial start.
+     *
+     * @param checkpoint specifies the last checkpoint
+     * @throws Exception is thrown for any errors.
+     */
     public void open(final Serializable checkpoint) throws Exception {
         InitialContext ic = null;
         try {
@@ -72,6 +105,13 @@ public abstract class JpaItemReaderWriterBase {
         }
     }
 
+    /**
+     * The close method marks the end of use of the
+     * ItemWriter. The writer is free to do any cleanup
+     * necessary.
+     *
+     * @throws Exception is thrown for any errors.
+     */
     public void close() throws Exception {
         if (emf != null) {
             em.close();
@@ -79,6 +119,14 @@ public abstract class JpaItemReaderWriterBase {
         }
     }
 
+    /**
+     *
+     * Returns the current checkpoint data for this writer.
+     * It is called before a chunk checkpoint is committed.
+     *
+     * @return null
+     * @throws Exception upon errors
+     */
     public Serializable checkpointInfo() throws Exception {
         return null;
     }
