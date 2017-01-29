@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -184,24 +184,6 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         userDefinedDdlFile = configProperties.getProperty(DDL_FILE_NAME_KEY);
         this.dataSource = dataSource;
         dbUrl = null;
-        String sqlFile = DEFAULT_SQL_FILE;
-        final InputStream sqlResource = getClassLoader(false).getResourceAsStream(sqlFile);
-        try {
-            if (sqlResource == null) {
-                throw BatchMessages.MESSAGES.failToLoadSqlProperties(null, sqlFile);
-            }
-            sqls.load(sqlResource);
-        } catch (final IOException e) {
-            throw BatchMessages.MESSAGES.failToLoadSqlProperties(e, sqlFile);
-        } finally {
-            if (sqlResource != null) {
-                try {
-                    sqlResource.close();
-                } catch (final IOException e) {
-                    BatchLogger.LOGGER.failToClose(e, InputStream.class, sqlResource);
-                }
-            }
-        }
         createTables(configProperties);
     }
 
