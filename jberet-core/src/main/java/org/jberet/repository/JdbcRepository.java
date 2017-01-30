@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
@@ -45,6 +47,7 @@ import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
+import org.jboss.logging.Logger;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class JdbcRepository extends AbstractPersistentRepository {
@@ -57,6 +60,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     public static final String DB_PASSWORD_KEY = "db-password";
     public static final String DB_PROPERTIES_KEY = "db-properties";
     public static final String DB_PROPERTY_DELIM = ":";
+    public static final String DB_TABLE_PREFIX_KEY = "db-table-prefix";
+    public static final String DB_TABLE_SUFFIX_KEY = "db-table-suffix";
 
     //defaults for entries in jberet.properties
     //private static final String DEFAULT_DATASOURCE = "java:jboss/datasources/ExampleDS";
@@ -195,12 +200,23 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         if (sqlFile == null || sqlFile.isEmpty()) {
             sqlFile = DEFAULT_SQL_FILE;
         }
+        final String tablePrefix = configProperties.getProperty(DB_TABLE_PREFIX_KEY);
+        final String tableSuffix = configProperties.getProperty(DB_TABLE_SUFFIX_KEY);
+        final Pattern tableNamesPattern =
+                (tablePrefix != null && tablePrefix.length() > 0) || (tableSuffix != null && tableSuffix.length() > 0) ?
+                Pattern.compile("JOB_INSTANCE|JOB_EXECUTION|STEP_EXECUTION|PARTITION_EXECUTION"): null;
+
         final InputStream sqlResource = getClassLoader(false).getResourceAsStream(sqlFile);
         try {
             if (sqlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadSqlProperties(null, sqlFile);
             }
             sqls.load(sqlResource);
+            if (tableNamesPattern != null) {
+                BatchLogger.LOGGER.logv(Logger.Level.TRACE,
+                    "Applying batch job repository table prefix %s and suffix %s%n", tablePrefix, tableSuffix);
+                sqls.replaceAll((k, v) -> addPrefixSuffix((String) v, tablePrefix, tableSuffix, tableNamesPattern));
+            }
         } catch (final IOException e) {
             throw BatchMessages.MESSAGES.failToLoadSqlProperties(e, sqlFile);
         } finally {
@@ -251,8 +267,11 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 connection2 = getConnection();
                 batchDDLStatement = connection2.createStatement();
                 while (scanner.hasNext()) {
-                    final String ddlEntry = scanner.next().trim();
+                    String ddlEntry = scanner.next().trim();
                     if (!ddlEntry.isEmpty()) {
+                        if (tableNamesPattern != null) {
+                            ddlEntry = addPrefixSuffix(ddlEntry, tablePrefix, tableSuffix, tableNamesPattern);
+                        }
                         batchDDLStatement.addBatch(ddlEntry);
                         BatchLogger.LOGGER.addDDLEntry(ddlEntry);
                     }
@@ -1057,5 +1076,30 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             return null;
         }
         return new Timestamp(date.getTime());
+    }
+
+    private static String addPrefixSuffix(final String input,
+                                          final String prefix,
+                                          final String suffix,
+                                          final Pattern pattern) {
+        Matcher matcher = pattern.matcher(input);
+        final StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            final int start = matcher.start();
+            if (start > 0 && input.charAt(start - 1) == '_') {
+                continue;
+            } else {
+                final String matchedContent = matcher.group();
+                String replacement = prefix == null ? matchedContent : prefix + matchedContent;
+                if (suffix != null) {
+                    replacement += suffix;
+                }
+                matcher.appendReplacement(sb, replacement);
+            }
+        }
+
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }
