@@ -32,9 +32,6 @@
     <packaging>pom</packaging>
 
     <properties>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <maven.compiler.source>1.7</maven.compiler.source>
-
         <version.org.jboss.apiviz>1.3.2.GA</version.org.jboss.apiviz>
         <version.com.fasterxml.aalto-xml>1.0.0</version.com.fasterxml.aalto-xml>
         <version.com.google.guava>18.0</version.com.google.guava>
