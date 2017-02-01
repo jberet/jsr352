@@ -47,7 +47,6 @@ import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
-import org.jboss.logging.Logger;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class JdbcRepository extends AbstractPersistentRepository {
@@ -200,10 +199,9 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         if (sqlFile == null || sqlFile.isEmpty()) {
             sqlFile = DEFAULT_SQL_FILE;
         }
-        final String tablePrefix = configProperties.getProperty(DB_TABLE_PREFIX_KEY);
-        final String tableSuffix = configProperties.getProperty(DB_TABLE_SUFFIX_KEY);
-        final Pattern tableNamesPattern =
-                (tablePrefix != null && tablePrefix.length() > 0) || (tableSuffix != null && tableSuffix.length() > 0) ?
+        final String tablePrefix = configProperties.getProperty(DB_TABLE_PREFIX_KEY, "").trim();
+        final String tableSuffix = configProperties.getProperty(DB_TABLE_SUFFIX_KEY, "").trim();
+        final Pattern tableNamesPattern = tablePrefix.length() > 0 || tableSuffix.length() > 0 ?
                 Pattern.compile("JOB_INSTANCE|JOB_EXECUTION|STEP_EXECUTION|PARTITION_EXECUTION"): null;
 
         final InputStream sqlResource = getClassLoader(false).getResourceAsStream(sqlFile);
@@ -213,8 +211,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             }
             sqls.load(sqlResource);
             if (tableNamesPattern != null) {
-                BatchLogger.LOGGER.logv(Logger.Level.TRACE,
-                    "Applying batch job repository table prefix %s and suffix %s%n", tablePrefix, tableSuffix);
+                BatchLogger.LOGGER.tracef("Applying batch job repository table prefix %s and suffix %s%n",
+                        tablePrefix, tableSuffix);
                 sqls.replaceAll((k, v) -> addPrefixSuffix((String) v, tablePrefix, tableSuffix, tableNamesPattern));
             }
         } catch (final IOException e) {
@@ -1091,8 +1089,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 continue;
             } else {
                 final String matchedContent = matcher.group();
-                String replacement = prefix == null ? matchedContent : prefix + matchedContent;
-                if (suffix != null) {
+                String replacement = prefix.length() > 0 ? prefix + matchedContent : matchedContent;
+                if (suffix.length() > 0) {
                     replacement += suffix;
                 }
                 matcher.appendReplacement(sb, replacement);
