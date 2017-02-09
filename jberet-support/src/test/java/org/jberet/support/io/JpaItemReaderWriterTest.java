@@ -16,6 +16,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 import javax.persistence.Persistence;
@@ -30,7 +32,8 @@ import org.junit.Test;
 import static org.jberet.support.io.JpaResourceProducer.em;
 import static org.jberet.support.io.JpaResourceProducer.emf;
 
-public final class JpaItemReaderWriterTest extends MovieTest {
+public final class JpaItemReaderWriterTest {
+    private static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     private static final String jpaItemWriterJob = "org.jberet.support.io.jpaItemWriterTest";
     private static final String jpaItemReaderJob = "org.jberet.support.io.jpaItemReaderTest";
     static final String persistenceUnitName = "JpaItemWriterTest";

@@ -131,20 +131,27 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
     /**
      * Current read position
      */
-    protected int currentPosition;
+    protected int readPosition;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void open(final Serializable checkpoint) throws Exception {
+        query = getQuery();
+
+        if (firstResult != 0) {
+            query.setFirstResult(firstResult);
+        }
+        if (maxResults != 0) {
+            query.setMaxResults(maxResults);
+        }
+
+        resultList = query.getResultList();
         if (checkpoint == null) {
-            super.open(checkpoint);
-            query = getQuery();
-            resultList = query.getResultList();
-            currentPosition = 0;
+            readPosition = 0;
         } else {
-            currentPosition = (Integer) checkpoint;
+            readPosition = (Integer) checkpoint;
         }
     }
 
@@ -152,11 +159,26 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
      * {@inheritDoc}
      */
     @Override
+    public void close() throws Exception {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Object readItem() throws Exception {
-        if (currentPosition >= resultList.size()) {
+        if (readPosition >= resultList.size()) {
             return null;
         }
-        return resultList.get(currentPosition++);
+        return resultList.get(readPosition++);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Serializable checkpointInfo() throws Exception {
+        return readPosition;
     }
 
     /**
@@ -187,11 +209,11 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
             } else if (nativeQuery != null) {
                 q = beanType != null ? em.createNativeQuery(nativeQuery, beanType) :
                         resultSetMapping != null ? em.createNativeQuery(nativeQuery, resultSetMapping) :
-                        em.createNativeQuery(nativeQuery);
+                                em.createNativeQuery(nativeQuery);
             } else if (storedProcedureQuery != null) {
                 q = beanType != null ? em.createStoredProcedureQuery(storedProcedureQuery, beanType) :
                         resultSetMapping != null ? em.createStoredProcedureQuery(storedProcedureQuery, resultSetMapping) :
-                        em.createStoredProcedureQuery(storedProcedureQuery);
+                                em.createStoredProcedureQuery(storedProcedureQuery);
             } else if (namedStoredProcedureQuery != null) {
                 q = em.createNamedStoredProcedureQuery(namedStoredProcedureQuery);
             }
@@ -212,5 +234,4 @@ public class JpaItemReader extends JpaItemReaderWriterBase implements ItemReader
 
         return q;
     }
-
 }

@@ -89,4 +89,7 @@ public interface SupportMessages {
     @Message(id = 60023, value = "REST API invocation failed with status code: %s, reason: %s, and entity: %s")
     BatchRuntimeException restApiFailure(int statusCode, String reason, Object responseEntity);
 
+    @Message(id = 60024, value = "Failed to look up resource by name: %s")
+    BatchRuntimeException failToLookup(@Cause Throwable throwable, String lookupName);
+
 }

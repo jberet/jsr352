@@ -12,6 +12,7 @@
 
 package org.jberet.support.io;
 
+import java.io.Serializable;
 import java.util.List;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
@@ -40,6 +41,18 @@ public class JpaItemWriter extends JpaItemReaderWriterBase implements ItemWriter
 
     /**
      * {@inheritDoc}
+     */
+    public void open(final Serializable checkpoint) throws Exception {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void close() throws Exception {
+    }
+
+    /**
+     * {@inheritDoc}
      * <p>
      * In this method, the entity manager persists the {@code items}.
      * If {@link #entityTransaction} is true, this method explicitly
@@ -61,6 +74,17 @@ public class JpaItemWriter extends JpaItemReaderWriterBase implements ItemWriter
         if (entityTransaction) {
             em.getTransaction().commit();
         }
+    }
+
+    /**
+     * Returns the current checkpoint data for this writer.
+     * It is called before a chunk checkpoint is committed.
+     *
+     * @return null
+     * @throws Exception upon errors
+     */
+    public Serializable checkpointInfo() throws Exception {
+        return null;
     }
 
 }

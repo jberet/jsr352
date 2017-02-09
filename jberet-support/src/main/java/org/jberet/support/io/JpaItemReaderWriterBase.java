@@ -12,15 +12,19 @@
 
 package org.jberet.support.io;
 
-import java.io.Serializable;
 import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.batch.api.BatchProperty;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
+import org.jberet.support._private.SupportMessages;
 
 /**
  * The base class for {@link JpaItemWriter} and {@link JpaItemReader}.
@@ -69,26 +73,34 @@ public abstract class JpaItemReaderWriterBase {
     protected EntityManagerFactory emf;
     protected EntityManager em;
 
-    /**
-     * The open method prepares the writer to write items.
-     *
-     * The input parameter represents the last checkpoint
-     * for this writer in a given job instance. The
-     * checkpoint data is defined by this writer and is
-     * provided by the checkpointInfo method. The checkpoint
-     * data provides the writer whatever information it needs
-     * to resume writing items upon restart. A checkpoint value
-     * of null is passed upon initial start.
-     *
-     * @param checkpoint specifies the last checkpoint
-     * @throws Exception is thrown for any errors.
-     */
-    public void open(final Serializable checkpoint) throws Exception {
-        InitialContext ic = null;
-        try {
+    @PostConstruct
+    protected void postConstruct() {
+        initEntityManager();
+    }
+
+    @PreDestroy
+    protected void preDestroy() {
+        closeEntityManager();
+    }
+
+    protected void initEntityManager() {
+        if (em == null) {
             if (entityManagerLookupName != null) {
-                ic = new InitialContext();
-                em = (EntityManager) ic.lookup(entityManagerLookupName);
+                InitialContext ic = null;
+                try {
+                    ic = new InitialContext();
+                    em = (EntityManager) ic.lookup(entityManagerLookupName);
+                } catch (final NamingException e) {
+                    throw SupportMessages.MESSAGES.failToLookup(e, entityManagerLookupName);
+                } finally {
+                    if (ic != null) {
+                        try {
+                            ic.close();
+                        } catch (final NamingException e) {
+                            //ignore
+                        }
+                    }
+                }
             } else {
                 if (entityManagerInstance != null && !entityManagerInstance.isUnsatisfied()) {
                     em = entityManagerInstance.get();
@@ -98,36 +110,13 @@ public abstract class JpaItemReaderWriterBase {
                     em = emf.createEntityManager();
                 }
             }
-        } finally {
-            if (ic != null) {
-                ic.close();
-            }
         }
     }
 
-    /**
-     * The close method marks the end of use of the
-     * ItemWriter. The writer is free to do any cleanup
-     * necessary.
-     *
-     * @throws Exception is thrown for any errors.
-     */
-    public void close() throws Exception {
+    protected void closeEntityManager() {
         if (emf != null) {
             em.close();
             emf.close();
         }
-    }
-
-    /**
-     *
-     * Returns the current checkpoint data for this writer.
-     * It is called before a chunk checkpoint is committed.
-     *
-     * @return null
-     * @throws Exception upon errors
-     */
-    public Serializable checkpointInfo() throws Exception {
-        return null;
     }
 }
