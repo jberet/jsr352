@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>21</version>
+        <version>22</version>
     </parent>
 
     <groupId>org.jberet</groupId>
@@ -49,8 +49,8 @@
         </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
         <version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>1.0.0.Final
         </version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>
-        <version.org.jboss.weld.weld>2.4.1.Final</version.org.jboss.weld.weld>
-        <version.org.jboss.weld.weld-se>2.4.1.Final</version.org.jboss.weld.weld-se>
+        <version.org.jboss.weld.weld>2.4.2.SP1</version.org.jboss.weld.weld>
+        <version.org.jboss.weld.weld-se>2.4.2.SP1</version.org.jboss.weld.weld-se>
         <version.org.jboss.jandex>2.0.3.Final</version.org.jboss.jandex>
         <version.net.sf.supercsv>2.3.1</version.net.sf.supercsv>
         <version.com.fasterxml.jackson>2.8.3</version.com.fasterxml.jackson>

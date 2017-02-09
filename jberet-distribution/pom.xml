@@ -41,7 +41,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <descriptor>src/main/assemble/assemble.xml</descriptor>
+                    <descriptors>
+                        <descriptor>src/main/assemble/assemble.xml</descriptor>
+                    </descriptors>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
             </plugin>
