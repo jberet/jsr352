@@ -48,6 +48,7 @@
         <module>throttle</module>
         <module>restAPI</module>
         <module>amqp</module>
+        <module>upsertWriter</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
