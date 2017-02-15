@@ -29,14 +29,18 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+/**
+ * Tests using {@code jdbcItemWriter} in jberet-support, and upsert / merge
+ * sql statement.
+ */
 @Ignore("Need to connect to db2 database server")
 public class UpsertWriterIT extends AbstractIT {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String upsertWriterTestJob = "upsertWriterTest";
 
-    static final String url = "jdbc:db2://db16.mw.lab.eng.bos.redhat.com:50000/jbossqa:currentSchema=DBALLO03;";
-    static final String user = "dballo03";
-    static final String password = "dballo03";
+    static final String url = "";
+    static final String user = "";
+    static final String password = "";
 
     //rank,tit,grs,opn
     static final String createTable =
@@ -54,6 +58,16 @@ public class UpsertWriterIT extends AbstractIT {
 
     static final String selectAll = "select * from MOVIES";
 
+    /**
+     * Initializes database:
+     * <ul>
+     *     <li>drop table
+     *     <li>create table
+     *     <li>insert 2 rows, 1 row is to be merged with batch data item when running
+     *     {@link #upsertWriterTest()}, and the other row is not modified
+     *
+     * @throws Exception upon errors
+     */
     @BeforeClass
     public static void beforeClass() throws Exception {
         Connection connection = null;
@@ -118,6 +132,12 @@ public class UpsertWriterIT extends AbstractIT {
         System.out.printf("Records after running tests:%n%s%n", selectAll());
     }
 
+    /**
+     * Selects all records from the table and append all data to string.
+     *
+     * @return the result string containing all records
+     * @throws Exception upon errors
+     */
     protected String selectAll() throws Exception {
         StringBuilder sb = new StringBuilder();
         Connection connection = null;
