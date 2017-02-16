@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,6 +29,7 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.batch.api.BatchProperty;
@@ -87,6 +88,8 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
      * <p>
      * And this class will call {@link java.sql.PreparedStatement#setString(int, String)},
      * {@link java.sql.PreparedStatement#setString(int, String)}, and {@link java.sql.PreparedStatement#setInt(int, int)}.
+     * <p>
+     * Note that the value of this property is case sensitive.
      */
     @Inject
     @BatchProperty
@@ -375,6 +378,9 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
             } else {
                 throw SupportMessages.MESSAGES.unexpectedDataType("java.sql.Array", val.getClass().getName(), val);
             }
+        } else {
+            throw SupportMessages.MESSAGES.invalidReaderWriterProperty(
+                    null, Arrays.toString(parameterTypes), "parameterTypes");
         }
     }
 }
