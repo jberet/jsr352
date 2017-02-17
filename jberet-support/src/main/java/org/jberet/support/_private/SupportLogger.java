@@ -45,4 +45,8 @@ public interface SupportLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     void runCommand(String command, String args, String workingDir);
 
+    @Message(id = 60505, value = "JDBC batch update count: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void jdbcBatchUpdateCounts(String updateCounts);
+
 }

@@ -19,12 +19,14 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Array;
+import java.sql.BatchUpdateException;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.RowId;
+import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -38,6 +40,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 /**
@@ -115,6 +118,18 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
         } catch (Exception e) {
             if (dataSource == null && connection != null) {
                 connection.rollback();
+            }
+            if(e instanceof SQLException) {
+                final SQLException sqlException = (SQLException) e;
+                for(SQLException nextException = sqlException.getNextException();
+                    nextException != null; nextException = nextException.getNextException()) {
+                    SupportLogger.LOGGER.warn(null, nextException);
+                }
+
+                if (e instanceof BatchUpdateException) {
+                    final BatchUpdateException batchUpdateException = (BatchUpdateException) e;
+                    SupportLogger.LOGGER.jdbcBatchUpdateCounts(Arrays.toString(batchUpdateException.getUpdateCounts()));
+                }
             }
             throw e;
         } finally {
