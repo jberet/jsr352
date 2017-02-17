@@ -123,7 +123,7 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
                 final SQLException sqlException = (SQLException) e;
                 for(SQLException nextException = sqlException.getNextException();
                     nextException != null; nextException = nextException.getNextException()) {
-                    SupportLogger.LOGGER.warn(null, nextException);
+                    SupportLogger.LOGGER.warn(nextException.toString(), null);
                 }
 
                 if (e instanceof BatchUpdateException) {
