@@ -32,7 +32,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class JdbcReaderWriterTest {
-    private final JobOperator jobOperator = BatchRuntime.getJobOperator();
+    static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String h2JdbcDriverClassName = "org.h2.Driver";
     static final String writerTestJobName = "org.jberet.support.io.JdbcWriterTest";
     static final String readerTestJobName = "org.jberet.support.io.JdbcReaderTest";

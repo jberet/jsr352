@@ -49,4 +49,9 @@ public interface SupportLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void jdbcBatchUpdateCounts(String updateCounts);
 
+    @Message(id = 60506, value = "Adding sql statement to be executed: %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void addingSql(String sql);
+
+
 }
