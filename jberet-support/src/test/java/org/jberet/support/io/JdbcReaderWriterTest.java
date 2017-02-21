@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -122,6 +123,42 @@ public class JdbcReaderWriterTest {
                 null, ibmStockTradeColumnsUpperCase,
                 //readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
                 readerQuery, null, parameterTypes, null,
+                "09:30, 67040,  1998-01-02,11:31,5900", "11:32");
+    }
+
+    /**
+     * Same as {@link #readIBMStockTradeCsvWriteJdbcMapType}, except that this test uses stored procedure
+     * in {@code jdbcItemReader}
+     *
+     * @throws Exception upon errors
+     */
+    @Test
+    public void storedProcedureReader() throws Exception {
+        final String storedProcedureDef = "CREATE ALIAS IF NOT EXISTS sp1 AS $$" +
+                "ResultSet sp1(Connection conn, String sql) throws SQLException {" +
+                "    return conn.createStatement().executeQuery(sql);" +
+                "}$$;";
+        final String callStoredProcedure = "{ call sp1('select * from STOCK_TRADE') }";
+
+        final Connection connection = getConnection();
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            final int result = statement.executeUpdate(storedProcedureDef);
+            System.out.printf("Created stored procedure sp1 as %s%n", storedProcedureDef);
+        } finally {
+            JdbcItemReaderWriterBase.close(connection, statement);
+        }
+
+        testWrite0(writerTestJobName, Map.class, Map.class, ExcelWriterTest.ibmStockTradeHeader,
+                "0", "120",
+                writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
+
+        testRead0(readerTestJobName, Map.class, Map.class, "readIBMStockTradeCsvWriteJdbcMapType.out",
+                null, null,
+                null, ibmStockTradeColumnsUpperCase,
+                //readerQuery, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
+                callStoredProcedure, null, parameterTypes, null,
                 "09:30, 67040,  1998-01-02,11:31,5900", "11:32");
     }
 

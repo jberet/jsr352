@@ -16,13 +16,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.jberet.support._private.SupportLogger;
@@ -30,9 +30,9 @@ import org.jberet.support._private.SupportLogger;
 /**
  * The base class for {@link JdbcItemReader} and {@link JdbcItemWriter}.
  *
- * @see     JdbcItemReader
- * @see     JdbcItemWriter
- * @since   1.1.0
+ * @see JdbcItemReader
+ * @see JdbcItemWriter
+ * @since 1.1.0
  */
 public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase {
     /**
@@ -48,9 +48,9 @@ public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase 
      * it's the java type for each incoming data item. In either case, the valid values are:
      * <p>
      * <ul>
-     *     <li>a custom java type that represents data item;
-     *     <li>java.util.Map
-     *     <li>java.util.List
+     * <li>a custom java type that represents data item;
+     * <li>java.util.Map
+     * <li>java.util.List
      * </ul>
      */
     @Inject
@@ -126,7 +126,7 @@ public abstract class JdbcItemReaderWriterBase extends JsonItemReaderWriterBase 
         }
     }
 
-    protected static void close(final Connection connection, final PreparedStatement preparedStatement) {
+    protected static void close(final Connection connection, final Statement preparedStatement) {
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();

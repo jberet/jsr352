@@ -57,6 +57,7 @@
             <artifactId>db2jcc4</artifactId>
             <scope>system</scope>
             <systemPath>${env.HOME}/tmp/db2jcc4.jar</systemPath>
+            <version>1</version>
         </dependency>
     </dependencies>
 

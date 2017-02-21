@@ -34,9 +34,9 @@ import org.jberet.support._private.SupportMessages;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from the source database.
  *
- * @see     JdbcItemWriter
- * @see     JdbcItemReaderWriterBase
- * @since   1.1.0
+ * @see JdbcItemWriter
+ * @see JdbcItemReaderWriterBase
+ * @since 1.1.0
  */
 @Named
 @Dependent
@@ -94,39 +94,39 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
      * The following {@code resultSetProperties} can be optionally configured in job xml:
      * <p>
      * <ul>
-     *  <li>fetchSize (use driver default)</li>
-     *  <p>
-     *  <li>fetchDirection
-     *      <ul>
-     *          <li>FETCH_FORWARD (default)</li>
-     *          <li>FETCH_REVERSE</li>
-     *          <li>FETCH_UNKNOWN</li>
-     *      </ul>
-     *  </li>
-     *  <p>
-     *  <li>resultSetType:
-     *      <ul>
-     *          <li>TYPE_FORWARD_ONLY (default)</li>
-     *          <li>TYPE_SCROLL_INSENSITIVE</li>
-     *          <li>TYPE_SCROLL_SENSITIVE</li>
-     *      </ul>
-     *  </li>
-     *  <p>
-     *  <li>
-     *      resultSetConcurrency:
-     *      <ul>
-     *          <li>CONCUR_READ_ONLY (default)</li>
-     *          <li>CONCUR_UPDATABLE</li>
-     *      </ul>
-     *  </li>
-     *  <p>
-     *  <li>
-     *      resultSetHoldability:
-     *      <ul>
-     *          <li>HOLD_CURSORS_OVER_COMMIT (default)</li>
-     *          <li>CLOSE_CURSORS_AT_COMMIT</li>
-     *      </ul>
-     *  </li>
+     * <li>fetchSize (use driver default)</li>
+     * <p>
+     * <li>fetchDirection
+     * <ul>
+     * <li>FETCH_FORWARD (default)</li>
+     * <li>FETCH_REVERSE</li>
+     * <li>FETCH_UNKNOWN</li>
+     * </ul>
+     * </li>
+     * <p>
+     * <li>resultSetType:
+     * <ul>
+     * <li>TYPE_FORWARD_ONLY (default)</li>
+     * <li>TYPE_SCROLL_INSENSITIVE</li>
+     * <li>TYPE_SCROLL_SENSITIVE</li>
+     * </ul>
+     * </li>
+     * <p>
+     * <li>
+     * resultSetConcurrency:
+     * <ul>
+     * <li>CONCUR_READ_ONLY (default)</li>
+     * <li>CONCUR_UPDATABLE</li>
+     * </ul>
+     * </li>
+     * <p>
+     * <li>
+     * resultSetHoldability:
+     * <ul>
+     * <li>HOLD_CURSORS_OVER_COMMIT (default)</li>
+     * <li>CLOSE_CURSORS_AT_COMMIT</li>
+     * </ul>
+     * </li>
      * <p>
      * </ul>
      * For example:
@@ -160,67 +160,29 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
             connection.setAutoCommit(autoCommit);
         }
 
-        if (resultSetProperties == null) {
-            preparedStatement = connection.prepareStatement(sql,
-                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
-        } else {
-            int rsType = ResultSet.TYPE_FORWARD_ONLY;
-            int rsConcur = ResultSet.CONCUR_READ_ONLY;
-            int rsHold = ResultSet.HOLD_CURSORS_OVER_COMMIT;
-            int fetchSize = 0;
-            int fetchDirection = ResultSet.FETCH_FORWARD;
-            for (final Map.Entry<String, String> e : resultSetProperties.entrySet()) {
-                final String k = e.getKey();
-                final String v = e.getValue();
-
-                if ("fetchSize".equals(k)) {
-                    fetchSize = Integer.parseInt(v.trim());
-                } else if ("resultSetType".equals(k)) {
-                    if ("TYPE_FORWARD_ONLY".equals(v)) {
-                        rsType = ResultSet.TYPE_FORWARD_ONLY;
-                    } else if ("TYPE_SCROLL_SENSITIVE".equals(v)) {
-                        rsType = ResultSet.TYPE_SCROLL_SENSITIVE;
-                    } else if ("TYPE_SCROLL_INSENSITIVE".equals(v)) {
-                        rsType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-                    } else {
-                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetType");
-                    }
-                } else if ("resultSetConcurrency".equals(k)) {
-                    if ("CONCUR_READ_ONLY".equals(v)) {
-                        rsConcur = ResultSet.CONCUR_READ_ONLY;
-                    } else if ("CONCUR_UPDATABLE".equals(v)) {
-                        rsConcur = ResultSet.CONCUR_UPDATABLE;
-                    } else {
-                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetConcurrency");
-                    }
-                } else if ("resultSetHoldability".equals(k)) {
-                    if ("HOLD_CURSORS_OVER_COMMIT".equals(v)) {
-                        rsHold = ResultSet.HOLD_CURSORS_OVER_COMMIT;
-                    } else if ("CLOSE_CURSORS_AT_COMMIT".equals(v)) {
-                        rsHold = ResultSet.CLOSE_CURSORS_AT_COMMIT;
-                    } else {
-                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetHoldability");
-                    }
-                } else if ("fetchDirection".equals(k)) {
-                    if ("FETCH_FORWARD".equals(v)) {
-                        fetchDirection = ResultSet.FETCH_FORWARD;
-                    } else if ("FETCH_REVERSE".equals(v)) {
-                        fetchDirection = ResultSet.FETCH_REVERSE;
-                    } else if ("FETCH_UNKNOWN".equals(v)) {
-                        fetchDirection = ResultSet.FETCH_UNKNOWN;
-                    } else {
-                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "fetchDirection");
-                    }
-                } else {
-                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, k);
-                }
+        if (isStoredProcedure()) {
+            if (resultSetProperties == null) {
+                preparedStatement = connection.prepareCall(sql,
+                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            } else {
+                final int[] rsProps = parseResultSetProperties();
+                preparedStatement = connection.prepareCall(sql, rsProps[0], rsProps[1], rsProps[2]);
+                preparedStatement.setFetchDirection(rsProps[3]);
+                preparedStatement.setFetchSize(rsProps[4]);
             }
-            preparedStatement = connection.prepareStatement(sql, rsType, rsConcur, rsHold);
-            preparedStatement.setFetchDirection(fetchDirection);
-            preparedStatement.setFetchSize(fetchSize);
+            resultSet = executeStoredProcedure();
+        } else {
+            if (resultSetProperties == null) {
+                preparedStatement = connection.prepareStatement(sql,
+                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            } else {
+                final int[] rsProps = parseResultSetProperties();
+                preparedStatement = connection.prepareStatement(sql, rsProps[0], rsProps[1], rsProps[2]);
+                preparedStatement.setFetchDirection(rsProps[3]);
+                preparedStatement.setFetchSize(rsProps[4]);
+            }
+            resultSet = preparedStatement.executeQuery();
         }
-
-        resultSet = preparedStatement.executeQuery();
 
         if (columnMapping == null) {
             final ResultSetMetaData metaData = resultSet.getMetaData();
@@ -314,6 +276,80 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
     @Override
     public Serializable checkpointInfo() throws Exception {
         return currentRowNumber;
+    }
+
+    protected boolean isStoredProcedure() {
+        sql = sql.trim();
+        return sql.startsWith("{") && sql.endsWith("}");
+    }
+
+    protected int[] parseResultSetProperties() {
+        final int[] result = new int[5];
+        int rsType = ResultSet.TYPE_FORWARD_ONLY;
+        int rsConcur = ResultSet.CONCUR_READ_ONLY;
+        int rsHold = ResultSet.HOLD_CURSORS_OVER_COMMIT;
+        int fetchDirection = ResultSet.FETCH_FORWARD;
+        int fetchSize = 0;
+        for (final Map.Entry<String, String> e : resultSetProperties.entrySet()) {
+            final String k = e.getKey();
+            final String v = e.getValue();
+
+            if ("fetchSize".equals(k)) {
+                fetchSize = Integer.parseInt(v.trim());
+            } else if ("resultSetType".equals(k)) {
+                if ("TYPE_FORWARD_ONLY".equals(v)) {
+                    rsType = ResultSet.TYPE_FORWARD_ONLY;
+                } else if ("TYPE_SCROLL_SENSITIVE".equals(v)) {
+                    rsType = ResultSet.TYPE_SCROLL_SENSITIVE;
+                } else if ("TYPE_SCROLL_INSENSITIVE".equals(v)) {
+                    rsType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+                } else {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetType");
+                }
+            } else if ("resultSetConcurrency".equals(k)) {
+                if ("CONCUR_READ_ONLY".equals(v)) {
+                    rsConcur = ResultSet.CONCUR_READ_ONLY;
+                } else if ("CONCUR_UPDATABLE".equals(v)) {
+                    rsConcur = ResultSet.CONCUR_UPDATABLE;
+                } else {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetConcurrency");
+                }
+            } else if ("resultSetHoldability".equals(k)) {
+                if ("HOLD_CURSORS_OVER_COMMIT".equals(v)) {
+                    rsHold = ResultSet.HOLD_CURSORS_OVER_COMMIT;
+                } else if ("CLOSE_CURSORS_AT_COMMIT".equals(v)) {
+                    rsHold = ResultSet.CLOSE_CURSORS_AT_COMMIT;
+                } else {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetHoldability");
+                }
+            } else if ("fetchDirection".equals(k)) {
+                if ("FETCH_FORWARD".equals(v)) {
+                    fetchDirection = ResultSet.FETCH_FORWARD;
+                } else if ("FETCH_REVERSE".equals(v)) {
+                    fetchDirection = ResultSet.FETCH_REVERSE;
+                } else if ("FETCH_UNKNOWN".equals(v)) {
+                    fetchDirection = ResultSet.FETCH_UNKNOWN;
+                } else {
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "fetchDirection");
+                }
+            } else {
+                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, k);
+            }
+        }
+        result[0] = rsType;
+        result[1] = rsConcur;
+        result[2] = rsHold;
+        result[3] = fetchDirection;
+        result[4] = fetchSize;
+        return result;
+    }
+
+    protected ResultSet executeStoredProcedure() throws SQLException {
+        final boolean hasResultSet = preparedStatement.execute();
+        final ResultSet rs = hasResultSet ? preparedStatement.getResultSet() : null;
+        // if necessary, retrieve and process the output parameter
+
+        return rs;
     }
 
     private Object getColumnValue(final int i) throws Exception {
