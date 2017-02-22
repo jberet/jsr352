@@ -12,6 +12,8 @@
 
 package org.jberet.support.io;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +24,7 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.jberet.support.io.JdbcReaderWriterTest.getConnection;
 import static org.jberet.support.io.JdbcReaderWriterTest.jobOperator;
 import static org.junit.Assert.assertEquals;
 
@@ -51,6 +54,27 @@ public class JdbcBatchletTest {
     @Test
     public void multipleSqlsInvalid() throws Exception {
         runTest(sqls + ";" + "xxx", BatchStatus.FAILED);
+    }
+
+    @Test
+    public void storedProcedure() throws Exception {
+        final String storedProcedureDef = "CREATE ALIAS IF NOT EXISTS sp2 AS $$" +
+                "void sp2(Connection conn) throws SQLException {" +
+                "    conn.createStatement().executeUpdate(\"delete from STOCK_TRADE\");" +
+                "}$$;";
+        final String callStoredProcedure = "{ call sp2() }";
+
+        final Connection connection = getConnection();
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            statement.executeUpdate(storedProcedureDef);
+            System.out.printf("Created stored procedure sp2 as %s%n", storedProcedureDef);
+        } finally {
+            JdbcItemReaderWriterBase.close(connection, statement);
+        }
+
+        runTest(callStoredProcedure, BatchStatus.COMPLETED);
     }
 
     private void runTest(final String sqls, final BatchStatus batchStatus) throws Exception {
