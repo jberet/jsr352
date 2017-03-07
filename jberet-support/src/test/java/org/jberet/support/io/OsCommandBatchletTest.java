@@ -12,6 +12,9 @@
 
 package org.jberet.support.io;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +22,7 @@ import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.StepExecution;
 
+import org.apache.commons.exec.ExecuteStreamHandler;
 import org.jberet.operations.JobOperatorImpl;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Test;
@@ -62,6 +66,21 @@ public class OsCommandBatchletTest {
         jobParams.setProperty("commandLine", "cd ..");
         jobParams.setProperty("commandOkExitValues", String.valueOf(999999));
         runCommand(jobParams, BatchStatus.FAILED, String.valueOf(0));
+    }
+
+    /**
+     * This test uses a custom stream handler that does nothing.
+     * There should be no output displayed from running the command subprocess.
+     *
+     * @throws Exception upon errors
+     */
+    @Test
+    public void streamHandler() throws Exception {
+        // run echo command, and should complete successfully with process exit code 0.
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("commandLine", "echo This is echo from osCommandBatchlet");
+        jobParams.setProperty("streamHandler", "org.jberet.support.io.OsCommandBatchletTest$NoopStreamHandler");
+        runCommand(jobParams, BatchStatus.COMPLETED, String.valueOf(0));
     }
 
     /**
@@ -119,4 +138,33 @@ public class OsCommandBatchletTest {
         final StepExecution stepExecution = stepExecutions.get(0);
         assertEquals(expectedExitStatus, stepExecution.getExitStatus());
     }
+
+    public static final class NoopStreamHandler implements ExecuteStreamHandler {
+
+        @Override
+        public void setProcessInputStream(final OutputStream os) throws IOException {
+
+        }
+
+        @Override
+        public void setProcessErrorStream(final InputStream is) throws IOException {
+
+        }
+
+        @Override
+        public void setProcessOutputStream(final InputStream is) throws IOException {
+
+        }
+
+        @Override
+        public void start() throws IOException {
+
+        }
+
+        @Override
+        public void stop() throws IOException {
+
+        }
+    }
+
 }

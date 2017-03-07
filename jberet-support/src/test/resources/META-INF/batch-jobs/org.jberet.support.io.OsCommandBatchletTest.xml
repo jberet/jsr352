@@ -22,6 +22,7 @@
                 <property name="commandOkExitValues" value="#{jobParameters['commandOkExitValues']}"/>
                 <property name="timeoutSeconds" value="#{jobParameters['timeoutSeconds']}"/>
                 <property name="environment" value="FOO=1, BAR=a"/>
+                <property name="streamHandler" value="#{jobParameters['streamHandler']}"/>
             </properties>
         </batchlet>
     </step>

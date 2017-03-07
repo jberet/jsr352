@@ -27,6 +27,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
 import org.jberet.support._private.SupportLogger;
@@ -143,6 +144,16 @@ public class OsCommandBatchlet implements Batchlet {
     @BatchProperty
     protected Map<String, String> environment;
 
+    /**
+     * Fully-qualified name of a class that implements {@code org.apache.commons.exec.ExecuteStreamHandler},
+     * which handles the input and output of the subprocess.
+     *
+     * @see "org.apache.commons.exec.ExecuteStreamHandler"
+     */
+    @Inject
+    @BatchProperty
+    protected Class streamHandler;
+
     private ExecuteWatchdog watchdog;
 
     private volatile boolean isStopped;
@@ -183,6 +194,9 @@ public class OsCommandBatchlet implements Batchlet {
 
         if (workingDir != null) {
             executor.setWorkingDirectory(workingDir);
+        }
+        if (streamHandler != null) {
+            executor.setStreamHandler((ExecuteStreamHandler) streamHandler.newInstance());
         }
 
         SupportLogger.LOGGER.runCommand(commandLineObj.getExecutable(),
