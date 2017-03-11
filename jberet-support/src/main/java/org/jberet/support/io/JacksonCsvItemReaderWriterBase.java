@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -107,7 +107,8 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
 
     /**
      * Character used for quoting values that contain quote characters or linefeeds.
-     * Optional property and defaults to " (double-quote character).
+     * Optional property and defaults to " (double-quote character). To disable quoting
+     * completely, set this property to {@code "-1"}.
      *
      * @see "com.fasterxml.jackson.dataformat.csv.CsvSchema"
      */
@@ -185,7 +186,8 @@ public abstract class JacksonCsvItemReaderWriterBase extends JsonItemReaderWrite
             schema = schema.withColumnSeparator(columnSeparator.charAt(0));
         }
         if (quoteChar != null) {
-            schema = schema.withQuoteChar(quoteChar.charAt(0));
+            schema = quoteChar.equals("-1") ? schema.withoutQuoteChar() :
+                    schema.withQuoteChar(quoteChar.charAt(0));
         }
         if (nullValue != null) {
             schema = schema.withNullValue(nullValue);
