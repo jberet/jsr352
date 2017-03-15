@@ -20,7 +20,7 @@
     <parent>
         <artifactId>jberet-schedule</artifactId>
         <groupId>org.jberet</groupId>
-        <version>1.3.0.Beta5-SNAPSHOT</version>
+        <version>1.3.0.Beta5</version>
     </parent>
 
     <artifactId>jberet-schedule-executor</artifactId>
