@@ -23,11 +23,17 @@
             </reader>
             <writer ref="mockItemWriter">
                 <properties>
+                    <!--<property name="toConsole" value="true"/>-->
+                    <!--<property name="toConsole" value="false"/>-->
                     <property name="toConsole" value="#{jobParameters['toConsole']}"/>
+
+                    <!-- Name of a class with a public static java.util.List field to hold data items -->
+                    <!--<property name="toClass" value="org.jberet.support.io.MockItemWriterTest$DataHolder"/>-->
                     <property name="toClass" value="#{jobParameters['toClass']}"/>
+
+                    <!--<property name="toFile" value="/tmp/xxx.txt"/>-->
+                    <!--<property name="writeMode" value="overwrite"/>-->
                     <property name="toFile" value="#{jobParameters['toFile']}"/>
-                    <property name="toConsole" value="#{jobParameters['toConsole']}"/>
-                    <property name="writeMode" value="#{jobParameters['writeMode']}"/>
                 </properties>
             </writer>
         </chunk>
