@@ -119,9 +119,9 @@ public class JsonItemReader extends JsonItemReaderWriterBase implements ItemRead
     @BatchProperty
     protected Class inputDecorator;
 
-    private JsonParser jsonParser;
+    protected JsonParser jsonParser;
     private JsonToken token;
-    private int rowNumber;
+    protected int rowNumber;
 
     @Override
     public void open(final Serializable checkpoint) throws Exception {

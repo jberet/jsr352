@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
 
 package org.jberet.support.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -141,11 +142,16 @@ public abstract class ItemReaderWriterBase {
                     inputStream = new FileInputStream(file);
                 } else {
                     SupportLogger.LOGGER.tracef("The resource %s is not a file %n", inputResource);
-                    ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                    if (cl == null) {
-                        cl = ItemReaderWriterBase.class.getClassLoader();
+
+                    if (inputResource.startsWith("[") && inputResource.endsWith("]")) {
+                        inputStream = new ByteArrayInputStream(inputResource.getBytes());
+                    } else {
+                        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                        if (cl == null) {
+                            cl = ItemReaderWriterBase.class.getClassLoader();
+                        }
+                        inputStream = cl.getResourceAsStream(inputResource);
                     }
-                    inputStream = cl.getResourceAsStream(inputResource);
                 }
             }
             if (detectBOM) {
