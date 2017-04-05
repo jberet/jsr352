@@ -12,6 +12,7 @@
 
 package org.jberet.support.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import javax.enterprise.context.Dependent;
@@ -22,7 +23,7 @@ import org.jberet.support._private.SupportLogger;
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads from an array.
  *
- * @since   1.3.0.Beta6
+ * @since 1.3.0.Beta6
  */
 @Named
 @Dependent
@@ -36,7 +37,13 @@ public class ArrayItemReader extends JsonItemReader {
             beanType = String.class;
         }
         final Object[] objs = (Object[]) Array.newInstance(beanType, 0);
-        values = objectMapper.readValue(resource, objs.getClass());
+        final Object inputSource = jsonParser.getInputSource();
+
+        if (inputSource instanceof ByteArrayInputStream) {
+            values = objectMapper.readValue(resource, objs.getClass());
+        } else {
+            values = objectMapper.readValue(jsonParser, objs.getClass());
+        }
     }
 
     @Override

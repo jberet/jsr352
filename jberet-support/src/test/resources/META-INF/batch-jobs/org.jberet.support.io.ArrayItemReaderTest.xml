@@ -17,16 +17,34 @@
         <chunk item-count="100">
             <reader ref="arrayItemReader">
                 <properties>
+                    <!-- read inlined string array -->
                     <!--<property name="resource" value='["a", "b", "c"]'/>-->
                     <!--<property name="beanType" value="java.lang.String"/>-->
 
+                    <!-- read inlined Integer array -->
                     <!--<property name="resource" value="[1, 2, 3]"/>-->
                     <!--<property name="beanType" value="java.lang.Integer"/>-->
+
+                    <!-- read Movie data from a file resource -->
+                    <!--<property name="resource" value="movies-2012.json"/>-->
+                    <!--<property name="beanType" value="org.jberet.support.io.Movie"/>-->
+
+                    <!-- read inlined Movie data
+                    <property name="beanType" value="org.jberet.support.io.Movie"/>
+                    <property name="resource" value='[
+                        {"rank" : 1, "tit" : "Number One", "grs" : 1000, "opn" : "2017-01-01"},
+                        {"rank" : 2, "tit" : "Number Two", "grs" : 2000, "opn" : "2017-02-02"},
+                        {"rank" : 3, "tit" : "Number Three", "grs" : 3000, "opn" : "2017-03-03"},
+                        {"rank" : 4, "tit" : "Number Four", "grs" : 4000, "opn" : "2017-04-04"},
+                        {"rank" : 5, "tit" : "Number Five", "grs" : 5000, "opn" : "2017-05-05"}
+                    ]'/>
+                    -->
 
                     <property name="resource" value="#{jobParameters['resource']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                 </properties>
             </reader>
+
             <writer ref="mockItemWriter">
                 <properties>
                     <property name="toConsole" value="true"/>

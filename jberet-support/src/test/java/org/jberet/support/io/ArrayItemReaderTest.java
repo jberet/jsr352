@@ -82,10 +82,22 @@ public final class ArrayItemReaderTest {
         test0(arrayContent, Movie.class, 5);
     }
 
+    /**
+     * Same as {@link #MovieArray()}, except that this test reads batch data from a file resource,
+     * instead of inlined batch data.
+     *
+     * @throws Exception upon errors
+     */
+    @Test
+    public void fileResource() throws Exception {
+        final String resourceFile = "movies-2012.json";
+        test0(resourceFile, Movie.class, 100);
+    }
 
-    private void test0(String arrayContent, Class<?> beanType, int expectedSize) throws Exception {
+
+    private void test0(String resource, Class<?> beanType, int expectedSize) throws Exception {
         final Properties params = new Properties();
-        params.setProperty(CsvProperties.RESOURCE_KEY, arrayContent);
+        params.setProperty(CsvProperties.RESOURCE_KEY, resource);
 
         if (beanType != null) {
             params.setProperty(CsvProperties.BEAN_TYPE_KEY, beanType.getName());
