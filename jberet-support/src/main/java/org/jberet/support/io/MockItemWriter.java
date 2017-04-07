@@ -38,30 +38,56 @@ import org.jboss.logging.Logger;
 @Dependent
 public class MockItemWriter extends ItemReaderWriterBase implements ItemWriter {
 
+    /**
+     * A flag to control whether to write data items to the console.
+     * Optional property, and defaults to null.  Valid values are
+     * {@code true}, {@code false}, or {@code null}.
+     */
     @Inject
     @BatchProperty
     protected Boolean toConsole;
 
+    /**
+     * The fully-qualified name of a class that contains a
+     * {@code public static java.util.List} field to hold data items.
+     * Optional property, and defaults to null.
+     */
     @Inject
     @BatchProperty
     protected Class toClass;
 
+    /**
+     * The {@code List} field in {@link #toClass} class to save data items.
+     */
     protected List listField;
 
 
     /**
-     * Alais for {@link #resource} batch property
+     * The file path to write data to. Optional property, and defaults to null.
      */
     @Inject
     @BatchProperty
     protected String toFile;
 
+    /**
+     * Instructs this class, when the target file already exists, whether to append to, or overwrite
+     * the existing resource, or fail.
+     * Valid values are {@code append}, {@code overwrite}, and {@code failIfExists}.
+     * Optional property, and defaults to {@code append}.
+     * This property is used only when {@link #toFile} is specified.
+     */
     @Inject
     @BatchProperty
     protected String writeMode;
 
+    /**
+     * The {@code PrintWriter} writing to the file specified by {@link #toFile} property.
+     */
     protected PrintWriter printWriter;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         if (toClass != null) {
@@ -84,6 +110,17 @@ public class MockItemWriter extends ItemReaderWriterBase implements ItemWriter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <ul>
+     * <li>If {@link #toConsole} is {@code true}, {@code items} are written to the console.
+     * <li>If {@link #toConsole} is {@code false}, {@code items} are not written to the console.
+     * <li>If {@link #toFile} is specified, {@code items} are written to the specified file.
+     * <li>If {@link #toClass} is specified, {@code items} are saved to a public static java.util.List field of {@link #toClass} class.
+     *     If the field is not initialized, it will be initialized to a new {@code java.util.ArrayList}.
+     * <li>If none of the above property is specified, {@code items} are written to the console.
+     * </ul>
+     */
     @Override
     public void writeItems(final List<Object> items) throws Exception {
         if (listField != null) {
@@ -96,7 +133,7 @@ public class MockItemWriter extends ItemReaderWriterBase implements ItemWriter {
             }
         }
 
-        if ((toClass == null && toFile == null) ||
+        if ((toClass == null && toFile == null && toConsole == null) ||
                 toConsole == Boolean.TRUE) {
             for (final Object e : items) {
                 System.out.println(e.toString());
@@ -105,6 +142,9 @@ public class MockItemWriter extends ItemReaderWriterBase implements ItemWriter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void close() throws Exception {
         if (printWriter != null) {
@@ -117,6 +157,9 @@ public class MockItemWriter extends ItemReaderWriterBase implements ItemWriter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Serializable checkpointInfo() throws Exception {
         return null;

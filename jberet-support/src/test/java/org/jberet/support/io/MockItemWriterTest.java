@@ -47,6 +47,13 @@ public final class MockItemWriterTest {
     }
 
     @Test
+    public void noop() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("toConsole", Boolean.FALSE.toString());
+        verifyJobExecution(jobOperator.start(jobName, jobParams), BatchStatus.COMPLETED);
+    }
+
+    @Test
     public void toFile() throws Exception {
         final Properties jobParams = new Properties();
         jobParams.setProperty("toFile",
