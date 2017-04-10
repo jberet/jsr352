@@ -24,6 +24,7 @@
 
     <modules>
         <module>common</module>
+        <module>simple</module>
         <module>loadBatchXml</module>
         <module>flow</module>
         <module>loopback</module>

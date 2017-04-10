@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+    <ref id="arrayItemReader" class="org.jberet.support.io.ArrayItemReader" />
+    <ref id="mockItemWriter" class="org.jberet.support.io.MockItemWriter" />
+</batch-artifacts>
