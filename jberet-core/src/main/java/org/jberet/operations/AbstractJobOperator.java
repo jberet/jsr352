@@ -207,7 +207,7 @@ public abstract class AbstractJobOperator implements JobOperator {
         }
         final JobRepository repository = getJobRepository();
         final List<Long> result = repository.getRunningExecutions(jobName);
-        if (result.isEmpty() && !repository.jobExists(jobName)) {
+        if (result.size() == 0 && !repository.jobExists(jobName)) {
             throw MESSAGES.noSuchJobException(jobName);
         }
         return result;
@@ -374,14 +374,14 @@ public abstract class AbstractJobOperator implements JobOperator {
         if (executionId != mostRecentExecution.getExecutionId()) {
             throw MESSAGES.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
         }
+        final BatchEnvironment batchEnvironment = getBatchEnvironment();
+        final JobRepository repository = getJobRepository();
 
         // the job may not have been loaded, e.g., when the restart is performed in a new JVM
         final String jobName = originalToRestart.getJobName();
         Properties oldJobParameters = originalToRestart.getJobParameters();
         Job jobDefined = jobInstance.getUnsubstitutedJob();
         if (jobDefined == null) {
-            final BatchEnvironment batchEnvironment = getBatchEnvironment();
-            final JobRepository repository = getJobRepository();
             final ApplicationAndJobName applicationAndJobName = new ApplicationAndJobName(jobInstance.getApplicationName(), jobName);
             jobDefined = repository.getJob(applicationAndJobName);
 
