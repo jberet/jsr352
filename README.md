@@ -3,7 +3,7 @@
 
 JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platform)](https://java.net/projects/jbatch). It is also included in [WildFly, the new and improved JBoss Application Server](http://wildfly.org/) to provide portable batch processing support in Java EE environment. 
 
-####Build JBeret
+#### Build JBeret
 To build and run default set of tests:
     
     mvn install
@@ -26,7 +26,7 @@ Increase `ulimit` to avoid such errors. For example,
 
     ulimit -u 2048add
 
-####Sub-modules:
+#### Sub-modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
 * [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, PDF, etc) for batch applications, and JNDI support
@@ -38,13 +38,13 @@ Increase `ulimit` to avoid such errors. For example,
 * [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [JSR 352 TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
 * [wildfly-jberet-samples](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples): Sample batch processing apps that can be deployed to WildFly or JBoss EAP 7
 
-####3rd-party & Community Extensions:
+#### 3rd-party & Community Extensions:
 * [JBoss Tools for Batch (Eclipse extensions, Wizards, Visual editing, etc)](http://tools.jboss.org/features/batch.html)
 * [jberet-eap6](https://github.com/fcorneli/jberet-eap6)
 * [jberetweb, job repository viewer](https://github.com/lbtc-xxx/jberetweb)
 * [jBatch Suite, Visual Modeling](https://java.net/projects/jbatchsuite)
 
-####Project Resources:
+#### Project Resources:
 * [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET), [Issues Awaiting Volunteers](https://issues.jboss.org/browse/JBERET-143?jql=project%20%3D%20JBERET%20AND%20fixVersion%20%3D%20%22Awaiting%20Volunteers%22)
 * [JBeret Documentation](http://docs.jboss.org/jberet/)
 * [JBoss EAP Quickstarts for Batch Processing](https://github.com/jboss-developer/jboss-eap-quickstarts)
@@ -56,7 +56,7 @@ Increase `ulimit` to avoid such errors. For example,
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
 * Additional JBeret project info on [ohloh Open HUB](https://www.ohloh.net/p/jberet)
 
-####Batch sample & test applications:
+#### Batch sample & test applications:
   - <https://github.com/chengfang/wildfly-samples/tree/master/jberet>, web apps that demonstrate the following:
     + JsonItemReader, JsonItemWriter
     + CsvItemReader, CsvItemWriter
@@ -98,8 +98,8 @@ Increase `ulimit` to avoid such errors. For example,
             <version>1.0.2.Final</version> <!-- replace it with the desired version -->
         </dependency>
 
-####Batch application dependencies
-#####Minimal application dependencies:
+#### Batch application dependencies
+##### Minimal application dependencies:
         <dependency>
             <groupId>org.jboss.spec.javax.batch</groupId>
             <artifactId>jboss-batch-api_1.0_spec</artifactId>
@@ -146,7 +146,7 @@ are already available in the appserver, and should not be included in WAR, JAR, 
 scope should be set to `provided`. In addition, if the application is deployed to JBoss EAP or WildFly, almost all of
 the above dependencies are already available as JBoss modules, and should not be duplicated in application package.
         
-#####The following is also required for Java SE batch applications (h2 can be omitted when using in-memory batch job repository):
+##### The following is also required for Java SE batch applications (h2 can be omitted when using in-memory batch job repository):
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-se</artifactId>
@@ -160,7 +160,7 @@ the above dependencies are already available as JBoss modules, and should not be
             <artifactId>h2</artifactId>
         </dependency>
         
-#####Optional application dependencies depending on application usage:
+##### Optional application dependencies depending on application usage:
         <!-- any JDBC driver jars, e.g., h2, when using jdbc batch job repository -->
         <dependency>
             <groupId>com.h2database</groupId>
