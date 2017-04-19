@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -555,11 +555,28 @@ public final class PropertyResolver {
         }
         final int startPropCategory = startExpression + prefixLen;
         final int openBracket = sb.indexOf("[", startPropCategory);
+        if (openBracket < 0) {
+            throw MESSAGES.invalidPropertyExpression(sb.toString());
+        }
+
+        final char startQuote = sb.charAt(openBracket + 1);
+        if (startQuote != '\'' && startQuote != '"') {
+            throw MESSAGES.invalidPropertyExpression(sb.toString());
+        }
+
         final String propCategory = sb.substring(startPropCategory, openBracket);
         final int startVariableName = openBracket + 2;  //jump to the next char after ', the start of variable name
         final int endBracket = sb.indexOf("]", startVariableName + 1);
-        int endExpression = endBracket + 1;
+        if (endBracket < 1) {
+            throw MESSAGES.invalidPropertyExpression(sb.toString());
+        }
 
+        final char endQuote = sb.charAt(endBracket - 1);
+        if (endQuote != '\'' && endQuote != '"') {
+            throw MESSAGES.invalidPropertyExpression(sb.toString());
+        }
+
+        int endExpression = endBracket + 1;
         if (endExpression >= sb.length()) {
             //this can happen when missing an ending } (e.g.,   #{jobProperties['step-prop']   )
             LOGGER.possibleSyntaxErrorInProperty(sb.toString());

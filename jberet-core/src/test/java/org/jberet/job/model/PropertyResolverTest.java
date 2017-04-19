@@ -22,6 +22,7 @@ import static org.jberet.job.model.PropertyResolver.jobParametersToken;
 import static org.jberet.job.model.PropertyResolver.jobPropertiesToken;
 import static org.jberet.job.model.PropertyResolver.partitionPlanToken;
 import static org.jberet.job.model.PropertyResolver.systemPropertiesToken;
+import static org.junit.Assert.assertEquals;
 
 public class PropertyResolverTest {
     private static final String jobParam1 = "infile.path";
@@ -88,7 +89,7 @@ public class PropertyResolverTest {
     private void run(final String[] raws, final String[] expected) {
         for (int i = 0, j = raws.length; i < j; i++) {
             final String actual = resolver.resolve(raws[i]);
-            Assert.assertEquals(expected[i], actual);
+            assertEquals(expected[i], actual);
 //            System.out.println("Expected: " + expected[i] + ", actual: " + actual);
         }
     }
@@ -112,12 +113,61 @@ public class PropertyResolverTest {
         props.setProperty("java.version", "#{systemProperties['java.version']}");  //valid one, not cycle
 
         resolver.pushJobProperties(fromJavaUtilProperties(props));
-        Assert.assertEquals("", resolver.resolve("#{jobProperties['one']}"));
-        Assert.assertEquals("", resolver.resolve("#{jobProperties['two']}"));
-        Assert.assertEquals("", resolver.resolve("#{jobProperties['four']}"));
-        Assert.assertEquals("TEN", resolver.resolve("#{jobProperties['seven']}"));
+        assertEquals("", resolver.resolve("#{jobProperties['one']}"));
+        assertEquals("", resolver.resolve("#{jobProperties['two']}"));
+        assertEquals("", resolver.resolve("#{jobProperties['four']}"));
+        assertEquals("TEN", resolver.resolve("#{jobProperties['seven']}"));
 
-        org.junit.Assert.assertEquals(javaVersion, resolver.resolve("#{jobProperties['java.version']}"));
+        assertEquals(javaVersion, resolver.resolve("#{jobProperties['java.version']}"));
+    }
+
+    /**
+     * Tests invalid forms based on the expression:
+     *
+     * #{systemProperties['java.version']}
+     *
+     */
+    @Test public void syntaxError() {
+        //valid property expression
+        final String exp = "#{systemProperties['java.version']}";
+        String val = resolver.resolve(exp);
+        System.out.printf("%s -> %s%n", exp, val);
+
+        String[] expressions = {
+                //missing starting '
+                "#{systemProperties[java.version']}",
+                "#{jobProperties[java.version']}",
+                "#{jobParameters[java.version']}",
+                "#{partitionPlan[java.version']}",
+
+                //missing ending '
+                "#{systemProperties['java.version]}",
+                "#{jobProperties['java.version]}",
+                "#{jobParameters['java.version]}",
+                "#{partitionPlan['java.version]}",
+
+                //missing starting [
+                "#{systemProperties'java.version']}",
+                "#{jobProperties'java.version']}",
+                "#{jobParameters'java.version']}",
+                "#{partitionPlan'java.version']}",
+
+                //missing ending ]
+                "#{systemProperties['java.version'}",
+                "#{jobProperties['java.version'}",
+                "#{jobParameters['java.version'}",
+                "#{partitionPlan['java.version'}",
+        };
+
+        for(String e : expressions) {
+            try {
+                val = resolver.resolve(e);
+                System.out.printf("%s -> %s%n", e, val);
+                Assert.fail();
+            } catch (IllegalArgumentException ex) {
+                System.out.printf("Got expected BatchRuntimeException: %s%n", ex.getMessage());
+            }
+        }
     }
 
     @Test public void literal() {

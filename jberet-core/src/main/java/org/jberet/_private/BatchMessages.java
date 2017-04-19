@@ -201,4 +201,7 @@ public interface BatchMessages {
     @Message(id = 655, value = "ClassLoader (%s) is already registered to a job operator context")
     IllegalArgumentException classLoaderAlreadyRegistered(ClassLoader classLoader);
 
+    @Message(id = 656, value = "Invalid batch property expression: %s")
+    IllegalArgumentException invalidPropertyExpression(String propertyExpression);
+
 }
