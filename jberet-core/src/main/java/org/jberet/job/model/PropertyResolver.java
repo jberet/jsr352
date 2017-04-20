@@ -543,8 +543,22 @@ public final class PropertyResolver {
         return sb.toString();
     }
 
-    private void resolve(final StringBuilder sb, final int start, final boolean defaultAllowed, final LinkedList<String> referringExpressions)
-                                        throws BatchRuntimeException {
+    /**
+     * Resolves a JSL batch property value that may contain a JSL expression.
+     *
+     * @param sb the batch property value as StringBuilder
+     * @param start starting position to track recursive calls of this method
+     * @param defaultAllowed whether there is a default value
+     * @param referringExpressions referring expression for tracking cyclic references
+     *
+     * @throws BatchRuntimeException if there is a cyclic reference
+     * @throws IllegalArgumentException for invalid JSL property expressions such as missing ', [, or ]
+     */
+    private void resolve(final StringBuilder sb,
+                         final int start,
+                         final boolean defaultAllowed,
+                         final LinkedList<String> referringExpressions)
+                        throws BatchRuntimeException, IllegalArgumentException {
         //distance-to-end doesn't have space for any template, so no variable referenced
         if (sb.length() - start < shortestTemplateLen) {
             return;

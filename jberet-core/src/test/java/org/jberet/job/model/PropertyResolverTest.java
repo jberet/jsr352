@@ -165,7 +165,7 @@ public class PropertyResolverTest {
                 System.out.printf("%s -> %s%n", e, val);
                 Assert.fail();
             } catch (IllegalArgumentException ex) {
-                System.out.printf("Got expected BatchRuntimeException: %s%n", ex.getMessage());
+                System.out.printf("Got expected %s: %s%n", ex.getClass().getName(), ex.getMessage());
             }
         }
     }
