@@ -134,14 +134,16 @@ public class JdbcBatchlet implements Batchlet {
                 try {
                     updateCounts = statement.executeBatch();
                 } catch (final SQLException sqlException) {
+                    final SQLException cause = sqlException.getNextException();
                     for(SQLException nextException = sqlException.getNextException();
                         nextException != null; nextException = nextException.getNextException()) {
                         SupportLogger.LOGGER.error(nextException.toString());
                     }
                     if (sqlException instanceof BatchUpdateException) {
                         updateCounts = ((BatchUpdateException) sqlException).getUpdateCounts();
+                        SupportLogger.LOGGER.jdbcBatchUpdateCounts(Arrays.toString(updateCounts));
                     }
-                    throw sqlException;
+                    throw cause != null ? cause : sqlException;
                 }
                 result = Arrays.toString(updateCounts);
             }
