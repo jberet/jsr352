@@ -121,6 +121,7 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
             }
             if(e instanceof SQLException) {
                 final SQLException sqlException = (SQLException) e;
+                final SQLException cause = sqlException.getNextException();
                 for(SQLException nextException = sqlException.getNextException();
                     nextException != null; nextException = nextException.getNextException()) {
                     SupportLogger.LOGGER.error(nextException.toString());
@@ -130,6 +131,7 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
                     final BatchUpdateException batchUpdateException = (BatchUpdateException) e;
                     SupportLogger.LOGGER.jdbcBatchUpdateCounts(Arrays.toString(batchUpdateException.getUpdateCounts()));
                 }
+                throw cause != null ? cause : sqlException;
             }
             throw e;
         } finally {
