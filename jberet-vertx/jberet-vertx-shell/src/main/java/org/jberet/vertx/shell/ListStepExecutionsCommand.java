@@ -20,7 +20,8 @@ import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
+
+import static org.jberet.vertx.shell.GetStepExecutionCommand.format;
 
 @SuppressWarnings("unused")
 @Name("list-step-executions")
@@ -41,14 +42,9 @@ public final class ListStepExecutionsCommand extends CommandBase {
     public void process(final CommandProcess process) {
         try {
             final List<StepExecution> stepExecutions = jobOperator.getStepExecutions(jobExecutionId);
-            process.write("Step executions in job execution ").write(String.valueOf(jobExecutionId))
-                    .write(":")
-                    .write(BatchUtil.NL);
+            process.write(String.format("Step executions in job execution %s:%n", jobExecutionId));
             for (StepExecution stepExecution : stepExecutions) {
-                process.write(String.valueOf(stepExecution.getStepExecutionId()))
-                        .write("\t")
-                        .write(String.valueOf(stepExecution.getBatchStatus()))
-                        .write(BatchUtil.NL);
+                process.write(format(stepExecution.getStepExecutionId(), stepExecution.getBatchStatus()));
             }
             process.end();
         } catch (Exception e) {

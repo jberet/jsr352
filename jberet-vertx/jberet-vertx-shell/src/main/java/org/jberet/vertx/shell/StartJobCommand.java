@@ -19,7 +19,6 @@ import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
 
 @SuppressWarnings("unused")
 @Name("start-job")
@@ -47,11 +46,8 @@ public final class StartJobCommand extends CommandBase {
     public void process(final CommandProcess process) {
         try {
             final long jobExecutionId = jobOperator.start(jobName, jobParameters);
-            process.write("Started job: ")
-                    .write(jobName)
-                    .write(", job execution id: ")
-                    .write(String.valueOf(jobExecutionId))
-                    .write(BatchUtil.NL);
+            process.write(String.format(
+                    "Started job %s, and the job execution id is %s%n", jobName, jobExecutionId));
             process.end();
         } catch (Exception e) {
             failed(process, e);

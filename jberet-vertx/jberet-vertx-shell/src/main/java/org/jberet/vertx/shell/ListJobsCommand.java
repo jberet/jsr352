@@ -17,7 +17,6 @@ import java.util.Set;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
 
 @SuppressWarnings("unused")
 @Name("list-jobs")
@@ -30,9 +29,7 @@ public final class ListJobsCommand extends CommandBase {
     public void process(final CommandProcess process) {
         try {
             final Set<String> jobNames = jobOperator.getJobNames();
-            process.write("Batch jobs: ")
-                    .write(jobNames.toString())
-                    .write(BatchUtil.NL);
+            process.write(String.format("Batch jobs: %s%n", jobNames));
             process.end();
         } catch (Exception e) {
             failed(process, e);

@@ -17,7 +17,6 @@ import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
 
 @SuppressWarnings("unused")
 @Name("stop-job-execution")
@@ -38,9 +37,7 @@ public final class StopJobExecutionCommand extends CommandBase {
     public void process(final CommandProcess process) {
         try {
             jobOperator.stop(jobExecutionId);
-            process.write("Requested to stop job execution: ")
-                    .write(String.valueOf(jobExecutionId))
-                    .write(BatchUtil.NL);
+            process.write(String.format("Requested to stop job execution %s%n", jobExecutionId));
             process.end();
         } catch (Exception e) {
             failed(process, e);

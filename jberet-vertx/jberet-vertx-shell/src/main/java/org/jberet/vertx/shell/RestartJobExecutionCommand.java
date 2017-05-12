@@ -19,7 +19,6 @@ import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
 
 @SuppressWarnings("unused")
 @Name("restart-job-execution")
@@ -47,11 +46,9 @@ public final class RestartJobExecutionCommand extends CommandBase {
     public void process(final CommandProcess process) {
         try {
             final long restartJobExecutionId = jobOperator.restart(jobExecutionId, jobParameters);
-            process.write("Restarted previous job execution: ")
-                    .write(String.valueOf(jobExecutionId))
-                    .write(", and the new job execution id is: ")
-                    .write(String.valueOf(restartJobExecutionId))
-                    .write(BatchUtil.NL);
+            process.write(String.format(
+                    "Restarted previous job execution %s, and the new job execution id is %s%n",
+                    jobExecutionId, restartJobExecutionId));
             process.end();
         } catch (Exception e) {
             failed(process, e);

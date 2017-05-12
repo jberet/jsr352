@@ -17,7 +17,6 @@ import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
 
 @SuppressWarnings("unused")
 @Name("count-job-instances")
@@ -38,10 +37,7 @@ public final class CountJobInstancesCommand extends CommandBase {
     public void process(final CommandProcess process) {
         try {
             final int count = jobOperator.getJobInstanceCount(jobName);
-            process.write(String.valueOf(count))
-                    .write(" job instances for job: ")
-                    .write(jobName)
-                    .write(BatchUtil.NL);
+            process.write(String.format("%s job instances for job %s%n", count, jobName));
             process.end();
         } catch (Exception e) {
             failed(process, e);

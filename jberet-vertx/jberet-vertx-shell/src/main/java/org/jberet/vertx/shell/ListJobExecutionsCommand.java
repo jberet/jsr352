@@ -13,7 +13,6 @@
 package org.jberet.vertx.shell;
 
 import java.util.List;
-
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 
@@ -22,7 +21,8 @@ import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
+
+import static org.jberet.vertx.shell.GetStepExecutionCommand.format;
 
 @SuppressWarnings("unused")
 @Name("list-job-executions")
@@ -39,7 +39,9 @@ public final class ListJobExecutionsCommand extends CommandBase {
 
     @Description("whether to return only running job executions")
     @Option(longName = "running", shortName = "r", flag = true)
-    public void setRunning(boolean r) {this.running = r;}
+    public void setRunning(boolean r) {
+        this.running = r;
+    }
 
     /**
      * {@inheritDoc}
@@ -47,23 +49,18 @@ public final class ListJobExecutionsCommand extends CommandBase {
     @Override
     public void process(final CommandProcess process) {
         try {
-            if(running) {
+            if (running) {
                 final List<Long> runningExecutions = jobOperator.getRunningExecutions(jobName);
-                process.write("Running job executions for job: ")
-                        .write(jobName).write(BatchUtil.NL)
-                        .write(runningExecutions.toString()).write(BatchUtil.NL);
+                process.write(
+                        String.format("Running job executions for job %s:%n%s%n ", jobName, runningExecutions));
             } else {
-                process.write("Job executions for job: ")
-                        .write(jobName)
-                        .write(BatchUtil.NL);
-                final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, 0, Integer.MAX_VALUE);
+                process.write(String.format("Job executions for job %s:%n", jobName));
+                final List<JobInstance> jobInstances =
+                        jobOperator.getJobInstances(jobName, 0, Integer.MAX_VALUE);
                 for (JobInstance jobInstance : jobInstances) {
                     final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
                     for (JobExecution jobExecution : jobExecutions) {
-                        process.write(String.valueOf(jobExecution.getExecutionId()))
-                                .write("\t")
-                                .write(jobExecution.getBatchStatus().toString())
-                                .write(BatchUtil.NL);
+                        process.write(format(jobExecution.getExecutionId(), jobExecution.getBatchStatus()));
                     }
                 }
             }

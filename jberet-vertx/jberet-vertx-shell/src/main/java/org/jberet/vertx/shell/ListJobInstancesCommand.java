@@ -20,7 +20,6 @@ import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
 
 @SuppressWarnings("unused")
 @Name("list-job-instances")
@@ -55,10 +54,10 @@ public final class ListJobInstancesCommand extends CommandBase {
     public void process(final CommandProcess process) {
         try {
             final List<JobInstance> jobInstances = jobOperator.getJobInstances(jobName, start, count);
-            process.write("Job instances for job: ").write(jobName).write(BatchUtil.NL);
+            process.write(String.format("Job instances for job %s:%n", jobName));
 
             for (JobInstance jobInstance : jobInstances) {
-                process.write(String.valueOf(jobInstance.getInstanceId())).write(BatchUtil.NL);
+                process.write(String.format("%s%n", jobInstance.getInstanceId()));
             }
             process.end();
         } catch (Exception e) {

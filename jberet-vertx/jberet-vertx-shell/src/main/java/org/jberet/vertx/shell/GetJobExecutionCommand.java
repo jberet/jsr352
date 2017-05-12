@@ -19,7 +19,8 @@ import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
+
+import static org.jberet.vertx.shell.GetStepExecutionCommand.format;
 
 @SuppressWarnings("unused")
 @Name("get-job-execution")
@@ -40,16 +41,15 @@ public final class GetJobExecutionCommand extends CommandBase {
     public void process(final CommandProcess process) {
         try {
             final JobExecution je = jobOperator.getJobExecution(jobExecutionId);
-            process.write("execution id\t\t").write(String.valueOf(jobExecutionId)).write(BatchUtil.NL)
-                    .write("job name\t\t").write(je.getJobName()).write(BatchUtil.NL)
-                    .write("batch status\t\t").write(je.getBatchStatus().toString()).write(BatchUtil.NL)
-                    .write("exit status\t\t").write(je.getExitStatus()).write(BatchUtil.NL)
-                    .write("create time\t\t").write(String.valueOf(je.getCreateTime())).write(BatchUtil.NL)
-                    .write("start time\t\t").write(String.valueOf(je.getStartTime())).write(BatchUtil.NL)
-                    .write("update time\t\t").write(String.valueOf(je.getLastUpdatedTime())).write(BatchUtil.NL)
-                    .write("end time\t\t").write(String.valueOf(je.getEndTime())).write(BatchUtil.NL)
-                    .write("job params\t\t").write(String.valueOf(je.getJobParameters()))
-                    .write(BatchUtil.NL);
+            process.write(format("execution id", jobExecutionId))
+                    .write(format("job name", je.getJobName()))
+                    .write(format("batch status", je.getBatchStatus()))
+                    .write(format("exit status", je.getExitStatus()))
+                    .write(format("create time", je.getCreateTime()))
+                    .write(format("start time", je.getStartTime()))
+                    .write(format("update time", je.getLastUpdatedTime()))
+                    .write(format("end time", je.getEndTime()))
+                    .write(format("job params", je.getJobParameters()));
             process.end();
         } catch (Exception e) {
             failed(process, e);

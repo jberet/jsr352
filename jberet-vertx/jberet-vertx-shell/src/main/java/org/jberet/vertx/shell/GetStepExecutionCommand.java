@@ -22,7 +22,6 @@ import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.shell.command.CommandProcess;
-import org.jberet.util.BatchUtil;
 
 @SuppressWarnings("unused")
 @Name("get-step-execution")
@@ -61,34 +60,32 @@ public final class GetStepExecutionCommand extends CommandBase {
                 final long sid = se.getStepExecutionId();
                 if (sid == stepExecutionId) {
                     found = true;
-                    process.write("execution id\t\t").write(String.valueOf(sid)).write(BatchUtil.NL)
-                            .write("step name\t\t").write(se.getStepName()).write(BatchUtil.NL)
-                            .write("batch status\t\t").write(se.getBatchStatus().toString()).write(BatchUtil.NL)
-                            .write("exit status\t\t").write(se.getExitStatus()).write(BatchUtil.NL)
-                            .write("start time\t\t").write(String.valueOf(se.getStartTime())).write(BatchUtil.NL)
-                            .write("end time\t\t").write(String.valueOf(se.getEndTime())).write(BatchUtil.NL);
+                    process.write(format("execution id", sid))
+                            .write(format("step name", se.getStepName()))
+                            .write(format("batch status", se.getBatchStatus()))
+                            .write(format("exit status", se.getExitStatus()))
+                            .write(format("start time", se.getStartTime()))
+                            .write(format("end time", se.getEndTime()));
 
                     for (Metric m : se.getMetrics()) {
-                        process.write(m.getType().toString())
-                                .write("\t")
-                                .write(String.valueOf(m.getValue()))
-                                .write(BatchUtil.NL);
+                        process.write(format(m.getType(), m.getValue()));
                     }
-
-                    process.write("persistent data\t\t").write(String.valueOf(se.getPersistentUserData()))
-                            .write(BatchUtil.NL);
+                    process.write(format("persistent data", se.getPersistentUserData()));
                 }
             }
 
             if (!found) {
-                process.write("Didn't find step execution with step execution id ")
-                        .write(String.valueOf(stepExecutionId))
-                        .write(" and job execution id ")
-                        .write(String.valueOf(jobExecutionId));
+                process.write(String.format(
+                        "Didn't find step execution with step execution id %s and job execution id %s",
+                        stepExecutionId, jobExecutionId));
             }
             process.end();
         } catch (Exception e) {
             failed(process, e);
         }
+    }
+
+    static String format(Object label, Object value) {
+        return String.format("%-25s %s%n", label, value);
     }
 }

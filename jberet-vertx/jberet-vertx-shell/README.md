@@ -150,27 +150,29 @@ To list all job executions for job name `simple`:
 
 ```asciidoc
 % list-job-executions --job-name simple
-Job executions for job: simple
-11012	COMPLETED
-11011	COMPLETED
-11010	ABANDONED
-11009	COMPLETED
-11008	COMPLETED
+Job executions for job simple:
+11014                     COMPLETED
+11013                     COMPLETED
+11012                     ABANDONED
+11011                     COMPLETED
+11010                     ABANDONED
+11009                     COMPLETED
+11008                     ABANDONED
 ```
 
-To get details for a specific job execution with id `11012`:
+To get details for a specific job execution with id `11014`:
 
 ```asciidoc
-% get-job-execution 11012
-execution id		11012
-job name		simple
-batch status		COMPLETED
-exit status		COMPLETED
-create time		Fri May 12 11:51:41 EDT 2017
-start time		Fri May 12 11:51:42 EDT 2017
-update time		Fri May 12 11:51:42 EDT 2017
-end time		Fri May 12 11:51:42 EDT 2017
-job params		{param2=value2, param1=value1}
+% get-job-execution 11014
+execution id              11014
+job name                  simple
+batch status              COMPLETED
+exit status               COMPLETED
+create time               Fri May 12 16:49:50 EDT 2017
+start time                Fri May 12 16:49:50 EDT 2017
+update time               Fri May 12 16:49:50 EDT 2017
+end time                  Fri May 12 16:49:50 EDT 2017
+job params                {param2=value2, param1=value1}
 ```
 
 To list all step executions in a specific job execution with id `555`
@@ -181,25 +183,25 @@ Step executions in job execution 555:
 805	COMPLETED
 ```
 
-To get details for a step execution with id `805` within job execution with id `555`
+To get details for a step execution with id `14588` within job execution with id `11008`
 
 ```asciidoc
-% get-step-execution 805 --job-execution-id 555
-execution id		805
-step name		restJob1.step1
-batch status		COMPLETED
-exit status		Processed
-start time		Fri Oct 16 12:17:58 EDT 2015
-end time		Fri Oct 16 12:17:58 EDT 2015
-FILTER_COUNT	0
-COMMIT_COUNT	0
-PROCESS_SKIP_COUNT	0
-READ_SKIP_COUNT	0
-READ_COUNT	0
-ROLLBACK_COUNT	0
-WRITE_SKIP_COUNT	0
-WRITE_COUNT	0
-persistent data		null
+% get-step-execution 14588 -j 11008
+execution id              14588
+step name                 simple.step1
+batch status              COMPLETED
+exit status               COMPLETED
+start time                Thu May 11 12:09:33 EDT 2017
+end time                  Thu May 11 12:09:33 EDT 2017
+READ_SKIP_COUNT           0
+ROLLBACK_COUNT            0
+READ_COUNT                15
+WRITE_COUNT               15
+PROCESS_SKIP_COUNT        0
+COMMIT_COUNT              2
+WRITE_SKIP_COUNT          0
+FILTER_COUNT              0
+persistent data           null
 ```
 
 To restart a job execution with id `11012`
