@@ -23,6 +23,7 @@ import org.jberet.job.model.RefArtifact;
 import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.JobTask;
+import org.jberet.spi.PartitionWorker;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
@@ -31,11 +32,17 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     private final StepExecutionRunner stepRunner;
     private PartitionCollector collector;
     private javax.batch.api.Batchlet batchletObj;
+    private PartitionWorker partitionWorker;
 
-    public BatchletRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner, final StepExecutionRunner stepRunner, final RefArtifact batchlet) {
+    public BatchletRunner(final StepContextImpl stepContext,
+                          final CompositeExecutionRunner enclosingRunner,
+                          final StepExecutionRunner stepRunner,
+                          final RefArtifact batchlet,
+                          final PartitionWorker partitionWorker) {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
         this.batchlet = batchlet;
+        this.partitionWorker = partitionWorker;
     }
 
     @Override
@@ -56,7 +63,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     public void run() {
         try {
             final RefArtifact collectorConfig;
-            if (stepRunner.collectorDataQueue != null) {
+            if (partitionWorker != null) {
                 collectorConfig = batchContext.getStep().getPartition().getCollector();
                 if (collectorConfig != null) {
                     collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
@@ -86,7 +93,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
 
             batchContext.setExitStatus(exitStatus);
             if (collector != null) {
-                stepRunner.collectorDataQueue.put(collector.collectPartitionData());
+                partitionWorker.reportData(collector.collectPartitionData());
             }
         } catch (final Throwable e) {
             batchContext.setException(e instanceof Exception ? (Exception) e : new BatchRuntimeException(e));
@@ -94,15 +101,12 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
             try {
-                if (stepRunner.collectorDataQueue != null) {
-                    stepRunner.collectorDataQueue.put(batchContext.getStepExecution());
+                if (partitionWorker != null) {
                     JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
+                    partitionWorker.partitionDone(batchContext.getStepExecution());
                 }
-            } catch (final InterruptedException e) {
+            } catch (final Exception e) {
                 //ignore
-            }
-            if (stepRunner.completedPartitionThreads != null) {
-                stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
             }
             jobContext.destroyArtifact(batchletObj, collector);
         }

@@ -13,11 +13,14 @@
 package org.jberet.runtime.runner;
 
 import java.io.Serializable;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -55,8 +58,11 @@ import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.JobTask;
+import org.jberet.spi.PartitionHandler;
+import org.jberet.spi.PartitionHandlerFactory;
 import org.jberet.spi.PropertyKey;
 import org.jberet.tx.LocalTransactionManager;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
@@ -77,13 +83,18 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     java.util.Properties[] partitionProperties;
 
     boolean isPartitioned;
-    BlockingQueue<Serializable> collectorDataQueue;
-    BlockingQueue<Boolean> completedPartitionThreads;
-
     final TransactionManager tm;
     final StepExecutionImpl stepExecution;
 
     private boolean analyzerTxEnabled = true;
+
+    private static PrivilegedAction<PartitionHandlerFactory> loaderAction = () -> {
+        final ServiceLoader<PartitionHandlerFactory> serviceLoader = ServiceLoader.load(PartitionHandlerFactory.class);
+        if (serviceLoader.iterator().hasNext()) {
+            return serviceLoader.iterator().next();
+        }
+        return null;
+    };
 
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
@@ -227,10 +238,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (isPartitioned) {
             beginPartition();
         } else if (chunk != null) {
-            final ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
+            final ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk, null);
             chunkRunner.run();
         } else {
-            final BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, this, batchlet);
+            final BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, this, batchlet, null);
             batchletRunner.run();
         }
     }
@@ -303,16 +314,18 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
             numOfPartitions = abortedPartitionExecutionsFromPrevious.size();
         }
+
+        BlockingQueue<Boolean> completedPartitionThreads = null;
         if (numOfPartitions > numOfThreads) {
             completedPartitionThreads = new ArrayBlockingQueue<Boolean>(numOfPartitions);
         }
-        collectorDataQueue = new LinkedBlockingQueue<Serializable>();
+
+        BlockingQueue<Serializable> collectorDataQueue = new LinkedBlockingQueue<Serializable>();
 
         for (int i = 0; i < numOfPartitions; i++) {
             final PartitionExecutionImpl partitionExecution = isRestartNotOverride ? abortedPartitionExecutionsFromPrevious.get(i) : null;
             final int partitionIndex = isRestartNotOverride ? partitionExecution.getPartitionId() : i;
 
-            final AbstractRunner<StepContextImpl> runner1;
             final StepContextImpl stepContext1 = batchContext.clone();
             final Step step1 = stepContext1.getStep();
             final PartitionExecutionImpl partitionExecution1 = (PartitionExecutionImpl) stepContext1.getStepExecution();
@@ -340,17 +353,18 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (isStepRestart && isOverride && reducer != null) {
                 reducer.rollbackPartitionedStep();
             }
-            final Chunk ch = step1.getChunk();
-            if (ch == null) {
-                runner1 = new BatchletRunner(stepContext1, enclosingRunner, this, step1.getBatchlet());
-            } else {
-                runner1 = new ChunkRunner(stepContext1, enclosingRunner, this, ch);
-            }
+
+            final PartitionHandlerFactory partitionHandlerFactory = getPartitionHandlerFactory();
+            final PartitionHandler partitionHandler =
+                    partitionHandlerFactory.createPartitionHandler(partitionExecution1, this);
+            partitionHandler.setResourceTracker(completedPartitionThreads);
+            partitionHandler.setCollectorDataQueue(collectorDataQueue);
+
             if (i >= numOfThreads) {
                 completedPartitionThreads.take();
             }
             jobContext.getJobRepository().addPartitionExecution(stepExecution, partitionExecution1);
-            jobContext.getBatchEnvironment().submitTask(runner1);
+            partitionHandler.submitPartitionTask(stepContext1);
         }
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
@@ -514,5 +528,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
         }
         return false;
+    }
+
+    private static PartitionHandlerFactory getPartitionHandlerFactory() {
+        final PartitionHandlerFactory partitionHandlerFactory = WildFlySecurityManager.isChecking() ?
+                AccessController.doPrivileged(loaderAction) : loaderAction.run();
+        return partitionHandlerFactory != null ?
+                partitionHandlerFactory : ThreadPartitionHandlerFactory.getInstance();
     }
 }

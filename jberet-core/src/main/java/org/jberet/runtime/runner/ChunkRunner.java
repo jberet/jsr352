@@ -49,6 +49,7 @@ import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.metric.StepMetrics;
 import org.jberet.spi.JobTask;
+import org.jberet.spi.PartitionWorker;
 import org.jboss.logging.Logger;
 
 import static org.jberet._private.BatchLogger.LOGGER;
@@ -106,15 +107,19 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private final AtomicBoolean itemReaderClosed = new AtomicBoolean(false);
     private final AtomicBoolean itemWriterClosed = new AtomicBoolean(false);
 
+    private final PartitionWorker partitionWorker;
+
     public ChunkRunner(final StepContextImpl stepContext,
                        final CompositeExecutionRunner enclosingRunner,
                        final StepExecutionRunner stepRunner,
-                       final Chunk chunk) throws Exception {
+                       final Chunk chunk,
+                       final PartitionWorker partitionWorker) throws Exception {
         super(stepContext, enclosingRunner);
         this.stepRunner = stepRunner;
         this.chunk = chunk;
         this.stepOrPartitionExecution = stepContext.getStepExecution();
         this.stepMetrics = this.stepOrPartitionExecution.getStepMetrics();
+        this.partitionWorker = partitionWorker;
 
         String attrVal = chunk.getSkipLimit();
         skipLimit = attrVal == null ? -1 : Integer.parseInt(attrVal);
@@ -139,7 +144,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 itemProcessor = (ItemProcessor) createArtifact(processorElement, batchContext, ScriptItemProcessor.class);
             }
 
-            if (stepRunner.collectorDataQueue != null) {
+            if (partitionWorker != null) {
                 final RefArtifact collectorConfig = batchContext.getStep().getPartition().getCollector();
                 if (collectorConfig != null) {
                     collector = jobContext.createArtifact(collectorConfig.getRef(), null, collectorConfig.getProperties(), batchContext);
@@ -213,7 +218,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
             //collect data at the end of the partition
             if (collector != null) {
-                stepRunner.collectorDataQueue.put(collector.collectPartitionData());
+                partitionWorker.reportData(collector.collectPartitionData());
             }
             //set batch status to indicate that either the main step, or a partition has completed successfully.
             //note that when a chunk range is completed, we should not set batch status as completed.
@@ -230,16 +235,14 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
             try {
-                if (stepRunner.collectorDataQueue != null) {
-                    stepRunner.collectorDataQueue.put(stepOrPartitionExecution);
+                if (partitionWorker != null) {
                     JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
+                    partitionWorker.partitionDone(stepOrPartitionExecution);
                 }
-            } catch (final InterruptedException e) {
+            } catch (final Exception e) {
                 //ignore
             }
-            if (stepRunner.completedPartitionThreads != null) {
-                stepRunner.completedPartitionThreads.offer(Boolean.TRUE);
-            }
+
             jobContext.destroyArtifact(itemReader, itemWriter, itemProcessor, collector, checkpointAlgorithm);
             jobContext.destroyArtifact(allChunkRelatedListeners);
             // Safely close the reader and writer
@@ -564,7 +567,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 processingInfo.chunkState = ChunkState.TO_START_NEW;
             }
             if (collector != null && !nothingToWrite) {
-                stepRunner.collectorDataQueue.put(collector.collectPartitionData());
+                partitionWorker.reportData(collector.collectPartitionData());
             }
         } catch (final Exception e) {
             if (backupWriterCheckpointInfo != ChunkState.TO_START_NEW && backupWriterCheckpointInfo != ChunkState.RUNNING) {
@@ -663,7 +666,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         processingInfo.chunkState = ChunkState.TO_RETRY;
         processingInfo.itemState = ItemState.RUNNING;
         if (collector != null) {
-            stepRunner.collectorDataQueue.put(collector.collectPartitionData());
+            partitionWorker.reportData(collector.collectPartitionData());
         }
     }
 
