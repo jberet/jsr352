@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,23 +17,11 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import javax.batch.api.chunk.listener.ChunkListener;
-import javax.batch.api.chunk.listener.ItemProcessListener;
-import javax.batch.api.chunk.listener.ItemReadListener;
-import javax.batch.api.chunk.listener.ItemWriteListener;
-import javax.batch.api.chunk.listener.RetryProcessListener;
-import javax.batch.api.chunk.listener.RetryReadListener;
-import javax.batch.api.chunk.listener.RetryWriteListener;
-import javax.batch.api.chunk.listener.SkipProcessListener;
-import javax.batch.api.chunk.listener.SkipReadListener;
-import javax.batch.api.chunk.listener.SkipWriteListener;
 import javax.batch.api.listener.StepListener;
 import javax.batch.api.partition.PartitionAnalyzer;
 import javax.batch.api.partition.PartitionMapper;
@@ -70,7 +58,6 @@ import static org.jberet._private.BatchMessages.MESSAGES;
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements JobTask {
     Step step;
     private final List<StepListener> stepListeners = new ArrayList<StepListener>();
-    Map<String, Class<?>> chunkRelatedListeners;
 
     PartitionMapper mapper;    //programmatic partition config
     PartitionPlan plan;  //static jsl config, mutually exclusive with mapper
@@ -321,6 +308,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         }
 
         BlockingQueue<Serializable> collectorDataQueue = new LinkedBlockingQueue<Serializable>();
+        final PartitionHandlerFactory partitionHandlerFactory = getPartitionHandlerFactory();
 
         for (int i = 0; i < numOfPartitions; i++) {
             final PartitionExecutionImpl partitionExecution = isRestartNotOverride ? abortedPartitionExecutionsFromPrevious.get(i) : null;
@@ -354,7 +342,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 reducer.rollbackPartitionedStep();
             }
 
-            final PartitionHandlerFactory partitionHandlerFactory = getPartitionHandlerFactory();
             final PartitionHandler partitionHandler =
                     partitionHandlerFactory.createPartitionHandler(partitionExecution1, this);
             partitionHandler.setResourceTracker(completedPartitionThreads);
@@ -478,17 +465,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (StepListener.class.isAssignableFrom(cls)) {
                 final Object o = jobContext.createArtifact(ref, null, listener.getProperties(), batchContext);
                 stepListeners.add((StepListener) o);
-            }
-            if (ChunkListener.class.isAssignableFrom(cls) || ItemReadListener.class.isAssignableFrom(cls) ||
-                    ItemWriteListener.class.isAssignableFrom(cls) || ItemProcessListener.class.isAssignableFrom(cls) ||
-                    SkipReadListener.class.isAssignableFrom(cls) || SkipWriteListener.class.isAssignableFrom(cls) ||
-                    SkipProcessListener.class.isAssignableFrom(cls) || RetryReadListener.class.isAssignableFrom(cls) ||
-                    RetryWriteListener.class.isAssignableFrom(cls) || RetryProcessListener.class.isAssignableFrom(cls)
-                    ) {
-                if (chunkRelatedListeners == null) {
-                    chunkRelatedListeners = new HashMap<String, Class<?>>();
-                }
-                chunkRelatedListeners.put(ref, cls);
             }
         }
     }

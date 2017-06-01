@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -724,11 +724,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         Object o;
         for (final RefArtifact l : listeners.getListeners()) {
             ref = l.getRef();
-            Class<?> cls = null;
-            if (stepRunner.chunkRelatedListeners != null) {
-                cls = stepRunner.chunkRelatedListeners.get(ref);
-            }
-            o = jobContext.createArtifact(ref, cls, l.getProperties(), batchContext);
+            o = jobContext.createArtifact(ref, null, l.getProperties(), batchContext);
             allChunkRelatedListeners.add(o);
             if (o instanceof ChunkListener) {
                 chunkListeners.add((ChunkListener) o);
