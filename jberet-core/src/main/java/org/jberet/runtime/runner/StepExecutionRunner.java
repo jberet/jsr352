@@ -87,12 +87,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
         this.stepExecution = (StepExecutionImpl) stepContext.getStepExecution();
-        // Determine which TransactionManager to use,
-        if (useLocalTx(jobContext, step)) {
-            tm = LocalTransactionManager.getInstance();
-        } else {
-            tm = jobContext.getBatchEnvironment().getTransactionManager();
-        }
+        this.tm = getTransactionManager(jobContext, step);
 
         if (step.getProperties() != null) {
             analyzerTxEnabled = !Boolean.parseBoolean(step.getProperties().get(PropertyKey.ANALYZER_TX_DISABLED));
@@ -225,10 +220,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (isPartitioned) {
             beginPartition();
         } else if (chunk != null) {
-            final ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk, null);
+            final ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, chunk, tm, null);
             chunkRunner.run();
         } else {
-            final BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, this, batchlet, null);
+            final BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, batchlet, null);
             batchletRunner.run();
         }
     }
@@ -467,6 +462,14 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 stepListeners.add((StepListener) o);
             }
         }
+    }
+
+    static TransactionManager getTransactionManager(final JobContextImpl jobContext, final Step step) {
+        // Determine which TransactionManager to use,
+        if (useLocalTx(jobContext, step)) {
+            return LocalTransactionManager.getInstance();
+        }
+        return jobContext.getBatchEnvironment().getTransactionManager();
     }
 
     private static boolean useLocalTx(final JobContextImpl jobContext, final Step step) {

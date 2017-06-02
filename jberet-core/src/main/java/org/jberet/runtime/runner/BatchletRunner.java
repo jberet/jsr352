@@ -29,18 +29,15 @@ import static org.jberet._private.BatchLogger.LOGGER;
 
 public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements JobTask, JobStopNotificationListener {
     private final RefArtifact batchlet;
-    private final StepExecutionRunner stepRunner;
     private PartitionCollector collector;
     private javax.batch.api.Batchlet batchletObj;
     private PartitionWorker partitionWorker;
 
     public BatchletRunner(final StepContextImpl stepContext,
                           final CompositeExecutionRunner enclosingRunner,
-                          final StepExecutionRunner stepRunner,
                           final RefArtifact batchlet,
                           final PartitionWorker partitionWorker) {
         super(stepContext, enclosingRunner);
-        this.stepRunner = stepRunner;
         this.batchlet = batchlet;
         this.partitionWorker = partitionWorker;
     }

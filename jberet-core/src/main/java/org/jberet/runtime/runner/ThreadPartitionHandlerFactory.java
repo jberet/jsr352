@@ -20,6 +20,9 @@ public class ThreadPartitionHandlerFactory implements PartitionHandlerFactory {
 
     private static final ThreadPartitionHandlerFactory instance = new ThreadPartitionHandlerFactory();
 
+    private ThreadPartitionHandlerFactory() {
+    }
+
     public static ThreadPartitionHandlerFactory getInstance() {
         return instance;
     }

@@ -55,10 +55,10 @@ public class ThreadPartitionHandler implements PartitionHandler {
         final PartitionWorker partitionWorker = new ThreadPartitionWorker(completedPartitionThreads, collectorDataQueue);
         if (ch == null) {
             runner1 = new BatchletRunner(partitionStepContext, stepExecutionRunner.enclosingRunner,
-                    stepExecutionRunner, step1.getBatchlet(), partitionWorker);
+                    step1.getBatchlet(), partitionWorker);
         } else {
             runner1 = new ChunkRunner(partitionStepContext, stepExecutionRunner.enclosingRunner,
-                    stepExecutionRunner, ch, partitionWorker);
+                    ch, stepExecutionRunner.tm, partitionWorker);
         }
         stepExecutionRunner.jobContext.getBatchEnvironment().submitTask(runner1);
     }

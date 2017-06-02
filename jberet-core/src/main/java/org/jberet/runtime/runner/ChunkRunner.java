@@ -79,7 +79,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     private final List<ItemProcessListener> itemProcessListeners = new ArrayList<ItemProcessListener>();
 
     private final Chunk chunk;
-    private final StepExecutionRunner stepRunner;
     private final StepMetrics stepMetrics;
     private final AbstractStepExecution stepOrPartitionExecution;
     private ItemReader itemReader;
@@ -111,11 +110,10 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     public ChunkRunner(final StepContextImpl stepContext,
                        final CompositeExecutionRunner enclosingRunner,
-                       final StepExecutionRunner stepRunner,
                        final Chunk chunk,
+                       final TransactionManager tm,
                        final PartitionWorker partitionWorker) throws Exception {
         super(stepContext, enclosingRunner);
-        this.stepRunner = stepRunner;
         this.chunk = chunk;
         this.stepOrPartitionExecution = stepContext.getStepExecution();
         this.stepMetrics = this.stepOrPartitionExecution.getStepMetrics();
@@ -130,7 +128,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         skippableExceptionClasses = chunk.getSkippableExceptionClasses();
         retryableExceptionClasses = chunk.getRetryableExceptionClasses();
         noRollbackExceptionClasses = chunk.getNoRollbackExceptionClasses();
-        this.tm = stepRunner.tm;
+
+        this.tm = tm != null ? tm :
+                StepExecutionRunner.getTransactionManager(jobContext, stepContext.getStep());
     }
 
     @Override
@@ -170,7 +170,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 if (alg != null) {
                     checkpointAlgorithm = jobContext.createArtifact(alg.getRef(), null, alg.getProperties(), batchContext);
                 } else {
-                    throw MESSAGES.checkpointAlgorithmMissing(stepRunner.step.getId());
+                    throw MESSAGES.checkpointAlgorithmMissing(batchContext.getStep().getId());
                 }
             } else {
                 throw MESSAGES.invalidCheckpointPolicy(attrVal);
@@ -180,7 +180,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
             //When running in EE environment, set global transaction timeout for the current thread
             // from javax.transaction.global.timeout property at step level
-            final Properties stepProps = stepRunner.step.getProperties();
+            final Properties stepProps = batchContext.getStep().getProperties();
             int globalTimeout = 180; //default 180 seconds defined by spec
             if (stepProps != null) {
                 final String globalTimeoutProp = stepProps.get("javax.transaction.global.timeout");
