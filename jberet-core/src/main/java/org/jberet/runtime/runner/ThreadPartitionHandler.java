@@ -17,7 +17,6 @@ import java.util.concurrent.BlockingQueue;
 
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.Step;
-import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.PartitionHandler;
 import org.jberet.spi.PartitionWorker;
@@ -25,15 +24,11 @@ import org.jberet.spi.PartitionWorker;
 public class ThreadPartitionHandler implements PartitionHandler {
     private StepExecutionRunner stepExecutionRunner;
 
-    private PartitionExecutionImpl partitionExecution;
-
     private BlockingQueue<Boolean> completedPartitionThreads;
 
     private BlockingQueue<Serializable> collectorDataQueue;
 
-    public ThreadPartitionHandler(final PartitionExecutionImpl partitionExecution,
-                                  final StepExecutionRunner stepExecutionRunner) {
-        this.partitionExecution = partitionExecution;
+    public ThreadPartitionHandler(final StepExecutionRunner stepExecutionRunner) {
         this.stepExecutionRunner = stepExecutionRunner;
     }
 
@@ -48,7 +43,7 @@ public class ThreadPartitionHandler implements PartitionHandler {
     }
 
     @Override
-    public void submitPartitionTask(final StepContextImpl partitionStepContext) throws Exception {
+    public void submitPartitionTask(final StepContextImpl partitionStepContext) {
         final AbstractRunner<StepContextImpl> runner1;
         final Step step1 = partitionStepContext.getStep();
         final Chunk ch = step1.getChunk();

@@ -12,7 +12,7 @@
 
 package org.jberet.runtime.runner;
 
-import org.jberet.runtime.PartitionExecutionImpl;
+import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.PartitionHandler;
 import org.jberet.spi.PartitionHandlerFactory;
 
@@ -28,8 +28,8 @@ public class ThreadPartitionHandlerFactory implements PartitionHandlerFactory {
     }
 
     @Override
-    public PartitionHandler createPartitionHandler(final PartitionExecutionImpl partitionExecution,
+    public PartitionHandler createPartitionHandler(final StepContextImpl stepContext,
                                                    final StepExecutionRunner stepExecutionRunner) {
-        return new ThreadPartitionHandler(partitionExecution, stepExecutionRunner);
+        return new ThreadPartitionHandler(stepExecutionRunner);
     }
 }

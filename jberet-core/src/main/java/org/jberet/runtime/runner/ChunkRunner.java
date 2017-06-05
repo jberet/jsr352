@@ -112,7 +112,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                        final CompositeExecutionRunner enclosingRunner,
                        final Chunk chunk,
                        final TransactionManager tm,
-                       final PartitionWorker partitionWorker) throws Exception {
+                       final PartitionWorker partitionWorker)  {
         super(stepContext, enclosingRunner);
         this.chunk = chunk;
         this.stepOrPartitionExecution = stepContext.getStepExecution();
@@ -218,7 +218,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             }
             //collect data at the end of the partition
             if (collector != null) {
-                partitionWorker.reportData(collector.collectPartitionData());
+                partitionWorker.reportData(collector.collectPartitionData(), stepOrPartitionExecution);
             }
             //set batch status to indicate that either the main step, or a partition has completed successfully.
             //note that when a chunk range is completed, we should not set batch status as completed.
@@ -567,7 +567,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 processingInfo.chunkState = ChunkState.TO_START_NEW;
             }
             if (collector != null && !nothingToWrite) {
-                partitionWorker.reportData(collector.collectPartitionData());
+                partitionWorker.reportData(collector.collectPartitionData(), stepOrPartitionExecution);
             }
         } catch (final Exception e) {
             if (backupWriterCheckpointInfo != ChunkState.TO_START_NEW && backupWriterCheckpointInfo != ChunkState.RUNNING) {
@@ -666,7 +666,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         processingInfo.chunkState = ChunkState.TO_RETRY;
         processingInfo.itemState = ItemState.RUNNING;
         if (collector != null) {
-            partitionWorker.reportData(collector.collectPartitionData());
+            partitionWorker.reportData(collector.collectPartitionData(), stepOrPartitionExecution);
         }
     }
 

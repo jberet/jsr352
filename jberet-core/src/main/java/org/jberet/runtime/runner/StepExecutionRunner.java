@@ -304,6 +304,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
         BlockingQueue<Serializable> collectorDataQueue = new LinkedBlockingQueue<Serializable>();
         final PartitionHandlerFactory partitionHandlerFactory = getPartitionHandlerFactory();
+        final PartitionHandler partitionHandler =
+                partitionHandlerFactory.createPartitionHandler(batchContext, this);
+        partitionHandler.setResourceTracker(completedPartitionThreads);
+        partitionHandler.setCollectorDataQueue(collectorDataQueue);
 
         for (int i = 0; i < numOfPartitions; i++) {
             final PartitionExecutionImpl partitionExecution = isRestartNotOverride ? abortedPartitionExecutionsFromPrevious.get(i) : null;
@@ -336,11 +340,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (isStepRestart && isOverride && reducer != null) {
                 reducer.rollbackPartitionedStep();
             }
-
-            final PartitionHandler partitionHandler =
-                    partitionHandlerFactory.createPartitionHandler(partitionExecution1, this);
-            partitionHandler.setResourceTracker(completedPartitionThreads);
-            partitionHandler.setCollectorDataQueue(collectorDataQueue);
 
             if (i >= numOfThreads) {
                 completedPartitionThreads.take();

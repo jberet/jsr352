@@ -90,7 +90,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
 
             batchContext.setExitStatus(exitStatus);
             if (collector != null) {
-                partitionWorker.reportData(collector.collectPartitionData());
+                partitionWorker.reportData(collector.collectPartitionData(), batchContext.getStepExecution());
             }
         } catch (final Throwable e) {
             batchContext.setException(e instanceof Exception ? (Exception) e : new BatchRuntimeException(e));

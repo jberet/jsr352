@@ -12,10 +12,9 @@
 
 package org.jberet.spi;
 
-import org.jberet.runtime.PartitionExecutionImpl;
+import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.runner.StepExecutionRunner;
 
 public interface PartitionHandlerFactory {
-    PartitionHandler createPartitionHandler(PartitionExecutionImpl partitionExecution,
-                                            StepExecutionRunner stepExecutionRunner);
+    PartitionHandler createPartitionHandler(StepContextImpl stepContext, StepExecutionRunner stepExecutionRunner);
 }

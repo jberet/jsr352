@@ -17,7 +17,7 @@ import java.io.Serializable;
 import org.jberet.runtime.AbstractStepExecution;
 
 public interface PartitionWorker {
-    void reportData(Serializable data) throws Exception;
+    void reportData(Serializable data, AbstractStepExecution partitionExecution) throws Exception;
 
     void partitionDone(AbstractStepExecution partitionExecution) throws Exception;
 }

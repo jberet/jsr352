@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 
 import org.jberet.runtime.AbstractStepExecution;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.spi.PartitionWorker;
 
 public class ThreadPartitionWorker implements PartitionWorker {
@@ -30,7 +31,8 @@ public class ThreadPartitionWorker implements PartitionWorker {
     }
 
     @Override
-    public void reportData(final Serializable data) throws Exception {
+    public void reportData(final Serializable data,
+                           final AbstractStepExecution partitionExecution) throws Exception {
         collectorDataQueue.put(data);
     }
 
