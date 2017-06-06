@@ -49,7 +49,7 @@ public class ChunkPartitionVerticle extends AbstractVerticle {
                 final VertxPartitionInfo partitionInfo;
                 try {
                     partitionInfo = (VertxPartitionInfo) BatchUtil.bytesToSerializableObject(
-                            bytes, getClass().getClassLoader());
+                            bytes, batchEnvironment.getClassLoader());
                 } catch (Exception e) {
                     throw VertxClusterMessages.MESSAGES.failedToReceivePartitionInfo(e);
                 }
@@ -60,7 +60,8 @@ public class ChunkPartitionVerticle extends AbstractVerticle {
 
                 final VertxPartitionWorker partitionWorker = new VertxPartitionWorker(eventBus);
                 final AbstractContext[] outerContext = {jobContext};
-                final StepContextImpl stepContext = new StepContextImpl(partitionInfo.step, outerContext);
+                final StepContextImpl stepContext = new StepContextImpl(partitionInfo.step,
+                                                    partitionInfo.partitionExecution, outerContext);
 
                 final AbstractRunner<StepContextImpl> runner;
                 final Chunk chunk = partitionInfo.step.getChunk();

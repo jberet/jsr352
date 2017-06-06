@@ -51,9 +51,9 @@ public class VertxPartitionHandler implements PartitionHandler {
                 } catch (Exception e) {
                     throw VertxClusterMessages.MESSAGES.failedToReceivePartitionCollectorData(e);
                 }
-                VertxClusterLogger.LOGGER.receivedPartitionResult(partitionCollectorData);
 
                 if (partitionCollectorData instanceof PartitionExecutionImpl) {
+                    VertxClusterLogger.LOGGER.receivedPartitionResult(((PartitionExecutionImpl)partitionCollectorData).getPartitionId());
                     if (completedPartitionThreads != null) {
                         completedPartitionThreads.offer(Boolean.TRUE);
                     }

@@ -45,6 +45,7 @@ public class VertxPartitionInfo implements Serializable {
         return "VertxPartitionInfo{" +
                 "partitionExecution=" + partitionExecution.getPartitionId() +
                 ", step=" + step.getId() +
+                ", stepExecution=" + partitionExecution.getStepExecutionId() +
                 ", jobExecution=" + jobExecution.getExecutionId() +
                 ", jobName=" + jobExecution.getJobName() +
                 '}';

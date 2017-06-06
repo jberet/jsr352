@@ -97,13 +97,13 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             LOGGER.failToRunBatchlet(e, batchlet);
             batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
-            try {
-                if (partitionWorker != null) {
+            if (partitionWorker != null) {
+                try {
                     JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
                     partitionWorker.partitionDone(batchContext.getStepExecution());
+                } catch (final Exception e) {
+                    BatchLogger.LOGGER.problemFinalizingPartitionExecution(e, batchContext.getStepExecutionId());
                 }
-            } catch (final Exception e) {
-                //ignore
             }
             jobContext.destroyArtifact(batchletObj, collector);
         }

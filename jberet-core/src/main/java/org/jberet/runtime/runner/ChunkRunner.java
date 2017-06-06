@@ -39,6 +39,7 @@ import javax.batch.runtime.Metric;
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 
+import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.ExceptionClassFilter;
@@ -234,13 +235,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             LOGGER.failToRunJob(e, jobContext.getJobName(), batchContext.getStepName(), chunk);
             batchContext.setBatchStatus(BatchStatus.FAILED);
         } finally {
-            try {
-                if (partitionWorker != null) {
+            if (partitionWorker != null) {
+                try {
                     JobScopedContextImpl.ScopedInstance.destroy(batchContext.getPartitionScopedBeans());
                     partitionWorker.partitionDone(stepOrPartitionExecution);
+                } catch (final Exception e) {
+                    BatchLogger.LOGGER.problemFinalizingPartitionExecution(e, stepOrPartitionExecution.getStepExecutionId());
                 }
-            } catch (final Exception e) {
-                //ignore
             }
 
             jobContext.destroyArtifact(itemReader, itemWriter, itemProcessor, collector, checkpointAlgorithm);

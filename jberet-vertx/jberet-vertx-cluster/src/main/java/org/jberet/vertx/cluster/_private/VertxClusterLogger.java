@@ -36,7 +36,11 @@ public interface VertxClusterLogger extends BasicLogger {
     void receivedPartitionInfo(VertxPartitionInfo partitionInfo);
 
     @LogMessage(level = Logger.Level.INFO)
-    @Message(id = 74502, value = "Received partition result from a remote node: %s")
-    void receivedPartitionResult(Serializable partitionResult);
+    @Message(id = 74502, value = "Received partition execution result for partition %s")
+    void receivedPartitionResult(int partitionId);
+
+    @LogMessage(level = Logger.Level.INFO)
+    @Message(id = 74503, value = "Sending partition execution collector data for step execution %s: %s")
+    void sendCollectorData(long stepExecutionId, Serializable collectorData);
 
 }
