@@ -43,7 +43,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
     }
 
     @Override
-    public void stopRequested() {
+    public void stopRequested(final long jobExecutionId) {
         if (batchContext.getBatchStatus() == BatchStatus.STARTED) {
             batchContext.setBatchStatus(BatchStatus.STOPPING);
             if (batchletObj != null) {

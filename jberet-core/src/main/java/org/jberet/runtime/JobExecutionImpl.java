@@ -307,7 +307,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
             ls = jobStopNotificationListeners.toArray(new JobStopNotificationListener[jobStopNotificationListeners.size()]);
         }
         for (final JobStopNotificationListener l : ls) {
-            l.stopRequested();
+            l.stopRequested(id);
         }
     }
 
