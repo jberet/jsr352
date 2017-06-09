@@ -21,6 +21,7 @@ import org.jberet.creation.ArtifactFactoryWrapper;
 import org.jberet.job.model.Chunk;
 import org.jberet.operations.JobOperatorImpl;
 import org.jberet.repository.JobRepository;
+import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
@@ -53,8 +54,21 @@ public class ChunkPartitionVerticle extends AbstractVerticle {
                 } catch (Exception e) {
                     throw VertxClusterMessages.MESSAGES.failedToReceivePartitionInfo(e);
                 }
-                VertxClusterLogger.LOGGER.receivedPartitionInfo(partitionInfo);
 
+                final JobExecutionImpl jobExecution = partitionInfo.jobExecution;
+                final String stopRequestTopicName =
+                        VertxPartitionInfo.getStopRequestTopicName(jobExecution.getExecutionId());
+                eventBus.consumer(stopRequestTopicName, new Handler<Message<Boolean>>() {
+                            @Override
+                            public void handle(final Message<Boolean> stopMessage) {
+                                VertxClusterLogger.LOGGER.receivedStopRequest(jobExecution.getExecutionId(),
+                                        partitionInfo.step.getId(), partitionInfo.partitionExecution.getStepExecutionId(),
+                                        partitionInfo.partitionExecution.getPartitionId());
+                                jobExecution.stop();
+                            }
+                        });
+
+                VertxClusterLogger.LOGGER.receivedPartitionInfo(partitionInfo);
                 final JobContextImpl jobContext = new JobContextImpl(partitionInfo.jobExecution, null,
                         artifactFactory, jobRepository, batchEnvironment);
 

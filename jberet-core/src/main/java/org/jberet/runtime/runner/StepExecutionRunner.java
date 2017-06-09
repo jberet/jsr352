@@ -40,6 +40,7 @@ import org.jberet.job.model.Properties;
 import org.jberet.job.model.PropertyResolver;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.job.model.Step;
+import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
@@ -309,6 +310,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         partitionHandler.setResourceTracker(completedPartitionThreads);
         partitionHandler.setCollectorDataQueue(collectorDataQueue);
 
+        if (partitionHandler instanceof JobStopNotificationListener) {
+            jobContext.getJobExecution().registerJobStopNotifier((JobStopNotificationListener) partitionHandler);
+        }
+
         for (int i = 0; i < numOfPartitions; i++) {
             final PartitionExecutionImpl partitionExecution = isRestartNotOverride ? abortedPartitionExecutionsFromPrevious.get(i) : null;
             final int partitionIndex = isRestartNotOverride ? partitionExecution.getPartitionId() : i;
@@ -422,6 +427,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
         }
         batchContext.setBatchStatus(consolidatedBatchStatus);
+
+        if (partitionHandler instanceof JobStopNotificationListener) {
+            jobContext.getJobExecution().unregisterJobStopNotifier((JobStopNotificationListener) partitionHandler);
+        }
     }
 
     private void initPartitionConfig() {

@@ -12,8 +12,8 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="simple" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
-    <step id="simple.step1">
+<job id="clusterJob" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="clusterJob.step1">
         <chunk>
             <reader ref="arrayItemReader">
                 <properties>

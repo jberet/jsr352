@@ -13,6 +13,7 @@
 package org.jberet.vertx.cluster;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import io.vertx.core.Handler;
@@ -21,6 +22,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import org.jberet.job.model.Step;
+import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.PartitionHandler;
@@ -28,7 +31,7 @@ import org.jberet.util.BatchUtil;
 import org.jberet.vertx.cluster._private.VertxClusterLogger;
 import org.jberet.vertx.cluster._private.VertxClusterMessages;
 
-public class VertxPartitionHandler implements PartitionHandler {
+public class VertxPartitionHandler implements PartitionHandler, JobStopNotificationListener {
     private BlockingQueue<Boolean> completedPartitionThreads;
 
     private BlockingQueue<Serializable> collectorDataQueue;
@@ -46,16 +49,29 @@ public class VertxPartitionHandler implements PartitionHandler {
                 Buffer body = message.body();
                 final Serializable partitionCollectorData;
                 try {
-                    partitionCollectorData =
-                            BatchUtil.bytesToSerializableObject(body.getBytes(), getClass().getClassLoader());
+                    partitionCollectorData = BatchUtil.bytesToSerializableObject(body.getBytes(),
+                                            stepContext.getJobContext().getClassLoader());
                 } catch (Exception e) {
                     throw VertxClusterMessages.MESSAGES.failedToReceivePartitionCollectorData(e);
                 }
 
                 if (partitionCollectorData instanceof PartitionExecutionImpl) {
-                    VertxClusterLogger.LOGGER.receivedPartitionResult(((PartitionExecutionImpl)partitionCollectorData).getPartitionId());
                     if (completedPartitionThreads != null) {
                         completedPartitionThreads.offer(Boolean.TRUE);
+                    }
+                    final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) partitionCollectorData;
+                    final int partitionId = partitionExecution.getPartitionId();
+                    VertxClusterLogger.LOGGER.receivedPartitionResult(partitionId);
+
+                    //put the partition execution from remote node into its enclosing step execution.
+                    //The original partition execution stored in step execution now are obsolete.
+                    final List<PartitionExecutionImpl> partitionExecutions =
+                            stepContext.getStepExecution().getPartitionExecutions();
+                    for (int i = 0; i < partitionExecutions.size(); i++) {
+                        if (partitionExecutions.get(i).getPartitionId() == partitionId) {
+                            partitionExecutions.remove(i);
+                            partitionExecutions.add(partitionExecution);
+                        }
                     }
                 }
 
@@ -84,11 +100,19 @@ public class VertxPartitionHandler implements PartitionHandler {
     public void submitPartitionTask(final StepContextImpl partitionStepContext) throws Exception {
         final Step step1 = partitionStepContext.getStep();
         final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) partitionStepContext.getStepExecution();
-        final VertxPartitionInfo partitionInfo = new VertxPartitionInfo(partitionExecution, step1,
-                partitionStepContext.getJobContext().getJobExecution());
-        final byte[] bytes = BatchUtil.objectToBytes(partitionInfo);
+        final JobExecutionImpl jobExecution = partitionStepContext.getJobContext().getJobExecution();
 
-        //send the partition to another node for execution
-        eventBus.send(VertxPartitionInfo.PARTITION_QUEUE, Buffer.buffer(bytes));
+        if (!jobExecution.isStopRequested()) {
+            final VertxPartitionInfo partitionInfo = new VertxPartitionInfo(partitionExecution, step1, jobExecution);
+            final byte[] bytes = BatchUtil.objectToBytes(partitionInfo);
+
+            //send the partition to another node for execution
+            eventBus.send(VertxPartitionInfo.PARTITION_QUEUE, Buffer.buffer(bytes));
+        }
+    }
+
+    @Override
+    public void stopRequested(final long jobExecutionId) {
+        eventBus.publish(VertxPartitionInfo.getStopRequestTopicName(jobExecutionId), Boolean.TRUE);
     }
 }

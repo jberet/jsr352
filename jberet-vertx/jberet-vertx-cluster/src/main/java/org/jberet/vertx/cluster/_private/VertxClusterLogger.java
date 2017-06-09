@@ -37,10 +37,14 @@ public interface VertxClusterLogger extends BasicLogger {
 
     @LogMessage(level = Logger.Level.INFO)
     @Message(id = 74502, value = "Received partition execution result for partition %s")
-    void receivedPartitionResult(int partitionId);
+    void receivedPartitionResult(int partitionId);@LogMessage(level = Logger.Level.INFO)
+
+    @Message(id = 74503, value =
+    "Received request to stop partition execution [job execution %s, step name %s, step execution %s, partition %s]")
+    void receivedStopRequest(long jobExecutionId, String stepName, long stepExecutionId, int partitionId);
 
     @LogMessage(level = Logger.Level.INFO)
-    @Message(id = 74503, value = "Sending partition execution collector data for step execution %s: %s")
+    @Message(id = 74504, value = "Sending partition execution collector data for step execution %s: %s")
     void sendCollectorData(long stepExecutionId, Serializable collectorData);
 
 }

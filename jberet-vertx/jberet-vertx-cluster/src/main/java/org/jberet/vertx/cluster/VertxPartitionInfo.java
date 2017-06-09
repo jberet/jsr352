@@ -23,6 +23,7 @@ public class VertxPartitionInfo implements Serializable {
 
     public static final String PARTITION_QUEUE = "jberet.partition";
     public static final String COLLECTOR_QUEUE = "jberet.collector";
+    public static final String STOP_REQUEST_TOPIC = "jberet.stop";
 
     PartitionExecutionImpl partitionExecution;
     Step step;
@@ -36,8 +37,19 @@ public class VertxPartitionInfo implements Serializable {
         this.jobExecution = jobExecution;
     }
 
+    /**
+     * Returns the name of the queue for sending and receiving partition execution
+     * collector data.
+     *
+     * @param stepExecutionId the step execution id used to uniquely identify the step execution
+     * @return the name of the queue for sending and receiving partition execution collector data
+     */
     public static String getCollectorQueueName(final long stepExecutionId) {
         return COLLECTOR_QUEUE + stepExecutionId;
+    }
+
+    public static String getStopRequestTopicName(final long jobExecutionId) {
+        return STOP_REQUEST_TOPIC + jobExecutionId;
     }
 
     @Override
