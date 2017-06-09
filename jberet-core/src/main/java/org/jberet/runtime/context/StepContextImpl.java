@@ -94,7 +94,6 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
         this.classLoader = getJobContext().getClassLoader();
         this.stepExecution = stepExecution;
         this.partitionScopedBeans = new ConcurrentHashMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>>();
-        this.stepExecution.setBatchStatus(BatchStatus.STARTING);
     }
 
     @Override

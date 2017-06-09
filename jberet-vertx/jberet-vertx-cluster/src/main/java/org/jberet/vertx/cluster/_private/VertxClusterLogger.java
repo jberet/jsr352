@@ -14,6 +14,8 @@ package org.jberet.vertx.cluster._private;
 
 import java.io.Serializable;
 
+import javax.batch.runtime.BatchStatus;
+
 import org.jberet.vertx.cluster.VertxPartitionInfo;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
@@ -36,15 +38,18 @@ public interface VertxClusterLogger extends BasicLogger {
     void receivedPartitionInfo(VertxPartitionInfo partitionInfo);
 
     @LogMessage(level = Logger.Level.INFO)
-    @Message(id = 74502, value = "Received partition execution result for partition %s")
-    void receivedPartitionResult(int partitionId);@LogMessage(level = Logger.Level.INFO)
+    @Message(id = 74502,
+    value = "Received partition execution result: job execution %s, step execution %s, partition %s, partition status %s")
+    void receivedPartitionResult(long jobExecutionId, long stepExecutionId, int partitionId, BatchStatus batchStatus);
 
+    @LogMessage(level = Logger.Level.INFO)
     @Message(id = 74503, value =
     "Received request to stop partition execution [job execution %s, step name %s, step execution %s, partition %s]")
     void receivedStopRequest(long jobExecutionId, String stepName, long stepExecutionId, int partitionId);
 
     @LogMessage(level = Logger.Level.INFO)
-    @Message(id = 74504, value = "Sending partition execution collector data for step execution %s: %s")
-    void sendCollectorData(long stepExecutionId, Serializable collectorData);
+    @Message(id = 74504,
+    value = "Sending partition execution collector data for step execution %s partition %s: %s")
+    void sendCollectorData(long stepExecutionId, int partitionId, Serializable collectorData);
 
 }

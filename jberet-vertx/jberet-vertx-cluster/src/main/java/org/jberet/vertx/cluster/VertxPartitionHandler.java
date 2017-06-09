@@ -61,7 +61,9 @@ public class VertxPartitionHandler implements PartitionHandler, JobStopNotificat
                     }
                     final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) partitionCollectorData;
                     final int partitionId = partitionExecution.getPartitionId();
-                    VertxClusterLogger.LOGGER.receivedPartitionResult(partitionId);
+                    VertxClusterLogger.LOGGER.receivedPartitionResult(
+                            stepContext.getJobContext().getExecutionId(), stepContext.getStepExecutionId(),
+                            partitionId, partitionExecution.getBatchStatus());
 
                     //put the partition execution from remote node into its enclosing step execution.
                     //The original partition execution stored in step execution now are obsolete.

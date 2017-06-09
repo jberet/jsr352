@@ -19,7 +19,6 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -33,7 +32,14 @@ public class ClusterIT extends AbstractIT {
     @Test
     public void readArrayWriteToConsole() throws Exception {
         startJobAndWait(clusterJob);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+
+        final List<PartitionExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
+        for (PartitionExecutionImpl p : partitionExecutions) {
+            System.out.printf("partition %s batch status: %s%n", p.getPartitionId(), p.getBatchStatus());
+            assertEquals(BatchStatus.COMPLETED, p.getBatchStatus());
+        }
     }
 
     @Test
@@ -54,7 +60,7 @@ public class ClusterIT extends AbstractIT {
         final List<PartitionExecutionImpl> partitionExecutions = stepExecution.getPartitionExecutions();
         for (PartitionExecutionImpl p : partitionExecutions) {
             System.out.printf("partition %s batch status: %s%n", p.getPartitionId(), p.getBatchStatus());
-            Assert.assertEquals(BatchStatus.STOPPED, p.getBatchStatus());
+            assertEquals(BatchStatus.STOPPED, p.getBatchStatus());
         }
     }
 }
