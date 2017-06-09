@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.3.0.Beta6</version>
+        <version>1.3.0.Beta7-SNAPSHOT</version>
     </parent>
 
     <groupId>org.jberet.samples</groupId>
