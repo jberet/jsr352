@@ -55,7 +55,7 @@ public class JobOperatorImpl extends AbstractJobOperator implements JobOperator 
     }
 
     @Override
-    protected BatchEnvironment getBatchEnvironment() {
+    public BatchEnvironment getBatchEnvironment() {
         return batchEnvironment;
     }
 }
