@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,24 +13,15 @@
 package org.jberet.runtime.runner;
 
 import java.io.Serializable;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import javax.batch.api.chunk.listener.ChunkListener;
-import javax.batch.api.chunk.listener.ItemProcessListener;
-import javax.batch.api.chunk.listener.ItemReadListener;
-import javax.batch.api.chunk.listener.ItemWriteListener;
-import javax.batch.api.chunk.listener.RetryProcessListener;
-import javax.batch.api.chunk.listener.RetryReadListener;
-import javax.batch.api.chunk.listener.RetryWriteListener;
-import javax.batch.api.chunk.listener.SkipProcessListener;
-import javax.batch.api.chunk.listener.SkipReadListener;
-import javax.batch.api.chunk.listener.SkipWriteListener;
 import javax.batch.api.listener.StepListener;
 import javax.batch.api.partition.PartitionAnalyzer;
 import javax.batch.api.partition.PartitionMapper;
@@ -49,14 +40,18 @@ import org.jberet.job.model.Properties;
 import org.jberet.job.model.PropertyResolver;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.job.model.Step;
+import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.JobTask;
+import org.jberet.spi.PartitionHandler;
+import org.jberet.spi.PartitionHandlerFactory;
 import org.jberet.spi.PropertyKey;
 import org.jberet.tx.LocalTransactionManager;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
@@ -64,7 +59,6 @@ import static org.jberet._private.BatchMessages.MESSAGES;
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements JobTask {
     Step step;
     private final List<StepListener> stepListeners = new ArrayList<StepListener>();
-    Map<String, Class<?>> chunkRelatedListeners;
 
     PartitionMapper mapper;    //programmatic partition config
     PartitionPlan plan;  //static jsl config, mutually exclusive with mapper
@@ -77,24 +71,24 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     java.util.Properties[] partitionProperties;
 
     boolean isPartitioned;
-    BlockingQueue<Serializable> collectorDataQueue;
-    BlockingQueue<Boolean> completedPartitionThreads;
-
     final TransactionManager tm;
     final StepExecutionImpl stepExecution;
 
     private boolean analyzerTxEnabled = true;
 
+    private static PrivilegedAction<PartitionHandlerFactory> loaderAction = () -> {
+        final ServiceLoader<PartitionHandlerFactory> serviceLoader = ServiceLoader.load(PartitionHandlerFactory.class);
+        if (serviceLoader.iterator().hasNext()) {
+            return serviceLoader.iterator().next();
+        }
+        return null;
+    };
+
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
         this.step = stepContext.getStep();
         this.stepExecution = (StepExecutionImpl) stepContext.getStepExecution();
-        // Determine which TransactionManager to use,
-        if (useLocalTx(jobContext, step)) {
-            tm = LocalTransactionManager.getInstance();
-        } else {
-            tm = jobContext.getBatchEnvironment().getTransactionManager();
-        }
+        this.tm = getTransactionManager(jobContext, step);
 
         if (step.getProperties() != null) {
             analyzerTxEnabled = !Boolean.parseBoolean(step.getProperties().get(PropertyKey.ANALYZER_TX_DISABLED));
@@ -227,10 +221,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (isPartitioned) {
             beginPartition();
         } else if (chunk != null) {
-            final ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, this, chunk);
+            final ChunkRunner chunkRunner = new ChunkRunner(batchContext, enclosingRunner, chunk, tm, null);
             chunkRunner.run();
         } else {
-            final BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, this, batchlet);
+            final BatchletRunner batchletRunner = new BatchletRunner(batchContext, enclosingRunner, batchlet, null);
             batchletRunner.run();
         }
     }
@@ -303,16 +297,27 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
             numOfPartitions = abortedPartitionExecutionsFromPrevious.size();
         }
+
+        BlockingQueue<Boolean> completedPartitionThreads = null;
         if (numOfPartitions > numOfThreads) {
             completedPartitionThreads = new ArrayBlockingQueue<Boolean>(numOfPartitions);
         }
-        collectorDataQueue = new LinkedBlockingQueue<Serializable>();
+
+        BlockingQueue<Serializable> collectorDataQueue = new LinkedBlockingQueue<Serializable>();
+        final PartitionHandlerFactory partitionHandlerFactory = getPartitionHandlerFactory();
+        final PartitionHandler partitionHandler =
+                partitionHandlerFactory.createPartitionHandler(batchContext, this);
+        partitionHandler.setResourceTracker(completedPartitionThreads);
+        partitionHandler.setCollectorDataQueue(collectorDataQueue);
+
+        if (partitionHandler instanceof JobStopNotificationListener) {
+            jobContext.getJobExecution().registerJobStopNotifier((JobStopNotificationListener) partitionHandler);
+        }
 
         for (int i = 0; i < numOfPartitions; i++) {
             final PartitionExecutionImpl partitionExecution = isRestartNotOverride ? abortedPartitionExecutionsFromPrevious.get(i) : null;
             final int partitionIndex = isRestartNotOverride ? partitionExecution.getPartitionId() : i;
 
-            final AbstractRunner<StepContextImpl> runner1;
             final StepContextImpl stepContext1 = batchContext.clone();
             final Step step1 = stepContext1.getStep();
             final PartitionExecutionImpl partitionExecution1 = (PartitionExecutionImpl) stepContext1.getStepExecution();
@@ -340,17 +345,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             if (isStepRestart && isOverride && reducer != null) {
                 reducer.rollbackPartitionedStep();
             }
-            final Chunk ch = step1.getChunk();
-            if (ch == null) {
-                runner1 = new BatchletRunner(stepContext1, enclosingRunner, this, step1.getBatchlet());
-            } else {
-                runner1 = new ChunkRunner(stepContext1, enclosingRunner, this, ch);
-            }
+
             if (i >= numOfThreads) {
                 completedPartitionThreads.take();
             }
             jobContext.getJobRepository().addPartitionExecution(stepExecution, partitionExecution1);
-            jobContext.getBatchEnvironment().submitTask(runner1);
+            partitionHandler.submitPartitionTask(stepContext1);
         }
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
@@ -427,6 +427,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
         }
         batchContext.setBatchStatus(consolidatedBatchStatus);
+
+        if (partitionHandler instanceof JobStopNotificationListener) {
+            jobContext.getJobExecution().unregisterJobStopNotifier((JobStopNotificationListener) partitionHandler);
+        }
     }
 
     private void initPartitionConfig() {
@@ -465,18 +469,15 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 final Object o = jobContext.createArtifact(ref, null, listener.getProperties(), batchContext);
                 stepListeners.add((StepListener) o);
             }
-            if (ChunkListener.class.isAssignableFrom(cls) || ItemReadListener.class.isAssignableFrom(cls) ||
-                    ItemWriteListener.class.isAssignableFrom(cls) || ItemProcessListener.class.isAssignableFrom(cls) ||
-                    SkipReadListener.class.isAssignableFrom(cls) || SkipWriteListener.class.isAssignableFrom(cls) ||
-                    SkipProcessListener.class.isAssignableFrom(cls) || RetryReadListener.class.isAssignableFrom(cls) ||
-                    RetryWriteListener.class.isAssignableFrom(cls) || RetryProcessListener.class.isAssignableFrom(cls)
-                    ) {
-                if (chunkRelatedListeners == null) {
-                    chunkRelatedListeners = new HashMap<String, Class<?>>();
-                }
-                chunkRelatedListeners.put(ref, cls);
-            }
         }
+    }
+
+    static TransactionManager getTransactionManager(final JobContextImpl jobContext, final Step step) {
+        // Determine which TransactionManager to use,
+        if (useLocalTx(jobContext, step)) {
+            return LocalTransactionManager.getInstance();
+        }
+        return jobContext.getBatchEnvironment().getTransactionManager();
     }
 
     private static boolean useLocalTx(final JobContextImpl jobContext, final Step step) {
@@ -514,5 +515,12 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
             }
         }
         return false;
+    }
+
+    private static PartitionHandlerFactory getPartitionHandlerFactory() {
+        final PartitionHandlerFactory partitionHandlerFactory = WildFlySecurityManager.isChecking() ?
+                AccessController.doPrivileged(loaderAction) : loaderAction.run();
+        return partitionHandlerFactory != null ?
+                partitionHandlerFactory : ThreadPartitionHandlerFactory.getInstance();
     }
 }

@@ -12,6 +12,8 @@
 
 package org.jberet.runtime;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -66,7 +68,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     private transient CountDownLatch jobTerminationLatch = new CountDownLatch(1);
     private final AtomicBoolean stopRequested = new AtomicBoolean();
-    private transient final List<JobStopNotificationListener> jobStopNotificationListeners = new ArrayList<JobStopNotificationListener>();
+    private transient List<JobStopNotificationListener> jobStopNotificationListeners = new ArrayList<JobStopNotificationListener>();
 
     public JobExecutionImpl(final JobInstanceImpl jobInstance, final Properties jobParameters) throws JobStartException {
         this.jobInstance = jobInstance;
@@ -307,7 +309,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
             ls = jobStopNotificationListeners.toArray(new JobStopNotificationListener[jobStopNotificationListeners.size()]);
         }
         for (final JobStopNotificationListener l : ls) {
-            l.stopRequested();
+            l.stopRequested(id);
         }
     }
 
@@ -354,5 +356,10 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     @Override
     public int hashCode() {
         return (int) (id ^ (id >>> 32));
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        jobStopNotificationListeners = new ArrayList<>();
     }
 }

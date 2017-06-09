@@ -148,4 +148,8 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     void resolvedJobXml(String location);
 
+    @Message(id = 31, value = "Problem finalizing partition execution in step execution %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void problemFinalizingPartitionExecution(@Cause Throwable cause, long stepExecutionId);
+
 }

@@ -112,7 +112,8 @@ public final class StepExecutionImpl extends AbstractStepExecution {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + partitionExecutions.hashCode();
+        result = 31 * result +
+                (partitionExecutions == null ? 0 : partitionExecutions.hashCode());
         return result;
     }
 }

@@ -71,10 +71,15 @@ public class JobContextImpl extends AbstractContext implements JobContext, Clone
             }
         }
 
-        final PropertyResolver resolver = new PropertyResolver();
-        resolver.setJobParameters(jobExecution.getJobParameters());
-        resolver.resolve(jobExecution.getSubstitutedJob());
-        batchArtifacts = ArchiveXmlLoader.loadBatchXml(classLoader);
+        //if the job execution already contains step executions, e.g., when
+        //transported remotely for execution, no need to resolve properties
+        //or load batch artifacts.
+        if(jobExecution.getStepExecutions().size() == 0) {
+            final PropertyResolver resolver = new PropertyResolver();
+            resolver.setJobParameters(jobExecution.getJobParameters());
+            resolver.resolve(jobExecution.getSubstitutedJob());
+            batchArtifacts = ArchiveXmlLoader.loadBatchXml(classLoader);
+        }
     }
 
     @Override

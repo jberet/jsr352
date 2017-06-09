@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,8 @@ package org.jberet.runtime;
 public interface JobStopNotificationListener {
     /**
      * Invoked when the current job is requested to stop.
+     *
+     * @param jobExecutionId the job execution id requested to stop
      */
-    void stopRequested();
+    void stopRequested(long jobExecutionId);
 }

@@ -66,14 +66,14 @@ public abstract class AbstractJobOperator implements JobOperator {
      *
      * @return the batch environment
      */
-    protected abstract BatchEnvironment getBatchEnvironment();
+    public abstract BatchEnvironment getBatchEnvironment();
 
     /**
      * This is equivalent to {@link BatchEnvironment#getJobRepository() getBatchEnvironment().getJobRepository()}.
      *
      * @return the job repository that belongs to the batch environment
      */
-    protected JobRepository getJobRepository() {
+    public JobRepository getJobRepository() {
         return getBatchEnvironment().getJobRepository();
     }
 

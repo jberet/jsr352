@@ -50,6 +50,7 @@
         <module>restAPI</module>
         <module>amqp</module>
         <module>upsertWriter</module>
+        <module>cluster</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>

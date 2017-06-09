@@ -71,6 +71,13 @@ public class ArrayItemReader extends JsonItemReader {
         } else {
             values = objectMapper.readValue(jsonParser, objs.getClass());
         }
+        if (checkpoint == null) {
+            while (start > 0 && rowNumber < start) {
+                rowNumber++;
+            }
+        } else {
+            rowNumber = (Integer) checkpoint;
+        }
     }
 
     /**
