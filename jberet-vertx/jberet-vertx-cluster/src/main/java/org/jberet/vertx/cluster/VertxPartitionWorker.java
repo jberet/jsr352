@@ -18,6 +18,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.PartitionExecutionImpl;
+import org.jberet.spi.PartitionInfo;
 import org.jberet.spi.PartitionWorker;
 import org.jberet.util.BatchUtil;
 import org.jberet.vertx.cluster._private.VertxClusterLogger;
@@ -34,7 +35,7 @@ public class VertxPartitionWorker implements PartitionWorker {
                            final AbstractStepExecution partitionExecution) throws Exception {
         final byte[] bytes = BatchUtil.objectToBytes(data);
         final long stepExecutionId = partitionExecution.getStepExecutionId();
-        eventBus.send(VertxPartitionInfo.getCollectorQueueName(stepExecutionId), Buffer.buffer(bytes));
+        eventBus.send(PartitionInfo.getCollectorQueueName(stepExecutionId), Buffer.buffer(bytes));
         VertxClusterLogger.LOGGER.sendCollectorData(stepExecutionId,
                 ((PartitionExecutionImpl) partitionExecution).getPartitionId(), data);
     }

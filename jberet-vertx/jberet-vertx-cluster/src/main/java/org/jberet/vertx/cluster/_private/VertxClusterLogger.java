@@ -16,7 +16,7 @@ import java.io.Serializable;
 
 import javax.batch.runtime.BatchStatus;
 
-import org.jberet.vertx.cluster.VertxPartitionInfo;
+import org.jberet.spi.PartitionInfo;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.LogMessage;
@@ -35,7 +35,7 @@ public interface VertxClusterLogger extends BasicLogger {
 
     @LogMessage(level = Logger.Level.INFO)
     @Message(id = 74501, value = "Received partition info at remote node: %s")
-    void receivedPartitionInfo(VertxPartitionInfo partitionInfo);
+    void receivedPartitionInfo(PartitionInfo partitionInfo);
 
     @LogMessage(level = Logger.Level.INFO)
     @Message(id = 74502,

@@ -19,9 +19,11 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import org.jberet.creation.ArtifactFactoryWrapper;
 import org.jberet.job.model.Chunk;
+import org.jberet.job.model.Step;
 import org.jberet.operations.JobOperatorImpl;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.context.AbstractContext;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
@@ -29,6 +31,7 @@ import org.jberet.runtime.runner.AbstractRunner;
 import org.jberet.runtime.runner.BatchletRunner;
 import org.jberet.runtime.runner.ChunkRunner;
 import org.jberet.spi.BatchEnvironment;
+import org.jberet.spi.PartitionInfo;
 import org.jberet.util.BatchUtil;
 import org.jberet.vertx.cluster._private.VertxClusterLogger;
 import org.jberet.vertx.cluster._private.VertxClusterMessages;
@@ -47,46 +50,47 @@ public class ChunkPartitionVerticle extends AbstractVerticle {
             public void handle(Message<Buffer> message) {
                 Buffer body = message.body();
                 final byte[] bytes = body.getBytes();
-                final VertxPartitionInfo partitionInfo;
+                final PartitionInfo partitionInfo;
                 try {
-                    partitionInfo = (VertxPartitionInfo) BatchUtil.bytesToSerializableObject(
+                    partitionInfo = (PartitionInfo) BatchUtil.bytesToSerializableObject(
                             bytes, batchEnvironment.getClassLoader());
                 } catch (Exception e) {
                     throw VertxClusterMessages.MESSAGES.failedToReceivePartitionInfo(e);
                 }
 
-                final JobExecutionImpl jobExecution = partitionInfo.jobExecution;
+                final JobExecutionImpl jobExecution = partitionInfo.getJobExecution();
+                final Step step = partitionInfo.getStep();
+                final PartitionExecutionImpl partitionExecution = partitionInfo.getPartitionExecution();
                 final String stopRequestTopicName =
-                        VertxPartitionInfo.getStopRequestTopicName(jobExecution.getExecutionId());
+                        PartitionInfo.getStopRequestTopicName(jobExecution.getExecutionId());
                 eventBus.consumer(stopRequestTopicName, new Handler<Message<Boolean>>() {
                             @Override
                             public void handle(final Message<Boolean> stopMessage) {
                                 VertxClusterLogger.LOGGER.receivedStopRequest(jobExecution.getExecutionId(),
-                                        partitionInfo.step.getId(), partitionInfo.partitionExecution.getStepExecutionId(),
-                                        partitionInfo.partitionExecution.getPartitionId());
+                                        step.getId(), partitionExecution.getStepExecutionId(),
+                                        partitionExecution.getPartitionId());
                                 jobExecution.stop();
                             }
                         });
 
                 VertxClusterLogger.LOGGER.receivedPartitionInfo(partitionInfo);
-                final JobContextImpl jobContext = new JobContextImpl(partitionInfo.jobExecution, null,
+                final JobContextImpl jobContext = new JobContextImpl(jobExecution, null,
                         artifactFactory, jobRepository, batchEnvironment);
 
                 final VertxPartitionWorker partitionWorker = new VertxPartitionWorker(eventBus);
                 final AbstractContext[] outerContext = {jobContext};
-                final StepContextImpl stepContext = new StepContextImpl(partitionInfo.step,
-                                                    partitionInfo.partitionExecution, outerContext);
+                final StepContextImpl stepContext = new StepContextImpl(step, partitionExecution, outerContext);
 
                 final AbstractRunner<StepContextImpl> runner;
-                final Chunk chunk = partitionInfo.step.getChunk();
+                final Chunk chunk = step.getChunk();
                 if (chunk == null) {
-                    runner = new BatchletRunner(stepContext, null, partitionInfo.step.getBatchlet(), partitionWorker);
+                    runner = new BatchletRunner(stepContext, null, step.getBatchlet(), partitionWorker);
                 } else {
                     runner = new ChunkRunner(stepContext, null, chunk, null, partitionWorker);
                 }
                 batchEnvironment.submitTask(runner);
             }
         };
-        eventBus.consumer(VertxPartitionInfo.PARTITION_QUEUE, receivingPartitionHandler);
+        eventBus.consumer(PartitionInfo.PARTITION_QUEUE, receivingPartitionHandler);
     }
 }

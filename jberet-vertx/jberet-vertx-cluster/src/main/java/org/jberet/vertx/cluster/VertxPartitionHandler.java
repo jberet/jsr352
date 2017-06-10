@@ -27,6 +27,7 @@ import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.PartitionHandler;
+import org.jberet.spi.PartitionInfo;
 import org.jberet.util.BatchUtil;
 import org.jberet.vertx.cluster._private.VertxClusterLogger;
 import org.jberet.vertx.cluster._private.VertxClusterMessages;
@@ -85,7 +86,7 @@ public class VertxPartitionHandler implements PartitionHandler, JobStopNotificat
             }
         };
         final long stepExecutionId = stepContext.getStepExecutionId();
-        eventBus.consumer(VertxPartitionInfo.getCollectorQueueName(stepExecutionId), receivingResultHandler);
+        eventBus.consumer(PartitionInfo.getCollectorQueueName(stepExecutionId), receivingResultHandler);
     }
 
     @Override
@@ -105,16 +106,16 @@ public class VertxPartitionHandler implements PartitionHandler, JobStopNotificat
         final JobExecutionImpl jobExecution = partitionStepContext.getJobContext().getJobExecution();
 
         if (!jobExecution.isStopRequested()) {
-            final VertxPartitionInfo partitionInfo = new VertxPartitionInfo(partitionExecution, step1, jobExecution);
+            final PartitionInfo partitionInfo = new PartitionInfo(partitionExecution, step1, jobExecution);
             final byte[] bytes = BatchUtil.objectToBytes(partitionInfo);
 
             //send the partition to another node for execution
-            eventBus.send(VertxPartitionInfo.PARTITION_QUEUE, Buffer.buffer(bytes));
+            eventBus.send(PartitionInfo.PARTITION_QUEUE, Buffer.buffer(bytes));
         }
     }
 
     @Override
     public void stopRequested(final long jobExecutionId) {
-        eventBus.publish(VertxPartitionInfo.getStopRequestTopicName(jobExecutionId), Boolean.TRUE);
+        eventBus.publish(PartitionInfo.getStopRequestTopicName(jobExecutionId), Boolean.TRUE);
     }
 }

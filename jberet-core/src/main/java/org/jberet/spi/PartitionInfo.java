@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.vertx.cluster;
+package org.jberet.spi;
 
 import java.io.Serializable;
 
@@ -18,7 +18,7 @@ import org.jberet.job.model.Step;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 
-public class VertxPartitionInfo implements Serializable {
+public class PartitionInfo implements Serializable {
     private static final long serialVersionUID = -8906466052166191853L;
 
     public static final String PARTITION_QUEUE = "jberet.partition";
@@ -29,9 +29,9 @@ public class VertxPartitionInfo implements Serializable {
     Step step;
     JobExecutionImpl jobExecution;
 
-    public VertxPartitionInfo(final PartitionExecutionImpl partitionExecution,
-                              final Step step,
-                              final JobExecutionImpl jobExecution) {
+    public PartitionInfo(final PartitionExecutionImpl partitionExecution,
+                         final Step step,
+                         final JobExecutionImpl jobExecution) {
         this.partitionExecution = partitionExecution;
         this.step = step;
         this.jobExecution = jobExecution;
@@ -52,9 +52,21 @@ public class VertxPartitionInfo implements Serializable {
         return STOP_REQUEST_TOPIC + jobExecutionId;
     }
 
+    public PartitionExecutionImpl getPartitionExecution() {
+        return partitionExecution;
+    }
+
+    public Step getStep() {
+        return step;
+    }
+
+    public JobExecutionImpl getJobExecution() {
+        return jobExecution;
+    }
+
     @Override
     public String toString() {
-        return "VertxPartitionInfo{" +
+        return "PartitionInfo{" +
                 "partitionExecution=" + partitionExecution.getPartitionId() +
                 ", step=" + step.getId() +
                 ", stepExecution=" + partitionExecution.getStepExecutionId() +
