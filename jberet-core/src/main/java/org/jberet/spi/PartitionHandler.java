@@ -23,4 +23,6 @@ public interface PartitionHandler {
     void setCollectorDataQueue(BlockingQueue<Serializable> collectorDataQueue);
 
     void submitPartitionTask(StepContextImpl partitionStepContext) throws Exception;
+
+    default void close(StepContextImpl stepContext) {}
 }
