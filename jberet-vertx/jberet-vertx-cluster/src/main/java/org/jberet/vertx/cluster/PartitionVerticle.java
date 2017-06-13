@@ -36,7 +36,7 @@ import org.jberet.util.BatchUtil;
 import org.jberet.vertx.cluster._private.VertxClusterLogger;
 import org.jberet.vertx.cluster._private.VertxClusterMessages;
 
-public class ChunkPartitionVerticle extends AbstractVerticle {
+public class PartitionVerticle extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
