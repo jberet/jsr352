@@ -108,7 +108,7 @@ public class DelegatingJobOperator implements JobOperator {
      * @return the delegate job operator
      */
     @SuppressWarnings("WeakerAccess")
-    protected JobOperator getDelegate() {
+    public JobOperator getDelegate() {
         return JobOperatorContext.getJobOperatorContext().getJobOperator();
     }
 }

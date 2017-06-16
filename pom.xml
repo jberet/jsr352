@@ -122,6 +122,7 @@
         <module>jberet-schedule</module>
         <module>jberet-camel</module>
         <module>jberet-vertx</module>
+        <module>jberet-wildfly</module>
     </modules>
 
     <build>
