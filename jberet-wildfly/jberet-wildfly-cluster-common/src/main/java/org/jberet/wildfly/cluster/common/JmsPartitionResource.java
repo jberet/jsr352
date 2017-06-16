@@ -47,7 +47,6 @@ public final class JmsPartitionResource {
     public <T> T lookUp(final String name) {
         String s = "java:comp/env/" + name;
         try {
-            System.out.printf("## About to look up %s%n", s);
             T result = (T) namingContext.lookup(s);
             ClusterCommonLogger.LOGGER.lookupResource(s, result);
             return result;

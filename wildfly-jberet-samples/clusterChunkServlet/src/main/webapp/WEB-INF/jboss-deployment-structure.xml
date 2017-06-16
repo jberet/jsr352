@@ -1,0 +1,8 @@
+<jboss-deployment-structure>
+    <deployment>
+        <dependencies>
+            <module name="com.google.guava"/>
+            <module name="javax.jms.api"/>
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>

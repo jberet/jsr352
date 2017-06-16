@@ -44,6 +44,7 @@
         <module>scheduleTimer</module>
         <module>purgeJdbcRepository2</module>
         <module>camelReaderWriter</module>
+        <module>clusterChunkServlet</module>
     </modules>
 
     <properties>
