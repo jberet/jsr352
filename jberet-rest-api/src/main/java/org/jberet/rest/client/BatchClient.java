@@ -105,6 +105,18 @@ public class BatchClient {
     }
 
     /**
+     * Stops the job execution specified by the job execution id.
+     *
+     * @param jobExecutionId job execution id
+     * @throws Exception if errors occur
+     */
+    public void stopJobExecution(final long jobExecutionId) throws Exception {
+        final URI uri = getJobExecutionUriBuilder("stop").resolveTemplate("jobExecutionId", jobExecutionId).build();
+        WebTarget target = target(uri, null);
+        target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE));
+    }
+
+    /**
      * Restarts the latest failed or stopped job execution belonging to the
      * specified job name.
      * This method is equivalent to first finding the latest failed or stopped
