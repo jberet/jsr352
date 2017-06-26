@@ -11,6 +11,10 @@ jms-queue add --queue-address=partitionQueue --entries=jms/partitionQueue,java:j
 [standalone@localhost:9990 /] 
 jms-topic add --topic-address=stopRequestTopic --entries=jms/stopRequestTopic,java:jboss/exported/jms/jms/stopRequestTopic
 
+<jms-queue name="partitionQueue" entries="jms/partitionQueue java:jboss/exported/jms/partitionQueue"/>
+<jms-topic name="stopRequestTopic" entries="jms/stopRequestTopic java:jboss/exported/jms/jms/stopRequestTopic"/>
+                
+                
 https://issues.jboss.org/browse/JBEAP-773
 <module-option name="unauthenticatedIdentity" value="guest"/>
 

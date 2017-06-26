@@ -75,7 +75,7 @@ public final class JmsPartitionResource {
     }
 
     public static String getMessageSelector(final long jobExecutionId) {
-        return String.format("%s = '%s'", MESSAGE_JOB_EXECUTION_ID_KEY, jobExecutionId);
+        return String.format("%s = %s", MESSAGE_JOB_EXECUTION_ID_KEY, jobExecutionId);
     }
 
     public void close() {

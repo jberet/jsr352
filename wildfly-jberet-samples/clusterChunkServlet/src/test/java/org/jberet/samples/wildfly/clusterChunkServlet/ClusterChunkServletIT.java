@@ -33,11 +33,13 @@ public final class ClusterChunkServletIT extends BatchTestBase {
     private static final String clusterChunkServletStop = "clusterChunkServletStop";
     private static final long waitForCompletionMillis = 60000;
 
+    protected static final String BASE_URL_1 = "http://localhost:8230/";
+
     /**
      * The full REST API URL, including scheme, hostname, port number, context path, servlet path for REST API.
      * For example, "http://localhost:8080/testApp/api"
      */
-    private static final String restUrl = BASE_URL + "clusterChunkServlet/api";
+    private static final String restUrl = BASE_URL_1 + "clusterChunkServlet/api";
 
     private BatchClient batchClient = new BatchClient(restUrl);
 
@@ -58,5 +60,23 @@ public final class ClusterChunkServletIT extends BatchTestBase {
         final StepExecutionEntity stepExecutionEntity = stepExecutions[0];
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecutionEntity.getBatchStatus());
 
+    }
+
+    @Test
+    public void stopRemotePartitions() throws Exception {
+        JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkServletStop, null);
+        Thread.sleep(20000);
+        batchClient.stopJobExecution(jobExecutionEntity.getExecutionId());
+
+        Thread.sleep(120000);
+
+        jobExecutionEntity = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
+        final StepExecutionEntity[] stepExecutions = batchClient.getStepExecutions(jobExecutionEntity.getExecutionId());
+        final StepExecutionEntity stepExecution = stepExecutions[0];
+
+        System.out.printf("job batch status: %s, step batch status: %s%n",
+                jobExecutionEntity.getBatchStatus(), stepExecution.getBatchStatus());
+        assertEquals(BatchStatus.STOPPED, jobExecutionEntity.getBatchStatus());
+        assertEquals(BatchStatus.STOPPED, stepExecution.getBatchStatus());
     }
 }
