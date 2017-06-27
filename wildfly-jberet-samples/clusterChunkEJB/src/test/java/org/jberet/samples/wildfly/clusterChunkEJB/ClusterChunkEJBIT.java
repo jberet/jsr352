@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.samples.wildfly.clusterChunkServlet;
+package org.jberet.samples.wildfly.clusterChunkEJB;
 
 import javax.batch.runtime.BatchStatus;
 
@@ -25,9 +25,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 @Ignore("need to configure and start WildFly cluster first")
-public final class ClusterChunkServletIT extends BatchTestBase {
-    private static final String clusterChunkServlet = "clusterChunkServlet";
-    private static final String clusterChunkServletStop = "clusterChunkServletStop";
+public final class ClusterChunkEJBIT extends BatchTestBase {
+    private static final String clusterChunkEJB = "clusterChunkEJB";
+    private static final String clusterChunkEJBStop = "clusterChunkEJBStop";
     private static final long waitForCompletionMillis = 60000;
 
     protected static final String BASE_URL_1 = "http://localhost:8230/";
@@ -36,7 +36,7 @@ public final class ClusterChunkServletIT extends BatchTestBase {
      * The full REST API URL, including scheme, hostname, port number, context path, servlet path for REST API.
      * For example, "http://localhost:8080/testApp/api"
      */
-    private static final String restUrl = BASE_URL_1 + "clusterChunkServlet/api";
+    private static final String restUrl = BASE_URL_1 + "clusterChunkEJB/api";
 
     private BatchClient batchClient = new BatchClient(restUrl);
 
@@ -46,8 +46,8 @@ public final class ClusterChunkServletIT extends BatchTestBase {
     }
 
     @Test
-    public void clusterChunkServlet() throws Exception {
-        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkServlet, null);
+    public void clusterChunkEJB() throws Exception {
+        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkEJB, null);
         Thread.sleep(waitForCompletionMillis);
         final JobExecutionEntity jobExecution1 = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
         assertEquals(BatchStatus.COMPLETED, jobExecution1.getBatchStatus());
@@ -61,7 +61,7 @@ public final class ClusterChunkServletIT extends BatchTestBase {
 
     @Test
     public void stopRemotePartitions() throws Exception {
-        JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkServletStop, null);
+        JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkEJBStop, null);
         Thread.sleep(20000);
         batchClient.stopJobExecution(jobExecutionEntity.getExecutionId());
 

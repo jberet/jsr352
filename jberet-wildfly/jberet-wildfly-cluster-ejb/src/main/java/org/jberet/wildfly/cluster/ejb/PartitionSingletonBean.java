@@ -14,6 +14,8 @@ package org.jberet.wildfly.cluster.ejb;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchRuntime;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Singleton;
@@ -28,7 +30,8 @@ import javax.jms.Topic;
 import org.jberet.creation.ArtifactFactoryWrapper;
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.Step;
-import org.jberet.operations.JobOperatorImpl;
+import org.jberet.operations.AbstractJobOperator;
+import org.jberet.operations.DelegatingJobOperator;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
@@ -40,11 +43,11 @@ import org.jberet.runtime.runner.BatchletRunner;
 import org.jberet.runtime.runner.ChunkRunner;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
-import org.jberet.spi.JobOperatorContext;
 import org.jberet.spi.PartitionInfo;
 import org.jberet.wildfly.cluster.common.JmsPartitionResource;
 import org.jberet.wildfly.cluster.common.JmsPartitionWorker;
 import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonLogger;
+import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonMessages;
 
 @Singleton
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)
@@ -66,7 +69,17 @@ public class PartitionSingletonBean {
 
     @PostConstruct
     private void postConstruct() {
-        final JobOperatorImpl jobOperator = (JobOperatorImpl) JobOperatorContext.getJobOperatorContext().getJobOperator();
+        final JobOperator operator = BatchRuntime.getJobOperator();
+        AbstractJobOperator jobOperator = null;
+        if (operator instanceof DelegatingJobOperator) {
+            JobOperator delegate = ((DelegatingJobOperator) operator).getDelegate();
+            if (delegate instanceof AbstractJobOperator) {
+                jobOperator = (AbstractJobOperator) delegate;
+            }
+        }
+        if (jobOperator == null) {
+            throw ClusterCommonMessages.MESSAGES.failedToGetJobOperator(this.toString());
+        }
         batchEnvironment = jobOperator.getBatchEnvironment();
         jobRepository = jobOperator.getJobRepository();
         artifactFactory = new ArtifactFactoryWrapper(batchEnvironment.getArtifactFactory());

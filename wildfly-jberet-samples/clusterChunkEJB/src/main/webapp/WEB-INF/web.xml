@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+    <distributable/>
+
+    <servlet-mapping>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+
+    <resource-ref>
+        <res-ref-name>jms/connectionFactory</res-ref-name>
+        <res-type>javax.jms.ConnectionFactory</res-type>
+        <!--<lookup-name>java:comp/DefaultJMSConnectionFactory</lookup-name>-->
+        <lookup-name>java:jboss/exported/jms/RemoteConnectionFactory</lookup-name>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>jms/partitionQueue</res-ref-name>
+        <res-type>javax.jms.Queue</res-type>
+        <lookup-name>java:jboss/exported/jms/partitionQueue</lookup-name>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>jms/stopRequestTopic</res-ref-name>
+        <res-type>javax.jms.Topic</res-type>
+        <lookup-name>java:jboss/exported/jms/jms/stopRequestTopic</lookup-name>
+    </resource-ref>
+
+</web-app>
