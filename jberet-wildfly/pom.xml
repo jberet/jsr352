@@ -29,6 +29,7 @@
     <modules>
         <module>jberet-wildfly-cluster-common</module>
         <module>jberet-wildfly-cluster-servlet</module>
+        <module>jberet-wildfly-cluster-ejb</module>
     </modules>
 
 </project>
