@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private;
+package org.jberet.wildfly.cluster.jms._private;
 
 import java.io.Serializable;
 import javax.batch.runtime.BatchStatus;
@@ -26,8 +26,8 @@ import org.jboss.logging.annotations.ValidIdRange;
 
 @MessageLogger(projectCode = "JBERET")
 @ValidIdRange(min = 75500, max = 75999)
-public interface ClusterCommonLogger extends BasicLogger {
-    ClusterCommonLogger LOGGER = Logger.getMessageLogger(ClusterCommonLogger.class, "org.jberet.wildfly-cluster");
+public interface ClusterJmsLogger extends BasicLogger {
+    ClusterJmsLogger LOGGER = Logger.getMessageLogger(ClusterJmsLogger.class, "org.jberet.wildfly-cluster");
 
     @LogMessage(level = Logger.Level.INFO)
     @Message(id = 75501, value = "Received partition info at remote node: %s")

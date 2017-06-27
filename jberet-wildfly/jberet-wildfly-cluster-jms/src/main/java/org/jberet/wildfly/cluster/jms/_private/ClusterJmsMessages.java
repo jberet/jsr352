@@ -8,8 +8,8 @@ import org.jboss.logging.annotations.ValidIdRange;
 
 @MessageBundle(projectCode = "JBERET")
 @ValidIdRange(min = 75000, max = 75499)
-public interface ClusterCommonMessages {
-    ClusterCommonMessages MESSAGES = Messages.getBundle(ClusterCommonMessages.class);
+public interface ClusterJmsMessages {
+    ClusterJmsMessages MESSAGES = Messages.getBundle(ClusterJmsMessages.class);
 
     @Message(id = 75000, value = "Failed to lookup %s")
     IllegalStateException failedToLookup(@Cause Throwable throwable, String name);

@@ -42,8 +42,8 @@ import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.PartitionInfo;
 import org.jberet.wildfly.cluster.jms.JmsPartitionResource;
 import org.jberet.wildfly.cluster.jms.JmsPartitionWorker;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsMessages;
 
 @WebListener
 public class PartitionContextListener implements ServletContextListener {
@@ -65,7 +65,7 @@ public class PartitionContextListener implements ServletContextListener {
             }
         }
         if (jobOperator == null) {
-            throw ClusterCommonMessages.MESSAGES.failedToGetJobOperator(this.toString());
+            throw ClusterJmsMessages.MESSAGES.failedToGetJobOperator(this.toString());
         }
 
         final BatchEnvironment batchEnvironment = jobOperator.getBatchEnvironment();
@@ -87,7 +87,7 @@ public class PartitionContextListener implements ServletContextListener {
             try {
                 partitionInfo = message.getBody(PartitionInfo.class);
             } catch (JMSException e) {
-                throw ClusterCommonMessages.MESSAGES.failedInJms(e);
+                throw ClusterJmsMessages.MESSAGES.failedInJms(e);
             }
 
             final JobExecutionImpl jobExecution = partitionInfo.getJobExecution();
@@ -99,13 +99,13 @@ public class PartitionContextListener implements ServletContextListener {
             final JMSContext stopRequestTopicContext = connectionFactory.createContext();
             final JMSConsumer stopRequestConsumer = stopRequestTopicContext.createConsumer(stopRequestTopic, stopTopicSelector);
             stopRequestConsumer.setMessageListener(stopMessage -> {
-                ClusterCommonLogger.LOGGER.receivedStopRequest(jobExecutionId,
+                ClusterJmsLogger.LOGGER.receivedStopRequest(jobExecutionId,
                         step.getId(), partitionExecution.getStepExecutionId(),
                         partitionExecution.getPartitionId());
                 jobExecution.stop();
             });
 
-            ClusterCommonLogger.LOGGER.receivedPartitionInfo(partitionInfo);
+            ClusterJmsLogger.LOGGER.receivedPartitionInfo(partitionInfo);
             final JobContextImpl jobContext = new JobContextImpl(jobExecution, null,
                     artifactFactory, jobRepository, batchEnvironment);
 

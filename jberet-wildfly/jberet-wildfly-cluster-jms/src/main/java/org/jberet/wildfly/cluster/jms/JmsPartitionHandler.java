@@ -31,8 +31,8 @@ import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.PartitionHandler;
 import org.jberet.spi.PartitionInfo;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsMessages;
 
 import static org.jberet.wildfly.cluster.jms.JmsPartitionResource.MESSAGE_TYPE_KEY;
 import static org.jberet.wildfly.cluster.jms.JmsPartitionResource.MESSAGE_TYPE_PARTITION;
@@ -69,7 +69,7 @@ public class JmsPartitionHandler implements PartitionHandler, JobStopNotificatio
             try {
                 partitionCollectorData = message.getBody(Serializable.class);
             } catch (JMSException e) {
-                throw ClusterCommonMessages.MESSAGES.failedInJms(e);
+                throw ClusterJmsMessages.MESSAGES.failedInJms(e);
             }
             if (partitionCollectorData instanceof PartitionExecutionImpl) {
                 if (completedPartitionThreads != null) {
@@ -77,7 +77,7 @@ public class JmsPartitionHandler implements PartitionHandler, JobStopNotificatio
                 }
                 final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) partitionCollectorData;
                 final int partitionId = partitionExecution.getPartitionId();
-                ClusterCommonLogger.LOGGER.receivedPartitionResult(
+                ClusterJmsLogger.LOGGER.receivedPartitionResult(
                         stepContext.getJobContext().getExecutionId(), stepContext.getStepExecutionId(),
                         partitionId, partitionExecution.getBatchStatus());
 
@@ -132,7 +132,7 @@ public class JmsPartitionHandler implements PartitionHandler, JobStopNotificatio
                 message.writeByte((byte) 1);
                 stopRequestTopicContext.createProducer().send(stopRequestTopic, message);
             } catch (JMSException e) {
-                throw ClusterCommonMessages.MESSAGES.failedInJms(e);
+                throw ClusterJmsMessages.MESSAGES.failedInJms(e);
             }
         }
     }

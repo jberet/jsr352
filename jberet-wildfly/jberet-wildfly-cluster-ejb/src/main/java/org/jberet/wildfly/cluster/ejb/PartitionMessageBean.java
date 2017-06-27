@@ -22,7 +22,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 import org.jberet.spi.PartitionInfo;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsMessages;
 
 @MessageDriven(name = "PartitionMessageBean", activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/partitionQueue"),
@@ -41,7 +41,7 @@ public class PartitionMessageBean implements MessageListener {
         try {
             partitionInfo = message.getBody(PartitionInfo.class);
         } catch (JMSException e) {
-            throw ClusterCommonMessages.MESSAGES.failedInJms(e);
+            throw ClusterJmsMessages.MESSAGES.failedInJms(e);
         }
         partitionSingletonBean.runPartition(partitionInfo);
     }

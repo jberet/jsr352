@@ -21,7 +21,7 @@ import javax.jms.Queue;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.spi.PartitionWorker;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsLogger;
 
 public class JmsPartitionWorker implements PartitionWorker {
     private final ConnectionFactory connectionFactory;
@@ -48,7 +48,7 @@ public class JmsPartitionWorker implements PartitionWorker {
             partitionQueueContext.createProducer().send(partitionQueue, message);
         }
 
-        ClusterCommonLogger.LOGGER.sendCollectorData(stepExecutionId,
+        ClusterJmsLogger.LOGGER.sendCollectorData(stepExecutionId,
                 ((PartitionExecutionImpl) partitionExecution).getPartitionId(), data);
     }
 

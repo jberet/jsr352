@@ -20,8 +20,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsMessages;
 
 public final class JmsPartitionResource {
     public static final String CONNECTION_FACTORY = "jms/connectionFactory";
@@ -40,7 +40,7 @@ public final class JmsPartitionResource {
         try {
             namingContext = new InitialContext();
         } catch (NamingException e) {
-            throw ClusterCommonMessages.MESSAGES.failedToNewNamingContext(e);
+            throw ClusterJmsMessages.MESSAGES.failedToNewNamingContext(e);
         }
     }
 
@@ -48,10 +48,10 @@ public final class JmsPartitionResource {
         String s = "java:comp/env/" + name;
         try {
             T result = (T) namingContext.lookup(s);
-            ClusterCommonLogger.LOGGER.lookupResource(s, result);
+            ClusterJmsLogger.LOGGER.lookupResource(s, result);
             return result;
         } catch (NamingException e) {
-            throw ClusterCommonMessages.MESSAGES.failedToLookup(e, s);
+            throw ClusterJmsMessages.MESSAGES.failedToLookup(e, s);
         }
     }
 
@@ -83,7 +83,7 @@ public final class JmsPartitionResource {
             try {
                 namingContext.close();
             } catch (NamingException e) {
-                ClusterCommonLogger.LOGGER.problemClosingResource(e);
+                ClusterJmsLogger.LOGGER.problemClosingResource(e);
             }
         }
     }
@@ -93,7 +93,7 @@ public final class JmsPartitionResource {
             try {
                 jmsContext.close();
             } catch (Exception e) {
-                ClusterCommonLogger.LOGGER.problemClosingResource(e);
+                ClusterJmsLogger.LOGGER.problemClosingResource(e);
             }
         }
     }

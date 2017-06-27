@@ -46,8 +46,8 @@ import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.PartitionInfo;
 import org.jberet.wildfly.cluster.jms.JmsPartitionResource;
 import org.jberet.wildfly.cluster.jms.JmsPartitionWorker;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
-import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterJmsMessages;
 
 @Singleton
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)
@@ -78,7 +78,7 @@ public class PartitionSingletonBean {
             }
         }
         if (jobOperator == null) {
-            throw ClusterCommonMessages.MESSAGES.failedToGetJobOperator(this.toString());
+            throw ClusterJmsMessages.MESSAGES.failedToGetJobOperator(this.toString());
         }
         batchEnvironment = jobOperator.getBatchEnvironment();
         jobRepository = jobOperator.getJobRepository();
@@ -95,13 +95,13 @@ public class PartitionSingletonBean {
         final JMSContext stopRequestTopicContext = connectionFactory.createContext();
         final JMSConsumer stopRequestConsumer = stopRequestTopicContext.createConsumer(stopRequestTopic, stopTopicSelector);
         stopRequestConsumer.setMessageListener(stopMessage -> {
-            ClusterCommonLogger.LOGGER.receivedStopRequest(jobExecutionId,
+            ClusterJmsLogger.LOGGER.receivedStopRequest(jobExecutionId,
                     step.getId(), partitionExecution.getStepExecutionId(),
                     partitionExecution.getPartitionId());
             jobExecution.stop();
         });
 
-        ClusterCommonLogger.LOGGER.receivedPartitionInfo(partitionInfo);
+        ClusterJmsLogger.LOGGER.receivedPartitionInfo(partitionInfo);
         final JobContextImpl jobContext = new JobContextImpl(jobExecution, null,
                 artifactFactory, jobRepository, batchEnvironment);
 
