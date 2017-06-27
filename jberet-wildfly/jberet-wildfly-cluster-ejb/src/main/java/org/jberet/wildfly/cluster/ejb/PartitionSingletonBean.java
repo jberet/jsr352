@@ -44,10 +44,10 @@ import org.jberet.runtime.runner.ChunkRunner;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.PartitionInfo;
-import org.jberet.wildfly.cluster.common.JmsPartitionResource;
-import org.jberet.wildfly.cluster.common.JmsPartitionWorker;
-import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonLogger;
-import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms.JmsPartitionResource;
+import org.jberet.wildfly.cluster.jms.JmsPartitionWorker;
+import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
 
 @Singleton
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)

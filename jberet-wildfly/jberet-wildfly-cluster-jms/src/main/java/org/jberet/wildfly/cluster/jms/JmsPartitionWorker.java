@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.wildfly.cluster.common;
+package org.jberet.wildfly.cluster.jms;
 
 import java.io.Serializable;
 import javax.jms.ConnectionFactory;
@@ -21,7 +21,7 @@ import javax.jms.Queue;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.spi.PartitionWorker;
-import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
 
 public class JmsPartitionWorker implements PartitionWorker {
     private final ConnectionFactory connectionFactory;

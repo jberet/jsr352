@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.wildfly.cluster.common;
+package org.jberet.wildfly.cluster.jms;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
@@ -20,8 +20,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonLogger;
-import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
 
 public final class JmsPartitionResource {
     public static final String CONNECTION_FACTORY = "jms/connectionFactory";

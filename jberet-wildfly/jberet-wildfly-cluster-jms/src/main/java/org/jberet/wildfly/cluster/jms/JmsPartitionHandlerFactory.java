@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.wildfly.cluster.common;
+package org.jberet.wildfly.cluster.jms;
 
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.runtime.runner.StepExecutionRunner;

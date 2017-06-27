@@ -65,7 +65,7 @@
         </dependency>
         <dependency>
             <groupId>org.jberet</groupId>
-            <artifactId>jberet-wildfly-cluster-common</artifactId>
+            <artifactId>jberet-wildfly-cluster-jms</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

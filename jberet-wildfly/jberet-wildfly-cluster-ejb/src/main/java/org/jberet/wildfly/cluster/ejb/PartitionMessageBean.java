@@ -22,7 +22,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 import org.jberet.spi.PartitionInfo;
-import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
 
 @MessageDriven(name = "PartitionMessageBean", activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/partitionQueue"),

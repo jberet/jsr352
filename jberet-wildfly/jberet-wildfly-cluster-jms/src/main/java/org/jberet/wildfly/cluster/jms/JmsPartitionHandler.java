@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.wildfly.cluster.common;
+package org.jberet.wildfly.cluster.jms;
 
 import java.io.Serializable;
 import java.util.List;
@@ -31,13 +31,13 @@ import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.PartitionHandler;
 import org.jberet.spi.PartitionInfo;
-import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonLogger;
-import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonMessages;
+import org.jberet.wildfly.cluster.jms._private.ClusterCommonLogger;
+import org.jberet.wildfly.cluster.jms._private.ClusterCommonMessages;
 
-import static org.jberet.wildfly.cluster.common.JmsPartitionResource.MESSAGE_TYPE_KEY;
-import static org.jberet.wildfly.cluster.common.JmsPartitionResource.MESSAGE_TYPE_PARTITION;
-import static org.jberet.wildfly.cluster.common.JmsPartitionResource.MESSAGE_TYPE_RESULT;
-import static org.jberet.wildfly.cluster.common.JmsPartitionResource.getMessageSelector;
+import static org.jberet.wildfly.cluster.jms.JmsPartitionResource.MESSAGE_TYPE_KEY;
+import static org.jberet.wildfly.cluster.jms.JmsPartitionResource.MESSAGE_TYPE_PARTITION;
+import static org.jberet.wildfly.cluster.jms.JmsPartitionResource.MESSAGE_TYPE_RESULT;
+import static org.jberet.wildfly.cluster.jms.JmsPartitionResource.getMessageSelector;
 
 public class JmsPartitionHandler implements PartitionHandler, JobStopNotificationListener {
     private BlockingQueue<Boolean> completedPartitionThreads;
