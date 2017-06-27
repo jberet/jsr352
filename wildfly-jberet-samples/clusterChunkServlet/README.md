@@ -1,5 +1,7 @@
 
-./standalone.sh -c standalone-full-ha.xml -Djboss.messaging.cluster.password=hello
+bin/domain.sh --host-config=host-master.xml -Djboss.domain.base.dir=domain1
+
+bin/domain.sh --host-config=host-slave.xml -Djboss.domain.base.dir=host1 -Djboss.domain.master.address=127.0.0.1 -Djboss.management.native.port=9991
 
 ./add-user.sh 
 guest

@@ -21,22 +21,24 @@ import javax.jms.Queue;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.spi.PartitionWorker;
-import org.jberet.util.BatchUtil;
 import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._private.ClusterCommonLogger;
 
 public class JmsPartitionWorker implements PartitionWorker {
     private final ConnectionFactory connectionFactory;
     private final Queue partitionQueue;
+    private final JMSContext stopRequestTopicContext;
 
-    public JmsPartitionWorker(final ConnectionFactory connectionFactory, final Queue partitionQueue) {
+    public JmsPartitionWorker(final ConnectionFactory connectionFactory,
+                              final Queue partitionQueue,
+                              final JMSContext stopRequestTopicContext) {
         this.connectionFactory = connectionFactory;
         this.partitionQueue = partitionQueue;
+        this.stopRequestTopicContext = stopRequestTopicContext;
     }
 
     @Override
     public void reportData(final Serializable data,
                            final AbstractStepExecution partitionExecution) throws Exception {
-        final byte[] bytes = BatchUtil.objectToBytes(data);
         final long stepExecutionId = partitionExecution.getStepExecutionId();
 
         try (JMSContext partitionQueueContext = connectionFactory.createContext()) {
@@ -53,6 +55,7 @@ public class JmsPartitionWorker implements PartitionWorker {
     @Override
     public void partitionDone(final AbstractStepExecution partitionExecution) throws Exception {
         reportData(partitionExecution, partitionExecution);
+        stopRequestTopicContext.close();
     }
 
 }

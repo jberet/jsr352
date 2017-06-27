@@ -47,7 +47,6 @@ import org.jberet.wildfly.cluster.common.org.jberet.wildfly.cluster.common._priv
 
 @WebListener
 public class PartitionContextListener implements ServletContextListener {
-    private JMSContext stopRequestTopicContext;
     private Topic stopRequestTopic;
 
     private JMSContext partitionQueueContext;
@@ -97,7 +96,7 @@ public class PartitionContextListener implements ServletContextListener {
             final long jobExecutionId = jobExecution.getExecutionId();
 
             final String stopTopicSelector = JmsPartitionResource.getMessageSelector(jobExecutionId);
-            stopRequestTopicContext = connectionFactory.createContext();
+            final JMSContext stopRequestTopicContext = connectionFactory.createContext();
             final JMSConsumer stopRequestConsumer = stopRequestTopicContext.createConsumer(stopRequestTopic, stopTopicSelector);
             stopRequestConsumer.setMessageListener(stopMessage -> {
                 ClusterCommonLogger.LOGGER.receivedStopRequest(jobExecutionId,
@@ -110,7 +109,7 @@ public class PartitionContextListener implements ServletContextListener {
             final JobContextImpl jobContext = new JobContextImpl(jobExecution, null,
                     artifactFactory, jobRepository, batchEnvironment);
 
-            final JmsPartitionWorker partitionWorker = new JmsPartitionWorker(connectionFactory, partitionQueue);
+            final JmsPartitionWorker partitionWorker = new JmsPartitionWorker(connectionFactory, partitionQueue, stopRequestTopicContext);
             final AbstractContext[] outerContext = {jobContext};
             final StepContextImpl stepContext = new StepContextImpl(step, partitionExecution, outerContext);
 
@@ -129,6 +128,5 @@ public class PartitionContextListener implements ServletContextListener {
     public void contextDestroyed(final ServletContextEvent sce) {
         jmsPartitionResource.close();
         JmsPartitionResource.closeJmsContext(partitionQueueContext);
-        JmsPartitionResource.closeJmsContext(stopRequestTopicContext);
     }
 }

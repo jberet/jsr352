@@ -431,6 +431,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         if (partitionHandler instanceof JobStopNotificationListener) {
             jobContext.getJobExecution().unregisterJobStopNotifier((JobStopNotificationListener) partitionHandler);
         }
+        partitionHandler.close(batchContext);
     }
 
     private void initPartitionConfig() {
