@@ -20,8 +20,7 @@ public interface ClusterJmsMessages {
     @Message(id = 75002, value = "Failed in JMS operation")
     IllegalStateException failedInJms(@Cause Throwable throwable);
 
-    @Message(id = 75003, value = "Failed to get job operator in %s")
-    IllegalStateException failedToGetJobOperator(String location);
-
+    @Message(id = 75003, value = "Failed to get job operator")
+    IllegalStateException failedToGetJobOperator();
 
 }
