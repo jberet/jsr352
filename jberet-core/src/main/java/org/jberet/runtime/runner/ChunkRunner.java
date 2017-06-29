@@ -37,6 +37,7 @@ import javax.batch.operations.BatchRuntimeException;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 import javax.transaction.Status;
+import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
 import org.jberet._private.BatchLogger;
@@ -234,6 +235,23 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     ", retry-limit=" + retryLimit + ", retryCount=" + retryCount);
             LOGGER.failToRunJob(e, jobContext.getJobName(), batchContext.getStepName(), chunk);
             batchContext.setBatchStatus(BatchStatus.FAILED);
+
+            try {
+                final int txStatus = tm.getStatus();
+                if (txStatus == Status.STATUS_ACTIVE || txStatus == Status.STATUS_MARKED_ROLLBACK ||
+                        txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
+                        txStatus == Status.STATUS_COMMITTING || txStatus == Status.STATUS_ROLLING_BACK) {
+                    tm.rollback();
+                    stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
+                } else if (txStatus == Status.STATUS_ROLLEDBACK || txStatus == Status.STATUS_NO_TRANSACTION) {
+                    //the transaction might have been cancelled by a reaper thread, but has not been disassociated from
+                    //the current thread, so call tm.suspend() to safely disassociate it.
+                    tm.suspend();
+                    stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
+                }
+            } catch (SystemException txSystemException) {
+                LOGGER.warn(toString(), txSystemException);
+            }
         } finally {
             if (partitionWorker != null) {
                 try {
@@ -336,19 +354,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     //}
                 }
             } catch (final Exception e) {
-                final int txStatus = tm.getStatus();
-                if (txStatus == Status.STATUS_ACTIVE || txStatus == Status.STATUS_MARKED_ROLLBACK ||
-                        txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
-                        txStatus == Status.STATUS_COMMITTING || txStatus == Status.STATUS_ROLLING_BACK) {
-                    tm.rollback();
-                    stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
-                } else if (txStatus == Status.STATUS_ROLLEDBACK || txStatus == Status.STATUS_NO_TRANSACTION) {
-                    //the transaction might have been cancelled by a reaper thread, but has not been disassociated from
-                    //the current thread, so call tm.suspend() to safely disassociate it.
-                    tm.suspend();
-                    stepMetrics.increment(Metric.MetricType.ROLLBACK_COUNT, 1);
-                }
-                
                 for (final ChunkListener l : chunkListeners) {
                     l.onError(e);
                 }
