@@ -12,6 +12,7 @@
 
 package org.jberet.support._private;
 
+import java.util.Collection;
 import javax.batch.operations.BatchRuntimeException;
 
 import com.fasterxml.jackson.core.JsonLocation;
@@ -91,5 +92,11 @@ public interface SupportMessages {
 
     @Message(id = 60024, value = "Failed to look up resource by name: %s")
     BatchRuntimeException failToLookup(@Cause Throwable throwable, String lookupName);
+
+    @Message(id = 60025, value = "Process has exited with an error code %d. %s")
+    String processExecutionFailure(int exitCode, final Collection<String> cmd);
+
+    @Message(id = 60026, value = "Directory %s is invalid.")
+    BatchRuntimeException invalidDirectory(String dir);
 
 }

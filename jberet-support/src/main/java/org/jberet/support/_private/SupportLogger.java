@@ -12,6 +12,8 @@
 
 package org.jberet.support._private;
 
+import java.util.List;
+
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
@@ -41,9 +43,9 @@ public interface SupportLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void failToWriteWorkbook(@Cause Throwable th, String workbook, String resource);
 
-    @Message(id = 60504, value = "About to run command %s, with arguments %s, in working directory %s")
+    @Message(id = 60504, value = "About to run command %s, in working directory %s")
     @LogMessage(level = Logger.Level.INFO)
-    void runCommand(String command, String args, String workingDir);
+    void runCommand(List<String> cmd, String workingDir);
 
     @Message(id = 60505, value = "JDBC batch update count: %s")
     @LogMessage(level = Logger.Level.WARN)
