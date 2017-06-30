@@ -168,12 +168,6 @@
             <artifactId>jasperreports</artifactId>
         </dependency>
 
-        <!-- OsCommandBatchlet dependencies -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-exec</artifactId>
-        </dependency>
-
         <!-- JAX-RS dependencies -->
         <dependency>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
