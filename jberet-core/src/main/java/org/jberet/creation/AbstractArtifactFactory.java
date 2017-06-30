@@ -36,6 +36,14 @@ import org.wildfly.security.manager.WildFlySecurityManager;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
+/**
+ * An abstract implementation of an {@link ArtifactFactory} which contains some helper methods for dealing injecting
+ * data if CDI is not available or the class was created from the job XML using the fully qualified class name.
+ * <p>
+ * Note that if subclasses over the {@link #destroy(Object)} method, they should invoke {@code super.destroy(instance)}
+ * if the instance was not destroyed by another means, e.g. releasing the CDI context.
+ * </p>
+ */
 public abstract class AbstractArtifactFactory implements ArtifactFactory {
     @Override
     public void destroy(final Object instance) {
