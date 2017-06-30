@@ -26,6 +26,11 @@ public final class ArtifactFactoryWrapper extends AbstractArtifactFactory {
     }
 
     @Override
+    public void destroy(final Object instance) {
+        factory.destroy(instance);
+    }
+
+    @Override
     public Class<?> getArtifactClass(final String ref, final ClassLoader classLoader) {
         Class<?> cls = factory.getArtifactClass(ref, classLoader);
         if (cls == null) {
