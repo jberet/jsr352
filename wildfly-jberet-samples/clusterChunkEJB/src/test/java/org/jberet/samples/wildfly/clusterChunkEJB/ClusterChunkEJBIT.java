@@ -27,7 +27,9 @@ import static org.junit.Assert.assertEquals;
 @Ignore("need to configure and start WildFly cluster first")
 public final class ClusterChunkEJBIT extends BatchTestBase {
     private static final String clusterChunkEJB = "clusterChunkEJB";
+    private static final String clusterBatchletEJB = "clusterBatchletEJB";
     private static final String clusterChunkEJBStop = "clusterChunkEJBStop";
+    private static final String clusterBatchletEJBStop = "clusterBatchletEJBStop";
     private static final long waitForCompletionMillis = 60000;
 
     protected static final String BASE_URL_1 = "http://localhost:8230/";
@@ -47,7 +49,26 @@ public final class ClusterChunkEJBIT extends BatchTestBase {
 
     @Test
     public void clusterChunkEJB() throws Exception {
-        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkEJB, null);
+        runChunkOrBatchletJob(clusterChunkEJB);
+    }
+
+    @Test
+    public void clusterBatchletEJB() throws Exception {
+        runChunkOrBatchletJob(clusterBatchletEJB);
+    }
+
+    @Test
+    public void stopRemoteChunkPartitions() throws Exception {
+        stopRemotePartitions(clusterChunkEJBStop);
+    }
+
+    @Test
+    public void stopRemoteBatchletPartitions() throws Exception {
+        stopRemotePartitions(clusterBatchletEJBStop);
+    }
+
+    private void runChunkOrBatchletJob(final String jobName) throws Exception {
+        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(jobName, null);
         Thread.sleep(waitForCompletionMillis);
         final JobExecutionEntity jobExecution1 = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
         assertEquals(BatchStatus.COMPLETED, jobExecution1.getBatchStatus());
@@ -56,12 +77,10 @@ public final class ClusterChunkEJBIT extends BatchTestBase {
         assertEquals(1, stepExecutions.length);
         final StepExecutionEntity stepExecutionEntity = stepExecutions[0];
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecutionEntity.getBatchStatus());
-
     }
 
-    @Test
-    public void stopRemotePartitions() throws Exception {
-        JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkEJBStop, null);
+    private void stopRemotePartitions(final String jobName) throws Exception {
+        JobExecutionEntity jobExecutionEntity = batchClient.startJob(jobName, null);
         Thread.sleep(20000);
         batchClient.stopJobExecution(jobExecutionEntity.getExecutionId());
 

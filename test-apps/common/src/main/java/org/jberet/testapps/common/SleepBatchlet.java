@@ -60,7 +60,7 @@ public class SleepBatchlet implements Batchlet {
             Thread.sleep(sleepMillis);
             duration += sleepMillis;
         }
-
+        System.out.printf("SleepBatchlet slept for %s milliseconds%n", duration);
         return "SLEPT " + duration;
     }
 
