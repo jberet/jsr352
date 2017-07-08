@@ -27,7 +27,9 @@ import static org.junit.Assert.assertEquals;
 @Ignore("need to configure and start WildFly cluster first")
 public final class ClusterChunkServletIT extends BatchTestBase {
     private static final String clusterChunkServlet = "clusterChunkServlet";
+    private static final String clusterBatchletServlet = "clusterBatchletServlet";
     private static final String clusterChunkServletStop = "clusterChunkServletStop";
+    private static final String clusterBatchletServletStop = "clusterBatchletServletStop";
     private static final long waitForCompletionMillis = 60000;
 
     protected static final String BASE_URL_1 = "http://localhost:8230/";
@@ -47,7 +49,26 @@ public final class ClusterChunkServletIT extends BatchTestBase {
 
     @Test
     public void clusterChunkServlet() throws Exception {
-        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkServlet, null);
+        runChunkOrBatchletJob(clusterChunkServlet);
+    }
+
+    @Test
+    public void clusterBatchletServlet() throws Exception {
+        runChunkOrBatchletJob(clusterBatchletServlet);
+    }
+
+    @Test
+    public void stopRemoteChunkPartitions() throws Exception {
+        stopRemotePartitions(clusterChunkServletStop);
+    }
+
+    @Test
+    public void stopRemoteBatchletPartitions() throws Exception {
+        stopRemotePartitions(clusterBatchletServletStop);
+    }
+
+    private void runChunkOrBatchletJob(final String jobName) throws Exception {
+        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(jobName, null);
         Thread.sleep(waitForCompletionMillis);
         final JobExecutionEntity jobExecution1 = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
         assertEquals(BatchStatus.COMPLETED, jobExecution1.getBatchStatus());
@@ -56,12 +77,10 @@ public final class ClusterChunkServletIT extends BatchTestBase {
         assertEquals(1, stepExecutions.length);
         final StepExecutionEntity stepExecutionEntity = stepExecutions[0];
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecutionEntity.getBatchStatus());
-
     }
 
-    @Test
-    public void stopRemotePartitions() throws Exception {
-        JobExecutionEntity jobExecutionEntity = batchClient.startJob(clusterChunkServletStop, null);
+    private void stopRemotePartitions(final String jobName) throws Exception {
+        JobExecutionEntity jobExecutionEntity = batchClient.startJob(jobName, null);
         Thread.sleep(20000);
         batchClient.stopJobExecution(jobExecutionEntity.getExecutionId());
 
@@ -76,4 +95,5 @@ public final class ClusterChunkServletIT extends BatchTestBase {
         assertEquals(BatchStatus.STOPPED, jobExecutionEntity.getBatchStatus());
         assertEquals(BatchStatus.STOPPED, stepExecution.getBatchStatus());
     }
+
 }
