@@ -38,7 +38,7 @@
         <module>scripting</module>
         <module>infinispanRepositoryMem</module>
         <module>infinispanRepositoryFile</module>
-        <module>infinispanRepositoryLevelDB</module>
+        <module>infinispanRepositoryRocksDB</module>
         <module>infinispanRepositoryJdbc</module>
         <module>chunkSkipRetry</module>
         <module>purgeInMemoryRepository</module>

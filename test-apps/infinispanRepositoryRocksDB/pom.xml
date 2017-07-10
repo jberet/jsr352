@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>infinispanRepositoryLevelDB</artifactId>
+    <artifactId>infinispanRepositoryRocksDB</artifactId>
 
     <dependencies>
         <dependency>
@@ -32,13 +32,8 @@
         </dependency>
         <dependency>
             <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-cachestore-leveldb</artifactId>
+            <artifactId>infinispan-cachestore-rocksdb</artifactId>
             <version>${version.org.infinispan}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.iq80.leveldb</groupId>
-            <artifactId>leveldb</artifactId>
-            <version>0.7</version>
         </dependency>
     </dependencies>
 </project>

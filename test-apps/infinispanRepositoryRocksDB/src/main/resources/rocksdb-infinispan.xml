@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+
+Contributors:
+Cheng Fang - Initial API and implementation
+-->
+
+<infinispan xmlns="urn:infinispan:config:9.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:rdb="urn:infinispan:config:store:rocksdb:9.0"
+            xsi:schemaLocation="urn:infinispan:config:9.0 http://infinispan.org/schemas/infinispan-config-9.0.xsd
+            urn:infinispan:config:store:rocksdb:9.0 http://infinispan.org/schemas/infinispan-cachestore-rocksdb-config-9.0.xsd">
+
+    <cache-container name="jberet" default-cache="JOB_EXECUTION">
+        <transport lock-timeout="60000"/>
+
+        <distributed-cache name="JOB_INSTANCE" mode="ASYNC" l1-lifespan="0">
+            <persistence>
+                <rdb:rocksdb-store path="/tmp/jberet.infinispan.rocksdb.location/JOB_INSTANCE">
+                    <rdb:expiration path="/tmp/jberet.infinispan.rocksdb.expiredLocation/JOB_INSTANCE"/>
+                </rdb:rocksdb-store>
+            </persistence>
+        </distributed-cache>
+
+        <distributed-cache name="JOB_EXECUTION" mode="ASYNC" l1-lifespan="0">
+            <persistence>
+                <rdb:rocksdb-store path="/tmp/jberet.infinispan.rocksdb.location/JOB_EXECUTION">
+                    <rdb:expiration path="/tmp/jberet.infinispan.rocksdb.expiredLocation/JOB_EXECUTION"/>
+                </rdb:rocksdb-store>
+            </persistence>
+        </distributed-cache>
+
+        <distributed-cache name="STEP_EXECUTION" mode="ASYNC" l1-lifespan="0">
+            <persistence>
+                <rdb:rocksdb-store path="/tmp/jberet.infinispan.rocksdb.location/STEP_EXECUTION">
+                    <rdb:expiration path="/tmp/jberet.infinispan.rocksdb.expiredLocation/STEP_EXECUTION"/>
+                </rdb:rocksdb-store>
+            </persistence>
+        </distributed-cache>
+
+        <distributed-cache name="PARTITION_EXECUTION" mode="ASYNC" l1-lifespan="0">
+            <persistence>
+                <rdb:rocksdb-store path="/tmp/jberet.infinispan.rocksdb.location/PARTITION_EXECUTION">
+                    <rdb:expiration path="/tmp/jberet.infinispan.rocksdb.expiredLocation/PARTITION_EXECUTION"/>
+                </rdb:rocksdb-store>
+            </persistence>
+        </distributed-cache>
+
+        <distributed-cache name="seq" mode="SYNC" l1-lifespan="0">
+            <transaction mode="BATCH" locking="PESSIMISTIC"/>
+            <persistence>
+                <rdb:rocksdb-store path="/tmp/jberet.infinispan.rocksdb.location/seq">
+                    <rdb:expiration path="/tmp/jberet.infinispan.rocksdb.expiredLocation/seq"/>
+                </rdb:rocksdb-store>
+            </persistence>
+        </distributed-cache>
+    </cache-container>
+</infinispan>

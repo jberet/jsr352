@@ -10,17 +10,17 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.testapps.infinispanRepositoryLevelDB;
+package org.jberet.testapps.infinispanRepositoryRocksDB;
+
+import javax.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.batch.runtime.BatchStatus;
-
-public class LevelDBInfinispanRepositoryIT extends AbstractIT {
+public class RocksDBInfinispanRepositoryIT extends AbstractIT {
     @Test
-    public void partitionWithInfinispanLevelDB() throws Exception {
+    public void partitionWithInfinispanRocksDB() throws Exception {
         startJobAndWait(infinispanRepositoryJobXml);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
