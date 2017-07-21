@@ -22,7 +22,7 @@ public interface PartitionHandler {
 
     void setCollectorDataQueue(BlockingQueue<Serializable> collectorDataQueue);
 
-    void submitPartitionTask(StepContextImpl partitionStepContext) throws Exception;
+    void submitPartitionTask(StepContextImpl partitionStepContext, int currentIndex, int numOfPartitions) throws Exception;
 
     default void close(StepContextImpl stepContext) {}
 }

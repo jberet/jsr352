@@ -111,7 +111,9 @@ public class JmsPartitionHandler implements PartitionHandler, JobStopNotificatio
     }
 
     @Override
-    public void submitPartitionTask(final StepContextImpl partitionStepContext) throws Exception {
+    public void submitPartitionTask(final StepContextImpl partitionStepContext,
+                                    final int currentIndex,
+                                    final int numOfPartitions) throws Exception {
         final Step step1 = partitionStepContext.getStep();
         final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) partitionStepContext.getStepExecution();
         final JobExecutionImpl jobExecution = partitionStepContext.getJobContext().getJobExecution();

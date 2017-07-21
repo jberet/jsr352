@@ -350,7 +350,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                 completedPartitionThreads.take();
             }
             jobContext.getJobRepository().addPartitionExecution(stepExecution, partitionExecution1);
-            partitionHandler.submitPartitionTask(stepContext1);
+            partitionHandler.submitPartitionTask(stepContext1, i, numOfPartitions);
         }
 
         BatchStatus consolidatedBatchStatus = BatchStatus.STARTED;
