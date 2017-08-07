@@ -43,7 +43,9 @@ public class ThreadPartitionHandler implements PartitionHandler {
     }
 
     @Override
-    public void submitPartitionTask(final StepContextImpl partitionStepContext) {
+    public void submitPartitionTask(final StepContextImpl partitionStepContext,
+                                    final int currentIndex,
+                                    final int numOfPartitions) {
         final AbstractRunner<StepContextImpl> runner1;
         final Step step1 = partitionStepContext.getStep();
         final Chunk ch = step1.getChunk();
