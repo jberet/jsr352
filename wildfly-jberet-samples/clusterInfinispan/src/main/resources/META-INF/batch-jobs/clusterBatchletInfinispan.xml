@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2017 Red Hat,Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution,and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="clusterBatchletInfinispan" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="clusterBatchletInfinispan.step1">
+        <batchlet>
+            <properties>
+                <property name="partition.id" value="#{partitionPlan['partition.id']}"/>
+            </properties>
+            <script type="javascript">
+                function process() {
+                    var partitionId = batchProperties.get('partition.id');
+                    print('In clusterBatchletInfinispan.step1 batchlet of partition ' + partitionId + '\n');
+                    return null;
+                }
+            </script>
+        </batchlet>
+        <partition>
+            <plan partitions="5">
+                <properties partition="0">
+                    <property name="partition.id" value="0"/>
+                </properties>
+                <properties partition="1">
+                    <property name="partition.id" value="1"/>
+                </properties>
+                <properties partition="2">
+                    <property name="partition.id" value="2"/>
+                </properties>
+                <properties partition="3">
+                    <property name="partition.id" value="3"/>
+                </properties>
+                <properties partition="4">
+                    <property name="partition.id" value="4"/>
+                </properties>
+            </plan>
+        </partition>
+    </step>
+</job>

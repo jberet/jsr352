@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+    <distributable/>
+
+    <servlet-mapping>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+
+    <resource-ref>
+        <res-ref-name>infinispan/cache/web/jberet</res-ref-name>
+        <res-type>org.infinispan.Cache</res-type>
+        <lookup-name>java:jboss/infinispan/cache/web/jberet</lookup-name>
+    </resource-ref>
+</web-app>

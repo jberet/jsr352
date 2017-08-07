@@ -46,6 +46,7 @@
         <module>camelReaderWriter</module>
         <module>clusterChunkServlet</module>
         <module>clusterChunkEJB</module>
+        <module>clusterInfinispan</module>
     </modules>
 
     <properties>

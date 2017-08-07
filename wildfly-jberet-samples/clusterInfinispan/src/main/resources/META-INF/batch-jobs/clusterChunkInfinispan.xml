@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2017 Red Hat,Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution,and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="clusterChunkInfinispan" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="clusterChunkInfinispan.step1">
+        <chunk>
+            <reader ref="arrayItemReader">
+                <properties>
+                    <property name="resource"
+value="[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,42,44,45,46,47,48,49]"/>
+                    <property name="beanType" value="java.lang.Integer"/>
+                    <property name="skipBeanValidation" value="true"/>
+                    <property name="start" value="#{partitionPlan['partition.start']}"/>
+                    <property name="end" value="#{partitionPlan['partition.end']}"/>
+                </properties>
+            </reader>
+            <writer ref="mockItemWriter"/>
+        </chunk>
+        <partition>
+            <plan partitions="5">
+                <properties partition="0">
+                    <property name="partition.start" value="0"/>
+                    <property name="partition.end" value="9"/>
+                </properties>
+                <properties partition="1">
+                    <property name="partition.start" value="10"/>
+                    <property name="partition.end" value="19"/>
+                </properties>
+                <properties partition="2">
+                    <property name="partition.start" value="20"/>
+                    <property name="partition.end" value="29"/>
+                </properties>
+                <properties partition="3">
+                    <property name="partition.start" value="30"/>
+                    <property name="partition.end" value="39"/>
+                </properties>
+                <properties partition="4">
+                    <property name="partition.start" value="40"/>
+                    <property name="partition.end" value="49"/>
+                </properties>
+            </plan>
+        </partition>
+    </step>
+</job>
