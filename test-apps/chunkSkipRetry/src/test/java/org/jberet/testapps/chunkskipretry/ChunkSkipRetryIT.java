@@ -19,11 +19,14 @@ import javax.batch.runtime.Metric;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static java.util.Arrays.asList;
+import static org.jberet.testapps.chunkskipretry.ChunkListener1.after;
+import static org.jberet.testapps.chunkskipretry.ChunkListener1.before;
+import static org.jberet.testapps.chunkskipretry.ChunkListener1.error;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests to verify skip and retry behaviors by configuring {@code ArithmeticException} as {@code skippable-exception},
@@ -70,6 +73,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
     protected static final String chunkRetryXml = "chunkRetry.xml";
     protected static final String chunkSkipXml = "chunkSkip.xml";
     protected static final String chunkSkipRetryXml = "chunkSkipRetry.xml";
+    protected static final String chunkListenerXml = "chunkListener.xml";
 
     @Before
     public void before() throws Exception {
@@ -99,6 +103,40 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    /**
+     * This test expands {@link #retryRead0()} by adding {@link ChunkListener1}
+     * to the test job, and verifying job exit status, which should contain
+     * values saved in chunk listener.
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void retryRead0ChunkListener() throws Exception {
+        params.setProperty("reader.fail.on.values", "0");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0));
+        expected.add(asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        expected.add(asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
+        expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        final String expectedExitStatus = before + error + before + after +
+                before + after +
+                before + after +
+                before + after;
+
+        runTest(chunkListenerXml, expected);
+        verifyMetric(Metric.MetricType.COMMIT_COUNT, 4);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
     }
 
     @Test
@@ -160,6 +198,61 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
         verifyMetric(Metric.MetricType.FILTER_COUNT, 0);
+    }
+
+    /**
+     * This test expands {@link #retryRead5NoRollback()} by adding {@link ChunkListener1}
+     * to the test job, and verifying job exit status, which should contain
+     * values saved in chunk listener.
+     * <p>
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void retryRead5NoRollbackChunkListener() throws Exception {
+        params.setProperty("reader.fail.on.values", "5");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 6, 7, 8, 9, 10));
+        expected.add(asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
+        expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        final String expectedExitStatus = before + after +
+                before + after +
+                before + after;
+
+        runTest(chunkListenerXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+        verifyMetric(Metric.MetricType.FILTER_COUNT, 0);
+
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
+    }
+
+    /**
+     * This test uses {@link ChunkListener1} to verify that when a step
+     * that has no retryable exception classes fails, {@code onError}
+     * method of the chunk listener is called.
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void failRead5ChunkListener() throws Exception {
+        params.setProperty("reader.fail.on.values", "5");
+        params.setProperty("retryable.exception.classes", SecurityException.class.getName());
+        final String expectedExitStatus = before + error;
+
+        startJob(chunkListenerXml);
+        awaitTermination();
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
     }
 
     @Test
@@ -376,7 +469,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("retry.limit", "2");
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -391,7 +484,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("repeat.failure", "true");
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -406,7 +499,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("no.rollback.exception.classes", arithmeticException);
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -422,7 +515,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("retry.limit", "2");
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -455,6 +548,57 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
     }
 
+    /**
+     * This test expands {@link #retryWrite0()} by adding {@link ChunkListener1}
+     * to the test job, and verifying job exit status, which should contain
+     * values saved in chunk listener.
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void retryWrite0ChunkListener() throws Exception {
+        params.setProperty("writer.fail.on.values", "0");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0));
+        expected.add(asList(1));
+        expected.add(asList(2));
+        expected.add(asList(3));
+        expected.add(asList(4));
+        expected.add(asList(5));
+        expected.add(asList(6));
+        expected.add(asList(7));
+        expected.add(asList(8));
+        expected.add(asList(9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        final String expectedExitStatus = before + error +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after +
+                before + after;
+
+        runTest(chunkListenerXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
+    }
+
     @Test
     public void retryWrite0NoRollback() throws Exception {
         params.setProperty("writer.fail.on.values", "0");
@@ -470,6 +614,60 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    /**
+     * This test expands {@link #retryWrite0NoRollback()} by adding {@link ChunkListener1}
+     * to the test job, and verifying job exit status, which should contain
+     * values saved in chunk listener.
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void retryWrite0NoRollbackChunkListener() throws Exception {
+        params.setProperty("writer.fail.on.values", "0");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        final String expectedExitStatus = before + after +
+                before + after +
+                before + after +
+                before + after;
+
+        runTest(chunkListenerXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
+    }
+
+    /**
+     * This test uses {@link ChunkListener1} to verify that when a step
+     * that has no retryable exception classes fails, {@code onError}
+     * method of the chunk listener is called.
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void failWrite5ChunkListener() throws Exception {
+        params.setProperty("writer.fail.on.values", "5");
+        params.setProperty("retryable.exception.classes", SecurityException.class.getName());
+        final String expectedExitStatus = before + error;
+
+        startJob(chunkListenerXml);
+        awaitTermination();
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
     }
 
     @Test
@@ -690,7 +888,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("retry.limit", "2");
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -705,7 +903,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("no.rollback.exception.classes", arithmeticException);
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -720,7 +918,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("repeat.failure", "true");
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -744,6 +942,40 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    /**
+     * This test expands {@link #retryProcess0()} by adding {@link ChunkListener1}
+     * to the test job, and verifying job exit status, which should contain
+     * values saved in chunk listener.
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void retryProcess0ChunkListener() throws Exception {
+        params.setProperty("processor.fail.on.values", "0");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0));
+        expected.add(asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        expected.add(asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
+        expected.add(asList(21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        final String expectedExitStatus = before + error +
+                before + after +
+                before + after +
+                before + after +
+                before + after;
+
+        runTest(chunkListenerXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
     }
 
     @Test
@@ -801,6 +1033,60 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+    }
+
+    /**
+     * This test expands {@link #retryProcess5NoRollback()} by adding {@link ChunkListener1}
+     * to the test job, and verifying job exit status, which should contain
+     * values saved in chunk listener.
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void retryProcess5NoRollbackChunkListener() throws Exception {
+        params.setProperty("processor.fail.on.values", "5");
+        params.setProperty("no.rollback.exception.classes", arithmeticException);
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        expected.add(asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.add(asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        final String expectedExitStatus = before + after +
+                before + after +
+                before + after +
+                before + after;
+
+        runTest(chunkListenerXml, expected);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 0);
+
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
+    }
+
+    /**
+     * This test uses {@link ChunkListener1} to verify that when a step
+     * that has no retryable exception classes fails, {@code onError}
+     * method of the chunk listener is called.
+     *
+     * @throws Exception upon errors
+     *
+     * @since 1.3.0.Beta7, 1.2.5.Final
+     */
+    @Test
+    public void failProcess5ChunkListener() throws Exception {
+        params.setProperty("processor.fail.on.values", "5");
+        params.setProperty("retryable.exception.classes", SecurityException.class.getName());
+        final String expectedExitStatus = before + error;
+
+        startJob(chunkListenerXml);
+        awaitTermination();
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(expectedExitStatus, jobExecution.getExitStatus());
     }
 
     @Test
@@ -971,7 +1257,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("retry.limit", "2");
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -986,7 +1272,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("repeat.failure", "true");
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -1002,7 +1288,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("no.rollback.exception.classes", arithmeticException);
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -1017,7 +1303,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("no.rollback.exception.classes", arithmeticException);
         startJob(chunkRetryXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -1161,7 +1447,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("skip.limit", "2");
         startJob(chunkSkipXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.COMMIT_COUNT, 2);
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 2);
@@ -1178,7 +1464,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("skip.limit", "2");
         startJob(chunkSkipXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 1);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
@@ -1272,7 +1558,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("skip.limit", "2");
         startJob(chunkSkipXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
@@ -1389,7 +1675,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
         params.setProperty("skip.limit", "2");
         startJob(chunkSkipXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
 
         verifyMetric(Metric.MetricType.COMMIT_COUNT, 0);
         verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
@@ -1754,7 +2040,7 @@ public class ChunkSkipRetryIT extends AbstractIT {
     private void runTest(final String jobXml, final ArrayList<List<Integer>> expected) throws Exception {
         startJob(jobXml);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(expected, stepExecution0.getPersistentUserData());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(expected, stepExecution0.getPersistentUserData());
     }
 }
