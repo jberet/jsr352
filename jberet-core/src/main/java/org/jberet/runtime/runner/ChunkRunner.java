@@ -397,7 +397,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
                 retryCount++;
                 if (needRollbackBeforeRetry(e)) {
-                    rollbackCheckpoint(processingInfo);
+                    rollbackCheckpoint(processingInfo, e);
                 } else {
                     processingInfo.itemState = ItemState.TO_RETRY_READ;
                 }
@@ -444,7 +444,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     }
                     retryCount++;
                     if (needRollbackBeforeRetry(e)) {
-                        rollbackCheckpoint(processingInfo);
+                        rollbackCheckpoint(processingInfo, e);
                     } else {
                         processingInfo.itemState = ItemState.TO_RETRY_PROCESS;
                     }
@@ -619,7 +619,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 }
                 retryCount++;
                 if (needRollbackBeforeRetry(e)) {
-                    rollbackCheckpoint(processingInfo);
+                    rollbackCheckpoint(processingInfo, e);
                 } else {
                     processingInfo.itemState = ItemState.TO_RETRY_WRITE;
                 }
@@ -634,9 +634,21 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         }
     }
 
-    private void rollbackCheckpoint(final ProcessingInfo processingInfo) throws Exception {
+    /**
+     * Invokes ChunkListener.onError method and rolls back transaction.
+     *
+     * @param processingInfo the current processing info
+     * @param exception the exception causing the transaction rollback
+     * @throws Exception
+     */
+    private void rollbackCheckpoint(final ProcessingInfo processingInfo,
+                                    final Exception exception) throws Exception {
         outputList.clear();
         processingInfo.failurePoint = processingInfo.readPosition;
+
+        for (final ChunkListener l : chunkListeners) {
+            l.onError(exception);
+        }
 
         //when chunk commit failed, the transaction was already rolled back and its status is STATUS_NO_TRANSACTION (6)
         if (tm.getStatus() != Status.STATUS_NO_TRANSACTION) {
