@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,6 +11,12 @@
  */
 
 package org.jberet.repository;
+
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 
 import com.google.common.base.Throwables;
 import org.jberet.util.BatchUtil;
@@ -108,11 +114,26 @@ final class TableColumns {
         if (exception == null) {
             return null;
         }
+
         String asString = Throwables.getStackTraceAsString(exception);
-        if (asString.length() <= TableColumns.EXECUTION_EXCEPTION_LENGTH_LIMIT) {
+        final Charset charset = Charset.defaultCharset();
+        byte[] asBytes = asString.getBytes(charset);
+        if (asBytes.length <= EXECUTION_EXCEPTION_LENGTH_LIMIT) {
             return asString;
         }
+
         asString = exception + BatchUtil.NL + Throwables.getRootCause(exception);
-        return asString.substring(0, Math.min(TableColumns.EXECUTION_EXCEPTION_LENGTH_LIMIT, asString.length()));
+        asBytes = asString.getBytes(charset);
+        if (asBytes.length <= EXECUTION_EXCEPTION_LENGTH_LIMIT) {
+            return asString;
+        }
+
+        final ByteBuffer bb = ByteBuffer.wrap(asBytes, 0, EXECUTION_EXCEPTION_LENGTH_LIMIT);
+        final CharBuffer cb = CharBuffer.allocate(EXECUTION_EXCEPTION_LENGTH_LIMIT);
+        final CharsetDecoder decoder = charset.newDecoder();
+        decoder.onMalformedInput(CodingErrorAction.IGNORE);
+        decoder.decode(bb, cb, true);
+        decoder.flush(cb);
+        return new String(cb.array(), 0, cb.position());
     }
 }
