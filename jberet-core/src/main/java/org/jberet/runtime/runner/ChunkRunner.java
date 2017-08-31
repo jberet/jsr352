@@ -526,8 +526,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private void doCheckpoint(final ProcessingInfo processingInfo) throws Exception {
-        final int outputSize = outputList.size();
-        final boolean nothingToWrite = outputSize == 0 && processingInfo.chunkState == ChunkState.DEPLETED;
+        final boolean nothingToWrite = outputList.size() == 0 && processingInfo.chunkState == ChunkState.DEPLETED;
 
         //to back up reader and writer checkpointInfo, and if tx commit fails, restore to previous valid state
         //ChunkState.TO_START_NEW and ChunkState.RUNNING here are used to indicate values not set by application.
@@ -539,7 +538,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     l.beforeWrite(outputList);
                 }
                 itemWriter.writeItems(outputList);
-                stepMetrics.increment(Metric.MetricType.WRITE_COUNT, outputSize);
+                stepMetrics.increment(Metric.MetricType.WRITE_COUNT, outputList.size());
                 for (final ItemWriteListener l : itemWriteListeners) {
                     l.afterWrite(outputList);
                 }
