@@ -35,7 +35,7 @@ public class MovieTest {
     static final String header = "rank,tit,grs,opn";
 
     static final String cellProcessors =
-            "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate(YYYY-MM-dd)";
+            "ParseInt; NotNull, StrMinMax(1, 100); DMinMax(1000000, 1000000000); ParseDate('yyyy-MM-dd')";
 
     //in xml output, ' in Marvel's will be escaped so we cannot match it verbatim
     static final String expectFull = "The Avengers," +
