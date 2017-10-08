@@ -316,6 +316,9 @@ public class PropertyInjectionBatchlet extends BatchletNoNamed {
     @Inject @BatchProperty(name = "not.defined...")
     File notDefinedFile = new File("/tmp");
 
+    @Inject @BatchProperty
+    String path;
+
     @Override
     public String process() throws Exception {
         final Field[] declaredFields = this.getClass().getDeclaredFields();

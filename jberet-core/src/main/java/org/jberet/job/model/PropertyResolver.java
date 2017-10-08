@@ -38,6 +38,14 @@ public final class PropertyResolver {
     protected static final String systemPropertiesToken = "systemProperties";
     protected static final String partitionPlanToken = "partitionPlan";
 
+    /**
+     * Used to reference environment variables in JSL property expressions.
+     * For example, #{environmentVariables['PATH']}.
+     *
+     * @since 1.3.0.Beta7
+     */
+    protected static final String environmentVariablesToken = "environmentVariables";
+
     private static final String prefix = "#{";
     private static final String defaultValuePrefix = "?:";
 
@@ -707,6 +715,12 @@ public final class PropertyResolver {
         } else if (propCategory.equals(partitionPlanToken)) {
             if (partitionPlanProperties != null) {
                 val = partitionPlanProperties.getProperty(variableName);
+            }
+        } else if(propCategory.equals(environmentVariablesToken)) {
+            if (variableName == null || variableName.isEmpty()) {
+                val = null;
+            } else {
+                val = System.getenv(variableName);
             }
         } else {
             LOGGER.unrecognizedPropertyReference(propCategory, variableName, sb.toString());

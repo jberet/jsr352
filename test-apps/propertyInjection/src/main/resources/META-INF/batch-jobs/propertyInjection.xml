@@ -62,6 +62,8 @@
                 <property name="include.not.defined" value="a#{jobProperties['X']}b"/>
                 <property name="include.not.defined.2" value="2#{jobProperties['include.not.defined']}2"/>
                 <property name="include.not.defined.3" value="2#{jobProperties['X']}?:default;2"/>
+
+                <property name="path" value="#{environmentVariables['PATH']}"/>
             </properties>
         </batchlet>
     </step>

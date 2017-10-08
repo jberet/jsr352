@@ -23,6 +23,7 @@ import static org.jberet.job.model.PropertyResolver.jobPropertiesToken;
 import static org.jberet.job.model.PropertyResolver.partitionPlanToken;
 import static org.jberet.job.model.PropertyResolver.systemPropertiesToken;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class PropertyResolverTest {
     private static final String jobParam1 = "infile.path";
@@ -351,5 +352,17 @@ public class PropertyResolverTest {
                 partitionPlan1Val
         };
         run(raw, expected);
+    }
+
+    @Test public void environmentVariables() {
+        String expression = "#{environmentVariables['PATH']}?:NONE;";
+        String resolvedValue = resolver.resolve(expression);
+        System.out.printf("%s = %s%n", expression, resolvedValue);
+        assertNotEquals("NONE", resolvedValue);
+
+        expression = "#{environmentVariables['a-b-c123']}?:NONE;";
+        resolvedValue = resolver.resolve(expression);
+        System.out.printf("%s = %s%n", expression, resolvedValue);
+        assertEquals("NONE", resolvedValue);
     }
 }
