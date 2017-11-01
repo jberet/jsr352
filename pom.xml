@@ -130,7 +130,6 @@
         <module>jberet-camel</module>
         <module>jberet-vertx</module>
         <module>jberet-wildfly</module>
-        <module>jberet-rest</module>
     </modules>
 
     <build>
