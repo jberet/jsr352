@@ -71,6 +71,12 @@
             </dependency>
             <dependency>
                 <groupId>org.jberet</groupId>
+                <artifactId>jberet-rest-commons</artifactId>
+                <version>${project.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jberet</groupId>
                 <artifactId>jberet-schedule-executor</artifactId>
                 <version>${project.version}</version>
                 <scope>compile</scope>
@@ -115,6 +121,10 @@
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-rest-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-rest-commons</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jberet</groupId>

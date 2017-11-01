@@ -32,6 +32,7 @@ import org.jberet.rest._private.RestAPIMessages;
 import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
+import org.jberet.rest.service.JobService;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduler;

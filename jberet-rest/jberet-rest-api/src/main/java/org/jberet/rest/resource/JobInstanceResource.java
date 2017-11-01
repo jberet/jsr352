@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 
 import org.jberet.rest._private.RestAPIMessages;
 import org.jberet.rest.entity.JobInstanceEntity;
+import org.jberet.rest.service.JobService;
 
 /**
  * REST resource class for job instance. This class supports job-instance-related

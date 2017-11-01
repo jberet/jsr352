@@ -124,12 +124,13 @@
         <module>jberet-distribution</module>
         <module>jberet-jpa-repository</module>
         <module>jberet-support</module>
-        <module>jberet-rest-api</module>
+        <module>jberet-rest</module>
         <module>wildfly-jberet-samples</module>
         <module>jberet-schedule</module>
         <module>jberet-camel</module>
         <module>jberet-vertx</module>
         <module>jberet-wildfly</module>
+        <module>jberet-rest</module>
     </modules>
 
     <build>

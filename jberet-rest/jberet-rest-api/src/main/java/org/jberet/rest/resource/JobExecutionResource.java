@@ -28,6 +28,7 @@ import javax.ws.rs.core.UriInfo;
 import org.jberet.rest._private.RestAPIMessages;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
+import org.jberet.rest.service.JobService;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduler;
