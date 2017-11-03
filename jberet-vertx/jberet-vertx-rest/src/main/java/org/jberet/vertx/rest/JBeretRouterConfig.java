@@ -60,9 +60,7 @@ public class JBeretRouterConfig {
         for (JobEntity jobEntity : jobEntities) {
             jsonArray.add(JsonObject.mapFrom(jobEntity));
         }
-
-        routingContext.response().putHeader("content-type", "application/json")
-                .end(jsonArray.encodePrettily());
+        sendJsonResponse(routingContext, jsonArray.encodePrettily());
     }
 
     public static void startJob(final RoutingContext routingContext) {
@@ -70,9 +68,7 @@ public class JBeretRouterConfig {
         final Properties jobParams = getJobParameters(routingContext);
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().start(jobXmlName, jobParams);
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
-        routingContext.response().putHeader("content-type", "application/json")
-                .end(jsonObject.encodePrettily());
-
+        sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
 
     public static void getJobExecution(final RoutingContext routingContext) {
@@ -80,8 +76,7 @@ public class JBeretRouterConfig {
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().getJobExecution(jobExecutionId);
 
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
-        routingContext.response().putHeader("content-type", "application/json")
-                .end(jsonObject.encodePrettily());
+        sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
 
     public static void getStepExecutions(final RoutingContext routingContext) {
@@ -92,9 +87,7 @@ public class JBeretRouterConfig {
         for (StepExecutionEntity e : stepExecutions) {
             jsonArray.add(JsonObject.mapFrom(e));
         }
-
-        routingContext.response().putHeader("content-type", "application/json")
-                .end(jsonArray.encodePrettily());
+        sendJsonResponse(routingContext, jsonArray.encodePrettily());
     }
 
     public static void getStepExecution(final RoutingContext routingContext) {
@@ -109,8 +102,7 @@ public class JBeretRouterConfig {
         }
 
         final JsonObject jsonObject = JsonObject.mapFrom(stepExecutionFound);
-        routingContext.response().putHeader("content-type", "application/json")
-                .end(jsonObject.encodePrettily());
+        sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
 
     public static void abandonJobExecution(final RoutingContext routingContext) {
@@ -131,8 +123,7 @@ public class JBeretRouterConfig {
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().restart(jobExecutionId, jobParams);
 
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
-        routingContext.response().putHeader("content-type", "application/json")
-                .end(jsonObject.encodePrettily());
+        sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
 
 
@@ -151,5 +142,9 @@ public class JBeretRouterConfig {
     private static long getIdAsLong(final RoutingContext routingContext, final String pathParamKey) {
         final String idString = routingContext.pathParam(pathParamKey);
         return Long.parseLong(idString);
+    }
+
+    private static void sendJsonResponse(final RoutingContext routingContext, String body) {
+        routingContext.response().putHeader("content-type", "application/json").end(body);
     }
 }
