@@ -76,8 +76,7 @@ public class JBeretRouterConfig {
     }
 
     public static void getJobExecution(final RoutingContext routingContext) {
-        final String jobExecutionIdString = routingContext.pathParam("jobExecutionId");
-        final long jobExecutionId = Long.parseLong(jobExecutionIdString);
+        final long jobExecutionId = getIdAsLong(routingContext, "jobExecutionId");
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().getJobExecution(jobExecutionId);
 
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
@@ -86,8 +85,7 @@ public class JBeretRouterConfig {
     }
 
     public static void getStepExecutions(final RoutingContext routingContext) {
-        final String jobExecutionIdString = routingContext.pathParam("jobExecutionId");
-        final long jobExecutionId = Long.parseLong(jobExecutionIdString);
+        final long jobExecutionId = getIdAsLong(routingContext, "jobExecutionId");
         final StepExecutionEntity[] stepExecutions = JobService.getInstance().getStepExecutions(jobExecutionId);
 
         final JsonArray jsonArray = new JsonArray();
@@ -100,11 +98,8 @@ public class JBeretRouterConfig {
     }
 
     public static void getStepExecution(final RoutingContext routingContext) {
-        final String jobExecutionIdString = routingContext.pathParam("jobExecutionId");
-        final long jobExecutionId = Long.parseLong(jobExecutionIdString);
-        final String stepExecutionIdString = routingContext.pathParam("stepExecutionId");
-        final long stepExecutionId = Long.parseLong(stepExecutionIdString);
-
+        final long jobExecutionId = getIdAsLong(routingContext, "jobExecutionId");
+        final long stepExecutionId = getIdAsLong(routingContext, "stepExecutionId");
         StepExecutionEntity stepExecutionFound = null;
         final StepExecutionEntity[] stepExecutions = JobService.getInstance().getStepExecutions(jobExecutionId);
         for (StepExecutionEntity e : stepExecutions) {
@@ -119,22 +114,19 @@ public class JBeretRouterConfig {
     }
 
     public static void abandonJobExecution(final RoutingContext routingContext) {
-        final String jobExecutionIdString = routingContext.pathParam("jobExecutionId");
-        final long jobExecutionId = Long.parseLong(jobExecutionIdString);
+        final long jobExecutionId = getIdAsLong(routingContext, "jobExecutionId");
         JobService.getInstance().abandon(jobExecutionId);
         routingContext.response().end();
     }
 
     public static void stopJobExecution(final RoutingContext routingContext) {
-        final String jobExecutionIdString = routingContext.pathParam("jobExecutionId");
-        final long jobExecutionId = Long.parseLong(jobExecutionIdString);
+        final long jobExecutionId = getIdAsLong(routingContext, "jobExecutionId");
         JobService.getInstance().stop(jobExecutionId);
         routingContext.response().end();
     }
 
     public static void restartJobExecution(final RoutingContext routingContext) {
-        final String jobExecutionIdString = routingContext.pathParam("jobExecutionId");
-        final long jobExecutionId = Long.parseLong(jobExecutionIdString);
+        final long jobExecutionId = getIdAsLong(routingContext, "jobExecutionId");
         final Properties jobParams = getJobParameters(routingContext);
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().restart(jobExecutionId, jobParams);
 
@@ -156,4 +148,8 @@ public class JBeretRouterConfig {
         return jobParams;
     }
 
+    private static long getIdAsLong(final RoutingContext routingContext, final String pathParamKey) {
+        final String idString = routingContext.pathParam(pathParamKey);
+        return Long.parseLong(idString);
+    }
 }
