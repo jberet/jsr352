@@ -22,6 +22,11 @@
                     <property name="skipBeanValidation" value="true"/>
                 </properties>
             </reader>
+            <processor ref="sleepItemProcessor">
+                <properties>
+                    <property name="sleepSeconds" value="#{jobParameters['sleepSeconds']}"/>
+                </properties>
+            </processor>
             <writer ref="mockItemWriter"/>
         </chunk>
     </step>

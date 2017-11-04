@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import io.vertx.core.MultiMap;
+import io.vertx.core.VertxException;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -24,6 +26,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
+import org.jberet.rest.entity.JobInstanceEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
 import org.jberet.rest.service.JobService;
 
@@ -40,7 +43,13 @@ public class JBeretRouterConfig {
         router.get("/").handler(JBeretRouterConfig::getDefault);
         router.get("/jobs").handler(JBeretRouterConfig::getJobs);
         router.post("/jobs/:jobXmlName/start").handler(JBeretRouterConfig::startJob);
+        router.post("/jobs/:jobXmlName/restart").handler(JBeretRouterConfig::restartJob);
 
+        router.get("/jobinstances").handler(JBeretRouterConfig::getJobInstances);
+        router.get("/jobinstances/count").handler(JBeretRouterConfig::getJobInstanceCount);
+
+        router.get("/jobexecutions").handler(JBeretRouterConfig::getJobExecutions);
+        router.get("/jobexecutions/running").handler(JBeretRouterConfig::getRunningExecutions);
         router.get("/jobexecutions/:jobExecutionId").handler(JBeretRouterConfig::getJobExecution);
         router.get("/jobexecutions/:jobExecutionId/stepexecutions").handler(JBeretRouterConfig::getStepExecutions);
         router.get("/jobexecutions/:jobExecutionId/stepexecutions/:stepExecutionId").handler(JBeretRouterConfig::getStepExecution);
@@ -69,6 +78,22 @@ public class JBeretRouterConfig {
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().start(jobXmlName, jobParams);
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
         sendJsonResponse(routingContext, jsonObject.encodePrettily());
+    }
+
+    public static void restartJob(final RoutingContext routingContext) {
+        final String jobXmlName = routingContext.pathParam("jobXmlName");
+        final Properties jobParams = getJobParameters(routingContext);
+
+        final JobInstanceEntity[] jobInstances = JobService.getInstance().getJobInstances(jobXmlName, 0, 1);
+        if (jobInstances.length > 0) {
+            final long latestJobExecutionId = jobInstances[0].getLatestJobExecutionId();
+            final JobExecutionEntity jobExecutionEntity = JobService.getInstance().restart(latestJobExecutionId, jobParams);
+
+            final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
+            sendJsonResponse(routingContext, jsonObject.encodePrettily());
+        } else {
+            throw new VertxException(routingContext.normalisedPath());
+        }
     }
 
     public static void getJobExecution(final RoutingContext routingContext) {
@@ -126,6 +151,68 @@ public class JBeretRouterConfig {
         sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
 
+    public static void getRunningExecutions(final RoutingContext routingContext) {
+        final String jobName = routingContext.request().getParam("jobName");
+        final JobExecutionEntity[] runningExecutions = JobService.getInstance().getRunningExecutions(jobName);
+        final JsonArray jsonArray = new JsonArray();
+        for (JobExecutionEntity e : runningExecutions) {
+            jsonArray.add(JsonObject.mapFrom(e));
+        }
+        sendJsonResponse(routingContext, jsonArray.encodePrettily());
+    }
+
+    public static void getJobExecutions(final RoutingContext routingContext) {
+        final String jobExecutionId1String = routingContext.request().getParam("jobExecutionId1");
+        final long jobExecutionId1 = jobExecutionId1String == null ? 0 : Long.parseLong(jobExecutionId1String);
+        final String countString = routingContext.request().getParam("count");
+        final int count = countString == null ? 0 : Integer.parseInt(countString);
+
+        //jobExecutionId1 is used to retrieve the JobInstance, from which to get all its JobExecution's
+        //jobInstanceId param is currently not used.
+        final JobExecutionEntity[] jobExecutionEntities =
+                JobService.getInstance().getJobExecutions(count, 0, jobExecutionId1);
+        final JsonArray jsonArray = new JsonArray();
+        for (JobExecutionEntity e : jobExecutionEntities) {
+            jsonArray.add(JsonObject.mapFrom(e));
+        }
+        sendJsonResponse(routingContext, jsonArray.encodePrettily());
+    }
+
+    public static void getJobInstances(final RoutingContext routingContext) {
+        final HttpServerRequest request = routingContext.request();
+
+        final String jobName = request.getParam("jobName");
+
+        final String startString = request.getParam("start");
+        final int start = startString == null ? 0 : Integer.parseInt(startString);
+
+        final String countString = request.getParam("count");
+        final int count = countString == null ? 0 : Integer.parseInt(countString);
+
+        final String jobExecutionIdString = request.getParam("jobExecutionId");
+        final long jobExecutionId = jobExecutionIdString == null ? 0 : Long.parseLong(jobExecutionIdString);
+
+        if (jobExecutionId > 0) {
+            final JobInstanceEntity jobInstanceData = JobService.getInstance().getJobInstance(jobExecutionId);
+            final JsonObject jsonObject = JsonObject.mapFrom(jobInstanceData);
+            sendJsonResponse(routingContext, jsonObject.encodePrettily());
+        } else {
+            final JobInstanceEntity[] jobInstanceData =
+                    JobService.getInstance().getJobInstances(jobName == null ? "*" : jobName, start,
+                            count == 0 ? Integer.MAX_VALUE : count);
+            final JsonArray jsonArray = new JsonArray();
+            for (JobInstanceEntity e : jobInstanceData) {
+                jsonArray.add(JsonObject.mapFrom(e));
+            }
+            sendJsonResponse(routingContext, jsonArray.encodePrettily());
+        }
+    }
+
+    public static void getJobInstanceCount(final RoutingContext routingContext) {
+        final String jobName = routingContext.request().getParam("jobName");
+        final int jobInstanceCount = JobService.getInstance().getJobInstanceCount(jobName);
+        routingContext.response().end(String.valueOf(jobInstanceCount));
+    }
 
     private static Properties getJobParameters(final RoutingContext routingContext) {
         final MultiMap params = routingContext.request().params();
