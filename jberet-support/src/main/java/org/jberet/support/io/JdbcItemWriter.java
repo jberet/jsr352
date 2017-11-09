@@ -192,9 +192,22 @@ public class JdbcItemWriter extends JdbcItemReaderWriterBase implements ItemWrit
     private void mapParameters(final Object item) throws Exception {
         if (item instanceof List) {
             final List itemAsList = (List) item;
+            final int itemSize = itemAsList.size();
+
             //the item is a list and should contain data of proper types, e.g., String, Integer, Date, etc,
             //and in the same order as SQL insert statement parameters.
-            for (int i = 0; i < itemAsList.size(); ++i) {
+
+            //the item list may contain more elements than the number of sql parameters
+            //in the insert sql statement. So first count the number of sql parameters,
+            // if supported by the jdbc driver.
+            int parameterCount;
+            try {
+                parameterCount = preparedStatement.getParameterMetaData().getParameterCount();
+            } catch (final Exception e) {
+                parameterCount = itemSize;
+            }
+
+            for (int i = 0; i < parameterCount; ++i) {
                 setParameter(i, itemAsList.get(i));
             }
         } else {

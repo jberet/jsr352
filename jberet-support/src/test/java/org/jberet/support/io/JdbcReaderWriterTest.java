@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,6 +58,8 @@ public class JdbcReaderWriterTest {
                     "PRIMARY KEY(TRADEDATE, TRADETIME))";
     static final String writerInsertSql =
             "insert into STOCK_TRADE (TRADEDATE, TRADETIME, OPEN, HIGH, LOW, CLOSE, VOLUMN) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    static final String writerInsertSql2 =
+            "insert into STOCK_TRADE (TRADEDATE, TRADETIME, OPEN, HIGH, LOW, CLOSE)         VALUES(?, ?, ?, ?, ?, ?)";
 
     static final String parameterTypes = "Date, String, Double, Double, Double, Double, Double";
 
@@ -179,6 +181,36 @@ public class JdbcReaderWriterTest {
                 readerQuery, null, parameterTypes,
                 "resultSetType=TYPE_SCROLL_INSENSITIVE",
                 "09:31, 10810,  09:32, 09:33,  09:34, 4800", "09:35");
+    }
+
+    /**
+     * Same as above test {@link #readIBMStockTradeCsvWriteJdbcListType()}, except that
+     * in this test, the insert sql statement does not contain {@code VOLUMN} parameter.
+     * While the incoming date item list still contains the {@code VOLUMN} value,
+     * {@code jdbcItemWriter} should not attempt to assign that value to a non-exist
+     * sql parameter.
+     *
+     * @see "https://issues.jboss.org/browse/JBERET-363"
+     *
+     * @throws Exception
+     */
+    @Test
+    public void readIBMStockTradeCsvWriteJdbcListTypeNoVolumn() throws Exception {
+        testWrite0(writerTestJobName, List.class, List.class, ExcelWriterTest.ibmStockTradeHeader,
+                "0", "200",
+                writerInsertSql2, null, parameterTypes);
+
+        //since beanType is List, data fields go by order, so CsvItemWriter does not need to do any mapping,
+        //and so CsvItemWriter header is just used for display purpose only.
+
+        //this JdbcItemReader reads row 2, 3, 4, 5 (start = 2 and end = 5 below)
+        //use default resultSetProperties
+        testRead0(readerTestJobName, List.class, List.class, "readIBMStockTradeCsvWriteJdbcListType.out",
+                "2", "5",
+                null, ExcelWriterTest.ibmStockTradeHeader,
+                readerQuery, null, parameterTypes,
+                "resultSetType=TYPE_SCROLL_INSENSITIVE",
+                "09:31,  09:32, 09:33,  09:34", "09:35, 10810, 4800");
     }
 
     @Test
