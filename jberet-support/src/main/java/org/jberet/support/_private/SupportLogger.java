@@ -55,5 +55,8 @@ public interface SupportLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.INFO)
     void addingSql(String sql);
 
+    @Message(id = 60507, value = "Produced report to: %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void producedJasperReport(String dest);
 
 }

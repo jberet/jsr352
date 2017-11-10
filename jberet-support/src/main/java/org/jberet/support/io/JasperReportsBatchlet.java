@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,6 +41,7 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.data.XlsDataSource;
 import net.sf.jasperreports.export.Exporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
+import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
 /**
@@ -293,14 +294,18 @@ public class JasperReportsBatchlet implements Batchlet {
             if (exporter != null) {
                 //injected Exporter instance should already set appropriate ExporterOutput, so pass null to fillAndExportReport(...)
                 fillAndExportReport(templateInputStream, reportParameters1, jrDataSource, exporter);
+                SupportLogger.LOGGER.producedJasperReport(exporter.toString());
             } else {
                 if (ftype.equals("pdf")) {
                     JasperRunManager.runReportToPdfStream(templateInputStream, outputStream, reportParameters1, jrDataSource);
                     outputStream.flush();
+                    SupportLogger.LOGGER.producedJasperReport(outputFile != null ? outputFile : outputStream.toString());
                 } else if (ftype.equals("html")) {
                     JasperRunManager.runReportToHtmlFile(getTemplateFilePath(templateInputStream), outputFile, reportParameters1, jrDataSource);
+                    SupportLogger.LOGGER.producedJasperReport(outputFile);
                 } else if (ftype.equals("jrprint")) {
                     JasperFillManager.fillReportToFile(getTemplateFilePath(templateInputStream), outputFile, reportParameters1, jrDataSource);
+                    SupportLogger.LOGGER.producedJasperReport(outputFile);
                 } else {
                     throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, outputFile, "outputFile");
                 }
