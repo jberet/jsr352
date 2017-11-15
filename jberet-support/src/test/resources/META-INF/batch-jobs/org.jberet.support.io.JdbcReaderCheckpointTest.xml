@@ -12,11 +12,11 @@
  Cheng Fang - Initial API and implementation
 -->
 
-<job id="myJob" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+<job id="org.jberet.support.io.JdbcReaderCheckpointTest" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
      version="1.0">
-    <step id="org.jberet.support.io.JdbcReaderTest.step1">
+    <step id="org.jberet.support.io.JdbcReaderCheckpointTest.step1">
         <chunk>
             <reader ref="jdbcItemReader">
                 <properties>
