@@ -32,11 +32,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class JdbcReaderWriterTest {
     static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String h2JdbcDriverClassName = "org.h2.Driver";
     static final String writerTestJobName = "org.jberet.support.io.JdbcWriterTest";
     static final String readerTestJobName = "org.jberet.support.io.JdbcReaderTest";
+    static final String readerCheckpointTestJobName = "org.jberet.support.io.JdbcReaderCheckpointTest";
 
     static final File dbDir = new File(CsvItemReaderWriterTest.tmpdir, "JdbcReaderWriterTest");
     static final String url = "jdbc:h2:" + dbDir.getPath();
@@ -231,6 +234,53 @@ public class JdbcReaderWriterTest {
                 "09:31, 10810,  09:32, 09:33,  09:34, 4800", null);
     }
 
+    @Test
+    public void jdbcItemReaderCheckpointTest() throws Exception {
+        //first populate the table
+        testWrite0(writerTestJobName, List.class, List.class, ExcelWriterTest.ibmStockTradeHeader,
+                "0", "19",
+                writerInsertSql, ExcelWriterTest.ibmStockTradeHeader, parameterTypes);
+
+        //then read from the above table with jdbcItemReader.
+        //this job execution will fail, since the item processor is configured to fail when
+        //encountering certain value (failOnTimes).
+        final File writeResourceFile = new File(CsvItemReaderWriterTest.tmpdir, "jdbcItemReaderCheckpointTest");
+        final Properties params = new Properties();
+        params.setProperty("url", url);
+        params.setProperty("user", dbUser == null ? "" : dbUser);
+        params.setProperty("password", dbPassword == null ? "" : dbPassword);
+        params.setProperty("sql", readerQuery);
+        params.setProperty("start", "0");
+        params.setProperty("end", "14");
+        params.setProperty("failOnTimes", "09:41");
+        params.setProperty("writeResource", writeResourceFile.getAbsolutePath());
+
+        final long jobExecutionId = jobOperator.start(readerCheckpointTestJobName, params);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+
+        String expect = "09:30, 09:31, 09:32, 09:33, 09:34, 09:35, 09:36, 09:37, 09:38, 09:39";
+        String forbid = "09:40, 09:41";
+        CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
+
+        //then restart the above failed job execution, instructing the item processor not to fail
+        //on the selected item.
+        //The jdbcItemReader in this restart job execution should read from the item right after
+        //the checkpoint from the previous failed job execution.
+        //Items that have already been committed should not be read again.
+        final Properties restartParams = new Properties();
+        restartParams.setProperty("failOnTimes", "");
+        final long restartExecutionId = jobOperator.restart(jobExecutionId, restartParams);
+        final JobExecutionImpl restartExecution = (JobExecutionImpl) jobOperator.getJobExecution(restartExecutionId);
+        restartExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.MINUTES);
+        Assert.assertEquals(BatchStatus.COMPLETED, restartExecution.getBatchStatus());
+
+        expect = "09:40, 09:41, 09:42, 09:43";
+        forbid = "09:30, 09:31, 09:32, 09:33, 09:34, 09:35, 09:36, 09:37, 09:38, 09:39, 09:44";
+        CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
+    }
+
     void testWrite0(final String jobName, final Class<?> readerBeanType, final Class<?> writerBeanType, final String csvNameMapping,
                     final String start, final String end,
                     final String sql, final String parameterNames, final String parameterTypes) throws Exception {
@@ -271,7 +321,7 @@ public class JdbcReaderWriterTest {
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.HOURS);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
     void testRead0(final String jobName, final Class<?> readerBeanType, final Class<?> writerBeanType, final String writeResource,
@@ -330,7 +380,7 @@ public class JdbcReaderWriterTest {
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(CsvItemReaderWriterTest.waitTimeoutMinutes, TimeUnit.HOURS);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         CsvItemReaderWriterTest.validate(writeResourceFile, expect, forbid);
     }
 

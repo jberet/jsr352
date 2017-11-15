@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2017 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="myJob" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
+    <step id="org.jberet.support.io.JdbcReaderTest.step1">
+        <chunk>
+            <reader ref="jdbcItemReader">
+                <properties>
+                    <property name="sql" value="#{jobParameters['sql']}"/>
+                    <property name="url" value="#{jobParameters['url']}"/>
+                    <property name="user" value="#{jobParameters['user']}"/>
+                    <property name="password" value="#{jobParameters['password']}"/>
+
+                    <property name="beanType" value="java.util.Map"/>
+                    <property name="columnMapping" value="date, time, open, high, low, close, volumn"/>
+                    <property name="columnTypes" value="Date, String, Double, Double, Double, Double, Double"/>
+                    <property name="start" value="#{jobParameters['start']}"/>
+                    <property name="end" value="#{jobParameters['end']}"/>
+                </properties>
+            </reader>
+            <processor ref="stockTradeFailureProcessor">
+                <properties>
+                    <property name="failOnTimes" value="#{jobParameters['failOnTimes']}" />
+                </properties>
+            </processor>
+            <writer ref="csvItemWriter">
+                <properties>
+                    <property name="resource" value="#{jobParameters['writeResource']}"/>
+                    <property name="beanType" value="java.util.Map"/>
+                    <property name="writeMode" value="overwrite"/>
+                    <property name="header" value="date, time, open, high, low, close, volumn"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+</job>

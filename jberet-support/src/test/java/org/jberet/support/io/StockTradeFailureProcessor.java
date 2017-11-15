@@ -13,6 +13,7 @@
 package org.jberet.support.io;
 
 import java.util.List;
+import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemProcessor;
 import javax.enterprise.context.Dependent;
@@ -39,16 +40,40 @@ public class StockTradeFailureProcessor implements ItemProcessor {
 
     @Override
     public Object processItem(final Object item) throws Exception {
-        final StockTrade st = (StockTrade) item;
-        if (failOnTimes != null) {
-            for (final String e : failOnTimes) {
-                if (e.equals(st.getTime())) {
-                    throw new ArithmeticException("StockTrade: " + st +
-                            " time value matches configured failOnTimes value: " + failOnTimes);
+        if(item instanceof StockTrade) {
+            final StockTrade st = (StockTrade) item;
+            if (failOnTimes != null) {
+                for (final String e : failOnTimes) {
+                    if (e.equals(st.getTime())) {
+                        fail(e);
+                    }
+                }
+            }
+        } else if (item instanceof java.util.Map) {
+            final Map map = (Map) item;
+            if (failOnTimes != null) {
+                for (final String e : failOnTimes) {
+                    if (e.equals(map.get("time"))) {
+                        fail(e);
+                    }
+                }
+            }
+        } else if (item instanceof java.util.List) {
+            final List list = (List) item;
+            if (failOnTimes != null) {
+                for (final String e : failOnTimes) {
+                    if (e.equals(list.get(1))) {
+                        fail(e);
+                    }
                 }
             }
         }
 
         return item;
+    }
+
+    private void fail(final Object failedItem) throws ArithmeticException {
+        throw new ArithmeticException("StockTrade: " + failedItem +
+                " time value matches configured failOnTimes value: " + failOnTimes);
     }
 }

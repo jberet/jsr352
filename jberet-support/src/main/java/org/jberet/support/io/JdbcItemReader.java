@@ -199,7 +199,7 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
             columnMapping = columnLabels;
         }
 
-        if (start == 0) {
+        if (start <= 0) {
             start = 1;
         }
         if (end == 0) {
@@ -208,14 +208,19 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
         if (end < start) {
             throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, String.valueOf(end), "end");
         }
-        int rowToStart = start;
+
+        //readyPosition is the position before the first item to be read
+        int readyPosition = start - 1;
         if (checkpoint != null) {
-            rowToStart = Math.max(start, (Integer) checkpoint);
+            final int checkpointPosition = (Integer) checkpoint;
+            if (checkpointPosition > readyPosition) {
+                readyPosition = checkpointPosition;
+            }
         }
-        if (rowToStart > 1) {
-            resultSet.absolute(rowToStart - 1);
+        if (readyPosition >= 0) {
+            resultSet.absolute(readyPosition);
         }
-        currentRowNumber = rowToStart - 1;
+        currentRowNumber = readyPosition;
     }
 
     @Override
