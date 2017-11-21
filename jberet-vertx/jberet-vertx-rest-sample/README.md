@@ -28,3 +28,7 @@ curl -X POST http://localhost:8080/jobs/simple/restart
 curl 'http://localhost:8080/jobinstances?jobName=simple&count=2'
 curl 'http://localhost:8080/jobinstances?jobExecutionId=1'
 curl 'http://localhost:8080/jobinstances?jobName=simple&count=2&start=1'
+curl 'http://localhost:8080/jobinstances/count?jobName=simple'
+
+curl -X POST 'http://localhost:8080/jobs/simple/schedule?delay=1'
+curl -X POST 'http://localhost:8080/jobs/simple/schedule?delay=1&periodic=true'

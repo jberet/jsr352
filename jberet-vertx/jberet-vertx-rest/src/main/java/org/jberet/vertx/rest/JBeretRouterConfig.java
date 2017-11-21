@@ -17,10 +17,12 @@ import java.util.Map;
 import java.util.Properties;
 
 import io.vertx.core.MultiMap;
+import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -37,12 +39,20 @@ import org.jberet.rest.service.JobService;
  * @since 1.3.0.Beta7
  */
 public class JBeretRouterConfig {
+    /**
+     * Default schedule delay is 5 minutes.
+     */
+    public static final int DEFAULT_SCHEDULE_DELAY = 5;
+
+    public static final String TIMER_COUNTER_NAME = "timer-counter";
 
     public static void config(final Router router) {
         router.route().handler(BodyHandler.create());
         router.get("/").handler(JBeretRouterConfig::getDefault);
         router.get("/jobs").handler(JBeretRouterConfig::getJobs);
+
         router.post("/jobs/:jobXmlName/start").handler(JBeretRouterConfig::startJob);
+        router.post("/jobs/:jobXmlName/schedule").handler(JBeretRouterConfig::scheduleJob);
         router.post("/jobs/:jobXmlName/restart").handler(JBeretRouterConfig::restartJob);
 
         router.get("/jobinstances").handler(JBeretRouterConfig::getJobInstances);
@@ -77,6 +87,43 @@ public class JBeretRouterConfig {
         final Properties jobParams = getJobParameters(routingContext);
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().start(jobXmlName, jobParams);
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
+        sendJsonResponse(routingContext, jsonObject.encodePrettily());
+    }
+
+    public static void scheduleJob(final RoutingContext routingContext) {
+        final String jobXmlName = routingContext.pathParam("jobXmlName");
+        final HttpServerRequest request = routingContext.request();
+        final String delayString = request.getParam("delay");
+        final long delay = delayString == null ? DEFAULT_SCHEDULE_DELAY : Long.parseLong(delayString);
+        final String periodicString = request.getParam("periodic");
+        final boolean periodic = periodicString != null && Boolean.parseBoolean(periodicString);
+
+        final Properties jobParams = getJobParameters(routingContext);
+        final Vertx vertx = routingContext.vertx();
+
+        final SharedData sharedData = vertx.sharedData();
+        final JobSchedule jobSchedule = new JobSchedule();
+        jobSchedule.setDelay(delay);
+        jobSchedule.setJobName(jobXmlName);
+        jobSchedule.setJobParameters(jobParams);
+
+        final long delayMillis = delay * 60 * 1000;
+        if (!periodic) {
+            vertx.setTimer(delayMillis, timerId1 -> {
+                jobSchedule.setId(timerId1);
+                final JobExecutionEntity jobExecutionEntity = JobService.getInstance().start(jobXmlName, jobParams);
+                jobSchedule.addJobExecutionIds(jobExecutionEntity.getExecutionId());
+                jobSchedule.setStatus(JobSchedule.Status.DONE);
+            });
+        } else {
+            vertx.setPeriodic(delayMillis, timerId1 -> {
+                jobSchedule.setId(timerId1);
+                final JobExecutionEntity jobExecutionEntity = JobService.getInstance().start(jobXmlName, jobParams);
+                jobSchedule.addJobExecutionIds(jobExecutionEntity.getExecutionId());
+                jobSchedule.setStatus(JobSchedule.Status.DONE);
+            });
+        }
+        final JsonObject jsonObject = JsonObject.mapFrom(jobSchedule);
         sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
 
