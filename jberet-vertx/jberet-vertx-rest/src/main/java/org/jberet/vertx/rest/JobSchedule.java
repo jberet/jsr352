@@ -22,6 +22,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import io.vertx.core.shareddata.Shareable;
+
 /**
  * Represents a job schedule.
  *
@@ -29,7 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public final class JobSchedule implements Serializable, Comparable<JobSchedule> {
+public final class JobSchedule implements Serializable, Comparable<JobSchedule>, Shareable {
     private static final long serialVersionUID = 5759369754976526021L;
 
     /**
@@ -63,8 +65,9 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
     /**
      * id of the job schedule. It should be initialized as part of the
      * instantiation if possible, but in some cases, it may have to be set afterwards.
+     * Defaults to -1, since in Vert.x 0 is a valid timer id (the first timer).
      */
-    private long id;
+    private long id = -1;
 
     /**
      * The time the job schedule is created.
@@ -124,7 +127,7 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
      *
      * @return job schedule id
      */
-    public long getId() {
+    public synchronized long getId() {
         return id;
     }
 
@@ -133,7 +136,7 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
      *
      * @return job schedule status
      */
-    public Status getStatus() {
+    public synchronized Status getStatus() {
         return status;
     }
 
@@ -162,43 +165,43 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
         jobExecutionIds.add(jobExecutionId);
     }
 
-    void setStatus(final Status status) {
+    synchronized void setStatus(final Status status) {
         this.status = status;
     }
 
-    void setId(final long id) {
+    synchronized void setId(final long id) {
         this.id = id;
     }
 
-    public String getJobName() {
+    synchronized public String getJobName() {
         return jobName;
     }
 
-    public void setJobName(final String jobName) {
+    public synchronized void setJobName(final String jobName) {
         this.jobName = jobName;
     }
 
-    public long getJobExecutionId() {
+    public synchronized long getJobExecutionId() {
         return jobExecutionId;
     }
 
-    public void setJobExecutionId(final long jobExecutionId) {
+    public synchronized void setJobExecutionId(final long jobExecutionId) {
         this.jobExecutionId = jobExecutionId;
     }
 
-    public Properties getJobParameters() {
+    public synchronized Properties getJobParameters() {
         return jobParameters;
     }
 
-    public void setJobParameters(final Properties jobParameters) {
+    public synchronized void setJobParameters(final Properties jobParameters) {
         this.jobParameters = jobParameters;
     }
 
-    public long getDelay() {
+    public synchronized long getDelay() {
         return delay;
     }
 
-    public void setDelay(final long delay) {
+    public synchronized void setDelay(final long delay) {
         this.delay = delay;
     }
 }

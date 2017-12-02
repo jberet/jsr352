@@ -32,3 +32,9 @@ curl 'http://localhost:8080/jobinstances/count?jobName=simple'
 
 curl -X POST 'http://localhost:8080/jobs/simple/schedule?delay=1'
 curl -X POST 'http://localhost:8080/jobs/simple/schedule?delay=1&periodic=true'
+curl http://localhost:8080/schedules
+curl http://localhost:8080/schedules/0
+curl http://localhost:8080/schedules/1
+curl -X POST http://localhost:8080/schedules/0/cancel
+curl http://localhost:8080/schedules/features
+curl http://localhost:8080/schedules/timezones
