@@ -77,7 +77,7 @@ public enum JBeretRouterConfig {
         router.get("/schedules/features").handler(JBeretRouterConfig::getJobSchedulesFeatures);
         router.get("/schedules/:scheduleId").handler(JBeretRouterConfig::getJobSchedule);
         router.post("/schedules/:scheduleId/cancel").handler(JBeretRouterConfig::cancelJobSchedule);
-
+        router.delete("/schedules/:scheduleId").handler(JBeretRouterConfig::deleteJobSchedule);
     }
 
     private static void getDefault(final RoutingContext routingContext) {
@@ -284,24 +284,23 @@ public enum JBeretRouterConfig {
     }
 
     private static void getJobSchedule(final RoutingContext routingContext) {
-        final LocalMap<String, JobSchedule> timerLocalMap = getTimerLocalMap(routingContext.vertx());
-        final String idString = routingContext.pathParam("scheduleId");
-        final JobSchedule jobSchedule = timerLocalMap.get(idString);
+        final JobSchedule jobSchedule = lookupJobScheduleWithPathParam(routingContext);
         final JsonObject jsonObject = JsonObject.mapFrom(jobSchedule);
         sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
 
     private static void cancelJobSchedule(final RoutingContext routingContext) {
-        final LocalMap<String, JobSchedule> timerLocalMap = getTimerLocalMap(routingContext.vertx());
-        final String idString = routingContext.pathParam("scheduleId");
-        final JobSchedule jobSchedule = timerLocalMap.get(idString);
-        final boolean cancelled = routingContext.vertx().cancelTimer(jobSchedule.getId());
-        if (cancelled) {
-            jobSchedule.setStatus(JobSchedule.Status.CANCELLED);
+        final JobSchedule jobSchedule = lookupJobScheduleWithPathParam(routingContext);
+        boolean cancelled = false;
+
+        if (jobSchedule != null) {
+            cancelled = routingContext.vertx().cancelTimer(jobSchedule.getId());
+            if (cancelled) {
+                jobSchedule.setStatus(JobSchedule.Status.CANCELLED);
+            }
         }
         routingContext.response().end(String.valueOf(cancelled));
     }
-
 
     private static void getJobSchedulesFeatures(final RoutingContext routingContext) {
         routingContext.response().end(new JsonArray().encode());
@@ -319,6 +318,18 @@ public enum JBeretRouterConfig {
         final JsonArray jsonArray = new JsonArray();
         Arrays.stream(result).forEach(jsonArray::add);
         sendJsonResponse(routingContext, jsonArray.encodePrettily());
+    }
+
+    private static void deleteJobSchedule(final RoutingContext routingContext) {
+        final String idString = routingContext.pathParam("scheduleId");
+        final LocalMap<String, JobSchedule> timerLocalMap = getTimerLocalMap(routingContext.vertx());
+        final JobSchedule removedItem = timerLocalMap.remove(idString);
+
+        boolean deleted = removedItem != null;
+        if (deleted) {
+            deleted = routingContext.vertx().cancelTimer(removedItem.getId());
+        }
+        routingContext.response().end(String.valueOf(deleted));
     }
 
 
@@ -347,6 +358,12 @@ public enum JBeretRouterConfig {
 
     private static LocalMap<String, JobSchedule> getTimerLocalMap(Vertx vertx) {
         return vertx.sharedData().getLocalMap(TIMER_LOCAL_MAP_NAME);
+    }
+
+    private static JobSchedule lookupJobScheduleWithPathParam(final RoutingContext routingContext) {
+        final LocalMap<String, JobSchedule> timerLocalMap = getTimerLocalMap(routingContext.vertx());
+        final String idString = routingContext.pathParam("scheduleId");
+        return timerLocalMap.get(idString);
     }
 
 }
