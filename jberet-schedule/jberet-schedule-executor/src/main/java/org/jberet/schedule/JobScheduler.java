@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -191,6 +191,18 @@ public abstract class JobScheduler {
      */
     public String[] getFeatures() {
         return EMPTY_STRING_ARRAY;
+    }
+
+    /**
+     * Deletes a job schedule by its id. The default implementation of this method
+     * just calls {@link #cancel(String)} method.
+     *
+     * @param scheduleId the schedule id to delete
+     *
+     * @since 1.3.0.Beta7
+     */
+    public void delete(final String scheduleId) {
+        cancel(scheduleId);
     }
 
     /**

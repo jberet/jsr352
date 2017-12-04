@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -143,6 +143,12 @@ public class ExecutorSchedulerImpl extends JobScheduler {
             }
         }
         return result;
+    }
+
+    @Override
+    public void delete(final String scheduleId) {
+        super.delete(scheduleId);
+        schedules.remove(scheduleId);
     }
 
     @Override

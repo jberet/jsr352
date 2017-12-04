@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -253,6 +253,19 @@ public class BatchClient {
         WebTarget target = target(uri);
         return target.request().accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), boolean.class);
+    }
+
+    /**
+     * Deletes the job schedule specified by the job schedule id.
+     * @param scheduleId job schedule id
+     *
+     * @since 1.3.0.Beta7
+     */
+    public void deleteJobSchedule(final String scheduleId) {
+        final URI uri = getJobScheduleUriBuilder("delete")
+                .resolveTemplate("scheduleId", scheduleId).build();
+        WebTarget target = target(uri);
+        target.request().delete();
     }
 
     /**

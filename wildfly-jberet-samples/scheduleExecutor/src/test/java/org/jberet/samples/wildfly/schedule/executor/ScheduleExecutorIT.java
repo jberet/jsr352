@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,7 +24,6 @@ import org.jberet.schedule.ExecutorSchedulerImpl;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduleConfigBuilder;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -99,6 +98,7 @@ public final class ScheduleExecutorIT extends BatchTestBase {
      * Verifies job schedule status after certain sleep time.
      * Verifies the number of realized job executions.
      * Cancels the above schedule, and verifies the cancelled status of the schedule.
+     * Deletes the above schedule, and verifies that it is deleted.
      *
      * @throws Exception if errors occur
      */
@@ -123,6 +123,9 @@ public final class ScheduleExecutorIT extends BatchTestBase {
         assertEquals(BatchStatus.COMPLETED,
                 batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
         assertEquals(true, batchClient.cancelJobSchedule(jobSchedule.getId()));
+
+        batchClient.deleteJobSchedule(jobSchedule.getId());
+        assertEquals(null, batchClient.getJobSchedule(jobSchedule.getId()));
     }
 
     /**
@@ -131,6 +134,8 @@ public final class ScheduleExecutorIT extends BatchTestBase {
      * {@code DONE}, the restarted job execution has batch status {@code COMPLETED}.
      * Tries to cancel the job schedule, but the cancellation should return false
      * since the job schedule is already DONE.
+     *
+     * The schedule should not exist once it is deleted.
      *
      * @throws Exception if errors occur
      */
@@ -141,7 +146,7 @@ public final class ScheduleExecutorIT extends BatchTestBase {
         JobExecutionEntity jobExecutionEntity = batchClient.startJob(jobName, params);
         Thread.sleep(3000);
         jobExecutionEntity = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
-        Assert.assertEquals(BatchStatus.FAILED, jobExecutionEntity.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecutionEntity.getBatchStatus());
 
         params = new Properties();
         params.setProperty(testNameKey, "scheduleRestart");
@@ -161,5 +166,8 @@ public final class ScheduleExecutorIT extends BatchTestBase {
         assertEquals(BatchStatus.COMPLETED,
                 batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
         assertEquals(false, batchClient.cancelJobSchedule(jobSchedule.getId()));
+
+        batchClient.deleteJobSchedule(jobSchedule.getId());
+        assertEquals(null, batchClient.getJobSchedule(jobSchedule.getId()));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,7 @@ import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduleConfigBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -117,6 +118,8 @@ public final class ScheduleTimerIT extends BatchTestBase {
         System.out.printf("Job executions from above schedule: %s%n", schedule.getJobExecutionIds());
         assertEquals(true, schedule.getJobExecutionIds().size() >= 2);
         assertEquals(true, cancelJobSchedule(schedule));
+
+        deleteJobSchedule(schedule);
     }
 
     /**
@@ -150,6 +153,8 @@ public final class ScheduleTimerIT extends BatchTestBase {
         System.out.printf("Job executions from above schedule: %s%n", schedule.getJobExecutionIds());
         assertEquals(true, schedule.getJobExecutionIds().size() >= 2);
         assertEquals(true, cancelJobSchedule(schedule));
+
+        deleteJobSchedule(schedule);
     }
 
     /**
@@ -214,6 +219,8 @@ public final class ScheduleTimerIT extends BatchTestBase {
         schedule = batchClient.getJobSchedule(schedule.getId());
         assertEquals(0, schedule.getJobExecutionIds().size());
         assertEquals(true, cancelJobSchedule(schedule));
+
+        deleteJobSchedule(schedule);
     }
 
     /**
@@ -258,8 +265,8 @@ public final class ScheduleTimerIT extends BatchTestBase {
                     batchClient.getJobExecution(jobSchedule.getJobExecutionIds().get(0)).getBatchStatus());
 
         } finally {
-            cancelJobSchedule(jobSchedule);
-            cancelJobSchedule(jobSchedule2);
+            deleteJobSchedule(jobSchedule);
+            deleteJobSchedule(jobSchedule2);
         }
     }
 
@@ -288,5 +295,16 @@ public final class ScheduleTimerIT extends BatchTestBase {
         for (final JobSchedule e : batchClient.getJobSchedules()) {
             cancelJobSchedule(e);
         }
+    }
+
+    /**
+     * Deletes the job schedule, and verifies that it no longer exists.
+     *
+     * @param schedule the job schedule to cancel
+     */
+    private void deleteJobSchedule(final JobSchedule schedule) {
+        final String id = schedule.getId();
+        batchClient.deleteJobSchedule(id);
+        Assert.assertEquals(null, batchClient.getJobSchedule(id));
     }
 }

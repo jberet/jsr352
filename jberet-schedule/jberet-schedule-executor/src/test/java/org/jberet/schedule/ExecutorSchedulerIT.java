@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -192,6 +192,43 @@ public class ExecutorSchedulerIT {
         final boolean cancelResult = jobScheduler.cancel(schedule.getId());
         assertEquals(JobSchedule.Status.CANCELLED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
         assertEquals(true, cancelResult);
+
+        Thread.sleep(sleepTimeMillis);
+
+        try {
+            final int jobInstanceCount = jobOperator.getJobInstanceCount(jobName);
+            assertEquals(0, jobInstanceCount);
+        } catch (final NoSuchJobException e) {
+            System.out.printf("Got expected %s%n", e);
+        }
+    }
+
+    /**
+     * Tests deleting a job schedule.
+     * A single-action job schedule is submitted and deleted immediately.
+     * Verifies the job schedule is cancelled and deleted successfully, and no job executions
+     * have realized.
+     *
+     * @throws Exception if errors occur
+     *
+     * @since 1.3.0.Beta7
+     */
+    @Test
+    public void delete() throws Exception {
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "delete");
+
+        final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                .jobName(jobName)
+                .jobParameters(params)
+                .initialDelay(initialDelayMinute)
+                .build();
+        JobSchedule schedule = jobScheduler.schedule(scheduleConfig);
+
+        assertEquals(JobSchedule.Status.SCHEDULED, jobScheduler.getJobSchedule(schedule.getId()).getStatus());
+
+        jobScheduler.delete(schedule.getId());
+        assertEquals(null, jobScheduler.getJobSchedule(schedule.getId()));
 
         Thread.sleep(sleepTimeMillis);
 

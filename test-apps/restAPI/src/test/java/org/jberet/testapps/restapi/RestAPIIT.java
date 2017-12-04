@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -448,6 +448,9 @@ public class RestAPIIT {
         System.out.printf("Cancelled job schedule %s?%s%n", jobSchedule.getId(), cancelStatus);
         assertEquals(true, cancelStatus);
         assertEquals(JobSchedule.Status.CANCELLED, batchClient.getJobSchedule(jobSchedule.getId()).getStatus());
+
+        batchClient.deleteJobSchedule(jobSchedule.getId());
+        assertEquals(null, batchClient.getJobSchedule(jobSchedule.getId()));
     }
 
     @Test

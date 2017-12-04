@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -59,6 +60,20 @@ public class JobScheduleResource {
     public boolean cancel(final @PathParam("scheduleId") String scheduleId) {
         final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
         return jobScheduler.cancel(scheduleId);
+    }
+
+    /**
+     * Deletes a job schedule.
+     *
+     * @param scheduleId the job schedule id to delete
+     *
+     * @since 1.3.0.Beta7
+     */
+    @DELETE
+    @Path("{scheduleId}")
+    public void delete(final @PathParam("scheduleId") String scheduleId) {
+        final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
+        jobScheduler.delete(scheduleId);
     }
 
     /**
