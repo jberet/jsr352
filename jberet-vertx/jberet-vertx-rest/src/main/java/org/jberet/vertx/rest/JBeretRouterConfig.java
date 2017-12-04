@@ -325,11 +325,10 @@ public enum JBeretRouterConfig {
         final LocalMap<String, JobSchedule> timerLocalMap = getTimerLocalMap(routingContext.vertx());
         final JobSchedule removedItem = timerLocalMap.remove(idString);
 
-        boolean deleted = removedItem != null;
-        if (deleted) {
-            deleted = routingContext.vertx().cancelTimer(removedItem.getId());
+        if (removedItem != null) {
+            routingContext.vertx().cancelTimer(removedItem.getId());
         }
-        routingContext.response().end(String.valueOf(deleted));
+        routingContext.response().end();
     }
 
 
