@@ -70,7 +70,11 @@ public enum JBeretRouterConfig {
      *             <li>URI Pattern: /
      *             <li>Query Params: None
      *             <li>Return: default return value
-     *             <li>Examples: http://localhost:8080/
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/</li>
+     *                 </ul>
+     *             </li>
      *         </ul>
      *     </li>
      *     <li>
@@ -80,7 +84,11 @@ public enum JBeretRouterConfig {
      *             <li>URI Pattern: /jobs
      *             <li>Query Params: None
      *             <li>Return: JSON array of jobs
-     *             <li>Examples: http://localhost:8080/jobs
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobs</li>
+     *                 </ul>
+     *             </li>
      *         </ul>
      *     </li>
      *     <li>
@@ -93,7 +101,7 @@ public enum JBeretRouterConfig {
      *             <li>Examples:
      *                  <ul>
      *                     <li>http://localhost:8080/jobs/simple/start
-     *                     <li>http://localhost:8080/jobs/simple/start?sleepSeconds=4&foo=bar
+     *                     <li>http://localhost:8080/jobs/simple/start?sleepSeconds=4&amp;foo=bar
      *                 </ul>
      *             </li>
      *         </ul>
@@ -113,13 +121,13 @@ public enum JBeretRouterConfig {
      *             <li>Examples:
      *                 <ul>
      *                     <li>http://localhost:8080/jobs/simple/schedule?delay=1
-     *                     <li>http://localhost:8080/jobs/simple/schedule?delay=1&periodic=true
+     *                     <li>http://localhost:8080/jobs/simple/schedule?delay=1&amp;periodic=true
      *                 </ul>
      *             </li>
      *         </ul>
      *     </li>
      *     <li>
-     *         restart the most recently failed or stopped job execution belonging to the job name
+     *         Restart the most recently failed or stopped job execution belonging to the job name
      *         <ul>
      *             <li>HTTP Method: POST
      *             <li>URI Pattern: /jobs/:jobXmlName/restart
@@ -128,7 +136,7 @@ public enum JBeretRouterConfig {
      *             <li>Examples:
      *                  <ul>
      *                     <li>http://localhost:8080/jobs/simple/restart
-     *                     <li>http://localhost:8080/jobs/simple/restart?sleepSeconds=5&foo=bar
+     *                     <li>http://localhost:8080/jobs/simple/restart?sleepSeconds=5&amp;foo=bar
      *                 </ul>
      *             </li>
      *         </ul>
@@ -147,12 +155,12 @@ public enum JBeretRouterConfig {
      *                         This param should not be used along with jobName, start, or count.
      *                 </ul>
      *             </li>
-     *             <li>JSON array of job instances
+     *             <li>Return: JSON array of job instances
      *             <li>Examples:
      *                 <ul>
-     *                     <li>http://localhost:8080/jobinstances?jobName=simple&count=2
+     *                     <li>http://localhost:8080/jobinstances?jobName=simple&amp;count=2
      *                     <li>http://localhost:8080/jobinstances?jobExecutionId=1
-     *                     <li>http://localhost:8080/jobinstances?jobName=simple&count=2&start=1
+     *                     <li>http://localhost:8080/jobinstances?jobName=simple&amp;count=2&amp;start=1
      *                     <li>http://localhost:8080/jobinstances/count?jobName=simple
      *                 </ul>
      *             </li>
@@ -193,7 +201,7 @@ public enum JBeretRouterConfig {
      *                     <li>http://localhost:8080/jobexecutions
      *                     <li>http://localhost:8080/jobexecutions?count=5
      *                     <li>http://localhost:8080/jobexecutions?jobExecutionId1=2
-     *                     <li>http://localhost:8080/jobexecutions?jobExecutionId1=1&count=10
+     *                     <li>http://localhost:8080/jobexecutions?jobExecutionId1=1&amp;count=10
      *                 </ul>
      *             </li>
      *         </ul>
@@ -298,7 +306,7 @@ public enum JBeretRouterConfig {
      *             <li>Examples:
      *                 <ul>
      *                     <li>http://localhost:8080/jobexecutions/1/restart
-     *                     <li>http://localhost:8080/jobexecutions/1/restart?sleepSeconds=3&foo=buzz
+     *                     <li>http://localhost:8080/jobexecutions/1/restart?sleepSeconds=3&amp;foo=buzz
      *                 </ul>
      *             </li>
      *         </ul>
