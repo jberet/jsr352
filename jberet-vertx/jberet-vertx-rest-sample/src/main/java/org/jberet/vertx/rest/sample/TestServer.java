@@ -17,6 +17,7 @@ import io.vertx.ext.web.Router;
 import org.jberet.vertx.rest.JBeretRouterConfig;
 
 /**
+ * Test class for Vert.x-based JBeret REST API.
  *
  * @since 1.3.0.Beta7
  */
@@ -26,11 +27,14 @@ public class TestServer extends AbstractVerticle {
         Runner.runExample(TestServer.class, null);
     }
 
+    /**
+     * Configures JBeret REST API routes by calling {@link JBeretRouterConfig#config(Router)} method,
+     * and starts the test web server.
+     */
     @Override
-    public void start() throws Exception {
+    public void start() {
         Router router = Router.router(vertx);
         JBeretRouterConfig.config(router);
-
         vertx.createHttpServer().requestHandler(router::accept).listen(8080);
     }
 }

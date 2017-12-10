@@ -36,7 +36,13 @@ import org.jberet.rest.service.JobService;
 
 /**
  * This class is responsible for configuring the vert.x router for
- * servicing JBeret REST API.
+ * servicing JBeret REST API. The follow shows how to configure it in your application:
+ *
+ * <pre>
+ *   Router router = Router.router(vertx);
+ *   JBeretRouterConfig.config(router);
+ *   vertx.createHttpServer().requestHandler(router::accept).listen(8080);
+ </pre>
  *
  * @since 1.3.0.Beta7
  */
@@ -48,8 +54,343 @@ public enum JBeretRouterConfig {
      */
     private static final int DEFAULT_SCHEDULE_DELAY = 5;
 
+    /**
+     * Name of the local map used to store job schedules
+     */
     private static final String TIMER_LOCAL_MAP_NAME = "timer-local-map";
 
+    /**
+     * Configures REST API routes based on request URI.
+     *
+     * <ul>
+     *     <li>
+     *         Default mapping
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /
+     *             <li>Query Params: None
+     *             <li>Return: default return value
+     *             <li>Examples: http://localhost:8080/
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get jobs
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /jobs
+     *             <li>Query Params: None
+     *             <li>Return: JSON array of jobs
+     *             <li>Examples: http://localhost:8080/jobs
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Start a job execution with a job name
+     *         <ul>
+     *             <li>HTTP Method: POST
+     *             <li>URI Pattern: /jobs/:jobXmlName/start
+     *             <li>Query Params: 0 or more job parameters
+     *             <li>Return: job execution as JSON
+     *             <li>Examples:
+     *                  <ul>
+     *                     <li>http://localhost:8080/jobs/simple/start
+     *                     <li>http://localhost:8080/jobs/simple/start?sleepSeconds=4&foo=bar
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Schedule a job execution with a job name
+     *         <ul>
+     *             <li>HTTP Method: POST
+     *             <li>URI Pattern: /jobs/:jobXmlName/schedule
+     *             <li>Query Params:
+     *                 <ul>
+     *                     <li>delay: required, int number indicating the number of minutes to delay before starting job execution
+     *                     <li>periodic: flag to control whether the schedule is recurring or not, optional and defaults to false
+     *                 </ul>
+     *             </li>
+     *             <li>Return: job schedule as JSON
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobs/simple/schedule?delay=1
+     *                     <li>http://localhost:8080/jobs/simple/schedule?delay=1&periodic=true
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         restart the most recently failed or stopped job execution belonging to the job name
+     *         <ul>
+     *             <li>HTTP Method: POST
+     *             <li>URI Pattern: /jobs/:jobXmlName/restart
+     *             <li>Query Params: 0 or more job parameters to override the corresponding original job parameters
+     *             <li>Return: job execution as JSON
+     *             <li>Examples:
+     *                  <ul>
+     *                     <li>http://localhost:8080/jobs/simple/restart
+     *                     <li>http://localhost:8080/jobs/simple/restart?sleepSeconds=5&foo=bar
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get job instances
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /jobinstances
+     *             <li>Query Params:
+     *                 <ul>
+     *                     <li>jobName: the job name used to get the associated job instances, required unless jobExecutionId is present
+     *                     <li>start: the offset position in the list of all eligible job instances to include, optional and defaults to 0
+     *                     <li>count: the number of job instances to return, optional and defaults to all job instances
+     *                     <li>jobExecutionId: the job execution id used to get the associated job instance.
+     *                         This param should not be used along with jobName, start, or count.
+     *                 </ul>
+     *             </li>
+     *             <li>JSON array of job instances
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobinstances?jobName=simple&count=2
+     *                     <li>http://localhost:8080/jobinstances?jobExecutionId=1
+     *                     <li>http://localhost:8080/jobinstances?jobName=simple&count=2&start=1
+     *                     <li>http://localhost:8080/jobinstances/count?jobName=simple
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Count the number of job instances
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /jobinstances/count
+     *             <li>Query Params:
+     *                 <ul>
+     *                     <li>jobName: the job name used to get the associated job instances, required.
+     *                 </ul>
+     *             </li>
+     *             <li>Return: number of job instances
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobinstances/count?jobName=simple
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get job executions
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /jobexecutions
+     *             <li>Query Params:
+     *                 <ul>
+     *                     <li>count: the number of job executions to return, optional and defaults to all matching job executions
+     *                     <li>jobExecutionId1: the job execution id whose sibling job executions will be returned, optional and defaults to unspecified
+     *                 </ul>
+     *             </li>
+     *             <li>Return: JSON array of job executions
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobexecutions
+     *                     <li>http://localhost:8080/jobexecutions?count=5
+     *                     <li>http://localhost:8080/jobexecutions?jobExecutionId1=2
+     *                     <li>http://localhost:8080/jobexecutions?jobExecutionId1=1&count=10
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get running job executions associated with a job name
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /jobexecutions/running
+     *             <li>Query Params:
+     *                 <ul>
+     *                     <li>jobName: the job name used to get the associated job instances, required.
+     *                 </ul>
+     *             </li>
+     *             <li>Return: JSON array of job executions
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobexecutions/running?jobName=simple'
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get job execution by id
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /jobexecutions/:jobExecutionId
+     *             <li>Query Params: None
+     *             <li>Return: job execution as JSON
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobexecutions/1
+     *                     <li>http://localhost:8080/jobexecutions/2
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get step executions belonging to a particular job execution
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /jobexecutions/:jobExecutionId/stepexecutions
+     *             <li>Query Params: None
+     *             <li>Return: JSON array of step executions
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobexecutions/1/stepexecutions
+     *                     <li>http://localhost:8080/jobexecutions/15/stepexecutions
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get the step execution by job execution id and step execution id
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /jobexecutions/:jobExecutionId/stepexecutions/:stepExecutionId
+     *             <li>Query Params: None
+     *             <li>Return: step execution as JSON
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobexecutions/1/stepexecutions/1
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Abandon a job execution
+     *         <ul>
+     *             <li>HTTP Method: POST
+     *             <li>URI Pattern: /jobexecutions/:jobExecutionId/abandon
+     *             <li>Query Params: None
+     *             <li>Return: void
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobexecutions/1/abandon
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Stop a job execution
+     *         <ul>
+     *             <li>HTTP Method: POST
+     *             <li>URI Pattern: /jobexecutions/:jobExecutionId/stop
+     *             <li>Query Params: None
+     *             <li>Return: void
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobexecutions/2/stop
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Restart a failed or stopped job execution
+     *         <ul>
+     *             <li>HTTP Method: POST
+     *             <li>URI Pattern: /jobexecutions/:jobExecutionId/restart
+     *             <li>Query Params: 0 or more job parameters to override the corresponding original job parameters
+     *             <li>Return: job execution as JSON
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/jobexecutions/1/restart
+     *                     <li>http://localhost:8080/jobexecutions/1/restart?sleepSeconds=3&foo=buzz
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get all job schedules
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /schedules
+     *             <li>Query Params: None
+     *             <li>Return: JSON array of job schedules
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/schedules
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get job schedule by id
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /schedules/:scheduleId
+     *             <li>Query Params: None
+     *             <li>Return: job schedule as JSON
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/schedules/2
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get all timezone values available to job schedules
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /schedules/timezones
+     *             <li>Query Params: None
+     *             <li>Return: JSON array of all timezone values
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/schedules/timezones
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Get supported extra features as a string array, currently return []
+     *         <ul>
+     *             <li>HTTP Method: GET
+     *             <li>URI Pattern: /schedules/features
+     *             <li>Query Params: None
+     *             <li>Return: JSON array, currently return empty array
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/schedules/features
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Cancel a job schedule
+     *         <ul>
+     *             <li>HTTP Method: POST
+     *             <li>URI Pattern: /schedules/:scheduleId/cancel
+     *             <li>Query Params: None
+     *             <li>Return: true if the job schedule is cancelled successfully; false otherwise
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/schedules/0/cancel
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     *     <li>
+     *         Delete a job schedule
+     *         <ul>
+     *             <li>HTTP Method: DELETE
+     *             <li>URI Pattern: /schedules/:scheduleId
+     *             <li>Query Params: None
+     *             <li>Return: void
+     *             <li>Examples:
+     *                 <ul>
+     *                     <li>http://localhost:8080/schedules/0
+     *                 </ul>
+     *             </li>
+     *         </ul>
+     *     </li>
+     * </ul>
+     *
+     * @param router the vert.x router for the current request
+     */
     public static void config(final Router router) {
         router.route().handler(BodyHandler.create());
         router.get("/").handler(JBeretRouterConfig::getDefault);
