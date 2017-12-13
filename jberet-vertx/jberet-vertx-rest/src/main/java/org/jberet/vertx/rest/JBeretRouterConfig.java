@@ -446,6 +446,8 @@ public enum JBeretRouterConfig {
         final String jobXmlName = routingContext.pathParam("jobXmlName");
         final Properties jobParams = getJobParameters(routingContext);
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().start(jobXmlName, jobParams);
+
+        setJobExecutionEntityHref(routingContext, jobExecutionEntity);
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
         sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
@@ -470,12 +472,14 @@ public enum JBeretRouterConfig {
         if (!periodic) {
             timerId = vertx.setTimer(delayMillis, timerId1 -> {
                 final JobExecutionEntity jobExecutionEntity = JobService.getInstance().start(jobXmlName, jobParams);
+                setJobExecutionEntityHref(routingContext, jobExecutionEntity);
                 jobSchedule.addJobExecutionIds(jobExecutionEntity.getExecutionId());
                 jobSchedule.setStatus(JobSchedule.Status.DONE);
             });
         } else {
             timerId = vertx.setPeriodic(delayMillis, timerId1 -> {
                 final JobExecutionEntity jobExecutionEntity = JobService.getInstance().start(jobXmlName, jobParams);
+                setJobExecutionEntityHref(routingContext, jobExecutionEntity);
                 jobSchedule.addJobExecutionIds(jobExecutionEntity.getExecutionId());
 
 //                 since this is periodic timer, there may be more in the future
@@ -497,7 +501,7 @@ public enum JBeretRouterConfig {
         if (jobInstances.length > 0) {
             final long latestJobExecutionId = jobInstances[0].getLatestJobExecutionId();
             final JobExecutionEntity jobExecutionEntity = JobService.getInstance().restart(latestJobExecutionId, jobParams);
-
+            setJobExecutionEntityHref(routingContext, jobExecutionEntity);
             final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
             sendJsonResponse(routingContext, jsonObject.encodePrettily());
         } else {
@@ -508,7 +512,7 @@ public enum JBeretRouterConfig {
     private static void getJobExecution(final RoutingContext routingContext) {
         final long jobExecutionId = getIdAsLong(routingContext, "jobExecutionId");
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().getJobExecution(jobExecutionId);
-
+        setJobExecutionEntityHref(routingContext, jobExecutionEntity);
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
         sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
@@ -555,7 +559,7 @@ public enum JBeretRouterConfig {
         final long jobExecutionId = getIdAsLong(routingContext, "jobExecutionId");
         final Properties jobParams = getJobParameters(routingContext);
         final JobExecutionEntity jobExecutionEntity = JobService.getInstance().restart(jobExecutionId, jobParams);
-
+        setJobExecutionEntityHref(routingContext, jobExecutionEntity);
         final JsonObject jsonObject = JsonObject.mapFrom(jobExecutionEntity);
         sendJsonResponse(routingContext, jsonObject.encodePrettily());
     }
@@ -565,6 +569,7 @@ public enum JBeretRouterConfig {
         final JobExecutionEntity[] runningExecutions = JobService.getInstance().getRunningExecutions(jobName);
         final JsonArray jsonArray = new JsonArray();
         for (JobExecutionEntity e : runningExecutions) {
+            setJobExecutionEntityHref(routingContext, e);
             jsonArray.add(JsonObject.mapFrom(e));
         }
         sendJsonResponse(routingContext, jsonArray.encodePrettily());
@@ -582,6 +587,7 @@ public enum JBeretRouterConfig {
                 JobService.getInstance().getJobExecutions(count, 0, jobExecutionId1);
         final JsonArray jsonArray = new JsonArray();
         for (JobExecutionEntity e : jobExecutionEntities) {
+            setJobExecutionEntityHref(routingContext, e);
             jsonArray.add(JsonObject.mapFrom(e));
         }
         sendJsonResponse(routingContext, jsonArray.encodePrettily());
@@ -714,4 +720,20 @@ public enum JBeretRouterConfig {
         return timerLocalMap.get(idString);
     }
 
+    /**
+     * Sets the href field for each {@code org.jberet.rest.entity.JobExecutionEntity} passed in.
+     *
+     * @param routingContext io.vertx.ext.web.RoutingContext
+     * @param entities 1 or more {@code org.jberet.rest.entity.JobExecutionEntity}
+     */
+    private static void setJobExecutionEntityHref(final RoutingContext routingContext,
+                                          final JobExecutionEntity... entities) {
+        final HttpServerRequest request = routingContext.request();
+        final String absoluteURI = request.absoluteURI();
+        final String uri = request.uri();
+        final String baseURI = absoluteURI.substring(0, absoluteURI.length() - uri.length());
+        for (final JobExecutionEntity e : entities) {
+            e.setHref(baseURI + "/jobexecutions/" + e.getExecutionId());
+        }
+    }
 }
