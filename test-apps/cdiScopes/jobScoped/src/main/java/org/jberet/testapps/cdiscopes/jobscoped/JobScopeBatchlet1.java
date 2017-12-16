@@ -12,6 +12,7 @@
  
 package org.jberet.testapps.cdiscopes.jobscoped;
 
+import java.lang.annotation.ElementType;
 import java.util.List;
 import javax.batch.api.AbstractBatchlet;
 import javax.batch.runtime.context.StepContext;
@@ -21,16 +22,35 @@ import javax.inject.Named;
 @Named
 public class JobScopeBatchlet1 extends AbstractBatchlet {
     @Inject
-    private Foo foo;
+    private Foo fooTypeTarget;
+    
+    @Inject
+    @Named("METHOD")
+    private FooMethodTarget fooMethodTarget;
+    
+    @Inject
+    @Named("FIELD")
+    private FooFieldTarget fooFieldTarget;
 
     @Inject
     private StepContext stepContext;
 
     @Override
     public String process() throws Exception {
-        final List<String> stepNames = foo.getStepNames();
-        stepNames.add(stepContext.getStepName());
-        System.out.printf("In %s, foo.stepNames: %s%n", this, stepNames);
-        return stepNames.toString();
+        final List<String> stepNamesTypeTarget = fooTypeTarget.getStepNames();
+        final String stepName = stepContext.getStepName();
+        stepNamesTypeTarget.add(stepName + ElementType.TYPE);
+        String exitStatus1 = String.join(" ", stepNamesTypeTarget);
+        
+        final List<String> stepNamesMethodTarget = fooMethodTarget.getStepNames();
+        stepNamesMethodTarget.add(stepName + ElementType.METHOD);
+        String exitStatus2 = String.join(" ", stepNamesMethodTarget);
+        
+        final List<String> stepNamesFieldTarget = fooFieldTarget.getStepNames();
+        stepNamesFieldTarget.add(stepName + ElementType.FIELD);
+        String exitStatus3 = String.join(" ", stepNamesFieldTarget);
+
+
+        return String.join(" ", exitStatus1, exitStatus2, exitStatus3);
     }
 }

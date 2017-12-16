@@ -17,6 +17,10 @@ import javax.inject.Named;
 import org.jberet.cdi.JobScoped;
 import org.jberet.testapps.common.StepNameHolder;
 
+/**
+ * This bean class is annotated with {@link JobScoped} at the type level,
+ * so any injected instance will have job scope as defined in {@code JobScope}.
+ */
 @Named
 @JobScoped
 public class Foo extends StepNameHolder {

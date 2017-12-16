@@ -12,7 +12,6 @@
 
 package org.jberet.testapps.cdiscopes.jobscoped;
 
-import java.util.List;
 import javax.batch.api.partition.AbstractPartitionAnalyzer;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.context.StepContext;
@@ -22,26 +21,45 @@ import javax.inject.Named;
 @Named
 public class JobScopePartitionAnalyzer extends AbstractPartitionAnalyzer {
     @Inject
-    private Foo foo;
+    private Foo fooTypeTarget;
+
+    @Inject
+    @Named("METHOD")
+    private FooMethodTarget fooMethodTarget;
+
+    @Inject
+    @Named("FIELD")
+    private FooFieldTarget fooFieldTarget;
 
     @Inject
     private StepContext stepContext;
 
-    static final int numberOfPartitions = 2;
+    private static final int numberOfPartitions = 2;
     private int numberOfPartitionsFinished;
 
     @Override
     public void analyzeStatus(final BatchStatus batchStatus, final String exitStatus) throws Exception {
         if (++numberOfPartitionsFinished == numberOfPartitions) {
-            if (stepContext.getStepName().equals("jobScopedPartitioned.step2") ||
-                    stepContext.getStepName().equals("jobScoped2Partitioned.step2")) {
+            final String stepName = stepContext.getStepName();
+            if (stepName.equals("jobScopedPartitioned.step2") ||
+                    stepName.equals("jobScoped2Partitioned.step2")) {
+
                 // step2 has finished, and all partitions are finished
-                final List<String> stepNames = foo.getStepNames();
-                if (stepNames.size() == 4) {
-                    stepContext.setExitStatus(stepNames.toString());
-                } else {
-                    throw new IllegalStateException("Expecting 4 elements, but got " + stepNames);
+                final int fooTypeSize = fooTypeTarget.getStepNames().size();
+                final int fooMethodSize = fooMethodTarget.getStepNames().size();
+                final int fooFieldSize = fooFieldTarget.getStepNames().size();
+
+                // 2 steps, each step has 2 partitions, each partition runs one batchlet
+                final int expectedSize = 4;
+                if (fooTypeSize != expectedSize || fooMethodSize != expectedSize || fooFieldSize != expectedSize) {
+                    throw new IllegalStateException(String.format(
+                    "Expecting %s elements, but got fooTypeTarget %s, fooMethodType %s, fooFieldTarget %s",
+                            expectedSize, fooTypeSize, fooMethodSize, fooFieldSize));
                 }
+                final String exitStatus1 = String.join(" ", fooTypeTarget.getStepNames());
+                final String exitStatus2 = String.join(" ", fooMethodTarget.getStepNames());
+                final String exitStatus3 = String.join(" ", fooFieldTarget.getStepNames());
+                stepContext.setExitStatus(String.join(" ", exitStatus1, exitStatus2, exitStatus3));
             }
         }
     }
