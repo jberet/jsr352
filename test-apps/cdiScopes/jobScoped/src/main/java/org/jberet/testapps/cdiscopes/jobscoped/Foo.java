@@ -12,18 +12,12 @@
 
 package org.jberet.testapps.cdiscopes.jobscoped;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.inject.Named;
 
 import org.jberet.cdi.JobScoped;
+import org.jberet.testapps.common.StepNameHolder;
 
 @Named
 @JobScoped
-public class Foo {
-    private final List<String> stepNames = new CopyOnWriteArrayList<String>();
-
-    public List<String> getStepNames() {
-        return stepNames;
-    }
+public class Foo extends StepNameHolder {
 }
