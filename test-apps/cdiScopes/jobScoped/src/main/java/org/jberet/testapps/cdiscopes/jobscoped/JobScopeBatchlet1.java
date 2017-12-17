@@ -9,7 +9,7 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.testapps.cdiscopes.jobscoped;
 
 import java.lang.annotation.ElementType;
@@ -19,17 +19,20 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
+import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;
+
 @Named
 public class JobScopeBatchlet1 extends AbstractBatchlet {
     @Inject
     private Foo fooTypeTarget;
-    
+
     @Inject
-    @Named("METHOD")
+    @Named("jobScopedMethod")
     private FooMethodTarget fooMethodTarget;
-    
+
     @Inject
-    @Named("FIELD")
+    @Named("jobScopedField")
     private FooFieldTarget fooFieldTarget;
 
     @Inject
@@ -41,11 +44,11 @@ public class JobScopeBatchlet1 extends AbstractBatchlet {
         final String stepName = stepContext.getStepName();
         stepNamesTypeTarget.add(stepName + ElementType.TYPE);
         String exitStatus1 = String.join(" ", stepNamesTypeTarget);
-        
+
         final List<String> stepNamesMethodTarget = fooMethodTarget.getStepNames();
         stepNamesMethodTarget.add(stepName + ElementType.METHOD);
         String exitStatus2 = String.join(" ", stepNamesMethodTarget);
-        
+
         final List<String> stepNamesFieldTarget = fooFieldTarget.getStepNames();
         stepNamesFieldTarget.add(stepName + ElementType.FIELD);
         String exitStatus3 = String.join(" ", stepNamesFieldTarget);

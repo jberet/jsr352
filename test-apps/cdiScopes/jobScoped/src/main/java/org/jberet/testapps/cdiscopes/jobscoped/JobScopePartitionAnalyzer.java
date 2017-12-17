@@ -18,17 +18,20 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
+import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;
+
 @Named
 public class JobScopePartitionAnalyzer extends AbstractPartitionAnalyzer {
     @Inject
     private Foo fooTypeTarget;
 
     @Inject
-    @Named("METHOD")
+    @Named("jobScopedMethod")
     private FooMethodTarget fooMethodTarget;
 
     @Inject
-    @Named("FIELD")
+    @Named("jobScopedField")
     private FooFieldTarget fooFieldTarget;
 
     @Inject
@@ -53,7 +56,7 @@ public class JobScopePartitionAnalyzer extends AbstractPartitionAnalyzer {
                 final int expectedSize = 4;
                 if (fooTypeSize != expectedSize || fooMethodSize != expectedSize || fooFieldSize != expectedSize) {
                     throw new IllegalStateException(String.format(
-                    "Expecting %s elements, but got fooTypeTarget %s, fooMethodType %s, fooFieldTarget %s",
+                            "Expecting %s elements, but got fooTypeTarget %s, fooMethodType %s, fooFieldTarget %s",
                             expectedSize, fooTypeSize, fooMethodSize, fooFieldSize));
                 }
                 final String exitStatus1 = String.join(" ", fooTypeTarget.getStepNames());

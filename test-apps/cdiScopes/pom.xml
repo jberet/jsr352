@@ -21,6 +21,7 @@
         <module>jobScoped</module>
         <module>stepScoped</module>
         <module>partitionScoped</module>
+        <module>common</module>
     </modules>
 
     <parent>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.testapps.common;
+package org.jberet.testapps.cdiscopes.commons;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

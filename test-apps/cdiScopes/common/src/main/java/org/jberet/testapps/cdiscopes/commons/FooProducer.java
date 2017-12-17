@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.testapps.cdiscopes.jobscoped;
+package org.jberet.testapps.cdiscopes.commons;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
@@ -25,12 +25,12 @@ import org.jberet.cdi.JobScoped;
 public class FooProducer {
     @Produces
     @JobScoped
-    @Named("FIELD")
+    @Named("jobScopedField")
     private FooFieldTarget fooFieldTargetreturn = new FooFieldTarget();
 
     @Produces
     @JobScoped
-    @Named("METHOD")
+    @Named("jobScopedMethod")
     public FooMethodTarget getFooMethodTarget() {
         return new FooMethodTarget();
     }

@@ -15,7 +15,7 @@ package org.jberet.testapps.cdiscopes.jobscoped;
 import javax.inject.Named;
 
 import org.jberet.cdi.JobScoped;
-import org.jberet.testapps.common.StepNameHolder;
+import org.jberet.testapps.cdiscopes.commons.StepNameHolder;
 
 /**
  * This bean class is annotated with {@link JobScoped} at the type level,

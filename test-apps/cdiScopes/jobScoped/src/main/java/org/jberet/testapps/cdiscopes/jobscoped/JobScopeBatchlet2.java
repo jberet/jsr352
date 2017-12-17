@@ -19,17 +19,20 @@ import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
+import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;
+
 @Named
 public class JobScopeBatchlet2 extends AbstractBatchlet {
     @Inject
     private Foo fooTypeTarget;
 
     @Inject
-    @Named("METHOD")
+    @Named("jobScopedMethod")
     private FooMethodTarget fooMethodTarget;
 
     @Inject
-    @Named("FIELD")
+    @Named("jobScopedField")
     private FooFieldTarget fooFieldTarget;
 
     @Inject

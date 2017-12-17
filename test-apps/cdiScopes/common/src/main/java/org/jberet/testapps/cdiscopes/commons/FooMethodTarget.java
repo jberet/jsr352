@@ -10,13 +10,11 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.testapps.cdiscopes.jobscoped;
-
-import org.jberet.testapps.common.StepNameHolder;
+package org.jberet.testapps.cdiscopes.commons;
 
 /**
  * This class does not declare any CDI scope at the type level.
- * When injecting into a field, the field should declare one of the
+ * When produced by a producer method, the field should declare one of the
  * JBeret CDI scopes:
  * <ul>
  *     <li>{@link org.jberet.cdi.JobScoped}
@@ -26,5 +24,5 @@ import org.jberet.testapps.common.StepNameHolder;
  *
  * @since 1.3.0.Final
  */
-public class FooFieldTarget extends StepNameHolder {
+public class FooMethodTarget extends StepNameHolder {
 }
