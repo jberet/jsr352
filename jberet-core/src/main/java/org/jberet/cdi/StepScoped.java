@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,13 +18,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.context.NormalScope;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Custom CDI scope for step execution.
  */
-@Target({TYPE})
+@Target({TYPE, METHOD, FIELD})
 @Retention(RUNTIME)
 @Documented
 @NormalScope

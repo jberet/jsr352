@@ -12,15 +12,16 @@
 
 package org.jberet.testapps.cdiscopes.jobscoped;
 
+import javax.batch.api.Batchlet;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
 import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;
-import org.jberet.testapps.cdiscopes.commons.ScopeBatchletBase;
+import org.jberet.testapps.cdiscopes.commons.ScopeArtifactBase;
 
 @Named
-public class JobScopeBatchlet2 extends ScopeBatchletBase {
+public class JobScopeBatchlet2 extends ScopeArtifactBase implements Batchlet {
     @Inject
     private Foo fooTypeTarget;
 

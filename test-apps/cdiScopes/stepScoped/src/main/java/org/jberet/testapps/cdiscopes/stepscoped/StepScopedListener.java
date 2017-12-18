@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,31 +12,34 @@
 
 package org.jberet.testapps.cdiscopes.stepscoped;
 
-import java.util.List;
 import javax.batch.api.listener.StepListener;
-import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
+import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;
+import org.jberet.testapps.cdiscopes.commons.ScopeArtifactBase;
+
 @Named
-public class StepScopedListener implements StepListener {
+public class StepScopedListener extends ScopeArtifactBase implements StepListener {
     @Inject
-    private Foo foo;
+    private Foo fooTypeTarget;
 
     @Inject
-    private StepContext stepContext;
+    @Named("stepScopedMethod")
+    private FooMethodTarget fooMethodTarget;
+
+    @Inject
+    @Named("stepScopedField")
+    private FooFieldTarget fooFieldTarget;
 
     @Override
     public void beforeStep() throws Exception {
-        foo.getStepNames().add(stepContext.getStepName());
-        System.out.printf("In %s, foo.stepNames: %s%n", this, foo.getStepNames());
+        addStepNames(fooTypeTarget, fooMethodTarget, fooFieldTarget);
     }
 
     @Override
     public void afterStep() throws Exception {
-        foo.getStepNames().add(stepContext.getStepName());
-
-        System.out.printf("In %s, foo.stepNames: %s%n", this, foo.getStepNames());
-        stepContext.setExitStatus(foo.getStepNames().toString());
+        stepContext.setExitStatus(addStepNames(fooTypeTarget, fooMethodTarget, fooFieldTarget));
     }
 }

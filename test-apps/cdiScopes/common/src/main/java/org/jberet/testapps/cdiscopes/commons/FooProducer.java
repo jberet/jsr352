@@ -16,6 +16,7 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 
 import org.jberet.cdi.JobScoped;
+import org.jberet.cdi.StepScoped;
 
 /**
  * A CDI producer class to produce injection resources to batch artifacts.
@@ -26,12 +27,24 @@ public class FooProducer {
     @Produces
     @JobScoped
     @Named("jobScopedField")
-    private FooFieldTarget fooFieldTargetreturn = new FooFieldTarget();
+    private FooFieldTarget jobScopedFooFieldTarget = new FooFieldTarget();
+
+    @Produces
+    @StepScoped
+    @Named("stepScopedField")
+    private FooFieldTarget stepScopedFooFieldTarget = new FooFieldTarget();
 
     @Produces
     @JobScoped
     @Named("jobScopedMethod")
-    public FooMethodTarget getFooMethodTarget() {
+    public FooMethodTarget getJobScopedFooMethodTarget() {
+        return new FooMethodTarget();
+    }
+
+    @Produces
+    @StepScoped
+    @Named("stepScopedMethod")
+    public FooMethodTarget getStepScopedFooMethodTarget() {
         return new FooMethodTarget();
     }
 

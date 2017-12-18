@@ -14,11 +14,13 @@ package org.jberet.testapps.cdiscopes.commons;
 
 import java.lang.annotation.ElementType;
 import java.util.List;
-import javax.batch.api.AbstractBatchlet;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
-public abstract class ScopeBatchletBase extends AbstractBatchlet {
+/**
+ * Common super class for batch artifacts used in CDI-scope-related tests.
+ */
+public abstract class ScopeArtifactBase {
     @Inject
     protected StepContext stepContext;
 
@@ -39,5 +41,8 @@ public abstract class ScopeBatchletBase extends AbstractBatchlet {
         String exitStatus3 = String.join(" ", stepNamesFieldTarget);
 
         return String.join(" ", exitStatus1, exitStatus2, exitStatus3);
+    }
+
+    public void stop() throws Exception {
     }
 }

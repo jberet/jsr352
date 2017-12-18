@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,29 +9,32 @@
  * Contributors:
  * Cheng Fang - Initial API and implementation
  */
- 
+
 package org.jberet.testapps.cdiscopes.stepscoped;
 
-import java.util.List;
-import javax.batch.api.AbstractBatchlet;
-import javax.batch.runtime.context.StepContext;
+import javax.batch.api.Batchlet;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
+import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;
+import org.jberet.testapps.cdiscopes.commons.ScopeArtifactBase;
+
 @Named
-public class StepScopeBatchlet1 extends AbstractBatchlet {
+public class StepScopeBatchlet1 extends ScopeArtifactBase implements Batchlet {
     @Inject
-    private Foo foo;
+    private Foo fooTypeTarget;
 
     @Inject
-    private StepContext stepContext;
+    @Named("stepScopedMethod")
+    private FooMethodTarget fooMethodTarget;
+
+    @Inject
+    @Named("stepScopedField")
+    private FooFieldTarget fooFieldTarget;
 
     @Override
     public String process() throws Exception {
-        final List<String> stepNames = foo.getStepNames();
-        stepNames.add(stepContext.getStepName());
-        System.out.printf("In %s, foo.stepNames: %s%n", this, stepNames);
-
-        return stepNames.toString();
+        return addStepNames(fooTypeTarget, fooMethodTarget, fooFieldTarget);
     }
 }
