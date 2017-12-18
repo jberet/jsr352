@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,10 +18,22 @@ import javax.batch.api.BatchProperty;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
+import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;
+
 @Named
 public class PartitionScopeBatchlet1 extends AbstractBatchlet {
     @Inject
-    private Foo foo;
+    private Foo fooTypeTarget;
+
+    @Inject
+    @Named("partitionScopedMethod")
+    private FooMethodTarget fooMethodTarget;
+
+    @Inject
+    @Named("partitionScopedField")
+    private FooFieldTarget fooFieldTarget;
+
 
     @Inject
     private JobScopedFoo jobScopedFoo;
@@ -35,10 +47,16 @@ public class PartitionScopeBatchlet1 extends AbstractBatchlet {
 
     @Override
     public String process() throws Exception {
-        final List<String> stepNames = foo.getStepNames();
-        stepNames.add(stepName);
-        System.out.printf("In %s, foo.stepNames: %s%n", this, foo.getStepNames());
+        final List<String> typeStepNames = fooTypeTarget.getStepNames();
+        typeStepNames.add(stepName);
+        System.out.printf("In %s, fooTypeTarget.stepNames: %s%n", this, fooTypeTarget.getStepNames());
         System.out.printf("In %s, jobScopedFoo: %s, stepScopedFoo: %s%n", this, jobScopedFoo, stepScopedFoo);
+
+        final List<String> methodStepNames = fooMethodTarget.getStepNames();
+        methodStepNames.add(stepName);
+
+        final List<String> fieldStepNames = fooFieldTarget.getStepNames();
+        fieldStepNames.add(stepName);
 
         return null;
     }

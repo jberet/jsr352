@@ -16,6 +16,7 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 
 import org.jberet.cdi.JobScoped;
+import org.jberet.cdi.PartitionScoped;
 import org.jberet.cdi.StepScoped;
 
 /**
@@ -35,6 +36,11 @@ public class FooProducer {
     private FooFieldTarget stepScopedFooFieldTarget = new FooFieldTarget();
 
     @Produces
+    @PartitionScoped
+    @Named("partitionScopedField")
+    private FooFieldTarget partitionScopedFooFieldTarget = new FooFieldTarget();
+
+    @Produces
     @JobScoped
     @Named("jobScopedMethod")
     public FooMethodTarget getJobScopedFooMethodTarget() {
@@ -48,4 +54,10 @@ public class FooProducer {
         return new FooMethodTarget();
     }
 
+    @Produces
+    @PartitionScoped
+    @Named("partitionScopedMethod")
+    public FooMethodTarget getPartitionScopedFooMethodTarget() {
+        return new FooMethodTarget();
+    }
 }
