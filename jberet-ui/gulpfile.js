@@ -58,7 +58,7 @@ var files = {
  * 1, from gulp command line args, e.g., gulp --restUrl "http://example.com/myapp/api";
  * 2, from ./config.json restUrl property;
  * 3, from environment variable JBERET_REST_URL;
- * 4, default value '/jberet-api'
+ * 4, default value '/api'
  */
 function getRestUrl() {
     return argv.restUrl || config.restUrl || process.env.JBERET_REST_URL || '/api';
@@ -84,42 +84,45 @@ var customOpts = {
     //debug: true
 };
 var opts = assign({}, watchify.args, customOpts);
-var b = watchify(browserify(opts));
 
-gulp.task('js', bundle);
 
-b.on('update', bundle);
+var b = function() {
+  return browserify(opts);
+};
 
-b.on('log', plugins.util.log);
+var w = watchify(b());
 
-function bundle() {
+var bundle = function(tool) {
     //This will replace /* @echo __REST_URL__ */ with real value
     //and replace __DEBUG__ with real value
-    b.transform(preprocessify({
+    tool.transform(preprocessify({
         '__REST_URL__': getRestUrl(),
         '__DEBUG__': isDebug()
     }));
 
-    return b.bundle()
-        .on('error', plugins.util.log.bind(plugins.util, 'Browserify Error'))
-        .pipe(source('bundle.js'))
+  return tool.bundle()
+          .on('error', plugins.util.log.bind(plugins.util, 'Browserify Error'))
+          .pipe(source('bundle.js'))
 
-        //minify with source map file
-        .pipe(buffer())
-        //.pipe(plugins.sourcemaps.init({loadMaps: true}))
-        .pipe(plugins.if(!isDebug(), plugins.uglify()))
-        // Add transformation tasks to the pipeline here.
-        //.pipe(plugins.sourcemaps.write('./'))
+          //minify with source map file
+          .pipe(buffer())
+          //.pipe(plugins.sourcemaps.init({loadMaps: true}))
+          .pipe(plugins.if(!isDebug(), plugins.uglify()))
+          // Add transformation tasks to the pipeline here.
+          //.pipe(plugins.sourcemaps.write('./'))
 
-        .pipe(gulp.dest(distDir));
-}
+          .pipe(gulp.dest(distDir));
+};
+
+w.on('update', bundle.bind(null, w));
+w.on('log', plugins.util.log);
+
 
 gulp.task('img', function () {
     return gulp.src(files.img)
         .pipe(plugins.if(!isDebug(), plugins.imagemin()))
         .pipe(gulp.dest(distDir + '/img'));
 });
-
 
 gulp.task('lint', ['jshint', 'csslint']);
 
@@ -189,9 +192,10 @@ gulp.task('serve', function(done) {
 });
 
 /**
- * Just start browser-sync server, without running the 'build' task. This task is typically used when you know there is
- * no new changes to be built. Any javascript file changes will still be automatically sync'ed to browser, but other
- * files (html, image, css) will not.
+ * Just start browser-sync server, without running the 'build' or 'building' task. 
+ * This task is typically used when you know there is no new changes to be built.
+ * Any javascript file changes will still be automatically sync'ed to browser,
+ * but other files (html, image, css) will not.
  */
 gulp.task('serve-only', function () {
     return browserSync.init(files.dist, {
@@ -201,7 +205,10 @@ gulp.task('serve-only', function () {
     });
 });
 
-gulp.task('watch', ['build'], function () {
+/**
+ * Build and keep watching all file changes
+ */
+gulp.task('watch', ['building'], function () {
     gulp.watch(files.html, ['html']);
     gulp.watch(files.img, ['img']);
     gulp.watch(files.mycss, ['csslint', 'css']);
@@ -213,8 +220,14 @@ gulp.task('clean', function () {
     return del([distDir + '/**']);
 });
 
-gulp.task('build', ['lint', 'img', 'js', 'css', 'html', 'font', 'license'], function () {
+/**
+ * Build and keep watching for javascript file changes
+ */
+gulp.task('building', ['lint', 'img', 'css', 'html', 'font', 'license'], bundle.bind(null, w));
 
-});
+/**
+ * Build and exit
+ */
+gulp.task('build',    ['lint', 'img', 'css', 'html', 'font', 'license'], bundle.bind(null, b()));
 
 gulp.task('default', ['serve']);
