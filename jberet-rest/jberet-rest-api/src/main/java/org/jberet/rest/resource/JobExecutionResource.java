@@ -90,7 +90,7 @@ public class JobExecutionResource {
      *
      * @return the job execution with {@code jobExecutionId}
      */
-    @Path("{jobExecutionId}")
+    @Path("{jobExecutionId : \\d+}")
     @GET
     public JobExecutionEntity getJobExecution(final @PathParam("jobExecutionId") long jobExecutionId,
                                               final @Context UriInfo uriInfo) {

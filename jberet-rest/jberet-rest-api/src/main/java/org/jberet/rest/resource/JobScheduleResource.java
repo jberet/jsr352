@@ -83,7 +83,7 @@ public class JobScheduleResource {
      * @return the job schedule, and null if the job schedule is not found
      */
     @GET
-    @Path("{scheduleId}")
+    @Path("{scheduleId : .*\\d+.*}")
     public JobSchedule getJobSchedule(final @PathParam("scheduleId") String scheduleId) {
         final JobScheduler jobScheduler = JobScheduler.getJobScheduler();
         return jobScheduler.getJobSchedule(scheduleId);
