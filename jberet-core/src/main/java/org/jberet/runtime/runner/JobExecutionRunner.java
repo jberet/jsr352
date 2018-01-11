@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,38 +47,39 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
         if (jobExecution.getBatchStatus() != BatchStatus.STOPPING) {
             jobExecution.setBatchStatus(BatchStatus.STARTED);
             batchContext.getJobRepository().updateJobExecution(jobExecution, false, false);
-        }
-        JobListener[] jobListeners = null;
-        int i = 0;
 
-        try {
-            jobListeners = createJobListeners();
-            for (; i < jobListeners.length; i++) {
-                jobListeners[i].beforeJob();
-            }
+            JobListener[] jobListeners = null;
+            int i = 0;
 
-            runFromHeadOrRestartPoint(jobExecution.getRestartPosition());
-
-            if (jobExecution.getBatchStatus() == BatchStatus.STARTED) {
-                jobExecution.setBatchStatus(BatchStatus.COMPLETED);
-            }
-        } catch (final Throwable e) {
-            BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", job);
-            jobExecution.setBatchStatus(BatchStatus.FAILED);
-            if (jobListeners == null) {
-                jobExecution.setExitStatus(e.toString());
-            }
-        } finally {
-            if (jobListeners != null && jobListeners.length > 0) {
-                for (i = 0; i < jobListeners.length; i++) {
-                    try {
-                        jobListeners[i].afterJob();
-                    } catch (final Throwable e) {
-                        BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", jobListeners[i]);
-                        jobExecution.setBatchStatus(BatchStatus.FAILED);
-                    }
+            try {
+                jobListeners = createJobListeners();
+                for (; i < jobListeners.length; i++) {
+                    jobListeners[i].beforeJob();
                 }
-                batchContext.destroyArtifact(jobListeners);
+
+                runFromHeadOrRestartPoint(jobExecution.getRestartPosition());
+
+                if (jobExecution.getBatchStatus() == BatchStatus.STARTED) {
+                    jobExecution.setBatchStatus(BatchStatus.COMPLETED);
+                }
+            } catch (final Throwable e) {
+                BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", job);
+                jobExecution.setBatchStatus(BatchStatus.FAILED);
+                if (jobListeners == null) {
+                    jobExecution.setExitStatus(e.toString());
+                }
+            } finally {
+                if (jobListeners != null && jobListeners.length > 0) {
+                    for (i = 0; i < jobListeners.length; i++) {
+                        try {
+                            jobListeners[i].afterJob();
+                        } catch (final Throwable e) {
+                            BatchLogger.LOGGER.failToRunJob(e, job.getId(), "", jobListeners[i]);
+                            jobExecution.setBatchStatus(BatchStatus.FAILED);
+                        }
+                    }
+                    batchContext.destroyArtifact(jobListeners);
+                }
             }
         }
 
