@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
 
 package org.jberet.samples.wildfly.schedule.timer;
 
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -19,11 +20,11 @@ import javax.batch.runtime.BatchStatus;
 import javax.ejb.ScheduleExpression;
 
 import org.jberet.rest.client.BatchClient;
+import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduleConfigBuilder;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -60,6 +61,33 @@ public final class ScheduleTimerIT extends BatchTestBase {
     @Override
     protected BatchClient getBatchClient() {
         return batchClient;
+    }
+
+    /**
+     * Tests job execution scheduled at the end of the current job execution.
+     * This tests first cancels all job schedules to avoid left-over schedules.
+     *
+     * @throws Exception if errors occur
+     *
+     * @since 1.3.0
+     */
+    @Test
+    public void scheduleAfterEnd() throws Exception {
+        cancelAllSchedules();
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "scheduleAfterEnd");
+        params.setProperty("initialDelay", "1");
+
+        DateFormat df = DateFormat.getDateTimeInstance();
+        final Date stopDateTime = new Date(System.currentTimeMillis() + 1000*60*3);
+        params.setProperty("stopAfterTime", df.format(stopDateTime));
+
+        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(jobName, params);
+        Thread.sleep(sleepTimeMillis);
+        assertEquals(BatchStatus.COMPLETED, batchClient.getJobExecution(jobExecutionEntity.getExecutionId()).getBatchStatus());
+
+        //manually verify that the next job execution is scheduled to start approximately 1 minute
+        //after this job execution completes.
     }
 
     /**
@@ -305,6 +333,6 @@ public final class ScheduleTimerIT extends BatchTestBase {
     private void deleteJobSchedule(final JobSchedule schedule) {
         final String id = schedule.getId();
         batchClient.deleteJobSchedule(id);
-        Assert.assertEquals(null, batchClient.getJobSchedule(id));
+        assertEquals(null, batchClient.getJobSchedule(id));
     }
 }

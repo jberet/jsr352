@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
 
 package org.jberet.schedule._private;
 
+import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduler;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
@@ -33,5 +34,10 @@ public interface ScheduleExecutorLogger extends BasicLogger {
     @Message(id = 72501, value = "Failed to look up the ManagedScheduledExecutorService: %s, and will use the default resource.")
     @LogMessage(level = Logger.Level.WARN)
     void failToLookupManagedScheduledExecutorService(String lookupName);
+
+    @Message(id = 72502,
+    value = "The following job execution is scheduled to run after execution %s ends: schedule id %s, %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void scheduledNextExecution(long currentExecutionId, String scheduleId, JobScheduleConfig scheduleConfig);
 
 }
