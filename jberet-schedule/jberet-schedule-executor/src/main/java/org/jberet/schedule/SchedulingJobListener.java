@@ -13,9 +13,11 @@
 package org.jberet.schedule;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.listener.AbstractJobListener;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.context.JobContext;
 import javax.inject.Inject;
@@ -27,13 +29,16 @@ import org.jberet.schedule._private.ScheduleExecutorLogger;
  * An implementation of {@code javax.batch.api.listener.JobListener} that
  * schedules the next execution of the same job to start some time after
  * the current execution ends.
+ * <p>
+ * If there are multiple job listeners in a job, this class should always
+ * be specified as the last one within &lt;listeners&gt;.
  *
  * @since 1.3.0
  */
 @Named
 public class SchedulingJobListener extends AbstractJobListener {
     @Inject
-    private JobContext jobContext;
+    protected JobContext jobContext;
 
     /**
      * The initial delay (in minutes) after the current job execution ends,
@@ -43,7 +48,7 @@ public class SchedulingJobListener extends AbstractJobListener {
      */
     @Inject
     @BatchProperty
-    private long initialDelay = 2;
+    protected long initialDelay = 2;
 
     /**
      * Whether the job schedule is persistent.
@@ -53,7 +58,7 @@ public class SchedulingJobListener extends AbstractJobListener {
      */
     @Inject
     @BatchProperty
-    private boolean persistent;
+    protected boolean persistent;
 
     /**
      * The date and time after which to stop scheduling any further job executions.
@@ -62,7 +67,16 @@ public class SchedulingJobListener extends AbstractJobListener {
      */
     @Inject
     @BatchProperty
-    private Date stopAfterTime;
+    protected Date stopAfterTime;
+
+    /**
+     * The list of {@code BatchStatus}, if any of which matches the batch status of
+     * the current job execution, the next job execution is scheduled. Otherwise,
+     * no execution is scheduled.
+     */
+    @Inject
+    @BatchProperty
+    protected List<BatchStatus> onBatchStatus;
 
     /**
      * {@inheritDoc}
@@ -73,26 +87,49 @@ public class SchedulingJobListener extends AbstractJobListener {
      */
     @Override
     public void afterJob() {
+        if(needToSchedule()) {
+            final JobScheduler scheduler = JobScheduler.getJobScheduler();
+            final long executionId = jobContext.getExecutionId();
+            final JobExecution jobExecution = JobScheduler.getJobOperator().getJobExecution(executionId);
+            final Properties jobParameters = jobExecution.getJobParameters();
+
+            JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
+                    .jobName(jobContext.getJobName())
+                    .initialDelay(initialDelay)
+                    .persistent(persistent)
+                    .jobParameters(jobParameters)
+                    .build();
+
+            final JobSchedule schedule = scheduler.schedule(scheduleConfig);
+            ScheduleExecutorLogger.LOGGER.scheduledNextExecution(executionId, schedule.getId(), scheduleConfig);
+        }
+    }
+
+    /**
+     * Checks if need to schedule the next job execution.
+     * This method may be overridden by subclass to customize the condition whether to schedule
+     * the next job execution.  In this case, the overriding method should class
+     * {@code super.needToSchedule() first}.
+     *
+     * @return false if {@link #initialDelay} is negative, or {@link #stopAfterTime} has passed,
+     *          or current batch status does not match any one of {@link #onBatchStatus};
+     *          otherwise, return true
+     */
+    protected boolean needToSchedule() {
         if (initialDelay < 0) {
-            return;
+            return false;
         }
         if (stopAfterTime != null && System.currentTimeMillis() >= stopAfterTime.getTime() ) {
-            return;
+            return false;
         }
-
-        final JobScheduler scheduler = JobScheduler.getJobScheduler();
-        final long executionId = jobContext.getExecutionId();
-        final JobExecution jobExecution = JobScheduler.getJobOperator().getJobExecution(executionId);
-        final Properties jobParameters = jobExecution.getJobParameters();
-
-        JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
-                .jobName(jobContext.getJobName())
-                .initialDelay(initialDelay)
-                .persistent(persistent)
-                .jobParameters(jobParameters)
-                .build();
-
-        final JobSchedule schedule = scheduler.schedule(scheduleConfig);
-        ScheduleExecutorLogger.LOGGER.scheduledNextExecution(executionId, schedule.getId(), scheduleConfig);
+        if (onBatchStatus != null && !onBatchStatus.isEmpty()) {
+            final BatchStatus currentStatus = jobContext.getBatchStatus();
+            if (currentStatus == BatchStatus.STARTED) {
+                return onBatchStatus.contains(BatchStatus.COMPLETED) || onBatchStatus.contains(BatchStatus.STARTED);
+            } else {
+                return onBatchStatus.contains(currentStatus);
+            }
+        }
+        return true;
     }
 }

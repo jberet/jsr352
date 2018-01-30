@@ -20,7 +20,16 @@
         <listener ref="org.jberet.schedule.SchedulingJobListener">
             <properties>
                 <property name="initialDelay"  value="#{jobParameters['initialDelay']}?:-1;"/>
+
+                <!--
+                <property name="stopAfterTime" value="Jan 28, 2018 11:04:30 PM"/>
+                -->
                 <property name="stopAfterTime" value="#{jobParameters['stopAfterTime']}"/>
+
+                <!--
+                only when current job execution failed or was stopped, will the next execution be scheduled
+                <property name="onBatchStatus" value="FAILED, STOPPED"/>
+                -->
             </properties>
         </listener>
     </listeners>
