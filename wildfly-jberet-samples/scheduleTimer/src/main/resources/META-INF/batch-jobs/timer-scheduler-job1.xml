@@ -19,6 +19,11 @@
     <listeners>
         <listener ref="org.jberet.schedule.SchedulingJobListener">
             <properties>
+
+                <!-- all properties for this listener are optional, and they are included
+                for illustration purpose
+                -->
+
                 <property name="initialDelay"  value="#{jobParameters['initialDelay']}?:-1;"/>
 
                 <!--
@@ -27,9 +32,26 @@
                 <property name="stopAfterTime" value="#{jobParameters['stopAfterTime']}"/>
 
                 <!--
-                only when current job execution failed or was stopped, will the next execution be scheduled
-                <property name="onBatchStatus" value="FAILED, STOPPED"/>
+                max number of schedules
                 -->
+                <property name="maxSchedules" value="2"/>
+
+                <!--
+                only when current job execution status is FAILED, STOPPED or COMPLETED,
+                will the next execution be scheduled
+                -->
+                <property name="onBatchStatus" value="FAILED, STOPPED, COMPLETED"/>
+
+                <!--
+                at the end of a failed or stopped job executions, whether to restart that job execution,
+                or start a new job execution
+                -->
+                <property name="restartFailedStopped" value="true"/>
+
+                <!--
+                whether the job schedule should be persistent.
+                -->
+                <property name="persistent" value="false"/>
             </properties>
         </listener>
     </listeners>

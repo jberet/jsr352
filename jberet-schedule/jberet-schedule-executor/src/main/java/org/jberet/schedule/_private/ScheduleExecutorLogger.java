@@ -16,6 +16,7 @@ import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduler;
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
+import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
@@ -39,5 +40,10 @@ public interface ScheduleExecutorLogger extends BasicLogger {
     value = "The following job execution is scheduled to run after execution %s ends: schedule id %s, %s")
     @LogMessage(level = Logger.Level.INFO)
     void scheduledNextExecution(long currentExecutionId, String scheduleId, JobScheduleConfig scheduleConfig);
+
+    @Message(id = 72503,
+    value = "Failed to schedule in current job execution %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToSchedule(@Cause Throwable throwable, long currentExecutionId);
 
 }

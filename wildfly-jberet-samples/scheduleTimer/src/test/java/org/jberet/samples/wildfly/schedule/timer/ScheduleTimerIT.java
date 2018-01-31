@@ -91,6 +91,29 @@ public final class ScheduleTimerIT extends BatchTestBase {
     }
 
     /**
+     * Same as {@link #scheduleAfterEnd()}, except that this test fails the initial job execution,
+     * and schedule to restart (not start) the initial job execution.
+     *
+     * @throws Exception if errors occur
+     *
+     * @since 1.3.0
+     */
+    @Test
+    public void scheduleAfterEndRestart() throws Exception {
+        cancelAllSchedules();
+        final Properties params = new Properties();
+        params.setProperty(testNameKey, "fail");
+        params.setProperty("initialDelay", "1");
+
+        final JobExecutionEntity jobExecutionEntity = batchClient.startJob(jobName, params);
+        Thread.sleep(sleepTimeMillis);
+        assertEquals(BatchStatus.FAILED, batchClient.getJobExecution(jobExecutionEntity.getExecutionId()).getBatchStatus());
+
+        //manually verify that the next job execution is scheduled to restart approximately 1 minute
+        //after this job execution failed.
+    }
+
+    /**
      * Tests single-action job scheudle specified with an initial delay.
      * This tests first cancels all job schedules to avoid left-over schedules.
      *
