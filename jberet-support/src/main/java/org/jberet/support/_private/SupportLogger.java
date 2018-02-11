@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,5 +58,14 @@ public interface SupportLogger extends BasicLogger {
     @Message(id = 60507, value = "Produced report to: %s")
     @LogMessage(level = Logger.Level.INFO)
     void producedJasperReport(String dest);
+
+    @Message(id = 60508, value = "Ignoring unrecognized property: %s = %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void ignoreProperties(String key, String value);
+
+    @Message(id = 60509, value = "Query parameter %s not bound in: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void queryParameterNotBound(String parameter, String query);
+
 
 }
