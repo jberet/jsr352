@@ -17,9 +17,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
 import javax.batch.operations.BatchRuntimeException;
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.datastax.driver.core.BatchStatement;
@@ -44,6 +46,19 @@ import org.jberet.support._private.SupportMessages;
 @Named
 @Dependent
 public class CassandraItemWriter extends CassandraReaderWriterBase implements ItemWriter {
+
+    /**
+     * When the cql parameter (variable) name only differs from the corresponding table column name
+     * in case (i.e., they are same when compared case insensitive), the current driver uses the column
+     * name as the column definition name. When using this value as key to look up
+     * in the date item map, it will return null if the Map is keyed with the cql parameter (variable)
+     * name. Therefore, this property can be used to specify the parameter names in the correct case
+     * matching the keys in date item map.
+     */
+    @Inject
+    @BatchProperty
+    protected String[] parameterNames;
+
     protected BatchStatement batchStatement = new BatchStatement();
 
     @Override
@@ -103,10 +118,28 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
             } else {
                 itemAsMap = objectMapper.convertValue(item, Map.class);
             }
+            System.out.printf("## itemAsMap: %s%n", itemAsMap);
             boundStatement = preparedStatement.bind();
             for (ColumnDefinitions.Definition cd : preparedStatement.getVariables()) {
                 final String name = cd.getName();
-                final Object val = itemAsMap.get(name);
+                Object val = itemAsMap.get(name);
+
+                //When the cql parameter (variable) name only differs from the corresponding table column name
+                //in case (i.e., they are same when compared case insensitive), the driver will use the column
+                //name as the ColumnDefinition getName() return value. When using this value as key to look up
+                //in the date item Map, it will return null if the Map is keyed with the cql parameter (variable)
+                //name.
+                //If cql parameter (variable) name is totally different than the corresponding table column name,
+                //then the cql parameter (variable) name will be used as the ColumnDefinition getName() return value.
+
+                if (val == null && parameterNames != null) {
+                    for (String n : parameterNames) {
+                        if (name.equalsIgnoreCase(n)) {
+                            val = itemAsMap.get(n);
+                            break;
+                        }
+                    }
+                }
 
                 if (val == null) {
                     SupportLogger.LOGGER.queryParameterNotBound(name, cql);
@@ -199,6 +232,8 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
             case TIMESTAMP:
                 if (v instanceof java.util.Date) {
                     st.setTimestamp(n, (java.util.Date) v);
+                } else if(v instanceof Long) {
+                    st.setTimestamp(n, new java.util.Date((Long) v));
                 } else {
                     incompatibleDataType(java.util.Date.class, v);
                 }

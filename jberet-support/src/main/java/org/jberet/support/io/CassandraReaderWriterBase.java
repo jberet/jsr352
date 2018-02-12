@@ -147,6 +147,10 @@ public abstract class CassandraReaderWriterBase extends JsonItemReaderWriterBase
             session = cluster.connect(keyspace);
             sessionCreated = true;
         }
+
+        if (beanType != List.class && beanType != Map.class) {
+            initJsonFactoryAndObjectMapper();
+        }
     }
 
     protected void applyClusterProperties(final Cluster.Builder clusterBuilder) throws Exception {

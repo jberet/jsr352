@@ -58,6 +58,8 @@ public class CassandraReaderWriterTest {
                     "volume double, " +
                     "primary key(tradedate, tradetime))";
 
+    static final String nameMapping = "Date,Time,Open,High,Low,Close,Volume";
+
     static final String writerInsertCql =
     "insert into stock_trade (tradedate, tradetime, open, high, low, close, volume) values(?, ?, ?, ?, ?, ?, ?)";
 
@@ -105,10 +107,31 @@ public class CassandraReaderWriterTest {
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
         jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
+        jobParams.setProperty("end", String .valueOf(8));  // read the first 8 lines
+
+        //use nameMapping since the bean type is Map, and the input csv has no header
+        jobParams.setProperty("nameMapping", nameMapping);
+        jobParams.setProperty("parameterNames", nameMapping);
+
+        final long jobExecutionId = jobOperator.start(writerTestJobName, jobParams);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(1, TimeUnit.MINUTES);
+
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    @Test
+    public void readIBMStockTradeCsvWriteCassandraPOJO() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("readerBeanType", StockTrade.class.getName());
+        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("keyspace", keyspace);
+        jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
         jobParams.setProperty("end", String .valueOf(10));  // read the first 10 lines
 
         //use nameMapping since the bean type is Map, and the input csv has no header
-        jobParams.setProperty("nameMapping", ExcelWriterTest.ibmStockTradeNameMapping);
+        jobParams.setProperty("nameMapping", nameMapping);
+        jobParams.setProperty("parameterNames", nameMapping);
 
         final long jobExecutionId = jobOperator.start(writerTestJobName, jobParams);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
