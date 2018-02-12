@@ -26,8 +26,10 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore("Need to run Cassandra cluster first")
 public class CassandraReaderWriterTest {
     static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String writerTestJobName = "org.jberet.support.io.CassandraWriterTest";
@@ -59,6 +61,10 @@ public class CassandraReaderWriterTest {
     static final String writerInsertCql =
     "insert into stock_trade (tradedate, tradetime, open, high, low, close, volume) values(?, ?, ?, ?, ?, ?, ?)";
 
+    static final String writerInsertCql2 =
+    "insert into stock_trade (tradedate, tradetime, open, high, low, close, volume) " +
+    "values(:date, :time, :open, :high, :low, :close, :volume)";
+
     @BeforeClass
     public static void beforeClass() {
         initKeyspaceAndTable();
@@ -84,6 +90,25 @@ public class CassandraReaderWriterTest {
         jobParams.setProperty("keyspace", keyspace);
         jobParams.setProperty("cql", writerInsertCql);
         jobParams.setProperty("end", String .valueOf(5));  // read the first 5 lines
+
+        final long jobExecutionId = jobOperator.start(writerTestJobName, jobParams);
+        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        jobExecution.awaitTermination(1, TimeUnit.MINUTES);
+
+        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    }
+
+    @Test
+    public void readIBMStockTradeCsvWriteCassandraMap() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("readerBeanType", java.util.Map.class.getName());
+        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("keyspace", keyspace);
+        jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
+        jobParams.setProperty("end", String .valueOf(10));  // read the first 10 lines
+
+        //use nameMapping since the bean type is Map, and the input csv has no header
+        jobParams.setProperty("nameMapping", ExcelWriterTest.ibmStockTradeNameMapping);
 
         final long jobExecutionId = jobOperator.start(writerTestJobName, jobParams);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);

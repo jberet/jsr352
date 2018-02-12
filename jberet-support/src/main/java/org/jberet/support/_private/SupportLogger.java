@@ -67,5 +67,10 @@ public interface SupportLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void queryParameterNotBound(String parameter, String query);
 
+    @Message(id = 60510, value = "Unsupported data type: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void unsupportedDataType(String dataType);
+
+
 
 }

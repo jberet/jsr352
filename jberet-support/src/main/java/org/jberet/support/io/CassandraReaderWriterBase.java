@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -123,6 +123,7 @@ public abstract class CassandraReaderWriterBase extends JsonItemReaderWriterBase
 
     protected Cluster cluster;
     protected Session session;
+    protected boolean sessionCreated;
     protected PreparedStatement preparedStatement;
 
     protected void init() throws Exception {
@@ -144,6 +145,7 @@ public abstract class CassandraReaderWriterBase extends JsonItemReaderWriterBase
                 cluster = clusterBuilder.build();
             }
             session = cluster.connect(keyspace);
+            sessionCreated = true;
         }
     }
 
@@ -242,4 +244,9 @@ public abstract class CassandraReaderWriterBase extends JsonItemReaderWriterBase
         return (T) aClass.newInstance();
     }
 
+    public void close() throws Exception {
+        if (sessionCreated && session != null && !session.isClosed()) {
+            session.close();
+        }
+    }
 }
