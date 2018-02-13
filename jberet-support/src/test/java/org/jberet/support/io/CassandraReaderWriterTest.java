@@ -67,6 +67,30 @@ public class CassandraReaderWriterTest {
     "insert into stock_trade (tradedate, tradetime, open, high, low, close, volume) " +
     "values(:date, :time, :open, :high, :low, :close, :volume)";
 
+    // tradedate is date type (instead of timestamp), which maps to java type
+    // com.datastax.driver.core.LocalDate
+    // and table name is different (with suffix _date)
+    static final String createTableDateColumn =
+            "create table if not exists stock_trade_date (" +
+                    "tradedate date, " +
+                    "tradetime text, " +
+                    "open double, " +
+                    "high double, " +
+                    "low double, " +
+                    "close double, " +
+                    "volume double, " +
+                    "primary key(tradedate, tradetime))";
+
+    static final String deleteAllRowsDate = "truncate stock_trade_date";
+
+    static final String writerInsertCqlDate =
+            "insert into stock_trade_date (tradedate, tradetime, open, high, low, close, volume) values(?, ?, ?, ?, ?, ?, ?)";
+
+    static final String writerInsertCql2Date =
+            "insert into stock_trade_date (tradedate, tradetime, open, high, low, close, volume) " +
+                    "values(:date, :time, :open, :high, :low, :close, :volume)";
+
+
     @BeforeClass
     public static void beforeClass() {
         initKeyspaceAndTable();
@@ -84,26 +108,42 @@ public class CassandraReaderWriterTest {
         deleteAllRows();
     }
 
+    /**
+     * Writes data items into table stock_trade.
+     * Each data item is of java type java.util.List, which is used to
+     * fill cql parameters, one list element for one parameter in order.
+     * The java type of each list element must be compatible with the
+     * cql type in each column.
+     * <p>
+     * Note tradedate column has cql type timestamp, which maps to java type java.util.Date.
+     * So it contains both date info and time info.
+     * <p>
+     * Sample output:
+     * <pre>
+     *       tradedate                       | tradetime | close  | high   | low    | open   | volume
+     *      ---------------------------------+-----------+--------+--------+--------+--------+--------
+     *       1998-01-02 05:00:00.000000+0000 |     09:30 | 104.44 | 104.44 | 104.44 | 104.44 |  67040
+     *       1998-01-02 05:00:00.000000+0000 |     09:31 | 104.31 | 104.44 | 104.31 | 104.31 |  10810
+     *       1998-01-02 05:00:00.000000+0000 |     09:32 | 104.44 | 104.44 | 104.31 | 104.37 |  13310
+     * </pre>
+     * @throws Exception
+     */
     @Test
     public void readIBMStockTradeCsvWriteCassandraList() throws Exception {
         final Properties jobParams = new Properties();
-        jobParams.setProperty("readerBeanType", java.util.List.class.getName());
+        jobParams.setProperty("beanType", java.util.List.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
         jobParams.setProperty("cql", writerInsertCql);
         jobParams.setProperty("end", String .valueOf(5));  // read the first 5 lines
 
-        final long jobExecutionId = jobOperator.start(writerTestJobName, jobParams);
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(1, TimeUnit.MINUTES);
-
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        runTest(writerTestJobName, jobParams);
     }
 
     @Test
     public void readIBMStockTradeCsvWriteCassandraMap() throws Exception {
         final Properties jobParams = new Properties();
-        jobParams.setProperty("readerBeanType", java.util.Map.class.getName());
+        jobParams.setProperty("beanType", java.util.Map.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
         jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
@@ -113,17 +153,48 @@ public class CassandraReaderWriterTest {
         jobParams.setProperty("nameMapping", nameMapping);
         jobParams.setProperty("parameterNames", nameMapping);
 
-        final long jobExecutionId = jobOperator.start(writerTestJobName, jobParams);
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
-        jobExecution.awaitTermination(1, TimeUnit.MINUTES);
+        runTest(writerTestJobName, jobParams);
+    }
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+    /**
+     * Same as {@link #readIBMStockTradeCsvWriteCassandraMap()}, except that
+     * this test uses table stock_trade_date, whose tradedate column only contains
+     * date info without time info. The cql data type date maps to java type
+     * com.datastax.driver.core.LocalDate
+     * <p>
+     * Sample output:
+     * <pre>
+     *      tradedate  | tradetime | close  | high   | low    | open   | volume
+     *     ------------+-----------+--------+--------+--------+--------+--------
+     *      1998-01-05 |     09:30 | 105.66 | 105.66 | 105.66 | 105.66 |  82630
+     *      1998-01-05 |     09:31 | 105.66 | 105.66 | 105.66 | 105.66 |  13690
+     *      1998-01-05 |     09:32 | 105.66 | 105.66 | 105.66 | 105.66 |   8790
+     *      1998-01-05 |     09:33 | 105.59 | 105.66 | 105.41 | 105.59 |  26880
+     * </pre>
+     *
+     * @throws Exception
+     */
+    @Test
+    public void readIBMStockTradeCsvWriteCassandraMapDate() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("beanType", java.util.Map.class.getName());
+        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("keyspace", keyspace);
+        jobParams.setProperty("cql", writerInsertCql2Date);  // use cql with named parameters
+        jobParams.setProperty("start", String .valueOf(365));
+        jobParams.setProperty("end", String .valueOf(400));
+
+        //use nameMapping since the bean type is Map, and the input csv has no header
+        jobParams.setProperty("nameMapping", nameMapping);
+        jobParams.setProperty("parameterNames", nameMapping);
+
+        runTest(writerTestJobName, jobParams);
     }
 
     @Test
     public void readIBMStockTradeCsvWriteCassandraPOJO() throws Exception {
         final Properties jobParams = new Properties();
-        jobParams.setProperty("readerBeanType", StockTrade.class.getName());
+        jobParams.setProperty("beanType", StockTrade.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
         jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
@@ -133,10 +204,30 @@ public class CassandraReaderWriterTest {
         jobParams.setProperty("nameMapping", nameMapping);
         jobParams.setProperty("parameterNames", nameMapping);
 
-        final long jobExecutionId = jobOperator.start(writerTestJobName, jobParams);
+        runTest(writerTestJobName, jobParams);
+    }
+
+    @Test
+    public void readIBMStockTradeCsvWriteCassandraPOJODate() throws Exception {
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("beanType", StockTrade.class.getName());
+        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("keyspace", keyspace);
+        jobParams.setProperty("cql", writerInsertCql2Date);  // use cql with named parameters
+        jobParams.setProperty("start", String .valueOf(755));
+        jobParams.setProperty("end", String .valueOf(785));
+
+        //use nameMapping since the bean type is Map, and the input csv has no header
+        jobParams.setProperty("nameMapping", nameMapping);
+        jobParams.setProperty("parameterNames", nameMapping);
+
+        runTest(writerTestJobName, jobParams);
+    }
+
+    private void runTest(final String jobName, final Properties jobParams) throws Exception {
+        final long jobExecutionId = jobOperator.start(jobName, jobParams);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(1, TimeUnit.MINUTES);
-
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
@@ -146,15 +237,19 @@ public class CassandraReaderWriterTest {
             System.out.printf("Created keyspace %s%n", keyspace);
         }
         getSession().execute(useKeyspace);
-        final ResultSet resultSet1 = getSession().execute(createTable);
+        ResultSet resultSet1 = getSession().execute(createTable);
         if (resultSet1.wasApplied()) {
             System.out.printf("Created table STOCK_TRADE%n");
+        }
+        resultSet1 = getSession().execute(createTableDateColumn);
+        if (resultSet1.wasApplied()) {
+            System.out.printf("Created table STOCK_TRADE_DATE%n");
         }
     }
 
     static void deleteAllRows() {
-        final ResultSet resultSet = getSession().execute(deleteAllRows);
-        System.out.printf("Deleted rows: %s%n", resultSet.one());
+        getSession().execute(deleteAllRows);
+        getSession().execute(deleteAllRowsDate);
     }
 
     static Session getSession() {

@@ -12,9 +12,14 @@
 
 package org.jberet.support.io;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.batch.api.BatchProperty;
@@ -30,6 +35,7 @@ import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.Duration;
 import com.datastax.driver.core.LocalDate;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.UDTValue;
@@ -60,6 +66,9 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
     protected String[] parameterNames;
 
     protected BatchStatement batchStatement = new BatchStatement();
+    protected PreparedStatement preparedStatement;
+
+    protected PropertyDescriptor[] propertyDescriptors;
 
     @Override
     public void writeItems(final List<Object> items) throws Exception {
@@ -85,6 +94,11 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
 
         //if parameterNames is null, assume the cql string contains named parameters
         //and the parameter value will be bound with its name instead of the index.
+
+        if (beanType != null && beanType != List.class && beanType != Map.class && propertyDescriptors == null) {
+            BeanInfo beanInfo = Introspector.getBeanInfo(beanType);
+            propertyDescriptors = beanInfo.getPropertyDescriptors();
+        }
     }
 
     @Override
@@ -116,9 +130,18 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
             if (item instanceof Map) {
                 itemAsMap = (Map) item;
             } else {
-                itemAsMap = objectMapper.convertValue(item, Map.class);
+                if (propertyDescriptors == null) {
+                    propertyDescriptors = Introspector.getBeanInfo(item.getClass()).getPropertyDescriptors();
+                }
+                itemAsMap = new HashMap();
+                for (PropertyDescriptor d : propertyDescriptors) {
+                    final String name = d.getName();
+                    if(!name.equals("class")) {
+                        final Object val = d.getReadMethod().invoke(item);
+                        itemAsMap.put(name, val);
+                    }
+                }
             }
-            System.out.printf("## itemAsMap: %s%n", itemAsMap);
             boundStatement = preparedStatement.bind();
             for (ColumnDefinitions.Definition cd : preparedStatement.getVariables()) {
                 final String name = cd.getName();
@@ -225,6 +248,11 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
             case DATE:
                 if (v instanceof LocalDate) {
                     st.setDate(n, (LocalDate) v);
+                } else if (v instanceof java.util.Date) {
+                    final long time = ((Date) v).getTime();
+                    st.setDate(n, LocalDate.fromMillisSinceEpoch(time));
+                } else if (v instanceof Long){
+                    st.setDate(n, LocalDate.fromMillisSinceEpoch((Long) v));
                 } else {
                     incompatibleDataType(LocalDate.class, v);
                 }

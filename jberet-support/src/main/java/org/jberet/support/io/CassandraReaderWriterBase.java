@@ -27,7 +27,6 @@ import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.NettyOptions;
 import com.datastax.driver.core.PoolingOptions;
-import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.QueryOptions;
@@ -50,7 +49,7 @@ import org.jberet.support._private.SupportLogger;
  * @see CassandraItemWriter
  * @since 1.3.0
  */
-public abstract class CassandraReaderWriterBase extends JsonItemReaderWriterBase {
+public abstract class CassandraReaderWriterBase {
     /**
      * This field holds an optional injection of {@code com.datastax.driver.core.Cluster}.
      * The application may implement a {@code javax.enterprise.inject.Produces} method to satisfy
@@ -124,7 +123,6 @@ public abstract class CassandraReaderWriterBase extends JsonItemReaderWriterBase
     protected Cluster cluster;
     protected Session session;
     protected boolean sessionCreated;
-    protected PreparedStatement preparedStatement;
 
     protected void init() throws Exception {
         if (!sessionInstance.isUnsatisfied()) {
@@ -146,10 +144,6 @@ public abstract class CassandraReaderWriterBase extends JsonItemReaderWriterBase
             }
             session = cluster.connect(keyspace);
             sessionCreated = true;
-        }
-
-        if (beanType != List.class && beanType != Map.class) {
-            initJsonFactoryAndObjectMapper();
         }
     }
 
@@ -251,6 +245,7 @@ public abstract class CassandraReaderWriterBase extends JsonItemReaderWriterBase
     public void close() throws Exception {
         if (sessionCreated && session != null && !session.isClosed()) {
             session.close();
+            session = null;
         }
     }
 }
