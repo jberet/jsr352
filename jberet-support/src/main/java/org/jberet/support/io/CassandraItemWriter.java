@@ -12,7 +12,6 @@
 
 package org.jberet.support.io;
 
-import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
@@ -59,7 +58,7 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
      * name as the column definition name. When using this value as key to look up
      * in the date item map, it will return null if the Map is keyed with the cql parameter (variable)
      * name. Therefore, this property can be used to specify the parameter names in the correct case
-     * matching the keys in date item map.
+     * matching the keys in data item map.
      */
     @Inject
     @BatchProperty
@@ -67,8 +66,6 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
 
     protected BatchStatement batchStatement = new BatchStatement();
     protected PreparedStatement preparedStatement;
-
-    protected PropertyDescriptor[] propertyDescriptors;
 
     @Override
     public void writeItems(final List<Object> items) throws Exception {
@@ -85,7 +82,7 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         if (session == null) {
-            init();
+            initSession();
         }
 
         if (preparedStatement == null) {
@@ -95,10 +92,7 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
         //if parameterNames is null, assume the cql string contains named parameters
         //and the parameter value will be bound with its name instead of the index.
 
-        if (beanType != null && beanType != List.class && beanType != Map.class && propertyDescriptors == null) {
-            BeanInfo beanInfo = Introspector.getBeanInfo(beanType);
-            propertyDescriptors = beanInfo.getPropertyDescriptors();
-        }
+        initBeanPropertyDescriptors();
     }
 
     @Override
@@ -340,5 +334,4 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
             throws BatchRuntimeException {
         throw SupportMessages.MESSAGES.incompatibleDataType(expectedType.getName(), val.getClass().getName());
     }
-
 }

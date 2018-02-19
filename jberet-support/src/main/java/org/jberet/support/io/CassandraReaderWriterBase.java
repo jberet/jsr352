@@ -12,6 +12,9 @@
 
 package org.jberet.support.io;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,8 +126,9 @@ public abstract class CassandraReaderWriterBase {
     protected Cluster cluster;
     protected Session session;
     protected boolean sessionCreated;
+    protected PropertyDescriptor[] propertyDescriptors;
 
-    protected void init() throws Exception {
+    protected void initSession() throws Exception {
         if (!sessionInstance.isUnsatisfied()) {
             session = sessionInstance.get();
         } else {
@@ -144,6 +148,13 @@ public abstract class CassandraReaderWriterBase {
             }
             session = cluster.connect(keyspace);
             sessionCreated = true;
+        }
+    }
+
+    public void close() throws Exception {
+        if (sessionCreated && session != null && !session.isClosed()) {
+            session.close();
+            session = null;
         }
     }
 
@@ -221,6 +232,12 @@ public abstract class CassandraReaderWriterBase {
         }
     }
 
+    protected void initBeanPropertyDescriptors() throws IntrospectionException {
+        if (beanType != null && beanType != List.class && beanType != Map.class && propertyDescriptors == null) {
+            propertyDescriptors = Introspector.getBeanInfo(beanType).getPropertyDescriptors();
+        }
+    }
+
     private void addContactPoints(final Cluster.Builder clusterBuilder) {
         if (contactPoints != null) {
             for (String e : contactPoints) {
@@ -240,12 +257,5 @@ public abstract class CassandraReaderWriterBase {
             throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         final Class<?> aClass = CassandraReaderWriterBase.class.getClassLoader().loadClass(className);
         return (T) aClass.newInstance();
-    }
-
-    public void close() throws Exception {
-        if (sessionCreated && session != null && !session.isClosed()) {
-            session.close();
-            session = null;
-        }
     }
 }
