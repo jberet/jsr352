@@ -17,6 +17,7 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,7 @@ import javax.inject.Named;
 
 import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
@@ -165,22 +167,22 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
             if (beanType == List.class) {
                 final List<Object> resultList = new ArrayList<Object>();
                 for (int i = 0, k = columnDefinitions.size(); i < k; ++i) {
-                    resultList.add(getColumnValue(row, i));
+                    resultList.add(getColumnValue(row, i, null));
                 }
                 result = resultList;
             } else if (beanType == Map.class) {
                 final Map<String, Object> resultMap = new HashMap<String, Object>();
                 for (int i = 0; i < columnMapping.length; ++i) {
-                    resultMap.put(columnMapping[i], getColumnValue(row, i));
+                    resultMap.put(columnMapping[i], getColumnValue(row, i, null));
                 }
                 result = resultMap;
             } else if (beanType != null) {
                 final Object readValue = beanType.newInstance();
                 Object columnValue;
                 for (int i = 0; i < columnMapping.length; ++i) {
-                    columnValue = getColumnValue(row, i);
+                    final PropertyDescriptor propertyDescriptor = propertyDescriptorMap.get(columnMapping[i]);
+                    columnValue = getColumnValue(row, i, propertyDescriptor.getPropertyType());
                     if (columnValue != null) {
-                        final PropertyDescriptor propertyDescriptor = propertyDescriptorMap.get(columnMapping[i]);
                         propertyDescriptor.getWriteMethod().invoke(readValue, columnValue);
                     }
                 }
@@ -214,12 +216,15 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
         if (propertyDescriptors != null) {
             propertyDescriptorMap = new HashMap<>();
             for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-                propertyDescriptorMap.put(propertyDescriptor.getName(), propertyDescriptor);
+                final String name = propertyDescriptor.getName();
+                if (!name.equals("class")) {
+                    propertyDescriptorMap.put(name, propertyDescriptor);
+                }
             }
         }
     }
 
-    private Object getColumnValue(final Row row, final int position) throws Exception {
+    private Object getColumnValue(final Row row, final int position, final Class<?> desiredType) {
         if (row.isNull(position)) {
             return null;
         }
@@ -264,10 +269,22 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
                 val = row.getDecimal(position);
                 break;
             case DATE:
-                val = row.getDate(position);
+                final LocalDate localDate = row.getDate(position);
+                if (desiredType == long.class || desiredType == Long.class) {
+                    val = localDate.getMillisSinceEpoch();
+                } else if (desiredType == java.util.Date.class) {
+                    val = new java.util.Date(localDate.getMillisSinceEpoch());
+                } else {
+                    val = localDate;
+                }
                 break;
             case TIMESTAMP:
-                val = row.getTimestamp(position);
+                final Date date = row.getTimestamp(position);
+                if (desiredType == long.class || desiredType == Long.class) {
+                    val = date.getTime();
+                } else {
+                    val = date;
+                }
                 break;
             case UUID:
             case TIMEUUID:

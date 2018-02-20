@@ -33,6 +33,8 @@ import org.junit.Test;
 public class CassandraReaderWriterTest {
     static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String writerTestJobName = "org.jberet.support.io.CassandraWriterTest";
+    static final String readerTestJobName = "org.jberet.support.io.CassandraReaderTest";
+
     static final String contactPoints = "localhost";
     static final String keyspace = "test";
     static Cluster cluster;
@@ -90,6 +92,9 @@ public class CassandraReaderWriterTest {
             "insert into stock_trade_date (tradedate, tradetime, open, high, low, close, volume) " +
                     "values(:date, :time, :open, :high, :low, :close, :volume)";
 
+    static final String readerSelectCql  = "select tradedate, tradetime, open, high, low, close, volume from stock_trade";
+    static final String readerSelectCqlDate = "select tradedate, tradetime, open, high, low, close, volume from stock_trade_date";
+    static final String columnMapping = "date,time,open,high,low,close,volume";
 
     @BeforeClass
     public static void beforeClass() {
@@ -109,7 +114,7 @@ public class CassandraReaderWriterTest {
     }
 
     /**
-     * Writes data items into table stock_trade.
+     * Writes data items into table stock_trade, and then reads from Cassandra.
      * Each data item is of java type java.util.List, which is used to
      * fill cql parameters, one list element for one parameter in order.
      * The java type of each list element must be compatible with the
@@ -130,30 +135,47 @@ public class CassandraReaderWriterTest {
      */
     @Test
     public void readIBMStockTradeCsvWriteCassandraList() throws Exception {
-        final Properties jobParams = new Properties();
+        Properties jobParams = new Properties();
+        Properties jobParams2 = new Properties();
         jobParams.setProperty("beanType", java.util.List.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
+        jobParams2.putAll(jobParams);
         jobParams.setProperty("cql", writerInsertCql);
         jobParams.setProperty("end", String .valueOf(5));  // read the first 5 lines
 
         runTest(writerTestJobName, jobParams);
+
+        jobParams = null;
+        jobParams2.setProperty("cql", readerSelectCql);
+        jobParams2.setProperty("start", String .valueOf(2));
+        jobParams2.setProperty("end", String .valueOf(4));
+        runTest(readerTestJobName, jobParams2);
     }
 
     @Test
     public void readIBMStockTradeCsvWriteCassandraMap() throws Exception {
-        final Properties jobParams = new Properties();
+        Properties jobParams = new Properties();
+        Properties jobParams2 = new Properties();
         jobParams.setProperty("beanType", java.util.Map.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
-        jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
-        jobParams.setProperty("end", String .valueOf(8));  // read the first 8 lines
 
         //use nameMapping since the bean type is Map, and the input csv has no header
         jobParams.setProperty("nameMapping", nameMapping);
         jobParams.setProperty("parameterNames", nameMapping);
+        jobParams2.putAll(jobParams);
+
+        jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
+        jobParams.setProperty("end", String .valueOf(8));  // read the first 8 lines
 
         runTest(writerTestJobName, jobParams);
+
+        jobParams = null;
+        jobParams2.setProperty("cql", readerSelectCql);
+        jobParams2.setProperty("start", String .valueOf(2));
+        jobParams2.setProperty("end", String .valueOf(4));
+        runTest(readerTestJobName, jobParams2);
     }
 
     /**
@@ -176,52 +198,81 @@ public class CassandraReaderWriterTest {
      */
     @Test
     public void readIBMStockTradeCsvWriteCassandraMapDate() throws Exception {
-        final Properties jobParams = new Properties();
+        Properties jobParams = new Properties();
+        Properties jobParams2 = new Properties();
         jobParams.setProperty("beanType", java.util.Map.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
+
+        //use nameMapping since the bean type is Map, and the input csv has no header
+        jobParams.setProperty("nameMapping", nameMapping);
+        jobParams.setProperty("parameterNames", nameMapping);
+        jobParams2.putAll(jobParams);
+
         jobParams.setProperty("cql", writerInsertCql2Date);  // use cql with named parameters
         jobParams.setProperty("start", String .valueOf(365));
         jobParams.setProperty("end", String .valueOf(400));
 
-        //use nameMapping since the bean type is Map, and the input csv has no header
-        jobParams.setProperty("nameMapping", nameMapping);
-        jobParams.setProperty("parameterNames", nameMapping);
-
         runTest(writerTestJobName, jobParams);
+        jobParams = null;
+
+        jobParams2.setProperty("cql", readerSelectCqlDate);
+        jobParams2.setProperty("start", String .valueOf(2));
+        jobParams2.setProperty("end", String .valueOf(4));
+        runTest(readerTestJobName, jobParams2);
     }
 
     @Test
     public void readIBMStockTradeCsvWriteCassandraPOJO() throws Exception {
-        final Properties jobParams = new Properties();
+        Properties jobParams = new Properties();
+        Properties jobParams2 = new Properties();
         jobParams.setProperty("beanType", StockTrade.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
-        jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
-        jobParams.setProperty("end", String .valueOf(10));  // read the first 10 lines
+        jobParams2.putAll(jobParams);
 
         //use nameMapping since the bean type is Map, and the input csv has no header
         jobParams.setProperty("nameMapping", nameMapping);
         jobParams.setProperty("parameterNames", nameMapping);
 
+        jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
+        jobParams.setProperty("end", String .valueOf(10));  // read the first 10 lines
+
         runTest(writerTestJobName, jobParams);
+
+        jobParams = null;
+        jobParams2.setProperty("cql", readerSelectCql);
+        jobParams2.setProperty("columnMapping", columnMapping);
+        jobParams2.setProperty("start", String .valueOf(2));
+        jobParams2.setProperty("end", String .valueOf(4));
+        runTest(readerTestJobName, jobParams2);
     }
 
     @Test
     public void readIBMStockTradeCsvWriteCassandraPOJODate() throws Exception {
-        final Properties jobParams = new Properties();
+        Properties jobParams = new Properties();
+        Properties jobParams2 = new Properties();
         jobParams.setProperty("beanType", StockTrade.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
-        jobParams.setProperty("cql", writerInsertCql2Date);  // use cql with named parameters
-        jobParams.setProperty("start", String .valueOf(755));
-        jobParams.setProperty("end", String .valueOf(785));
+        jobParams2.putAll(jobParams);
 
         //use nameMapping since the bean type is Map, and the input csv has no header
         jobParams.setProperty("nameMapping", nameMapping);
         jobParams.setProperty("parameterNames", nameMapping);
 
+        jobParams.setProperty("cql", writerInsertCql2Date);  // use cql with named parameters
+        jobParams.setProperty("start", String .valueOf(755));
+        jobParams.setProperty("end", String .valueOf(785));
+
         runTest(writerTestJobName, jobParams);
+
+        jobParams = null;
+        jobParams2.setProperty("cql", readerSelectCqlDate);
+        jobParams2.setProperty("columnMapping", columnMapping);
+        jobParams2.setProperty("start", String .valueOf(2));
+        jobParams2.setProperty("end", String .valueOf(4));
+        runTest(readerTestJobName, jobParams2);
     }
 
     private void runTest(final String jobName, final Properties jobParams) throws Exception {
