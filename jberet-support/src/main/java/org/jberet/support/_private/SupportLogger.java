@@ -71,6 +71,10 @@ public interface SupportLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void unsupportedDataType(String dataType);
 
+    @Message(id = 60511, value = "Failed to close resource: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void failToClose(@Cause Throwable throwable, String resource);
+
 
 
 }

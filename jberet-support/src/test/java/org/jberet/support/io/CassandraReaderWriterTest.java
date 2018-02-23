@@ -34,6 +34,7 @@ public class CassandraReaderWriterTest {
     static final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String writerTestJobName = "org.jberet.support.io.CassandraWriterTest";
     static final String readerTestJobName = "org.jberet.support.io.CassandraReaderTest";
+    static final String batchletTestJobName = "org.jberet.support.io.CassandraBatchletTest";
 
     static final String contactPoints = "localhost";
     static final String keyspace = "test";
@@ -95,6 +96,27 @@ public class CassandraReaderWriterTest {
     static final String readerSelectCql  = "select tradedate, tradetime, open, high, low, close, volume from stock_trade";
     static final String readerSelectCqlDate = "select tradedate, tradetime, open, high, low, close, volume from stock_trade_date";
     static final String columnMapping = "date,time,open,high,low,close,volume";
+    
+    static final String batchletInsertCql =
+            "insert into stock_trade_date (tradedate, tradetime, open, high, low, close, volume) " +
+            "values('2017-12-30', '09:30', 100, 200, 50, 150, 1000000)";
+
+    static final String batchletSelectCql = "select * from stock_trade_date";
+
+    static final String batchletUpdateCql =
+        "update stock_trade_date set volume = 1 where tradedate = '2017-12-30' and tradetime = '09:30'";
+
+    static final String batchletDeleteCql =
+        "delete from stock_trade_date where tradedate = '2017-12-30' and tradetime = '09:30'";
+
+    static final String batchletMultiCql =
+            "begin batch \n" +
+                "insert into stock_trade_date (tradedate, tradetime) values('2018-02-22', '09:30'); \n" +
+                "update stock_trade_date set open  = 1000 where tradedate = '2018-02-22' and tradetime = '09:30'; \n" +
+                "update stock_trade_date set high  = 5000 where tradedate = '2018-02-22' and tradetime = '09:30'; \n" +
+                "update stock_trade_date set low   = 800  where tradedate = '2018-02-22' and tradetime = '09:30'; \n" +
+                "update stock_trade_date set close = 3000 where tradedate = '2018-02-22' and tradetime = '09:30'; \n" +
+            "apply batch;";
 
     @BeforeClass
     public static void beforeClass() {
@@ -273,6 +295,42 @@ public class CassandraReaderWriterTest {
         jobParams2.setProperty("start", String .valueOf(2));
         jobParams2.setProperty("end", String .valueOf(4));
         runTest(readerTestJobName, jobParams2);
+    }
+
+    @Test
+    public void batchletInsert() throws Exception {
+        runBatchletTest(batchletInsertCql);
+    }
+
+    @Test
+    public void batchletSelect() throws Exception {
+        getSession().execute(batchletInsertCql);
+        runBatchletTest(batchletSelectCql);
+    }
+
+    @Test
+    public void batchletUpdate() throws Exception {
+        getSession().execute(batchletInsertCql);
+        runBatchletTest(batchletUpdateCql);
+    }
+
+    @Test
+    public void batchletDelete() throws Exception {
+        getSession().execute(batchletInsertCql);
+        runBatchletTest(batchletDeleteCql);
+    }
+
+    @Test
+    public void batchletMulti() throws Exception {
+        runBatchletTest(batchletMultiCql);
+    }
+
+    private void runBatchletTest(final String cqlString) throws Exception {
+        Properties jobParams = new Properties();
+        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("keyspace", keyspace);
+        jobParams.setProperty("cql", cqlString);
+        runTest(batchletTestJobName, jobParams);
     }
 
     private void runTest(final String jobName, final Properties jobParams) throws Exception {
