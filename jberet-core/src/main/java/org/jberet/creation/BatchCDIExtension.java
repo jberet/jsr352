@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,7 +21,7 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 public class BatchCDIExtension implements javax.enterprise.inject.spi.Extension {
     public void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery beforeBeanDiscovery, final BeanManager beanManager) {
         final AnnotatedType<BatchBeanProducer> batchProducerAnnotatedType = beanManager.createAnnotatedType(BatchBeanProducer.class);
-        beforeBeanDiscovery.addAnnotatedType(batchProducerAnnotatedType);
+        beforeBeanDiscovery.addAnnotatedType(batchProducerAnnotatedType, BatchBeanProducer.class.getName());
     }
 
     public void addContext(@Observes final AfterBeanDiscovery afterBeanDiscovery) {
