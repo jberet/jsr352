@@ -46,6 +46,8 @@ import org.jberet.support._private.SupportMessages;
  *
  * @see CassandraItemReader
  * @see CassandraReaderWriterBase
+ * @see CassandraBatchlet
+ *
  * @since 1.3.0
  */
 @Named
@@ -67,6 +69,9 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
     protected BatchStatement batchStatement = new BatchStatement();
     protected PreparedStatement preparedStatement;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void writeItems(final List<Object> items) throws Exception {
         try {
@@ -79,6 +84,9 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         if (session == null) {
@@ -95,6 +103,9 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
         initBeanPropertyDescriptors();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Serializable checkpointInfo() throws Exception {
         return null;

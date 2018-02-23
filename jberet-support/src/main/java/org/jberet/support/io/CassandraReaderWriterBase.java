@@ -46,10 +46,12 @@ import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
 import org.jberet.support._private.SupportLogger;
 
 /**
- * The base class for {@link CassandraItemReader} and {@link CassandraItemWriter}.
+ * The base class for {@link CassandraItemReader}, {@link CassandraItemWriter} and {@link CassandraBatchlet}.
  *
  * @see CassandraItemReader
  * @see CassandraItemWriter
+ * @see CassandraBatchlet
+ *
  * @since 1.3.0
  */
 public abstract class CassandraReaderWriterBase {
@@ -70,22 +72,26 @@ public abstract class CassandraReaderWriterBase {
     protected Instance<Session> sessionInstance;
 
     /**
-     * The CQL statement for reading data from, or inserting data into Cassandra. It should include parameter
-     * markers that will be filled in with real data by the current batch {@code ItemReader} or {@code ItemWriter}.
+     * The CQL statement for reading data from, or inserting data into Cassandra.
+     * When used in {@link CassandraItemWriter}, its value should include parameter
+     * markers that will be filled in with real data.
+     * When used in {@link CassandraBatchlet}, its value may be one cql statement,
+     * or multiple cql statements grouped into a cql batch group.
      */
     @Inject
     @BatchProperty
     protected String cql;
 
     /**
-     * For {@code ItemReader}, it's the java type that each data item should be converted to; for {@code ItemWriter},
-     * it's the java type for each incoming data item. In either case, the valid values are:
-     * <p>
+     * For {@code ItemReader}, it's the java type that each data item should be converted to;
+     * for {@code ItemWriter}, it's the java type for each incoming data item.
+     * In either case, the valid values are:
      * <ul>
      * <li>a custom java type that represents data item;
      * <li>java.util.Map
      * <li>java.util.List
      * </ul>
+     * This property is not used in {@link CassandraBatchlet}.
      */
     @Inject
     @BatchProperty

@@ -41,7 +41,9 @@ import org.jberet.support._private.SupportMessages;
  * An implementation of {@code javax.batch.api.chunk.ItemReader} that reads data items from the Cassandra cluster.
  *
  * @see CassandraItemWriter
+ * @see CassandraBatchlet
  * @see CassandraReaderWriterBase
+ *
  * @since 1.3.0
  */
 @Named
@@ -99,6 +101,9 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
 
     protected int currentRowNumber;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void open(final Serializable checkpoint) throws Exception {
         if (session == null) {
@@ -155,6 +160,9 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object readItem() throws Exception {
         if (currentRowNumber >= end) {
@@ -200,10 +208,7 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
     }
 
     /**
-     * Gets the current row number in the {@code ResultSet} as the checkpoint info.
-     *
-     * @return the current row number in the {@code ResultSet}
-     * @throws Exception any exception raised
+     * {@inheritDoc}
      */
     @Override
     public Serializable checkpointInfo() throws Exception {
