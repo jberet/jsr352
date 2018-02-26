@@ -37,6 +37,9 @@ public class CassandraReaderWriterTest {
     static final String batchletTestJobName = "org.jberet.support.io.CassandraBatchletTest";
 
     static final String contactPoints = "localhost";
+    static final String contactPoints2 = "localhost:9042";
+    static final String contactPoints3 = "127.0.0.1:9042";
+
     static final String keyspace = "test";
     static Cluster cluster;
     static Session session;
@@ -180,7 +183,7 @@ public class CassandraReaderWriterTest {
         Properties jobParams = new Properties();
         Properties jobParams2 = new Properties();
         jobParams.setProperty("beanType", java.util.Map.class.getName());
-        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("contactPoints", contactPoints2);
         jobParams.setProperty("keyspace", keyspace);
 
         //use nameMapping since the bean type is Map, and the input csv has no header
@@ -223,7 +226,7 @@ public class CassandraReaderWriterTest {
         Properties jobParams = new Properties();
         Properties jobParams2 = new Properties();
         jobParams.setProperty("beanType", java.util.Map.class.getName());
-        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("contactPoints", contactPoints3);
         jobParams.setProperty("keyspace", keyspace);
 
         //use nameMapping since the bean type is Map, and the input csv has no header
