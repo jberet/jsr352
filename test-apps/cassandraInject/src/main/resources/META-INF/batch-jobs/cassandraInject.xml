@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2018 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="cassandraInject" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
+    <step id="cassandraInject.step1">
+        <chunk>
+            <reader ref="cassandraItemReader">
+                <properties>
+                    <property name="cql" value="#{jobParameters['cql']}"/>
+                    <property name="beanType" value="#{jobParameters['beanType']}"/>
+
+                    <!-- batch properties not used for this test
+                    <property name="contactPoints" value="#{jobParameters['contactPoints']}"/>
+                    <property name="keyspace" value="#{jobParameters['keyspace']}"/>
+                    <property name="user" value="#{jobParameters['user']}"/>
+                    <property name="password" value="#{jobParameters['password']}"/>
+                    <property name="clusterProperties" value="#{jobParameters['clusterProperties']}"/>
+                    <property name="columnMapping" value="#{jobParameters['columnMapping']}"/>
+                    <property name="start" value="#{jobParameters['start']}"/>
+                    <property name="end" value="#{jobParameters['end']}"/>
+                    -->
+
+                </properties>
+            </reader>
+            <writer ref="mockItemWriter"/>
+        </chunk>
+    </step>
+</job>
