@@ -13,14 +13,20 @@
 package org.jberet.support.io;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.ThreadingOptions;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -39,6 +45,10 @@ public class CassandraReaderWriterTest {
     static final String contactPoints = "localhost";
     static final String contactPoints2 = "localhost:9042";
     static final String contactPoints3 = "127.0.0.1:9042";
+    static final String clusterProperties =
+    "Metrics=false, JMXReporting=false, " +
+    "ThreadingOptions=org.jberet.support.io.CassandraReaderWriterTest$ThreadingOptions1, " +
+    "QueryOptions=org.jberet.support.io.CassandraReaderWriterTest$QueryOptions1";
 
     static final String keyspace = "test";
     static Cluster cluster;
@@ -165,6 +175,7 @@ public class CassandraReaderWriterTest {
         jobParams.setProperty("beanType", java.util.List.class.getName());
         jobParams.setProperty("contactPoints", contactPoints);
         jobParams.setProperty("keyspace", keyspace);
+        jobParams.setProperty("clusterProperties", clusterProperties);
         jobParams2.putAll(jobParams);
         jobParams.setProperty("cql", writerInsertCql);
         jobParams.setProperty("end", String .valueOf(5));  // read the first 5 lines
@@ -374,4 +385,63 @@ public class CassandraReaderWriterTest {
 
         return session = cluster.newSession();
     }
+
+    public static final class ThreadingOptions1 extends ThreadingOptions {
+        @Override
+        public ThreadFactory createThreadFactory(final String clusterName, final String executorName) {
+            System.out.printf("createThreadFactory of custom threading Options class %s%n", this);
+            return super.createThreadFactory(clusterName, executorName);
+        }
+
+        @Override
+        public ExecutorService createExecutor(final String clusterName) {
+            System.out.printf("createExecutor of custom threading Options class %s%n", this);
+            return super.createExecutor(clusterName);
+        }
+
+        @Override
+        public ExecutorService createBlockingExecutor(final String clusterName) {
+            System.out.printf("createBlockingExecutor of custom threading Options class %s%n", this);
+            return super.createBlockingExecutor(clusterName);
+        }
+
+        @Override
+        public ScheduledExecutorService createReconnectionExecutor(final String clusterName) {
+            System.out.printf("createReconnectionExecutor of custom threading Options class %s%n", this);
+            return super.createReconnectionExecutor(clusterName);
+        }
+
+        @Override
+        public ScheduledExecutorService createScheduledTasksExecutor(final String clusterName) {
+            System.out.printf("createScheduledTasksExecutor of custom threading Options class %s%n", this);
+            return super.createScheduledTasksExecutor(clusterName);
+        }
+
+        @Override
+        public ScheduledExecutorService createReaperExecutor(final String clusterName) {
+            System.out.printf("createReaperExecutor of custom threading Options class %s%n", this);
+            return super.createReaperExecutor(clusterName);
+        }
+    }
+
+    public static final class QueryOptions1 extends QueryOptions {
+        @Override
+        public QueryOptions setConsistencyLevel(final ConsistencyLevel consistencyLevel) {
+            System.out.printf("setConsistencyLevel of custom query option class %s%n", this);
+            return super.setConsistencyLevel(consistencyLevel);
+        }
+
+        @Override
+        public QueryOptions setFetchSize(final int fetchSize) {
+            System.out.printf("setFetchSize of custom query option class %s%n", this);
+            return super.setFetchSize(fetchSize);
+        }
+
+        @Override
+        public int getFetchSize() {
+            System.out.printf("getFetchSize of custom query option class %s%n", this);
+            return super.getFetchSize();
+        }
+    }
+
 }

@@ -24,6 +24,7 @@
                 <property name="user" value="#{jobParameters['user']}"/>
                 <property name="password" value="#{jobParameters['password']}"/>
                 <property name="cql" value="#{jobParameters['cql']}"/>
+                <property name="clusterProperties" value="#{jobParameters['clusterProperties']}"/>
             </properties>
         </batchlet>
     </step>

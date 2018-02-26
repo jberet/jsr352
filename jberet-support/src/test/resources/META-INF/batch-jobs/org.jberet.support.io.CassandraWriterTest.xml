@@ -46,6 +46,7 @@
                     <property name="password" value="#{jobParameters['password']}"/>
                     <property name="parameterNames" value="#{jobParameters['parameterNames']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
+                    <property name="clusterProperties" value="#{jobParameters['clusterProperties']}"/>
                 </properties>
             </writer>
         </chunk>
