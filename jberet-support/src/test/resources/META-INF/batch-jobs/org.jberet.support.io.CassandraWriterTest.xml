@@ -47,6 +47,7 @@
                     <property name="parameterNames" value="#{jobParameters['parameterNames']}"/>
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="clusterProperties" value="#{jobParameters['clusterProperties']}"/>
+                    <property name="customCodecs" value="#{jobParameters['customCodecs']}"/>
                 </properties>
             </writer>
         </chunk>

@@ -26,6 +26,7 @@
                     <property name="password" value="#{jobParameters['password']}"/>
                     <property name="cql" value="#{jobParameters['cql']}"/>
                     <property name="clusterProperties" value="#{jobParameters['clusterProperties']}"/>
+                    <property name="customCodecs" value="#{jobParameters['customCodecs']}"/>
 
                     <property name="beanType" value="#{jobParameters['beanType']}"/>
                     <property name="columnMapping" value="#{jobParameters['columnMapping']}"/>

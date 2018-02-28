@@ -34,6 +34,7 @@ import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.TypeCodec;
 import org.jberet.support._private.SupportLogger;
 import org.jberet.support._private.SupportMessages;
 
@@ -237,6 +238,19 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
         Object val;
         final DataType columnDefinitionsType = columnDefinitions.getType(position);
         final DataType.Name cqlType = columnDefinitionsType.getName();
+
+        //for POJO beanType, first check if any custom codec should be used based on the
+        //POJO field type (desiredType).
+        //for List or Map beanType, since desiredType is not passed in, this explicit check
+        //of custom codecs is not performed. Just let the driver do the work with built-in and
+        //registered codecs.
+        if (desiredType != null && customCodecList != null) {
+            for (TypeCodec c : customCodecList) {
+                if (c.accepts(desiredType) && c.accepts(columnDefinitionsType)) {
+                    return row.get(position, c);
+                }
+            }
+        }
 
         switch (cqlType) {
             case ASCII:

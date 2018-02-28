@@ -12,6 +12,8 @@
 
 package org.jberet.support.io;
 
+import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,11 +25,16 @@ import javax.batch.runtime.BatchStatus;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ThreadingOptions;
+import com.datastax.driver.core.TypeCodec;
+import com.datastax.driver.core.exceptions.InvalidTypeException;
 import org.jberet.runtime.JobExecutionImpl;
+import org.joda.time.DateTime;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,6 +56,8 @@ public class CassandraReaderWriterTest {
     "Metrics=false, JMXReporting=false, " +
     "ThreadingOptions=org.jberet.support.io.CassandraReaderWriterTest$ThreadingOptions1, " +
     "QueryOptions=org.jberet.support.io.CassandraReaderWriterTest$QueryOptions1";
+
+    static final String customCodecs = "org.jberet.support.io.CassandraReaderWriterTest$JodaTypeCodec";
 
     static final String keyspace = "test";
     static Cluster cluster;
@@ -166,6 +175,9 @@ public class CassandraReaderWriterTest {
      *       1998-01-02 05:00:00.000000+0000 |     09:31 | 104.31 | 104.44 | 104.31 | 104.31 |  10810
      *       1998-01-02 05:00:00.000000+0000 |     09:32 | 104.44 | 104.44 | 104.31 | 104.37 |  13310
      * </pre>
+     * This test also uses additional cluster properties, via the batch property {@code clusterProperties},
+     * which includes {@link ThreadingOptions1} and {@link QueryOptions1}.
+     *
      * @throws Exception
      */
     @Test
@@ -284,6 +296,42 @@ public class CassandraReaderWriterTest {
         runTest(readerTestJobName, jobParams2);
     }
 
+    /**
+     * Same as {@link #readIBMStockTradeCsvWriteCassandraPOJO()}, except that this method
+     * uses {@code beanType} {@code org.jberet.support.io.StockTradeWithJoda}.
+     * Therefore, this test requires the use of custom codec {@link JodaTypeCodec}
+     * to deserialize into Joda date type.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void readIBMStockTradeCsvWriteCassandraPOJOJoda() throws Exception {
+        Properties jobParams = new Properties();
+        Properties jobParams2 = new Properties();
+        jobParams.setProperty("beanType", StockTrade.class.getName());
+        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("keyspace", keyspace);
+        jobParams.setProperty("customCodecs", customCodecs);
+        jobParams2.putAll(jobParams);
+
+        //use nameMapping since the bean type is Map, and the input csv has no header
+        jobParams.setProperty("nameMapping", nameMapping);
+        jobParams.setProperty("parameterNames", nameMapping);
+
+        jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
+        jobParams.setProperty("end", String .valueOf(10));  // read the first 10 lines
+
+        runTest(writerTestJobName, jobParams);
+
+        jobParams = null;
+        jobParams2.setProperty("beanType", StockTradeWithJoda.class.getName());
+        jobParams2.setProperty("cql", readerSelectCql);
+        jobParams2.setProperty("columnMapping", columnMapping);
+        jobParams2.setProperty("start", String .valueOf(2));
+        jobParams2.setProperty("end", String .valueOf(4));
+        runTest(readerTestJobName, jobParams2);
+    }
+
     @Test
     public void readIBMStockTradeCsvWriteCassandraPOJODate() throws Exception {
         Properties jobParams = new Properties();
@@ -386,6 +434,14 @@ public class CassandraReaderWriterTest {
         return session = cluster.newSession();
     }
 
+    /**
+     * This class is used as Cassandra cluster configuration for threading options.
+     * Its fully-qualified class name can be used in batch property {@code clusterProperties}.
+     * For example,
+     * <pre>
+     * &lt;property name="clusterProperties" value="ThreadingOptions=org.jberet.support.io.CassandraReaderWriterTest$ThreadingOptions1"/&gt;
+     * </pre>
+     */
     public static final class ThreadingOptions1 extends ThreadingOptions {
         @Override
         public ThreadFactory createThreadFactory(final String clusterName, final String executorName) {
@@ -424,6 +480,14 @@ public class CassandraReaderWriterTest {
         }
     }
 
+    /**
+     * This class is used as Cassandra cluster configuration for query options.
+     * Its fully-qualified class name can be used in batch property {@code clusterProperties}.
+     * For example,
+     * <pre>
+     * &lt;property name="clusterProperties" value="QueryOptions=org.jberet.support.io.CassandraReaderWriterTest$QueryOptions1"/&gt;
+     * </pre>
+     */
     public static final class QueryOptions1 extends QueryOptions {
         @Override
         public QueryOptions setConsistencyLevel(final ConsistencyLevel consistencyLevel) {
@@ -441,6 +505,34 @@ public class CassandraReaderWriterTest {
         public int getFetchSize() {
             System.out.printf("getFetchSize of custom query option class %s%n", this);
             return super.getFetchSize();
+        }
+    }
+
+    public static final class JodaTypeCodec extends TypeCodec<DateTime> {
+        private static final TypeCodec<Date> dateTypeCodec = TypeCodec.timestamp();
+
+        public JodaTypeCodec() {
+            super(DataType.timestamp(), DateTime.class);
+        }
+
+        @Override
+        public ByteBuffer serialize(final DateTime value, final ProtocolVersion protocolVersion) throws InvalidTypeException {
+            return dateTypeCodec.serialize(value.toDate(), protocolVersion);
+        }
+
+        @Override
+        public DateTime deserialize(final ByteBuffer bytes, final ProtocolVersion protocolVersion) throws InvalidTypeException {
+            return new DateTime(dateTypeCodec.deserialize(bytes, protocolVersion).getTime());
+        }
+
+        @Override
+        public DateTime parse(final String value) throws InvalidTypeException {
+            return new DateTime(dateTypeCodec.parse(value).getTime());
+        }
+
+        @Override
+        public String format(final DateTime value) throws InvalidTypeException {
+            return dateTypeCodec.format(value.toDate());
         }
     }
 

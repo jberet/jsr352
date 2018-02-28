@@ -38,6 +38,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.ThreadingOptions;
 import com.datastax.driver.core.TimestampGenerator;
+import com.datastax.driver.core.TypeCodec;
 import com.datastax.driver.core.policies.AddressTranslator;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.ReconnectionPolicy;
@@ -129,10 +130,18 @@ public abstract class CassandraReaderWriterBase {
     @BatchProperty
     protected Map<String, String> clusterProperties;
 
+    /**
+     * Custom codec's for converting between CQL values and Java objects
+     */
+    @Inject
+    @BatchProperty
+    protected List<String> customCodecs;
+
     protected Cluster cluster;
     protected Session session;
     protected boolean sessionCreated;
     protected PropertyDescriptor[] propertyDescriptors;
+    protected List<TypeCodec> customCodecList;
 
     protected void initSession() throws Exception {
         if (!sessionInstance.isUnsatisfied()) {
@@ -155,6 +164,7 @@ public abstract class CassandraReaderWriterBase {
             session = cluster.connect(keyspace);
             sessionCreated = true;
         }
+        initCustomCodecs();
     }
 
     public void close() throws Exception {
@@ -241,6 +251,19 @@ public abstract class CassandraReaderWriterBase {
     protected void initBeanPropertyDescriptors() throws IntrospectionException {
         if (beanType != null && beanType != List.class && beanType != Map.class && propertyDescriptors == null) {
             propertyDescriptors = Introspector.getBeanInfo(beanType).getPropertyDescriptors();
+        }
+    }
+
+    protected void initCustomCodecs() throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+        if (customCodecs != null) {
+            customCodecList = new ArrayList<>();
+            for (String s : customCodecs) {
+                final TypeCodec codec = create(s, TypeCodec.class);
+                customCodecList.add(codec);
+                if (sessionCreated) {
+                    cluster.getConfiguration().getCodecRegistry().register(codec);
+                }
+            }
         }
     }
 
