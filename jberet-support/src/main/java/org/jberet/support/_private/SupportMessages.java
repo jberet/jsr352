@@ -99,7 +99,4 @@ public interface SupportMessages {
     @Message(id = 60026, value = "Directory %s is invalid.")
     BatchRuntimeException invalidDirectory(String dir);
 
-    @Message(id = 60027, value = "Expecting data type %s, but the actual data type is %s")
-    BatchRuntimeException incompatibleDataType(String expectedType, String actualType);
-
 }

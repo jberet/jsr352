@@ -42,6 +42,11 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+/**
+ * Tests for {@link CassandraItemReader}, {@link CassandraItemWriter} and {@link CassandraBatchlet}.
+ *
+ * @since 1.3.0.Final
+ */
 @Ignore("Need to run Cassandra cluster first")
 public class CassandraReaderWriterTest {
     static final JobOperator jobOperator = BatchRuntime.getJobOperator();
@@ -201,6 +206,38 @@ public class CassandraReaderWriterTest {
         runTest(readerTestJobName, jobParams2);
     }
 
+    /**
+     * Tests custom codec in {@link CassandraItemWriter}.
+     * Same as {@link #readIBMStockTradeCsvWriteCassandraList()}, except that
+     * this test does not use any cluster properties, and this test uses
+     * {@link StockTradeItemReadListener} to convert java.util.Date fields
+     * to org.joda.time.DateTime, and also uses custom codec
+     * {@link JodaTypeCodec} to enable this mapping.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void readIBMStockTradeCsvWriteCassandraListJoda() throws Exception {
+        Properties jobParams = new Properties();
+        Properties jobParams2 = new Properties();
+        jobParams.setProperty("beanType", java.util.List.class.getName());
+        jobParams.setProperty("contactPoints", contactPoints);
+        jobParams.setProperty("keyspace", keyspace);
+        jobParams2.putAll(jobParams);
+        jobParams.setProperty("cql", writerInsertCql);
+        jobParams.setProperty("end", String .valueOf(5));  // read the first 5 lines
+        jobParams.setProperty("convertToJodaDate", "true");
+        jobParams.setProperty("customCodecs", customCodecs);
+
+        runTest(writerTestJobName, jobParams);
+
+        jobParams = null;
+        jobParams2.setProperty("cql", readerSelectCql);
+        jobParams2.setProperty("start", String .valueOf(2));
+        jobParams2.setProperty("end", String .valueOf(4));
+        runTest(readerTestJobName, jobParams2);
+    }
+
     @Test
     public void readIBMStockTradeCsvWriteCassandraMap() throws Exception {
         Properties jobParams = new Properties();
@@ -216,6 +253,43 @@ public class CassandraReaderWriterTest {
 
         jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
         jobParams.setProperty("end", String .valueOf(8));  // read the first 8 lines
+
+        runTest(writerTestJobName, jobParams);
+
+        jobParams = null;
+        jobParams2.setProperty("cql", readerSelectCql);
+        jobParams2.setProperty("start", String .valueOf(2));
+        jobParams2.setProperty("end", String .valueOf(4));
+        runTest(readerTestJobName, jobParams2);
+    }
+
+    /**
+     * Tests custom codec in {@link CassandraItemWriter}.
+     * Same as {@link #readIBMStockTradeCsvWriteCassandraMap()}, except that
+     * this test does not use any cluster properties, and this test uses
+     * {@link StockTradeItemReadListener} to convert java.util.Date fields
+     * to org.joda.time.DateTime, and also uses custom codec
+     * {@link JodaTypeCodec} to enable this mapping.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void readIBMStockTradeCsvWriteCassandraMapJoda() throws Exception {
+        Properties jobParams = new Properties();
+        Properties jobParams2 = new Properties();
+        jobParams.setProperty("beanType", java.util.Map.class.getName());
+        jobParams.setProperty("contactPoints", contactPoints2);
+        jobParams.setProperty("keyspace", keyspace);
+
+        //use nameMapping since the bean type is Map, and the input csv has no header
+        jobParams.setProperty("nameMapping", nameMapping);
+        jobParams.setProperty("parameterNames", nameMapping);
+        jobParams2.putAll(jobParams);
+
+        jobParams.setProperty("cql", writerInsertCql2);  // use cql with named parameters
+        jobParams.setProperty("end", String .valueOf(8));  // read the first 8 lines
+        jobParams.setProperty("convertToJodaDate", "true");
+        jobParams.setProperty("customCodecs", customCodecs);
 
         runTest(writerTestJobName, jobParams);
 
@@ -508,6 +582,10 @@ public class CassandraReaderWriterTest {
         }
     }
 
+    /**
+     * A custom codec that converts between Cassandra CQL data type {@code timestamp}
+     * and Java type {@code org.joda.time.DateTime}.
+     */
     public static final class JodaTypeCodec extends TypeCodec<DateTime> {
         private static final TypeCodec<Date> dateTypeCodec = TypeCodec.timestamp();
 

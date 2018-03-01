@@ -52,7 +52,6 @@ import org.jberet.support._private.SupportLogger;
  * @see CassandraItemReader
  * @see CassandraItemWriter
  * @see CassandraBatchlet
- *
  * @since 1.3.0
  */
 public abstract class CassandraReaderWriterBase {
@@ -260,9 +259,7 @@ public abstract class CassandraReaderWriterBase {
             for (String s : customCodecs) {
                 final TypeCodec codec = create(s, TypeCodec.class);
                 customCodecList.add(codec);
-                if (sessionCreated) {
-                    cluster.getConfiguration().getCodecRegistry().register(codec);
-                }
+                cluster.getConfiguration().getCodecRegistry().register(codec);
             }
         }
     }

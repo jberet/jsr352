@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import javax.batch.api.BatchProperty;
 import javax.batch.api.chunk.ItemWriter;
-import javax.batch.operations.BatchRuntimeException;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,7 +38,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.UDTValue;
 import org.jberet.support._private.SupportLogger;
-import org.jberet.support._private.SupportMessages;
 
 /**
  * An implementation of {@code javax.batch.api.chunk.ItemWriter} that inserts data items into Cassandra cluster.
@@ -191,7 +189,7 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
                 if (v instanceof Integer) {
                     st.setInt(n, (Integer) v);
                 } else {
-                    incompatibleDataType(Integer.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case BIGINT:
@@ -200,54 +198,56 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
                 if (v instanceof Long) {
                     st.setLong(n, (Long) v);
                 } else {
-                    incompatibleDataType(Long.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case BOOLEAN:
                 if (v instanceof Boolean) {
                     st.setBool(n, (Boolean) v);
                 } else {
-                    incompatibleDataType(Boolean.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case DOUBLE:
                 if (v instanceof Double) {
                     st.setDouble(n, (Double) v);
                 } else {
-                    incompatibleDataType(Double.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case VARINT:
                 if (v instanceof BigInteger) {
                     st.setVarint(n, (BigInteger) v);
+                } else {
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case TINYINT:
                 if (v instanceof Byte) {
                     st.setByte(n, (Byte) v);
                 } else {
-                    incompatibleDataType(Byte.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case SMALLINT:
                 if (v instanceof Short) {
                     st.setShort(n, (Short) v);
                 } else {
-                    incompatibleDataType(Short.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case FLOAT:
                 if (v instanceof Float) {
                     st.setFloat(n, (Float) v);
                 } else {
-                    incompatibleDataType(Float.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case DECIMAL:
                 if (v instanceof BigDecimal) {
                     st.setDecimal(n, (BigDecimal) v);
                 } else {
-                    incompatibleDataType(BigDecimal.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case DATE:
@@ -259,7 +259,7 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
                 } else if (v instanceof Long){
                     st.setDate(n, LocalDate.fromMillisSinceEpoch((Long) v));
                 } else {
-                    incompatibleDataType(LocalDate.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case TIMESTAMP:
@@ -268,7 +268,7 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
                 } else if(v instanceof Long) {
                     st.setTimestamp(n, new java.util.Date((Long) v));
                 } else {
-                    incompatibleDataType(java.util.Date.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case UUID:
@@ -276,73 +276,68 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
                 if (v instanceof java.util.UUID) {
                     st.setUUID(n, (java.util.UUID) v);
                 } else {
-                    incompatibleDataType(java.util.UUID.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case BLOB:
                 if (v instanceof java.nio.ByteBuffer) {
                     st.setBytes(n, (java.nio.ByteBuffer) v);
                 } else {
-                    incompatibleDataType(java.nio.ByteBuffer.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case INET:
                 if (v instanceof java.net.InetAddress) {
                     st.setInet(n, (java.net.InetAddress) v);
                 } else {
-                    incompatibleDataType(java.net.InetAddress.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case DURATION:
                 if (v instanceof Duration) {
                     st.set(n, (Duration) v, Duration.class);
                 } else {
-                    incompatibleDataType(Duration.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case TUPLE:
                 if (v instanceof TupleValue) {
                     st.setTupleValue(n, (TupleValue) v);
                 } else {
-                    incompatibleDataType(TupleValue.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case UDT:
                 if (v instanceof UDTValue) {
                     st.setUDTValue(n, (UDTValue) v);
                 } else {
-                    incompatibleDataType(UDTValue.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case LIST:
                 if (v instanceof java.util.List) {
                     st.setList(n, (java.util.List) v);
                 } else {
-                    incompatibleDataType(java.util.List.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case MAP:
                 if (v instanceof java.util.Map) {
                     st.setMap(n, (java.util.Map) v);
                 } else {
-                    incompatibleDataType(java.util.Map.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             case SET:
                 if (v instanceof java.util.Set) {
                     st.setSet(n, (java.util.Set) v);
                 } else {
-                    incompatibleDataType(java.util.Map.class, v);
+                    st.set(n, v, (Class<Object>) v.getClass());
                 }
                 break;
             default:
                 SupportLogger.LOGGER.unsupportedDataType(cqlType.name());
-                st.set(n, v, Object.class);
+                st.set(n, v, (Class<Object>) v.getClass());
         }
-    }
-
-    private static void incompatibleDataType(final Class<?> expectedType, final Object val)
-            throws BatchRuntimeException {
-        throw SupportMessages.MESSAGES.incompatibleDataType(expectedType.getName(), val.getClass().getName());
     }
 }
