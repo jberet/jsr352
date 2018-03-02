@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2018 Red Hat, Inc. and/or its affiliates.
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+ Cheng Fang - Initial API and implementation
+-->
+
+<job id="jdbcBatchletReaderWriter" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
+
+    <!-- step1: run jdbcBatchlet to create the table, then proceed to step2,
+                whether it succeeds or fails (if the table already exists)
+      -->
+    <step id="jdbcBatchletReaderWriter.step1">
+        <batchlet ref="jdbcBatchlet">
+            <properties>
+                <property name="sqls" value="#{jobParameters['sqls']}"/>
+                <property name="url" value="#{jobParameters['url']}"/>
+                <property name="user" value="#{jobParameters['user']}"/>
+                <property name="password" value="#{jobParameters['password']}"/>
+            </properties>
+        </batchlet>
+        <next on="*" to="jdbcBatchletReaderWriter.step2"/>
+    </step>
+
+    <!-- step2: arrayItemReader reads a series of numbers (dummy reader);
+                conversionItemProcessor change the data to a map of data;
+                jdbcItemWriter inserts the map data into db
+      -->
+    <step id="jdbcBatchletReaderWriter.step2" next="jdbcBatchletReaderWriter.step3">
+        <chunk>
+            <reader ref="arrayItemReader">
+                <properties>
+                    <property name="resource" value="[0]"/>
+                    <property name="beanType" value="java.lang.Integer"/>
+                    <property name="skipBeanValidation" value="true"/>
+                </properties>
+            </reader>
+
+            <processor ref="conversionItemProcessor"/>
+
+            <writer ref="jdbcItemWriter">
+                <properties>
+                    <property name="sql" value="#{jobParameters['writerSql']}"/>
+                    <property name="url" value="#{jobParameters['url']}"/>
+                    <property name="user" value="#{jobParameters['user']}"/>
+                    <property name="password" value="#{jobParameters['password']}"/>
+                    <property name="parameterNames" value="#{jobParameters['parameterNames']}"/>
+                    <property name="parameterTypes" value="#{jobParameters['parameterTypes']}"/>
+                    <property name="beanType" value="java.util.Map"/>
+                </properties>
+            </writer>
+        </chunk>
+    </step>
+
+    <!-- step3: jdbcItemReader reads data from db;
+                mockItemWriter displays data to the console
+      -->
+    <step id="jdbcBatchletReaderWriter.step3">
+        <chunk>
+            <reader ref="jdbcItemReader">
+                <properties>
+                    <property name="sql" value="#{jobParameters['readerSql']}"/>
+                    <property name="url" value="#{jobParameters['url']}"/>
+                    <property name="user" value="#{jobParameters['user']}"/>
+                    <property name="password" value="#{jobParameters['password']}"/>
+                    <property name="beanType" value="java.util.List"/>
+                    <property name="resultSetProperties" value="#{jobParameters['resultSetProperties']}"/>
+                </properties>
+            </reader>
+            <writer ref="mockItemWriter"/>
+        </chunk>
+    </step>
+</job>

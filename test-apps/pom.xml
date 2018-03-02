@@ -52,6 +52,7 @@
         <module>upsertWriter</module>
         <module>cluster</module>
         <module>cassandraInject</module>
+        <module>jdbcBatchletReaderWriter</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
