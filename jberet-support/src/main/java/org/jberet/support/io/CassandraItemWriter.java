@@ -64,7 +64,16 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
     @BatchProperty
     protected String[] parameterNames;
 
+    /**
+     * The Cassandra batch statement that contains all insert statements within the
+     * current chunk processing cycle. After the batch inserts for the current chunk
+     * ends, it is cleared to be used by the next chunk.
+     */
     protected BatchStatement batchStatement = new BatchStatement();
+
+    /**
+     * The {@code com.datastax.driver.core.PreparedStatement} based on {@link #cql}
+     */
     protected PreparedStatement preparedStatement;
 
     /**
@@ -103,6 +112,8 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
 
     /**
      * {@inheritDoc}
+     * <p>
+     * This method returns null.
      */
     @Override
     public Serializable checkpointInfo() throws Exception {
@@ -177,6 +188,23 @@ public class CassandraItemWriter extends CassandraReaderWriterBase implements It
         return boundStatement;
     }
 
+    /**
+     * Sets the value for a parameter marker in the CQL statement.
+     * If the value {@code v} matches the CQL data type {@code cqlType}, or it
+     * can be easily converted to match, then the appropriate type-specific
+     * set method is called on the {@code BoundStatement st} to bind the value.
+     * <p>
+     * Otherwise, a generic
+     * {@code com.datastax.driver.core.BoundStatement#set(java.lang.String, java.lang.Object, java.lang.Class)}
+     * method is called on {@code BoundStatement st} to bind the value.
+     * This also makes it possible to enlist any registered custom codec
+     * to perform more customized serialization and de-serialization.
+     *
+     * @param st the {@code com.datastax.driver.core.BoundStatement} to bind values to
+     * @param cqlType the CQL data type of the current parameter marker
+     * @param n the column name of the current parameter marker
+     * @param v the value to bind to the current parameter marker
+     */
     private void setParameter(final BoundStatement st, final DataType.Name cqlType,
                               final String n, final Object v) {
         switch (cqlType) {

@@ -35,6 +35,7 @@ import org.jberet.support._private.SupportLogger;
 public class CassandraBatchlet extends CassandraReaderWriterBase implements Batchlet {
     /**
      * {@inheritDoc}
+     * <p>
      * This method executes the cql statement(s) as specified in {@link #cql} batch property,
      * and returns the string representation of the first row in the result set.
      * For certain mutation cql statements (e.g., update, insert, delete),
@@ -63,6 +64,8 @@ public class CassandraBatchlet extends CassandraReaderWriterBase implements Batc
 
     /**
      * {@inheritDoc}
+     * <p>
+     * This method does nothing.
      */
     @Override
     public void stop() throws Exception {

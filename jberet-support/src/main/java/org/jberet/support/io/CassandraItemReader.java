@@ -64,6 +64,15 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
     @BatchProperty
     protected int end;
 
+    /**
+     * The query fetch size. As stated in {@code com.datastax.driver.core.Statement#setFetchSize(int)},
+     * the fetch size controls how much resulting rows will be retrieved simultaneously
+     * (the goal being to avoid loading too much results in memory for queries yielding large results).
+     * Please note that while value as low as 1 can be used,
+     * it is *highly* discouraged to use such a low value in practice as it will yield very poor performance.
+     * If in doubt, leaving the default is probably a good idea.
+     * Optional property, and defaults to null (not specified).
+     */
     @Inject
     @BatchProperty
     protected Integer fetchSize;
@@ -88,18 +97,49 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
     @BatchProperty
     protected String[] columnMapping;
 
+    /**
+     * Whether to perform bean validation with Bean Validation API, if the {@link #beanType}
+     * is a custom POJO bean type. Optional property, and defaults to false
+     * (perform bean validation).
+     */
     @Inject
     @BatchProperty
     protected boolean skipBeanValidation;
 
+    /**
+     * The column names of the {@code ResultSet}
+     */
     protected String[] columnLabels;
 
+    /**
+     * The regular cql statement based on {@link #cql}
+     */
     protected Statement statement;
+
+    /**
+     * The {@code com.datastax.driver.core.ResultSet} from executing {@link #statement}
+     */
     protected com.datastax.driver.core.ResultSet resultSet;
+
+    /**
+     * The iterator of {@code com.datastax.driver.core.Row} based on {@link #resultSet}
+     */
     protected Iterator<Row> rowIterator;
+
+    /**
+     * The column definitions of the {@code ResultSet}
+     */
     protected ColumnDefinitions columnDefinitions;
+
+    /**
+     * For {@link #beanType} of custom POJO bean, this property defines a mapping
+     * between POJO bean's property name and its JavaBeans {@code java.beans.PropertyDescriptor}.
+     */
     protected Map<String, PropertyDescriptor> propertyDescriptorMap;
 
+    /**
+     * The current row number.
+     */
     protected int currentRowNumber;
 
     /**
@@ -230,6 +270,21 @@ public class CassandraItemReader extends CassandraReaderWriterBase implements It
         }
     }
 
+    /**
+     * Gets the value for a column in a row of data.
+     *
+     * @param row the current row of data
+     * @param position the position of current column within the current row, 0-based
+     * @param desiredType the desired Java type when de-serializing column data.
+     *                    If null, it's up to the underlying driver to determine the
+     *                    Java type mapping. This parameter is typically used when
+     *                    the {@link #beanType} is custom POJO and its field types
+     *                    differ from the default CQL data type mapping. If more
+     *                    customization is needed during de-serialization, consider
+     *                    using {@link #customCodecs}.
+     *
+     * @return the current column value
+     */
     private Object getColumnValue(final Row row, final int position, final Class<?> desiredType) {
         if (row.isNull(position)) {
             return null;
