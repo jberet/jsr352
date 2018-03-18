@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,6 @@
 
 package org.jberet.se;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.BatchRuntimeException;
 import javax.batch.operations.JobOperator;
@@ -20,6 +19,8 @@ import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.se._private.SEBatchLogger;
+import org.jberet.se._private.SEBatchMessages;
 
 public class Main {
     public static void main(final String[] args) throws BatchRuntimeException {
@@ -53,7 +54,8 @@ public class Main {
             jobExecution.awaitTermination(0, TimeUnit.SECONDS);  //no timeout
 
             if (!jobExecution.getBatchStatus().equals(BatchStatus.COMPLETED)) {
-                throw new BatchRuntimeException(String.format("The job did not complete: %s%n", jobXml));
+                throw SEBatchMessages.MESSAGES.jobDidNotComplete(jobXml,
+                        jobExecution.getBatchStatus(), jobExecution.getExitStatus());
             }
         } catch (InterruptedException e) {
             throw new BatchRuntimeException(e);
@@ -61,6 +63,6 @@ public class Main {
     }
 
     private static void usage(final String[] args) {
-        System.err.printf("Usage: java -classpath ... -Dkey1=val1 ... org.jberet.se.Main jobXML%nThe following application args are invalid:%n%s", Arrays.asList(args));
+        SEBatchLogger.LOGGER.usage(args);
     }
 }

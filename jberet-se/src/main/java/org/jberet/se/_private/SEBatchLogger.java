@@ -31,4 +31,9 @@ public interface SEBatchLogger {
     @LogMessage(level = Logger.Level.TRACE)
     void useDefaultJBeretConfig(String configFile);
 
+    @Message(id = 50501,
+    value = "Usage:%njava -classpath ... [other java options] org.jberet.se.Main jobXMLName [jobParameter1=value1 jobParameter2=value2 ...]%nThe following application args are invalid: %s")
+    @LogMessage(level = Logger.Level.ERROR)
+    void usage(String[] args);
+
 }

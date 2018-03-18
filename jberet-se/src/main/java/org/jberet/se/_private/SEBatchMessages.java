@@ -13,6 +13,7 @@
 package org.jberet.se._private;
 
 import javax.batch.operations.BatchRuntimeException;
+import javax.batch.runtime.BatchStatus;
 
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;
@@ -33,4 +34,7 @@ public interface SEBatchMessages {
 
     @Message(id = 50003, value = "Unrecognized job repository type %s")
     BatchRuntimeException unrecognizedJobRepositoryType(String v);
+
+    @Message(id = 50004, value = "The job %s did not complete with batch status %s, exit status %s.")
+    BatchRuntimeException jobDidNotComplete(String jobId, BatchStatus batchStatus, String exitStatus);
 }
