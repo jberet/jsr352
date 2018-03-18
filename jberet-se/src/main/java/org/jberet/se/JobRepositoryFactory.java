@@ -16,7 +16,7 @@ import org.jberet.repository.InfinispanRepository;
 import org.jberet.repository.JdbcRepository;
 import org.jberet.repository.JobRepository;
 import org.jberet.repository.MongoRepository;
-import org.jberet.se._private.SEBatchLogger;
+import org.jberet.se._private.SEBatchMessages;
 
 /**
  * Determines the {@link org.jberet.repository.JobRepository job repistory} to use.
@@ -60,7 +60,7 @@ class JobRepositoryFactory {
                     jobRepository = INSTANCE.jobRepository = InfinispanRepository.create(configProperties);
                 }
             } else {
-                throw SEBatchLogger.LOGGER.unrecognizedJobRepositoryType(repositoryType);
+                throw SEBatchMessages.MESSAGES.unrecognizedJobRepositoryType(repositoryType);
             }
         }
         return jobRepository;

@@ -28,6 +28,7 @@ import javax.transaction.TransactionManager;
 
 import org.jberet.repository.JobRepository;
 import org.jberet.se._private.SEBatchLogger;
+import org.jberet.se._private.SEBatchMessages;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.JobExecutor;
@@ -80,7 +81,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             try {
                 configProperties.load(configStream);
             } catch (final IOException e) {
-                throw SEBatchLogger.LOGGER.failToLoadConfig(e, CONFIG_FILE_NAME);
+                throw SEBatchMessages.MESSAGES.failToLoadConfig(e, CONFIG_FILE_NAME);
             } finally {
                 try {
                     configStream.close();
@@ -152,7 +153,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
                 final Class<?> threadFactoryClass = getClassLoader().loadClass(threadFactoryProp.trim());
                 threadFactory = (ThreadFactory) threadFactoryClass.newInstance();
             } catch (final Exception e) {
-                throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_FACTORY, threadFactoryProp, e);
+                throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_FACTORY, threadFactoryProp, e);
             }
         } else {
             threadFactory = new BatchThreadFactory();
@@ -167,7 +168,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         try {
             coreSize = Integer.parseInt(coreSizeProp.trim());
         } catch (final Exception e) {
-            throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_CORE_SIZE, coreSizeProp, e);
+            throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_POOL_CORE_SIZE, coreSizeProp, e);
         }
 
         threadPoolType = threadPoolType.trim();
@@ -181,7 +182,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             try {
                 maxSize = Integer.parseInt(maxSizeProp.trim());
             } catch (final Exception e) {
-                throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_MAX_SIZE, maxSizeProp, e);
+                throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_POOL_MAX_SIZE, maxSizeProp, e);
             }
 
             final String keepAliveProp = configProperties.getProperty(THREAD_POOL_KEEP_ALIVE_TIME);
@@ -189,7 +190,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             try {
                 keepAliveSeconds = Long.parseLong(keepAliveProp.trim());
             } catch (final Exception e) {
-                throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_KEEP_ALIVE_TIME, keepAliveProp, e);
+                throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_POOL_KEEP_ALIVE_TIME, keepAliveProp, e);
             }
 
             final String queueCapacityProp = configProperties.getProperty(THREAD_POOL_QUEUE_CAPACITY);
@@ -197,7 +198,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             try {
                 queueCapacity = Integer.parseInt(queueCapacityProp.trim());
             } catch (final Exception e) {
-                throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_QUEUE_CAPACITY, queueCapacityProp, e);
+                throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_POOL_QUEUE_CAPACITY, queueCapacityProp, e);
             }
 
             final String allowCoreThreadTimeoutProp = configProperties.getProperty(THREAD_POOL_ALLOW_CORE_THREAD_TIMEOUT);
@@ -219,7 +220,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
                     final Class<?> aClass = getClassLoader().loadClass(rejectionPolicyProp.trim());
                     rejectionHandler = (RejectedExecutionHandler) aClass.newInstance();
                 } catch (final Exception e) {
-                    throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_REJECTION_POLICY, rejectionPolicyProp, e);
+                    throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_POOL_REJECTION_POLICY, rejectionPolicyProp, e);
                 }
             }
 
@@ -236,6 +237,6 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             return threadPoolExecutor;
         }
 
-        throw SEBatchLogger.LOGGER.failToGetConfigProperty(THREAD_POOL_TYPE, threadPoolType, null);
+        throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_POOL_TYPE, threadPoolType, null);
     }
 }
