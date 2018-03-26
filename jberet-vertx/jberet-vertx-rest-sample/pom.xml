@@ -79,7 +79,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.weld</groupId>
-            <artifactId>weld-core</artifactId>
+            <artifactId>weld-core-impl</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -101,7 +101,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
-            <artifactId>weld-se</artifactId>
+            <artifactId>weld-se-core</artifactId>
             <scope>runtime</scope>
         </dependency>
 
