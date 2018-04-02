@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>22</version>
+        <version>26</version>
     </parent>
 
     <groupId>org.jberet</groupId>
@@ -112,6 +112,7 @@
 
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
+        <javadoc.additional.params>-sourceclasspath ${project.build.outputDirectory}</javadoc.additional.params>
 
         <!-- Modularized JDK support (various workarounds) - activated via profile -->
         <modular.jdk.args/>
@@ -197,7 +198,6 @@
                         <version>true</version>
                         <author>true</author>
                         <keywords>true</keywords>
-                        <additionalparam>-sourceclasspath ${project.build.outputDirectory}</additionalparam>
                     </configuration>
                 </plugin>
             </plugins>
