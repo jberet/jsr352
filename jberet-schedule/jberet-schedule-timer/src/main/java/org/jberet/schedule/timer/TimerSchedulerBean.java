@@ -10,7 +10,7 @@
  * Cheng Fang - Initial API and implementation
  */
 
-package org.jberet.schedule;
+package org.jberet.schedule.timer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,6 +27,9 @@ import javax.ejb.TimerService;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
+import org.jberet.schedule.JobSchedule;
+import org.jberet.schedule.JobScheduleConfig;
+import org.jberet.schedule.JobScheduler;
 import org.jberet.schedule._private.ScheduleExecutorMessages;
 
 /**
@@ -40,6 +43,7 @@ import org.jberet.schedule._private.ScheduleExecutorMessages;
 @Singleton()
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class TimerSchedulerBean extends JobScheduler {
+    @SuppressWarnings("unused")
     @Resource
     private TimerService timerService;
 
@@ -47,21 +51,22 @@ public class TimerSchedulerBean extends JobScheduler {
     public JobSchedule schedule(final JobScheduleConfig scheduleConfig) {
         final Timer timer;
         final JobSchedule jobSchedule = new JobSchedule(null, scheduleConfig);
-        if (scheduleConfig.initialDelay > 0) {
-            if (scheduleConfig.interval > 0) {
-                timer = timerService.createIntervalTimer(toMillis(scheduleConfig.initialDelay),
-                        toMillis(scheduleConfig.interval),
+        final long initialDelay = scheduleConfig.getInitialDelay();
+        if (initialDelay > 0) {
+            if (scheduleConfig.getInterval() > 0) {
+                timer = timerService.createIntervalTimer(toMillis(initialDelay),
+                        toMillis(scheduleConfig.getInterval()),
                         new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
-            } else if (scheduleConfig.afterDelay > 0) {
-                timer = timerService.createIntervalTimer(toMillis(scheduleConfig.initialDelay),
-                        toMillis(scheduleConfig.afterDelay),
+            } else if (scheduleConfig.getAfterDelay() > 0) {
+                timer = timerService.createIntervalTimer(toMillis(initialDelay),
+                        toMillis(scheduleConfig.getAfterDelay()),
                         new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
             } else {
-                timer = timerService.createSingleActionTimer(toMillis(scheduleConfig.initialDelay),
+                timer = timerService.createSingleActionTimer(toMillis(initialDelay),
                         new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
             }
-        } else if (scheduleConfig.scheduleExpression != null) {
-            timer = timerService.createCalendarTimer(scheduleConfig.scheduleExpression,
+        } else if (scheduleConfig.getScheduleExpression() != null) {
+            timer = timerService.createCalendarTimer(scheduleConfig.getScheduleExpression(),
                     new TimerConfig(jobSchedule, scheduleConfig.isPersistent()));
         } else {
             throw ScheduleExecutorMessages.MESSAGES.invalidJobScheduleConfig(scheduleConfig);
@@ -124,16 +129,17 @@ public class TimerSchedulerBean extends JobScheduler {
      *
      * @param timer the current timer which has just expired
      */
+    @SuppressWarnings("unused")
     @Timeout
     protected void timeout(final Timer timer) {
         final JobSchedule jobSchedule = (JobSchedule) timer.getInfo();
         final JobScheduleConfig scheduleConfig = jobSchedule.getJobScheduleConfig();
         if (scheduleConfig.getJobExecutionId() > 0) {
             jobSchedule.addJobExecutionIds(
-            JobScheduler.getJobOperator().restart(scheduleConfig.jobExecutionId, scheduleConfig.jobParameters));
+            JobScheduler.getJobOperator().restart(scheduleConfig.getJobExecutionId(), scheduleConfig.getJobParameters()));
         } else {
             jobSchedule.addJobExecutionIds(
-            JobScheduler.getJobOperator().start(scheduleConfig.jobName, scheduleConfig.jobParameters));
+            JobScheduler.getJobOperator().start(scheduleConfig.getJobName(), scheduleConfig.getJobParameters()));
         }
     }
 

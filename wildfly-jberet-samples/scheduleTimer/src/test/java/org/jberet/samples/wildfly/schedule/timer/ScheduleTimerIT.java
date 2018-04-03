@@ -25,13 +25,14 @@ import org.jberet.samples.wildfly.common.BatchTestBase;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
 import org.jberet.schedule.JobScheduleConfigBuilder;
+import org.jberet.schedule.timer.TimerSchedulerBean;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for batch job scheduling in Java EE, JBoss EAP and WildFly environment,
- * where the job scheduler impl {@link org.jberet.schedule.TimerSchedulerBean} will be used.
+ * where the job scheduler impl {@link TimerSchedulerBean} will be used.
  * <p>
  * A similar set of tests using {@link org.jberet.schedule.ExecutorSchedulerImpl} are in
  * wildfly-jberet-samples/scheduleExecutor/src/test/java/org/jberet/samples/wildfly/schedule/executor/ScheduleExecutorIT.java

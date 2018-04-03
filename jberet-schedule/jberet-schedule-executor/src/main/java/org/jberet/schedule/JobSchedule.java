@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -127,6 +127,10 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
         return id;
     }
 
+    public void setId(final String id) {
+        this.id = id;
+    }
+
     /**
      * Gets the job schedule config, which is typically passed in when creating
      * {@code JobSchedule}.
@@ -153,6 +157,10 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
         return Collections.unmodifiableList(jobExecutionIds);
     }
 
+    public void addJobExecutionIds(final long jobExecutionId) {
+        jobExecutionIds.add(jobExecutionId);
+    }
+
     /**
      * Compares another job schedule to this one, based on their create time.
      *
@@ -162,10 +170,6 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
     @Override
     public int compareTo(final JobSchedule o) {
         return createTime.compareTo(o.createTime);
-    }
-
-    void addJobExecutionIds(final long jobExecutionId) {
-        jobExecutionIds.add(jobExecutionId);
     }
 
     void setStatus(final Status status) {
@@ -180,7 +184,4 @@ public final class JobSchedule implements Serializable, Comparable<JobSchedule> 
         this.future = future;
     }
 
-    void setId(final String id) {
-        this.id = id;
-    }
 }
