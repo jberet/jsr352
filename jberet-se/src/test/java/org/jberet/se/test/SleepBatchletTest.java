@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -68,12 +68,6 @@ public class SleepBatchletTest {
                 jobExecution.getLastUpdatedTime(), jobExecution.getLastUpdatedTime(), jobExecution.getEndTime());
         Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
         Assert.assertEquals(BatchStatus.STOPPED.name(), jobExecution.getExitStatus());
-
-        final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
-                stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
-        Assert.assertEquals(BatchStatus.STOPPED, stepExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.STOPPED.name(), stepExecution.getExitStatus());
     }
 
     /**
