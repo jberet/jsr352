@@ -47,12 +47,25 @@
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>db2</groupId>
-            <artifactId>db2jcc4</artifactId>
-            <scope>system</scope>
-            <systemPath>${env.HOME}/tmp/db2jcc4.jar</systemPath>
-            <version>1</version>
-        </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>db2</id>
+            <activation>
+                <file>
+                    <exists>${env.HOME}/tmp/db2jcc4.jar</exists>
+                </file>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>db2</groupId>
+                    <artifactId>db2jcc4</artifactId>
+                    <scope>system</scope>
+                    <systemPath>${env.HOME}/tmp/db2jcc4.jar</systemPath>
+                    <version>1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
