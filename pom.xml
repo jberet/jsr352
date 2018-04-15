@@ -60,7 +60,7 @@
         <version.org.jboss.weld.weld-se>3.0.3.Final</version.org.jboss.weld.weld-se>
         <version.org.jboss.jandex>2.0.5.Final</version.org.jboss.jandex>
         <version.net.sf.supercsv>2.3.1</version.net.sf.supercsv>
-        <version.com.fasterxml.jackson>2.8.3</version.com.fasterxml.jackson>
+        <version.com.fasterxml.jackson>2.9.5</version.com.fasterxml.jackson>
         <version.org.mongodb.mongo-java-driver>3.0.3</version.org.mongodb.mongo-java-driver>
         <version.org.mongojack>2.3.0</version.org.mongojack>
         <version.org.beanio>2.1.0</version.org.beanio>
