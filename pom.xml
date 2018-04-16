@@ -50,7 +50,7 @@
         <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
         <version.org.hibernate>5.1.3.Final</version.org.hibernate>
         <version.org.jboss.logging.jboss-logging>3.3.0.Final</version.org.jboss.logging.jboss-logging>
-        <version.org.jboss.logging.jboss-logging-tools>2.0.1.Final</version.org.jboss.logging.jboss-logging-tools>
+        <version.org.jboss.logging.jboss-logging-tools>2.1.0.Final</version.org.jboss.logging.jboss-logging-tools>
         <version.org.jboss.marshalling>2.0.5.Final</version.org.jboss.marshalling>
         <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final
         </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
@@ -77,9 +77,12 @@
         <version.org.codehaus.groovy>2.4.4</version.org.codehaus.groovy>
         <version.org.jruby.jruby>9.0.0.0</version.org.jruby.jruby>
         <version.org.python.jython>2.7-b1</version.org.python.jython>
-        <version.org.scala-lang.scala-dist>2.11.7</version.org.scala-lang.scala-dist>
+        <version.org.scala-lang.scala-dist>2.11.12</version.org.scala-lang.scala-dist>
         <version.com.caucho.resin-quercus>3.2.1</version.com.caucho.resin-quercus>
+        <version.org.jboss.spec.javax.annotation.jboss-annotations-api_1.3_spec>1.0.1.Final</version.org.jboss.spec.javax.annotation.jboss-annotations-api_1.3_spec>
         <version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>1.0.0.Final</version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec>
+        <version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.2_spec>1.0.5.Final</version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.2_spec>
+        <version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec>2.0.5.Final</version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec>
 
         <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
         <version.org.hornetq>2.4.7.Final</version.org.hornetq>
@@ -303,10 +306,29 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>org.jboss.spec.javax.annotation</groupId>
+                <artifactId>jboss-annotations-api_1.3_spec</artifactId>
+                <version>${version.org.jboss.spec.javax.annotation.jboss-annotations-api_1.3_spec}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.jboss.spec.javax.transaction</groupId>
                 <artifactId>jboss-transaction-api_1.2_spec</artifactId>
                 <version>${version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.spec.javax.xml.bind</groupId>
+                <artifactId>jboss-jaxb-api_2.2_spec</artifactId>
+                <version>${version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.2_spec}</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- Required for jberet-core tests -->
+            <dependency>
+                <groupId>org.jboss.spec.javax.xml.ws</groupId>
+                <artifactId>jboss-jaxws-api_2.2_spec</artifactId>
+                <version>${version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld</groupId>
@@ -321,6 +343,10 @@
                     <exclusion>
                         <groupId>org.jboss.weld</groupId>
                         <artifactId>weld-core-jsf</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>javax.annotation-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -852,35 +878,6 @@
                         <artifactId>maven-source-plugin</artifactId>
                         <configuration>
                             <skipSource>false</skipSource>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>modularizedJdk</id>
-            <activation>
-                <jdk>9</jdk>
-            </activation>
-            <properties>
-                <modular.jdk.args>
-                    --add-modules java.activation,java.annotations.common,java.xml.bind,java.xml.ws
-                </modular.jdk.args>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>${version.compiler.plugin}</version>
-                        <configuration>
-                            <!-- fork is needed so compiler args can be used -->
-                            <fork>true</fork>
-                            <compilerArgs>
-                                <arg>-J--add-modules</arg>
-                                <arg>-Jjava.annotations.common</arg>
-                                <arg>-Aorg.jboss.logging.tools.level=INFO</arg>
-                            </compilerArgs>
                         </configuration>
                     </plugin>
                 </plugins>
