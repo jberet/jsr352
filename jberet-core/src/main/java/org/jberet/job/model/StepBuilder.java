@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,8 +13,10 @@
 package org.jberet.job.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Builder class for building a single {@linkplain Step step}. After the step is built, the same {@code StepBuilder}
@@ -706,15 +708,29 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * @param exceptionClasses exception classes to include as skippable
      * @return this {@code StepBuilder}
      *
+     * @see #skippableExceptionsInclude(List)
      * @see #skippableExceptionsExclude(Class[])
      */
     public StepBuilder skippableExceptionsInclude(final Class<? extends Exception>... exceptionClasses) {
+        return skippableExceptionsInclude(classesToNames(exceptionClasses));
+    }
+
+    /**
+     * Adds exception class names to the chunk-type step to include as skippable.
+     *
+     * @param exceptionClassNames exception class names to include as skippable
+     * @return this {@code StepBuilder}
+     *
+     * @see #skippableExceptionsInclude(Class[])
+     * @see #skippableExceptionsExclude(List)
+     *
+     * @since 1.3.0.Final
+     */
+    public StepBuilder skippableExceptionsInclude(final List<String> exceptionClassNames) {
         if (chunk.skippableExceptionClasses == null) {
             chunk.skippableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : exceptionClasses) {
-            chunk.skippableExceptionClasses.include.add(cl.getName());
-        }
+        chunk.skippableExceptionClasses.include.addAll(exceptionClassNames);
         return this;
     }
 
@@ -724,15 +740,29 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * @param exceptionClasses exception classes to exclude from skippable exceptions
      * @return this {@code StepBuilder}
      *
+     * @see #skippableExceptionsExclude(List)
      * @see #skippableExceptionsInclude(Class[])
      */
     public StepBuilder skippableExceptionsExclude(final Class<? extends Exception>... exceptionClasses) {
+        return skippableExceptionsExclude(classesToNames(exceptionClasses));
+    }
+
+    /**
+     * Adds exception class names to the chunk-type step to exclude from skippable exceptions.
+     *
+     * @param exceptionClassNames exception class names to exclude from skippable exceptions
+     * @return this {@code StepBuilder}
+     *
+     * @see #skippableExceptionsExclude(Class[])
+     * @see #skippableExceptionsInclude(List)
+     *
+     * @since 1.3.0.Final
+     */
+    public StepBuilder skippableExceptionsExclude(final List<String> exceptionClassNames) {
         if (chunk.skippableExceptionClasses == null) {
             chunk.skippableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : exceptionClasses) {
-            chunk.skippableExceptionClasses.exclude.add(cl.getName());
-        }
+        chunk.skippableExceptionClasses.exclude.addAll(exceptionClassNames);
         return this;
     }
 
@@ -743,14 +773,28 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * @return this {@code StepBuilder}
      *
      * @see #retryableExceptionsExclude(Class[])
+     * @see #retryableExceptionsInclude(List)
      */
     public StepBuilder retryableExceptionsInclude(final Class<? extends Exception>... exceptionClasses) {
+        return retryableExceptionsInclude(classesToNames(exceptionClasses));
+    }
+
+    /**
+     * Adds exception class names to the chunk-type step to include as retryable.
+     *
+     * @param exceptionClassNames exception class names to include as retryable
+     * @return this {@code StepBuilder}
+     *
+     * @see #retryableExceptionsExclude(List)
+     * @see #retryableExceptionsInclude(Class[])
+     *
+     * @since 1.3.0.Final
+     */
+    public StepBuilder retryableExceptionsInclude(final List<String> exceptionClassNames) {
         if (chunk.retryableExceptionClasses == null) {
             chunk.retryableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : exceptionClasses) {
-            chunk.retryableExceptionClasses.include.add(cl.getName());
-        }
+        chunk.retryableExceptionClasses.include.addAll(exceptionClassNames);
         return this;
     }
 
@@ -761,14 +805,28 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * @return this {@code StepBuilder}
      *
      * @see #retryableExceptionsInclude(Class[])
+     * @see #retryableExceptionsExclude(List)
      */
     public StepBuilder retryableExceptionsExclude(final Class<? extends Exception>... exceptionClasses) {
+        return retryableExceptionsExclude(classesToNames(exceptionClasses));
+    }
+
+    /**
+     * Adds exception class names to the chunk-type step to exclude from retryable exceptions.
+     *
+     * @param exceptionClassNames exception class names to exclude from retryable exceptions
+     * @return this {@code StepBuilder}
+     *
+     * @see #retryableExceptionsInclude(List)
+     * @see #retryableExceptionsExclude(Class[])
+     *
+     * @since 1.3.0.Final
+     */
+    public StepBuilder retryableExceptionsExclude(final List<String> exceptionClassNames) {
         if (chunk.retryableExceptionClasses == null) {
             chunk.retryableExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : exceptionClasses) {
-            chunk.retryableExceptionClasses.exclude.add(cl.getName());
-        }
+        chunk.retryableExceptionClasses.exclude.addAll(exceptionClassNames);
         return this;
     }
 
@@ -779,14 +837,28 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * @return this {@code StepBuilder}
      *
      * @see #noRollbackExceptionsExclude(Class[])
+     * @see #noRollbackExceptionsInclude(List)
      */
     public StepBuilder noRollbackExceptionsInclude(final Class<? extends Exception>... exceptionClasses) {
+        return noRollbackExceptionsInclude(classesToNames(exceptionClasses));
+    }
+
+    /**
+     * Adds exception class names to the chunk-type step to include as no-rollback exceptions.
+     *
+     * @param exceptionClassNames exception classes to include as no-rollback exceptions
+     * @return this {@code StepBuilder}
+     *
+     * @see #noRollbackExceptionsExclude(List)
+     * @see #noRollbackExceptionsInclude(Class[])
+     *
+     * @since 1.3.0.Final
+     */
+    public StepBuilder noRollbackExceptionsInclude(final List<String> exceptionClassNames) {
         if (chunk.noRollbackExceptionClasses == null) {
             chunk.noRollbackExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : exceptionClasses) {
-            chunk.noRollbackExceptionClasses.include.add(cl.getName());
-        }
+        chunk.noRollbackExceptionClasses.include.addAll(exceptionClassNames);
         return this;
     }
 
@@ -797,17 +869,30 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
      * @return this {@code StepBuilder}
      *
      * @see #noRollbackExceptionsInclude(Class[])
+     * @see #noRollbackExceptionsExclude(List)
      */
     public StepBuilder noRollbackExceptionsExclude(final Class<? extends Exception>... exceptionClasses) {
+        return noRollbackExceptionsExclude(classesToNames(exceptionClasses));
+    }
+
+    /**
+     * Adds exception class names to the chunk-type step to exclude from no-rollback exceptions.
+     *
+     * @param exceptionClassNames exception class names to exclude from no-rollback exceptions
+     * @return this {@code StepBuilder}
+     *
+     * @see #noRollbackExceptionsInclude(List)
+     * @see #noRollbackExceptionsExclude(Class[])
+     *
+     * @since 1.3.0.Final
+     */
+    public StepBuilder noRollbackExceptionsExclude(final List<String> exceptionClassNames) {
         if (chunk.noRollbackExceptionClasses == null) {
             chunk.noRollbackExceptionClasses = new ExceptionClassFilter();
         }
-        for (final Class<? extends Exception> cl : exceptionClasses) {
-            chunk.noRollbackExceptionClasses.exclude.add(cl.getName());
-        }
+        chunk.noRollbackExceptionClasses.exclude.addAll(exceptionClassNames);
         return this;
     }
-
 
     /**
      * Builds the step. After this method, this {@code StepBuilder} should not be reused to build another step.
@@ -834,5 +919,9 @@ public final class StepBuilder extends AbstractPropertiesBuilder<StepBuilder> {
         }
         step.getTransitionElements().addAll(transitions);
         return step;
+    }
+
+    private static List<String> classesToNames(final Class<? extends Exception>[] exceptionClasses) {
+        return Arrays.stream(exceptionClasses).map(Class::getName).collect(Collectors.toList());
     }
 }

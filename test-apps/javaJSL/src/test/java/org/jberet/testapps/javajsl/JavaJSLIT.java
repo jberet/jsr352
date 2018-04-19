@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,9 @@ package org.jberet.testapps.javajsl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Properties;
@@ -24,19 +26,39 @@ import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.Metric;
 
 import org.jberet.job.model.DecisionBuilder;
+import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.FlowBuilder;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobBuilder;
 import org.jberet.job.model.SplitBuilder;
+import org.jberet.job.model.Step;
 import org.jberet.job.model.StepBuilder;
 import org.jberet.runtime.metric.StepMetrics;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class JavaJSLIT extends AbstractIT {
     static final String batchlet1Name = "batchlet1";
     static final String deciderName = "decider2";
+
+    /**
+     * Exception classes used in chunk step's skippable exceptions, retryable exceptions
+     * and no-rollback exceptions.
+     */
+    static final Class<? extends Exception>[] includeExceptions = new Class[]
+            {java.io.IOException.class, java.lang.RuntimeException.class};
+    static final Class<? extends Exception>[] excludeExceptions = new Class[]
+            {java.io.FileNotFoundException.class, java.lang.IllegalArgumentException.class};
+
+    static final List<String> includeExceptionNames = Arrays.asList(
+            "java.io.IOException", "java.lang.RuntimeException");
+    static final List<String> excludeExceptionNames = Arrays.asList(
+            "java.io.FileNotFoundException", "java.lang.IllegalArgumentException");
+
+    static final Class<CloneNotSupportedException> notIncludedOrExcludedException = CloneNotSupportedException.class;
 
     /**
      * Creates a job with Java JSL:
@@ -99,9 +121,9 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals("LL", jobExecution.getExitStatus());
-        Assert.assertEquals("JJSSBBll", stepExecution0.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals("LL", jobExecution.getExitStatus());
+        assertEquals("JJSSBBll", stepExecution0.getExitStatus());
     }
 
     /**
@@ -137,21 +159,21 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         System.out.printf("step exit status: %s%n", stepExecution0.getExitStatus());
-        Assert.assertEquals(true, stepExecution0.getExitStatus().contains(stepExitStatusExpected));
+        assertEquals(true, stepExecution0.getExitStatus().contains(stepExitStatusExpected));
 
         final Metric[] metrics = stepExecution0.getMetrics();
         System.out.printf("metrics: %s%n", java.util.Arrays.asList(metrics));
         final StepMetrics stepMetrics = stepExecution0.getStepMetrics();
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(4, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
+        assertEquals(4, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
     }
 
     /**
@@ -189,7 +211,7 @@ public class JavaJSLIT extends AbstractIT {
 
         params.setProperty("fail.on.values", "1");
         startJobAndWait(job);
-        Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
         System.out.printf("Stopped job execution: %s, with exit status: %s%n", jobExecutionId, jobExecution.getExitStatus());
 
         params.setProperty("fail.on.values", "-1");
@@ -200,8 +222,8 @@ public class JavaJSLIT extends AbstractIT {
         }
 
         System.out.printf("Completed restart job execution: %s, with exit status: %s%n", jobExecutionId, jobExecution.getExitStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(restartCompleted, jobExecution.getExitStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(restartCompleted, jobExecution.getExitStatus());
     }
 
     /**
@@ -245,18 +267,18 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final Metric[] metrics = stepExecution0.getMetrics();
         System.out.printf("metrics: %s%n", java.util.Arrays.asList(metrics));
         final StepMetrics stepMetrics = stepExecution0.getStepMetrics();
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(6, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
+        assertEquals(6, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
     }
 
     /**
@@ -283,18 +305,18 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final Metric[] metrics = stepExecution0.getMetrics();
         System.out.printf("metrics: %s%n", java.util.Arrays.asList(metrics));
         final StepMetrics stepMetrics = stepExecution0.getStepMetrics();
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(6, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
+        assertEquals(6, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
     }
 
     /**
@@ -324,11 +346,11 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         System.out.printf("step exit status: %s%n", stepExecution0.getExitStatus());
 
         // collector * 2 chunk * 3 partitions + analyzer * 3 = 9
-        Assert.assertEquals("9", stepExecution0.getExitStatus());
+        assertEquals("9", stepExecution0.getExitStatus());
     }
 
     /**
@@ -354,18 +376,68 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final Metric[] metrics = stepExecution0.getMetrics();
         System.out.printf("metrics: %s%n", java.util.Arrays.asList(metrics));
         final StepMetrics stepMetrics = stepExecution0.getStepMetrics();
-        Assert.assertEquals(1, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(3, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(20, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
+        assertEquals(1, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
+        assertEquals(3, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
+        assertEquals(20, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
+    }
+
+    /**
+     * Static verification of a chunk-step's skippable exceptions,
+     * retryable exceptions, and no-rollback exceptions.
+     * These exceptions are passed to {@code StepBuilder} as list of string values.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void filterExceptionNames() throws Exception {
+        final StepBuilder stepBuilder = new StepBuilder("skipExceptionNames-step");
+        stepBuilder.reader("integerArrayReader").writer("integerArrayWriter")
+                .skippableExceptionsInclude(includeExceptionNames)
+                .skippableExceptionsExclude(excludeExceptionNames)
+
+                .retryableExceptionsInclude(includeExceptionNames)
+                .retryableExceptionsExclude(excludeExceptionNames)
+
+                .noRollbackExceptionsInclude(includeExceptionNames)
+                .noRollbackExceptionsExclude(excludeExceptionNames);
+        final Step step = stepBuilder.build();
+        checkExceptionFilter(step.getChunk().getSkippableExceptionClasses());
+        checkExceptionFilter(step.getChunk().getRetryableExceptionClasses());
+        checkExceptionFilter(step.getChunk().getNoRollbackExceptionClasses());
+    }
+
+    /**
+     * Static verification of a chunk-step's skippable exceptions,
+     * retryable exceptions, and no-rollback exceptions.
+     * These exceptions are passed to {@code StepBuilder} as {@code Class[]}.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void filterExceptions() throws Exception {
+        final StepBuilder stepBuilder = new StepBuilder("skipExceptions-step");
+        stepBuilder.reader("integerArrayReader").writer("integerArrayWriter")
+                .skippableExceptionsInclude(includeExceptions)
+                .skippableExceptionsExclude(excludeExceptions)
+
+                .retryableExceptionsInclude(includeExceptions)
+                .retryableExceptionsExclude(excludeExceptions)
+
+                .noRollbackExceptionsInclude(includeExceptions)
+                .noRollbackExceptionsExclude(excludeExceptions);
+        final Step step = stepBuilder.build();
+        checkExceptionFilter(step.getChunk().getSkippableExceptionClasses());
+        checkExceptionFilter(step.getChunk().getRetryableExceptionClasses());
+        checkExceptionFilter(step.getChunk().getNoRollbackExceptionClasses());
     }
 
     /**
@@ -391,18 +463,18 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final Metric[] metrics = stepExecution0.getMetrics();
         System.out.printf("metrics: %s%n", java.util.Arrays.asList(metrics));
         final StepMetrics stepMetrics = stepExecution0.getStepMetrics();
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(13, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(40, stepMetrics.get(Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(1, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
+        assertEquals(13, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
+        assertEquals(40, stepMetrics.get(Metric.MetricType.READ_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
+        assertEquals(1, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
     }
 
     /**
@@ -430,18 +502,18 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final Metric[] metrics = stepExecution0.getMetrics();
         System.out.printf("metrics: %s%n", java.util.Arrays.asList(metrics));
         final StepMetrics stepMetrics = stepExecution0.getStepMetrics();
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(4, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
+        assertEquals(4, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
     }
 
     /**
@@ -470,18 +542,18 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final Metric[] metrics = stepExecution0.getMetrics();
         System.out.printf("metrics: %s%n", java.util.Arrays.asList(metrics));
         final StepMetrics stepMetrics = stepExecution0.getStepMetrics();
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(31, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.WRITE_SKIP_COUNT));
+        assertEquals(31, stepMetrics.get(Metric.MetricType.COMMIT_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.READ_COUNT));
+        assertEquals(30, stepMetrics.get(Metric.MetricType.WRITE_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.READ_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.PROCESS_SKIP_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.ROLLBACK_COUNT));
+        assertEquals(0, stepMetrics.get(Metric.MetricType.FILTER_COUNT));
     }
 
     /**
@@ -509,10 +581,10 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(2, stepExecutions.size());
-        Assert.assertEquals(stepName, stepExecution0.getStepName());
-        Assert.assertEquals(step2Name, stepExecutions.get(1).getStepName());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(2, stepExecutions.size());
+        assertEquals(stepName, stepExecution0.getStepName());
+        assertEquals(step2Name, stepExecutions.get(1).getStepName());
     }
 
     /**
@@ -540,10 +612,10 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(1, stepExecutions.size());
-        Assert.assertEquals(stepName, stepExecution0.getStepName());
-        Assert.assertEquals(stepName, jobExecution.getExitStatus());  //set by the decision element endOn("*").exitStatus(...)
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(1, stepExecutions.size());
+        assertEquals(stepName, stepExecution0.getStepName());
+        assertEquals(stepName, jobExecution.getExitStatus());  //set by the decision element endOn("*").exitStatus(...)
     }
 
     /**
@@ -579,13 +651,13 @@ public class JavaJSLIT extends AbstractIT {
 
         startJobAndWait(job);
 
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(3, stepExecutions.size());
+        assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        assertEquals(3, stepExecutions.size());
 
         //step1 and step2 execution order may be random, so stepExecution0 may point to step1 or step2
         //Assert.assertEquals(stepName, stepExecution0.getStepName());
         //Assert.assertEquals(step2Name, stepExecutions.get(1).getStepName());
-        Assert.assertEquals(step3Name, stepExecutions.get(2).getStepName());
+        assertEquals(step3Name, stepExecutions.get(2).getStepName());
     }
 
     @Test(expected = BatchRuntimeException.class)
@@ -675,8 +747,8 @@ public class JavaJSLIT extends AbstractIT {
                 .build();
 
         startJobAndWait(job);
-        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -693,8 +765,8 @@ public class JavaJSLIT extends AbstractIT {
                 .build();
 
         startJobAndWait(job);
-        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -711,8 +783,8 @@ public class JavaJSLIT extends AbstractIT {
                 .build();
 
         startJobAndWait(job);
-        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -730,8 +802,8 @@ public class JavaJSLIT extends AbstractIT {
                 .build();
 
         startJobAndWait(job);
-        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -750,8 +822,17 @@ public class JavaJSLIT extends AbstractIT {
                 .build();
 
         startJobAndWait(job);
-        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
+    private void checkExceptionFilter(final ExceptionClassFilter filter) {
+        assertEquals(false, filter.matches(notIncludedOrExcludedException));
+        assertEquals(false, filter.matches(FileNotFoundException.class));
+        assertEquals(false, filter.matches(IllegalArgumentException.class));
+        assertEquals(true, filter.matches(SocketException.class));
+        assertEquals(true, filter.matches(IllegalStateException.class));
+        assertEquals(true, filter.matches(IOException.class));
+        assertEquals(true, filter.matches(RuntimeException.class));
+    }
 }
