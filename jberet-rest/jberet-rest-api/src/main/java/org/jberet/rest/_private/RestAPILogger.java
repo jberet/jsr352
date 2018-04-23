@@ -21,11 +21,11 @@ import org.jboss.logging.annotations.MessageLogger;
 import org.jboss.logging.annotations.ValidIdRange;
 
 @MessageLogger(projectCode = "JBERET")
-@ValidIdRange(min = 71000, max = 71999)
+@ValidIdRange(min = 70500, max = 70999)
 public interface RestAPILogger extends BasicLogger {
     RestAPILogger LOGGER = Logger.getMessageLogger(RestAPILogger.class, "org.jberet.rest-api");
 
-    @Message(id = 71000, value = "Exception occurred when accessing JBeret Rest API:")
+    @Message(id = 70500, value = "Exception occurred when accessing JBeret Rest API:")
     @LogMessage(level = Logger.Level.WARN)
     void exceptionAccessingRestAPI(@Cause Throwable ex);
 

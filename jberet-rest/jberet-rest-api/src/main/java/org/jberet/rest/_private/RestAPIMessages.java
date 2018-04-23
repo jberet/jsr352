@@ -21,7 +21,7 @@ import org.jboss.logging.annotations.MessageBundle;
 import org.jboss.logging.annotations.ValidIdRange;
 
 @MessageBundle(projectCode = "JBERET")
-@ValidIdRange(min = 70000, max = 70999)
+@ValidIdRange(min = 70000, max = 70499)
 public interface RestAPIMessages {
     RestAPIMessages MESSAGES = Messages.getBundle(RestAPIMessages.class);
 
