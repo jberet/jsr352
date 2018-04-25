@@ -235,14 +235,16 @@ public final class JsonJobMapper {
                                       final StepBuilder stepBuilder,
                                       final FlowBuilder flowBuilder,
                                       final DecisionBuilder decisionBuilder) {
-        final String on = getRequiredTextValue(singleNextNode, XmlAttribute.ON, XmlElement.NEXT);
-        final String to = getRequiredTextValue(singleNextNode, XmlAttribute.TO, XmlElement.NEXT);
-        if (stepBuilder != null) {
-            stepBuilder.nextOn(on).to(to);
-        } else if (flowBuilder != null) {
-            flowBuilder.nextOn(on).to(to);
-        } else if (decisionBuilder != null) {
-            decisionBuilder.nextOn(on).to(to);
+        if (singleNextNode.isObject()) {
+            final String on = getRequiredTextValue(singleNextNode, XmlAttribute.ON, XmlElement.NEXT);
+            final String to = getRequiredTextValue(singleNextNode, XmlAttribute.TO, XmlElement.NEXT);
+            if (stepBuilder != null) {
+                stepBuilder.nextOn(on).to(to);
+            } else if (flowBuilder != null) {
+                flowBuilder.nextOn(on).to(to);
+            } else if (decisionBuilder != null) {
+                decisionBuilder.nextOn(on).to(to);
+            }
         }
     }
 
@@ -415,8 +417,10 @@ public final class JsonJobMapper {
                                        final Consumer<String> applyMethod) {
         final JsonNode attrNode = parentNode.get(attr.getLocalName());
         if (attrNode != null) {
-            final String textValue = attrNode.textValue();
-            applyMethod.accept(textValue);
+            if (attr != XmlAttribute.NEXT || attrNode.isTextual()) {
+                final String textValue = attrNode.textValue();
+                applyMethod.accept(textValue);
+            }
         }
     }
 
