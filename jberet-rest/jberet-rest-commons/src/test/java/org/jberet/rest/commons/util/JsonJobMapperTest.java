@@ -16,10 +16,12 @@ import java.util.List;
 
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.Decision;
+import org.jberet.job.model.Flow;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.RefArtifact;
+import org.jberet.job.model.Split;
 import org.jberet.job.model.Step;
 import org.jberet.job.model.Transition;
 import org.junit.Test;
@@ -215,6 +217,244 @@ public final class JsonJobMapperTest {
         assertEquals(null, step2.getChunk());
         assertEquals("batchlet2", step2.getBatchlet().getRef());
         assertEquals(0, step2.getBatchlet().getProperties().size());
+    }
+
+    /**
+     * Verifies a step that contains one or multiple transition elements:
+     * end, fail, stop & next and each of them can appear one or multiple times.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void stepWithTransitionElements() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"job1\",\n" +
+                "    \"step\": [\n" +
+                "      {\n" +
+                "        \"id\": \"step1\",\n" +
+                "        \"batchlet\": { \"ref\": \"batchlet1\" },\n" +
+                "        \"next\": {\n" +
+                "          \"on\": \"next1\",\n" +
+                "          \"to\": \"step1\"\n" +
+                "        },\n" +
+                "        \"fail\": {\n" +
+                "          \"on\": \"fail1\",\n" +
+                "          \"exit-status\": \"x\"\n" +
+                "        },\n" +
+                "        \"end\": {\n" +
+                "          \"on\": \"end1\",\n" +
+                "          \"exit-status\": \"x\"\n" +
+                "        },\n" +
+                "        \"stop\": {\n" +
+                "          \"on\": \"stop1\",\n" +
+                "          \"exit-status\": \"x\",\n" +
+                "          \"restart\": \"step1\"\n" +
+                "        }\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": \"step2\",\n" +
+                "        \"batchlet\": { \"ref\": \"batchlet2\" }\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        assertEquals(2, job.getJobElements().size());
+        final Step step1 = (Step) job.getJobElements().get(0);
+        assertEquals("step1", step1.getId());
+        verifyTransitionElements(step1.getTransitionElements());
+    }
+
+    /**
+     * Verifies a flow that contains 2 steps and transition elements:
+     * end, fail, stop & next, and each of the appear once.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void flowWithTransitionElements() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"job1\",\n" +
+                "    \"flow\": {\n" +
+                "      \"id\": \"flow1\",\n" +
+                "      \"step\": [\n" +
+                "        {\n" +
+                "          \"id\": \"step1\",\n" +
+                "          \"batchlet\": { \"ref\": \"batchlet1\" }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"id\": \"step2\",\n" +
+                "          \"batchlet\": { \"ref\": \"batchlet2\" }\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"next\": {\n" +
+                "        \"on\": \"next1\",\n" +
+                "        \"to\": \"step1\"\n" +
+                "      },\n" +
+                "      \"fail\": {\n" +
+                "        \"on\": \"fail1\",\n" +
+                "        \"exit-status\": \"x\"\n" +
+                "      },\n" +
+                "      \"end\": {\n" +
+                "        \"on\": \"end1\",\n" +
+                "        \"exit-status\": \"x\"\n" +
+                "      },\n" +
+                "      \"stop\": {\n" +
+                "        \"on\": \"stop1\",\n" +
+                "        \"exit-status\": \"x\",\n" +
+                "        \"restart\": \"step1\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        assertEquals(1, job.getJobElements().size());
+        final Flow flow = (Flow) job.getJobElements().get(0);
+        assertEquals("flow1", flow.getId());
+
+        final List<JobElement> elementsInFlow = flow.getJobElements();
+        assertEquals(2, elementsInFlow.size());
+        Step step = (Step) elementsInFlow.get(0);
+        assertEquals("step1", step.getId());
+        assertEquals("batchlet1", step.getBatchlet().getRef());
+        step = (Step) elementsInFlow.get(1);
+        assertEquals("step2", step.getId());
+        assertEquals("batchlet2", step.getBatchlet().getRef());
+
+        verifyTransitionElements(flow.getTransitionElements());
+    }
+
+    /**
+     * Verifies a flow that contains 2 steps and transition elements:
+     * end, fail, stop & next, and each of the appear twice.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void flowWithTransitionElements2() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"job1\",\n" +
+                "    \"flow\": {\n" +
+                "      \"id\": \"flow1\",\n" +
+                "      \"step\": [\n" +
+                "        {\n" +
+                "          \"id\": \"step1\",\n" +
+                "          \"batchlet\": { \"ref\": \"batchlet1\" }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"id\": \"step2\",\n" +
+                "          \"batchlet\": { \"ref\": \"batchlet2\" }\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"next\": [\n" +
+                "        {\n" +
+                "          \"on\": \"next1\",\n" +
+                "          \"to\": \"step1\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"on\": \"next2\",\n" +
+                "          \"to\": \"step2\"\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"fail\": [\n" +
+                "        {\n" +
+                "          \"on\": \"fail1\",\n" +
+                "          \"exit-status\": \"x\"\n" +
+                "        },\n" +
+                "        { \"on\": \"fail2\" }\n" +
+                "      ],\n" +
+                "      \"end\": [\n" +
+                "        {\n" +
+                "          \"on\": \"end1\",\n" +
+                "          \"exit-status\": \"x\"\n" +
+                "        },\n" +
+                "        { \"on\": \"end2\" }\n" +
+                "      ],\n" +
+                "      \"stop\": [\n" +
+                "        {\n" +
+                "          \"on\": \"stop1\",\n" +
+                "          \"exit-status\": \"x\",\n" +
+                "          \"restart\": \"step1\"\n" +
+                "        },\n" +
+                "        { \"on\": \"stop2\" }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        final Flow flow = (Flow) job.getJobElements().get(0);
+        verifyTransitionElements2(flow.getTransitionElements());
+    }
+
+    /**
+     * Verifies a step that contains one or multiple transition elements:
+     * end, fail, stop & next and each of them appears twice.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void stepWithTransitionElements2() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"job1\",\n" +
+                "    \"step\": [\n" +
+                "      {\n" +
+                "        \"id\": \"step1\",\n" +
+                "        \"batchlet\": { \"ref\": \"batchlet1\" },\n" +
+                "        \"next\": [\n" +
+                "          {\n" +
+                "            \"on\": \"next1\",\n" +
+                "            \"to\": \"step1\"\n" +
+                "          },\n" +
+                "          {\n" +
+                "            \"on\": \"next2\",\n" +
+                "            \"to\": \"step2\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"fail\": [\n" +
+                "          {\n" +
+                "            \"on\": \"fail1\",\n" +
+                "            \"exit-status\": \"x\"\n" +
+                "          },\n" +
+                "          {\n" +
+                "            \"on\": \"fail2\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"end\": [\n" +
+                "          {\n" +
+                "            \"on\": \"end1\",\n" +
+                "            \"exit-status\": \"x\"\n" +
+                "          },\n" +
+                "          {\n" +
+                "            \"on\": \"end2\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"stop\": [\n" +
+                "          {\n" +
+                "            \"on\": \"stop1\",\n" +
+                "            \"exit-status\": \"x\",\n" +
+                "            \"restart\": \"step1\"\n" +
+                "          },\n" +
+                "          {\n" +
+                "            \"on\": \"stop2\"\n" +
+                "          }\n" +
+                "        ]\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": \"step2\",\n" +
+                "        \"batchlet\": { \"ref\": \"batchlet2\" }\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        assertEquals(2, job.getJobElements().size());
+        final Step step1 = (Step) job.getJobElements().get(0);
+        assertEquals("step1", step1.getId());
+        verifyTransitionElements2(step1.getTransitionElements());
     }
 
     /**
@@ -447,7 +687,7 @@ public final class JsonJobMapperTest {
      * @throws Exception
      */
     @Test
-    public void decisionFailEndStopNext() throws Exception {
+    public void decisionWithTransitionElements() throws Exception {
         final String json = "{\n" +
                 "  \"job\": {\n" +
                 "    \"id\": \"job1\",\n" +
@@ -472,16 +712,19 @@ public final class JsonJobMapperTest {
                 "        }\n" +
                 "      },\n" +
                 "      \"next\": {\n" +
-                "        \"on\": \"next\",\n" +
-                "        \"to\": \"step2\"\n" +
+                "        \"on\": \"next1\",\n" +
+                "        \"to\": \"step1\"\n" +
                 "      },\n" +
                 "      \"fail\": {\n" +
-                "        \"on\": \"fail\",\n" +
+                "        \"on\": \"fail1\",\n" +
                 "        \"exit-status\": \"x\"\n" +
                 "      },\n" +
-                "      \"end\": { \"on\": \"end\" },\n" +
+                "      \"end\": {\n" +
+                "          \"on\": \"end1\",\n" +
+                "          \"exit-status\": \"x\"\n" +
+                "        },\n" +
                 "      \"stop\": {\n" +
-                "        \"on\": \"stop\",\n" +
+                "        \"on\": \"stop1\",\n" +
                 "        \"exit-status\": \"x\",\n" +
                 "        \"restart\": \"step1\"\n" +
                 "      }\n" +
@@ -510,26 +753,7 @@ public final class JsonJobMapperTest {
                 final Properties properties = decision.getProperties();
                 assertEquals(1, properties.size());
                 assertEquals("DV1", properties.get("DN1"));
-
-                final List<Transition> transitionElements = decision.getTransitionElements();
-                assertEquals(4, transitionElements.size());
-                for (Transition transition : transitionElements) {
-                    if (transition instanceof Transition.End) {
-                        assertEquals("end", transition.getOn());
-                    } else if (transition instanceof Transition.Fail) {
-                        assertEquals("fail", transition.getOn());
-                        assertEquals("x", ((Transition.Fail) transition).getExitStatus());
-                    } else if (transition instanceof Transition.Stop) {
-                        assertEquals("stop", transition.getOn());
-                        assertEquals("x", ((Transition.Stop) transition).getExitStatus());
-                        assertEquals("step1", ((Transition.Stop) transition).getRestart());
-                    } else if (transition instanceof Transition.Next) {
-                        assertEquals("next", transition.getOn());
-                        assertEquals("step2", ((Transition.Next) transition).getTo());
-                    } else {
-                        throw new IllegalStateException("Unexpected transition element: " + transition);
-                    }
-                }
+                verifyTransitionElements(decision.getTransitionElements());
             }
         }
     }
@@ -541,7 +765,7 @@ public final class JsonJobMapperTest {
      * @throws Exception
      */
     @Test
-    public void decisionFailEndStopNext2() throws Exception {
+    public void decisionWithTransitionElements2() throws Exception {
         final String json = "{\n" +
                 "  \"job\": {\n" +
                 "    \"id\": \"job1\",\n" +
@@ -627,58 +851,7 @@ public final class JsonJobMapperTest {
                     assertEquals(2, properties.size());
                     assertEquals("DV1", properties.get("DN1"));
                     assertEquals("DV2", properties.get("DN2"));
-
-                    final List<Transition> transitionElements = decision.getTransitionElements();
-                    assertEquals(8, transitionElements.size());
-                    int failCount = 0;
-                    int endCound = 0;
-                    int stopCount = 0;
-                    int nextCount = 0;
-                    for (Transition transition : transitionElements) {
-                        final String on = transition.getOn();
-                        if (transition instanceof Transition.End) {
-                            endCound++;
-                            if (on.equals("end1")) {
-                                assertEquals("x", ((Transition.End) transition).getExitStatus());
-                            } else {
-                                assertEquals("end2", on);
-                                assertNull(((Transition.End) transition).getExitStatus());
-                            }
-                        } else if (transition instanceof Transition.Fail) {
-                            failCount++;
-                            if (on.equals("fail1")) {
-                                assertEquals("x", ((Transition.Fail) transition).getExitStatus());
-                            } else {
-                                assertEquals("fail2", on);
-                                assertNull(((Transition.Fail) transition).getExitStatus());
-                            }
-                        } else if (transition instanceof Transition.Stop) {
-                            stopCount++;
-                            if (on.equals("stop1")) {
-                                assertEquals("x", ((Transition.Stop) transition).getExitStatus());
-                                assertEquals("step1", ((Transition.Stop) transition).getRestart());
-                            } else {
-                                assertEquals("stop2", on);
-                                assertNull(((Transition.Stop) transition).getExitStatus());
-                                assertNull(((Transition.Stop) transition).getRestart());
-                            }
-                        } else if (transition instanceof Transition.Next) {
-                            nextCount++;
-                            if (on.equals("next1")) {
-                                assertEquals("next1", on);
-                                assertEquals("step1", ((Transition.Next) transition).getTo());
-                            } else {
-                                assertEquals("next2", on);
-                                assertEquals("step2", ((Transition.Next) transition).getTo());
-                            }
-                        } else {
-                            throw new IllegalStateException("Unexpected transition element: " + transition);
-                        }
-                    }
-                    assertEquals(2, failCount);
-                    assertEquals(2, endCound);
-                    assertEquals(2, stopCount);
-                    assertEquals(2, nextCount);
+                    verifyTransitionElements2(decision.getTransitionElements());
                 } else {
                     assertEquals("decision2", element.getId());
                     assertEquals("decider2", ((Decision) element).getRef());
@@ -687,5 +860,242 @@ public final class JsonJobMapperTest {
                 }
             }
         }
+    }
+
+    /**
+     * Verifies various elements that can appear inside a flow:
+     * 2 flows, 2 decisions, and 2 splits.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void flowElements() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"job1\",\n" +
+                "    \"flow\": {\n" +
+                "      \"id\": \"flow1\",\n" +
+                "      \"flow\": [\n" +
+                "        {\n" +
+                "          \"id\": \"flow2\",\n" +
+                "          \"next\": \"flow3\",\n" +
+                "          \"step\": {\n" +
+                "            \"id\": \"step1\",\n" +
+                "            \"batchlet\": { \"ref\": \"batchlet1\" }\n" +
+                "          }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"id\": \"flow3\",\n" +
+                "          \"step\": {\n" +
+                "            \"id\": \"step2\",\n" +
+                "            \"batchlet\": { \"ref\": \"batchlet2\" }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"decision\": [\n" +
+                "        {\n" +
+                "          \"id\": \"decision1\",\n" +
+                "          \"ref\": \"decider1\",\n" +
+                "          \"end\": { \"on\": \"end\" }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"id\": \"decision2\",\n" +
+                "          \"ref\": \"decider2\",\n" +
+                "          \"end\": { \"on\": \"end\" }\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"split\": [\n" +
+                "        {\n" +
+                "          \"id\": \"split1\",\n" +
+                "          \"next\": \"split2\",\n" +
+                "          \"flow\": [\n" +
+                "            {\n" +
+                "              \"id\": \"flow4\",\n" +
+                "              \"step\": {\n" +
+                "                \"id\": \"step3\",\n" +
+                "                \"batchlet\": { \"ref\": \"batchlet3\" }\n" +
+                "              }\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"id\": \"flow5\",\n" +
+                "              \"step\": {\n" +
+                "                \"id\": \"step4\",\n" +
+                "                \"batchlet\": { \"ref\": \"batchlet4\" }\n" +
+                "              }\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"id\": \"split2\",\n" +
+                "          \"flow\": {\n" +
+                "            \"id\": \"flow6\",\n" +
+                "            \"step\": {\n" +
+                "              \"id\": \"step6\",\n" +
+                "              \"batchlet\": { \"ref\": \"batchlet6\" }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        assertEquals(1, job.getJobElements().size());
+        final Flow flow1 = (Flow) job.getJobElements().get(0);
+        assertEquals("flow1", flow1.getId());
+
+        final List<JobElement> flow1Elements = flow1.getJobElements();
+        assertEquals(6, flow1Elements.size());
+        int flowCount = 0;
+        int decisionCount = 0;
+        int splitCount = 0;
+
+        for (JobElement e : flow1Elements) {
+            final String id = e.getId();
+            if (e instanceof Decision) {
+                if (id.equals("decision1")) {
+                    decisionCount++;
+                    assertEquals("decider1", ((Decision) e).getRef());
+                    assertEquals("end", e.getTransitionElements().get(0).getOn());
+                } else {
+                    assertEquals("decision2", id);
+                    decisionCount++;
+                    assertEquals("decider2", ((Decision) e).getRef());
+                    assertEquals("end", e.getTransitionElements().get(0).getOn());
+                }
+            } else if (e instanceof Flow) {
+                if (id.equals("flow2")) {
+                    flowCount++;
+                    final List<JobElement> flowElements = ((Flow) e).getJobElements();
+                    assertEquals(1, flowElements.size());
+                    assertEquals("step1", flowElements.get(0).getId());
+                    assertEquals("flow3", ((Flow) e).getAttributeNext());
+                } else {
+                    assertEquals("flow3", id);
+                    flowCount++;
+                    final List<JobElement> flowElements = ((Flow) e).getJobElements();
+                    assertEquals(1, flowElements.size());
+                    assertEquals("step2", flowElements.get(0).getId());
+                }
+            } else if (e instanceof Split) {
+                if (id.equals("split1")) {
+                    splitCount++;
+                    final Split split = (Split) e;
+                    assertEquals("split2", split.getAttributeNext());
+                    assertEquals(2, split.getFlows().size());
+                    assertEquals("flow4", split.getFlows().get(0).getId());
+                    Step step = (Step) split.getFlows().get(0).getJobElements().get(0);
+                    assertEquals("step3", step.getId());
+                    assertEquals("batchlet3", step.getBatchlet().getRef());
+
+                    assertEquals("flow5", split.getFlows().get(1).getId());
+                    step = (Step) split.getFlows().get(1).getJobElements().get(0);
+                    assertEquals("step4", step.getId());
+                    assertEquals("batchlet4", step.getBatchlet().getRef());
+                } else {
+                    assertEquals("split2", id);
+                    splitCount++;
+                    final Split split = (Split) e;
+                    assertEquals(1, split.getFlows().size());
+                    assertEquals("flow6", split.getFlows().get(0).getId());
+                    final Step step = (Step) split.getFlows().get(0).getJobElements().get(0);
+                    assertEquals("step6", step.getId());
+                    assertEquals("batchlet6", step.getBatchlet().getRef());
+                }
+            }
+        }
+        assertEquals(2, decisionCount);
+        assertEquals(2, flowCount);
+        assertEquals(2, splitCount);
+    }
+
+    private static void verifyTransitionElements(final List<Transition> transitionElements) {
+        assertEquals(4, transitionElements.size());
+        int failCount = 0;
+        int endCount = 0;
+        int stopCount = 0;
+        int nextCount = 0;
+
+        for (Transition transition : transitionElements) {
+            if (transition instanceof Transition.Fail) {
+                failCount++;
+                assertEquals("fail1", transition.getOn());
+                assertEquals("x", ((Transition.Fail) transition).getExitStatus());
+            } else if (transition instanceof Transition.End) {
+                endCount++;
+                assertEquals("end1", transition.getOn());
+                assertEquals("x", ((Transition.End) transition).getExitStatus());
+            } else if (transition instanceof Transition.Stop) {
+                stopCount++;
+                assertEquals("stop1", transition.getOn());
+                assertEquals("x", ((Transition.Stop) transition).getExitStatus());
+                assertEquals("step1", ((Transition.Stop) transition).getRestart());
+            } else if(transition instanceof Transition.Next){
+                nextCount++;
+                assertEquals("next1", transition.getOn());
+                assertEquals("step1", ((Transition.Next) transition).getTo());
+            }
+        }
+        assertEquals(1, failCount);
+        assertEquals(1, endCount);
+        assertEquals(1, stopCount);
+        assertEquals(1, nextCount);
+    }
+
+    private static void verifyTransitionElements2(final List<Transition> transitionElements) {
+        assertEquals(8, transitionElements.size());
+        int failCount = 0;
+        int endCound = 0;
+        int stopCount = 0;
+        int nextCount = 0;
+        for (Transition transition : transitionElements) {
+            final String on = transition.getOn();
+            if (transition instanceof Transition.End) {
+                if (on.equals("end1")) {
+                    endCound++;
+                    assertEquals("x", ((Transition.End) transition).getExitStatus());
+                } else {
+                    endCound++;
+                    assertEquals("end2", on);
+                    assertNull(((Transition.End) transition).getExitStatus());
+                }
+            } else if (transition instanceof Transition.Fail) {
+                if (on.equals("fail1")) {
+                    failCount++;
+                    assertEquals("x", ((Transition.Fail) transition).getExitStatus());
+                } else {
+                    failCount++;
+                    assertEquals("fail2", on);
+                    assertNull(((Transition.Fail) transition).getExitStatus());
+                }
+            } else if (transition instanceof Transition.Stop) {
+                if (on.equals("stop1")) {
+                    stopCount++;
+                    assertEquals("x", ((Transition.Stop) transition).getExitStatus());
+                    assertEquals("step1", ((Transition.Stop) transition).getRestart());
+                } else {
+                    stopCount++;
+                    assertEquals("stop2", on);
+                    assertNull(((Transition.Stop) transition).getExitStatus());
+                    assertNull(((Transition.Stop) transition).getRestart());
+                }
+            } else if (transition instanceof Transition.Next) {
+                if (on.equals("next1")) {
+                    nextCount++;
+                    assertEquals("next1", on);
+                    assertEquals("step1", ((Transition.Next) transition).getTo());
+                } else {
+                    nextCount++;
+                    assertEquals("next2", on);
+                    assertEquals("step2", ((Transition.Next) transition).getTo());
+                }
+            } else {
+                throw new IllegalStateException("Unexpected transition element: " + transition);
+            }
+        }
+        assertEquals(2, failCount);
+        assertEquals(2, endCound);
+        assertEquals(2, stopCount);
+        assertEquals(2, nextCount);
     }
 }
