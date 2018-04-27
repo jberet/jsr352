@@ -12,10 +12,15 @@
 
 package org.jberet.rest.commons.util;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
+import java.util.zip.ZipException;
 
 import org.jberet.job.model.Chunk;
 import org.jberet.job.model.Decision;
+import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.Flow;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
@@ -221,7 +226,7 @@ public final class JsonJobMapperTest {
 
     /**
      * Verifies a step that contains one or multiple transition elements:
-     * end, fail, stop & next and each of them can appear one or multiple times.
+     * end, fail, stop and next and each of them can appear one or multiple times.
      *
      * @throws Exception
      */
@@ -268,7 +273,7 @@ public final class JsonJobMapperTest {
 
     /**
      * Verifies a flow that contains 2 steps and transition elements:
-     * end, fail, stop & next, and each of the appear once.
+     * end, fail, stop and next, and each of the appear once.
      * 
      * @throws Exception
      */
@@ -328,7 +333,7 @@ public final class JsonJobMapperTest {
 
     /**
      * Verifies a flow that contains 2 steps and transition elements:
-     * end, fail, stop & next, and each of the appear twice.
+     * end, fail, stop and next, and each of the appear twice.
      *
      * @throws Exception
      */
@@ -391,7 +396,7 @@ public final class JsonJobMapperTest {
 
     /**
      * Verifies a step that contains one or multiple transition elements:
-     * end, fail, stop & next and each of them appears twice.
+     * end, fail, stop and next and each of them appears twice.
      *
      * @throws Exception
      */
@@ -1007,6 +1012,145 @@ public final class JsonJobMapperTest {
         assertEquals(2, decisionCount);
         assertEquals(2, flowCount);
         assertEquals(2, splitCount);
+    }
+
+    /**
+     * Verifies exception class filters (skippable exceptions, retryable exceptions,
+     * and no-rollback exceptions) are properly parsed.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void exceptionFilters() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"simple\",\n" +
+                "    \"step\": {\n" +
+                "      \"id\": \"step1\",\n" +
+                "      \"chunk\": {\n" +
+                "        \"reader\": { \"ref\": \"reader1\" },\n" +
+                "        \"writer\": { \"ref\": \"writer1\" },\n" +
+                "        \"skippable-exception-classes\": {\n" +
+                "          \"include\": { \"class\": \"java.lang.RuntimeException\" },\n" +
+                "          \"exclude\": { \"class\": \"java.lang.IllegalStateException\" }\n" +
+                "        },\n" +
+                "        \"retryable-exception-classes\": {\n" +
+                "          \"include\": { \"class\": \"java.lang.RuntimeException\" },\n" +
+                "          \"exclude\": { \"class\": \"java.lang.IllegalArgumentException\" }\n" +
+                "        },\n" +
+                "        \"no-rollback-exception-classes\": {\n" +
+                "          \"include\": { \"class\": \"java.lang.RuntimeException\" },\n" +
+                "          \"exclude\": { \"class\": \"java.lang.NullPointerException\" }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        final Step step = (Step) job.getJobElements().get(0);
+        final Chunk chunk = step.getChunk();
+        assertEquals("reader1", chunk.getReader().getRef());
+        assertEquals("writer1", chunk.getWriter().getRef());
+        ExceptionClassFilter filter = chunk.getSkippableExceptionClasses();
+        assertEquals(true, filter.matches(RuntimeException.class));
+        assertEquals(true, filter.matches(IllegalArgumentException.class));
+        assertEquals(true, filter.matches(NullPointerException.class));
+        assertEquals(false, filter.matches(IllegalStateException.class));
+
+        filter = chunk.getRetryableExceptionClasses();
+        assertEquals(true, filter.matches(RuntimeException.class));
+        assertEquals(false, filter.matches(IllegalArgumentException.class));
+        assertEquals(true, filter.matches(NullPointerException.class));
+        assertEquals(true, filter.matches(IllegalStateException.class));
+
+        filter = chunk.getNoRollbackExceptionClasses();
+        assertEquals(true, filter.matches(RuntimeException.class));
+        assertEquals(true, filter.matches(IllegalArgumentException.class));
+        assertEquals(false, filter.matches(NullPointerException.class));
+        assertEquals(true, filter.matches(IllegalStateException.class));
+    }
+
+    /**
+     * Verifies exception class filters (skippable exceptions, retryable exceptions,
+     * and no-rollback exceptions) are properly parsed. Each element contains multiple
+     * include and exclude entries.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void exceptionFilters2() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"simple\",\n" +
+                "    \"step\": {\n" +
+                "      \"id\": \"step1\",\n" +
+                "      \"chunk\": {\n" +
+                "        \"reader\": { \"ref\": \"reader1\" },\n" +
+                "        \"writer\": { \"ref\": \"writer1\" },\n" +
+                "        \"skippable-exception-classes\": {\n" +
+                "          \"include\": [\n" +
+                "            { \"class\": \"java.lang.RuntimeException\" },\n" +
+                "            { \"class\": \"java.io.IOException\" }\n" +
+                "          ],\n" +
+                "          \"exclude\": [\n" +
+                "            { \"class\": \"java.lang.IllegalStateException\" },\n" +
+                "            { \"class\": \"java.io.FileNotFoundException\" }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        \"retryable-exception-classes\": {\n" +
+                "          \"include\": [\n" +
+                "            { \"class\": \"java.lang.RuntimeException\" },\n" +
+                "            { \"class\": \"java.io.IOException\" }\n" +
+                "          ],\n" +
+                "          \"exclude\": [\n" +
+                "            { \"class\": \"java.lang.IllegalArgumentException\" },\n" +
+                "            { \"class\": \"java.util.zip.ZipException\" }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        \"no-rollback-exception-classes\": {\n" +
+                "          \"include\": [\n" +
+                "            { \"class\": \"java.io.IOException\" },\n" +
+                "            { \"class\": \"java.lang.RuntimeException\" }\n" +
+                "          ],\n" +
+                "          \"exclude\": [\n" +
+                "            { \"class\": \"java.lang.NullPointerException\" },\n" +
+                "            { \"class\": \"java.net.UnknownHostException\" }\n" +
+                "          ]\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        final Step step = (Step) job.getJobElements().get(0);
+        final Chunk chunk = step.getChunk();
+        ExceptionClassFilter filter = chunk.getSkippableExceptionClasses();
+        assertEquals(true, filter.matches(RuntimeException.class));
+        assertEquals(true, filter.matches(IllegalArgumentException.class));
+        assertEquals(true, filter.matches(NullPointerException.class));
+        assertEquals(false, filter.matches(IllegalStateException.class));
+        assertEquals(true, filter.matches(IOException.class));
+        assertEquals(false, filter.matches(FileNotFoundException.class));
+        assertEquals(true, filter.matches(ZipException.class));
+
+        filter = chunk.getRetryableExceptionClasses();
+        assertEquals(true, filter.matches(RuntimeException.class));
+        assertEquals(false, filter.matches(IllegalArgumentException.class));
+        assertEquals(true, filter.matches(NullPointerException.class));
+        assertEquals(true, filter.matches(IllegalStateException.class));
+        assertEquals(true, filter.matches(IOException.class));
+        assertEquals(true, filter.matches(FileNotFoundException.class));
+        assertEquals(false, filter.matches(ZipException.class));
+
+        filter = chunk.getNoRollbackExceptionClasses();
+        assertEquals(true, filter.matches(RuntimeException.class));
+        assertEquals(true, filter.matches(IllegalArgumentException.class));
+        assertEquals(false, filter.matches(NullPointerException.class));
+        assertEquals(true, filter.matches(IllegalStateException.class));
+        assertEquals(true, filter.matches(IOException.class));
+        assertEquals(true, filter.matches(FileNotFoundException.class));
+        assertEquals(true, filter.matches(ZipException.class));
+        assertEquals(false, filter.matches(UnknownHostException.class));
     }
 
     private static void verifyTransitionElements(final List<Transition> transitionElements) {
