@@ -24,6 +24,8 @@ import org.jberet.job.model.ExceptionClassFilter;
 import org.jberet.job.model.Flow;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobElement;
+import org.jberet.job.model.Partition;
+import org.jberet.job.model.PartitionPlan;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.RefArtifact;
 import org.jberet.job.model.Split;
@@ -36,7 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 /**
- * Tests to verify JSON job definition content is property converted into
+ * Tests to verify JSON job definition content is properly converted into
  * job object.
  *
  * @see JsonJobMapper
@@ -93,52 +95,54 @@ public final class JsonJobMapperTest {
     }
 
     /**
-     * Verifies a job with one chunk-type step.
-     * This one step node is of object type.
+     * Verifies a job with one chunk-type step, which includes a reader, processor, writer
+     * and their properties.
      *
      * @throws Exception
      */
     @Test
-    public void job1() throws Exception {
+    public void simpleChunkStep() throws Exception {
         String json =
                 "{\n" +
-                        "  \"job\": {\n" +
-                        "    \"id\": \"simple\",\n" +
-                        "    \"step\": {\n" +
-                        "      \"id\": \"simple.step1\",\n" +
-                        "      \"chunk\": {\n" +
-                        "        \"reader\": {\n" +
-                        "          \"ref\": \"arrayItemReader\",\n" +
-                        "          \"properties\": {\n" +
-                        "            \"property\": [\n" +
-                        "              {\n" +
-                        "                \"name\": \"resource\",\n" +
-                        "                \"value\": \"[0, 1, 2, 3]\"\n" +
-                        "              },\n" +
-                        "              {\n" +
-                        "                \"name\": \"beanType\",\n" +
-                        "                \"value\": \"java.lang.Integer\"\n" +
-                        "              },\n" +
-                        "              {\n" +
-                        "                \"name\": \"skipBeanValidation\",\n" +
-                        "                \"value\": \"true\"\n" +
-                        "              },\n" +
-                        "              {\n" +
-                        "                \"name\": \"start\",\n" +
-                        "                \"value\": \"5\"\n" +
-                        "              },\n" +
-                        "              {\n" +
-                        "                \"name\": \"end\",\n" +
-                        "                \"value\": \"10\"\n" +
-                        "              }\n" +
-                        "            ]\n" +
-                        "          }\n" +
-                        "        },\n" +
-                        "        \"writer\": { \"ref\": \"mockItemWriter\" }\n" +
-                        "      }\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}";
+                "  \"job\": {\n" +
+                "    \"id\": \"simple\",\n" +
+                "    \"step\": {\n" +
+                "      \"id\": \"simple.step1\",\n" +
+                "      \"chunk\": {\n" +
+                "        \"reader\": {\n" +
+                "          \"ref\": \"arrayItemReader\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": \n" +
+                "              {\n" +
+                "                \"name\": \"RN\",\n" +
+                "                \"value\": \"RV\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"processor\": {\n" +
+                "          \"ref\": \"processor1\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": \n" +
+                "              {\n" +
+                "                \"name\": \"PN\",\n" +
+                "                \"value\": \"PV\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"writer\": {\n" +
+                "          \"ref\": \"mockItemWriter\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": \n" +
+                "              {\n" +
+                "                \"name\": \"WN\",\n" +
+                "                \"value\": \"WV\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
         Job job = JsonJobMapper.toJob(json);
         assertEquals("simple", job.getId());
         assertEquals(true, job.getRestartableBoolean());
@@ -159,7 +163,6 @@ public final class JsonJobMapperTest {
 
         final Chunk chunk = step1.getChunk();
         assertEquals(null, chunk.getCheckpointAlgorithm());
-        assertEquals(null, chunk.getProcessor());
         assertEquals(null, chunk.getNoRollbackExceptionClasses());
         assertEquals(null, chunk.getSkippableExceptionClasses());
         assertEquals(null, chunk.getRetryableExceptionClasses());
@@ -169,15 +172,275 @@ public final class JsonJobMapperTest {
         assertEquals(null, chunk.getSkipLimit());
         assertEquals(null, chunk.getTimeLimit());
 
-        final RefArtifact reader = chunk.getReader();
-        assertEquals("arrayItemReader", reader.getRef());
-        assertEquals(5, reader.getProperties().size());
-        assertEquals("5", reader.getProperties().get("start"));
+        RefArtifact refArtifact = chunk.getReader();
+        assertEquals("arrayItemReader", refArtifact.getRef());
+        assertEquals(1, refArtifact.getProperties().size());
+        assertEquals("RV", refArtifact.getProperties().get("RN"));
 
-        final RefArtifact writer = chunk.getWriter();
-        assertEquals("mockItemWriter", writer.getRef());
-        assertEquals(true, writer.getProperties() == null ||
-                writer.getProperties().size() == 0);
+        refArtifact = chunk.getProcessor();
+        assertEquals("processor1", refArtifact.getRef());
+        assertEquals(1, refArtifact.getProperties().size());
+        assertEquals("PV", refArtifact.getProperties().get("PN"));
+
+        refArtifact = chunk.getWriter();
+        assertEquals("mockItemWriter", refArtifact.getRef());
+        assertEquals(1, refArtifact.getProperties().size());
+        assertEquals("WV", refArtifact.getProperties().get("WN"));
+    }
+
+    /**
+     * Verifies attributes of chunk element.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void chunkAttributes() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"simple\",\n" +
+                "    \"step\": {\n" +
+                "      \"id\": \"step1\",\n" +
+                "      \"chunk\": {\n" +
+                "        \"checkpoint-policy\": \"item\",\n" +
+                "        \"item-count\": 100,\n" +
+                "        \"time-limit\": 600,\n" +
+                "        \"skip-limit\": 10,\n" +
+                "        \"retry-limit\": 20,\n" +
+                "        \"reader\": { \"ref\": \"reader1\" },\n" +
+                "        \"writer\": { \"ref\": \"writer1\" }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        final Step step = (Step) job.getJobElements().get(0);
+        final Chunk chunk = step.getChunk();
+        assertEquals("item", chunk.getCheckpointPolicy());
+        assertEquals(100, chunk.getItemCountInt());
+        assertEquals(600, chunk.getTimeLimitInt());
+        assertEquals(10, chunk.getSkipLimitInt());
+        assertEquals("20", chunk.getRetryLimit());
+        assertEquals("reader1", chunk.getReader().getRef());
+        assertEquals("writer1", chunk.getWriter().getRef());
+    }
+
+    /**
+     * Verifies chunk checkpoint algorithm element and its properties (2 properties).
+     *
+     * @throws Exception
+     */
+    @Test
+    public void chunkCheckpointAlgorithm() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"simple\",\n" +
+                "    \"step\": {\n" +
+                "      \"id\": \"step1\",\n" +
+                "      \"chunk\": {\n" +
+                "        \"checkpoint-policy\": \"custom\",\n" +
+                "        \"reader\": { \"ref\": \"reader1\" },\n" +
+                "        \"writer\": { \"ref\": \"writer1\" },\n" +
+                "        \"checkpoint-algorithm\": {\n" +
+                "          \"ref\": \"checkpointAlgorithm1\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": [\n" +
+                "              {\n" +
+                "                \"name\": \"CHKN1\",\n" +
+                "                \"value\": \"CHKV1\"\n" +
+                "              },\n" +
+                "              {\n" +
+                "                \"name\": \"CHKN2\",\n" +
+                "                \"value\": \"CHKV2\"\n" +
+                "              }\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        final Step step = (Step) job.getJobElements().get(0);
+        final Chunk chunk = step.getChunk();
+        assertEquals("custom", chunk.getCheckpointPolicy());
+        assertEquals("checkpointAlgorithm1", chunk.getCheckpointAlgorithm().getRef());
+        final Properties properties = chunk.getCheckpointAlgorithm().getProperties();
+        assertEquals("CHKV1", properties.get("CHKN1"));
+        assertEquals("CHKV2", properties.get("CHKN2"));
+    }
+
+    /**
+     * Verifies step partition element, including:
+     * <ul>
+     *     <li>partition plan and list of partition plan properties
+     *     <li>collector and its properties
+     *     <li>analyzer and its properties
+     *     <li>reducer and its properties
+     * </ul>
+     *
+     * @throws Exception
+     */
+    @Test
+    public void partitionPlanCollectorAnalyzerReducer() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"simple\",\n" +
+                "    \"step\": {\n" +
+                "      \"id\": \"step1\",\n" +
+                "      \"chunk\": {\n" +
+                "        \"reader\": { \"ref\": \"reader1\" },\n" +
+                "        \"writer\": { \"ref\": \"writer1\" }\n" +
+                "      },\n" +
+                "      \"partition\": {\n" +
+                "          \"plan\": {\n" +
+                "            \"partitions\": 2,\n" +
+                "            \"threads\": 3,\n" +
+                "            \"properties\": [\n" +
+                "              {\n" +
+                "                \"partition\": \"0\",\n" +
+                "                \"property\": [\n" +
+                "                  {\n" +
+                "                    \"name\": \"P1N1\",\n" +
+                "                    \"value\": \"P1V1\"\n" +
+                "                  },\n" +
+                "                  {\n" +
+                "                    \"name\": \"P1N2\",\n" +
+                "                    \"value\": \"P1V2\"\n" +
+                "                  }\n" +
+                "                ]\n" +
+                "              },\n" +
+                "              {\n" +
+                "                \"partition\": \"1\",\n" +
+                "                \"property\": \n" +
+                "                  {\n" +
+                "                    \"name\": \"P2N1\",\n" +
+                "                    \"value\": \"P2V1\"\n" +
+                "                  }\n" +
+                "              }\n" +
+                "            ]\n" +
+                "        },\n" +
+                "        \"collector\": {\n" +
+                "          \"ref\": \"collector1\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": \n" +
+                "              {\n" +
+                "                \"name\": \"CN\",\n" +
+                "                \"value\": \"CV\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"analyzer\": {\n" +
+                "          \"ref\": \"analyzer1\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": \n" +
+                "              {\n" +
+                "                \"name\": \"AN\",\n" +
+                "                \"value\": \"AV\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"reducer\": {\n" +
+                "          \"ref\": \"reducer1\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": \n" +
+                "              {\n" +
+                "                \"name\": \"RN\",\n" +
+                "                \"value\": \"RV\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        final Step step = (Step) job.getJobElements().get(0);
+        final Partition partition = step.getPartition();
+        final PartitionPlan plan = partition.getPlan();
+        assertEquals(2, plan.getPartitionsInt());
+        assertEquals(3, plan.getThreadsInt());
+
+        final List<Properties> propertiesList = plan.getPropertiesList();
+        assertEquals(2, propertiesList.size());
+        Properties properties = propertiesList.get(0);
+        assertEquals(2, properties.size());
+        assertEquals("P1V1", properties.get("P1N1"));
+        assertEquals("P1V2", properties.get("P1N2"));
+
+        properties = propertiesList.get(1);
+        assertEquals(1, properties.size());
+        assertEquals("P2V1", properties.get("P2N1"));
+
+        RefArtifact refArtifact = partition.getCollector();
+        assertEquals("collector1", refArtifact.getRef());
+        assertEquals(1, refArtifact.getProperties().size());
+        assertEquals("CV", refArtifact.getProperties().get("CN"));
+
+        refArtifact = partition.getAnalyzer();
+        assertEquals("analyzer1", refArtifact.getRef());
+        assertEquals(1, refArtifact.getProperties().size());
+        assertEquals("AV", refArtifact.getProperties().get("AN"));
+
+        refArtifact = partition.getReducer();
+        assertEquals("reducer1", refArtifact.getRef());
+        assertEquals(1, refArtifact.getProperties().size());
+        assertEquals("RV", refArtifact.getProperties().get("RN"));
+    }
+
+    /**
+     * Verifies partition mapper
+     * @throws Exception
+     */
+    @Test
+    public void partitionMapper() throws Exception {
+        final String json = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"simple\",\n" +
+                "    \"step\": {\n" +
+                "      \"id\": \"step1\",\n" +
+                "      \"chunk\": {\n" +
+                "        \"reader\": { \"ref\": \"reader1\" },\n" +
+                "        \"writer\": { \"ref\": \"writer1\" }\n" +
+                "      },\n" +
+                "      \"partition\": {\n" +
+                "        \"collector\": {\n" +
+                "          \"ref\": \"collector1\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": \n" +
+                "              {\n" +
+                "                \"name\": \"CN\",\n" +
+                "                \"value\": \"CV\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"mapper\": {\n" +
+                "          \"ref\": \"mapper1\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": \n" +
+                "              {\n" +
+                "                \"name\": \"MN\",\n" +
+                "                \"value\": \"MV\"\n" +
+                "              }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }" +
+                "}";
+        final Job job = JsonJobMapper.toJob(json);
+        final Step step = (Step) job.getJobElements().get(0);
+        final Partition partition = step.getPartition();
+
+        RefArtifact refArtifact = partition.getCollector();
+        assertEquals("collector1", refArtifact.getRef());
+        assertEquals(1, refArtifact.getProperties().size());
+        assertEquals("CV", refArtifact.getProperties().get("CN"));
+
+        refArtifact = partition.getMapper();
+        assertEquals("mapper1", refArtifact.getRef());
+        assertEquals(1, refArtifact.getProperties().size());
+        assertEquals("MV", refArtifact.getProperties().get("MN"));
+
     }
 
     /**
