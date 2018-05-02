@@ -27,6 +27,7 @@ import org.jberet.rest.client.BatchClient;
 import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
+import org.jberet.rest.entity.MetricEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
 import org.jberet.schedule.JobSchedule;
 import org.jberet.schedule.JobScheduleConfig;
@@ -459,5 +460,82 @@ public class RestAPIIT {
         final List<String> featureList = Arrays.asList(features);
         assertEquals(false, featureList.contains(JobScheduler.PERSISTENT));
         assertEquals(false, featureList.contains(JobScheduler.CALENDAR));
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void submit() throws Exception {
+        final String jobAsJson = "{\n" +
+                "  \"job\": {\n" +
+                "    \"id\": \"submitted\",\n" +
+                "    \"step\": {\n" +
+                "      \"id\": \"submitted.step1\",\n" +
+                "      \"chunk\": {\n" +
+                "        \"reader\": {\n" +
+                "          \"ref\": \"arrayItemReader\",\n" +
+                "          \"properties\": {\n" +
+                "            \"property\": [\n" +
+                "              {\n" +
+                "                \"name\": \"resource\",\n" +
+                "                \"value\": \"#{jobParameters['resource']}\"\n" +
+                "              },\n" +
+                "              {\n" +
+                "                \"name\": \"beanType\",\n" +
+                "                \"value\": \"java.lang.Integer\"\n" +
+                "              },\n" +
+                "              {\n" +
+                "                \"name\": \"skipBeanValidation\",\n" +
+                "                \"value\": \"true\"\n" +
+                "              }\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"writer\": { \"ref\": \"mockItemWriter\" }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        final URI uri = batchClient.getJobUriBuilder("submit").build();
+        System.out.printf("uri: %s%n", uri);
+
+        final Properties jobParams = new Properties();
+        jobParams.setProperty("resource", "[10, 11, 12, 13, 14, 15]");
+
+        JobExecutionEntity jobExecutionEntity = batchClient.submitJob(jobAsJson, jobParams);
+        Thread.sleep(500);
+        jobExecutionEntity = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
+        assertEquals(BatchStatus.COMPLETED, jobExecutionEntity.getBatchStatus());
+        assertEquals(BatchStatus.COMPLETED.toString(), jobExecutionEntity.getExitStatus());
+        assertEquals("submitted", jobExecutionEntity.getJobName());
+
+        final StepExecutionEntity[] stepExecutions = batchClient.getStepExecutions(jobExecutionEntity.getExecutionId());
+        assertEquals(1, stepExecutions.length);
+        final StepExecutionEntity stepExecutionEntity = stepExecutions[0];
+        assertEquals("submitted.step1", stepExecutionEntity.getStepName());
+
+        final MetricEntity[] metrics = stepExecutionEntity.getMetrics();
+        for (MetricEntity metricEntity : metrics) {
+            final long value = metricEntity.getValue();
+            switch (metricEntity.getType()) {
+                case READ_COUNT:
+                case WRITE_COUNT:
+                    assertEquals(6, value);
+                    break;
+                case COMMIT_COUNT:
+                    assertEquals(1, value);
+                    break;
+                case FILTER_COUNT:
+                case PROCESS_SKIP_COUNT:
+                case ROLLBACK_COUNT:
+                case READ_SKIP_COUNT:
+                case WRITE_SKIP_COUNT:
+                    assertEquals(0, value);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected metrics type: " + metricEntity.getType());
+            }
+        }
     }
 }
