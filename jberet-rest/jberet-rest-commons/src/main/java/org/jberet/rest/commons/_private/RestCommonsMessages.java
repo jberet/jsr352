@@ -12,7 +12,10 @@
 
 package org.jberet.rest.commons._private;
 
+import javax.batch.operations.BatchRuntimeException;
+
 import org.jboss.logging.Messages;
+import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
 import org.jboss.logging.annotations.ValidIdRange;
@@ -25,5 +28,7 @@ public interface RestCommonsMessages {
     @Message(id = 71000, value = "Expecting JSON element '%s' within '%s'")
     IllegalStateException expectingJsonElement(String name, String... parents);
 
+    @Message(id = 71001, value = "Failed to read batch job definition.")
+    BatchRuntimeException failToReadJobDefinition(@Cause Throwable cause);
 
 }

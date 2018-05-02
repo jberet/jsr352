@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -88,6 +88,20 @@ public class BatchClient {
         final URI uri = getJobUriBuilder("start").resolveTemplate("jobXmlName", jobXmlName).build();
         WebTarget target = target(uri, queryParams);
         return target.request().post(Entity.entity(null, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
+    }
+
+    /**
+     * Starts the job with the JSON job definition and job parameters.
+     * @param jobDefinition JSON job definition content
+     * @param queryParams job parameters
+     * @return the new job execution entity
+     *
+     * @since 1.3.0.Final
+     */
+    public JobExecutionEntity submitJob(final String jobDefinition, final Properties queryParams) {
+        final URI uri = getJobUriBuilder("submit").build();
+        WebTarget target = target(uri, queryParams);
+        return target.request().post(Entity.entity(jobDefinition, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
     }
 
     /**

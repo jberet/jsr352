@@ -12,6 +12,7 @@
 
 package org.jberet.rest.commons.util;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import javax.batch.operations.BatchRuntimeException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,10 +56,17 @@ public final class JsonJobMapper {
      *
      * @param json the JSON string representing the batch job definition
      * @return a {@link Job} converted from {@code json}
+     *
+     * @throws BatchRuntimeException if any errors when reading job definition
      */
-    public static Job toJob(final String json) throws Exception {
+    public static Job toJob(final String json) throws BatchRuntimeException {
         final ObjectMapper objectMapper = new ObjectMapper();
-        final JsonNode jobNode = objectMapper.readTree(json).get(XmlElement.JOB.getLocalName());
+        final JsonNode jobNode;
+        try {
+            jobNode = objectMapper.readTree(json).get(XmlElement.JOB.getLocalName());
+        } catch (IOException e) {
+            throw RestCommonsMessages.MESSAGES.failToReadJobDefinition(e);
+        }
 
         final String jobId = getRequiredTextValue(jobNode, XmlAttribute.ID, XmlElement.JOB);
         JobBuilder jobBuilder = new JobBuilder(jobId);

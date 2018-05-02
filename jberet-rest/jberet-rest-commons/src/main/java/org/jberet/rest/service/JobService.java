@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,6 +31,10 @@ import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
 
+import org.jberet.job.model.Job;
+import org.jberet.operations.AbstractJobOperator;
+import org.jberet.operations.DelegatingJobOperator;
+import org.jberet.rest.commons.util.JsonJobMapper;
 import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
@@ -57,6 +61,32 @@ public final class JobService {
     public JobExecutionEntity start(final String jobXmlName, final Properties jobParameters)
             throws JobStartException, JobSecurityException, NoSuchJobExecutionException {
         long jobExecutionId = jobOperator.start(jobXmlName, jobParameters);
+        return new JobExecutionEntity(jobOperator.getJobExecution(jobExecutionId),
+                jobOperator.getJobInstance(jobExecutionId).getInstanceId());
+    }
+
+    /**
+     * Starts the job with the JSON job definition content.
+     *
+     * @param jobContent the content of the job definition in JSON format
+     * @param jobParameters job parameters
+     * @return the resultant job execution entity
+     * @throws JobStartException
+     * @throws JobSecurityException
+     * @throws NoSuchJobExecutionException
+     *
+     * @since 1.3.0.Final
+     */
+    public JobExecutionEntity submit(final String jobContent, final Properties jobParameters)
+            throws JobStartException, JobSecurityException, NoSuchJobExecutionException {
+        AbstractJobOperator abstractJobOperator;
+        if (jobOperator instanceof DelegatingJobOperator) {
+            abstractJobOperator = ((AbstractJobOperator) ((DelegatingJobOperator) jobOperator).getDelegate());
+        } else {
+            abstractJobOperator = ((AbstractJobOperator) jobOperator);
+        }
+        final Job job = JsonJobMapper.toJob(jobContent);
+        long jobExecutionId = abstractJobOperator.start(job, jobParameters);
         return new JobExecutionEntity(jobOperator.getJobExecution(jobExecutionId),
                 jobOperator.getJobInstance(jobExecutionId).getInstanceId());
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -70,6 +70,35 @@ public class JobResource {
                           final Properties jobParamsAsProps) {
         JobExecutionEntity jobExecutionData = JobService.getInstance()
                 .start(jobXmlName, jobParametersFromUriInfoAndProps(uriInfo, jobParamsAsProps));
+        final URI jobExecutionDataUri = uriInfo.getBaseUriBuilder().path(JobExecutionResource.class).
+                path(String.valueOf(jobExecutionData.getExecutionId())).
+                build();
+        jobExecutionData.setHref(jobExecutionDataUri.toString());
+        return Response.created(jobExecutionDataUri).entity(jobExecutionData).build();
+    }
+
+    /**
+     * Starts a new job execution for the submitted job definition content.
+     * Job parameters are taken from query parameters, obtained from {@code uriInfo}.
+     * When extracting query parameters from {@code uriInfo}, only the first value of
+     * each key is used.
+     *
+     * @param uriInfo {@code javax.ws.rs.core.UriInfo} that contains query parameters and other info
+     * @param jobDefinition the job definition content
+     *
+     * @return {@code javax.ws.rs.core.Response}, which includes response status and newly
+     * started job execution of type {@link JobExecutionEntity}
+     *
+     * @since 1.3.0.Final
+     */
+    @Path("submit")
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response submit(final @Context UriInfo uriInfo,
+                           final String jobDefinition) {
+        JobExecutionEntity jobExecutionData = JobService.getInstance()
+                .submit(jobDefinition, jobParametersFromUriInfoAndProps(uriInfo, null));
         final URI jobExecutionDataUri = uriInfo.getBaseUriBuilder().path(JobExecutionResource.class).
                 path(String.valueOf(jobExecutionData.getExecutionId())).
                 build();
