@@ -59,6 +59,40 @@ public class RestAPIIT {
     private static final String restUrl = "http://localhost:8080/restAPI/api";
     private BatchClient batchClient = new BatchClient(restUrl);
 
+    private final String jobAsJson = "{\n" +
+            "  \"job\": {\n" +
+            "    \"id\": \"submitted\",\n" +
+            "    \"step\": {\n" +
+            "      \"id\": \"submitted.step1\",\n" +
+            "      \"chunk\": {\n" +
+            "        \"reader\": {\n" +
+            "          \"ref\": \"arrayItemReader\",\n" +
+            "          \"properties\": {\n" +
+            "            \"property\": [\n" +
+            "              {\n" +
+            "                \"name\": \"resource\",\n" +
+            "                \"value\": \"#{jobParameters['resource']}\"\n" +
+            "              },\n" +
+            "              {\n" +
+            "                \"name\": \"beanType\",\n" +
+            "                \"value\": \"java.lang.Integer\"\n" +
+            "              },\n" +
+            "              {\n" +
+            "                \"name\": \"skipBeanValidation\",\n" +
+            "                \"value\": \"true\"\n" +
+            "              }\n" +
+            "            ]\n" +
+            "          }\n" +
+            "        },\n" +
+            "        \"writer\": { \"ref\": \"mockItemWriter\" }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+
+    static final String submittedJobResource = "[10, 11, 12, 13, 14, 15]";
+    static final String submittedJobResourceInvalid = "[10, 11, 12, 13, 14, X]";
+
     @Test
     public void start() throws Exception {
         final JobExecutionEntity data = batchClient.startJob(jobName1, null);
@@ -464,48 +498,60 @@ public class RestAPIIT {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Verifies submitting a job definition as JSON to start a job execution.
+     *
+     * @throws Exception
+     *
+     * @since 1.3.0.Final
+     */
     @Test
     public void submit() throws Exception {
-        final String jobAsJson = "{\n" +
-                "  \"job\": {\n" +
-                "    \"id\": \"submitted\",\n" +
-                "    \"step\": {\n" +
-                "      \"id\": \"submitted.step1\",\n" +
-                "      \"chunk\": {\n" +
-                "        \"reader\": {\n" +
-                "          \"ref\": \"arrayItemReader\",\n" +
-                "          \"properties\": {\n" +
-                "            \"property\": [\n" +
-                "              {\n" +
-                "                \"name\": \"resource\",\n" +
-                "                \"value\": \"#{jobParameters['resource']}\"\n" +
-                "              },\n" +
-                "              {\n" +
-                "                \"name\": \"beanType\",\n" +
-                "                \"value\": \"java.lang.Integer\"\n" +
-                "              },\n" +
-                "              {\n" +
-                "                \"name\": \"skipBeanValidation\",\n" +
-                "                \"value\": \"true\"\n" +
-                "              }\n" +
-                "            ]\n" +
-                "          }\n" +
-                "        },\n" +
-                "        \"writer\": { \"ref\": \"mockItemWriter\" }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
 
         final URI uri = batchClient.getJobUriBuilder("submit").build();
         System.out.printf("uri: %s%n", uri);
 
         final Properties jobParams = new Properties();
-        jobParams.setProperty("resource", "[10, 11, 12, 13, 14, 15]");
+        jobParams.setProperty("resource", submittedJobResource);
 
         JobExecutionEntity jobExecutionEntity = batchClient.submitJob(jobAsJson, jobParams);
         Thread.sleep(500);
         jobExecutionEntity = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
+        verifySubmittedJobExecution(jobExecutionEntity);
+    }
+
+    /**
+     * This test submits a JSON job definition with incorrect configuration, expecting
+     * the job execution to fail, and restart the failed job execution.  The restarted
+     * job execution should complete successfully.
+     *
+     * @throws Exception
+
+     * @since 1.3.0.Final
+     */
+    @Test
+    public void submitFailRestart() throws Exception {
+        final URI uri = batchClient.getJobUriBuilder("submit").build();
+        System.out.printf("uri: %s%n", uri);
+
+        Properties jobParams = new Properties();
+        jobParams.setProperty("resource", submittedJobResourceInvalid);
+
+        JobExecutionEntity jobExecutionEntity = batchClient.submitJob(jobAsJson, jobParams);
+        Thread.sleep(500);
+        jobExecutionEntity = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
+        assertEquals("submitted", jobExecutionEntity.getJobName());
+        assertEquals(BatchStatus.FAILED, jobExecutionEntity.getBatchStatus());
+
+        jobParams = new Properties();
+        jobParams.setProperty("resource", submittedJobResource);
+        jobExecutionEntity = batchClient.restartJobExecution(jobExecutionEntity.getExecutionId(), jobParams);
+        Thread.sleep(500);
+        jobExecutionEntity = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
+        verifySubmittedJobExecution(jobExecutionEntity);
+    }
+
+    private void verifySubmittedJobExecution(final JobExecutionEntity jobExecutionEntity) {
         assertEquals(BatchStatus.COMPLETED, jobExecutionEntity.getBatchStatus());
         assertEquals(BatchStatus.COMPLETED.toString(), jobExecutionEntity.getExitStatus());
         assertEquals("submitted", jobExecutionEntity.getJobName());
