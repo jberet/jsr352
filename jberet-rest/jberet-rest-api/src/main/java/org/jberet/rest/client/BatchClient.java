@@ -119,6 +119,31 @@ public class BatchClient {
     }
 
     /**
+     * Restarts the job execution specified by the job execution id, job parameters, and
+     * optional JSON job definition.
+     * If the JSON job definition is specified, it will be used as the job definition to
+     * restart the job execution; otherwise, the job definition associated with
+     * {@code jobExecutionId} will be used to restart. In some cases, that previous
+     * job definition is not available due to long period of inactivity, or server restart,
+     * and in these cases, {@code jobDefinition} must be specified.
+     *
+     * @param jobDefinition JSON job definition content, may be null
+     * @param jobExecutionId job execution id
+     * @param queryParams job parameters
+     * @return the new job execution entity
+     * @throws Exception if errors occur
+     *
+     * @since 1.3.0.Final
+     */
+    public JobExecutionEntity resubmitJobExecution(final String jobDefinition,
+                                                final long jobExecutionId,
+                                                final Properties queryParams) throws Exception {
+        final URI uri = getJobExecutionUriBuilder("resubmit").resolveTemplate("jobExecutionId", jobExecutionId).build();
+        WebTarget target = target(uri, queryParams);
+        return target.request().post(Entity.entity(jobDefinition, MediaType.APPLICATION_JSON_TYPE), JobExecutionEntity.class);
+    }
+
+    /**
      * Stops the job execution specified by the job execution id.
      *
      * @param jobExecutionId job execution id

@@ -155,6 +155,40 @@ public class JobExecutionResource {
         return jobExecutionEntity;
     }
 
+    /**
+     * Restarts a job execution with job execution id, and optional JSON job definition content.
+     * <p>
+     * Job parameters are specified as query parameters, obtained from {@code uriInfo}.
+     * When extracting query parameters from {@code uriInfo}, only the first value of
+     * each key is used.
+     * <p>
+     * Job parameters in the previous job execution that is to be restarted will continue
+     * to be used in the restart job execution. Job parameters (as query parameters)
+     * in the current invocation will complement and override any same-keyed job parameters.
+     *
+     * @param jobExecutionId a previous job execution id
+     * @param uriInfo {@code javax.ws.rs.core.UriInfo} including additional restart parameters and other info
+     * @param jobDefinition JSON job definition content
+     *
+     * @return the new restart job execution
+     *
+     * @see JobExecutionResource#restart(long, javax.ws.rs.core.UriInfo, java.util.Properties)
+     * @see JobResource#restart(String, UriInfo, Properties)
+     * @see JobResource#submit(javax.ws.rs.core.UriInfo, java.lang.String)
+     *
+     * @since 1.3.0.Final
+     */
+    @Path("{jobExecutionId}/resubmit")
+    @POST
+    public JobExecutionEntity resubmit(final @PathParam("jobExecutionId") long jobExecutionId,
+                                      final @Context UriInfo uriInfo,
+                                      final String jobDefinition) {
+        final JobExecutionEntity jobExecutionEntity = JobService.getInstance().resubmit(jobDefinition,
+                jobExecutionId, JobResource.jobParametersFromUriInfoAndProps(uriInfo, null));
+        setJobExecutionEntityHref(uriInfo, jobExecutionEntity);
+        return jobExecutionEntity;
+    }
+
     @Path("{jobExecutionId}/schedule")
     @POST
     public JobSchedule schedule(final JobScheduleConfig scheduleConfig) {

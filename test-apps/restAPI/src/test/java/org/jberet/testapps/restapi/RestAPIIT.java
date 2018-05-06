@@ -543,9 +543,15 @@ public class RestAPIIT {
         assertEquals("submitted", jobExecutionEntity.getJobName());
         assertEquals(BatchStatus.FAILED, jobExecutionEntity.getBatchStatus());
 
+        //Optional: restart WildFly or EAP to clear out any in-memory cached jobs, and
+        //to verify the resubmitted job takes effect.
+        //If restarting happens without restarting, there is no need to pass job definition
+        //when calling resubmitJobExecution (pass null works)
+        Thread.sleep(1000 * 60);
+
         jobParams = new Properties();
         jobParams.setProperty("resource", submittedJobResource);
-        jobExecutionEntity = batchClient.restartJobExecution(jobExecutionEntity.getExecutionId(), jobParams);
+        jobExecutionEntity = batchClient.resubmitJobExecution(jobAsJson, jobExecutionEntity.getExecutionId(), jobParams);
         Thread.sleep(500);
         jobExecutionEntity = batchClient.getJobExecution(jobExecutionEntity.getExecutionId());
         verifySubmittedJobExecution(jobExecutionEntity);

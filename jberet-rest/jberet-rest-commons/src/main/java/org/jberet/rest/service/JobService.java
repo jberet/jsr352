@@ -39,6 +39,7 @@ import org.jberet.rest.entity.JobEntity;
 import org.jberet.rest.entity.JobExecutionEntity;
 import org.jberet.rest.entity.JobInstanceEntity;
 import org.jberet.rest.entity.StepExecutionEntity;
+import org.jberet.runtime.JobInstanceImpl;
 
 /**
  * Facade class to {@code JobOperator} interface.
@@ -79,12 +80,7 @@ public final class JobService {
      */
     public JobExecutionEntity submit(final String jobContent, final Properties jobParameters)
             throws JobStartException, JobSecurityException, NoSuchJobExecutionException {
-        AbstractJobOperator abstractJobOperator;
-        if (jobOperator instanceof DelegatingJobOperator) {
-            abstractJobOperator = ((AbstractJobOperator) ((DelegatingJobOperator) jobOperator).getDelegate());
-        } else {
-            abstractJobOperator = ((AbstractJobOperator) jobOperator);
-        }
+        final AbstractJobOperator abstractJobOperator = unwrapJobOperator();
         final Job job = JsonJobMapper.toJob(jobContent);
         long jobExecutionId = abstractJobOperator.start(job, jobParameters);
         return new JobExecutionEntity(jobOperator.getJobExecution(jobExecutionId),
@@ -174,6 +170,37 @@ public final class JobService {
                 jobOperator.getJobInstance(restartExecutionId).getInstanceId());
     }
 
+    /**
+     * Restart a job execution while resubmitting JSON job definition content.
+     *
+     * @param jobDefinition JSON job definition content
+     * @param jobExecutionId job execution id to restart
+     * @param restartParameters restart job parameters
+     * @return the restart job execution entity
+     * @throws JobExecutionAlreadyCompleteException
+     * @throws NoSuchJobExecutionException
+     * @throws JobExecutionNotMostRecentException
+     * @throws JobRestartException
+     * @throws JobSecurityException
+     *
+     * @since 1.3.0.Final
+     */
+    public JobExecutionEntity resubmit(final String jobDefinition, final long jobExecutionId,
+                                       final Properties restartParameters)
+            throws JobExecutionAlreadyCompleteException, NoSuchJobExecutionException, JobExecutionNotMostRecentException,
+            JobRestartException, JobSecurityException {
+        if (jobDefinition != null && jobDefinition.length() > 60) {
+            final Job job = JsonJobMapper.toJob(jobDefinition);
+            final AbstractJobOperator abstractJobOperator = unwrapJobOperator();
+            final JobInstanceImpl jobInstance = ((JobInstanceImpl) abstractJobOperator.getJobInstance(jobExecutionId));
+            jobInstance.setUnsubstitutedJob(job);
+        }
+
+        final long restartExecutionId = jobOperator.restart(jobExecutionId, restartParameters);
+        return new JobExecutionEntity(jobOperator.getJobExecution(restartExecutionId),
+                jobOperator.getJobInstance(restartExecutionId).getInstanceId());
+    }
+
     public JobExecutionEntity[] getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
         final List<Long> executionIds = jobOperator.getRunningExecutions(jobName);
         final int len = executionIds.size();
@@ -198,4 +225,13 @@ public final class JobService {
         return stepExecutionData;
     }
 
+    private AbstractJobOperator unwrapJobOperator() {
+        AbstractJobOperator abstractJobOperator;
+        if (jobOperator instanceof DelegatingJobOperator) {
+            abstractJobOperator = ((AbstractJobOperator) ((DelegatingJobOperator) jobOperator).getDelegate());
+        } else {
+            abstractJobOperator = ((AbstractJobOperator) jobOperator);
+        }
+        return abstractJobOperator;
+    }
 }
