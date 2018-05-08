@@ -120,6 +120,7 @@
         <!-- Modularized JDK support (various workarounds) - activated via profile -->
         <modular.jdk.args/>
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
+        <automatic.module.name>${project.groupId}.${project.artifactId}</automatic.module.name>
     </properties>
 
     <modules>
@@ -230,6 +231,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
                     <excludes>
                         <!-- Exclude i18n properties files -->
                         <exclude>**/*.i18n.properties</exclude>
