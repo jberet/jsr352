@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -51,7 +51,7 @@ public final class JsonItemReaderTest {
     static final String movieJson = "movies-2012.json";
     static final String movieJsonUnknownProperty = "movies-2012-unknown-properties.json";
     static final String widgetJson = "widget.json";
-    static final String githubJson = "https://api.github.com/users/chengfang/repos";
+    static final String githubJson = "github-repos-data.json";
 
     static final String widgetExpect1 = "\"widget\", \"debug\", \"window\", \"title\", " +
             "\"Sample Konfabulator Widget\", \"name\", \"main_window\", \"width\"," +
