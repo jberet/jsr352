@@ -122,7 +122,7 @@
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
         <automatic.module.name>${project.groupId}.${project.artifactId}</automatic.module.name>
     </properties>
-
+    <!-- Simple comment to test CI PR runs -->
     <modules>
         <module>jberet-core</module>
         <module>jberet-se</module>
