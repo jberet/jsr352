@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -268,60 +268,62 @@ public class PurgeBatchlet implements Batchlet {
         final JobContextImpl jobContextImpl = (JobContextImpl) jobContext;
         final JobRepository jobRepository = jobContextImpl.getJobRepository();
 
-        if (purgeJobsByNames != null && !purgeJobsByNames.isEmpty()) {
-            final boolean purgeAll = purgeJobsByNames.size() == 1 && purgeJobsByNames.contains("*");
-            final String currentJobName = jobContext.getJobName();
-            for (final String n : jobRepository.getJobNames()) {
-                //do not remove the current running job if purgeJobsByNames = "*"
-                if (purgeJobsByNames.contains(n) ||
-                        (purgeAll && !currentJobName.equals(n))) {
-                    jobRepository.removeJob(n);
+        synchronized (PurgeBatchlet.class) {
+            if (purgeJobsByNames != null && !purgeJobsByNames.isEmpty()) {
+                final boolean purgeAll = purgeJobsByNames.size() == 1 && purgeJobsByNames.contains("*");
+                final String currentJobName = jobContext.getJobName();
+                for (final String n : jobRepository.getJobNames()) {
+                    //do not remove the current running job if purgeJobsByNames = "*"
+                    if (purgeJobsByNames.contains(n) ||
+                            (purgeAll && !currentJobName.equals(n))) {
+                        jobRepository.removeJob(n);
+                    }
+                }
+            } else {
+                final JobExecutionSelector selector;
+                if (jobExecutionSelector != null) { //use the custom selector configured by the application
+                    selector = (JobExecutionSelector) jobExecutionSelector.newInstance();
+                } else {
+                    final DefaultJobExecutionSelector selector1 = new DefaultJobExecutionSelector(keepRunningJobExecutions);
+                    selector1.jobExecutionIds = jobExecutionIds;
+                    selector1.numberOfRecentJobExecutionsToExclude = numberOfRecentJobExecutionsToKeep;
+                    selector1.jobExecutionIdFrom = jobExecutionIdFrom;
+                    selector1.jobExecutionIdTo = jobExecutionIdTo;
+                    selector1.withinPastMinutes = withinPastMinutes;
+                    selector1.jobExecutionEndTimeFrom = jobExecutionEndTimeFrom;
+                    selector1.jobExecutionEndTimeTo = jobExecutionEndTimeTo;
+                    selector1.batchStatuses = batchStatuses;
+                    selector1.exitStatuses = exitStatuses;
+                    selector1.jobExecutionsByJobNames = jobExecutionsByJobNames;
+                    selector = selector1;
+                }
+                selector.setJobContext(jobContext);
+                selector.setStepContext(stepContext);
+                jobRepository.removeJobExecutions(selector);
+            }
+
+            if (sql != null) {
+                sql = sql.trim();
+                if (sql.isEmpty()) {
+                    sql = null;
                 }
             }
-        } else {
-            final JobExecutionSelector selector;
-            if (jobExecutionSelector != null) { //use the custom selector configured by the application
-                selector = (JobExecutionSelector) jobExecutionSelector.newInstance();
-            } else {
-                final DefaultJobExecutionSelector selector1 = new DefaultJobExecutionSelector(keepRunningJobExecutions);
-                selector1.jobExecutionIds = jobExecutionIds;
-                selector1.numberOfRecentJobExecutionsToExclude = numberOfRecentJobExecutionsToKeep;
-                selector1.jobExecutionIdFrom = jobExecutionIdFrom;
-                selector1.jobExecutionIdTo = jobExecutionIdTo;
-                selector1.withinPastMinutes = withinPastMinutes;
-                selector1.jobExecutionEndTimeFrom = jobExecutionEndTimeFrom;
-                selector1.jobExecutionEndTimeTo = jobExecutionEndTimeTo;
-                selector1.batchStatuses = batchStatuses;
-                selector1.exitStatuses = exitStatuses;
-                selector1.jobExecutionsByJobNames = jobExecutionsByJobNames;
-                selector = selector1;
+            if (sqlFile != null) {
+                sqlFile = sqlFile.trim();
+                if (sqlFile.isEmpty()) {
+                    sqlFile = null;
+                }
             }
-            selector.setJobContext(jobContext);
-            selector.setStepContext(stepContext);
-            jobRepository.removeJobExecutions(selector);
-        }
+            if (sql != null || sqlFile != null) {
+                final JdbcRepository jdbcRepository = getJdbcRepository(jobRepository);
+                if (jdbcRepository != null) {
+                    jdbcRepository.executeStatements(sql, sqlFile);
+                }
+            }
 
-        if (sql != null) {
-            sql = sql.trim();
-            if (sql.isEmpty()) {
-                sql = null;
+            if (mongoRemoveQueries != null && jobRepository instanceof MongoRepository) {
+                ((MongoRepository) jobRepository).executeRemoveQueries(mongoRemoveQueries);
             }
-        }
-        if (sqlFile != null) {
-            sqlFile = sqlFile.trim();
-            if (sqlFile.isEmpty()) {
-                sqlFile = null;
-            }
-        }
-        if (sql != null || sqlFile != null) {
-            final JdbcRepository jdbcRepository = getJdbcRepository(jobRepository);
-            if (jdbcRepository != null) {
-                jdbcRepository.executeStatements(sql, sqlFile);
-            }
-        }
-
-        if (mongoRemoveQueries != null && jobRepository instanceof MongoRepository) {
-            ((MongoRepository) jobRepository).executeRemoveQueries(mongoRemoveQueries);
         }
 
         return null;
