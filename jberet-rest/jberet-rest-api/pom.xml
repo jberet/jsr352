@@ -20,7 +20,7 @@
     <parent>
         <artifactId>jberet-rest</artifactId>
         <groupId>org.jberet</groupId>
-        <version>1.3.0.Final</version>
+        <version>1.4.0.Alpha-SNAPSHOT</version>
     </parent>
 
     <artifactId>jberet-rest-api</artifactId>
