@@ -503,7 +503,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     @Override
     public JobExecutionImpl getJobExecution(final long jobExecutionId) {
         JobExecutionImpl result = super.getJobExecution(jobExecutionId);
-        if (result != null) {
+        if (result != null && !isExecutionStale(result)) {
             return result;
         }
         final String select = sqls.getProperty(SELECT_JOB_EXECUTION);
@@ -517,8 +517,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             while (rs.next()) {
                 final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(jobExecutionId);
                 result = (ref != null) ? ref.get() : null;
+                final long jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
                 if (result == null) {
-                    final long jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
                     result = new JobExecutionImpl(getJobInstance(jobInstanceId),
                             jobExecutionId,
                             BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS)),
@@ -531,6 +531,22 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                             rs.getString(TableColumns.RESTARTPOSITION));
                     jobExecutions.put(jobExecutionId,
                             new SoftReference<JobExecutionImpl, Long>(result, jobExecutionReferenceQueue, jobExecutionId));
+                } else {
+                    if (result.getEndTime() == null && rs.getTimestamp(TableColumns.ENDTIME) != null) {
+                        final Properties jobParameters1 = BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS));
+                        result = new JobExecutionImpl(getJobInstance(jobInstanceId),
+                              jobExecutionId,
+                              BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS)),
+                              rs.getTimestamp(TableColumns.CREATETIME),
+                              rs.getTimestamp(TableColumns.STARTTIME),
+                              rs.getTimestamp(TableColumns.ENDTIME),
+                              rs.getTimestamp(TableColumns.LASTUPDATEDTIME),
+                              rs.getString(TableColumns.BATCHSTATUS),
+                              rs.getString(TableColumns.EXITSTATUS),
+                              rs.getString(TableColumns.RESTARTPOSITION));
+                        jobExecutions.replace(jobExecutionId,
+                                new SoftReference<JobExecutionImpl, Long>(result, jobExecutionReferenceQueue, jobExecutionId));
+                    }
                 }
                 break;
             }
@@ -553,10 +569,10 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             jobInstanceId = jobInstance.getInstanceId();
         }
 
+        final List<JobExecution> result = new ArrayList<JobExecution>();
         final Connection connection = getConnection();
         ResultSet rs = null;
         PreparedStatement preparedStatement = null;
-        final List<JobExecution> result = new ArrayList<JobExecution>();
         try {
             preparedStatement = connection.prepareStatement(select);
             if (jobInstance != null) {
@@ -564,8 +580,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             }
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
-                final long i = rs.getLong(TableColumns.JOBEXECUTIONID);
-                final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(i);
+                final long executionId = rs.getLong(TableColumns.JOBEXECUTIONID);
+                final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(executionId);
                 JobExecutionImpl jobExecution1 = (ref != null) ? ref.get() : null;
                 if (jobExecution1 == null) {
                     if (jobInstance == null) {
@@ -573,14 +589,26 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                     }
                     final Properties jobParameters1 = BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS));
                     jobExecution1 =
-                            new JobExecutionImpl(getJobInstance(jobInstanceId), i, jobParameters1,
+                            new JobExecutionImpl(getJobInstance(jobInstanceId), executionId, jobParameters1,
                                     rs.getTimestamp(TableColumns.CREATETIME), rs.getTimestamp(TableColumns.STARTTIME),
                                     rs.getTimestamp(TableColumns.ENDTIME), rs.getTimestamp(TableColumns.LASTUPDATEDTIME),
                                     rs.getString(TableColumns.BATCHSTATUS), rs.getString(TableColumns.EXITSTATUS),
                                     rs.getString(TableColumns.RESTARTPOSITION));
 
-                    jobExecutions.put(i,
-                            new SoftReference<JobExecutionImpl, Long>(jobExecution1, jobExecutionReferenceQueue, i));
+                    jobExecutions.put(executionId,
+                            new SoftReference<JobExecutionImpl, Long>(jobExecution1, jobExecutionReferenceQueue, executionId));
+                } else {
+                    if (jobExecution1.getEndTime() == null && rs.getTimestamp(TableColumns.ENDTIME) != null) {
+                        final Properties jobParameters1 = BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS));
+                        jobExecution1 =
+                                new JobExecutionImpl(getJobInstance(jobInstanceId), executionId, jobParameters1,
+                                      rs.getTimestamp(TableColumns.CREATETIME), rs.getTimestamp(TableColumns.STARTTIME),
+                                      rs.getTimestamp(TableColumns.ENDTIME), rs.getTimestamp(TableColumns.LASTUPDATEDTIME),
+                                      rs.getString(TableColumns.BATCHSTATUS), rs.getString(TableColumns.EXITSTATUS),
+                                      rs.getString(TableColumns.RESTARTPOSITION));
+                        jobExecutions.replace(executionId,
+                                new SoftReference<JobExecutionImpl, Long>(jobExecution1, jobExecutionReferenceQueue, executionId));
+                    }
                 }
                 // jobExecution1 is either got from the cache, or created, now add it to the result list
                 result.add(jobExecution1);
@@ -591,6 +619,18 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             close(connection, preparedStatement, null, rs);
         }
         return result;
+    }
+
+    private boolean isExecutionStale(final JobExecutionImpl jobExecution) {
+        final BatchStatus jobStatus = jobExecution.getBatchStatus();
+        if (jobStatus.equals(BatchStatus.COMPLETED) ||
+            jobStatus.equals(BatchStatus.FAILED) ||
+            jobStatus.equals(BatchStatus.STOPPED) ||
+            jobStatus.equals(BatchStatus.ABANDONED) || jobExecution.getStepExecutions().size() >= 1) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
