@@ -92,7 +92,7 @@
 
         <version.net.sf.jasperreports>6.1.0</version.net.sf.jasperreports>
 
-        <version.org.renjin.renjin-script-engine>0.7.0-RC8-SNAPSHOT</version.org.renjin.renjin-script-engine>
+        <version.org.renjin.renjin-script-engine>0.8.2524</version.org.renjin.renjin-script-engine>
 
         <!-- Other properties -->
         <redirectTestOutput>false</redirectTestOutput>
