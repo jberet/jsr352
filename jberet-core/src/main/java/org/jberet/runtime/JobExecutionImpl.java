@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -135,12 +135,14 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     //It's possible the (fast) job is already terminated and the latch nulled when this method is called
     public void awaitTermination(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
-        if (jobTerminationLatch != null) {
+        try {
             if (timeout <= 0) {
                 jobTerminationLatch.await();
             } else {
                 jobTerminationLatch.await(timeout, timeUnit);
             }
+        } catch (NullPointerException npe) {
+            //ignore, as the job execution has terminated.
         }
     }
 
