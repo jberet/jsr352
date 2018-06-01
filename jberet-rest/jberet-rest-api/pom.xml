@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2015-2017 Red Hat, Inc. and/or its affiliates.
+ Copyright (c) 2015-2018 Red Hat, Inc. and/or its affiliates.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
@@ -68,7 +68,7 @@
                         </executions>
                         <configuration>
                             <license>
-                                cHJvamVjdHxvcmcuamJlcmV0LmpiZXJldC1yZXN0LWFwaXwyMDE4LTAyLTE2fHRydWV8LTEjTUMwQ0ZBR1dJc0ZtZGlFc3J3OGhlQXdFRXBmTkJPVkNBaFVBaFE2ekVZM2pLdm9YSkFjM2VQYjNCQ2xNaVh3PQ==
+                                cHJvamVjdHxvcmcuamJlcmV0LmpiZXJldC1yZXN0LWFwaXwyMDIxLTA1LTMwfHRydWV8LTEjTUN3Q0ZFQmNOVExBd1c5azJIOUI1LzhmUUN5K244VWdBaFFzVXZLZDBCRXVrbW1UTDRjQUdoY2FiQ2ZINHc9PQ==
                             </license>
                             <output>
                                 <title>JBeret REST API ${project.version}</title>
