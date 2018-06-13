@@ -13,7 +13,8 @@
  ```
  
 ## Sample Applications
-
+* [restAPI](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples/restAPI)
+    * tests and shows how to use JBeret REST API to access and manage batch job data.
 * [restWriter](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples/restWriter)
     * uses `restItemWriter` to write batch data to destination resource via REST API.
     * uses `csvItemReader` to read data from online resource (movies-2012).

@@ -38,6 +38,7 @@
         <module>csv2mongoLookup</module>
         <module>excelstream2csv</module>
         <module>deserialization</module>
+        <module>restAPI</module>
         <module>restReader</module>
         <module>restWriter</module>
         <module>scheduleExecutor</module>
