@@ -47,8 +47,8 @@ The following is a list of reusable components in `jberet-support`:
     * [JmsItemWriter](https://github.com/jberet/jsr352/blob/master/jberet-support/src/main/java/org/jberet/support/io/JmsItemWriter.java)
     * [KafkaItemReader](https://github.com/jberet/jsr352/blob/master/jberet-support/src/main/java/org/jberet/support/io/KafkaItemReader.java)
     * [KafkaItemWriter](https://github.com/jberet/jsr352/blob/master/jberet-support/src/main/java/org/jberet/support/io/KafkaItemWriter.java)
-    * [HornetQItemReader](https://github.com/jberet/jsr352/blob/master/jberet-support/src/main/java/org/jberet/support/io/HornetQItemReader.java)
-    * [HornetQItemWriter](https://github.com/jberet/jsr352/blob/master/jberet-support/src/main/java/org/jberet/support/io/HornetQItemWriter.java)
+    * [ArtemisItemReader](https://github.com/jberet/jsr352/blob/master/jberet-support/src/main/java/org/jberet/support/io/ArtemisItemReader.java)
+    * [ArtemisItemWriter](https://github.com/jberet/jsr352/blob/master/jberet-support/src/main/java/org/jberet/support/io/ArtemisItemWriter.java)
     
 * JSON
     * [JsonItemReader](https://github.com/jberet/jsr352/blob/master/jberet-support/src/main/java/org/jberet/support/io/JsonItemReader.java)
