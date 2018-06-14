@@ -15,95 +15,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <artifactId>test-apps</artifactId>
-        <groupId>org.jberet.test-apps</groupId>
+        <artifactId>wildfly-jberet-samples</artifactId>
+        <groupId>org.jberet.samples</groupId>
         <version>1.4.0.Alpha-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
     <artifactId>restAPI</artifactId>
     <packaging>war</packaging>
     <name>restAPI Maven Webapp</name>
 
-    <properties>
-        <version.maven.wildfly.plugin>1.0.2.Final</version.maven.wildfly.plugin>
-        <version.org.jboss.resteasy>3.0.12.Final</version.org.jboss.resteasy>
-    </properties>
-
     <dependencies>
-        <dependency>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.jboss.spec.javax.ejb</groupId>
             <artifactId>jboss-ejb-api_3.2_spec</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.jberet</groupId>
-            <artifactId>jberet-rest-api</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jberet</groupId>
-            <artifactId>jberet-rest-commons</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-support</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jberet</groupId>
-            <artifactId>jberet-schedule-executor</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jberet</groupId>
-            <artifactId>jberet-core</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jberet</groupId>
-            <artifactId>jberet-se</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-client</artifactId>
-            <version>${version.org.jboss.resteasy}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
-            <version>${version.org.jboss.resteasy}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jberet.test-apps</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- add resteasy-jaxb-provider to test client to support receiving XML content type

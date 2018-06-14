@@ -44,14 +44,11 @@ import static org.junit.Assert.assertEquals;
  * ({@code restAPI.war}) deployed to WildFly or JBoss EAP 7.
  */
 public class RestAPIIT {
-    private static final String jobName1 = "restJob1";
-    private static final String jobName2 = "restJob2";
     private static final String jobWithParams = "restJobWithParams";
     private static final String jobNameBad = "xxxxxxx";
 
     private static final int initialDelayMinute = 1;
     private static final int intervalMinute = 1;
-    private static final int delaylMinute = 1;
     private static final long sleepTimeMillis = initialDelayMinute * 60 * 1000 + 1000;
 
     // context-path: use war file base name as the default context root
@@ -95,14 +92,15 @@ public class RestAPIIT {
 
     @Test
     public void start() throws Exception {
-        final JobExecutionEntity data = batchClient.startJob(jobName1, null);
+        final JobExecutionEntity data = batchClient.startJob(jobWithParams, null);
         System.out.printf("Response entity: %s%n", data);
         Assert.assertNotNull(data.getCreateTime());
     }
 
     @Test
     public void startWithJobParams() throws Exception {
-        final URI uri = batchClient.getJobUriBuilder("start").resolveTemplate("jobXmlName", jobName2).build();
+        final URI uri = batchClient.getJobUriBuilder("start").
+                resolveTemplate("jobXmlName", jobWithParams).build();
         final WebTarget target = batchClient.target(uri)
                 .queryParam("jobParam1", "jobParam1 value")
                 .queryParam("jobParam2", "jobParam2 value");
@@ -120,7 +118,8 @@ public class RestAPIIT {
         jobParams.setProperty("jobParam1", "jobParam1 value");
         jobParams.setProperty("jobParam2", "jobParam2 value");
 
-        final URI uri = batchClient.getJobUriBuilder("start").resolveTemplate("jobXmlName", jobName2).build();
+        final URI uri = batchClient.getJobUriBuilder("start").
+                resolveTemplate("jobXmlName", jobWithParams).build();
         final WebTarget target = batchClient.target(uri);
         System.out.printf("uri: %s%n", uri);
         final Response response = target.request().post(Entity.entity(jobParams, MediaType.APPLICATION_JSON_TYPE));
@@ -147,7 +146,7 @@ public class RestAPIIT {
 
     @Test
     public void getJobNames() throws Exception {
-        batchClient.startJob(jobName1, null);
+        batchClient.startJob(jobWithParams, null);
 
         final URI uri = batchClient.getJobUriBuilder(null).build();
         final WebTarget target = batchClient.target(uri);
@@ -158,7 +157,7 @@ public class RestAPIIT {
 
         boolean foundJobName1 = false;
         for (final JobEntity e : response) {
-            if (jobName1.equals(e.getJobName()) && (e.getNumberOfJobInstances() > 0)) {
+            if (jobWithParams.equals(e.getJobName()) && (e.getNumberOfJobInstances() > 0)) {
                 foundJobName1 = true;
             }
         }
@@ -169,7 +168,7 @@ public class RestAPIIT {
 
     @Test
     public void getJobInstances() throws Exception {
-        final JobExecutionEntity jobExecutionData = batchClient.startJob(jobName1, null);// to have at least 1 job instance
+        final JobExecutionEntity jobExecutionData = batchClient.startJob(jobWithParams, null);// to have at least 1 job instance
         final URI uri = batchClient.getJobInstanceUriBuilder(null).build();
         final WebTarget target = batchClient.target(uri)
                 .queryParam("jobName", jobExecutionData.getJobName())
@@ -182,14 +181,14 @@ public class RestAPIIT {
 
         //all JobInstanceEntity data may be too long, so just display its length
         System.out.printf("Got JobInstanceData[]: %s items%n", data.length);
-        assertEquals(jobName1, data[0].getJobName());
+        assertEquals(jobWithParams, data[0].getJobName());
     }
 
     @Test
     public void getJobInstanceCount() throws Exception {
-        batchClient.startJob(jobName1, null);  // to have at least 1 job instance
+        batchClient.startJob(jobWithParams, null);  // to have at least 1 job instance
         final URI uri = batchClient.getJobInstanceUriBuilder("getJobInstanceCount").build();
-        final WebTarget target = batchClient.target(uri).queryParam("jobName", jobName1);
+        final WebTarget target = batchClient.target(uri).queryParam("jobName", jobWithParams);
         System.out.printf("uri: %s%n", uri);
         final Integer count = target.request().get(int.class);
 
@@ -218,14 +217,14 @@ public class RestAPIIT {
 
     @Test
     public void getJobInstance() throws Exception {
-        final JobExecutionEntity jobExecutionData = batchClient.startJob(jobName1, null);// to have at least 1 job instance
+        final JobExecutionEntity jobExecutionData = batchClient.startJob(jobWithParams, null);// to have at least 1 job instance
         final URI uri = batchClient.getJobInstanceUriBuilder(null).build();
         final WebTarget target = batchClient.target(uri).queryParam("jobExecutionId", jobExecutionData.getExecutionId());
         System.out.printf("uri: %s%n", uri);
         final JobInstanceEntity data = target.request().get(JobInstanceEntity.class);
 
         System.out.printf("Got JobInstanceData: %s%n", data);
-        assertEquals(jobName1, data.getJobName());
+        assertEquals(jobWithParams, data.getJobName());
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,14 +232,14 @@ public class RestAPIIT {
 
     @Test
     public void getJobExecution() throws Exception {
-        final JobExecutionEntity jobExecutionData = batchClient.startJob(jobName1, null);
+        final JobExecutionEntity jobExecutionData = batchClient.startJob(jobWithParams, null);
         final URI uri = batchClient.getJobExecutionUriBuilder(null).path(String.valueOf(jobExecutionData.getExecutionId())).build();
         System.out.printf("uri: %s%n", uri);
         final WebTarget target = batchClient.target(uri);
         final JobExecutionEntity data = target.request().get(JobExecutionEntity.class);
 
         System.out.printf("Got JobExecutionData: %s%n", data);
-        assertEquals(jobName1, data.getJobName());
+        assertEquals(jobWithParams, data.getJobName());
     }
 
     @Test
@@ -405,7 +404,7 @@ public class RestAPIIT {
     @Test
     public void scheduleSingleAction() throws Exception {
         final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
-                .jobName(jobName1)
+                .jobName(jobWithParams)
                 .initialDelay(initialDelayMinute)
                 .build();
 
@@ -431,7 +430,7 @@ public class RestAPIIT {
     @Test
     public void scheduleSingleActionXml() throws Exception {
         final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
-                .jobName(jobName1)
+                .jobName(jobWithParams)
                 .initialDelay(initialDelayMinute)
                 .build();
 
@@ -464,7 +463,7 @@ public class RestAPIIT {
     @Test
     public void scheduleInterval() throws Exception {
         final JobScheduleConfig scheduleConfig = JobScheduleConfigBuilder.newInstance()
-                .jobName(jobName1)
+                .jobName(jobWithParams)
                 .initialDelay(initialDelayMinute)
                 .interval(intervalMinute)
                 .build();
