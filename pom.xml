@@ -129,7 +129,6 @@
         <module>test-apps</module>
         <module>tck-porting-impl</module>
         <module>jberet-distribution</module>
-        <module>jberet-jpa-repository</module>
         <module>jberet-support</module>
         <module>jberet-rest</module>
         <module>wildfly-jberet-samples</module>
