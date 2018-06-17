@@ -131,7 +131,6 @@
         <module>jberet-distribution</module>
         <module>jberet-support</module>
         <module>jberet-rest</module>
-        <module>wildfly-jberet-samples</module>
         <module>jberet-schedule</module>
         <module>jberet-camel</module>
         <module>jberet-vertx</module>
