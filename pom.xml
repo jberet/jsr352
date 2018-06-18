@@ -132,7 +132,6 @@
         <module>jberet-support</module>
         <module>jberet-rest</module>
         <module>jberet-schedule</module>
-        <module>jberet-camel</module>
         <module>jberet-wildfly</module>
     </modules>
 
