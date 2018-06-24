@@ -127,7 +127,6 @@
         <module>jberet-core</module>
         <module>jberet-se</module>
         <module>test-apps</module>
-        <module>tck-porting-impl</module>
         <module>jberet-distribution</module>
         <module>jberet-wildfly</module>
     </modules>
