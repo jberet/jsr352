@@ -129,7 +129,6 @@
         <module>jberet-se</module>
         <module>test-apps</module>
         <module>jberet-distribution</module>
-        <module>jberet-wildfly</module>
     </modules>
 
     <build>
