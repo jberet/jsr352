@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -102,15 +102,6 @@ public class ScriptingIT extends AbstractIT {
     @Test
     public void batchletPhpSrc() throws Exception {
         test0("batchletPhpSrc");
-    }
-
-    @Test
-    public void batchletRInlineCDATA() throws Exception {
-        //test0("batchletRInlineCDATA");
-        startJobAndWait("batchletRInlineCDATA");
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
-        System.out.printf("%nstep exit status: %s%n", stepExecution0.getExitStatus());
     }
 
     @Test

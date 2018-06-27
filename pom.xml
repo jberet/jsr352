@@ -99,8 +99,6 @@
 
         <version.net.sf.jasperreports>6.1.0</version.net.sf.jasperreports>
 
-        <version.org.renjin.renjin-script-engine>0.9.2626</version.org.renjin.renjin-script-engine>
-
         <version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>
         <version.miredot>2.1.2</version.miredot>
 
@@ -688,12 +686,6 @@
                 <groupId>org.jboss.spec.javax.servlet</groupId>
                 <artifactId>jboss-servlet-api_3.1_spec</artifactId>
                 <version>${version.org.jboss.spec.javax.servlet.jboss-servlet-api_3.1_spec}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.renjin</groupId>
-                <artifactId>renjin-script-engine</artifactId>
-                <version>${version.org.renjin.renjin-script-engine}</version>
                 <scope>test</scope>
             </dependency>
 
