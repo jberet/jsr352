@@ -384,6 +384,28 @@
                 <artifactId>guava</artifactId>
                 <version>${version.com.google.guava}</version>
                 <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.code.findbugs</groupId>
+                        <artifactId>jsr305</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.checkerframework</groupId>
+                        <artifactId>checker-qual</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.errorprone</groupId>
+                        <artifactId>error_prone_annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.j2objc</groupId>
+                        <artifactId>j2objc-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>animal-sniffer-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml</groupId>
@@ -404,6 +426,24 @@
                 <artifactId>infinispan-core</artifactId>
                 <version>${version.org.infinispan}</version>
                 <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jgroups</groupId>
+                        <artifactId>jgroups</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.spec.javax.transaction</groupId>
+                        <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.infinispan</groupId>
