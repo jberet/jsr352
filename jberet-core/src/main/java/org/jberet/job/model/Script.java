@@ -1,13 +1,11 @@
 /*
  * Copyright (c) 2013-2014 Red Hat, Inc. and/or its affiliates.
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
- * Contributors:
- * Cheng Fang - Initial API and implementation
+ * SPDX-License-Identifier: EPL-2.0
  */
 
 package org.jberet.job.model;
@@ -129,7 +127,6 @@ public class Script implements Serializable, Cloneable {
 
     /**
      * Gets the type of the script, for example, {@code javascript}.
-
      * @return type of the script
      */
     public String getType() {
