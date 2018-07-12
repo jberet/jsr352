@@ -10,8 +10,10 @@
  SPDX-License-Identifier: EPL-2.0
 -->
 
-<job id="job-inheritance-self" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0"
-     parent="job-inheritance-self">
+<job id="job-inheritance-self" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0" parent="job-inheritance-self">
 
     <step id="step1">
         <batchlet ref="Batchlet1"/>

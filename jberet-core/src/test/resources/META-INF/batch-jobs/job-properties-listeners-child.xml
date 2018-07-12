@@ -10,7 +10,10 @@
  SPDX-License-Identifier: EPL-2.0
 -->
 
-<job id="job-properties-listeners-child" parent="job-properties-listeners-parent" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="job-properties-listeners-child" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     parent="job-properties-listeners-parent" version="1.0">
 
     <step id="step1">
         <batchlet ref="Batchlet1"></batchlet>

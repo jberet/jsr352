@@ -10,7 +10,10 @@
  SPDX-License-Identifier: EPL-2.0
 -->
 
-<job id="step-same-file-parent-child" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="step-same-file-parent-child" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
     <!-- parent has its own parent -->
     <step id="step-same-file-child-child" parent="step-same-file-child-1">
         <properties>

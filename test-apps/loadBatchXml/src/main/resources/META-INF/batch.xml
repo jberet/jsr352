@@ -10,7 +10,9 @@
  SPDX-License-Identifier: EPL-2.0
 -->
 
-<batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+<batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/batchXML_1_0.xsd">
     <ref id="batchletNoNamed" class="org.jberet.testapps.common.BatchletNoNamed"/>
     <ref id="L1" class="SHOULD NOT REACH HERE"/>
     <ref id="L2" class="SHOULD NOT REACH HERE"/>

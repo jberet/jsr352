@@ -10,7 +10,10 @@
  SPDX-License-Identifier: EPL-2.0
 -->
 
-<job id="not-loopback-across-flow" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="not-loopback-across-flow" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
     <flow id="flow1" next="step1">
         <step id="flow1.step1" next="step2" parent="batchlet0-step" jsl-name="loopback-parent"/>
 

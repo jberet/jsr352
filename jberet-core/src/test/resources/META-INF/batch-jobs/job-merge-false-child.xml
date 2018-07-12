@@ -10,7 +10,10 @@
  SPDX-License-Identifier: EPL-2.0
 -->
 
-<job id="job-merge-false-child" restartable="false" parent="job-merge-false-parent" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+<job id="job-merge-false-child" restartable="false" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     parent="job-merge-false-parent" version="1.0">
 
     <properties merge="false">
     </properties>
