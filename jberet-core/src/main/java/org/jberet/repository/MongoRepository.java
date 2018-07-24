@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,13 +25,14 @@ import javax.naming.NamingException;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.util.JSON;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
@@ -46,8 +47,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
     private String dataSourceName;
     private String dbUrl;
     private MongoClient mongoClient;
-    private DB db;
-    private DBCollection seqCollection;
+    private MongoDatabase db;
+    private MongoCollection<DBObject> seqCollection;
 
     public static MongoRepository create(final Properties configProperties) {
         return new MongoRepository(configProperties);
@@ -65,8 +66,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
         if (dataSourceName != null && !dataSourceName.isEmpty()) {
             try {
                 mongoClient = InitialContext.doLookup(dataSourceName);
-                for (final DB d : mongoClient.getUsedDatabases()) {
-                    db = d;
+                for (final String s : mongoClient.listDatabaseNames()) {
+                    db = mongoClient.getDatabase(s);
                     break;
                 }
             } catch (final NamingException e) {
@@ -78,23 +79,23 @@ public final class MongoRepository extends AbstractPersistentRepository {
                 try {
                     final MongoClientURI uri = new MongoClientURI(dbUrl);
                     mongoClient = (MongoClient) Mongo.Holder.singleton().connect(uri);
-                    db = mongoClient.getDB(uri.getDatabase());
+                    db = mongoClient.getDatabase(uri.getDatabase());
                 } catch (final Exception e) {
                     throw BatchMessages.MESSAGES.invalidConfigProperty(e, JdbcRepository.DB_URL_KEY, dbUrl);
                 }
             }
         }
-        if (!db.collectionExists(TableColumns.SEQ)) {
-            seqCollection = db.createCollection(TableColumns.SEQ, new BasicDBObject());
+        seqCollection = db.getCollection(TableColumns.SEQ, DBObject.class);
+        if (seqCollection.count() < 3) {
             final DBObject jobInstanceDbo = new BasicDBObject(TableColumns._id, TableColumns.JOBINSTANCEID);
             jobInstanceDbo.put(TableColumns.SEQ, 1L);
             final DBObject jobExecutionDbo = new BasicDBObject(TableColumns._id, TableColumns.JOBEXECUTIONID);
             jobExecutionDbo.put(TableColumns.SEQ, 1L);
             final DBObject stepExecutionDbo = new BasicDBObject(TableColumns._id, TableColumns.STEPEXECUTIONID);
             stepExecutionDbo.put(TableColumns.SEQ, 1L);
-            seqCollection.insert(jobInstanceDbo, jobExecutionDbo, stepExecutionDbo);
-        } else {
-            seqCollection = db.getCollection(TableColumns.SEQ);
+            seqCollection.insertOne(jobInstanceDbo);
+            seqCollection.insertOne(jobExecutionDbo);
+            seqCollection.insertOne(stepExecutionDbo);
         }
     }
 
@@ -105,17 +106,19 @@ public final class MongoRepository extends AbstractPersistentRepository {
         final DBObject dbObject = new BasicDBObject(TableColumns.JOBINSTANCEID, nextId);
         dbObject.put(TableColumns.JOBNAME, jobInstance.getJobName());
         dbObject.put(TableColumns.APPLICATIONNAME, jobInstance.getApplicationName());
-        db.getCollection(TableColumns.JOB_INSTANCE).insert(dbObject);
+        db.getCollection(TableColumns.JOB_INSTANCE, DBObject.class).insertOne(dbObject);
     }
 
     @Override
     public List<JobInstance> getJobInstances(final String jobName) {
         final List<JobInstance> result = new ArrayList<JobInstance>();
         final boolean selectAll = jobName == null || jobName.equals("*");
-        final DBCursor cursor = selectAll ? db.getCollection(TableColumns.JOB_INSTANCE).find() :
-                db.getCollection(TableColumns.JOB_INSTANCE).find(new BasicDBObject(TableColumns.JOBNAME, jobName)).sort(
+        final FindIterable<DBObject> findIterable = selectAll ?
+                db.getCollection(TableColumns.JOB_INSTANCE, DBObject.class).find() :
+                db.getCollection(TableColumns.JOB_INSTANCE, DBObject.class).find(new BasicDBObject(TableColumns.JOBNAME, jobName)).sort(
                         new BasicDBObject(TableColumns.JOBINSTANCEID, -1));
 
+        final MongoCursor<DBObject> cursor = findIterable.iterator();
         while (cursor.hasNext()) {
             final DBObject next = cursor.next();
             final Long i = (Long) next.get(TableColumns.JOBINSTANCEID);
@@ -146,8 +149,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
             return result;
         }
 
-        final DBObject one = db.getCollection(TableColumns.JOB_INSTANCE).findOne(
-                new BasicDBObject(TableColumns.JOBINSTANCEID, jobInstanceId));
+        final DBObject one = db.getCollection(TableColumns.JOB_INSTANCE, DBObject.class).find(
+                new BasicDBObject(TableColumns.JOBINSTANCEID, jobInstanceId)).first();
         if (one == null) {
             return null;
         }
@@ -178,7 +181,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         dbObject.put(TableColumns.CREATETIME, jobExecution.getCreateTime());
         dbObject.put(TableColumns.BATCHSTATUS, jobExecution.getBatchStatus().name());
         dbObject.put(TableColumns.JOBPARAMETERS, BatchUtil.propertiesToString(jobExecution.getJobParameters()));
-        db.getCollection(TableColumns.JOB_EXECUTION).insert(dbObject);
+        db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).insertOne(dbObject);
     }
 
     @Override
@@ -197,7 +200,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             }
         }
 
-        db.getCollection(TableColumns.JOB_EXECUTION).update(
+        db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).updateOne(
                 new BasicDBObject(TableColumns.JOBEXECUTIONID, jobExecution.getExecutionId()),
                 new BasicDBObject("$set", update));
     }
@@ -208,8 +211,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
         if (result != null) {
             return result;
         }
-        final DBObject one = db.getCollection(TableColumns.JOB_EXECUTION).findOne(
-                new BasicDBObject(TableColumns.JOBEXECUTIONID, jobExecutionId));
+        final DBObject one = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(
+                new BasicDBObject(TableColumns.JOBEXECUTIONID, jobExecutionId)).first();
         if (one == null) {
             return null;
         }
@@ -236,10 +239,13 @@ public final class MongoRepository extends AbstractPersistentRepository {
     @Override
     public List<JobExecution> getJobExecutions(final JobInstance jobInstance) {
         long jobInstanceId = jobInstance == null ? 0 : jobInstance.getInstanceId();
-        DBCursor cursor = jobInstance == null ? db.getCollection(TableColumns.JOB_EXECUTION).find() :
-                db.getCollection(TableColumns.JOB_EXECUTION).find(
+
+        FindIterable<DBObject> findIterable = jobInstance == null ?
+                db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find():
+                db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(
                         new BasicDBObject(TableColumns.JOBINSTANCEID, jobInstance.getInstanceId()));
-        cursor = cursor.sort(new BasicDBObject(TableColumns.JOBEXECUTIONID, 1));
+
+        MongoCursor<DBObject> cursor = findIterable.sort(new BasicDBObject(TableColumns.JOBEXECUTIONID, 1)).iterator();
         final List<JobExecution> result = new ArrayList<JobExecution>();
         while (cursor.hasNext()) {
             final DBObject next = cursor.next();
@@ -272,11 +278,12 @@ public final class MongoRepository extends AbstractPersistentRepository {
     @Override
     public List<Long> getRunningExecutions(final String jobName) {
         //find all job instance ids belonging to the jobName
-        DBObject keys = new BasicDBObject(TableColumns.JOBINSTANCEID, 1);
-        DBCursor cursor = db.getCollection(TableColumns.JOB_INSTANCE).find(
-                new BasicDBObject(TableColumns.JOBNAME, jobName), keys);
+        BasicDBObject keys = new BasicDBObject(TableColumns.JOBINSTANCEID, 1);
+        FindIterable<DBObject> findIterable = db.getCollection(TableColumns.JOB_INSTANCE, DBObject.class).find(
+                new BasicDBObject(TableColumns.JOBNAME, jobName));
+        MongoCursor<DBObject> cursor = findIterable.projection(keys).iterator();
 
-        if (cursor.size() == 0) {
+        if (cursor.hasNext()) {
             throw BatchMessages.MESSAGES.noSuchJobException(jobName);
         }
 
@@ -287,7 +294,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             basicDBList.add(next.get(TableColumns.JOBINSTANCEID));
         }
         final DBObject inJobInstanceIdsClause = new BasicDBObject("$in", basicDBList);
-        final DBObject query = new BasicDBObject(TableColumns.JOBINSTANCEID, inJobInstanceIdsClause);
+        final BasicDBObject query = new BasicDBObject(TableColumns.JOBINSTANCEID, inJobInstanceIdsClause);
 
         //create "batchstatus in" list
         basicDBList = new BasicDBList();
@@ -298,7 +305,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         //combine batchstatus in clause into jobinstanceid in clause
         query.put(TableColumns.BATCHSTATUS, inBatchStatusClause);
         keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
-        cursor = db.getCollection(TableColumns.JOB_EXECUTION).find(query, keys);
+        cursor = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(query).projection(keys).iterator();
 
         final List<Long> result = new ArrayList<Long>();
         while (cursor.hasNext()) {
@@ -318,7 +325,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         dbObject.put(TableColumns.STEPNAME, stepExecution.getStepName());
         dbObject.put(TableColumns.STARTTIME, stepExecution.getStartTime());
         dbObject.put(TableColumns.BATCHSTATUS, stepExecution.getBatchStatus().name());
-        db.getCollection(TableColumns.STEP_EXECUTION).insert(dbObject);
+        db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class).insertOne(dbObject);
     }
 
     @Override
@@ -341,7 +348,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             update.put(TableColumns.READERCHECKPOINTINFO, stepExecutionImpl.getReaderCheckpointInfoSerialized());
             update.put(TableColumns.WRITERCHECKPOINTINFO, stepExecutionImpl.getWriterCheckpointInfoSerialized());
 
-            db.getCollection(TableColumns.STEP_EXECUTION).update(
+            db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class).updateOne(
                     new BasicDBObject(TableColumns.STEPEXECUTIONID, stepExecution.getStepExecutionId()),
                     new BasicDBObject("$set", update));
 
@@ -364,7 +371,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) stepOrPartitionExecution;
 
             try {
-                final DBObject query = new BasicDBObject(TableColumns.STEPEXECUTIONID, partitionExecution.getStepExecutionId());
+                final BasicDBObject query = new BasicDBObject(TableColumns.STEPEXECUTIONID, partitionExecution.getStepExecutionId());
                 query.put(TableColumns.PARTITIONEXECUTIONID, partitionExecution.getPartitionId());
 
                 final DBObject update = new BasicDBObject(TableColumns.BATCHSTATUS, partitionExecution.getBatchStatus().name());
@@ -374,7 +381,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
                 update.put(TableColumns.READERCHECKPOINTINFO, partitionExecution.getReaderCheckpointInfoSerialized());
                 update.put(TableColumns.WRITERCHECKPOINTINFO, partitionExecution.getWriterCheckpointInfoSerialized());
 
-                db.getCollection(TableColumns.PARTITION_EXECUTION).update(query, new BasicDBObject("$set", update));
+                db.getCollection(TableColumns.PARTITION_EXECUTION, DBObject.class).updateOne(query, new BasicDBObject("$set", update));
             } catch (final Exception e) {
                 throw BatchMessages.MESSAGES.failToRunQuery(e, "savePersistentData");
             }
@@ -398,10 +405,11 @@ public final class MongoRepository extends AbstractPersistentRepository {
      */
     @Override
     List<StepExecution> selectStepExecutions(final Long jobExecutionId, final ClassLoader classLoader) {
-        final DBCollection collection = db.getCollection(TableColumns.STEP_EXECUTION);
-        DBCursor cursor = jobExecutionId == null ? collection.find() :
-                collection.find(new BasicDBObject(TableColumns.JOBEXECUTIONID, jobExecutionId));
-        cursor = cursor.sort(new BasicDBObject(TableColumns.STEPEXECUTIONID, 1));
+        final MongoCollection<DBObject> collection = db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class);
+        final FindIterable<DBObject> findIterable = jobExecutionId == null ?
+                collection.find(DBObject.class) :
+                collection.find(new BasicDBObject(TableColumns.JOBEXECUTIONID, jobExecutionId), DBObject.class);
+        final MongoCursor<DBObject> cursor = findIterable.sort(new BasicDBObject(TableColumns.STEPEXECUTIONID, 1)).iterator();
         final List<StepExecution> result = new ArrayList<StepExecution>();
         createStepExecutionsFromDBCursor(cursor, result, classLoader);
         return result;
@@ -414,7 +422,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         final DBObject dbObject = new BasicDBObject(TableColumns.PARTITIONEXECUTIONID, partitionExecution.getPartitionId());
         dbObject.put(TableColumns.STEPEXECUTIONID, partitionExecution.getStepExecutionId());
         dbObject.put(TableColumns.BATCHSTATUS, partitionExecution.getBatchStatus().name());
-        db.getCollection(TableColumns.PARTITION_EXECUTION).insert(dbObject);
+        db.getCollection(TableColumns.PARTITION_EXECUTION, DBObject.class).insertOne(dbObject);
     }
 
     @Override
@@ -426,23 +434,24 @@ public final class MongoRepository extends AbstractPersistentRepository {
             return result;
         }
 
-        final DBObject keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
+        final BasicDBObject keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
         keys.put(TableColumns._id, 0);
-        final DBCursor cursor = db.getCollection(TableColumns.JOB_EXECUTION).find(
-                new BasicDBObject(TableColumns.JOBINSTANCEID, jobExecutionToRestart.getJobInstance().getInstanceId()),
-                keys);
+        final MongoCursor<DBObject> cursor = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(
+                new BasicDBObject(TableColumns.JOBINSTANCEID, jobExecutionToRestart.getJobInstance().getInstanceId()))
+                .projection(keys).iterator();
         final BasicDBList basicDBList = new BasicDBList();
         while (cursor.hasNext()) {
             final DBObject next = cursor.next();
             basicDBList.add(next.get(TableColumns.JOBEXECUTIONID));
         }
         final DBObject inClause = new BasicDBObject("$in", basicDBList);
-        final DBObject query = new BasicDBObject(TableColumns.JOBEXECUTIONID, inClause);
+        final BasicDBObject query = new BasicDBObject(TableColumns.JOBEXECUTIONID, inClause);
         query.put(TableColumns.STEPNAME, stepName);
-        final DBCursor cursor1 = db.getCollection(TableColumns.STEP_EXECUTION).find(query).sort(
-                new BasicDBObject(TableColumns.STEPEXECUTIONID, -1));
 
-        return createStepExecutionFromDBObject(cursor1.one(), classLoader);
+        final MongoCursor<DBObject> cursor1 = db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class).find(query).sort(
+                new BasicDBObject(TableColumns.STEPEXECUTIONID, -1)).iterator();
+
+        return createStepExecutionFromDBObject(cursor1.next(), classLoader);
     }
 
     @Override
@@ -455,9 +464,9 @@ public final class MongoRepository extends AbstractPersistentRepository {
             return result;
         }
         result = new ArrayList<PartitionExecutionImpl>();
-        final DBCursor cursor = db.getCollection(TableColumns.PARTITION_EXECUTION).find(
+        final MongoCursor<DBObject> cursor = db.getCollection(TableColumns.PARTITION_EXECUTION, DBObject.class).find(
                 new BasicDBObject(TableColumns.STEPEXECUTIONID, stepExecutionId)).sort(
-                new BasicDBObject(TableColumns.PARTITIONEXECUTIONID, 1));
+                new BasicDBObject(TableColumns.PARTITIONEXECUTIONID, 1)).iterator();
 
         try {
             while (cursor.hasNext()) {
@@ -483,7 +492,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         return result;
     }
 
-    private void createStepExecutionsFromDBCursor(final DBCursor cursor, final List<StepExecution> result, final ClassLoader classLoader) {
+    private void createStepExecutionsFromDBCursor(final MongoCursor<DBObject> cursor, final List<StepExecution> result, final ClassLoader classLoader) {
         while (cursor.hasNext()) {
             result.add(createStepExecutionFromDBObject(cursor.next(), classLoader));
         }
@@ -520,11 +529,10 @@ public final class MongoRepository extends AbstractPersistentRepository {
 
     @Override
     public int countStepStartTimes(final String stepName, final long jobInstanceId) {
-        final DBObject keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
+        final BasicDBObject keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
         keys.put(TableColumns._id, 0);
-        final DBCursor cursor = db.getCollection(TableColumns.JOB_EXECUTION).find(
-                new BasicDBObject(TableColumns.JOBINSTANCEID, jobInstanceId),
-                keys);
+        final MongoCursor<DBObject> cursor = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(
+                new BasicDBObject(TableColumns.JOBINSTANCEID, jobInstanceId)).projection(keys).iterator();
         final BasicDBList basicDBList = new BasicDBList();
         while (cursor.hasNext()) {
             final DBObject next = cursor.next();
@@ -533,7 +541,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         final DBObject inClause = new BasicDBObject("$in", basicDBList);
         final DBObject query = new BasicDBObject(TableColumns.JOBEXECUTIONID, inClause);
         query.put(TableColumns.STEPNAME, stepName);
-        return db.getCollection(TableColumns.STEP_EXECUTION).find(query).count();
+        return (int) db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class).count(keys);
     }
 
     /**
@@ -548,8 +556,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
     public void executeRemoveQueries(final String removeQueries) {
         //db.getCollection(TableColumns.PARTITION_EXECUTION).remove(null);
         final String[] queries = removeQueries.split(";");
-        final List<AbstractMap.SimpleEntry<DBObject, DBCollection>> dbObjectsAndCollections =
-                new ArrayList<AbstractMap.SimpleEntry<DBObject, DBCollection>>();
+        final List<AbstractMap.SimpleEntry<BasicDBObject, MongoCollection>> dbObjectsAndCollections = new ArrayList<>();
         String queryConditionJson;
 
         for (String q : queries) {
@@ -569,37 +576,36 @@ public final class MongoRepository extends AbstractPersistentRepository {
 
             final String collectionName = q.substring(dot1Pos + 1, dot2Pos).trim();
             queryConditionJson = q.substring(leftParenthesisPos + 1, q.length() - 1);
-            DBObject parsedDBObject = (DBObject) JSON.parse(queryConditionJson);
-            final DBCollection coll;
+            BasicDBObject parsedDBObject = (BasicDBObject) JSON.parse(queryConditionJson);
+            final MongoCollection<DBObject> coll;
 
             if (collectionName.equalsIgnoreCase(TableColumns.JOB_EXECUTION)) {
-                coll = db.getCollection(TableColumns.JOB_EXECUTION);
+                coll = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class);
             } else if (collectionName.equalsIgnoreCase(TableColumns.STEP_EXECUTION)) {
-                coll = db.getCollection(TableColumns.STEP_EXECUTION);
+                coll = db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class);
             } else if (collectionName.equalsIgnoreCase(TableColumns.JOB_INSTANCE)) {
-                coll = db.getCollection(TableColumns.JOB_INSTANCE);
+                coll = db.getCollection(TableColumns.JOB_INSTANCE, DBObject.class);
             } else if (collectionName.equalsIgnoreCase(TableColumns.PARTITION_EXECUTION)) {
-                coll = db.getCollection(TableColumns.PARTITION_EXECUTION);
+                coll = db.getCollection(TableColumns.PARTITION_EXECUTION, DBObject.class);
             } else {
                 throw BatchMessages.MESSAGES.failToRunQuery(null, q);
             }
             if (parsedDBObject == null) {
                 parsedDBObject = new BasicDBObject();
             }
-            dbObjectsAndCollections.add(new AbstractMap.SimpleEntry<DBObject, DBCollection>(parsedDBObject, coll));
+            dbObjectsAndCollections.add(new AbstractMap.SimpleEntry<>(parsedDBObject, coll));
             BatchLogger.LOGGER.tracef("About to remove from collection: %s, with query: %s%n", coll, parsedDBObject);
         }
 
-        for (final AbstractMap.SimpleEntry<DBObject, DBCollection> e : dbObjectsAndCollections) {
-            e.getValue().remove(e.getKey());
+        for (final AbstractMap.SimpleEntry<BasicDBObject, MongoCollection> e : dbObjectsAndCollections) {
+            e.getValue().deleteOne(e.getKey());
         }
-
     }
 
     private Long incrementAndGetSequence(final String whichId) {
-        final DBObject query = new BasicDBObject(TableColumns._id, whichId);
-        final DBObject update = new BasicDBObject("$inc", new BasicDBObject(TableColumns.SEQ, 1));
-        final DBObject result = seqCollection.findAndModify(query, update);
+        final BasicDBObject query = new BasicDBObject(TableColumns._id, whichId);
+        final BasicDBObject update = new BasicDBObject("$inc", new BasicDBObject(TableColumns.SEQ, 1));
+        final DBObject result = seqCollection.findOneAndUpdate(query, update);
         return (Long) result.get(TableColumns.SEQ);
     }
 
