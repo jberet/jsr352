@@ -283,7 +283,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
                 new BasicDBObject(TableColumns.JOBNAME, jobName));
         MongoCursor<DBObject> cursor = findIterable.projection(keys).iterator();
 
-        if (cursor.hasNext()) {
+        if (!cursor.hasNext()) {
             throw BatchMessages.MESSAGES.noSuchJobException(jobName);
         }
 
@@ -598,7 +598,8 @@ public final class MongoRepository extends AbstractPersistentRepository {
         }
 
         for (final AbstractMap.SimpleEntry<BasicDBObject, MongoCollection> e : dbObjectsAndCollections) {
-            e.getValue().deleteOne(e.getKey());
+            //use deleteMany since one query condition (e.g., with in clause) can match multiple documents
+            e.getValue().deleteMany(e.getKey());
         }
     }
 
