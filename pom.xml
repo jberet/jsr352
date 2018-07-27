@@ -642,14 +642,6 @@
                 <scope>provided</scope>
             </dependency>
 
-            <!-- OsCommandBatchlet dependencies -->
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-exec</artifactId>
-                <version>${version.commons-exec}</version>
-                <scope>provided</scope>
-            </dependency>
-
             <!-- Scripting testing dependency -->
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
