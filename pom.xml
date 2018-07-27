@@ -61,8 +61,6 @@
         <version.net.sf.supercsv>2.3.1</version.net.sf.supercsv>
         <version.com.fasterxml.jackson>2.9.5</version.com.fasterxml.jackson>
         <version.org.mongodb.mongo-java-driver>3.8.0</version.org.mongodb.mongo-java-driver>
-        <version.org.beanio>2.1.0</version.org.beanio>
-        <version.org.ow2.asm>5.0.4</version.org.ow2.asm>
 
         <version.org.infinispan>9.2.5.Final</version.org.infinispan>
         <version.org.jgroups>4.0.1.Final</version.org.jgroups>
@@ -506,20 +504,6 @@
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-jaxb-annotations</artifactId>
                 <version>${version.com.fasterxml.jackson}</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <!-- BeanIO dependencies -->
-            <dependency>
-                <groupId>org.beanio</groupId>
-                <artifactId>beanio</artifactId>
-                <version>${version.org.beanio}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm</artifactId>
-                <version>${version.org.ow2.asm}</version>
                 <scope>provided</scope>
             </dependency>
 
