@@ -94,8 +94,6 @@
 
         <version.org.wildfly.security.wildfly-security-manager>1.1.2.Final</version.org.wildfly.security.wildfly-security-manager>
 
-        <version.net.sf.jasperreports>6.1.0</version.net.sf.jasperreports>
-
         <version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>
         <version.miredot>2.1.2</version.miredot>
 
@@ -641,14 +639,6 @@
                 <groupId>org.glassfish</groupId>
                 <artifactId>javax.el</artifactId>
                 <version>${version.org.glassfish.javax.el}</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <!-- JasperReports dependencies -->
-            <dependency>
-                <groupId>net.sf.jasperreports</groupId>
-                <artifactId>jasperreports</artifactId>
-                <version>${version.net.sf.jasperreports}</version>
                 <scope>provided</scope>
             </dependency>
 
