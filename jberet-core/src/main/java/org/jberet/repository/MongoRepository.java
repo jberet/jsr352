@@ -86,7 +86,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             }
         }
         seqCollection = db.getCollection(TableColumns.SEQ, DBObject.class);
-        if (seqCollection.count() < 3) {
+        if (seqCollection.countDocuments() < 3) {
             final DBObject jobInstanceDbo = new BasicDBObject(TableColumns._id, TableColumns.JOBINSTANCEID);
             jobInstanceDbo.put(TableColumns.SEQ, 1L);
             final DBObject jobExecutionDbo = new BasicDBObject(TableColumns._id, TableColumns.JOBEXECUTIONID);
@@ -169,7 +169,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
 
     @Override
     public int getJobInstanceCount(final String jobName) {
-        return (int) db.getCollection(TableColumns.JOB_INSTANCE).count(new BasicDBObject(TableColumns.JOBNAME, jobName));
+        return (int) db.getCollection(TableColumns.JOB_INSTANCE).countDocuments(new BasicDBObject(TableColumns.JOBNAME, jobName));
     }
 
     @Override
@@ -541,7 +541,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         final DBObject inClause = new BasicDBObject("$in", basicDBList);
         final DBObject query = new BasicDBObject(TableColumns.JOBEXECUTIONID, inClause);
         query.put(TableColumns.STEPNAME, stepName);
-        return (int) db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class).count(keys);
+        return (int) db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class).countDocuments(keys);
     }
 
     /**
