@@ -33,7 +33,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.util.JSON;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.runtime.AbstractStepExecution;
@@ -575,8 +574,15 @@ public final class MongoRepository extends AbstractPersistentRepository {
             }
 
             final String collectionName = q.substring(dot1Pos + 1, dot2Pos).trim();
-            queryConditionJson = q.substring(leftParenthesisPos + 1, q.length() - 1);
-            BasicDBObject parsedDBObject = (BasicDBObject) JSON.parse(queryConditionJson);
+            queryConditionJson = q.substring(leftParenthesisPos + 1, q.length() - 1).trim();
+            BasicDBObject parsedDBObject = null;
+            if (!queryConditionJson.isEmpty()) {
+                parsedDBObject = BasicDBObject.parse(queryConditionJson);
+            }
+            if (parsedDBObject == null) {
+                parsedDBObject = new BasicDBObject();
+            }
+
             final MongoCollection<DBObject> coll;
 
             if (collectionName.equalsIgnoreCase(TableColumns.JOB_EXECUTION)) {
@@ -590,9 +596,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
             } else {
                 throw BatchMessages.MESSAGES.failToRunQuery(null, q);
             }
-            if (parsedDBObject == null) {
-                parsedDBObject = new BasicDBObject();
-            }
+
             dbObjectsAndCollections.add(new AbstractMap.SimpleEntry<>(parsedDBObject, coll));
             BatchLogger.LOGGER.tracef("About to remove from collection: %s, with query: %s%n", coll, parsedDBObject);
         }
