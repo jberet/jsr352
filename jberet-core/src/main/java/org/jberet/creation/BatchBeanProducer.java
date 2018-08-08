@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -388,7 +388,7 @@ public class BatchBeanProducer {
                 //best effort to get a default value
                 //no-arg constructor may not exist, in which case, we use null as its default value
                 //BatchLogger.LOGGER.infof("Injected batch property %s is not defined in job xml, will attempt to use the default value in class %s", propName, beanClass);
-                final Object o = beanClass.newInstance();
+                final Object o = beanClass.getDeclaredConstructor().newInstance();
                 final Object fieldVal;
 
                 if (WildFlySecurityManager.isChecking()) {

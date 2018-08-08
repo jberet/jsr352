@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -149,7 +149,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         if (threadFactoryProp != null && !threadFactoryProp.isEmpty()) {
             try {
                 final Class<?> threadFactoryClass = getClassLoader().loadClass(threadFactoryProp.trim());
-                threadFactory = (ThreadFactory) threadFactoryClass.newInstance();
+                threadFactory = (ThreadFactory) threadFactoryClass.getDeclaredConstructor().newInstance();
             } catch (final Exception e) {
                 throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_FACTORY, threadFactoryProp, e);
             }
@@ -216,7 +216,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
             if (rejectionPolicyProp != null && !rejectionPolicyProp.isEmpty()) {
                 try {
                     final Class<?> aClass = getClassLoader().loadClass(rejectionPolicyProp.trim());
-                    rejectionHandler = (RejectedExecutionHandler) aClass.newInstance();
+                    rejectionHandler = (RejectedExecutionHandler) aClass.getDeclaredConstructor().newInstance();
                 } catch (final Exception e) {
                     throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_POOL_REJECTION_POLICY, rejectionPolicyProp, e);
                 }

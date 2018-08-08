@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc. and/or its affiliates.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
 package org.jberet.creation;
 
 import org.junit.Before;
@@ -21,9 +31,9 @@ public class AbstractArtifactFactoryTest {
     private Object noPackageBatchlet;
 
     @Before
-    public void setup() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public void setup() throws Exception {
         noPackageBatchletClass = Class.forName("NoPackageBatchlet");
-        noPackageBatchlet = noPackageBatchletClass.newInstance();
+        noPackageBatchlet = noPackageBatchletClass.getDeclaredConstructor().newInstance();
     }
 
     @Test

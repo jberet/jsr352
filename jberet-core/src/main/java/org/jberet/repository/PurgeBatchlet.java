@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -279,7 +279,7 @@ public class PurgeBatchlet implements Batchlet {
         } else {
             final JobExecutionSelector selector;
             if (jobExecutionSelector != null) { //use the custom selector configured by the application
-                selector = (JobExecutionSelector) jobExecutionSelector.newInstance();
+                selector = (JobExecutionSelector) jobExecutionSelector.getDeclaredConstructor().newInstance();
             } else {
                 final DefaultJobExecutionSelector selector1 = new DefaultJobExecutionSelector(keepRunningJobExecutions);
                 selector1.jobExecutionIds = jobExecutionIds;
