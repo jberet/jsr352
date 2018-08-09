@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2016-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,7 +28,7 @@ public final class ProcessFileBatchlet extends AbstractBatchlet {
     public String process() throws Exception {
         final File file = (File) jobContext.getTransientUserData();
         jobContext.setTransientUserData(null);
-        final String firstLine = Files.readFirstLine(file, Charset.defaultCharset());
+        final String firstLine = Files.asCharSource(file, Charset.defaultCharset()).readFirstLine();
         System.out.printf("1st line of %s: %s%n", file.getPath(), firstLine);
 
         if (file.delete()) {

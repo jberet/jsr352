@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -65,7 +65,7 @@ public class LoopbackIT extends AbstractIT {
         for (int i = 0; i < numOfFiles; i++) {
             String fileName = fileBaseName + i + fileExt;
             files[i] = new File(tmpDir, fileName);
-            Files.write(fileName, files[i], Charset.defaultCharset());
+            Files.asCharSink(files[i], Charset.defaultCharset()).write(fileName);
         }
 
         try {
