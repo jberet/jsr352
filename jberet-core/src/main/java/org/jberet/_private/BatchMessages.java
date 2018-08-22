@@ -204,4 +204,7 @@ public interface BatchMessages {
     @Message(id = 656, value = "Invalid batch property expression: %s")
     IllegalArgumentException invalidPropertyExpression(String propertyExpression);
 
+    @Message(id = 657, value = "Could not find the restart position %s in job %s")
+    BatchRuntimeException couldNotFindRestartPoint(String restartPoint, String jobName);
+
 }

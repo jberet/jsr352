@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -48,32 +48,40 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             //clear the restart point passed over from original job execution.  This execution may have its own
             //restart point or null (start from head) for use by the next restart.
             jobContext.getJobExecution().setRestartPosition(null);
+            boolean restartPointFound = false;
             for (final JobElement e : getJobElements()) {
                 if (e instanceof Step) {
                     final Step step = (Step) e;
                     if (step.getId().equals(restartPoint)) {
+                        restartPointFound = true;
                         runStep(step);
                         break;
                     }
                 } else if (e instanceof Flow) {
                     final Flow flow = (Flow) e;
                     if (flow.getId().equals(restartPoint)) {
+                        restartPointFound = true;
                         runFlow(flow, null);
                         break;
                     }
                 } else if (e instanceof Split) {
                     final Split split = (Split) e;
                     if (split.getId().equals(restartPoint)) {
+                        restartPointFound = true;
                         runSplit(split);
                         break;
                     }
                 } else if (e instanceof Decision) {
                     final Decision decision = (Decision) e;
                     if (decision.getId().equals(restartPoint)) {
+                        restartPointFound = true;
                         runDecision(decision);
                         break;
                     }
                 }
+            }
+            if (!restartPointFound) {
+                throw BatchMessages.MESSAGES.couldNotFindRestartPoint(restartPoint, jobContext.getJobName());
             }
         } else {
             // the head of the composite job element is the first non-abstract element (step, flow, or split)
