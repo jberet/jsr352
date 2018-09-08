@@ -6,21 +6,26 @@
 *.war
 *.ear
 
-# ignore Maven generated target folders
+# ignore Maven generated folders and files
 ~
 target
+dependency-reduced-pom.xml
+
 # ignore eclipse files
 .project
 .classpath
 .settings
 .metadata
+
 # ignore m2e annotation processing files
 .factorypath
+
 # ignore IDEA files
 *.iml
 *.ipr
 *.iws
 .idea
+
 # other files to ignore
 derby.log
 server.lock
