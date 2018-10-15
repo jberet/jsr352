@@ -25,7 +25,7 @@
     <parent>
         <artifactId>test-apps</artifactId>
         <groupId>org.jberet.test-apps</groupId>
-        <version>1.4.0.Alpha-SNAPSHOT</version>
+        <version>1.4.0.Alpha</version>
     </parent>
 
     <artifactId>cdiScopes</artifactId>
