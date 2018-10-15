@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.jberet.test-apps</groupId>
         <artifactId>test-apps</artifactId>
-        <version>1.4.0.Alpha</version>
+        <version>1.4.0.Beta1-SNAPSHOT</version>
     </parent>
 
     <artifactId>loadBatchXml</artifactId>

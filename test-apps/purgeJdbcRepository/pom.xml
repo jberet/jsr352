@@ -18,7 +18,7 @@
     <parent>
         <artifactId>test-apps</artifactId>
         <groupId>org.jberet.test-apps</groupId>
-        <version>1.4.0.Alpha</version>
+        <version>1.4.0.Beta1-SNAPSHOT</version>
     </parent>
 
     <artifactId>purgeJdbcRepository</artifactId>
