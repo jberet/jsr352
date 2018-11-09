@@ -598,7 +598,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
                     //usually the transaction should not be rolled back upon skippable exception, but if the transaction
                     //is marked rollback only by other parties, it's no longer usable and so roll it back.
-                    if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
+                    if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK || tm.getStatus() == Status.STATUS_ROLLEDBACK) {
                         tm.rollback();
                     }
 
