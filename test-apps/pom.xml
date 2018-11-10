@@ -49,7 +49,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.2.7.Final</version>
+        <version>1.2.8.Final-SNAPSHOT</version>
     </parent>
 
     <groupId>org.jberet.test-apps</groupId>
