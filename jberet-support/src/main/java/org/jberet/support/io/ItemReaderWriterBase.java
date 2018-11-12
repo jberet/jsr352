@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2018 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -217,7 +217,7 @@ public abstract class ItemReaderWriterBase {
                                                  final boolean append,
                                                  final boolean failIfDirsNotExist) throws IOException {
         if (!exists) {
-            final File parentFile = file.getParentFile();
+            final File parentFile = file.getAbsoluteFile().getParentFile();
             if (parentFile == null) {
                 throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, resource, RESOURCE_KEY);
             }
