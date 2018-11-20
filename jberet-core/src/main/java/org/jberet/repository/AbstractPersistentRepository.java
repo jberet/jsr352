@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2013-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
 package org.jberet.repository;
 
 import java.lang.ref.ReferenceQueue;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
 import javax.batch.runtime.StepExecution;
@@ -172,5 +174,29 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the list of running job execution ids from the cache.
+     * The result may be used as a supplement to that from the persistence store.
+     *
+     * @param jobName the job name
+     * @return list of running job execution ids
+     */
+    List<Long> getCachedRunningExecutions(final String jobName) {
+        final List<Long> result = new ArrayList<Long>();
+
+        for (final Map.Entry<Long, SoftReference<JobExecutionImpl, Long>> e : jobExecutions.entrySet()) {
+            final JobExecutionImpl jobExecution = e.getValue().get();
+            if (jobExecution != null) {
+                if (jobExecution.getJobName().equals(jobName)) {
+                    final BatchStatus s = jobExecution.getBatchStatus();
+                    if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
+                        result.add(e.getKey());
+                    }
+                }
+            }
+        }
+        return result;
     }
 }
