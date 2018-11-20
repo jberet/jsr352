@@ -638,10 +638,11 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         final List<Long> result = new ArrayList<Long>();
         final String select = sqls.getProperty(SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME);
 
-        final Connection connection = getConnection();
+        Connection connection = null;
         ResultSet rs = null;
         PreparedStatement preparedStatement = null;
         try {
+            connection = getConnection();
             preparedStatement = connection.prepareStatement(select);
             preparedStatement.setString(1, jobName);
             rs = preparedStatement.executeQuery();
@@ -650,7 +651,13 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 result.add(i);
             }
         } catch (final Exception e) {
-            throw BatchMessages.MESSAGES.failToRunQuery(e, select);
+            final List<Long> cachedRunningExecutions = getCachedRunningExecutions(jobName);
+            for (Long i : cachedRunningExecutions) {
+                if (!result.contains(i)) {
+                    result.add(i);
+                }
+            }
+            BatchLogger.LOGGER.failedGetRunningExecutions(e, jobName, result);
         } finally {
             close(connection, preparedStatement, null, rs);
         }
