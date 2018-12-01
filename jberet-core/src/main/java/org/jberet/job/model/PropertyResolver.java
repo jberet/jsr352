@@ -696,6 +696,14 @@ public final class PropertyResolver {
         if (propCategory.equals(jobParametersToken)) {
             if (jobParameters != null) {
                 val = jobParameters.getProperty(variableName);
+
+                // additional step to retrieve the value from string-object mapping
+                if (val == null) {
+                    final Object objVal = jobParameters.get(variableName);
+                    if (objVal != null) {
+                        val = objVal.toString();
+                    }
+                }
             }
         } else if (propCategory.equals(jobPropertiesToken)) {
             for (final org.jberet.job.model.Properties p : jobPropertiesStack) {
