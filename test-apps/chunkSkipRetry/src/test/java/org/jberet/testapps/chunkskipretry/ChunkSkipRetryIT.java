@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2015-2018 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -2033,6 +2033,41 @@ public class ChunkSkipRetryIT extends AbstractIT {
         verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
         verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 0);
         verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 1);
+    }
+
+    /**
+     * Verifies that checkpoint is set properly after skipped items.
+     * This test is taken from Github issue #116 (https://github.com/jberet/jsr352/issues/116)
+     *
+     * @throws Exception
+     */
+    @Test
+    public void retrySkipWrite0to10() throws Exception {
+        params.setProperty("writer.fail.on.values", "0,1,2,3,4,5,6,7,8,9,10");
+        params.setProperty("repeat.failure", "true");
+        final ArrayList<List<Integer>> expected = new ArrayList<List<Integer>>();
+
+        // 0 - 10 failed, re-written and failed and skipped
+        expected.add(asList(11));
+        expected.add(asList(12));
+        expected.add(asList(13));
+        expected.add(asList(14));
+        expected.add(asList(15));
+        expected.add(asList(16));
+        expected.add(asList(17));
+        expected.add(asList(18));
+        expected.add(asList(19));
+        expected.add(asList(20, 21, 22, 23, 24, 25, 26, 27, 28, 29));
+
+        runTest(chunkSkipRetryXml, expected);
+        // 20: read first 10 in first try, read again in retry
+        // +20: read second 10 in first try, read again in retry
+        // +10: read third 10 in first try, no retry needed
+        verifyMetric(Metric.MetricType.READ_COUNT, 20 + 20 + 10);
+        verifyMetric(Metric.MetricType.READ_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.PROCESS_SKIP_COUNT, 0);
+        verifyMetric(Metric.MetricType.WRITE_SKIP_COUNT, 11);
+        verifyMetric(Metric.MetricType.ROLLBACK_COUNT, 2);
     }
 
     private void runTest(final String jobXml, final ArrayList<List<Integer>> expected) throws Exception {

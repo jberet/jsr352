@@ -389,6 +389,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 stepMetrics.increment(Metric.MetricType.READ_SKIP_COUNT, 1);
                 skipCount++;
                 itemRead = null;
+                processingInfo.checkpointPosition = processingInfo.readPosition;
+                stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
             } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                 for (final RetryReadListener l : retryReadListeners) {
                     l.onRetryReadException(e);
@@ -436,6 +438,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     stepMetrics.increment(Metric.MetricType.PROCESS_SKIP_COUNT, 1);
                     skipCount++;
                     output = null;
+                    processingInfo.checkpointPosition = processingInfo.readPosition;
+                    stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
                 } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                     for (final RetryProcessListener l : retryProcessListeners) {
                         l.onRetryProcessException(itemRead, e);
@@ -595,6 +599,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     stepMetrics.increment(Metric.MetricType.WRITE_SKIP_COUNT, 1);
                     skipCount++;
                     outputList.clear();
+                    processingInfo.checkpointPosition = processingInfo.readPosition;
+                    stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
+                    stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
 
                     //usually the transaction should not be rolled back upon skippable exception, but if the transaction
                     //is marked rollback only by other parties, it's no longer usable and so roll it back.
@@ -814,7 +821,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         ChunkState chunkState = ChunkState.TO_START_NEW;
 
         /**
-         * Used to remember the last checkpoint position in the reader intput data
+         * Used to remember the last checkpoint position in the reader input data
          */
         int checkpointPosition = -1;
 
