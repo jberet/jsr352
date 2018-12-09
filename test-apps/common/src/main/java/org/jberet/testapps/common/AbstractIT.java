@@ -63,8 +63,22 @@ abstract public class AbstractIT {
     @Before
     public void before() throws Exception {
         if (jobOperator == null) {
+            // org.jberet.spi.JobOperatorContext and org.jberet.operations.DelegatingJobOperator are introduced
+            // in jberet 1.3.0, to allow for different JobOperator implementation in different runtime
+            // environment.
+            //
             // The BatchRuntime.getJobOperator() returns the DelegatingJobOperator, using the context will give us
-            // access to the default JobOperatorImpl.
+            // access to the internal JobOperator implementation class.
+            //
+            // It's better to cast it to org.jberet.operations.AbstractJobOperator, which is extended
+            // by all concrete JobOperator implementation in different runtime environment
+            // (Java SE and WildFly Java EE). For example,
+            //
+            // AbstractJobOperator jobOperator = (AbstractJobOperator) JobOperatorContext.getJobOperatorContext().getJobOperator();
+            //
+            // Casting to JobOperatorImpl works in Java SE environment, but does not work in WildFly Java EE
+            // environment, which has a different JobOperator implementation class.
+            //
             jobOperator = (JobOperatorImpl) JobOperatorContext.getJobOperatorContext().getJobOperator();
         }
     }
