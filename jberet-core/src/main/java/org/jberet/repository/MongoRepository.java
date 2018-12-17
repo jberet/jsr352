@@ -276,40 +276,45 @@ public final class MongoRepository extends AbstractPersistentRepository {
 
     @Override
     public List<Long> getRunningExecutions(final String jobName) {
-        //find all job instance ids belonging to the jobName
-        BasicDBObject keys = new BasicDBObject(TableColumns.JOBINSTANCEID, 1);
-        FindIterable<DBObject> findIterable = db.getCollection(TableColumns.JOB_INSTANCE, DBObject.class).find(
-                new BasicDBObject(TableColumns.JOBNAME, jobName));
-        MongoCursor<DBObject> cursor = findIterable.projection(keys).iterator();
-
-        if (!cursor.hasNext()) {
-            throw BatchMessages.MESSAGES.noSuchJobException(jobName);
-        }
-
-        //add matching job instance ids to the "jobinstanceid in" list
-        BasicDBList basicDBList = new BasicDBList();
-        while (cursor.hasNext()) {
-            final DBObject next = cursor.next();
-            basicDBList.add(next.get(TableColumns.JOBINSTANCEID));
-        }
-        final DBObject inJobInstanceIdsClause = new BasicDBObject("$in", basicDBList);
-        final BasicDBObject query = new BasicDBObject(TableColumns.JOBINSTANCEID, inJobInstanceIdsClause);
-
-        //create "batchstatus in" list
-        basicDBList = new BasicDBList();
-        basicDBList.add(BatchStatus.STARTED.name());
-        basicDBList.add(BatchStatus.STARTING.name());
-        final DBObject inBatchStatusClause = new BasicDBObject("$in", basicDBList);
-
-        //combine batchstatus in clause into jobinstanceid in clause
-        query.put(TableColumns.BATCHSTATUS, inBatchStatusClause);
-        keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
-        cursor = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(query).projection(keys).iterator();
-
         final List<Long> result = new ArrayList<Long>();
-        while (cursor.hasNext()) {
-            final DBObject next = cursor.next();
-            result.add((Long) next.get(TableColumns.JOBEXECUTIONID));
+
+        try {
+            //find all job instance ids belonging to the jobName
+            BasicDBObject keys = new BasicDBObject(TableColumns.JOBINSTANCEID, 1);
+            FindIterable<DBObject> findIterable = db.getCollection(TableColumns.JOB_INSTANCE, DBObject.class).find(
+                    new BasicDBObject(TableColumns.JOBNAME, jobName));
+            MongoCursor<DBObject> cursor = findIterable.projection(keys).iterator();
+
+            if (!cursor.hasNext()) {
+                throw BatchMessages.MESSAGES.noSuchJobException(jobName);
+            }
+
+            //add matching job instance ids to the "jobinstanceid in" list
+            BasicDBList basicDBList = new BasicDBList();
+            while (cursor.hasNext()) {
+                final DBObject next = cursor.next();
+                basicDBList.add(next.get(TableColumns.JOBINSTANCEID));
+            }
+            final DBObject inJobInstanceIdsClause = new BasicDBObject("$in", basicDBList);
+            final BasicDBObject query = new BasicDBObject(TableColumns.JOBINSTANCEID, inJobInstanceIdsClause);
+
+            //create "batchstatus in" list
+            basicDBList = new BasicDBList();
+            basicDBList.add(BatchStatus.STARTED.name());
+            basicDBList.add(BatchStatus.STARTING.name());
+            final DBObject inBatchStatusClause = new BasicDBObject("$in", basicDBList);
+
+            //combine batchstatus in clause into jobinstanceid in clause
+            query.put(TableColumns.BATCHSTATUS, inBatchStatusClause);
+            keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
+            cursor = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(query).projection(keys).iterator();
+
+            while (cursor.hasNext()) {
+                final DBObject next = cursor.next();
+                result.add((Long) next.get(TableColumns.JOBEXECUTIONID));
+            }
+        } catch (Exception e) {
+            result.addAll(getCachedRunningExecutions(jobName));
         }
 
         return result;
