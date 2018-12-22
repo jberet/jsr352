@@ -264,6 +264,14 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             jobContext.destroyArtifact(allChunkRelatedListeners);
             // Safely close the reader and writer
             safeClose();
+
+            //reset global transaction timeout to system default value, since the current batch thread
+            //may be used for batchlet step or other chunk step execution.
+            try {
+                tm.setTransactionTimeout(0);
+            } catch (SystemException txSystemException) {
+                LOGGER.warn(toString(), txSystemException);
+            }
         }
     }
 
