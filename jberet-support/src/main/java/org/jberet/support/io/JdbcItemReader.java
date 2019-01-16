@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2014-2019 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -106,8 +106,8 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
      * <p>
      * <li>resultSetType:
      * <ul>
-     * <li>TYPE_FORWARD_ONLY (default)</li>
-     * <li>TYPE_SCROLL_INSENSITIVE</li>
+     * <li>TYPE_FORWARD_ONLY (default except for db2)</li>
+     * <li>TYPE_SCROLL_INSENSITIVE (default for db2)</li>
      * <li>TYPE_SCROLL_SENSITIVE</li>
      * </ul>
      * </li>
@@ -160,27 +160,16 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
             connection.setAutoCommit(autoCommit);
         }
 
+        final int[] rsProps = parseResultSetProperties();
         if (isStoredProcedure()) {
-            if (resultSetProperties == null) {
-                preparedStatement = connection.prepareCall(sql,
-                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
-            } else {
-                final int[] rsProps = parseResultSetProperties();
-                preparedStatement = connection.prepareCall(sql, rsProps[0], rsProps[1], rsProps[2]);
-                preparedStatement.setFetchDirection(rsProps[3]);
-                preparedStatement.setFetchSize(rsProps[4]);
-            }
+            preparedStatement = connection.prepareCall(sql, rsProps[0], rsProps[1], rsProps[2]);
+            preparedStatement.setFetchDirection(rsProps[3]);
+            preparedStatement.setFetchSize(rsProps[4]);
             resultSet = executeStoredProcedure();
         } else {
-            if (resultSetProperties == null) {
-                preparedStatement = connection.prepareStatement(sql,
-                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
-            } else {
-                final int[] rsProps = parseResultSetProperties();
-                preparedStatement = connection.prepareStatement(sql, rsProps[0], rsProps[1], rsProps[2]);
-                preparedStatement.setFetchDirection(rsProps[3]);
-                preparedStatement.setFetchSize(rsProps[4]);
-            }
+            preparedStatement = connection.prepareStatement(sql, rsProps[0], rsProps[1], rsProps[2]);
+            preparedStatement.setFetchDirection(rsProps[3]);
+            preparedStatement.setFetchSize(rsProps[4]);
             resultSet = preparedStatement.executeQuery();
         }
 
@@ -290,57 +279,69 @@ public class JdbcItemReader extends JdbcItemReaderWriterBase implements ItemRead
 
     protected int[] parseResultSetProperties() {
         final int[] result = new int[5];
-        int rsType = ResultSet.TYPE_FORWARD_ONLY;
+        int rsType = 0;
         int rsConcur = ResultSet.CONCUR_READ_ONLY;
         int rsHold = ResultSet.HOLD_CURSORS_OVER_COMMIT;
         int fetchDirection = ResultSet.FETCH_FORWARD;
         int fetchSize = 0;
-        for (final Map.Entry<String, String> e : resultSetProperties.entrySet()) {
-            final String k = e.getKey();
-            final String v = e.getValue();
 
-            if ("fetchSize".equals(k)) {
-                fetchSize = Integer.parseInt(v.trim());
-            } else if ("resultSetType".equals(k)) {
-                if ("TYPE_FORWARD_ONLY".equals(v)) {
-                    rsType = ResultSet.TYPE_FORWARD_ONLY;
-                } else if ("TYPE_SCROLL_SENSITIVE".equals(v)) {
-                    rsType = ResultSet.TYPE_SCROLL_SENSITIVE;
-                } else if ("TYPE_SCROLL_INSENSITIVE".equals(v)) {
-                    rsType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+        if(resultSetProperties != null) {
+            for (final Map.Entry<String, String> e : resultSetProperties.entrySet()) {
+                final String k = e.getKey();
+                final String v = e.getValue();
+
+                if ("fetchSize".equals(k)) {
+                    fetchSize = Integer.parseInt(v.trim());
+                } else if ("resultSetType".equals(k)) {
+                    if ("TYPE_FORWARD_ONLY".equals(v)) {
+                        rsType = ResultSet.TYPE_FORWARD_ONLY;
+                    } else if ("TYPE_SCROLL_SENSITIVE".equals(v)) {
+                        rsType = ResultSet.TYPE_SCROLL_SENSITIVE;
+                    } else if ("TYPE_SCROLL_INSENSITIVE".equals(v)) {
+                        rsType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+                    } else {
+                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetType");
+                    }
+                } else if ("resultSetConcurrency".equals(k)) {
+                    if ("CONCUR_READ_ONLY".equals(v)) {
+                        rsConcur = ResultSet.CONCUR_READ_ONLY;
+                    } else if ("CONCUR_UPDATABLE".equals(v)) {
+                        rsConcur = ResultSet.CONCUR_UPDATABLE;
+                    } else {
+                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetConcurrency");
+                    }
+                } else if ("resultSetHoldability".equals(k)) {
+                    if ("HOLD_CURSORS_OVER_COMMIT".equals(v)) {
+                        rsHold = ResultSet.HOLD_CURSORS_OVER_COMMIT;
+                    } else if ("CLOSE_CURSORS_AT_COMMIT".equals(v)) {
+                        rsHold = ResultSet.CLOSE_CURSORS_AT_COMMIT;
+                    } else {
+                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetHoldability");
+                    }
+                } else if ("fetchDirection".equals(k)) {
+                    if ("FETCH_FORWARD".equals(v)) {
+                        fetchDirection = ResultSet.FETCH_FORWARD;
+                    } else if ("FETCH_REVERSE".equals(v)) {
+                        fetchDirection = ResultSet.FETCH_REVERSE;
+                    } else if ("FETCH_UNKNOWN".equals(v)) {
+                        fetchDirection = ResultSet.FETCH_UNKNOWN;
+                    } else {
+                        throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "fetchDirection");
+                    }
                 } else {
-                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetType");
+                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, k);
                 }
-            } else if ("resultSetConcurrency".equals(k)) {
-                if ("CONCUR_READ_ONLY".equals(v)) {
-                    rsConcur = ResultSet.CONCUR_READ_ONLY;
-                } else if ("CONCUR_UPDATABLE".equals(v)) {
-                    rsConcur = ResultSet.CONCUR_UPDATABLE;
-                } else {
-                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetConcurrency");
-                }
-            } else if ("resultSetHoldability".equals(k)) {
-                if ("HOLD_CURSORS_OVER_COMMIT".equals(v)) {
-                    rsHold = ResultSet.HOLD_CURSORS_OVER_COMMIT;
-                } else if ("CLOSE_CURSORS_AT_COMMIT".equals(v)) {
-                    rsHold = ResultSet.CLOSE_CURSORS_AT_COMMIT;
-                } else {
-                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "resultSetHoldability");
-                }
-            } else if ("fetchDirection".equals(k)) {
-                if ("FETCH_FORWARD".equals(v)) {
-                    fetchDirection = ResultSet.FETCH_FORWARD;
-                } else if ("FETCH_REVERSE".equals(v)) {
-                    fetchDirection = ResultSet.FETCH_REVERSE;
-                } else if ("FETCH_UNKNOWN".equals(v)) {
-                    fetchDirection = ResultSet.FETCH_UNKNOWN;
-                } else {
-                    throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, "fetchDirection");
-                }
-            } else {
-                throw SupportMessages.MESSAGES.invalidReaderWriterProperty(null, v, k);
             }
         }
+
+        // If resultSetType property has not been explicitly configured, then pick a default value.
+        // For example, for db2 use TYPE_SCROLL_INSENSITIVE as default (db2 driver connection class
+        // name com.ibm.db2.jcc.t4.b).
+        if (rsType == 0) {
+            rsType = connection.getClass().getName().contains(".db2.") ?
+                    ResultSet.TYPE_SCROLL_INSENSITIVE : ResultSet.TYPE_FORWARD_ONLY;
+        }
+
         result[0] = rsType;
         result[1] = rsConcur;
         result[2] = rsHold;
