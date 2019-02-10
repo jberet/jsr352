@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2019 Red Hat, Inc. and/or its affiliates.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -399,6 +399,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 itemRead = null;
                 processingInfo.checkpointPosition = processingInfo.readPosition;
                 stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
+
+                if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK || tm.getStatus() == Status.STATUS_ROLLEDBACK) {
+                    tm.rollback();
+                    if (processingInfo.chunkState == ChunkState.RUNNING) {
+                        processingInfo.chunkState = ChunkState.TO_START_NEW;
+                    }
+                }
             } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                 for (final RetryReadListener l : retryReadListeners) {
                     l.onRetryReadException(e);
@@ -448,6 +455,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     output = null;
                     processingInfo.checkpointPosition = processingInfo.readPosition;
                     stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
+
+                    if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK || tm.getStatus() == Status.STATUS_ROLLEDBACK) {
+                        tm.rollback();
+                        if (processingInfo.chunkState == ChunkState.RUNNING) {
+                            processingInfo.chunkState = ChunkState.TO_START_NEW;
+                        }
+                    }
                 } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                     for (final RetryProcessListener l : retryProcessListeners) {
                         l.onRetryProcessException(itemRead, e);
