@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2012-2018 Red Hat, Inc. and/or its affiliates.
+ Copyright (c) 2012-2019 Red Hat, Inc. and/or its affiliates.
 
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
@@ -33,7 +33,7 @@
     <licenses>
         <license>
             <name>Eclipse Public License 1.0</name>
-            <url>http://repository.jboss.org/licenses/epl-1.0.txt</url>
+            <url>https://repository.jboss.org/licenses/epl-1.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -114,6 +114,14 @@
         <version.com.datastax.cassandra>3.4.0</version.com.datastax.cassandra>
 
         <!-- Other properties -->
+        <!-- Protocol to use for communication with remote maven repositories.
+             You can set to 'http' if you are using a maven proxy and 'https'
+             interferes with that. Use 'https' for builds that will be released
+             to non-snapshot public maven repos -->
+        <maven.repository.protocol>https</maven.repository.protocol>
+        <!-- The full remote maven repo URL; can be overridden via -D for special use cases -->
+        <maven.repository.url>${maven.repository.protocol}://repository.jboss.org/nexus/content/groups/public/</maven.repository.url>
+
         <redirectTestOutput>false</redirectTestOutput>
         <javadoc.additional.params>-sourceclasspath ${project.build.outputDirectory}</javadoc.additional.params>
 
@@ -836,14 +844,6 @@
 
     <repositories>
         <repository>
-            <id>central</id>
-            <url>http://repo1.maven.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>jboss-public-repository-group</id>
-            <name>JBoss Public Repository Group</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
-            <layout>default</layout>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>never</updatePolicy>
@@ -852,20 +852,24 @@
                 <enabled>true</enabled>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>${maven.repository.url}</url>
+            <layout>default</layout>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
-            <id>jboss-public-repository-group</id>
-            <name>JBoss Public Repository Group</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>${maven.repository.url}</url>
         </pluginRepository>
         <pluginRepository>
             <id>miredot</id>

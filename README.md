@@ -77,7 +77,7 @@ Increase `ulimit` to avoid such errors. For example,
         <repository>
             <id>jboss-public-repository-group</id>
             <name>JBoss Public Repository Group</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
         </repository>
     </repositories>
     ...
