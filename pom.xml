@@ -55,8 +55,8 @@
         <version.junit>4.12</version.junit>
         <version.org.codehaus.woodstox.stax2-api>4.0.0</version.org.codehaus.woodstox.stax2-api>
         <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
-        <version.org.jboss.logging.jboss-logging>3.3.0.Final</version.org.jboss.logging.jboss-logging>
-        <version.org.jboss.logging.jboss-logging-tools>2.0.0.Final</version.org.jboss.logging.jboss-logging-tools>
+        <version.org.jboss.logging.jboss-logging>3.4.0.Final</version.org.jboss.logging.jboss-logging>
+        <version.org.jboss.logging.jboss-logging-tools>2.2.0.Final</version.org.jboss.logging.jboss-logging-tools>
         <version.org.jboss.marshalling>1.4.10.Final</version.org.jboss.marshalling>
         <version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>1.0.0.Final
         </version.org.jboss.spec.javax.batch.jboss-batch-api_1.0_spec>
