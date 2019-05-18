@@ -129,10 +129,14 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     	} else {
     		try {
     			taskSubmissionListener.beforeSubmit();
-    			executor.execute(task);
+			} catch (Exception e) {
+				throw SEBatchMessages.MESSAGES.taskSubmissionListenerError(e, "beforeSubmit");
+			}
+    		executor.execute(task);
+    		try {
     			taskSubmissionListener.afterSubmit();
 			} catch (Exception e) {
-				throw SEBatchMessages.MESSAGES.taskSubmissionListenerError(e);
+				throw SEBatchMessages.MESSAGES.taskSubmissionListenerError(e, "afterSubmit");
 			}
     	}   
     }
