@@ -57,6 +57,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     private final TransactionManager tm;
     private final JobXmlResolver jobXmlResolver;
     private final JobExecutor executor;
+    private final TaskSubmissionListener taskSubmissionListener;
 
     static final String THREAD_POOL_TYPE = "thread-pool-type";
     static final String THREAD_POOL_TYPE_CACHED = "Cached";
@@ -71,6 +72,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     static final String THREAD_POOL_PRESTART_ALL_CORE_THREADS = "thread-pool-prestart-all-core-threads";
     static final String THREAD_POOL_REJECTION_POLICY = "thread-pool-rejection-policy";
     static final String THREAD_FACTORY = "thread-factory";
+    
+    static final String TASK_SUBMISSION_LISTENER = "task-submission-listener";
 
     public BatchSEEnvironment() {
         configProperties = new Properties();
@@ -101,6 +104,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         };
         final ServiceLoader<JobXmlResolver> userJobXmlResolvers = ServiceLoader.load(JobXmlResolver.class, getClassLoader());
         this.jobXmlResolver = new ChainedJobXmlResolver(userJobXmlResolvers, DEFAULT_JOB_XML_RESOLVERS);
+        
+        this.taskSubmissionListener = createTaskSubmissionListener();
     }
 
     @Override
@@ -119,7 +124,17 @@ public final class BatchSEEnvironment implements BatchEnvironment {
 
     @Override
     public void submitTask(final JobTask task) {
-        executor.execute(task);
+    	if(taskSubmissionListener == null) {
+    		executor.execute(task);
+    	} else {
+    		try {
+    			taskSubmissionListener.beforeSubmit();
+    			executor.execute(task);
+    			taskSubmissionListener.afterSubmit();
+			} catch (Exception e) {
+				throw SEBatchMessages.MESSAGES.taskSubmissionListenerError(e);
+			}
+    	}   
     }
 
     @Override
@@ -236,5 +251,18 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         }
 
         throw SEBatchMessages.MESSAGES.failToGetConfigProperty(THREAD_POOL_TYPE, threadPoolType, null);
+    }
+    
+    TaskSubmissionListener createTaskSubmissionListener() {
+        final String taskSubmissionListenerProp = configProperties.getProperty(TASK_SUBMISSION_LISTENER);
+        if (taskSubmissionListenerProp != null && !taskSubmissionListenerProp.isEmpty()) {
+        	try {
+				final Class<?> taskSubmissionListenerClass = getClassLoader().loadClass(taskSubmissionListenerProp.trim());
+                return (TaskSubmissionListener) taskSubmissionListenerClass.getDeclaredConstructor().newInstance();
+			} catch (Exception e) {
+				throw SEBatchMessages.MESSAGES.failToGetConfigProperty(TASK_SUBMISSION_LISTENER, taskSubmissionListenerProp, e);
+			}
+        }
+        return null;
     }
 }
