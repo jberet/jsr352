@@ -13,8 +13,6 @@ package org.jberet.runtime.runner;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.batch.api.chunk.CheckpointAlgorithm;
 import javax.batch.api.chunk.ItemProcessor;
@@ -313,7 +311,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                         processingInfo.chunkState == ChunkState.RETRYING ||
                         processingInfo.chunkState == ChunkState.TO_END_RETRY) {
                     if (processingInfo.chunkState == ChunkState.TO_START_NEW || processingInfo.chunkState == ChunkState.TO_END_RETRY) {
-                        processingInfo.reset();
+                        processingInfo.reset(timeLimit);
                     }
                     //if during Chunk RETRYING, and an item is skipped, the ut is still active so no need to begin a new one
                     if (tm.getStatus() != Status.STATUS_ACTIVE) {
@@ -505,16 +503,8 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
     }
 
     private void beginCheckpoint(final ProcessingInfo processingInfo) throws Exception {
-        if (checkpointPolicy.equals("item")) {
-            if (timeLimit > 0) {
-                final Timer timer = new Timer("chunk-checkpoint-timer", true);
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        processingInfo.timerExpired = true;
-                    }
-                }, timeLimit * 1000);
-            }
+        if (checkpointPolicy.equals("item") && timeLimit > 0) {
+            processingInfo.expiresAt = System.currentTimeMillis() + ( timeLimit * 1000 );
         }
         //if chunk is already RETRYING, do not change it to RUNNING
         if (processingInfo.chunkState == ChunkState.TO_RETRY) {
@@ -542,7 +532,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 return true;
             }
             if (timeLimit > 0) {
-                return processingInfo.timerExpired;
+                return processingInfo.timerExpired();
             }
             return false;
         }
@@ -838,7 +828,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
          */
         int count;
 
-        boolean timerExpired;
+        long expiresAt;
         ItemState itemState = ItemState.RUNNING;
         ChunkState chunkState = ChunkState.TO_START_NEW;
 
@@ -858,9 +848,9 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
          */
         Integer failurePoint;
 
-        private void reset() {
+        private void reset(final int timeLimit) {
             count = 0;
-            timerExpired = false;
+            expiresAt = System.currentTimeMillis() + ( timeLimit * 1000 );
             itemState = ItemState.RUNNING;
             chunkState = ChunkState.RUNNING;
             failurePoint = null;
@@ -871,12 +861,16 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     itemState == ItemState.TO_RETRY_READ || itemState == ItemState.TO_RETRY_PROCESS ||
                     itemState == ItemState.TO_RETRY_WRITE;
         }
+        
+        private boolean timerExpired() {
+        	return System.currentTimeMillis() > expiresAt;
+        }
 
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder("ProcessingInfo{");
             sb.append("count=").append(count);
-            sb.append(", timerExpired=").append(timerExpired);
+            sb.append(", timerExpired=").append(timerExpired());
             sb.append(", itemState=").append(itemState);
             sb.append(", chunkState=").append(chunkState);
             sb.append(", checkpointPosition=").append(checkpointPosition);
