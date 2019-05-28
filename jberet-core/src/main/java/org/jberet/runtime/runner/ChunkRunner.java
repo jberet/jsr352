@@ -504,7 +504,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
     private void beginCheckpoint(final ProcessingInfo processingInfo) throws Exception {
         if (checkpointPolicy.equals("item") && timeLimit > 0) {
-            processingInfo.expiresAt = timeLimit * 1_000_000 + System.nanoTime();
+            processingInfo.expiresAt = timeLimit * 1_000_000L + System.nanoTime();
         }
         //if chunk is already RETRYING, do not change it to RUNNING
         if (processingInfo.chunkState == ChunkState.TO_RETRY) {
@@ -850,7 +850,7 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
         private void reset(final int timeLimit) {
             count = 0;
-            expiresAt = timeLimit * 1_000_000 + System.nanoTime();
+            expiresAt = timeLimit * 1_000_000L + System.nanoTime();
             itemState = ItemState.RUNNING;
             chunkState = ChunkState.RUNNING;
             failurePoint = null;
