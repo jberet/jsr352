@@ -13,6 +13,7 @@
 
     <properties>
         <jvmArgs>-Xms512m -Xmx1024m -XX:MaxPermSize=512m</jvmArgs>
+        <insecure.repositories>WARN</insecure.repositories>
     </properties>
 
     <dependencies>
