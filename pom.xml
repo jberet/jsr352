@@ -81,7 +81,7 @@
         <version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec>2.0.5.Final</version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec>
 
         <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
-        <version.io.netty>4.0.35.Final</version.io.netty>
+        <version.io.netty>4.1.42.Final</version.io.netty>
 
         <version.javax.validation>1.1.0.Final</version.javax.validation>
         <version.org.hibernate.validator>5.3.3.Final</version.org.hibernate.validator>
