@@ -13,6 +13,7 @@
 package org.jberet._private;
 
 import java.sql.Connection;
+import java.util.List;
 import javax.batch.runtime.BatchStatus;
 
 import org.jboss.logging.BasicLogger;
@@ -151,5 +152,9 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 31, value = "Problem finalizing partition execution in step execution %s")
     @LogMessage(level = Logger.Level.WARN)
     void problemFinalizingPartitionExecution(@Cause Throwable cause, long stepExecutionId);
+
+    @Message(id = 32, value = "Failed to get running executions for job %s; instead got cached executions: %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void failedGetRunningExecutions(@Cause Throwable cause, String jobName, List<Long> jobExecutionIds);
 
 }
