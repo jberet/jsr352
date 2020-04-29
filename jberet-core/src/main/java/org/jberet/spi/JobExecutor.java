@@ -135,7 +135,17 @@ public abstract class JobExecutor implements Executor {
         }
     }
 
-    private JobTask wrap(final Runnable task) {
+    /**
+     * Wraps the original {@code java.lang.Runnable} to a {@code org.jberet.spi.JobTask},
+     * adding appropriate implementation of {@code org.jberet.spi.JobTask#getRequiredRemainingPermits()}
+     * method.
+     * <p>
+     * Subclass may override this method to wrap it appropriate for its environment.
+     *
+     * @param task the original {@code Runnable}
+     * @return a {@code JobTask} wrapping the original {@code Runnable}
+     */
+    protected JobTask wrap(final Runnable task) {
         if (task instanceof JobTask) {
             return (JobTask) task;
         }
