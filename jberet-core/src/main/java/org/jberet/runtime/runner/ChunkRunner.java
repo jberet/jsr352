@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc. and/or its affiliates.
+ * Copyright (c) 2012-2019 Red Hat, Inc. and/or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,6 +11,9 @@
  */
 
 package org.jberet.runtime.runner;
+
+import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -53,9 +56,6 @@ import org.jberet.runtime.metric.StepMetrics;
 import org.jberet.spi.JobTask;
 import org.jberet.spi.PartitionWorker;
 import org.jboss.logging.Logger;
-
-import static org.jberet._private.BatchLogger.LOGGER;
-import static org.jberet._private.BatchMessages.MESSAGES;
 
 /**
  * This runner class is responsible for running a chunk-type step (not just a chunk range of a step).  In a partitioned
@@ -401,6 +401,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                 itemRead = null;
                 processingInfo.checkpointPosition = processingInfo.readPosition;
                 stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
+
+                if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK || tm.getStatus() == Status.STATUS_ROLLEDBACK) {
+                    tm.rollback();
+                    if (processingInfo.chunkState == ChunkState.RUNNING) {
+                        processingInfo.chunkState = ChunkState.TO_START_NEW;
+                    }
+                }
             } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                 for (final RetryReadListener l : retryReadListeners) {
                     l.onRetryReadException(e);
@@ -450,6 +457,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     output = null;
                     processingInfo.checkpointPosition = processingInfo.readPosition;
                     stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
+
+                    if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK || tm.getStatus() == Status.STATUS_ROLLEDBACK) {
+                        tm.rollback();
+                        if (processingInfo.chunkState == ChunkState.RUNNING) {
+                            processingInfo.chunkState = ChunkState.TO_START_NEW;
+                        }
+                    }
                 } else if (processingInfo.itemState == ItemState.TO_RETRY) {
                     for (final RetryProcessListener l : retryProcessListeners) {
                         l.onRetryProcessException(itemRead, e);
