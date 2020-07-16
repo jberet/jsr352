@@ -13,6 +13,10 @@ package org.jberet.job.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import static org.jberet.job.model.Properties.toJavaUtilProperties;
 
 /**
  * Corresponds to {@code jsl:Job} type, the root element of job XML.
@@ -157,5 +161,28 @@ public final class Job extends InheritableJobElement implements Serializable, Pr
      */
     public List<InheritableJobElement> getInheritingJobElements() {
         return inheritingJobElements;
+    }
+
+    public JobBuilder toBuilder() {
+        final JobBuilder jobBuilder = new JobBuilder(this.getId());
+        jobBuilder.properties(toJavaUtilProperties(this.getProperties()))
+                  .restartable(this.getRestartableBoolean());
+
+        if (this.getListeners() != null) {
+            this.getListeners()
+                .getListeners()
+                .forEach(refArtifact -> jobBuilder
+                    .listener(refArtifact.getRef(), toJavaUtilProperties(refArtifact.getProperties())));
+        }
+
+        for (JobElement jobElement : this.jobElements) {
+
+            if (jobElement instanceof Step) {
+                jobBuilder.step(((Step) jobElement).toBuilder().build());
+            }
+
+        }
+
+        return jobBuilder;
     }
 }

@@ -10,6 +10,8 @@
 
 package org.jberet.job.model;
 
+import static org.jberet.job.model.Properties.toJavaUtilProperties;
+
 /**
  * Corresponds to {@code jsl:Step} job element type in job XML.
  */
@@ -160,5 +162,20 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
      */
     void setPartition(final Partition partition) {
         this.partition = partition;
+    }
+
+    public StepBuilder toBuilder() {
+        final StepBuilder stepBuilder = new StepBuilder(this.getId());
+
+        stepBuilder.properties(toJavaUtilProperties(this.getProperties()))
+                   .startLimit(this.getStartLimitInt())
+                   .allowStartIfComplete(this.getAllowStartIfCompleteBoolean())
+                   .next(this.getAttributeNext());
+
+        if (this.getBatchlet() != null) {
+            stepBuilder.batchlet(this.getBatchlet().getRef(), toJavaUtilProperties(this.getBatchlet().getProperties()));
+        }
+
+        return stepBuilder;
     }
 }
