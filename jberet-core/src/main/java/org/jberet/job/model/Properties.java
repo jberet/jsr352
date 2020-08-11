@@ -27,9 +27,9 @@ public final class Properties extends MergeableElement implements Serializable, 
      */
     private String partition;
 
-    private final Map<String, String> nameValues = new LinkedHashMap<String, String>();
+    private Map<String, String> nameValues = new LinkedHashMap<String, String>();
 
-    Properties() {
+    public Properties() {
     }
 
     /**
@@ -90,7 +90,7 @@ public final class Properties extends MergeableElement implements Serializable, 
      *
      * @param partition the partition index for this properties
      */
-    void setPartition(final String partition) {
+    public void setPartition(final String partition) {
         this.partition = partition;
     }
 
@@ -103,12 +103,20 @@ public final class Properties extends MergeableElement implements Serializable, 
         return nameValues.size();
     }
 
+    public Map<String, String> getNameValues() {
+        return nameValues;
+    }
+
+    public void setNameValues(final Map<String, String> nameValues) {
+        this.nameValues = nameValues;
+    }
+
     /**
      * Gets a copy of the underlying mapping for this {@code org.jberet.job.model.Properties}.
      *
      * @return a copy of the underlying mapping
      */
-    Map<String, String> getPropertiesMapping() {
+    public Map<String, String> getPropertiesMapping() {
         return new LinkedHashMap<String, String>(nameValues);
     }
 

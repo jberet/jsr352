@@ -32,7 +32,7 @@ public final class Flow extends InheritableJobElement {
      */
     List<JobElement> jobElements = new ArrayList<JobElement>();
 
-    Flow(final String id) {
+    public Flow(final String id) {
         super(id);
     }
 
@@ -45,6 +45,10 @@ public final class Flow extends InheritableJobElement {
         return next;
     }
 
+    public void setAttributeNext(final String next) {
+        this.next = next;
+    }
+
     /**
      * Gets the list of job elements contained inside this flow.
      *
@@ -52,6 +56,10 @@ public final class Flow extends InheritableJobElement {
      */
     public List<JobElement> getJobElements() {
         return jobElements;
+    }
+
+    public void setJobElements(final List<JobElement> jobElements) {
+        this.jobElements = jobElements;
     }
 
     /**
@@ -62,7 +70,7 @@ public final class Flow extends InheritableJobElement {
      */
     @Override
     public Listeners getListeners() {
-        throw new IllegalStateException();
+        return new Listeners();
     }
 
     /**
@@ -72,7 +80,7 @@ public final class Flow extends InheritableJobElement {
      */
     @Override
     public void setListeners(final Listeners listeners) {
-        throw new IllegalStateException();
+
     }
 
     /**
@@ -83,7 +91,7 @@ public final class Flow extends InheritableJobElement {
      */
     @Override
     public Properties getProperties() {
-        throw new IllegalStateException();
+        return new Properties();
     }
 
     /**
@@ -93,6 +101,6 @@ public final class Flow extends InheritableJobElement {
      */
     @Override
     public void setProperties(final Properties properties) {
-        throw new IllegalStateException();
+
     }
 }

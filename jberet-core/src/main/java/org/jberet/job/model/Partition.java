@@ -24,7 +24,7 @@ public final class Partition implements Serializable, Cloneable {
     private RefArtifact analyzer;
     private RefArtifact reducer;
 
-    Partition() {
+    public Partition() {
     }
 
     /**
@@ -41,7 +41,7 @@ public final class Partition implements Serializable, Cloneable {
      *
      * @param mapper partition mapper as a {@code RefArtifact}
      */
-    void setMapper(final RefArtifact mapper) {
+    public void setMapper(final RefArtifact mapper) {
         this.mapper = mapper;
     }
 
@@ -59,7 +59,7 @@ public final class Partition implements Serializable, Cloneable {
      *
      * @param plan a {@code org.jberet.job.model.PartitionPlan}
      */
-    void setPlan(final PartitionPlan plan) {
+    public void setPlan(final PartitionPlan plan) {
         this.plan = plan;
     }
 
@@ -77,7 +77,7 @@ public final class Partition implements Serializable, Cloneable {
      *
      * @param collector partition collector as a {@code RefArtifact}
      */
-    void setCollector(final RefArtifact collector) {
+    public void setCollector(final RefArtifact collector) {
         this.collector = collector;
     }
 
@@ -95,7 +95,7 @@ public final class Partition implements Serializable, Cloneable {
      *
      * @param analyzer partition analyzer as a {@code RefArtifact}
      */
-    void setAnalyzer(final RefArtifact analyzer) {
+    public void setAnalyzer(final RefArtifact analyzer) {
         this.analyzer = analyzer;
     }
 
@@ -113,7 +113,7 @@ public final class Partition implements Serializable, Cloneable {
      *
      * @param reducer partition reducer as a {@code RefArtifact}
      */
-    void setReducer(final RefArtifact reducer) {
+    public void setReducer(final RefArtifact reducer) {
         this.reducer = reducer;
     }
 

@@ -12,6 +12,7 @@ package org.jberet.job.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public final class Job extends InheritableJobElement implements Serializable, Pr
 
     private String restartable;
 
-    private final List<JobElement> jobElements = new ArrayList<JobElement>();
+    private List<JobElement> jobElements = new ArrayList<>();
 
     private String jobXmlName;
 
@@ -48,7 +49,7 @@ public final class Job extends InheritableJobElement implements Serializable, Pr
      */
     final List<InheritableJobElement> inheritingJobElements = new ArrayList<InheritableJobElement>();
 
-    Job(final String id) {
+    public Job(final String id) {
         super(id);
     }
 
@@ -75,7 +76,7 @@ public final class Job extends InheritableJobElement implements Serializable, Pr
      *
      * @param restartable the job's {@code restartable} attribute string value
      */
-    void setRestartable(final String restartable) {
+    public void setRestartable(final String restartable) {
         if (restartable != null) {
             this.restartable = restartable;
         }
@@ -112,12 +113,16 @@ public final class Job extends InheritableJobElement implements Serializable, Pr
         return jobElements;
     }
 
+    public void setJobElements(final List<JobElement> jobElements) {
+        this.jobElements = jobElements;
+    }
+
     /**
      * Adds a job element to the job's job element list.
      *
      * @param jobElement the job element to add, which may be a step, decision, flow, or split
      */
-    void addJobElement(final JobElement jobElement) {
+    public void addJobElement(final JobElement jobElement) {
         jobElements.add(jobElement);
     }
 
@@ -140,7 +145,7 @@ public final class Job extends InheritableJobElement implements Serializable, Pr
 
     @Override
     public List<Transition> getTransitionElements() {
-        throw new IllegalStateException();
+        return Collections.emptyList();
     }
 
     @Override

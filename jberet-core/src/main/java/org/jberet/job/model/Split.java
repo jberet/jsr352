@@ -25,9 +25,9 @@ public final class Split extends AbstractJobElement {
      * list of {@linkplain Flow flows} in this split.
      * Unlike a flow, which may contain all types of job-level job elements, split may only contain flows.
      */
-    final List<Flow> flows = new ArrayList<Flow>();
+    List<Flow> flows = new ArrayList<Flow>();
 
-    Split(final String id) {
+    public Split(final String id) {
         super(id);
     }
 
@@ -45,7 +45,7 @@ public final class Split extends AbstractJobElement {
      *
      * @param next {@code next} attribute value
      */
-    void setAttributeNext(final String next) {
+    public void setAttributeNext(final String next) {
         this.next = next;
     }
 
@@ -58,12 +58,16 @@ public final class Split extends AbstractJobElement {
         return flows;
     }
 
+    public void setFlows(final List<Flow> flows) {
+        this.flows = flows;
+    }
+
     /**
      * Adds a {@link Flow} to this split.
      *
      * @param flow a flow to add to this split
      */
-    void addFlow(final Flow flow) {
+    public void addFlow(final Flow flow) {
         flows.add(flow);
     }
 
@@ -75,7 +79,7 @@ public final class Split extends AbstractJobElement {
      */
     @Override
     public Properties getProperties() {
-        throw new IllegalStateException();
+        return new Properties();
     }
 
     /**
@@ -86,6 +90,6 @@ public final class Split extends AbstractJobElement {
      */
     @Override
     public void setProperties(final Properties properties) {
-        throw new IllegalStateException();
+
     }
 }

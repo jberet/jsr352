@@ -37,9 +37,9 @@ public final class PartitionPlan implements Serializable, Cloneable {
     /**
      * list of {@code org.jberet.job.model.Properties}, one properties for each partition.
      */
-    private final List<Properties> propertiesList = new ArrayList<Properties>();
+    private List<Properties> propertiesList = new ArrayList<Properties>();
 
-    PartitionPlan() {
+    public PartitionPlan() {
     }
 
     /**
@@ -51,13 +51,17 @@ public final class PartitionPlan implements Serializable, Cloneable {
         return propertiesList;
     }
 
+    public void setPropertiesList(final List<Properties> propertiesList) {
+        this.propertiesList = propertiesList;
+    }
+
     /**
      * Adds a {@code org.jberet.job.model.Properties} to the list of {@code org.jberet.job.model.Properties} for this
      * partition plan.
      *
      * @param properties a {@code org.jberet.job.model.Properties}
      */
-    void addProperties(final Properties properties) {
+    public void addProperties(final Properties properties) {
         propertiesList.add(properties);
     }
 
@@ -87,7 +91,7 @@ public final class PartitionPlan implements Serializable, Cloneable {
      *
      * @param partitions number of partitions as string
      */
-    void setPartitions(final String partitions) {
+    public void setPartitions(final String partitions) {
         if (partitions != null) {
             this.partitions = partitions;
         }
@@ -120,7 +124,7 @@ public final class PartitionPlan implements Serializable, Cloneable {
      *
      * @param threads number of threads as string
      */
-    void setThreads(final String threads) {
+    public void setThreads(final String threads) {
         if (threads != null) {
             this.threads = threads;
         }
