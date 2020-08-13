@@ -18,7 +18,6 @@ import javax.batch.operations.JobStartException;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.JobXmlResolver;
-import org.jberet.util.BatchUtil;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
@@ -93,11 +92,11 @@ public final class FlowMerger extends AbstractMerger<Flow> {
             child.jobElements = AccessController.doPrivileged(new PrivilegedAction<List<JobElement>>() {
                 @Override
                 public List<JobElement> run() {
-                    return BatchUtil.clone(parent.jobElements);
+                    return JobFactory.cloneJobElements(parent.jobElements);
                 }
             });
         } else {
-            child.jobElements = BatchUtil.clone(parent.jobElements);
+            child.jobElements = JobFactory.cloneJobElements(parent.jobElements);
         }
 
         child.setParentAndJslName(null, null);

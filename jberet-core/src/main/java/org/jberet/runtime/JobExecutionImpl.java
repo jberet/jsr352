@@ -30,6 +30,7 @@ import javax.batch.runtime.StepExecution;
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.ArtifactCreationContext;
 import org.jberet.job.model.Job;
+import org.jberet.job.model.JobFactory;
 import org.jberet.util.BatchUtil;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
@@ -75,11 +76,11 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
             this.substitutedJob = AccessController.doPrivileged(new PrivilegedAction<Job>() {
                 @Override
                 public Job run() {
-                    return BatchUtil.clone(jobInstance.unsubstitutedJob);
+                    return JobFactory.cloneJob(jobInstance.unsubstitutedJob);
                 }
             });
         } else {
-            this.substitutedJob = BatchUtil.clone(jobInstance.unsubstitutedJob);
+            this.substitutedJob = JobFactory.cloneJob(jobInstance.unsubstitutedJob);
         }
         this.createTime = System.currentTimeMillis();
         setBatchStatus(BatchStatus.STARTING);

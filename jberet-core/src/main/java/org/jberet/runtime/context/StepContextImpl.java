@@ -23,12 +23,12 @@ import javax.enterprise.context.spi.Contextual;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;
+import org.jberet.job.model.JobFactory;
 import org.jberet.job.model.Step;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.jberet.util.BatchUtil;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
@@ -109,11 +109,11 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
                 c.step = AccessController.doPrivileged(new PrivilegedAction<Step>() {
                     @Override
                     public Step run() {
-                        return BatchUtil.clone(step);
+                        return JobFactory.cloneStep(step);
                     }
                 });
             } else {
-                c.step = BatchUtil.clone(step);
+                c.step = JobFactory.cloneStep(step);
             }
             c.partitionScopedBeans = new ConcurrentHashMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>>();
         } catch (CloneNotSupportedException e) {
