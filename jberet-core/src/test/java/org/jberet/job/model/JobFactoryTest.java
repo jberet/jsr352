@@ -13,6 +13,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 public class JobFactoryTest {
@@ -114,6 +115,12 @@ public class JobFactoryTest {
     private static void assertInheritableJobElement(InheritableJobElement original, InheritableJobElement clone) {
         assertEquals(original.getId(), clone.getId());
         assertProperties(original.getProperties(), clone.getProperties());
+
+        if (original instanceof Flow) {
+            assertNull(original.getListeners());
+            assertNull(clone.getListeners());
+            return;
+        }
 
         assertNotSame(original.getListeners(), clone.getListeners());
         assertNotSame(original.getListeners().getListeners(), clone.getListeners().getListeners());

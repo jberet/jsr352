@@ -145,7 +145,7 @@ public final class Job extends InheritableJobElement implements Serializable, Pr
 
     @Override
     public List<Transition> getTransitionElements() {
-        return Collections.emptyList();
+        return null;
     }
 
     @Override

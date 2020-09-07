@@ -79,7 +79,7 @@ public final class Split extends AbstractJobElement {
      */
     @Override
     public Properties getProperties() {
-        return new Properties();
+        return null;
     }
 
     /**

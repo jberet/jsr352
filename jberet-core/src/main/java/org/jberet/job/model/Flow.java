@@ -70,7 +70,7 @@ public final class Flow extends InheritableJobElement {
      */
     @Override
     public Listeners getListeners() {
-        return new Listeners();
+        return null;
     }
 
     /**
@@ -91,7 +91,7 @@ public final class Flow extends InheritableJobElement {
      */
     @Override
     public Properties getProperties() {
-        return new Properties();
+        return null;
     }
 
     /**
