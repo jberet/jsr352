@@ -84,7 +84,7 @@
         <version.io.netty>4.1.42.Final</version.io.netty>
 
         <version.javax.validation>1.1.0.Final</version.javax.validation>
-        <version.org.hibernate.validator>5.3.3.Final</version.org.hibernate.validator>
+        <version.org.hibernate.validator>5.3.6.Final</version.org.hibernate.validator>
         <version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>1.0.7.Final</version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>
         <version.org.glassfish.javax.el>3.0.1-b08</version.org.glassfish.javax.el>
 
