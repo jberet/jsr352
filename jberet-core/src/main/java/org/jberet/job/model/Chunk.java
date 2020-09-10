@@ -37,7 +37,7 @@ public final class Chunk implements Serializable, Cloneable {
     String skipLimit;    //default no limit
     String retryLimit;   //default no limit
 
-    Chunk() {
+    public Chunk() {
     }
 
     /**
@@ -54,7 +54,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param reader the chunk's item reader {@code RefArtifact}
      */
-    void setReader(final RefArtifact reader) {
+    public void setReader(final RefArtifact reader) {
         this.reader = reader;
     }
 
@@ -72,7 +72,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param processor the chunk's item processor {@code RefArtifact}
      */
-    void setProcessor(final RefArtifact processor) {
+    public void setProcessor(final RefArtifact processor) {
         this.processor = processor;
     }
 
@@ -90,7 +90,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param writer the chunk's item writer {@code RefArtifact}
      */
-    void setWriter(final RefArtifact writer) {
+    public void setWriter(final RefArtifact writer) {
         this.writer = writer;
     }
 
@@ -108,7 +108,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param checkpointAlgorithm the chunk's checkpoint algorithm {@code RefArtifact}
      */
-    void setCheckpointAlgorithm(final RefArtifact checkpointAlgorithm) {
+    public void setCheckpointAlgorithm(final RefArtifact checkpointAlgorithm) {
         this.checkpointAlgorithm = checkpointAlgorithm;
     }
 
@@ -126,7 +126,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param skippableExceptionClasses the chunk's skippable exception classes filter
      */
-    void setSkippableExceptionClasses(final ExceptionClassFilter skippableExceptionClasses) {
+    public void setSkippableExceptionClasses(final ExceptionClassFilter skippableExceptionClasses) {
         this.skippableExceptionClasses = skippableExceptionClasses;
     }
 
@@ -144,7 +144,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param retryableExceptionClasses the chunk's retryable exception classes filter
      */
-    void setRetryableExceptionClasses(final ExceptionClassFilter retryableExceptionClasses) {
+    public void setRetryableExceptionClasses(final ExceptionClassFilter retryableExceptionClasses) {
         this.retryableExceptionClasses = retryableExceptionClasses;
     }
 
@@ -162,7 +162,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param noRollbackExceptionClasses the chunk's no rollback exception classes filter
      */
-    void setNoRollbackExceptionClasses(final ExceptionClassFilter noRollbackExceptionClasses) {
+    public void setNoRollbackExceptionClasses(final ExceptionClassFilter noRollbackExceptionClasses) {
         this.noRollbackExceptionClasses = noRollbackExceptionClasses;
     }
 
@@ -180,7 +180,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param checkpointPolicy the chunk's checkpoint policy, either "item" (default), or "custom"
      */
-    void setCheckpointPolicy(final String checkpointPolicy) {
+    public void setCheckpointPolicy(final String checkpointPolicy) {
         this.checkpointPolicy = checkpointPolicy;
     }
 
@@ -210,7 +210,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param itemCount the chunk's {@code item-count} string value
      */
-    void setItemCount(final String itemCount) {
+    public void setItemCount(final String itemCount) {
         if (itemCount != null) {
             this.itemCount = itemCount;
         }
@@ -242,7 +242,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param timeLimit the chunk's {@code time-limit} string value
      */
-    void setTimeLimit(final String timeLimit) {
+    public void setTimeLimit(final String timeLimit) {
         if (timeLimit != null) {
             this.timeLimit = timeLimit;
         }
@@ -274,7 +274,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param skipLimit the chunk's {@code skip-limit} attribute value
      */
-    void setSkipLimit(final String skipLimit) {
+    public void setSkipLimit(final String skipLimit) {
         if (skipLimit != null) {
             this.skipLimit = skipLimit;
         }
@@ -294,7 +294,7 @@ public final class Chunk implements Serializable, Cloneable {
      *
      * @param retryLimit the chunk's {@code retry-limit} attribute value
      */
-    void setRetryLimit(final String retryLimit) {
+    public void setRetryLimit(final String retryLimit) {
         if (retryLimit != null) {
             this.retryLimit = retryLimit;
         }

@@ -28,7 +28,7 @@ import org.wildfly.security.manager.WildFlySecurityManager;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-class SerializableData implements Serializable {
+public class SerializableData implements Serializable {
 
     private final byte[] serialized;
     private final Serializable raw;

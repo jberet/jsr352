@@ -22,8 +22,24 @@ import java.util.List;
 public final class ExceptionClassFilter extends MergeableElement implements Serializable, Cloneable {
     private static final long serialVersionUID = -6174512038188933722L;
 
-    final List<String> include = new ArrayList<String>();
-    final List<String> exclude = new ArrayList<String>();
+    List<String> include = new ArrayList<String>();
+    List<String> exclude = new ArrayList<String>();
+
+    public List<String> getInclude() {
+        return include;
+    }
+
+    public void setInclude(final List<String> include) {
+        this.include = include;
+    }
+
+    public List<String> getExclude() {
+        return exclude;
+    }
+
+    public void setExclude(final List<String> exclude) {
+        this.exclude = exclude;
+    }
 
     /**
      * Adds an exception class fully-qualified name to either the include or exclude list.

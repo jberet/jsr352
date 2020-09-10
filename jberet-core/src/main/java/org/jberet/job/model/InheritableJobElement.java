@@ -44,7 +44,7 @@ public abstract class InheritableJobElement extends AbstractJobElement {
      *
      * @param s a string value specifying true or false
      */
-    void setAbstract(final String s) {
+    public void setAbstract(final String s) {
         if (s != null && s.toLowerCase().equals("true")) {
             this.abstractAttribute = true;
         }
@@ -55,8 +55,12 @@ public abstract class InheritableJobElement extends AbstractJobElement {
      *
      * @return the {@code parent} attribute value for this job element
      */
-    String getParent() {
+    public String getParent() {
         return parent;
+    }
+
+    public void setParent(final String parent) {
+        this.parent = parent;
     }
 
     /**
@@ -64,8 +68,12 @@ public abstract class InheritableJobElement extends AbstractJobElement {
      *
      * @return the {@code jsl-name} attribute for this job element
      */
-    String getJslName() {
+    public String getJslName() {
         return jslName;
+    }
+
+    public void setJslName(final String jslName) {
+        this.jslName = jslName;
     }
 
     /**

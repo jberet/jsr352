@@ -14,6 +14,9 @@ import org.jberet.job.model.Properties;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 
+import javax.batch.runtime.context.JobContext;
+import javax.batch.runtime.context.StepContext;
+
 public final class ArtifactCreationContext {
     JobContextImpl jobContext;
     StepContextImpl stepContext;
@@ -33,6 +36,18 @@ public final class ArtifactCreationContext {
         this.jobContext = jobContext;
         this.stepContext = stepContext;
         this.properties = properties;
+    }
+
+    public JobContext getJobContext() {
+        return jobContext;
+    }
+
+    public StepContext getStepContext() {
+        return stepContext;
+    }
+
+    public Properties getProperties() { 
+        return properties;
     }
 
     public static ArtifactCreationContext getCurrentArtifactCreationContext() {

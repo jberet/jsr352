@@ -16,39 +16,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import javax.batch.operations.JobStartException;
 
-import org.jboss.marshalling.cloner.ClonerConfiguration;
-import org.jboss.marshalling.cloner.ObjectCloner;
-import org.jboss.marshalling.cloner.ObjectClonerFactory;
-import org.jboss.marshalling.cloner.ObjectCloners;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class BatchUtil {
     public static final String NL = WildFlySecurityManager.getPropertyPrivileged("line.separator", "\n");
     private static final String keyValDelimiter = " = ";
-    private static final ObjectClonerFactory clonerFactory;
-    private static final ObjectCloner cloner;
-
-
-    static {
-        clonerFactory = AccessController.doPrivileged(new PrivilegedAction<ObjectClonerFactory>() {
-            @Override
-            public ObjectClonerFactory run() {
-                return ObjectCloners.getSerializingObjectClonerFactory();
-            }
-        });
-        cloner = AccessController.doPrivileged(new PrivilegedAction<ObjectCloner>() {
-            @Override
-            public ObjectCloner run() {
-                return clonerFactory.createCloner(new ClonerConfiguration());
-            }
-        });
-    }
 
     public static String propertiesToString(final Properties properties) {
         if (properties == null) {
@@ -118,20 +93,6 @@ public final class BatchUtil {
             } catch (IOException e2) {
                 //ignore
             }
-        }
-    }
-
-    public static <T> T clone(final T original) throws JobStartException {
-        if (original == null) {
-            return null;
-        }
-        try {
-            cloner.reset();
-            return (T) cloner.clone(original);
-        } catch (IOException e) {
-            throw new JobStartException(e);
-        } catch (ClassNotFoundException e) {
-            throw new JobStartException(e);
         }
     }
 }

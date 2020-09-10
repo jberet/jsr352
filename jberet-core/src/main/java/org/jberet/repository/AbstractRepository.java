@@ -10,10 +10,7 @@
 
 package org.jberet.repository;
 
-import java.io.Serializable;
 import java.lang.ref.ReferenceQueue;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -33,8 +30,6 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.jberet.util.BatchUtil;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 public abstract class AbstractRepository implements JobRepository {
     final ConcurrentMap<ApplicationAndJobName, SoftReference<Job, ApplicationAndJobName>> jobs =
@@ -150,17 +145,5 @@ public abstract class AbstractRepository implements JobRepository {
             return result;
         }
         return null;
-    }
-
-    private static <T extends Serializable> T clone(final T object) {
-        if (WildFlySecurityManager.isChecking()) {
-            return AccessController.doPrivileged(new PrivilegedAction<T>() {
-                @Override
-                public T run() {
-                    return BatchUtil.clone(object);
-                }
-            });
-        }
-        return BatchUtil.clone(object);
     }
 }

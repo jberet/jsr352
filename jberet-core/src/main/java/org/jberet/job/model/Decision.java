@@ -24,7 +24,7 @@ public final class Decision extends AbstractJobElement implements PropertiesHold
      * @param id decision id
      * @param ref decider ref name
      */
-    Decision(final String id, final String ref) {
+    public Decision(final String id, final String ref) {
         super(id);
         this.ref = ref;
     }
@@ -43,7 +43,7 @@ public final class Decision extends AbstractJobElement implements PropertiesHold
      *
      * @param ref decider ref name
      */
-    void setRef(final String ref) {
+    public void setRef(final String ref) {
         this.ref = ref;
     }
 }

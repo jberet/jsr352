@@ -25,7 +25,7 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
     Chunk chunk;
     Partition partition;
 
-    Step(final String id) {
+    public Step(final String id) {
         super(id);
     }
 
@@ -55,7 +55,7 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
      *
      * @param startLimit the step's {@code start-limit} attribute value as string
      */
-    void setStartLimit(final String startLimit) {
+    public void setStartLimit(final String startLimit) {
         if (startLimit != null) {
             this.startLimit = startLimit;
         }
@@ -84,7 +84,7 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
      *
      * @param allowStartIfComplete the step's {@code allow-start-if-complete} attribute string value
      */
-    void setAllowStartIfComplete(final String allowStartIfComplete) {
+    public void setAllowStartIfComplete(final String allowStartIfComplete) {
         if (allowStartIfComplete != null) {
             this.allowStartIfComplete = allowStartIfComplete;
         }
@@ -104,7 +104,7 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
      *
      * @param next name of the next job element
      */
-    void setAttributeNext(final String next) {
+    public void setAttributeNext(final String next) {
         this.next = next;
     }
 
@@ -122,7 +122,7 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
      *
      * @param batchlet the step's batchlet {@code RefArtifact}
      */
-    void setBatchlet(final RefArtifact batchlet) {
+    public void setBatchlet(final RefArtifact batchlet) {
         this.batchlet = batchlet;
     }
 
@@ -140,7 +140,7 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
      *
      * @param chunk the step's chunk element
      */
-    void setChunk(final Chunk chunk) {
+    public void setChunk(final Chunk chunk) {
         this.chunk = chunk;
     }
 
@@ -158,7 +158,7 @@ public final class Step extends InheritableJobElement implements PropertiesHolde
      *
      * @param partition the step's partition element
      */
-    void setPartition(final Partition partition) {
+    public void setPartition(final Partition partition) {
         this.partition = partition;
     }
 }

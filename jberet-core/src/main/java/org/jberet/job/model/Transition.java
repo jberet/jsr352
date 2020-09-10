@@ -32,7 +32,7 @@ public abstract class Transition<T> implements Serializable {
 
     transient T enclosingBuilder;
 
-    Transition(final String on) {
+    public Transition(final String on) {
         this.on = on;
     }
 
@@ -49,7 +49,7 @@ public abstract class Transition<T> implements Serializable {
      *
      * @param on exit status condition to be set to {@code on} attribute, may contain ? or * wildcard
      */
-    void setOn(final String on) {
+    public void setOn(final String on) {
         this.on = on;
     }
 
@@ -63,7 +63,7 @@ public abstract class Transition<T> implements Serializable {
         private static final long serialVersionUID = 4417648893108466995L;
         private String exitStatus;
 
-        Termination(final String on) {
+        public Termination(final String on) {
             super(on);
         }
 
@@ -83,7 +83,7 @@ public abstract class Transition<T> implements Serializable {
          *
          * @param exitStatus the new, updated exit stauts
          */
-        void setExitStatus(final String exitStatus) {
+        public void setExitStatus(final String exitStatus) {
             this.exitStatus = exitStatus;
         }
 
@@ -121,7 +121,7 @@ public abstract class Transition<T> implements Serializable {
          *
          * @param on exit status condition (may contain ? or * wildcard)
          */
-        End(final String on) {
+        public End(final String on) {
             super(on);
         }
     }
@@ -139,7 +139,7 @@ public abstract class Transition<T> implements Serializable {
          *
          * @param on exit status condition (may contain ? or * wildcard)
          */
-        Fail(final String on) {
+        public Fail(final String on) {
             super(on);
         }
     }
@@ -160,7 +160,7 @@ public abstract class Transition<T> implements Serializable {
          * @param on exit status condition (may contain ? or * wildcard)
          * @param restart job element id to restart from, may be null
          */
-        Stop(final String on, final String restart) {
+        public Stop(final String on, final String restart) {
             super(on);
             this.restart = restart;
         }
@@ -179,7 +179,7 @@ public abstract class Transition<T> implements Serializable {
          *
          * @param restart {@code restart} attribute value
          */
-        void setRestart(final String restart) {
+        public void setRestart(final String restart) {
             this.restart = restart;
         }
 
@@ -210,7 +210,7 @@ public abstract class Transition<T> implements Serializable {
          *
          * @param on exit status condition (may contain ? or * wildcard)
          */
-        Next(final String on) {
+        public Next(final String on) {
             super(on);
         }
 
@@ -227,7 +227,7 @@ public abstract class Transition<T> implements Serializable {
          * Sets the {@code to} attribute value, which should points to the next job element.
          * @param to the {@code to} attribute value
          */
-        void setTo(final String to) {
+        public void setTo(final String to) {
             this.to = to;
         }
 
