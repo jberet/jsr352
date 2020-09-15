@@ -10,13 +10,22 @@ which is available at https://www.eclipse.org/legal/epl-2.0/
 SPDX-License-Identifier: EPL-2.0
 -->
 
-<infinispan xmlns="urn:infinispan:config:9.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xmlns:rdb="urn:infinispan:config:store:rocksdb:9.0"
-            xsi:schemaLocation="urn:infinispan:config:9.0 http://infinispan.org/schemas/infinispan-config-9.0.xsd
-            urn:infinispan:config:store:rocksdb:9.0 http://infinispan.org/schemas/infinispan-cachestore-rocksdb-config-9.0.xsd">
+<infinispan xmlns="urn:infinispan:config:11.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:rdb="urn:infinispan:config:store:rocksdb:11.0"
+            xsi:schemaLocation="urn:infinispan:config:11.0 http://infinispan.org/schemas/infinispan-config-11.0.xsd
+            urn:infinispan:config:store:rocksdb:11.0 http://infinispan.org/schemas/infinispan-cachestore-rocksdb-config-11.0.xsd">
 
     <cache-container name="jberet" default-cache="JOB_EXECUTION">
         <transport lock-timeout="60000"/>
+
+        <serialization marshaller="org.infinispan.commons.marshall.JavaSerializationMarshaller">
+            <white-list>
+                <class>org.jberet.runtime.JobInstanceImpl</class>
+                <class>org.jberet.runtime.JobExecutionImpl</class>
+                <class>org.jberet.runtime.StepExecutionImpl</class>
+                <class>org.jberet.runtime.PartitionExecutionImpl</class>
+            </white-list>
+        </serialization>
 
         <distributed-cache name="JOB_INSTANCE" mode="ASYNC" l1-lifespan="0">
             <persistence>

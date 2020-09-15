@@ -10,8 +10,8 @@ which is available at https://www.eclipse.org/legal/epl-2.0/
 SPDX-License-Identifier: EPL-2.0
 -->
 
-<infinispan xmlns="urn:infinispan:config:7.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="urn:infinispan:config:7.0 http://infinispan.org/schemas/infinispan-config-7.0.xsd">
+<infinispan xmlns="urn:infinispan:config:11.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:infinispan:config:11.0 http://infinispan.org/schemas/infinispan-config-11.0.xsd">
 
     <cache-container name="jberet" default-cache="JOB_EXECUTION">
         <transport lock-timeout="60000"/>

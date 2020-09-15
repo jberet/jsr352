@@ -10,13 +10,22 @@ which is available at https://www.eclipse.org/legal/epl-2.0/
 SPDX-License-Identifier: EPL-2.0
 -->
 
-<infinispan xmlns="urn:infinispan:config:7.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xmlns:jdbc="urn:infinispan:config:store:jdbc:7.0"
-            xsi:schemaLocation="urn:infinispan:config:7.0 http://infinispan.org/schemas/infinispan-config-7.0.xsd
-                                urn:infinispan:config:store:jdbc:7.0 http://infinispan.org/schemas/infinispan-cachestore-jdbc-config-7.0.xsd">
+<infinispan xmlns="urn:infinispan:config:11.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:jdbc="urn:infinispan:config:store:jdbc:11.0"
+            xsi:schemaLocation="urn:infinispan:config:11.0 http://infinispan.org/schemas/infinispan-config-11.0.xsd
+                                urn:infinispan:config:store:jdbc:11.0 http://infinispan.org/schemas/infinispan-cachestore-jdbc-config-11.0.xsd">
 
     <cache-container name="jberet" default-cache="JOB_EXECUTION">
         <transport lock-timeout="60000"/>
+
+        <serialization marshaller="org.infinispan.commons.marshall.JavaSerializationMarshaller">
+            <white-list>
+                <class>org.jberet.runtime.JobInstanceImpl</class>
+                <class>org.jberet.runtime.JobExecutionImpl</class>
+                <class>org.jberet.runtime.StepExecutionImpl</class>
+                <class>org.jberet.runtime.PartitionExecutionImpl</class>
+            </white-list>
+        </serialization>
 
         <distributed-cache name="JOB_INSTANCE" mode="ASYNC" l1-lifespan="0">
             <persistence>
@@ -27,6 +36,7 @@ SPDX-License-Identifier: EPL-2.0
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
                         <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                        <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
                 </jdbc:string-keyed-jdbc-store>
             </persistence>
@@ -41,6 +51,7 @@ SPDX-License-Identifier: EPL-2.0
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
                         <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                        <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
                 </jdbc:string-keyed-jdbc-store>
             </persistence>
@@ -55,6 +66,7 @@ SPDX-License-Identifier: EPL-2.0
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
                         <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                        <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
                 </jdbc:string-keyed-jdbc-store>
             </persistence>
@@ -69,6 +81,7 @@ SPDX-License-Identifier: EPL-2.0
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
                         <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                        <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
                 </jdbc:string-keyed-jdbc-store>
             </persistence>
@@ -84,6 +97,7 @@ SPDX-License-Identifier: EPL-2.0
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
                         <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
+                        <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
                 </jdbc:string-keyed-jdbc-store>
             </persistence>
