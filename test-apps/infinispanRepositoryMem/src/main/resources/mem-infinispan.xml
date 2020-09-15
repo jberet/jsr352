@@ -16,6 +16,15 @@ SPDX-License-Identifier: EPL-2.0
     <cache-container name="jberet" default-cache="JOB_EXECUTION">
         <transport lock-timeout="60000"/>
 
+        <serialization marshaller="org.infinispan.commons.marshall.JavaSerializationMarshaller">
+            <white-list>
+                <class>org.jberet.runtime.JobInstanceImpl</class>
+                <class>org.jberet.runtime.JobExecutionImpl</class>
+                <class>org.jberet.runtime.StepExecutionImpl</class>
+                <class>org.jberet.runtime.PartitionExecutionImpl</class>
+            </white-list>
+        </serialization>
+
         <distributed-cache name="JOB_INSTANCE" mode="ASYNC" l1-lifespan="0">
         </distributed-cache>
 
