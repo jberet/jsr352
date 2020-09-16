@@ -15,14 +15,19 @@ import javax.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RocksDBInfinispanRepositoryIT extends AbstractIT {
-    @Test
-    public void partitionWithInfinispanRocksDB() throws Exception {
+    @BeforeClass
+    public static void beforeClass() {
         // skip this test on Windows, see JBERET-500
         // RocksDBInfinispanRepositoryIT.partitionWithInfinispanRocksDB failed on Windows
         Assume.assumeFalse(System.getProperty("os.name").toLowerCase().startsWith("win"));
+    }
+
+    @Test
+    public void partitionWithInfinispanRocksDB() throws Exception {
         startJobAndWait(infinispanRepositoryJobXml);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
