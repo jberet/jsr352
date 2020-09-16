@@ -24,6 +24,7 @@ SPDX-License-Identifier: EPL-2.0
                 <class>org.jberet.runtime.JobExecutionImpl</class>
                 <class>org.jberet.runtime.StepExecutionImpl</class>
                 <class>org.jberet.runtime.PartitionExecutionImpl</class>
+                <class>java.util.concurrent.CopyOnWriteArrayList</class>
             </white-list>
         </serialization>
 
