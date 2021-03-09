@@ -73,6 +73,12 @@ public class Script implements Serializable, Cloneable {
         this.src = src;
     }
 
+    public Script(final String type, final String src, final String content) {
+        this.type = type;
+        this.src = src;
+        this.content = content;
+    }
+
     /**
      * Gets the content of the script as string.
      * If the script is specified as inline in job XML, its content is returned.  Otherwise, this method tries to load
@@ -112,7 +118,8 @@ public class Script implements Serializable, Cloneable {
         java.util.Scanner scanner = null;
         try {
             scanner = new java.util.Scanner(is).useDelimiter("\\A");
-            return scanner.hasNext() ? scanner.next() : "";
+            this.content = scanner.hasNext() ? scanner.next() : "";
+            return content;
         } finally {
             if (scanner != null) {
                 try {
@@ -123,6 +130,17 @@ public class Script implements Serializable, Cloneable {
                 }
             }
         }
+    }
+
+    public String getContent() {
+        if (content == null) {
+            throw new IllegalStateException();
+        }
+        return content;
+    }
+
+    public String getSrc() {
+        return src;
     }
 
     /**
