@@ -84,12 +84,15 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String UPDATE_JOB_EXECUTION = "update-job-execution";
     private static final String UPDATE_JOB_EXECUTION_AND_PARAMETERS = "update-job-execution-and-parameters";
     private static final String UPDATE_JOB_EXECUTION_PARTIAL = "update-job-execution-partial";
+    private static final String STOP_JOB_EXECUTION = "stop-job-execution";
 
     private static final String SELECT_ALL_STEP_EXECUTIONS = "select-all-step-executions";
     private static final String SELECT_STEP_EXECUTIONS_BY_JOB_EXECUTION_ID = "select-step-executions-by-job-execution-id";
     private static final String SELECT_STEP_EXECUTION = "select-step-execution";
     private static final String INSERT_STEP_EXECUTION = "insert-step-execution";
     private static final String UPDATE_STEP_EXECUTION = "update-step-execution";
+    private static final String UPDATE_STEP_EXECUTION_IF_NOT_STOPPING = "update-step-execution-if-not-stopping";
+    private static final String STOP_STEP_EXECUTION = "stop-step-execution";
 
     private static final String FIND_ORIGINAL_STEP_EXECUTION = "find-original-step-execution";
     private static final String COUNT_STEP_EXECUTIONS_BY_JOB_INSTANCE_ID = "count-step-executions-by-job-instance-id";
@@ -99,6 +102,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String SELECT_PARTITION_EXECUTIONS_BY_STEP_EXECUTION_ID = "select-partition-executions-by-step-execution-id";
     private static final String INSERT_PARTITION_EXECUTION = "insert-partition-execution";
     private static final String UPDATE_PARTITION_EXECUTION = "update-partition-execution";
+    private static final String UPDATE_PARTITION_EXECUTION_IF_NOT_STOPPING = "update-partition-execution-if-not-stopping";
+    private static final String STOP_PARTITION_EXECUTION = "stop-partition-execution";
 
     private final DataSource dataSource;
     private final String dbUrl;
@@ -501,6 +506,31 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     }
 
     @Override
+    public void stopJobExecution(final JobExecutionImpl jobExecution) {
+        super.stopJobExecution(jobExecution);
+        final String[] stopExecutionSqls = {
+                sqls.getProperty(STOP_JOB_EXECUTION),
+                sqls.getProperty(STOP_STEP_EXECUTION),
+                sqls.getProperty(STOP_PARTITION_EXECUTION)
+        };
+        final String jobExecutionIdString = String.valueOf(jobExecution.getExecutionId());
+        final String newBatchStatus = BatchStatus.STOPPING.toString();
+        final Connection connection = getConnection();
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            for (String sql : stopExecutionSqls) {
+                stmt.addBatch(sql.replace("?", jobExecutionIdString));
+            }
+            stmt.executeBatch();
+        } catch (Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, Arrays.toString(stopExecutionSqls));
+        } finally {
+            close(connection, stmt, null, null);
+        }
+    }
+
+    @Override
     public JobExecutionImpl getJobExecution(final long jobExecutionId) {
         JobExecutionImpl result = super.getJobExecution(jobExecutionId);
         if (result != null && !isExecutionStale(result)) {
@@ -691,35 +721,17 @@ public final class JdbcRepository extends AbstractPersistentRepository {
 
     @Override
     public void updateStepExecution(final StepExecution stepExecution) {
-        final String update = sqls.getProperty(UPDATE_STEP_EXECUTION);
-        final Connection connection = getConnection();
-        final StepExecutionImpl stepExecutionImpl = (StepExecutionImpl) stepExecution;
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = connection.prepareStatement(update);
-            preparedStatement.setTimestamp(1, createTimestamp(stepExecution.getEndTime()));
-            preparedStatement.setString(2, stepExecution.getBatchStatus().name());
-            preparedStatement.setString(3, stepExecution.getExitStatus());
-            preparedStatement.setString(4, TableColumns.formatException(stepExecutionImpl.getException()));
-            preparedStatement.setBytes(5, stepExecutionImpl.getPersistentUserDataSerialized());
-            preparedStatement.setLong(6, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
-            preparedStatement.setLong(7, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
-            preparedStatement.setLong(8, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
-            preparedStatement.setLong(9, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.ROLLBACK_COUNT));
-            preparedStatement.setLong(10, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_SKIP_COUNT));
-            preparedStatement.setLong(11, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
-            preparedStatement.setLong(12, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
-            preparedStatement.setLong(13, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
-            preparedStatement.setBytes(14, stepExecutionImpl.getReaderCheckpointInfoSerialized());
-            preparedStatement.setBytes(15, stepExecutionImpl.getWriterCheckpointInfoSerialized());
+        updateStepExecution0(stepExecution, sqls.getProperty(UPDATE_STEP_EXECUTION));
+    }
 
-            preparedStatement.setLong(16, stepExecution.getStepExecutionId());
-
-            preparedStatement.executeUpdate();
-        } catch (final Exception e) {
-            throw BatchMessages.MESSAGES.failToRunQuery(e, update);
-        } finally {
-            close(connection, preparedStatement, null, null);
+    @Override
+    public int savePersistentDataIfNotStopping(final JobExecution jobExecution, final AbstractStepExecution stepOrPartitionExecution) {
+        if (stepOrPartitionExecution instanceof StepExecutionImpl) {
+            //stepExecution is for the main step, and should map to the STEP_EXECUTIOIN table
+            return updateStepExecution0(stepOrPartitionExecution, sqls.getProperty(UPDATE_STEP_EXECUTION_IF_NOT_STOPPING));
+        } else {
+            //stepExecutionId is for a partition execution, and should map to the PARTITION_EXECUTION table
+            return updatePartitionExecution((PartitionExecutionImpl) stepOrPartitionExecution, sqls.getProperty(UPDATE_PARTITION_EXECUTION_IF_NOT_STOPPING));
         }
     }
 
@@ -732,27 +744,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             updateStepExecution(stepOrPartitionExecution);
         } else {
             //stepExecutionId is for a partition execution, and should map to the PARTITION_EXECUTION table
-            final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) stepOrPartitionExecution;
-            final String update = sqls.getProperty(UPDATE_PARTITION_EXECUTION);
-            final Connection connection = getConnection();
-            PreparedStatement preparedStatement = null;
-            try {
-                preparedStatement = connection.prepareStatement(update);
-                preparedStatement.setString(1, partitionExecution.getBatchStatus().name());
-                preparedStatement.setString(2, partitionExecution.getExitStatus());
-                preparedStatement.setString(3, TableColumns.formatException(partitionExecution.getException()));
-                preparedStatement.setBytes(4, partitionExecution.getPersistentUserDataSerialized());
-                preparedStatement.setBytes(5, partitionExecution.getReaderCheckpointInfoSerialized());
-                preparedStatement.setBytes(6, partitionExecution.getWriterCheckpointInfoSerialized());
-                preparedStatement.setInt(7, partitionExecution.getPartitionId());
-                preparedStatement.setLong(8, partitionExecution.getStepExecutionId());
-
-                preparedStatement.executeUpdate();
-            } catch (final Exception e) {
-                throw BatchMessages.MESSAGES.failToRunQuery(e, update);
-            } finally {
-                close(connection, preparedStatement, null, null);
-            }
+            updatePartitionExecution((PartitionExecutionImpl) stepOrPartitionExecution, sqls.getProperty(UPDATE_PARTITION_EXECUTION));
         }
     }
 
@@ -894,6 +886,72 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             close(connection, preparedStatement, null, rs);
         }
         return result;
+    }
+
+    /**
+     * Updates the partition execution in job repository, using the {@code updateSql} passed in.
+     * @param partitionExecution the partition execution to update to job repository
+     * @param updateSql the update sql to use
+     * @return the number of rows affected by this update sql execution
+     */
+    private int updatePartitionExecution(final PartitionExecutionImpl partitionExecution, final String updateSql) {
+        final Connection connection = getConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(updateSql);
+            preparedStatement.setString(1, partitionExecution.getBatchStatus().name());
+            preparedStatement.setString(2, partitionExecution.getExitStatus());
+            preparedStatement.setString(3, TableColumns.formatException(partitionExecution.getException()));
+            preparedStatement.setBytes(4, partitionExecution.getPersistentUserDataSerialized());
+            preparedStatement.setBytes(5, partitionExecution.getReaderCheckpointInfoSerialized());
+            preparedStatement.setBytes(6, partitionExecution.getWriterCheckpointInfoSerialized());
+            preparedStatement.setInt(7, partitionExecution.getPartitionId());
+            preparedStatement.setLong(8, partitionExecution.getStepExecutionId());
+
+            return preparedStatement.executeUpdate();
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, updateSql);
+        } finally {
+            close(connection, preparedStatement, null, null);
+        }
+    }
+
+    /**
+     * Updates the step execution in job repository, using the {@code updateSql} passed in.
+     * @param stepExecution the step execution to update to job repository
+     * @param updateSql the update sql to use
+     * @return the number of rows affected by this update sql execution
+     */
+    private int updateStepExecution0(final StepExecution stepExecution, final String updateSql) {
+        final Connection connection = getConnection();
+        final StepExecutionImpl stepExecutionImpl = (StepExecutionImpl) stepExecution;
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(updateSql);
+            preparedStatement.setTimestamp(1, createTimestamp(stepExecution.getEndTime()));
+            preparedStatement.setString(2, stepExecution.getBatchStatus().name());
+            preparedStatement.setString(3, stepExecution.getExitStatus());
+            preparedStatement.setString(4, TableColumns.formatException(stepExecutionImpl.getException()));
+            preparedStatement.setBytes(5, stepExecutionImpl.getPersistentUserDataSerialized());
+            preparedStatement.setLong(6, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
+            preparedStatement.setLong(7, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
+            preparedStatement.setLong(8, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
+            preparedStatement.setLong(9, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.ROLLBACK_COUNT));
+            preparedStatement.setLong(10, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_SKIP_COUNT));
+            preparedStatement.setLong(11, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
+            preparedStatement.setLong(12, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
+            preparedStatement.setLong(13, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
+            preparedStatement.setBytes(14, stepExecutionImpl.getReaderCheckpointInfoSerialized());
+            preparedStatement.setBytes(15, stepExecutionImpl.getWriterCheckpointInfoSerialized());
+
+            preparedStatement.setLong(16, stepExecution.getStepExecutionId());
+
+            return preparedStatement.executeUpdate();
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, updateSql);
+        } finally {
+            close(connection, preparedStatement, null, null);
+        }
     }
 
     private void createStepExecutionsFromResultSet(final ResultSet rs,
