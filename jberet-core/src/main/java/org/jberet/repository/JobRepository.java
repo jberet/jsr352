@@ -60,6 +60,15 @@ public interface JobRepository {
     void updateJobExecution(JobExecutionImpl jobExecution, boolean fullUpdate, boolean saveJobParameters);
 
     /**
+     * Updates the batch status to {@code STOPPING} in job repository,
+     * including job execution, step execution, and partition execution status.
+     *
+     * @param jobExecution the job execution to be stopped
+     * @since 1.3.8.Final
+     */
+    void stopJobExecution(JobExecutionImpl jobExecution);
+
+    /**
      * Gets the ids of running job executions belonging to a specific job.
      *
      * @param jobName  the name of the job, not null
@@ -91,4 +100,15 @@ public interface JobRepository {
 
     void savePersistentData(JobExecution jobExecution, AbstractStepExecution stepOrPartitionExecution);
 
+    /**
+     * Saves the step or partition execution data to job repository if its
+     * batch status is not {@code STOPPING}.
+     *
+     * @param jobExecution the current job execution
+     * @param stepOrPartitionExecution the step or partition to save
+     * @return 1 if saved successfully; 0 if not saved because its batch status is {@code STOPPING} in job repository
+     *
+     * @since 1.3.8.Final
+     */
+    int savePersistentDataIfNotStopping(JobExecution jobExecution, AbstractStepExecution stepOrPartitionExecution);
 }

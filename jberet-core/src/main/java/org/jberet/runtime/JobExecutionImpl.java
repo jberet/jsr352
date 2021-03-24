@@ -304,13 +304,14 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     }
 
     public void stop() {
-        stopRequested.set(true);
-        final JobStopNotificationListener[] ls;
         synchronized (jobStopNotificationListeners) {
-            ls = jobStopNotificationListeners.toArray(new JobStopNotificationListener[jobStopNotificationListeners.size()]);
-        }
-        for (final JobStopNotificationListener l : ls) {
-            l.stopRequested(id);
+            if (stopRequested.compareAndSet(false, true)) {
+                setBatchStatus(BatchStatus.STOPPING);
+                BatchLogger.LOGGER.stoppingJobExecution(id);
+                for (final JobStopNotificationListener l : jobStopNotificationListeners) {
+                    l.stopRequested(id);
+                }
+            }
         }
     }
 

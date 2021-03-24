@@ -577,7 +577,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
             stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
             stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
-            batchContext.savePersistentData();
+            final int savedCount = batchContext.savePersistentData(false);
+            if (savedCount == 0) {
+                // the step or partition execution was not saved, because the batch status in job repository has been
+                // changed to STOPPING
+                batchContext.savePersistentData(true);
+                jobContext.getJobExecution().stop();
+            }
             tm.commit();
             backupReaderCheckpointInfo = backupWriterCheckpointInfo = ChunkState.RUNNING;
 
