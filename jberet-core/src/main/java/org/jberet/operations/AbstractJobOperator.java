@@ -9,6 +9,8 @@
 
 package org.jberet.operations;
 
+import static org.jberet._private.BatchMessages.MESSAGES;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,8 +50,6 @@ import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.runner.JobExecutionRunner;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.PropertyKey;
-
-import static org.jberet._private.BatchMessages.MESSAGES;
 
 /**
  * An abstract implementation of a {@link JobOperator}. Subclasses should generally delegate to the super methods of
@@ -160,11 +160,11 @@ public abstract class AbstractJobOperator implements JobOperator {
         if (s == BatchStatus.STOPPED || s == BatchStatus.FAILED || s == BatchStatus.ABANDONED ||
                 s == BatchStatus.COMPLETED) {
             throw MESSAGES.jobExecutionNotRunningException(executionId, s);
-        } else if (s == BatchStatus.STOPPING) {
-            //in process of stopping, do nothing
-        } else {
-            jobExecution.setBatchStatus(BatchStatus.STOPPING);
+        } else if (s != BatchStatus.STOPPING) {
             jobExecution.stop();
+            if (jobExecution.getStepExecutions().size() == 0) {
+                getJobRepository().stopJobExecution(jobExecution);
+            }
         }
     }
 

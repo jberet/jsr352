@@ -195,8 +195,19 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
         return stepExecution.getMetrics();
     }
 
-    public void savePersistentData() {
-        getJobContext().jobRepository.savePersistentData(getJobContext().jobExecution, stepExecution);
+    /**
+     * Saves the execution data to job repository.
+     * @param always if true, always saves data to job repository; if false,
+     *               skip saving the step or partition if its batch status is {@code STOPPING}
+     * @return 1 if the execution data is saved to job repository successfully; 0 otherwise
+     */
+    public int savePersistentData(boolean always) {
+        if (always) {
+            getJobContext().jobRepository.savePersistentData(getJobContext().jobExecution, stepExecution);
+            return 1;
+        } else {
+            return getJobContext().jobRepository.savePersistentDataIfNotStopping(getJobContext().jobExecution, stepExecution);
+        }
     }
 
     public StepExecutionImpl getOriginalStepExecution() {
