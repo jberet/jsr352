@@ -57,7 +57,9 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
 
                 runFromHeadOrRestartPoint(jobExecution.getRestartPosition());
 
-                if (jobExecution.getBatchStatus() == BatchStatus.STARTED) {
+                if (jobExecution.isStopRequested()) {
+                    jobExecution.setBatchStatus(BatchStatus.STOPPED);
+                } else if (jobExecution.getBatchStatus() == BatchStatus.STARTED) {
                     jobExecution.setBatchStatus(BatchStatus.COMPLETED);
                 }
             } catch (final Throwable e) {
