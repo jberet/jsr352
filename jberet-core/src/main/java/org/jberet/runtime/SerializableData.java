@@ -14,12 +14,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
+import java.util.ServiceLoader;
 import javax.batch.operations.BatchRuntimeException;
 
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
-import org.jberet.util.BatchUtil;
+import org.jberet.spi.SerializableDataProvider;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
@@ -29,13 +32,28 @@ import org.wildfly.security.manager.WildFlySecurityManager;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 public class SerializableData implements Serializable {
+    private static final PrivilegedAction<SerializableDataProvider> loaderAction = new PrivilegedAction<SerializableDataProvider>() {
+        @Override
+        public SerializableDataProvider run() {
+            final ServiceLoader<SerializableDataProvider> serviceLoader = ServiceLoader.load(SerializableDataProvider.class);
+            if (serviceLoader.iterator().hasNext()) {
+                return serviceLoader.iterator().next();
+            }
+            return new SerializableDataProvider.DefaultSerializableDataProvider();
+        }
+    };
+
+    private static final SerializableDataProvider provider =
+        WildFlySecurityManager.isChecking() ? AccessController.doPrivileged(loaderAction) : loaderAction.run();
 
     private final byte[] serialized;
     private final Serializable raw;
+    private final Class<?> klass;
 
-    private SerializableData(final byte[] serialized, final Serializable raw) {
+    private SerializableData(final byte[] serialized, final Serializable raw, final Class<?> klass) {
         this.serialized = serialized;
         this.raw = raw;
+        this.klass = klass;
     }
 
     /**
@@ -52,10 +70,10 @@ public class SerializableData implements Serializable {
             return (SerializableData) data;
         }
         if (data instanceof byte[]) {
-            return new SerializableData((byte[]) data, null);
+            return new SerializableData((byte[]) data, null, byte[].class);
         }
         if (data == null) {
-            return new SerializableData(null, null);
+            return new SerializableData(null, null, null);
         }
 
         Class<?> c = data.getClass();
@@ -65,7 +83,7 @@ public class SerializableData implements Serializable {
 
         if (requiresSerialization(c)) {
             try {
-                return new SerializableData(BatchUtil.objectToBytes(data), null);
+                return new SerializableData(provider.objectToBytes(data), null, c);
             } catch (IOException e) {
                 if (data instanceof Throwable) {
                     //if failed to serialize step exception data, try to preserve original
@@ -75,7 +93,7 @@ public class SerializableData implements Serializable {
                     final BatchRuntimeException replacementException = new BatchRuntimeException(exceptionData.getMessage());
                     replacementException.setStackTrace(exceptionData.getStackTrace());
                     try {
-                        return new SerializableData(BatchUtil.objectToBytes(replacementException), null);
+                        return new SerializableData(provider.objectToBytes(replacementException), null, c);
                     } catch (final IOException e1) {
                         throw BatchMessages.MESSAGES.failedToSerialize(e1, replacementException);
                     }
@@ -83,7 +101,7 @@ public class SerializableData implements Serializable {
                 throw BatchMessages.MESSAGES.failedToSerialize(e, data);
             }
         }
-        return new SerializableData(null, data);
+        return new SerializableData(null, data, c);
     }
 
     /**
@@ -106,10 +124,8 @@ public class SerializableData implements Serializable {
                 cl = WildFlySecurityManager.getClassLoaderPrivileged(SerializableData.class);
             }
             try {
-                return BatchUtil.bytesToSerializableObject(serialized, cl);
-            } catch (IOException e) {
-                throw BatchMessages.MESSAGES.failedToDeserialize(e, Arrays.toString(serialized));
-            } catch (ClassNotFoundException e) {
+                return provider.bytesToObject(serialized, klass, cl);
+            } catch (IOException | ClassNotFoundException e) {
                 throw BatchMessages.MESSAGES.failedToDeserialize(e, Arrays.toString(serialized));
             }
         }
@@ -121,7 +137,7 @@ public class SerializableData implements Serializable {
             return serialized;
         }
         try {
-            return BatchUtil.objectToBytes(raw);
+            return provider.objectToBytes(raw);
         } catch (final IOException e) {
             throw BatchMessages.MESSAGES.failedToSerialize(e, raw);
         }
