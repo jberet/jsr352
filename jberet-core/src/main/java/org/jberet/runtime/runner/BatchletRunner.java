@@ -10,6 +10,8 @@
 
 package org.jberet.runtime.runner;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+
 import javax.batch.api.Batchlet;
 import javax.batch.api.partition.PartitionCollector;
 import javax.batch.operations.BatchRuntimeException;
@@ -22,8 +24,6 @@ import org.jberet.runtime.JobStopNotificationListener;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.JobTask;
 import org.jberet.spi.PartitionWorker;
-
-import static org.jberet._private.BatchLogger.LOGGER;
 
 public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements JobTask, JobStopNotificationListener {
     private final RefArtifact batchlet;
@@ -73,6 +73,15 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
                 jobContext.getJobExecution().registerJobStopNotifier(this);
                 exitStatus = batchletObj.process();
                 jobContext.getJobExecution().unregisterJobStopNotifier(this);
+
+                if (!jobContext.getJobExecution().isStopRequested()) {
+                    final int savedCount = batchContext.savePersistentData(false);
+                    if (savedCount == 0) {
+                        // the step or partition execution was not saved, because the batch status in job repository has been
+                        // changed to STOPPING
+                        jobContext.getJobExecution().stop();
+                    }
+                }
             }
 
             //set batch status to indicate that either the main step, or a partition has completed successfully.
