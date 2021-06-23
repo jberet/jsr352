@@ -69,7 +69,7 @@
     <repositories>
         <repository>
             <id>caucho-repository</id>
-            <url>http://caucho.com/m2/</url>
+            <url>https://caucho.com/m2/</url>
         </repository>
     </repositories>
 
