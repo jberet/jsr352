@@ -72,14 +72,14 @@
     <repositories>
         <repository>
             <id>caucho-repository</id>
-            <url>http://caucho.com/m2/</url>
+            <url>https://caucho.com/m2/</url>
         </repository>
 
         <!-- R and renjin repo -->
         <repository>
             <id>bedatadriven</id>
             <name>bedatadriven public repo</name>
-            <url>http://nexus.bedatadriven.com/content/groups/public/</url>
+            <url>https://nexus.bedatadriven.com/content/groups/public/</url>
         </repository>
     </repositories>
 

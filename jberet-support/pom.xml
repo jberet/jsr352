@@ -276,6 +276,13 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>jasperreports</id>
+            <url>http://jasperreports.sourceforge.net/maven2</url>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
