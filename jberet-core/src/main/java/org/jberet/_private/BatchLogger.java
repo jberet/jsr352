@@ -155,4 +155,7 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void failedGetRunningExecutions(@Cause Throwable cause, String jobName, List<Long> jobExecutionIds);
 
+    @Message(id = 33, value = "Stopping job execution: %s")
+    @LogMessage(level = Logger.Level.INFO)
+    void stoppingJobExecution(long jobExecutionId);
 }

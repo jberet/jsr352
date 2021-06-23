@@ -114,7 +114,17 @@ public abstract class AbstractRepository implements JobRepository {
     }
 
     @Override
+    public int savePersistentDataIfNotStopping(final JobExecution jobExecution, final AbstractStepExecution stepOrPartitionExecution) {
+        return 1;
+    }
+
+    @Override
     public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate, final boolean saveJobParameters) {
+        jobExecution.setLastUpdatedTime(System.currentTimeMillis());
+    }
+
+    @Override
+    public void stopJobExecution(final JobExecutionImpl jobExecution) {
         jobExecution.setLastUpdatedTime(System.currentTimeMillis());
     }
 

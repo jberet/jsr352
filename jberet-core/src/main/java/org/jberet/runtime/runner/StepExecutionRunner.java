@@ -10,6 +10,9 @@
 
 package org.jberet.runtime.runner;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
+
 import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -50,9 +53,6 @@ import org.jberet.spi.PartitionHandlerFactory;
 import org.jberet.spi.PropertyKey;
 import org.jberet.tx.LocalTransactionManager;
 import org.wildfly.security.manager.WildFlySecurityManager;
-
-import static org.jberet._private.BatchLogger.LOGGER;
-import static org.jberet._private.BatchMessages.MESSAGES;
 
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements JobTask {
     Step step;
@@ -166,7 +166,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
                             }
                         }
                     }
-                    batchContext.savePersistentData();
+                    batchContext.savePersistentData(true);
                 }
             }
 
