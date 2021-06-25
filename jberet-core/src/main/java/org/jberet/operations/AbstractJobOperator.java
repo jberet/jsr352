@@ -314,6 +314,16 @@ public abstract class AbstractJobOperator implements JobOperator {
         return getJobRepository().getJobExecutions(instance);
     }
 
+    /**
+     * Gets job execution ids belonging to the job identified by the {@code jobName}.
+     * @param jobName the job name identifying the job
+     * @return job execution ids belonging to the job
+     * @since 1.3.9.Final, 1.4.3.Final
+     */
+    public List<Long> getJobExecutionsByJob(final String jobName) {
+        return getJobRepository().getJobExecutionsByJob(jobName);
+    }
+
     @Override
     public JobExecution getJobExecution(final long executionId) throws NoSuchJobExecutionException, JobSecurityException {
         return getJobExecutionImpl(executionId);

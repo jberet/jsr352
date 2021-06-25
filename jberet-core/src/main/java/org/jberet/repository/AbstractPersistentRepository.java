@@ -179,21 +179,26 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
     }
 
     /**
-     * Gets the list of running job execution ids from the cache.
+     * Gets the list of job execution ids from the cache.
      * The result may be used as a supplement to that from the persistence store.
      *
      * @param jobName the job name
-     * @return list of running job execution ids
+     * @param runningExecutionsOnly if true, only running executions are returned
+     * @return list of job execution ids
      */
-    List<Long> getCachedRunningExecutions(final String jobName) {
+    List<Long> getCachedJobExecutions(final String jobName, final boolean runningExecutionsOnly) {
         final List<Long> result = new ArrayList<Long>();
 
         for (final Map.Entry<Long, SoftReference<JobExecutionImpl, Long>> e : jobExecutions.entrySet()) {
             final JobExecutionImpl jobExecution = e.getValue().get();
             if (jobExecution != null) {
                 if (jobExecution.getJobName().equals(jobName)) {
-                    final BatchStatus s = jobExecution.getBatchStatus();
-                    if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
+                    if (runningExecutionsOnly) {
+                        final BatchStatus s = jobExecution.getBatchStatus();
+                        if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
+                            result.add(e.getKey());
+                        }
+                    } else {
                         result.add(e.getKey());
                     }
                 }
