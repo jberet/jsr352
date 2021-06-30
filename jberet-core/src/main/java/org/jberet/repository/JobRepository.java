@@ -57,6 +57,15 @@ public interface JobRepository {
     JobExecutionImpl createJobExecution(JobInstanceImpl jobInstance, Properties jobParameters);
     JobExecution getJobExecution(long jobExecutionId);
     List<JobExecution> getJobExecutions(JobInstance jobInstance);
+
+    /**
+     * Gets job execution ids belonging to the job identified by the {@code jobName}.
+     * @param jobName the job name identifying the job
+     * @return job execution ids belonging to the job
+     * @since 1.3.9.Final, 1.4.3.Final
+     */
+    List<Long> getJobExecutionsByJob(String jobName);
+
     void updateJobExecution(JobExecutionImpl jobExecution, boolean fullUpdate, boolean saveJobParameters);
 
     /**

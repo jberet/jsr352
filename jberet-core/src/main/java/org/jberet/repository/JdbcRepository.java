@@ -77,6 +77,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String SELECT_ALL_JOB_EXECUTIONS = "select-all-job-executions";
     private static final String SELECT_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID = "select-job-executions-by-job-instance-id";
     private static final String SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME = "select-running-job-executions-by-job-name";
+    private static final String SELECT_JOB_EXECUTIONS_BY_JOB_NAME = "select-job-executions-by-job-name";
     private static final String SELECT_JOB_EXECUTION = "select-job-execution";
     private static final String INSERT_JOB_EXECUTION = "insert-job-execution";
     private static final String UPDATE_JOB_EXECUTION = "update-job-execution";
@@ -663,33 +664,17 @@ public final class JdbcRepository extends AbstractPersistentRepository {
 
     @Override
     public List<Long> getRunningExecutions(final String jobName) {
-        final List<Long> result = new ArrayList<Long>();
         final String select = sqls.getProperty(SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME);
+        return getJobExecutions0(select, jobName, true);
+    }
 
-        Connection connection = null;
-        ResultSet rs = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = getConnection();
-            preparedStatement = connection.prepareStatement(select);
-            preparedStatement.setString(1, jobName);
-            rs = preparedStatement.executeQuery();
-            while (rs.next()) {
-                final long i = rs.getLong(1);
-                result.add(i);
-            }
-        } catch (final Exception e) {
-            final List<Long> cachedRunningExecutions = getCachedRunningExecutions(jobName);
-            for (Long i : cachedRunningExecutions) {
-                if (!result.contains(i)) {
-                    result.add(i);
-                }
-            }
-            BatchLogger.LOGGER.failedGetRunningExecutions(e, jobName, result);
-        } finally {
-            close(connection, preparedStatement, null, rs);
-        }
-        return result;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Long> getJobExecutionsByJob(final String jobName) {
+        final String select = sqls.getProperty(SELECT_JOB_EXECUTIONS_BY_JOB_NAME);
+        return getJobExecutions0(select, jobName, false);
     }
 
     @Override
@@ -1065,6 +1050,34 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         } finally {
             close(connection, st, null, null);
         }
+    }
+
+    private List<Long> getJobExecutions0(final String selectSql, final String jobName, final boolean runningExecutionsOnly) {
+        final List<Long> result = new ArrayList<>();
+        Connection connection = null;
+        ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(selectSql);
+            preparedStatement.setString(1, jobName);
+            rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                final long i = rs.getLong(1);
+                result.add(i);
+            }
+        } catch (final Exception e) {
+            final List<Long> cachedExecutionIds = getCachedJobExecutions(jobName, runningExecutionsOnly);
+            for (Long i : cachedExecutionIds) {
+                if (!result.contains(i)) {
+                    result.add(i);
+                }
+            }
+            BatchLogger.LOGGER.failedGetJobExecutions(e, jobName, result);
+        } finally {
+            close(connection, preparedStatement, null, rs);
+        }
+        return result;
     }
 
     private Connection getConnection() {
