@@ -151,9 +151,9 @@ public interface BatchLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.WARN)
     void problemFinalizingPartitionExecution(@Cause Throwable cause, long stepExecutionId);
 
-    @Message(id = 32, value = "Failed to get running executions for job %s; instead got cached executions: %s")
+    @Message(id = 32, value = "Failed to get executions for job %s; instead got cached executions: %s")
     @LogMessage(level = Logger.Level.WARN)
-    void failedGetRunningExecutions(@Cause Throwable cause, String jobName, List<Long> jobExecutionIds);
+    void failedGetJobExecutions(@Cause Throwable cause, String jobName, List<Long> jobExecutionIds);
 
     @Message(id = 33, value = "Stopping job execution: %s")
     @LogMessage(level = Logger.Level.INFO)

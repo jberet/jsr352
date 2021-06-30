@@ -61,6 +61,11 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test
+    public void getJobExecutionsByJob() throws Exception {
+        super.getJobExecutionsByJob();
+    }
+
+    @Test
     public void jobExecutionSelector() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
         final long prepurge2JobExecutionId = prepurge();

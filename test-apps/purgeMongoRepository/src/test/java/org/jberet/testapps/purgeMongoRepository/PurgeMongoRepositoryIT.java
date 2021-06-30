@@ -155,6 +155,11 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test
+    public void getJobExecutionsByJob() throws Exception {
+        super.getJobExecutionsByJob();
+    }
+
+    @Test
     public void removeStepExecutionsAndJobExecutions() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
         final long prepurge2JobExecutionId = prepurge(prepurge2JobName);

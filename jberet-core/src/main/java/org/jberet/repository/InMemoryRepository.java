@@ -13,6 +13,7 @@ package org.jberet.repository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import javax.batch.runtime.BatchStatus;
 import javax.batch.runtime.JobExecution;
 import javax.batch.runtime.JobInstance;
@@ -264,5 +266,16 @@ public final class InMemoryRepository extends AbstractRepository {
             }
         }
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Long> getJobExecutionsByJob(String jobName) {
+        return jobExecutions.values().stream().filter(e -> e.getJobName().equals(jobName))
+                .map(JobExecution::getExecutionId)
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
     }
 }
