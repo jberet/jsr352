@@ -314,7 +314,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
                 result.add((Long) next.get(TableColumns.JOBEXECUTIONID));
             }
         } catch (Exception e) {
-            result.addAll(getCachedRunningExecutions(jobName));
+            result.addAll(getCachedJobExecutions(jobName, true));
         }
 
         return result;
