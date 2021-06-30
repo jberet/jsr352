@@ -9,6 +9,8 @@
 # ignore Maven generated target folders
 ~
 target
+dependency-reduced-pom.xml
+
 # ignore eclipse files
 .project
 .classpath
