@@ -158,6 +158,17 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test
+    public void getJobExecutionsByJob() throws Exception {
+        // first purge existing job execution data from db to have a clean start
+        params.setProperty("purgeJobsByNames", prepurgeAndPrepurge2JobNames);
+        startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
+        final JdbcRepository jdbcRepository = (JdbcRepository) jobOperator.getJobRepository();
+        jdbcRepository.executeStatements( "delete from PARTITION_EXECUTION; delete from STEP_EXECUTION; delete from JOB_EXECUTION; delete from JOB_INSTANCE", null);
+
+        super.getJobExecutionsByJob();
+    }
+
+    @Test
     public void withSql() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
         final long prepurge2JobExecutionId = prepurge(prepurge2JobName);

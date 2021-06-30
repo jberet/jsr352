@@ -311,6 +311,24 @@ public final class MongoRepository extends AbstractPersistentRepository {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Long> getJobExecutionsByJob(final String jobName) {
+        final List<Long> result = new ArrayList<>();
+
+        // jobInstances result is already in desc order
+        final List<JobInstance> jobInstances = getJobInstances(jobName);
+        for (JobInstance jobInstance : jobInstances) {
+            final List<JobExecution> jobExecutions = getJobExecutions(jobInstance);
+            for (int i = jobExecutions.size() - 1; i >= 0; i--) {
+                result.add(jobExecutions.get(i).getExecutionId());
+            }
+        }
+        return result;
+    }
+
     @Override
     void insertStepExecution(final StepExecutionImpl stepExecution, final JobExecutionImpl jobExecution) {
         final Long nextId = incrementAndGetSequence(TableColumns.STEPEXECUTIONID);
