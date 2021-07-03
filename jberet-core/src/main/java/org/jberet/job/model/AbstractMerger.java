@@ -112,7 +112,7 @@ abstract class AbstractMerger<T extends AbstractJobElement> {
             if (childProps == null) {
                 child.setProperties(parentProps.clone());
             } else if (childProps.isMerge()) {
-                for (final Map.Entry<String, String> e : parentProps.getPropertiesMapping().entrySet()) {
+                for (final Map.Entry<String, String> e : parentProps.getNameValues().entrySet()) {
                     childProps.addIfAbsent(e.getKey(), e.getValue());
                 }
             }

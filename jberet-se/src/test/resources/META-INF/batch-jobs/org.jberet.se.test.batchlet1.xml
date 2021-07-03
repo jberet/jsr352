@@ -19,6 +19,9 @@
         <property name="job-prop-2" value="#{jobProperties['job-prop']}"></property>
         <property name="job-prop" value="job-prop"></property>
         <property name="foo" value="foo"/>
+
+        <property name="jslStop" value="JSL.STOP"/>
+        <property name="stopAfterStep3" value="#{jobParameters['stop.after.step.3']}?:#{jobProperties['jslStop']};"/>
     </properties>
     <step id="step1" next="step2" start-limit="1">
         <properties>
@@ -37,6 +40,9 @@
                 <property name="bar" value="#{jobProperties['foo']}"></property>
                 <property name="foo" value="#{jobProperties['bar']}"></property>
                 <property name="job-param" value="#{jobParameters['job-param']}?:jobParamDefault;"></property>
+
+                <!-- the following property should resolve to JSL.STOP -->
+                <property name="multi-level" value="#{jobProperties['stopAfterStep3']}"/>
             </properties>
         </batchlet>
     </step>

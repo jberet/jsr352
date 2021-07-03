@@ -28,7 +28,7 @@ public class BatchletMergerTest {
     public void mergeFalse() throws Exception {
         final Job childJob = JobMergerTest.loadJob("batchlet-merge-false-child.xml");
         final RefArtifact child = getBatchlet(childJob, "batchlet-merge-false-child-step");
-        Assert.assertEquals(0, child.getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(0, child.getProperties().getNameValues().size());
         Assert.assertEquals("batchlet-merge-false-child-batchlet", child.getRef());
     }
 
@@ -38,7 +38,7 @@ public class BatchletMergerTest {
         final RefArtifact child = getBatchlet(childJob, "batchlet-merge-true-child-step");
         //Assert.assertEquals(2, child.getProperties().getPropertiesMapping().size());
         //JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"});
-        Assert.assertEquals(1, child.getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(1, child.getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"child"});
         Assert.assertEquals("batchlet-merge-true-child-batchlet", child.getRef());
     }
@@ -47,7 +47,7 @@ public class BatchletMergerTest {
     public void parentHasBatchlet() throws Exception {
         final Job childJob = JobMergerTest.loadJob("batchlet-merge-true-child.xml");
         final RefArtifact child = getBatchlet(childJob, "parent-has-batchlet-child");
-        Assert.assertEquals(1, child.getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(1, child.getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent-has-batchlet-parent"}, true);
         Assert.assertEquals("parent-has-batchlet-parent-batchlet", child.getRef());
     }

@@ -1,20 +1,20 @@
 package org.jberet.job.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.jboss.marshalling.cloner.ClonerConfiguration;
 import org.jboss.marshalling.cloner.ObjectCloner;
 import org.jboss.marshalling.cloner.ObjectCloners;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 public class JobFactoryTest {
     private static final ObjectCloner cloner =
@@ -281,8 +281,6 @@ public class JobFactoryTest {
         assertNotSame(original, clone);
 
         assertEquals(original.getPartition(), clone.getPartition());
-        assertNotSame(original.getPropertiesMapping(), clone.getPropertiesMapping());
-        assertEquals(original.getPropertiesMapping(), clone.getPropertiesMapping());
         assertNotSame(original.getNameValues(), clone.getNameValues());
         assertEquals(original.getNameValues(), clone.getNameValues());
     }

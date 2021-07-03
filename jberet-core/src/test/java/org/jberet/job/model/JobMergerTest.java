@@ -73,7 +73,7 @@ public class JobMergerTest {
         //parent job-properties-listeners-parent.xml
         final Job child = loadJob("job-properties-listeners-child.xml");
         Assert.assertEquals("true", child.getRestartable());
-        Assert.assertEquals(2, child.getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(2, child.getProperties().getNameValues().size());
         Assert.assertEquals(2, child.getListeners().getListeners().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "parent2"});
     }
@@ -83,7 +83,7 @@ public class JobMergerTest {
         //parent job-merge-false-parent.xml
         final Job child = loadJob("job-merge-false-child.xml");
         Assert.assertEquals("false", child.getRestartable());
-        Assert.assertEquals(0, child.getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(0, child.getProperties().getNameValues().size());
         Assert.assertEquals(0, child.getListeners().getListeners().size());
     }
 
@@ -91,7 +91,7 @@ public class JobMergerTest {
     public void mergeTrue() throws Exception {
         //parent job-merge-true-parent.xml
         final Job child = loadJob("job-merge-true-child.xml");
-        Assert.assertEquals(2, child.getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(2, child.getProperties().getNameValues().size());
         Assert.assertEquals(2, child.getListeners().getListeners().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"});
     }

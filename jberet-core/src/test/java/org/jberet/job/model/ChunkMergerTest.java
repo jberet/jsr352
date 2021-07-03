@@ -40,7 +40,7 @@ public class ChunkMergerTest {
         Assert.assertEquals("child", child.getCheckpointAlgorithm().getRef());
         //Assert.assertEquals(2, child.getCheckpointAlgorithm().getProperties().getPropertiesMapping().size());
         //JobMergerTest.propertiesContain(child.getCheckpointAlgorithm().getProperties(), new String[]{"child", "parent"});
-        Assert.assertEquals(1, child.getCheckpointAlgorithm().getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(1, child.getCheckpointAlgorithm().getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getCheckpointAlgorithm().getProperties(), new String[]{"child"});
 
         Assert.assertEquals("java.lang.RuntimeException", child.getSkippableExceptionClasses().include.get(0));
@@ -59,15 +59,15 @@ public class ChunkMergerTest {
         final Job childJob = JobMergerTest.loadJob("chunk-mixed-child.xml");
         final Chunk child = getChunk(childJob, "chunk-mixed-child-step");
 
-        Assert.assertEquals(1, child.getReader().getProperties().getPropertiesMapping().size());  //properties merge is false
+        Assert.assertEquals(1, child.getReader().getProperties().getNameValues().size());  //properties merge is false
         JobMergerTest.propertiesContain(child.getReader().getProperties(), new String[]{"child"}, true);
 
         //Assert.assertEquals(2, child.getProcessor().getProperties().getPropertiesMapping().size());
-        Assert.assertEquals(1, child.getProcessor().getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(1, child.getProcessor().getProperties().getNameValues().size());
         //JobMergerTest.propertiesContain(child.getProcessor().getProperties(), new String[]{"child", "parent"}, true);
         JobMergerTest.propertiesContain(child.getProcessor().getProperties(), new String[]{"child"}, true);
 
-        Assert.assertEquals(1, child.getWriter().getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(1, child.getWriter().getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getWriter().getProperties(), new String[]{"child"}, true);
     }
 
@@ -79,11 +79,11 @@ public class ChunkMergerTest {
         Assert.assertEquals("R1", child.getReader().getRef());
         Assert.assertEquals("P1", child.getProcessor().getRef());
         Assert.assertEquals("W1", child.getWriter().getRef());
-        Assert.assertEquals(1, child.getReader().getProperties().getPropertiesMapping().size());  //properties merge is false
+        Assert.assertEquals(1, child.getReader().getProperties().getNameValues().size());  //properties merge is false
         JobMergerTest.propertiesContain(child.getReader().getProperties(), new String[]{"child"}, true);
-        Assert.assertEquals(1, child.getProcessor().getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(1, child.getProcessor().getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getProcessor().getProperties(), new String[]{"child"}, true);
-        Assert.assertEquals(1, child.getWriter().getProperties().getPropertiesMapping().size());
+        Assert.assertEquals(1, child.getWriter().getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getWriter().getProperties(), new String[]{"child"}, true);
     }
 
