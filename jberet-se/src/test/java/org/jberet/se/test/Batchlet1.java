@@ -60,6 +60,10 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     private int intProp;
 
     @Inject
+    @BatchProperty(name = "multi-level")
+    private String multiLevel;
+
+    @Inject
     @BatchProperty
     private String action;
 
@@ -83,9 +87,9 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
             Assert.assertEquals("jobParamDefault", jobParam);
             Assert.assertEquals("foo", foo);
             Assert.assertEquals(1, intProp);
-            Assert.assertEquals(4, jobContext.getProperties().size());
+            Assert.assertEquals(6, jobContext.getProperties().size());
             Assert.assertEquals(4, stepContext.getProperties().size());
-
+            Assert.assertEquals("JSL.STOP", multiLevel);
             //System.out.printf("Job properties from injected JobContext: %s%n", jobContext.getProperties());
             //System.out.printf("Step properties from injected StepContext: %s%n", stepContext.getProperties());
         } else if (stepName.equals("step2")) {

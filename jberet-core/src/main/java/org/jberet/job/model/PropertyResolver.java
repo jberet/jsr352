@@ -10,8 +10,12 @@
 
 package org.jberet.job.model;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -23,9 +27,6 @@ import org.jberet.job.model.Transition.End;
 import org.jberet.job.model.Transition.Fail;
 import org.jberet.job.model.Transition.Next;
 import org.jberet.job.model.Transition.Stop;
-
-import static org.jberet._private.BatchLogger.LOGGER;
-import static org.jberet._private.BatchMessages.MESSAGES;
 
 /**
  * Responsible for resolving property expressions in job and job elements.
@@ -409,7 +410,7 @@ public final class PropertyResolver {
                 }
             }
 
-            final Map<String, String> propertiesMapping = props.getPropertiesMapping();
+            final LinkedHashMap<String, String> propertiesMapping = props.getNameValues();
             for (final Map.Entry<String, String> entry : propertiesMapping.entrySet()) {
                 final String oldKey = entry.getKey();
                 final String newKey = resolve(oldKey);

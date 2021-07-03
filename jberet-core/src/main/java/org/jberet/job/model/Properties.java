@@ -27,7 +27,7 @@ public final class Properties extends MergeableElement implements Serializable, 
      */
     private String partition;
 
-    private Map<String, String> nameValues = new LinkedHashMap<String, String>();
+    private LinkedHashMap<String, String> nameValues = new LinkedHashMap<String, String>();
 
     public Properties() {
     }
@@ -35,7 +35,7 @@ public final class Properties extends MergeableElement implements Serializable, 
     /**
      * Adds one property by its name and value. Any existing property of the same name will be overwritten.
      *
-     * @param name property name
+     * @param name  property name
      * @param value property value
      */
     void add(final String name, final String value) {
@@ -45,7 +45,7 @@ public final class Properties extends MergeableElement implements Serializable, 
     /**
      * Adds one property by its name and value if the name does not exist.
      *
-     * @param name property name
+     * @param name  property name
      * @param value property value
      */
     void addIfAbsent(final String name, final String value) {
@@ -103,21 +103,12 @@ public final class Properties extends MergeableElement implements Serializable, 
         return nameValues.size();
     }
 
-    public Map<String, String> getNameValues() {
+    public LinkedHashMap<String, String> getNameValues() {
         return nameValues;
     }
 
-    public void setNameValues(final Map<String, String> nameValues) {
+    public void setNameValues(final LinkedHashMap<String, String> nameValues) {
         this.nameValues = nameValues;
-    }
-
-    /**
-     * Gets a copy of the underlying mapping for this {@code org.jberet.job.model.Properties}.
-     *
-     * @return a copy of the underlying mapping
-     */
-    public Map<String, String> getPropertiesMapping() {
-        return new LinkedHashMap<String, String>(nameValues);
     }
 
     /**
