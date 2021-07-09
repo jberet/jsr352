@@ -10,10 +10,11 @@
 
 package org.jberet.testapps.chunkstop;
 
-import javax.batch.api.BatchProperty;
-import javax.batch.api.chunk.ItemProcessor;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.chunk.ItemProcessor;
 
 @Named
 public final class ChunkStopProcessor implements ItemProcessor {

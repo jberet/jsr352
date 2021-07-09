@@ -16,7 +16,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.BatchRuntimeException;
+import jakarta.batch.operations.BatchRuntimeException;
 
 import org.junit.Assert;
 import org.junit.Test;

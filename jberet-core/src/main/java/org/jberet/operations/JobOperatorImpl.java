@@ -13,8 +13,8 @@ package org.jberet.operations;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.operations.JobOperator;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.operations.JobOperator;
 
 import org.jberet._private.BatchMessages;
 import org.jberet.repository.JobRepository;

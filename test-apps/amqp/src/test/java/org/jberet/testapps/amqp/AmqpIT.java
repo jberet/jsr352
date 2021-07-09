@@ -10,24 +10,24 @@
 
 package org.jberet.testapps.amqp;
 
+import static org.jberet.testapps.amqp.MessagingResourceProducer.connectionFactory;
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.JobOperator;
-import javax.batch.runtime.BatchRuntime;
-import javax.batch.runtime.BatchStatus;
 import javax.jms.Connection;
 import javax.jms.Session;
 
+import jakarta.batch.operations.JobOperator;
+import jakarta.batch.runtime.BatchRuntime;
+import jakarta.batch.runtime.BatchStatus;
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.jberet.testapps.amqp.MessagingResourceProducer.connectionFactory;
-import static org.junit.Assert.assertEquals;
 
 @Ignore("This test class needs ActiveMQ Artemis standalone server running in a separate process.")
 public class AmqpIT extends AbstractIT {

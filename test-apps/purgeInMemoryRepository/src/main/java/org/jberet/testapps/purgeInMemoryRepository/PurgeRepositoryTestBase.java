@@ -19,12 +19,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.NoSuchJobException;
-import javax.batch.operations.NoSuchJobInstanceException;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
+import jakarta.batch.operations.NoSuchJobException;
+import jakarta.batch.operations.NoSuchJobInstanceException;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.JobExecution;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
 
 import org.jberet.repository.JobExecutionSelector;
 import org.jberet.runtime.JobExecutionImpl;

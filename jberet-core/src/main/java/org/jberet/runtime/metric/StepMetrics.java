@@ -13,7 +13,7 @@ package org.jberet.runtime.metric;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import javax.batch.runtime.Metric;
+import jakarta.batch.runtime.Metric;
 
 /**
  * Maintains execution metrics for a single step.

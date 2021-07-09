@@ -10,12 +10,12 @@
 
 package org.jberet.testapps.serialization;
 
-import javax.batch.api.Batchlet;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.context.StepContext;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.Batchlet;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.Serializable;
 
 @Named("batchlet")

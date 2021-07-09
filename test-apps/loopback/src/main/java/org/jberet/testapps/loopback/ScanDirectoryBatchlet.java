@@ -12,11 +12,11 @@ package org.jberet.testapps.loopback;
 
 import java.io.File;
 import java.util.regex.Pattern;
-import javax.batch.api.AbstractBatchlet;
-import javax.batch.api.BatchProperty;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.AbstractBatchlet;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import com.google.common.io.PatternFilenameFilter;
 

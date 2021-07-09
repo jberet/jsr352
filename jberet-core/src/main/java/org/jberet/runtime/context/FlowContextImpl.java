@@ -10,7 +10,7 @@
 
 package org.jberet.runtime.context;
 
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.job.model.Flow;
 import org.jberet.runtime.FlowExecutionImpl;

@@ -13,9 +13,9 @@ package org.jberet.repository;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.JobInstance;
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.runtime.JobExecution;
+import jakarta.batch.runtime.JobInstance;
+import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.job.model.Job;
 import org.jberet.runtime.AbstractStepExecution;

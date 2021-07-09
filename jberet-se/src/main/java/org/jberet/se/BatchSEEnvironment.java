@@ -22,7 +22,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.transaction.TransactionManager;
+import jakarta.transaction.TransactionManager;
 
 import org.jberet.repository.JobRepository;
 import org.jberet.se._private.SEBatchLogger;

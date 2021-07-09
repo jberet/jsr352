@@ -10,11 +10,12 @@
 
 package org.jberet.testapps.amqp;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Named;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.Queue;
+
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Named;
 
 @Named
 public class MessagingResourceProducer {

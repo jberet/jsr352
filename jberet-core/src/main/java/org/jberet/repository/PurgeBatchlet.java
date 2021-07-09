@@ -13,11 +13,11 @@ package org.jberet.repository;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Set;
-import javax.batch.api.BatchProperty;
-import javax.batch.api.Batchlet;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.Batchlet;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
 
 import org.jberet._private.BatchMessages;
 import org.jberet.runtime.context.JobContextImpl;

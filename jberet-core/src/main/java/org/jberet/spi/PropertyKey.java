@@ -38,7 +38,7 @@ public interface PropertyKey {
      * <p>
      * Its value should be a positive integer.
      * If this amount of time elapses before all flows complete, the split execution will fail with
-     * {@code javax.batch.operations.BatchRuntimeException}.
+     * {@code jakarta.batch.operations.BatchRuntimeException}.
      * If no such job parameter or job property is present, the split execution will wait infinitely for its flows to
      * complete.
      */

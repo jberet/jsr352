@@ -10,9 +10,9 @@
  
 package org.jberet.testapps.javajsl;
 
-import javax.batch.api.Decider;
-import javax.batch.runtime.StepExecution;
-import javax.inject.Named;
+import jakarta.batch.api.Decider;
+import jakarta.batch.runtime.StepExecution;
+import jakarta.inject.Named;
 
 @Named
 public class Decider2 implements Decider {

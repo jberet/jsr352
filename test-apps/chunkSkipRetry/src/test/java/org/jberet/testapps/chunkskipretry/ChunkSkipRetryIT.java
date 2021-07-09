@@ -12,8 +12,8 @@ package org.jberet.testapps.chunkskipretry;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.Metric;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.Metric;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.After;

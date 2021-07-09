@@ -12,9 +12,9 @@ package org.jberet.testapps.common;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.batch.api.BatchProperty;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
 
 public abstract class IntegerArrayReaderWriterProcessorBase {
     @Inject

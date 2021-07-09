@@ -69,13 +69,13 @@
             <!--
     java.lang.Exception
         java.lang.RuntimeException
-            javax.xml.ws.WebServiceException
+            jakarta.xml.ws.WebServiceException
                 javax.xml.ws.ProtocolException
                     javax.xml.ws.http.HTTPException
             -->
             <retryable-exception-classes>
                 <include class="java.lang.Exception"></include>
-                <include class="javax.xml.ws.WebServiceException"></include>
+                <include class="jakarta.xml.ws.WebServiceException"></include>
                 <exclude class="java.lang.RuntimeException"></exclude>
             </retryable-exception-classes>
             <no-rollback-exception-classes>

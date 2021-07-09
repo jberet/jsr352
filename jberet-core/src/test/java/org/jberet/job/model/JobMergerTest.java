@@ -12,7 +12,7 @@ package org.jberet.job.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.batch.operations.JobStartException;
+import jakarta.batch.operations.JobStartException;
 
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;

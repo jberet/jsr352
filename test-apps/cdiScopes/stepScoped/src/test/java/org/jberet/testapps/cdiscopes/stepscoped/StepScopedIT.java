@@ -10,7 +10,7 @@
 
 package org.jberet.testapps.cdiscopes.stepscoped;
 
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;

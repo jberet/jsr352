@@ -10,7 +10,7 @@
 package org.jberet.spi;
 
 import java.util.Properties;
-import javax.transaction.TransactionManager;
+import jakarta.transaction.TransactionManager;
 
 import org.jberet.repository.JobRepository;
 

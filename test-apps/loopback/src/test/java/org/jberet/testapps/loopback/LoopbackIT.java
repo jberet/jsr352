@@ -12,7 +12,7 @@ package org.jberet.testapps.loopback;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import com.google.common.io.Files;
 import org.jberet.spi.PropertyKey;

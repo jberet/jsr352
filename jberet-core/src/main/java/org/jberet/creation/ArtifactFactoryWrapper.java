@@ -10,7 +10,7 @@
 
 package org.jberet.creation;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.BatchArtifacts;

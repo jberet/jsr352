@@ -10,11 +10,11 @@
 
 package org.jberet.testapps.cdiscopes.jobscoped;
 
-import javax.batch.api.partition.AbstractPartitionAnalyzer;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.partition.AbstractPartitionAnalyzer;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
 import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;

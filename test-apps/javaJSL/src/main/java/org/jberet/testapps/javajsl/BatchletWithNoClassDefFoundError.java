@@ -10,8 +10,8 @@
 
 package org.jberet.testapps.javajsl;
 
-import javax.batch.api.AbstractBatchlet;
-import javax.inject.Named;
+import jakarta.batch.api.AbstractBatchlet;
+import jakarta.inject.Named;
 
 @Named
 public class BatchletWithNoClassDefFoundError extends AbstractBatchlet {

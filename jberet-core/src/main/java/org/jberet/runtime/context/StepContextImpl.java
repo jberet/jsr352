@@ -16,10 +16,10 @@ import java.security.PrivilegedAction;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.Metric;
-import javax.batch.runtime.context.StepContext;
-import javax.enterprise.context.spi.Contextual;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.Metric;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.enterprise.context.spi.Contextual;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;

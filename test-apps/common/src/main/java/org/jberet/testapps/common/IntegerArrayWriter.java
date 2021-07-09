@@ -14,10 +14,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.batch.api.BatchProperty;
-import javax.batch.api.chunk.ItemWriter;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.chunk.ItemWriter;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named("integerArrayWriter")
 public class IntegerArrayWriter extends IntegerArrayReaderWriterProcessorBase implements ItemWriter {

@@ -11,9 +11,9 @@
 package org.jberet.testapps.chunkstop;
 
 import java.util.Properties;
-import javax.batch.operations.JobRestartException;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.Metric;
+import jakarta.batch.operations.JobRestartException;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.Metric;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.metric.MetricImpl;

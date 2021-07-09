@@ -12,9 +12,9 @@ package org.jberet.creation;
 
 import java.lang.annotation.Annotation;
 import java.util.concurrent.ConcurrentMap;
-import javax.enterprise.context.spi.Context;
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.context.spi.Context;
+import jakarta.enterprise.context.spi.Contextual;
+import jakarta.enterprise.context.spi.CreationalContext;
 
 import org.jberet.cdi.PartitionScoped;
 import org.jberet.runtime.context.StepContextImpl;

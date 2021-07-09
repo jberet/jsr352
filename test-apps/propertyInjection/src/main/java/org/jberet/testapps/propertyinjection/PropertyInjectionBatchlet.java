@@ -27,9 +27,9 @@ import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
-import javax.batch.api.BatchProperty;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.BatchProperty;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import javax.management.ObjectName;
 
 import org.jberet.testapps.common.BatchletNoNamed;

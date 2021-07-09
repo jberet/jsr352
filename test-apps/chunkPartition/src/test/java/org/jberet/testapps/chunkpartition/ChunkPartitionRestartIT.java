@@ -12,9 +12,9 @@ package org.jberet.testapps.chunkpartition;
 
 import java.util.List;
 import java.util.Properties;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.Metric;
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.Metric;
+import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.metric.MetricImpl;

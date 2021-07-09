@@ -10,13 +10,14 @@
 
 package org.jberet.testapps.chunkskipretry;
 
-import javax.batch.api.chunk.listener.ChunkListener;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+import jakarta.batch.api.chunk.listener.ChunkListener;
+import jakarta.batch.runtime.context.JobContext;
 
 /**
- * Impl of {@code javax.batch.api.chunk.listener.ChunkListener} to verify
+ * Impl of {@code jakarta.batch.api.chunk.listener.ChunkListener} to verify
  * chunk listener methods, especially its {@code onError} is correctly called
  * before transaction rollback upon chunk error.
  *

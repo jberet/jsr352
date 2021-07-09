@@ -1,4 +1,4 @@
-import javax.batch.api.AbstractBatchlet;
+import jakarta.batch.api.AbstractBatchlet;
 
 public class NoPackageBatchlet extends AbstractBatchlet {
     @Override

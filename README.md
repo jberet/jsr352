@@ -82,11 +82,13 @@ Increase `ulimit` to avoid such errors. For example,
     </repositories>
     ...
     <dependencies>
-        <dependency>
-            <groupId>org.jboss.spec.javax.batch</groupId>
-            <artifactId>jboss-batch-api_1.0_spec</artifactId>
-            <version>1.0.0.Final</version>
-        </dependency>
+            <dependency>
+                <groupId>jakarta.batch</groupId>
+                <artifactId>jakarta.batch-api</artifactId>
+                <version>${version.jakarta.batch.batch-api}</version>
+                <scope>provided</scope>
+            </dependency>
+
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-core</artifactId>
@@ -101,9 +103,9 @@ Increase `ulimit` to avoid such errors. For example,
 #### Batch application dependencies
 ##### Minimal application dependencies:
         <dependency>
-            <groupId>org.jboss.spec.javax.batch</groupId>
-            <artifactId>jboss-batch-api_1.0_spec</artifactId>
-        </dependency>
+                <groupId>jakarta.batch</groupId>
+                <artifactId>jakarta.batch-api</artifactId>
+            </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>

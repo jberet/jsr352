@@ -11,7 +11,7 @@
 package org.jberet.runtime.metric;
 
 import java.io.Serializable;
-import javax.batch.runtime.Metric;
+import jakarta.batch.runtime.Metric;
 
 import org.jberet.runtime.AbstractStepExecution;
 

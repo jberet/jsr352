@@ -10,8 +10,8 @@
 
 package org.jberet.testapps.inheritance;
 
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;

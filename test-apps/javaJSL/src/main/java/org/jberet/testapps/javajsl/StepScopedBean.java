@@ -11,7 +11,7 @@
 package org.jberet.testapps.javajsl;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.jberet.cdi.StepScoped;
 

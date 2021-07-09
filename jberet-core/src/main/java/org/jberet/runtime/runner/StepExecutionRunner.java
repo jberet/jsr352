@@ -23,14 +23,14 @@ import java.util.ServiceLoader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import javax.batch.api.listener.StepListener;
-import javax.batch.api.partition.PartitionAnalyzer;
-import javax.batch.api.partition.PartitionMapper;
-import javax.batch.api.partition.PartitionReducer;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.BatchStatus;
-import javax.transaction.TransactionManager;
+import jakarta.transaction.TransactionManager;
 
+import jakarta.batch.api.listener.StepListener;
+import jakarta.batch.api.partition.PartitionAnalyzer;
+import jakarta.batch.api.partition.PartitionMapper;
+import jakarta.batch.api.partition.PartitionReducer;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.BatchStatus;
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.Chunk;
@@ -233,7 +233,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         }
         boolean isOverride = false;
         if (mapper != null) {
-            final javax.batch.api.partition.PartitionPlan partitionPlan = mapper.mapPartitions();
+            final jakarta.batch.api.partition.PartitionPlan partitionPlan = mapper.mapPartitions();
             isOverride = partitionPlan.getPartitionsOverride();
             numOfPartitions = partitionPlan.getPartitions();
             numOfThreads = partitionPlan.getThreads();

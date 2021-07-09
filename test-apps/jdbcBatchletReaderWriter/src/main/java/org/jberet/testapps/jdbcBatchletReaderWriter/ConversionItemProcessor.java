@@ -12,9 +12,10 @@ package org.jberet.testapps.jdbcBatchletReaderWriter;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.batch.api.chunk.ItemProcessor;
-import javax.enterprise.context.Dependent;
-import javax.inject.Named;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Named;
+
+import jakarta.batch.api.chunk.ItemProcessor;
 
 /**
  * An item processor that performs any necessary data conversion.

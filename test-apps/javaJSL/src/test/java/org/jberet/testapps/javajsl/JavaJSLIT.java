@@ -19,9 +19,9 @@ import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.Metric;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.Metric;
 
 import org.jberet.job.model.DecisionBuilder;
 import org.jberet.job.model.ExceptionClassFilter;

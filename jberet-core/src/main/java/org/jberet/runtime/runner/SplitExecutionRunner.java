@@ -13,8 +13,8 @@ package org.jberet.runtime.runner;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.StepExecution;
 
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Flow;

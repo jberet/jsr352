@@ -10,15 +10,15 @@
 
 package org.jberet.testapps.postconstruct;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.batch.api.BatchProperty;
-import javax.batch.api.Decider;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.StepExecution;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.Decider;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.StepExecution;
 import org.jberet.testapps.common.PostConstructPreDestroyBase;
 
 @Named("postconstruct.Decider1")

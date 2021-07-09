@@ -11,10 +11,10 @@
 package org.jberet.testapps.cdiscopes.partitionscoped;
 
 import java.util.List;
-import javax.batch.api.AbstractBatchlet;
-import javax.batch.api.BatchProperty;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.AbstractBatchlet;
+import jakarta.batch.api.BatchProperty;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.jberet.testapps.cdiscopes.commons.FooFieldTarget;
 import org.jberet.testapps.cdiscopes.commons.FooMethodTarget;

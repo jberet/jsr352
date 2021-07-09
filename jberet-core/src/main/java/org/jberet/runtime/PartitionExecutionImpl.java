@@ -12,7 +12,7 @@ package org.jberet.runtime;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 public final class PartitionExecutionImpl extends AbstractStepExecution {
     private static final long serialVersionUID = 1L;

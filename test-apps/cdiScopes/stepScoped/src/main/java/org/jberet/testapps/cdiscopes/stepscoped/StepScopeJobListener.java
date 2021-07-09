@@ -10,9 +10,9 @@
  
 package org.jberet.testapps.cdiscopes.stepscoped;
 
-import javax.batch.api.listener.AbstractJobListener;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.listener.AbstractJobListener;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class StepScopeJobListener extends AbstractJobListener {

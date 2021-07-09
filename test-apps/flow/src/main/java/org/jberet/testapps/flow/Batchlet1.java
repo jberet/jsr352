@@ -10,10 +10,10 @@
 
 package org.jberet.testapps.flow;
 
-import javax.batch.api.BatchProperty;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
+import jakarta.batch.api.BatchProperty;
 import org.jberet.testapps.common.Batchlet0;
 import org.junit.Assert;
 

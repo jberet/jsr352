@@ -10,7 +10,7 @@
 
 package org.jberet.testapps.cassandraInject;
 
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import com.datastax.driver.core.Cluster;
 import org.jberet.testapps.common.AbstractIT;

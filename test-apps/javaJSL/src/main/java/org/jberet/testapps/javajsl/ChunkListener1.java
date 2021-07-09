@@ -10,11 +10,11 @@
 
 package org.jberet.testapps.javajsl;
 
-import javax.batch.api.BatchProperty;
-import javax.batch.api.chunk.listener.AbstractChunkListener;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.chunk.listener.AbstractChunkListener;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class ChunkListener1 extends AbstractChunkListener {

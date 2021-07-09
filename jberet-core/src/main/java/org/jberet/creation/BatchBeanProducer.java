@@ -28,11 +28,11 @@ import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
-import javax.batch.api.BatchProperty;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
 import javax.management.ObjectName;
 
 import org.jberet._private.BatchLogger;

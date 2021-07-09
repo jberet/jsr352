@@ -12,9 +12,9 @@ package org.jberet.runtime.runner;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import javax.batch.api.Decider;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.api.Decider;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.StepExecution;
 
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;

@@ -11,8 +11,9 @@
 package org.jberet.testapps.upsertWriter;
 
 import java.util.Map;
-import javax.batch.api.chunk.ItemProcessor;
-import javax.inject.Named;
+import jakarta.inject.Named;
+
+import jakarta.batch.api.chunk.ItemProcessor;
 
 @Named
 public class UpperCaseItemProcessor implements ItemProcessor {

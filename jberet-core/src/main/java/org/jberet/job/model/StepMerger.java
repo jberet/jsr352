@@ -11,7 +11,7 @@
 package org.jberet.job.model;
 
 import java.util.List;
-import javax.batch.operations.JobStartException;
+import jakarta.batch.operations.JobStartException;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.ArchiveXmlLoader;

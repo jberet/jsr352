@@ -10,7 +10,7 @@
 
 package org.jberet.spi;
 
-import javax.batch.operations.JobOperator;
+import jakarta.batch.operations.JobOperator;
 
 import org.jberet.operations.JobOperatorImpl;
 import org.jberet.util.Assertions;

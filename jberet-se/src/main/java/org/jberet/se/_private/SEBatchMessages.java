@@ -10,8 +10,8 @@
 
 package org.jberet.se._private;
 
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;

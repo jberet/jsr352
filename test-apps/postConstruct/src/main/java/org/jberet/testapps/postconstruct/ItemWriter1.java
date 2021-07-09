@@ -10,14 +10,15 @@
 
 package org.jberet.testapps.postconstruct;
 
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.batch.api.chunk.AbstractItemWriter;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
-
 import static org.jberet.testapps.postconstruct.ItemProcessor1.setExitStatus;
+
+import java.util.List;
+import jakarta.annotation.PreDestroy;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.batch.api.chunk.AbstractItemWriter;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.inject.Inject;
 
 //@Named
 // This class is declared with custom ref name (W1) in batch.xml

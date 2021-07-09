@@ -11,10 +11,10 @@
 package org.jberet.se;
 
 import java.util.concurrent.TimeUnit;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.operations.JobOperator;
-import javax.batch.runtime.BatchRuntime;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.operations.JobOperator;
+import jakarta.batch.runtime.BatchRuntime;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.se._private.SEBatchLogger;

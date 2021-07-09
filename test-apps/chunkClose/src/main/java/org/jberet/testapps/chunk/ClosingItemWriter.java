@@ -12,15 +12,15 @@ package org.jberet.testapps.chunk;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.batch.api.BatchProperty;
-import javax.batch.api.chunk.AbstractItemWriter;
-import javax.batch.api.chunk.ItemWriter;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import com.google.common.base.MoreObjects;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.chunk.AbstractItemWriter;
+import jakarta.batch.api.chunk.ItemWriter;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.context.StepContext;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>

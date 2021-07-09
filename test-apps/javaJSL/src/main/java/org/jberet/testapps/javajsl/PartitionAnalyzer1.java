@@ -10,12 +10,12 @@
 
 package org.jberet.testapps.javajsl;
 
-import javax.batch.runtime.BatchStatus;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
-public class PartitionAnalyzer1 extends javax.batch.api.partition.AbstractPartitionAnalyzer {
+public class PartitionAnalyzer1 extends jakarta.batch.api.partition.AbstractPartitionAnalyzer {
     @Inject
     private StepScopedBean stepScopedBean;
 

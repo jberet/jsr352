@@ -11,12 +11,12 @@
 package org.jberet.testapps.javajsl;
 
 import java.util.Properties;
-import javax.batch.api.AbstractBatchlet;
-import javax.batch.api.BatchProperty;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.AbstractBatchlet;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class Batchlet1 extends AbstractBatchlet {

@@ -10,9 +10,9 @@
 
 package org.jberet.testapps.split;
 
-import javax.batch.api.BatchProperty;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.BatchProperty;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.jberet.testapps.common.Batchlet0;
 import org.junit.Assert;

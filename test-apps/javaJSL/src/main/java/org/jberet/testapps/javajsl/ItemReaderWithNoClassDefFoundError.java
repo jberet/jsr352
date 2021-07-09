@@ -12,10 +12,10 @@ package org.jberet.testapps.javajsl;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import javax.batch.api.BatchProperty;
-import javax.batch.api.chunk.AbstractItemReader;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.chunk.AbstractItemReader;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class ItemReaderWithNoClassDefFoundError extends AbstractItemReader {

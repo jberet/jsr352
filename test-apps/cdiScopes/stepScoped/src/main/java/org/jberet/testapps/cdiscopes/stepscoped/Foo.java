@@ -10,7 +10,7 @@
 
 package org.jberet.testapps.cdiscopes.stepscoped;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.jberet.cdi.StepScoped;
 import org.jberet.testapps.cdiscopes.commons.StepNameHolder;

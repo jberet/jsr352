@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.context.JobContext;
 
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;

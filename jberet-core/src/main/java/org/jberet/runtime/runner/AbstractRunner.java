@@ -12,7 +12,7 @@ package org.jberet.runtime.runner;
 
 import java.util.List;
 import java.util.regex.Pattern;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.RefArtifact;

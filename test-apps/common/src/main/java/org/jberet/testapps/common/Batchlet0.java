@@ -10,9 +10,10 @@
 
 package org.jberet.testapps.common;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Named;
+import jakarta.annotation.PreDestroy;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Named;
 
 @Named
 public class Batchlet0 extends BatchletNoNamed {

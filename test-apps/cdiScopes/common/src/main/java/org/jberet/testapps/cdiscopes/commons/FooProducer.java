@@ -10,8 +10,8 @@
 
 package org.jberet.testapps.cdiscopes.commons;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Named;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Named;
 
 import org.jberet.cdi.JobScoped;
 import org.jberet.cdi.PartitionScoped;
