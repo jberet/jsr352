@@ -11,8 +11,8 @@
 package org.jberet.testapps.common;
 
 import java.util.Arrays;
-import javax.batch.api.chunk.ItemProcessor;
-import javax.inject.Named;
+import jakarta.batch.api.chunk.ItemProcessor;
+import jakarta.inject.Named;
 
 @Named("integerProcessor")
 public class IntegerProcessor extends IntegerArrayReaderWriterProcessorBase implements ItemProcessor {

@@ -11,7 +11,7 @@
 package org.jberet.testapps.cluster;
 
 import java.util.List;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.PartitionExecutionImpl;

@@ -23,7 +23,7 @@ SPDX-License-Identifier: EPL-2.0
 
     <artifactId>jberet-se</artifactId>
     <name>jberet-se</name>
-    <description>JSR 352 implementation classes specific to Java SE environment</description>
+    <description>Jakarta Batch implementation classes specific to Java SE environment</description>
 
     <dependencies>
         <dependency>
@@ -32,12 +32,12 @@ SPDX-License-Identifier: EPL-2.0
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss.spec.javax.transaction</groupId>
-            <artifactId>jboss-transaction-api_1.2_spec</artifactId>
+            <groupId>jakarta.transaction</groupId>
+            <artifactId>jakarta.transaction-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jboss.marshalling</groupId>

@@ -13,8 +13,8 @@ package org.jberet.runtime;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.JobInstance;
+import jakarta.batch.runtime.JobExecution;
+import jakarta.batch.runtime.JobInstance;
 
 import org.jberet.job.model.Job;
 

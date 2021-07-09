@@ -12,7 +12,7 @@ package org.jberet._private;
 
 import java.sql.Connection;
 import java.util.List;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;

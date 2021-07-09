@@ -12,7 +12,7 @@ package org.jberet.runtime.context;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.job.model.Split;
 import org.jberet.runtime.FlowExecutionImpl;

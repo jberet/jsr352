@@ -22,10 +22,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.batch.operations.JobStartException;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.operations.JobStartException;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.JobExecution;
+import jakarta.batch.runtime.StepExecution;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.ArtifactCreationContext;

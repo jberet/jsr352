@@ -14,8 +14,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.Metric;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.Metric;
 
 public final class StepExecutionImpl extends AbstractStepExecution {
     private static final long serialVersionUID = 1L;

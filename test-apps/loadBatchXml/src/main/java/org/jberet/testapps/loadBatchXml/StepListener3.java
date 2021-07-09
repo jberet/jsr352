@@ -10,13 +10,13 @@
 
 package org.jberet.testapps.loadBatchXml;
 
-import javax.batch.api.BatchProperty;
-import javax.batch.api.listener.AbstractStepListener;
-import javax.batch.api.listener.StepListener;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.listener.AbstractStepListener;
+import jakarta.batch.api.listener.StepListener;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
 import org.junit.Assert;
 
 public class StepListener3 extends AbstractStepListener implements StepListener {

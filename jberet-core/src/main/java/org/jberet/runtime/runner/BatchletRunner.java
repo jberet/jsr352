@@ -12,10 +12,10 @@ package org.jberet.runtime.runner;
 
 import static org.jberet._private.BatchLogger.LOGGER;
 
-import javax.batch.api.Batchlet;
-import javax.batch.api.partition.PartitionCollector;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.api.Batchlet;
+import jakarta.batch.api.partition.PartitionCollector;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;
@@ -28,7 +28,7 @@ import org.jberet.spi.PartitionWorker;
 public final class BatchletRunner extends AbstractRunner<StepContextImpl> implements JobTask, JobStopNotificationListener {
     private final RefArtifact batchlet;
     private PartitionCollector collector;
-    private javax.batch.api.Batchlet batchletObj;
+    private jakarta.batch.api.Batchlet batchletObj;
     private PartitionWorker partitionWorker;
 
     public BatchletRunner(final StepContextImpl stepContext,

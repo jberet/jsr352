@@ -10,8 +10,8 @@
 
 package org.jberet.testapps.purgeInMemoryRepository;
 
-import javax.batch.operations.NoSuchJobExecutionException;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.operations.NoSuchJobExecutionException;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.junit.Assert;
 import org.junit.Test;

@@ -11,12 +11,12 @@
 package org.jberet.testapps.chunkpartition;
 
 import java.util.Properties;
-import javax.batch.api.BatchProperty;
-import javax.batch.api.partition.PartitionMapper;
-import javax.batch.api.partition.PartitionPlan;
-import javax.batch.api.partition.PartitionPlanImpl;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.partition.PartitionMapper;
+import jakarta.batch.api.partition.PartitionPlan;
+import jakarta.batch.api.partition.PartitionPlanImpl;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class ChunkPartitionMapper implements PartitionMapper {

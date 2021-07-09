@@ -10,14 +10,15 @@
  
 package org.jberet.se.test;
 
-import javax.batch.api.BatchProperty;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.context.JobContext;
 
 @Named
-public final class FailStepListener implements javax.batch.api.listener.StepListener {
+public final class FailStepListener implements jakarta.batch.api.listener.StepListener {
     @Inject
     @BatchProperty
     private boolean failBeforeStep;

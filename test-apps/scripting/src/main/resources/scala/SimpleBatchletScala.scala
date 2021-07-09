@@ -9,7 +9,7 @@
  */
 
 import java.util.Properties
-import javax.batch.runtime.context.{StepContext, JobContext}
+import jakarta.batch.runtime.context.{StepContext, JobContext}
 
 val jobContext1 = jobContext.asInstanceOf[JobContext]
 val stepContext1 = stepContext.asInstanceOf[StepContext]

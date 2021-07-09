@@ -10,7 +10,7 @@
 
 package org.jberet.test;
 
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Test;

@@ -10,9 +10,9 @@
 
 package org.jberet.testapps.cdiscopes.partitionscoped;
 
-import javax.batch.api.listener.StepListener;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.listener.StepListener;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class PartitionScopeStepListener implements StepListener {

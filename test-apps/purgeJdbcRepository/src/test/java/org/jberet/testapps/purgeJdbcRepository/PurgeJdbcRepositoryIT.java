@@ -21,10 +21,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.batch.operations.JobRestartException;
-import javax.batch.operations.NoSuchJobException;
-import javax.batch.operations.NoSuchJobExecutionException;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.operations.JobRestartException;
+import jakarta.batch.operations.NoSuchJobException;
+import jakarta.batch.operations.NoSuchJobExecutionException;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.repository.JdbcRepository;
 import org.jberet.se.BatchSEEnvironment;

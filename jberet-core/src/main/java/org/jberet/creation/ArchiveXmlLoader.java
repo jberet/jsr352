@@ -10,21 +10,21 @@
 
 package org.jberet.creation;
 
+import static org.jberet._private.BatchMessages.MESSAGES;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import javax.batch.operations.JobStartException;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 
+import jakarta.batch.operations.JobStartException;
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobMerger;
 import org.jberet.job.model.JobParser;
 import org.jberet.spi.JobXmlResolver;
-
-import static org.jberet._private.BatchMessages.MESSAGES;
 
 public class ArchiveXmlLoader {
     public final static String ARCHIVE_JOB_XML_DIR = "META-INF/batch-jobs/";
@@ -73,7 +73,7 @@ public class ArchiveXmlLoader {
      *
      * @return the job root element
      *
-     * @throws javax.batch.operations.JobStartException if the job failed to start
+     * @throws jakarta.batch.operations.JobStartException if the job failed to start
      */
     public static Job loadJobXml(final String jobXmlName, final ClassLoader classLoader, final List<Job> loadedJobs, final JobXmlResolver jobXmlResolver)
             throws JobStartException {

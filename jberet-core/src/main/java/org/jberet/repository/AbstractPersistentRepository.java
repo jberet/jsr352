@@ -19,10 +19,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.JobInstance;
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.JobExecution;
+import jakarta.batch.runtime.JobInstance;
+import jakarta.batch.runtime.StepExecution;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.job.model.Job;

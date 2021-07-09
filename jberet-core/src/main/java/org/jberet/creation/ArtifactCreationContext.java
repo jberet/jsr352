@@ -14,8 +14,8 @@ import org.jberet.job.model.Properties;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
 
 public final class ArtifactCreationContext {
     JobContextImpl jobContext;

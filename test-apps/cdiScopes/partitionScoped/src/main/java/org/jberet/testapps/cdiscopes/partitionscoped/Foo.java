@@ -10,7 +10,7 @@
 
 package org.jberet.testapps.cdiscopes.partitionscoped;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.jberet.cdi.PartitionScoped;
 import org.jberet.testapps.cdiscopes.commons.StepNameHolder;

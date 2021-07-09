@@ -11,17 +11,17 @@
 package org.jberet.testapps.postconstruct;
 
 import java.util.Date;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.batch.api.BatchProperty;
-import javax.batch.api.listener.JobListener;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.BatchRuntime;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.JobExecution;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.listener.JobListener;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.BatchRuntime;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.JobExecution;
 import org.jberet.testapps.common.PostConstructPreDestroyBase;
 
 @Named

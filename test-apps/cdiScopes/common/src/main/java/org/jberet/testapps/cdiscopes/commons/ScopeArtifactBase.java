@@ -12,8 +12,8 @@ package org.jberet.testapps.cdiscopes.commons;
 
 import java.lang.annotation.ElementType;
 import java.util.List;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
 
 /**
  * Common super class for batch artifacts used in CDI-scope-related tests.

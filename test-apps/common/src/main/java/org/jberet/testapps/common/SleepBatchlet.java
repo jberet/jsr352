@@ -11,10 +11,10 @@
 package org.jberet.testapps.common;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.batch.api.BatchProperty;
-import javax.batch.api.Batchlet;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.Batchlet;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * A batchlet that sleeps periodically. The amount of time it sleeps each time

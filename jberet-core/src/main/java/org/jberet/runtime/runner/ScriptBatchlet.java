@@ -10,16 +10,16 @@
 
 package org.jberet.runtime.runner;
 
-import javax.batch.api.Batchlet;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
+import jakarta.batch.api.Batchlet;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.Script;
 import org.jberet.runtime.context.StepContextImpl;
 
 /**
- * An implementation of {@code javax.batch.api.Batchlet} whose {@code process} method runs a script.
+ * An implementation of {@code jakarta.batch.api.Batchlet} whose {@code process} method runs a script.
  */
 final class ScriptBatchlet extends ScriptArtifactBase implements Batchlet {
 

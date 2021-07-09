@@ -11,9 +11,9 @@
 package org.jberet.repository;
 
 import java.util.Collection;
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
+import jakarta.batch.runtime.JobExecution;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
 
 /**
  * A selector that determines if a job execution matches this selector's

@@ -84,13 +84,13 @@ public class ExceptionClassFilterTest {
 
         filter = chunk.getRetryableExceptionClasses();
         Assert.assertEquals(true, filter.matches(Exception.class));
-        Assert.assertEquals(true, filter.matches(javax.xml.ws.WebServiceException.class));
+        Assert.assertEquals(true, filter.matches(jakarta.xml.ws.WebServiceException.class));
         Assert.assertEquals(false, filter.matches(java.lang.RuntimeException.class));
         Assert.assertEquals(true, filter.matches(IOException.class));
         Assert.assertEquals(true, filter.matches(FileNotFoundException.class));
         Assert.assertEquals(false, filter.matches(AlreadyConnectedException.class));
-        Assert.assertEquals(true, filter.matches(javax.xml.ws.ProtocolException.class));
-        Assert.assertEquals(true, filter.matches(javax.xml.ws.http.HTTPException.class));
+        Assert.assertEquals(true, filter.matches(jakarta.xml.ws.ProtocolException.class));
+        Assert.assertEquals(true, filter.matches(jakarta.xml.ws.http.HTTPException.class));
 
         filter = chunk.getNoRollbackExceptionClasses();
         Assert.assertEquals(true, filter.matches(IOException.class));

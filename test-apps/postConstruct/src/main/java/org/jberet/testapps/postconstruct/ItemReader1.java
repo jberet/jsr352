@@ -10,16 +10,17 @@
 
 package org.jberet.testapps.postconstruct;
 
+import static org.jberet.testapps.postconstruct.ItemProcessor1.setExitStatus;
+
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.batch.api.chunk.AbstractItemReader;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
-import static org.jberet.testapps.postconstruct.ItemProcessor1.setExitStatus;
+import jakarta.batch.api.chunk.AbstractItemReader;
+import jakarta.batch.runtime.context.JobContext;
 
 @Named
 public class ItemReader1 extends AbstractItemReader {

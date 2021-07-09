@@ -10,6 +10,8 @@
 
 package org.jberet.creation;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -19,20 +21,18 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.batch.api.BatchProperty;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Inject;
 
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
 import org.jberet.job.model.Properties;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.ArtifactFactory;
 import org.wildfly.security.manager.WildFlySecurityManager;
-
-import static org.jberet._private.BatchLogger.LOGGER;
 
 /**
  * An abstract implementation of an {@link ArtifactFactory} which contains some helper methods for dealing injecting
@@ -60,7 +60,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
                              final StepContextImpl stepContext,
                              final Properties batchProps) throws Exception {
         final boolean hasBatchProps = batchProps != null && batchProps.size() > 0;
-        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("javax.batch")) {
+        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("jakarta.batch")) {
             for (final Field f : cls.getDeclaredFields()) {
                 if (!f.isSynthetic()) {
                     Object fieldVal = null;
@@ -102,7 +102,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
 
     protected void invokeAnnotatedLifecycleMethod(final Object obj, Class<?> cls, final Class<? extends Annotation> annCls) throws Exception{
         final List<Method> lifecycleMethods = new ArrayList<Method>();
-        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("javax.batch")) {
+        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("jakarta.batch")) {
             final Method[] methods = cls.getDeclaredMethods();
             for (final Method m : methods) {
                 if (m.getAnnotation(annCls) != null) {  //the lifecyle annotation is present

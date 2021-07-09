@@ -10,8 +10,8 @@
 
 package org.jberet.se;
 
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
 
 import org.jberet.creation.AbstractArtifactFactory;
 import org.jboss.weld.bootstrap.api.helpers.RegistrySingletonProvider;

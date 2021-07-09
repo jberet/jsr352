@@ -10,34 +10,37 @@
 
 package org.jberet.runtime.runner;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.batch.api.chunk.CheckpointAlgorithm;
-import javax.batch.api.chunk.ItemProcessor;
-import javax.batch.api.chunk.ItemReader;
-import javax.batch.api.chunk.ItemWriter;
-import javax.batch.api.chunk.listener.ChunkListener;
-import javax.batch.api.chunk.listener.ItemProcessListener;
-import javax.batch.api.chunk.listener.ItemReadListener;
-import javax.batch.api.chunk.listener.ItemWriteListener;
-import javax.batch.api.chunk.listener.RetryProcessListener;
-import javax.batch.api.chunk.listener.RetryReadListener;
-import javax.batch.api.chunk.listener.RetryWriteListener;
-import javax.batch.api.chunk.listener.SkipProcessListener;
-import javax.batch.api.chunk.listener.SkipReadListener;
-import javax.batch.api.chunk.listener.SkipWriteListener;
-import javax.batch.api.partition.PartitionCollector;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.Metric;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
 
+import jakarta.batch.api.chunk.CheckpointAlgorithm;
+import jakarta.batch.api.chunk.ItemProcessor;
+import jakarta.batch.api.chunk.ItemReader;
+import jakarta.batch.api.chunk.ItemWriter;
+import jakarta.batch.api.chunk.listener.ChunkListener;
+import jakarta.batch.api.chunk.listener.ItemProcessListener;
+import jakarta.batch.api.chunk.listener.ItemReadListener;
+import jakarta.batch.api.chunk.listener.ItemWriteListener;
+import jakarta.batch.api.chunk.listener.RetryProcessListener;
+import jakarta.batch.api.chunk.listener.RetryReadListener;
+import jakarta.batch.api.chunk.listener.RetryWriteListener;
+import jakarta.batch.api.chunk.listener.SkipProcessListener;
+import jakarta.batch.api.chunk.listener.SkipReadListener;
+import jakarta.batch.api.chunk.listener.SkipWriteListener;
+import jakarta.batch.api.partition.PartitionCollector;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.Metric;
+import jakarta.transaction.Status;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionManager;
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;
 import org.jberet.job.model.Chunk;
@@ -51,9 +54,6 @@ import org.jberet.runtime.metric.StepMetrics;
 import org.jberet.spi.JobTask;
 import org.jberet.spi.PartitionWorker;
 import org.jboss.logging.Logger;
-
-import static org.jberet._private.BatchLogger.LOGGER;
-import static org.jberet._private.BatchMessages.MESSAGES;
 
 /**
  * This runner class is responsible for running a chunk-type step (not just a chunk range of a step).  In a partitioned
@@ -179,11 +179,11 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
 
             //When running in EE environment, set global transaction timeout for the current thread
-            // from javax.transaction.global.timeout property at step level
+            // from jakarta.transaction.global.timeout property at step level
             final Properties stepProps = batchContext.getStep().getProperties();
             int globalTimeout = 180; //default 180 seconds defined by spec
             if (stepProps != null) {
-                final String globalTimeoutProp = stepProps.get("javax.transaction.global.timeout");
+                final String globalTimeoutProp = stepProps.get("jakarta.transaction.global.timeout");
                 if (globalTimeoutProp != null) {
                     globalTimeout = Integer.parseInt(globalTimeoutProp);
                 }

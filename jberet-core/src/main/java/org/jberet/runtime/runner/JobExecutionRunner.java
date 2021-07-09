@@ -11,8 +11,8 @@
 package org.jberet.runtime.runner;
 
 import java.util.List;
-import javax.batch.api.listener.JobListener;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.api.listener.JobListener;
+import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;

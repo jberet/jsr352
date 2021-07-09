@@ -10,11 +10,11 @@
 
 package org.jberet.testapps.common;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
 
 abstract public class PostConstructPreDestroyBase {
     @Inject

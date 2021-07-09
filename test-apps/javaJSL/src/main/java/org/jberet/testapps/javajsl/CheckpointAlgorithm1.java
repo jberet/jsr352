@@ -10,8 +10,8 @@
  
 package org.jberet.testapps.javajsl;
 
-import javax.batch.api.chunk.AbstractCheckpointAlgorithm;
-import javax.inject.Named;
+import jakarta.batch.api.chunk.AbstractCheckpointAlgorithm;
+import jakarta.inject.Named;
 
 @Named
 public final class CheckpointAlgorithm1 extends AbstractCheckpointAlgorithm {

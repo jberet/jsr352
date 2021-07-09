@@ -11,8 +11,8 @@
 package org.jberet.testapps.chunkpartition;
 
 import java.io.Serializable;
-import javax.batch.api.partition.PartitionCollector;
-import javax.inject.Named;
+import jakarta.batch.api.partition.PartitionCollector;
+import jakarta.inject.Named;
 
 @Named
 public final class ChunkPartitionCollector implements PartitionCollector {

@@ -10,11 +10,12 @@
 
 package org.jberet.testapps.javajsl;
 
-import javax.batch.api.BatchProperty;
-import javax.batch.api.listener.JobListener;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.listener.JobListener;
+import jakarta.batch.runtime.context.JobContext;
 
 @Named
 public class JobListener1 implements JobListener {

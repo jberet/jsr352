@@ -12,17 +12,17 @@ package org.jberet.runtime.runner;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.batch.api.chunk.ItemWriter;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
+import jakarta.batch.api.chunk.ItemWriter;
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.Script;
 import org.jberet.runtime.context.StepContextImpl;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemWriter} whose methods run corresponding functions in a script.
+ * An implementation of {@code jakarta.batch.api.chunk.ItemWriter} whose methods run corresponding functions in a script.
  */
 final class ScriptItemWriter extends ScriptArtifactBase implements ItemWriter {
     private final Invocable invocable;

@@ -10,10 +10,10 @@
 
 package org.jberet.testapps.javajsl;
 
-import javax.batch.api.partition.AbstractPartitionReducer;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.partition.AbstractPartitionReducer;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class PartitionReducer1 extends AbstractPartitionReducer {

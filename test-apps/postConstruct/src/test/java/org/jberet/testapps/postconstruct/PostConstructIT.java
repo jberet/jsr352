@@ -10,15 +10,14 @@
 
 package org.jberet.testapps.postconstruct;
 
-import javax.batch.runtime.BatchStatus;
+import static org.junit.Assert.assertEquals;
 
+import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class PostConstructIT extends AbstractIT {
     @BeforeClass
@@ -77,13 +76,13 @@ public class PostConstructIT extends AbstractIT {
 
     /**
      * Verifies that after all steps are finished in a job execution, the job batch status is set to {@code COMPLETED}
-     * when accessed in {@code javax.batch.api.listener.JobListener#afterJob()} method, and job execution {@code endTime}
+     * when accessed in {@code jakarta.batch.api.listener.JobListener#afterJob()} method, and job execution {@code endTime}
      * is set to a valid date.
      *
      * If any {@code JobListener#afterJob} method fails, the job execution will still fail and batch status will change to
      * {@code FAILED}.
      *
-     * The same should also be true for {@code javax.batch.api.listener.StepListener#afterStep()}.
+     * The same should also be true for {@code jakarta.batch.api.listener.StepListener#afterStep()}.
      *
      * @throws Exception
      */

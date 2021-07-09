@@ -11,17 +11,17 @@
 package org.jberet.runtime.runner;
 
 import java.io.Serializable;
-import javax.batch.api.chunk.ItemReader;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
+import jakarta.batch.api.chunk.ItemReader;
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.Script;
 import org.jberet.runtime.context.StepContextImpl;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemReader} whose methods run corresponding functions in a script.
+ * An implementation of {@code jakarta.batch.api.chunk.ItemReader} whose methods run corresponding functions in a script.
  */
 final class ScriptItemReader extends ScriptArtifactBase implements ItemReader {
     private final Invocable invocable;

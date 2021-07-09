@@ -18,7 +18,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.ServiceLoader;
-import javax.batch.operations.BatchRuntimeException;
+import jakarta.batch.operations.BatchRuntimeException;
 
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;

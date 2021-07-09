@@ -10,11 +10,12 @@
 
 package org.jberet.testapps.postconstruct;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.batch.api.chunk.ItemProcessor;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
+import jakarta.annotation.PreDestroy;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.batch.api.chunk.ItemProcessor;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.inject.Inject;
 
 //@Named
 // This class is referenced with its fully-qualified class name in job.xml:

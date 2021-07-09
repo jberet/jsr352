@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
-import javax.batch.operations.BatchRuntimeException;
+import jakarta.batch.operations.BatchRuntimeException;
 
 import org.jberet.job.model.Transition.End;
 import org.jberet.job.model.Transition.Fail;

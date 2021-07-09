@@ -13,7 +13,7 @@ package org.jberet.job.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.batch.operations.JobStartException;
+import jakarta.batch.operations.JobStartException;
 
 import org.jberet._private.BatchMessages;
 import org.jberet.spi.BatchEnvironment;

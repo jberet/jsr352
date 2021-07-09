@@ -10,12 +10,12 @@
  
 package org.jberet.se.test;
 
-import javax.batch.api.BatchProperty;
-import javax.batch.api.listener.JobListener;
-import javax.batch.operations.BatchRuntimeException;
-import javax.batch.runtime.context.JobContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.api.listener.JobListener;
+import jakarta.batch.operations.BatchRuntimeException;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public final class FailJobListener implements JobListener {

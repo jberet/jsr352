@@ -14,11 +14,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import javax.batch.api.partition.PartitionAnalyzer;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.context.StepContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.partition.PartitionAnalyzer;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class PartitionScopePartitionAnalyzer implements PartitionAnalyzer {

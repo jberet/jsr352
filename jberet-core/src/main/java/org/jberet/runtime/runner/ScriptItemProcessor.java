@@ -10,16 +10,16 @@
 
 package org.jberet.runtime.runner;
 
-import javax.batch.api.chunk.ItemProcessor;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
+import jakarta.batch.api.chunk.ItemProcessor;
 import org.jberet.job.model.Properties;
 import org.jberet.job.model.Script;
 import org.jberet.runtime.context.StepContextImpl;
 
 /**
- * An implementation of {@code javax.batch.api.chunk.ItemProcessor} whose {@code processItem} method runs a script.
+ * An implementation of {@code jakarta.batch.api.chunk.ItemProcessor} whose {@code processItem} method runs a script.
  */
 final class ScriptItemProcessor extends ScriptArtifactBase implements ItemProcessor {
     public ScriptItemProcessor(final Script script, final Properties artifactProperties, final StepContextImpl stepContext) throws ScriptException {

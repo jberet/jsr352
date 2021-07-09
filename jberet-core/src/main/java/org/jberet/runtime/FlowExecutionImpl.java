@@ -10,7 +10,7 @@
 
 package org.jberet.runtime;
 
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.runtime.StepExecution;
 
 public final class FlowExecutionImpl extends AbstractExecution {
     private static final long serialVersionUID = 1426640914765713066L;

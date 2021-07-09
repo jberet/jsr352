@@ -14,10 +14,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.context.JobContext;
-import javax.batch.runtime.context.StepContext;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.JobExecution;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
 
 /**
  * Default implementation of {@link JobExecutionSelector}.

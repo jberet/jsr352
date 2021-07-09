@@ -11,9 +11,9 @@
 package org.jberet.testapps.javajsl;
 
 import java.io.Serializable;
-import javax.batch.api.partition.PartitionCollector;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.batch.api.partition.PartitionCollector;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class PartitionCollector1 implements PartitionCollector {

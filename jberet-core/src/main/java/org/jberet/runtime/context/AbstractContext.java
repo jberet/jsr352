@@ -12,8 +12,8 @@ package org.jberet.runtime.context;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.batch.runtime.BatchStatus;
-import javax.enterprise.context.spi.Contextual;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.enterprise.context.spi.Contextual;
 
 import org.jberet.creation.JobScopedContextImpl;
 
