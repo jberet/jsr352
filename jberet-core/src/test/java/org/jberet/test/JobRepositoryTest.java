@@ -151,6 +151,11 @@ public class JobRepositoryTest {
                 //props.setProperty(JobRepositoryFactory.JOB_REPOSITORY_TYPE_KEY, JobRepositoryFactory.REPOSITORY_TYPE_JDBC);
                 return props;
             }
+
+            @Override
+            public String getApplicationName() {
+                return null;
+            }
         };
         repo = batchEnvironment.getJobRepository();
     }
