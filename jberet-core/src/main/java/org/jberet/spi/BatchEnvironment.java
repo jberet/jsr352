@@ -68,4 +68,9 @@ public interface BatchEnvironment {
      * @return a key-value map of batch configuration
      */
     Properties getBatchConfigurationProperties();
+
+    /**
+     * @return application name
+     */
+    String getApplicationName();
 }

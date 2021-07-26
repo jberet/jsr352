@@ -74,6 +74,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     static final String THREAD_POOL_REJECTION_POLICY = "thread-pool-rejection-policy";
     static final String THREAD_FACTORY = "thread-factory";
 
+
     public BatchSEEnvironment() {
         configProperties = new Properties();
         final InputStream configStream = getClassLoader().getResourceAsStream(CONFIG_FILE_NAME);
@@ -142,6 +143,11 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     @Override
     public Properties getBatchConfigurationProperties() {
         return this.configProperties;
+    }
+
+    @Override
+    public String getApplicationName() {
+        return null;
     }
 
     ThreadPoolExecutor createThreadPoolExecutor() {
