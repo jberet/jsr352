@@ -142,6 +142,11 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         return this.configProperties;
     }
 
+    @Override
+    public String getApplicationName() {
+        return null;
+    }
+
     ThreadPoolExecutor createThreadPoolExecutor() {
         String threadPoolType = configProperties.getProperty(THREAD_POOL_TYPE);
         final String threadFactoryProp = configProperties.getProperty(THREAD_FACTORY);
