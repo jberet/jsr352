@@ -17,8 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import jakarta.transaction.InvalidTransactionException;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
@@ -138,7 +136,7 @@ public abstract class AbstractJobOperator implements JobOperator {
     public long start(final Job jobDefined, final Properties jobParameters, final String user) throws JobStartException, JobSecurityException {
         final BatchEnvironment batchEnvironment = getBatchEnvironment();
         final ClassLoader classLoader = batchEnvironment.getClassLoader();
-        final String applicationName = getApplicationName();
+        final String applicationName = batchEnvironment.getApplicationName();
         getJobRepository().addJob(new ApplicationAndJobName(applicationName, jobDefined.getId()), jobDefined);
         try {
             return invokeTransaction(new TransactionInvocation<Long>() {
@@ -451,14 +449,6 @@ public abstract class AbstractJobOperator implements JobOperator {
         final JobExecutionRunner jobExecutionRunner = new JobExecutionRunner(jobContext);
         jobContext.getBatchEnvironment().submitTask(jobExecutionRunner);
         return jobExecution.getExecutionId();
-    }
-
-    private String getApplicationName() {
-        try {
-            return InitialContext.doLookup("java:app/AppName");
-        } catch (NamingException e) {
-            return null;
-        }
     }
 
     private <T> T invokeTransaction(final TransactionInvocation<T> transactionInvocation) throws SystemException, InvalidTransactionException {
