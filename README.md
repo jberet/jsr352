@@ -1,7 +1,7 @@
 ![thumbnail](./images/jberet_logo_600px.png)
 
 
-JBeret is an implementation of [JSR 352 (Batch Applications for the Java Platform)](https://java.net/projects/jbatch). It is also included in [WildFly, the new and improved JBoss Application Server](http://wildfly.org/) to provide portable batch processing support in Java EE environment. 
+JBeret is an implementation of [Jakarta Batch (Batch Applications for the Java Platform)](https://java.net/projects/jbatch). It is also included in [WildFly, the new and improved JBoss Application Server](http://wildfly.org/) to provide portable batch processing support in Jakarta EE environment. 
 
 #### Build JBeret
 To build and run default set of tests:
@@ -35,7 +35,7 @@ Increase `ulimit` to avoid such errors. For example,
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
-* [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [JSR 352 TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
+* [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [Jakarta Batch TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
 * [wildfly-jberet-samples](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples): Sample batch processing apps that can be deployed to WildFly or JBoss EAP 7
 
 #### 3rd-party & Community Extensions:
@@ -51,8 +51,8 @@ Increase `ulimit` to avoid such errors. For example,
 * [JBeret-dev Mailing List](https://lists.jboss.org/mailman/listinfo/jberet-dev)
 * [WildFly Forum](https://developer.jboss.org/en/wildfly)
 * [JBeret Forum](https://developer.jboss.org/en/jberet/)
-* [JSR 352 Expert Group Discussion](https://java.net/projects/jbatch/lists/public/archive)
 * [JBoss Batch API project](https://github.com/jboss/jboss-batch-api_spec)
+* [Jakarta Batch Expert Group Discussion](https://github.com/eclipse-ee4j/batch-api/issues)
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
 * Additional JBeret project info on [ohloh Open HUB](https://www.ohloh.net/p/jberet)
 
@@ -143,7 +143,7 @@ Increase `ulimit` to avoid such errors. For example,
             <artifactId>guava</artifactId>
         </dependency>
         
-A note on webapp or Java EE application packaging: Java EE API jars (batch-api, cdi-api, javax.inject, transaction-api)
+A note on webapp or Jakarta EE application packaging: Jakarta EE API jars (batch-api, cdi-api, javax.inject, transaction-api)
 are already available in the appserver, and should not be included in WAR, JAR, or EAR files. Their maven dependency
 scope should be set to `provided`. In addition, if the application is deployed to JBoss EAP or WildFly, almost all of
 the above dependencies are already available as JBoss modules, and should not be duplicated in application package.
