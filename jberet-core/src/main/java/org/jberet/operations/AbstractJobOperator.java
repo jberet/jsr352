@@ -381,7 +381,7 @@ public abstract class AbstractJobOperator implements JobOperator {
         final List<JobExecution> executions = getJobExecutions(jobInstance);
         final JobExecution mostRecentExecution = executions.get(executions.size() - 1);
         if (executionId != mostRecentExecution.getExecutionId()) {
-            throw MESSAGES.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId());
+            throw MESSAGES.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId(), mostRecentExecution.getExecutionId());
         }
         final BatchEnvironment batchEnvironment = getBatchEnvironment();
         final JobRepository repository = getJobRepository();
