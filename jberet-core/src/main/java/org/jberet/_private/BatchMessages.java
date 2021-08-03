@@ -66,8 +66,8 @@ public interface BatchMessages {
     @Message(id = 610, value = "Failed to restart job execution %s, which had batch status %s.")
     JobRestartException jobRestartException(long jobExecutionId, BatchStatus previousStatus);
 
-    @Message(id = 611, value = "Job execution %s is not the most recent execution of job instance %s.")
-    JobExecutionNotMostRecentException jobExecutionNotMostRecentException(long jobExecutionId, long jobInstanceId);
+    @Message(id = 611, value = "Job execution %s is not the most recent execution of job instance %s. %s is the most recent Id")
+    JobExecutionNotMostRecentException jobExecutionNotMostRecentException(long jobExecutionId, long jobInstanceId, long mostRecentExecutionId);
 
     @Message(id = 612, value = "Job execution %s has batch status %s, and is not running.")
     JobExecutionNotRunningException jobExecutionNotRunningException(long jobExecutionId, BatchStatus batchStatus);

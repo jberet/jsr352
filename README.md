@@ -1,7 +1,9 @@
-![thumbnail](./images/jberet_logo_600px.png)
+<p align="center">
+   <img src="./images/jberet_logo_600px.png" alt="JBeret logo" title="JBeret" height="150" width="600"/>
+</p>
 
 
-JBeret is an implementation of [Jakarta Batch (Batch Applications for the Java Platform)](https://java.net/projects/jbatch). It is also included in [WildFly, the new and improved JBoss Application Server](http://wildfly.org/) to provide portable batch processing support in Jakarta EE environment. 
+JBeret is an implementation of [Jakarta Batch](https://jakarta.ee/specifications/batch/). It is also included in [WildFly, the new and improved JBoss Application Server](https://wildfly.org/) to provide portable batch processing support in Jakarta EE environment. 
 
 #### Build JBeret
 To build and run default set of tests:
@@ -26,35 +28,32 @@ Increase `ulimit` to avoid such errors. For example,
 
     ulimit -u 2048add
 
-#### Sub-modules:
+#### JBeret Modules:
 * [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
 * [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
-* [jberet-support](https://github.com/jberet/jsr352/tree/master/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, PDF, etc) for batch applications, and JNDI support
-* [jberet-rest-api](https://github.com/jberet/jsr352/tree/master/jberet-rest-api): REST API for batch job management
-* [jberet-ui](https://github.com/jberet/jsr352/tree/master/jberet-ui): front-end UI web app for batch job management
-* [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
-* [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
+* [jberet-support](https://github.com/jberet/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, PDF, etc) for batch applications, and JNDI support
+* [jberet-rest-api](https://github.com/jberet/jberet-rest): REST API for batch job management
+* [jberet-ui](https://github.com/jberet/jberet-ui): front-end UI web app for batch job management
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
-* [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [Jakarta Batch TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
-* [wildfly-jberet-samples](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples): Sample batch processing apps that can be deployed to WildFly or JBoss EAP 7
+* [tck-porting-impl](https://github.com/jberet/jberet-tck-porting): support running [Jakarta Batch TCK](https://jakarta.ee/specifications/batch/) with JBeret in Java SE
+* [wildfly-jberet-samples](https://github.com/jberet/jberet-wildfly-samples): Sample batch processing apps that can be deployed to WildFly or JBoss EAP 7
+* [quarkus-jberet](https://github.com/quarkiverse/quarkus-jberet): The Quarkus JBeret Extension adds support for Jakarta Batch applications
 
 #### 3rd-party & Community Extensions:
-* [JBoss Tools for Batch (Eclipse extensions, Wizards, Visual editing, etc)](http://tools.jboss.org/features/batch.html)
+* [JBoss Tools for Batch (Eclipse extensions, Wizards, Visual editing, etc)](https://tools.jboss.org/features/batch.html)
 * [jberet-eap6](https://github.com/fcorneli/jberet-eap6)
 * [jberetweb, job repository viewer](https://github.com/lbtc-xxx/jberetweb)
-* [jBatch Suite, Visual Modeling](https://java.net/projects/jbatchsuite)
 
 #### Project Resources:
 * [JBeret Issues & Bugs](https://issues.jboss.org/browse/JBERET-55?jql=project%20%3D%20JBERET), [Issues Awaiting Volunteers](https://issues.jboss.org/browse/JBERET-143?jql=project%20%3D%20JBERET%20AND%20fixVersion%20%3D%20%22Awaiting%20Volunteers%22)
-* [JBeret Documentation](http://docs.jboss.org/jberet/)
+* [JBeret Documentation](https://docs.jboss.org/jberet/)
 * [JBoss EAP Quickstarts for Batch Processing](https://github.com/jboss-developer/jboss-eap-quickstarts)
 * [JBeret-dev Mailing List](https://lists.jboss.org/mailman/listinfo/jberet-dev)
-* [WildFly Forum](https://developer.jboss.org/en/wildfly)
+* [WildFly Forum](https://groups.google.com/g/wildfly)
 * [JBeret Forum](https://developer.jboss.org/en/jberet/)
 * [JBoss Batch API project](https://github.com/jboss/jboss-batch-api_spec)
 * [Jakarta Batch Expert Group Discussion](https://github.com/eclipse-ee4j/batch-api/issues)
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
-* Additional JBeret project info on [ohloh Open HUB](https://www.ohloh.net/p/jberet)
 
 #### Batch sample & test applications:
   - <https://github.com/chengfang/wildfly-samples/tree/master/jberet>, web apps that demonstrate the following:
@@ -66,8 +65,6 @@ Increase `ulimit` to avoid such errors. For example,
     + JNDI lookup of MongoClient in WildFly
     + job xml files showing the use of various reader/writer configuration properties
     + jberet-support module can be installed in WildFly and referenced by multiple apps via either MANIFEST.MF or jboss-deployment-structure.xml
-  - <https://github.com/jberet/jsr352/tree/master/jberet-support/src/test>
-    + comprehensive tests for implemented batch readers and writers
   - <https://github.com/jberet/jsr352/tree/master/test-apps>
     + test apps running in Java SE environment to verify core batch requirements
     + test apps running in Java SE environment to verify additional JBeret features (inheritance, scripting support, infinispan job repository, etc)
@@ -143,7 +140,7 @@ Increase `ulimit` to avoid such errors. For example,
             <artifactId>guava</artifactId>
         </dependency>
         
-A note on webapp or Jakarta EE application packaging: Jakarta EE API jars (batch-api, cdi-api, javax.inject, transaction-api)
+A note on webapp or Jakarta EE application packaging: Jakarta EE API jars
 are already available in the appserver, and should not be included in WAR, JAR, or EAR files. Their maven dependency
 scope should be set to `provided`. In addition, if the application is deployed to JBoss EAP or WildFly, almost all of
 the above dependencies are already available as JBoss modules, and should not be duplicated in application package.
