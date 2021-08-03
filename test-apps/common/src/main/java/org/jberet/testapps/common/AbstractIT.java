@@ -72,11 +72,11 @@ abstract public class AbstractIT {
             //
             // It's better to cast it to org.jberet.operations.AbstractJobOperator, which is extended
             // by all concrete JobOperator implementation in different runtime environment
-            // (Java SE and WildFly Java EE). For example,
+            // (Java SE and WildFly Jakarta EE). For example,
             //
             // AbstractJobOperator jobOperator = (AbstractJobOperator) JobOperatorContext.getJobOperatorContext().getJobOperator();
             //
-            // Casting to JobOperatorImpl works in Java SE environment, but does not work in WildFly Java EE
+            // Casting to JobOperatorImpl works in Java SE environment, but does not work in WildFly Jakarta EE
             // environment, which has a different JobOperator implementation class.
             //
             jobOperator = (JobOperatorImpl) JobOperatorContext.getJobOperatorContext().getJobOperator();

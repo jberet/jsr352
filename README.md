@@ -52,6 +52,7 @@ Increase `ulimit` to avoid such errors. For example,
 * [WildFly Forum](https://groups.google.com/g/wildfly)
 * [JBeret Forum](https://developer.jboss.org/en/jberet/)
 * [JBoss Batch API project](https://github.com/jboss/jboss-batch-api_spec)
+* [Jakarta Batch Expert Group Discussion](https://github.com/eclipse-ee4j/batch-api/issues)
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
 
 #### Batch sample & test applications:
