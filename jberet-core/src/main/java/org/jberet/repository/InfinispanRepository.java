@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import javax.transaction.TransactionManager;
 
 import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.JobExecution;
@@ -30,6 +29,7 @@ import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.context.Flag;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.util.function.SerializableBiFunction;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Job;
@@ -312,7 +312,7 @@ public final class InfinispanRepository extends AbstractRepository {
 
     @Override
     void insertJobExecution(final JobExecutionImpl jobExecution) {
-        final Long jobExecutionId = getNextIdFor(TableColumns.JOB_EXECUTION_ID_SEQ);
+        final long jobExecutionId = getNextIdFor(TableColumns.JOB_EXECUTION_ID_SEQ);
         jobExecution.setId(jobExecutionId);
         jobExecutionCache.put(jobExecutionId, jobExecution);
     }
@@ -346,16 +346,8 @@ public final class InfinispanRepository extends AbstractRepository {
     }
 
     private long getNextIdFor(final String key) {
-        final long nextId;
-        final TransactionManager infinispanTransactionManager = sequenceCache.getAdvancedCache().getTransactionManager();
-
         try {
-            infinispanTransactionManager.begin();
-            sequenceCache.getAdvancedCache().lock(key);
-            nextId = sequenceCache.get(key) + 1;
-            sequenceCache.put(key, nextId);
-            infinispanTransactionManager.commit();
-            return nextId;
+            return sequenceCache.compute(key, (SerializableBiFunction<String, Long, Long>) (k, v) -> v + 1);
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToGetNextId(e, key);
         }
