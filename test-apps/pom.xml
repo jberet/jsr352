@@ -50,6 +50,7 @@
         <module>cassandraInject</module>
         <module>jdbcBatchletReaderWriter</module>
         <module>serialization</module>
+        <module>jberetSeBomTest</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
