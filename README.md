@@ -34,6 +34,7 @@ Increase `ulimit` to avoid such errors. For example,
 * [jberet-ui](https://github.com/jberet/jsr352/tree/master/jberet-ui): front-end UI web app for batch job management
 * [jberet-distribution](https://github.com/jberet/jsr352/tree/master/jberet-distribution): produces a zip distribution for Java SE
 * [jberet-jpa-repository](https://github.com/jberet/jsr352/tree/master/jberet-jpa-repository): batch job repository implemented with JPA (incomplete)
+* [jberet-se-bom](https://github.com/jberet/jsr352/tree/1.4.x/jberet-se-bom): a maven BOM to encapsulate all the dependencies required by JBeret Java SE.
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
 * [tck-porting-impl](https://github.com/jberet/jsr352/tree/master/test-apps): support running [JSR 352 TCK](https://java.net/projects/jbatch/downloads) with JBeret in Java SE
 * [wildfly-jberet-samples](https://github.com/jberet/jsr352/tree/master/wildfly-jberet-samples): Sample batch processing apps that can be deployed to WildFly or JBoss EAP 7
@@ -145,6 +146,20 @@ A note on webapp or Java EE application packaging: Java EE API jars (batch-api, 
 are already available in the appserver, and should not be included in WAR, JAR, or EAR files. Their maven dependency
 scope should be set to `provided`. In addition, if the application is deployed to JBoss EAP or WildFly, almost all of
 the above dependencies are already available as JBoss modules, and should not be duplicated in application package.
+
+##### maven BOM dependency used to encapsulate all the dependencies required by JBeret Java SE.
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jberet</groupId>
+                <artifactId>jberet-se-bom</artifactId>
+                <version>1.4.5.Final-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
         
 ##### The following is also required for Java SE batch applications (h2 can be omitted when using in-memory batch job repository):
         <dependency>
