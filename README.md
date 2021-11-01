@@ -34,6 +34,7 @@ Increase `ulimit` to avoid such errors. For example,
 * [jberet-support](https://github.com/jberet/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, PDF, etc) for batch applications, and JNDI support
 * [jberet-rest-api](https://github.com/jberet/jberet-rest): REST API for batch job management
 * [jberet-ui](https://github.com/jberet/jberet-ui): front-end UI web app for batch job management
+* [jberet-se-bom](https://github.com/jberet/jsr352/tree/master/jberet-se-bom): a maven BOM to encapsulate all the dependencies required by JBeret Java SE.
 * [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
 * [tck-porting-impl](https://github.com/jberet/jberet-tck-porting): support running [Jakarta Batch TCK](https://jakarta.ee/specifications/batch/) with JBeret in Java SE
 * [wildfly-jberet-samples](https://github.com/jberet/jberet-wildfly-samples): Sample batch processing apps that can be deployed to WildFly or JBoss EAP 7
@@ -145,6 +146,20 @@ are already available in the appserver, and should not be included in WAR, JAR, 
 scope should be set to `provided`. In addition, if the application is deployed to JBoss EAP or WildFly, almost all of
 the above dependencies are already available as JBoss modules, and should not be duplicated in application package.
         
+##### maven BOM dependency used to encapsulate all the dependencies required by JBeret Java SE.
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jberet</groupId>
+                <artifactId>jberet-se-bom</artifactId>
+                <version>2.0.2.Final-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
 ##### The following is also required for Java SE batch applications (h2 can be omitted when using in-memory batch job repository):
         <dependency>
             <groupId>org.jberet</groupId>
