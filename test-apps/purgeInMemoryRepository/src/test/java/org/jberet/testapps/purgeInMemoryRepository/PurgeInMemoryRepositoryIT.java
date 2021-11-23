@@ -66,6 +66,12 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
     }
 
     @Test
+    public void getJobExecutionsByJobWithLimit() throws Exception {
+        purgeJobExecutions();
+        super.getJobExecutionsByJobWithLimit();
+    }
+
+    @Test
     public void jobExecutionSelector() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
         final long prepurge2JobExecutionId = prepurge();
@@ -228,5 +234,9 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         startJobAndWait(transientUserDataXml);
         Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assert.assertEquals("step persistent user data", stepExecution0.getPersistentUserData());
+    }
+
+    private void purgeJobExecutions() {
+        jobOperator.getJobRepository().removeJobExecutions(new JobExecutionSelector1());
     }
 }
