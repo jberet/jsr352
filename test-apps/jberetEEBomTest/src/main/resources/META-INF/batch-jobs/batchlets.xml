@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job id="batchlets" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
+    <step id="batchlets.step1">
+        <batchlet ref="batchlet">
+        </batchlet>
+        <next on="COMPLETE" to="batchlets.step2"/>
+        <next on="STOP" to="batchlets.step3"/>
+    </step>
+
+    <step id="batchlets.step2" next="batchlets.step3">
+        <batchlet ref="batchletProcess">
+        </batchlet>
+    </step>
+
+    <step id="batchlets.step3">
+        <batchlet ref="batchletProcess">
+        </batchlet>
+    </step>
+</job>

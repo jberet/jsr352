@@ -51,6 +51,7 @@
         <module>jdbcBatchletReaderWriter</module>
         <module>serialization</module>
         <module>jberetSeBomTest</module>
+        <module>jberetEEBomTest</module>
     </modules>
     <parent>
         <groupId>org.jberet</groupId>
