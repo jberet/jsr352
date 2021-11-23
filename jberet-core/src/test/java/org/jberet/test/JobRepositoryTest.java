@@ -13,6 +13,7 @@
 package org.jberet.test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -30,6 +31,8 @@ import org.jberet.job.model.Job;
 import org.jberet.repository.ApplicationAndJobName;
 import org.jberet.repository.InMemoryRepository;
 import org.jberet.repository.JobRepository;
+import org.jberet.runtime.JobExecutionImpl;
+import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.spi.ArtifactFactory;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.JobTask;
@@ -175,6 +178,26 @@ public class JobRepositoryTest {
         Assert.assertFalse(repo.jobExists(jobId));
 
         repo.removeJob(job.getId());
+    }
+
+    @Test
+    public void getJobExecutionsByJob() throws Exception {
+        final String jobId = "exception-class-filter";
+        final Job job = ArchiveXmlLoader.loadJobXml(jobId, this.getClass().getClassLoader(), new ArrayList<Job>(), new MetaInfBatchJobsJobXmlResolver());
+
+        repo.addJob(new ApplicationAndJobName(null, jobId), job);
+        Assert.assertTrue(repo.jobExists(jobId));
+
+        for (int i = 0; i < 3; i++) {
+            JobInstanceImpl jobInstance = repo.createJobInstance(job, null, this.getClass().getClassLoader());
+            JobExecutionImpl jobExecution = repo.createJobExecution(jobInstance, null);
+        }
+
+        List<Long> jobExecutions = repo.getJobExecutionsByJob(jobId);
+        Assert.assertEquals(3, jobExecutions.size());
+
+        jobExecutions = repo.getJobExecutionsByJob(jobId, 1);
+        Assert.assertEquals(1, jobExecutions.size());
     }
 
 }

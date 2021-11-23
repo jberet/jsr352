@@ -148,17 +148,26 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
 
     @Test
     public void getRunningExecutions() throws Exception {
+        purgeJobExecutions();
         super.getRunningExecutions();
     }
 
     @Test
     public void getRunningExecutions2() throws Exception {
+        purgeJobExecutions();
         super.getRunningExecutions2();
     }
 
     @Test
     public void getJobExecutionsByJob() throws Exception {
+        purgeJobExecutions();
         super.getJobExecutionsByJob();
+    }
+
+    @Test
+    public void getJobExecutionsByJobWithLimit() throws Exception {
+        purgeJobExecutions();
+        super.getJobExecutionsByJobWithLimit();
     }
 
     @Test
@@ -260,4 +269,13 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
         Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
+    private void purgeJobExecutions() throws Exception {
+        params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
+
+        params.setProperty("mongoRemoveQueries",
+                "db.STEP_EXECUTION.remove({}); " +
+                        "db. JOB_EXECUTION.remove({})");
+
+        startAndVerifyPurgeJob(purgeMongoRepositoryJobName);
+    }
 }

@@ -18,7 +18,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.batch.operations.NoSuchJobException;
@@ -153,6 +155,26 @@ public abstract class PurgeRepositoryTestBase extends AbstractIT {
         // get job executions by invalid job name should return empty list
         executionIds = jobOperator.getJobExecutionsByJob("invalid job name");
         assertEquals(0, executionIds.size());
+    }
+
+    protected void getJobExecutionsByJobWithLimit() throws Exception {
+        // create number of executions
+        final int loopCount = 3;
+        for (int i = 0; i < loopCount; i++) {
+            startJob(prepurgeJobName);
+        }
+
+        // get all job executions and find the highest id
+        List<Long> allExecutionIds = jobOperator.getJobExecutionsByJob(prepurgeJobName);
+        assertEquals(loopCount, allExecutionIds.size());
+        Optional<Long> latestId = allExecutionIds.stream().max(Comparator.naturalOrder());
+        assertTrue(latestId.isPresent());
+
+        // get job executions with limit of 1 and verify that it's the latest execution
+        List<Long> executionIds = jobOperator.getJobRepository().getJobExecutionsByJob(prepurgeJobName, 1);
+        assertEquals(1, executionIds.size());
+        assertEquals(latestId.get(), executionIds.get(0));
+        assertEquals(prepurgeJobName, jobOperator.getJobExecution(executionIds.get(0)).getJobName());
     }
 
     protected void memoryTest() throws Exception {
