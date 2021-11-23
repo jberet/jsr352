@@ -149,23 +149,26 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
     @Test
     public void getRunningExecutions() throws Exception {
+        purgeJobExecutions();
         super.getRunningExecutions();
     }
 
     @Test
     public void getRunningExecutions2() throws Exception {
+        purgeJobExecutions();
         super.getRunningExecutions2();
     }
 
     @Test
     public void getJobExecutionsByJob() throws Exception {
-        // first purge existing job execution data from db to have a clean start
-        params.setProperty("purgeJobsByNames", prepurgeAndPrepurge2JobNames);
-        startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
-        final JdbcRepository jdbcRepository = (JdbcRepository) jobOperator.getJobRepository();
-        jdbcRepository.executeStatements( "delete from PARTITION_EXECUTION; delete from STEP_EXECUTION; delete from JOB_EXECUTION; delete from JOB_INSTANCE", null);
-
+        purgeJobExecutions();
         super.getJobExecutionsByJob();
+    }
+
+    @Test
+    public void getJobExecutionsByJobWithLimit() throws Exception {
+        purgeJobExecutions();
+        super.getJobExecutionsByJobWithLimit();
     }
 
     @Test
@@ -419,5 +422,14 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         } catch (final SQLException e) {
             System.out.printf("Exception while dropping tables: %s%n", e.toString());
         }
+    }
+
+    private void purgeJobExecutions() throws Exception {
+        // first purge existing job execution data from db to have a clean start
+        params.setProperty("purgeJobsByNames", prepurgeAndPrepurge2JobNames);
+        startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
+        final JdbcRepository jdbcRepository = (JdbcRepository) jobOperator.getJobRepository();
+        jdbcRepository.executeStatements( "delete from PARTITION_EXECUTION; delete from STEP_EXECUTION; delete from JOB_EXECUTION; delete from JOB_INSTANCE", null);
+
     }
 }

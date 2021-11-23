@@ -667,7 +667,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     @Override
     public List<Long> getRunningExecutions(final String jobName) {
         final String select = sqls.getProperty(SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME);
-        return getJobExecutions0(select, jobName, true);
+        return getJobExecutions0(select, jobName, true, null);
     }
 
     /**
@@ -675,8 +675,13 @@ public final class JdbcRepository extends AbstractPersistentRepository {
      */
     @Override
     public List<Long> getJobExecutionsByJob(final String jobName) {
+        return getJobExecutionsByJob(jobName, null);
+    }
+
+    @Override
+    public List<Long> getJobExecutionsByJob(String jobName, Integer limit) {
         final String select = sqls.getProperty(SELECT_JOB_EXECUTIONS_BY_JOB_NAME);
-        return getJobExecutions0(select, jobName, false);
+        return getJobExecutions0(select, jobName, false, limit);
     }
 
     @Override
@@ -1054,7 +1059,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         }
     }
 
-    private List<Long> getJobExecutions0(final String selectSql, final String jobName, final boolean runningExecutionsOnly) {
+    private List<Long> getJobExecutions0(final String selectSql, final String jobName, final boolean runningExecutionsOnly,
+            final Integer limit) {
         final List<Long> result = new ArrayList<>();
         Connection connection = null;
         ResultSet rs = null;
@@ -1063,11 +1069,26 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             connection = getConnection();
             preparedStatement = connection.prepareStatement(selectSql);
             preparedStatement.setString(1, jobName);
+            BatchLogger.LOGGER.debugf("Executing query to load job executions: %s", selectSql);
             rs = preparedStatement.executeQuery();
-            while (rs.next()) {
-                final long i = rs.getLong(1);
-                result.add(i);
+            BatchLogger.LOGGER.debugf("Reading job execution records");
+            if (limit == null) {
+                while (rs.next()) {
+                    final long i = rs.getLong(1);
+                    result.add(i);
+                }
+            } else {
+                int count = 0;
+                while (rs.next() && count < limit) {
+                    final long i = rs.getLong(1);
+                    result.add(i);
+                    count++;
+                }
+                if (count == limit) {
+                    BatchLogger.LOGGER.jobExecutionRecordsLimited(limit);
+                }
             }
+            BatchLogger.LOGGER.debugf("Number of job execution records read: %d", result.size());
         } catch (final Exception e) {
             final List<Long> cachedExecutionIds = getCachedJobExecutions(jobName, runningExecutionsOnly);
             for (Long i : cachedExecutionIds) {
