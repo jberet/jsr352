@@ -66,6 +66,17 @@ public interface JobRepository {
      */
     List<Long> getJobExecutionsByJob(String jobName);
 
+    /**
+     * Gets job execution ids belonging to the job identified by the {@code jobName}.
+     *
+     * @param jobName the job name identifying the job
+     * @param limit the maximum number of records that should be returned
+     * @return job execution ids belonging to the job
+     *
+     * @since 1.3.11.Final, 1.4.4.Final
+     */
+    List<Long> getJobExecutionsByJob(String jobName, Integer limit);
+
     void updateJobExecution(JobExecutionImpl jobExecution, boolean fullUpdate, boolean saveJobParameters);
 
     /**
