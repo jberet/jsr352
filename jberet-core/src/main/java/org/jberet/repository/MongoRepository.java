@@ -12,6 +12,7 @@ package org.jberet.repository;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -325,6 +326,11 @@ public final class MongoRepository extends AbstractPersistentRepository {
      */
     @Override
     public List<Long> getJobExecutionsByJob(final String jobName) {
+        return getJobExecutionsByJob(jobName, null);
+    }
+
+    @Override
+    public List<Long> getJobExecutionsByJob(final String jobName, Integer limit) {
         final List<Long> result = new ArrayList<>();
 
         // jobInstances result is already in desc order
@@ -335,7 +341,13 @@ public final class MongoRepository extends AbstractPersistentRepository {
                 result.add(jobExecutions.get(i).getExecutionId());
             }
         }
-        return result;
+        if (limit != null && result.size() >= limit) {
+            BatchLogger.LOGGER.jobExecutionRecordsLimited(limit);
+            result.sort(Comparator.reverseOrder());
+            return result.subList(0, limit);
+        } else {
+            return result;
+        }
     }
 
     @Override

@@ -25,6 +25,7 @@ import jakarta.batch.runtime.JobExecution;
 import jakarta.batch.runtime.JobInstance;
 import jakarta.batch.runtime.StepExecution;
 import org.infinispan.Cache;
+import org.infinispan.CacheStream;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.context.Flag;
 import org.infinispan.manager.DefaultCacheManager;
@@ -297,10 +298,19 @@ public final class InfinispanRepository extends AbstractRepository {
      */
     @Override
     public List<Long> getJobExecutionsByJob(final String jobName) {
-        return jobExecutionCache.values().stream().filter(e -> e.getJobName().equals(jobName))
+        return getJobExecutionsByJob(jobName, null);
+    }
+
+    @Override
+    public List<Long> getJobExecutionsByJob(final String jobName, Integer limit) {
+        CacheStream<Long> stream = jobExecutionCache.values().stream().filter(e -> e.getJobName().equals(jobName))
                 .map(JobExecution::getExecutionId)
-                .sorted(Comparator.reverseOrder())
-                .collect(Collectors.toList());
+                .sorted(Comparator.reverseOrder());
+        if (limit != null) {
+            BatchLogger.LOGGER.jobExecutionRecordsLimited(limit);
+            stream = stream.limit(limit);
+        }
+        return stream.collect(Collectors.toList());
     }
 
     @Override

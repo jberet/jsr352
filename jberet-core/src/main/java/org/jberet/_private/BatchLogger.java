@@ -158,4 +158,8 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 33, value = "Stopping job execution: %s")
     @LogMessage(level = Logger.Level.INFO)
     void stoppingJobExecution(long jobExecutionId);
+
+    @Message(id = 34, value = "The number of job executions read from the job repository is limited to %d.")
+    @LogMessage(level = Logger.Level.DEBUG)
+    void jobExecutionRecordsLimited(Integer limit);
 }
