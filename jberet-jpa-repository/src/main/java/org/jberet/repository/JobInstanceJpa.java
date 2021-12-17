@@ -25,17 +25,17 @@ public class JobInstanceJpa implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = JOBINSTANCEID)
     private Long id;
-    
+
     @Column(name = VERSION)
     private Long version;
-    
+
     @Column(name = JOBNAME)
     private String jobName;
-    
+
     @Column(name = APPLICATIONNAME)
     private String applicationName;
-    
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = JobExecutionJpa_.JOB_INSTANCE, cascade = CascadeType.REMOVE , orphanRemoval = true)
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = JobExecutionJpa_.JOB_INSTANCE, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Collection<JobExecutionJpa> jobExecutions;
 
     public Long getId() {

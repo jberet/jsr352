@@ -11,25 +11,19 @@
  */
 package org.jberet.test;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.batch.runtime.StepExecution;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.h2.jdbcx.JdbcDataSource;
-import org.h2.tools.Server;
-import static org.hibernate.cfg.AvailableSettings.DIALECT;
 import static org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO;
 import static org.hibernate.cfg.AvailableSettings.SHOW_SQL;
 import org.hibernate.jpa.boot.spi.Bootstrap;
@@ -44,60 +38,35 @@ import org.jberet.repository.JobRepository;
 import org.jberet.repository.JpaRepository;
 import org.jberet.repository.PartitionExecutionJpa;
 import org.jberet.repository.StepExecutionJpa;
+import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
+import org.jberet.runtime.PartitionExecutionImpl;
+import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.jberet.util.BatchPersistenceUnitInfo;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class JpaJobRepositoryTest {
-
+    
     final static String TEST_JOB_ID = "job";
-
+    final static Job job = ArchiveXmlLoader.loadJobXml(TEST_JOB_ID, JpaJobRepositoryTest.class.getClassLoader(), new ArrayList<>(), new MetaInfBatchJobsJobXmlResolver());
+    
     private static JobRepository repo;
     private static EntityManagerFactoryBuilder entityManagerFactoryBuilder;
     private static EntityManagerFactory entityManagerFactory;
     private static EntityManager entityManager;
-
-    private synchronized <T> T wrapInTransaction(Supplier<T> supplier) {
-        try {
-            entityManager.getTransaction().begin();
-            T result = supplier.get();
-            entityManager.getTransaction().commit();
-            return result;
-        } catch (Exception e) {
-            entityManager.getTransaction().rollback();
-            throw e;
-        }
-    }
-
-    private synchronized void wrapInTransaction(Runnable runnable) {
-        try {
-            entityManager.getTransaction().begin();
-            runnable.run();
-            entityManager.getTransaction().commit();
-        } catch (Exception e) {
-            entityManager.getTransaction().rollback();
-            throw e;
-        }
-    }
-
+    
     @BeforeClass
     public static void beforeClass() throws Exception {
-
+        
         JdbcDataSource ds = new JdbcDataSource();
-        ds.setURL("jdbc:h2:mem:test");
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                Server.startWebServer(ds.getConnection());
-            } catch (SQLException ex) {
-                Logger.getLogger(JpaJobRepositoryTest.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-
+        ds.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+        
         BatchPersistenceUnitInfo batchPersistenceUnitInfo = new BatchPersistenceUnitInfo();
         batchPersistenceUnitInfo.setPersistenceUnitName(JpaJobRepositoryTest.class.getSimpleName());
         batchPersistenceUnitInfo.setClassLoader(Thread.currentThread().getContextClassLoader());
@@ -119,17 +88,16 @@ public class JpaJobRepositoryTest {
         entityManagerFactoryBuilder = Bootstrap.getEntityManagerFactoryBuilder(
                 batchPersistenceUnitInfo,
                 Map.of(
-                        HBM2DDL_AUTO, "update",
-                        DIALECT, "org.hibernate.dialect.H2Dialect",
+                        HBM2DDL_AUTO, "create",
                         SHOW_SQL, "true"
                 )
         );
         entityManagerFactory = entityManagerFactoryBuilder.build();
         entityManager = entityManagerFactory.createEntityManager();
         repo = new JpaRepository(entityManager);
-
+        
     }
-
+    
     @AfterClass
     public static void afterClass() throws Exception {
         if (Objects.nonNull(entityManager) && entityManager.isOpen()) {
@@ -142,38 +110,65 @@ public class JpaJobRepositoryTest {
             entityManagerFactoryBuilder.cancel();
         }
     }
-
+    
+    @Before
+    public void before() {
+        entityManager.getTransaction().begin();
+    }
+    
+    @After
+    public void after() {
+        entityManager.getTransaction().commit();
+    }
+    
     @Test
     public void addRemoveJob() throws Exception {
-        final Job job = ArchiveXmlLoader.loadJobXml(TEST_JOB_ID, this.getClass().getClassLoader(), new ArrayList<>(), new MetaInfBatchJobsJobXmlResolver());
         repo.removeJob(job.getId());  //the job has not been added, but removeJob should still work
 
         repo.addJob(new ApplicationAndJobName(null, TEST_JOB_ID), job);
         Assert.assertTrue(repo.jobExists(TEST_JOB_ID));
-
+        
         repo.removeJob(TEST_JOB_ID);
         Assert.assertFalse(repo.jobExists(TEST_JOB_ID));
-
+        
         repo.removeJob(job.getId());
     }
-
+    
     @Test
-    public void getJobExecutionsByJob() throws Exception {
-        final Job job = ArchiveXmlLoader.loadJobXml(TEST_JOB_ID, this.getClass().getClassLoader(), new ArrayList<>(), new MetaInfBatchJobsJobXmlResolver());
-
-        wrapInTransaction(() -> repo.addJob(new ApplicationAndJobName(null, TEST_JOB_ID), job));
+    public void getJobExecutionsByJobExtended() throws Exception {
+        repo.addJob(new ApplicationAndJobName(null, TEST_JOB_ID), job);
         Assert.assertTrue(repo.jobExists(TEST_JOB_ID));
-
+        
         for (int i = 0; i < 3; i++) {
-            JobInstanceImpl jobInstance = wrapInTransaction(() -> repo.createJobInstance(job, null, this.getClass().getClassLoader()));
-            wrapInTransaction(() -> repo.createJobExecution(jobInstance, null));
+            JobInstanceImpl jobInstance = repo.createJobInstance(job, null, this.getClass().getClassLoader());
+            repo.createJobExecution(jobInstance, null);
         }
-
+        
         List<Long> jobExecutions = repo.getJobExecutionsByJob(TEST_JOB_ID);
         Assert.assertEquals(3, jobExecutions.size());
-
+        
         jobExecutions = repo.getJobExecutionsByJob(TEST_JOB_ID, 1);
         Assert.assertEquals(1, jobExecutions.size());
+        
+        JobInstanceImpl jobInstance = repo.createJobInstance(job, null, this.getClass().getClassLoader());
+        JobExecutionImpl jobExecution = repo.createJobExecution(jobInstance, null);
+        StepExecutionImpl stepExecutionImpl = new StepExecutionImpl("step1");
+        repo.addStepExecution(jobExecution, stepExecutionImpl);
+        repo.addStepExecution(jobExecution, new StepExecutionImpl("step2"));
+        repo.addStepExecution(jobExecution, new StepExecutionImpl("step3"));
+        repo.addStepExecution(jobExecution, new StepExecutionImpl("step4"));
+        
+        List<StepExecution> stepExecutions = repo.getStepExecutions(jobExecution.getExecutionId(), null);
+        Assert.assertEquals(4, stepExecutions.size());
+        
+        for (int i = 1; i <= 2; i++) {
+            PartitionExecutionImpl partitionExecutionImpl = new PartitionExecutionImpl(stepExecutionImpl);
+            partitionExecutionImpl.setPartitionId(i);
+            repo.addPartitionExecution(stepExecutionImpl, partitionExecutionImpl);
+        }
+        
+        List<PartitionExecutionImpl> partitionExecutions = repo.getPartitionExecutions(stepExecutionImpl.getStepExecutionId(), null, true, null);
+        Assert.assertEquals(2, partitionExecutions.size());
     }
-
+    
 }

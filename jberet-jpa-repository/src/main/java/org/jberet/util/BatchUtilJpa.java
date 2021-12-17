@@ -1,5 +1,7 @@
 package org.jberet.util;
 
+import java.util.Optional;
+import javax.batch.runtime.BatchStatus;
 import org.jberet.repository.JobExecutionJpa;
 import org.jberet.repository.PartitionExecutionJpa;
 import org.jberet.repository.StepExecutionJpa;
@@ -29,7 +31,7 @@ public class BatchUtilJpa {
                 from.getStartTime(),
                 from.getEndTime(),
                 from.getLastUpdatedTime(),
-                from.getBatchStatus().toString(),
+                Optional.ofNullable(from.getBatchStatus()).map(BatchStatus::toString).orElse(null),
                 from.getExitStatus(),
                 from.getRestartPosition()
         );
@@ -41,17 +43,17 @@ public class BatchUtilJpa {
                 from.getStepName(),
                 from.getStartTime(),
                 from.getEndTime(),
-                from.getBatchStatus().toString(),
+                Optional.ofNullable(from.getBatchStatus()).orElse(BatchStatus.STARTING).toString(),
                 from.getExitStatus(),
                 from.getPersistenUserData(),
-                from.getReadCount(),
-                from.getWriteCount(),
-                from.getCommitCount(),
-                from.getRollbackCount(),
-                from.getReadSkipCount(),
-                from.getProcessSkipCount(),
-                from.getFilterCount(),
-                from.getWriteSkipCount(),
+                Optional.ofNullable(from.getReadCount()).orElse(0L),
+                Optional.ofNullable(from.getWriteCount()).orElse(0L),
+                Optional.ofNullable(from.getCommitCount()).orElse(0L),
+                Optional.ofNullable(from.getRollbackCount()).orElse(0L),
+                Optional.ofNullable(from.getReadSkipCount()).orElse(0L),
+                Optional.ofNullable(from.getProcessSkipCount()).orElse(0L),
+                Optional.ofNullable(from.getFilterCount()).orElse(0L),
+                Optional.ofNullable(from.getWriteSkipCount()).orElse(0L),
                 from.getReaderCheckPointInfo(),
                 from.getWriterCheckPointInfo()
         );

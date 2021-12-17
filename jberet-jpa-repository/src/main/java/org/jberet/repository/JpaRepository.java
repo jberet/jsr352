@@ -34,6 +34,7 @@ import org.jberet.runtime.StepExecutionImpl;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.Optional;
+import javax.persistence.criteria.CriteriaDelete;
 import org.jberet.util.BatchUtilJpa;
 
 public final class JpaRepository implements JobRepository {
@@ -97,19 +98,19 @@ public final class JpaRepository implements JobRepository {
 
     @Override
     public void removeJobInstance(long jobInstanceId) {
-        JobInstanceJpa jobInstanceJpa = new JobInstanceJpa();
-        jobInstanceJpa.setId(jobInstanceId);
-        this.entityManager.remove(jobInstanceJpa);
+        this.entityManager.remove(
+                this.entityManager.find(JobInstanceJpa.class, jobInstanceId)
+        );
     }
 
     @Override
     public JobInstance getJobInstance(long jobInstanceId) {
         JobInstanceJpa jobInstanceJpa = this.entityManager.find(JobInstanceJpa.class, jobInstanceId);
         JobInstanceImpl jobInstance = new JobInstanceImpl(
-                Optional.of(
+                Optional.ofNullable(
                         jobs.get(new ApplicationAndJobName(jobInstanceJpa.getApplicationName(), jobInstanceJpa.getJobName()))
                 ).flatMap(
-                        softReference -> Optional.of(softReference.get())
+                        softReference -> Optional.ofNullable(softReference.get())
                 ).map(
                         extendedJob -> extendedJob.getJob()
                 ).orElse(null),
@@ -130,10 +131,10 @@ public final class JpaRepository implements JobRepository {
         return this.entityManager.createQuery(criteriaQuery).getResultList().stream().map(
                 jobInstanceJpa -> {
                     JobInstanceImpl jobInstance = new JobInstanceImpl(
-                            Optional.of(
+                            Optional.ofNullable(
                                     jobs.get(new ApplicationAndJobName(jobInstanceJpa.getApplicationName(), jobInstanceJpa.getJobName()))
                             ).flatMap(
-                                    softReference -> Optional.of(softReference.get())
+                                    softReference -> Optional.ofNullable(softReference.get())
                             ).map(
                                     extendedJob -> extendedJob.getJob()
                             ).orElse(null),
@@ -419,8 +420,8 @@ public final class JpaRepository implements JobRepository {
 
     @Override
     public List<PartitionExecutionImpl> getPartitionExecutions(long stepExecutionId, StepExecutionImpl stepExecution, boolean notCompletedOnly, ClassLoader classLoader) {
-        return Optional.of(stepExecution).map(
-                value -> Optional.of(value.getPartitionExecutions()).orElse(Collections.emptyList())
+        return Optional.ofNullable(stepExecution).map(
+                value -> Optional.ofNullable(value.getPartitionExecutions()).orElse(Collections.emptyList())
         ).map(
                 partitionExecutions
                 -> partitionExecutions.isEmpty() || !notCompletedOnly
