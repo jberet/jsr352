@@ -34,7 +34,6 @@ import org.jberet.runtime.StepExecutionImpl;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.Optional;
-import javax.persistence.criteria.CriteriaDelete;
 import org.jberet.util.BatchUtilJpa;
 
 public final class JpaRepository implements JobRepository {
@@ -54,7 +53,7 @@ public final class JpaRepository implements JobRepository {
         ExtendedJob extendedJob = new ExtendedJob();
         extendedJob.setJob(job);
         extendedJob.setApplicationAndJobName(applicationAndJobName);
-        for (Reference<? extends ExtendedJob> x; Objects.nonNull(x = jobReferenceQueue.poll());) {
+        for (Reference<? extends ExtendedJob> x; Objects.nonNull(x = jobReferenceQueue.poll()) && Objects.nonNull(x.get());) {
             jobs.remove(x.get().getApplicationAndJobName());
         }
         jobs.put(applicationAndJobName, new SoftReference<>(extendedJob, jobReferenceQueue));
