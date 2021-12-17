@@ -1,14 +1,3 @@
-/*
- * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- * Cheng Fang - Initial API and implementation
- */
 package org.jberet.test;
 
 import java.util.ArrayList;
@@ -51,6 +40,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ *
+ * @author a.moscatelli
+ */
 public class JpaJobRepositoryTest {
     
     final static String TEST_JOB_ID = "job";
