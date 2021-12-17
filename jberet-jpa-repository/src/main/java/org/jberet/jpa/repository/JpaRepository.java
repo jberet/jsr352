@@ -1,5 +1,9 @@
-package org.jberet.repository;
+package org.jberet.jpa.repository;
 
+import org.jberet.jpa.repository.entity.StepExecutionJpa;
+import org.jberet.jpa.repository.entity.JobExecutionJpa;
+import org.jberet.jpa.repository.entity.JobInstanceJpa;
+import org.jberet.jpa.repository.entity.PartitionExecutionJpa;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.util.Arrays;
@@ -34,7 +38,14 @@ import org.jberet.runtime.StepExecutionImpl;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.Optional;
-import org.jberet.util.BatchUtilJpa;
+import org.jberet.jpa.repository.entity.JobExecutionJpa_;
+import org.jberet.jpa.repository.entity.JobInstanceJpa_;
+import org.jberet.jpa.repository.entity.PartitionExecutionJpa_;
+import org.jberet.jpa.repository.entity.StepExecutionJpa_;
+import org.jberet.repository.ApplicationAndJobName;
+import org.jberet.repository.JobExecutionSelector;
+import org.jberet.repository.JobRepository;
+import org.jberet.jpa.util.BatchUtilJpa;
 
 public final class JpaRepository implements JobRepository {
 

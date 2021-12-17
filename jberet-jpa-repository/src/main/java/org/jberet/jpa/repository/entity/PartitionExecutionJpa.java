@@ -1,4 +1,4 @@
-package org.jberet.repository;
+package org.jberet.jpa.repository.entity;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -20,7 +20,7 @@ import static org.jberet.repository.TableColumns.PERSISTENTUSERDATA;
 import static org.jberet.repository.TableColumns.READERCHECKPOINTINFO;
 import static org.jberet.repository.TableColumns.STEPEXECUTIONID;
 import static org.jberet.repository.TableColumns.WRITERCHECKPOINTINFO;
-import static org.jberet.repository.TableColumnsJpa.VERSION;
+import static org.jberet.jpa.repository.TableColumnsJpa.VERSION;
 
 /**
  *

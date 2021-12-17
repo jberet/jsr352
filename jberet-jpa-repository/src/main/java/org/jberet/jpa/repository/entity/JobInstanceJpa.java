@@ -1,4 +1,4 @@
-package org.jberet.repository;
+package org.jberet.jpa.repository.entity;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -11,11 +11,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import static org.jberet.repository.JobInstanceJpa_.VERSION;
 import static org.jberet.repository.TableColumns.APPLICATIONNAME;
 import static org.jberet.repository.TableColumns.JOBINSTANCEID;
 import static org.jberet.repository.TableColumns.JOBNAME;
 import static org.jberet.repository.TableColumns.JOB_INSTANCE;
+import static org.jberet.jpa.repository.TableColumnsJpa.VERSION;
 
 @Entity
 @Table(name = JOB_INSTANCE)

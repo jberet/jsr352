@@ -1,4 +1,4 @@
-package org.jberet.repository;
+package org.jberet.jpa.repository.entity;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import org.jberet.jpa.repository.PropertiesConverter;
 import static org.jberet.repository.TableColumns.BATCHSTATUS;
 import static org.jberet.repository.TableColumns.CREATETIME;
 import static org.jberet.repository.TableColumns.ENDTIME;
@@ -33,7 +34,7 @@ import static org.jberet.repository.TableColumns.JOB_EXECUTION;
 import static org.jberet.repository.TableColumns.LASTUPDATEDTIME;
 import static org.jberet.repository.TableColumns.RESTARTPOSITION;
 import static org.jberet.repository.TableColumns.STARTTIME;
-import static org.jberet.repository.TableColumnsJpa.VERSION;
+import static org.jberet.jpa.repository.TableColumnsJpa.VERSION;
 
 /**
  *
@@ -191,6 +192,14 @@ public class JobExecutionJpa implements Serializable, JobExecution {
     @Override
     public String getJobName() {
         return this.jobInstance.getJobName();
+    }
+
+    public Collection<StepExecutionJpa> getStepExecutions() {
+        return stepExecutions;
+    }
+
+    public void setStepExecutions(Collection<StepExecutionJpa> stepExecutions) {
+        this.stepExecutions = stepExecutions;
     }
 
 }

@@ -1,4 +1,4 @@
-package org.jberet.util;
+package org.jberet.jpa.util;
 
 import java.net.URL;
 import java.util.List;

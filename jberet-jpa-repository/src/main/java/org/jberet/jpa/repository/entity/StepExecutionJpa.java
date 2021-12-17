@@ -1,4 +1,4 @@
-package org.jberet.repository;
+package org.jberet.jpa.repository.entity;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -40,7 +40,7 @@ import static org.jberet.repository.TableColumns.STEP_EXECUTION;
 import static org.jberet.repository.TableColumns.WRITECOUNT;
 import static org.jberet.repository.TableColumns.WRITERCHECKPOINTINFO;
 import static org.jberet.repository.TableColumns.WRITESKIPCOUNT;
-import static org.jberet.repository.TableColumnsJpa.VERSION;
+import static org.jberet.jpa.repository.TableColumnsJpa.VERSION;
 
 /**
  *
@@ -280,6 +280,14 @@ public class StepExecutionJpa implements Serializable {
 
     public void setWriterCheckPointInfo(byte[] writerCheckPointInfo) {
         this.writerCheckPointInfo = writerCheckPointInfo;
+    }
+
+    public Collection<PartitionExecutionJpa> getPartitionExecutions() {
+        return partitionExecutions;
+    }
+
+    public void setPartitionExecutions(Collection<PartitionExecutionJpa> partitionExecutions) {
+        this.partitionExecutions = partitionExecutions;
     }
     
 }

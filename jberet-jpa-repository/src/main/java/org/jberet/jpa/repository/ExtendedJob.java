@@ -1,6 +1,7 @@
-package org.jberet.repository;
+package org.jberet.jpa.repository;
 
 import org.jberet.job.model.Job;
+import org.jberet.repository.ApplicationAndJobName;
 
 public class ExtendedJob {
 

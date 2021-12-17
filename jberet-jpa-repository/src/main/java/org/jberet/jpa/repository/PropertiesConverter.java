@@ -1,4 +1,4 @@
-package org.jberet.repository;
+package org.jberet.jpa.repository;
 
 import java.util.Properties;
 import javax.persistence.AttributeConverter;

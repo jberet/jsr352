@@ -1,10 +1,10 @@
-package org.jberet.util;
+package org.jberet.jpa.util;
 
 import java.util.Optional;
 import javax.batch.runtime.BatchStatus;
-import org.jberet.repository.JobExecutionJpa;
-import org.jberet.repository.PartitionExecutionJpa;
-import org.jberet.repository.StepExecutionJpa;
+import org.jberet.jpa.repository.entity.JobExecutionJpa;
+import org.jberet.jpa.repository.entity.PartitionExecutionJpa;
+import org.jberet.jpa.repository.entity.StepExecutionJpa;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
