@@ -237,6 +237,17 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             batchContext.setBatchStatus(BatchStatus.FAILED);
 
             try {
+                closeItemWriter();
+            } catch (Exception exception) {
+                LOGGER.failToClose(exception, ItemWriter.class, itemWriter);
+            }
+            try {
+                closeItemReader();
+            } catch (Exception exception) {
+                LOGGER.failToClose(exception, ItemReader.class, itemReader);
+            }
+
+            try {
                 final int txStatus = tm.getStatus();
                 if (txStatus == Status.STATUS_ACTIVE || txStatus == Status.STATUS_MARKED_ROLLBACK ||
                         txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
@@ -264,8 +275,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
             jobContext.destroyArtifact(itemReader, itemWriter, itemProcessor, collector, checkpointAlgorithm);
             jobContext.destroyArtifact(allChunkRelatedListeners);
-            // Safely close the reader and writer
-            safeClose();
 
             //reset global transaction timeout to system default value, since the current batch thread
             //may be used for batchlet step or other chunk step execution.
