@@ -10,6 +10,9 @@
 
 package org.jberet.runtime.runner;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+import static org.jberet._private.BatchMessages.MESSAGES;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +54,6 @@ import org.jberet.runtime.metric.StepMetrics;
 import org.jberet.spi.JobTask;
 import org.jberet.spi.PartitionWorker;
 import org.jboss.logging.Logger;
-
-import static org.jberet._private.BatchLogger.LOGGER;
-import static org.jberet._private.BatchMessages.MESSAGES;
 
 /**
  * This runner class is responsible for running a chunk-type step (not just a chunk range of a step).  In a partitioned
@@ -235,6 +235,17 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
             batchContext.setBatchStatus(BatchStatus.FAILED);
 
             try {
+                closeItemWriter();
+            } catch (Exception exception) {
+                LOGGER.failToClose(exception, ItemWriter.class, itemWriter);
+            }
+            try {
+                closeItemReader();
+            } catch (Exception exception) {
+                LOGGER.failToClose(exception, ItemReader.class, itemReader);
+            }
+
+            try {
                 final int txStatus = tm.getStatus();
                 if (txStatus == Status.STATUS_ACTIVE || txStatus == Status.STATUS_MARKED_ROLLBACK ||
                         txStatus == Status.STATUS_PREPARED || txStatus == Status.STATUS_PREPARING ||
@@ -262,8 +273,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
 
             jobContext.destroyArtifact(itemReader, itemWriter, itemProcessor, collector, checkpointAlgorithm);
             jobContext.destroyArtifact(allChunkRelatedListeners);
-            // Safely close the reader and writer
-            safeClose();
 
             //reset global transaction timeout to system default value, since the current batch thread
             //may be used for batchlet step or other chunk step execution.
