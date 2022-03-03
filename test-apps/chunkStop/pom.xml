@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jberet.test-apps</groupId>
         <artifactId>test-apps</artifactId>
-        <version>1.3.12.Final</version>
+        <version>1.3.13.Final-SNAPSHOT</version>
     </parent>
 
     <artifactId>chunkStop</artifactId>
