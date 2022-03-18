@@ -51,7 +51,7 @@
         <version.org.jboss.logging.jboss-logging>3.4.0.Final</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-tools>2.2.0.Final</version.org.jboss.logging.jboss-logging-tools>
         <version.org.jboss.marshalling>2.0.6.Final</version.org.jboss.marshalling>
-        <version.jakarta.batch-api>2.0.0</version.jakarta.batch-api>
+        <version.jakarta.batch-api>2.1.0-M2</version.jakarta.batch-api>
         <version.jakarta-transaction-api>2.0.0</version.jakarta-transaction-api>
         <version.org.jboss.weld.weld>4.0.1.SP1</version.org.jboss.weld.weld>
         <version.org.jboss.weld.weld-se>4.0.1.SP1</version.org.jboss.weld.weld-se>
