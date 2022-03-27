@@ -1,0 +1,46 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: JBeret CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+jobs:
+  build-test-matrix:
+    name: ${{ matrix.impl}}-${{ matrix.jdk }}-${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-20.04, windows-latest ]
+        jdk: [ 8 ]
+        impl: [ hotspot ]
+    steps:
+      - name: Configure runner - Linux
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          sudo bash -c "echo '127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4' > /etc/hosts"
+          sudo bash -c "echo '::1         localhost localhost.localdomain localhost6 localhost6.localdomain6' >> /etc/hosts"
+      - name: Configure Runner - Windows
+        if: contains(matrix.os, 'windows')
+        run: |
+          echo '127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4' > %SystemRoot%\System32\drivers\etc\hosts
+          echo '::1         localhost localhost.localdomain localhost6 localhost6.localdomain6' >> %SystemRoot%\System32\drivers\etc\hosts
+        shell: cmd
+      - uses: actions/checkout@v2
+      - name: Set up JDK ${{ matrix.jdk }}
+        uses: AdoptOpenJDK/install-jdk@v1
+        with:
+          version: ${{ matrix.jdk }}
+          impl: ${{ matrix.impl }}
+      - name: Run Tests
+        run: mvn -ntp -U -B -fae clean install test
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: surefire-reports-${{ matrix.openjdk}}-${{ matrix.jdk }}-${{ matrix.os }}
+          path: '**/surefire-reports/*.txt'
