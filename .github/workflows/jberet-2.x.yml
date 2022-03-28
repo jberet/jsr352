@@ -1,12 +1,13 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: JBeret CI
+name: JBeret
 
 on:
   pull_request:
     branches:
-      - main
+      - master
+      - 2.*
     types: [ opened, synchronize, reopened, ready_for_review ]
 
 jobs:
@@ -16,12 +17,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-20.04, windows-latest ]
-        jdk: [ 8 ]
+        os: [ macos-latest, windows-latest ]
+        jdk: [ 11 ]
         impl: [ hotspot ]
     steps:
       - name: Configure runner - Linux
-        if: contains(matrix.os, 'ubuntu')
+        if: contains(matrix.os, 'macos')
         run: |
           sudo bash -c "echo '127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4' > /etc/hosts"
           sudo bash -c "echo '::1         localhost localhost.localdomain localhost6 localhost6.localdomain6' >> /etc/hosts"
@@ -38,7 +39,7 @@ jobs:
           version: ${{ matrix.jdk }}
           impl: ${{ matrix.impl }}
       - name: Run Tests
-        run: mvn -ntp -U -B -fae clean install test
+        run: mvn -ntp -U -B -fae clean install
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
