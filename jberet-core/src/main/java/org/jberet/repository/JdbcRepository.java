@@ -1170,7 +1170,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 return ddlFile;
             }
         }
-        if (databaseProductName.contains("MySQL")) {
+        if (databaseProductName.contains("MySQL") || databaseProductName.contains("MariaDB")) {
             ddlFile = "sql/jberet-mysql.ddl";
         } else if (databaseProductName.startsWith("Oracle")) {
             ddlFile = "sql/jberet-oracle.ddl";
