@@ -27,9 +27,12 @@ public final class SEArtifactFactory extends AbstractArtifactFactory {
     private final BeanManager beanManager;
 
     public SEArtifactFactory() {
-        WeldContainer weldContainer = WeldContainer.instance(RegistrySingletonProvider.STATIC_INSTANCE);
-        if (weldContainer == null) {
-            weldContainer = new Weld(RegistrySingletonProvider.STATIC_INSTANCE).initialize();
+        WeldContainer weldContainer;
+        synchronized (SEArtifactFactory.class) {
+            weldContainer = WeldContainer.instance(RegistrySingletonProvider.STATIC_INSTANCE);
+            if (weldContainer == null) {
+                weldContainer = new Weld(RegistrySingletonProvider.STATIC_INSTANCE).initialize();
+            }
         }
         beanManager = weldContainer.getBeanManager();
     }
