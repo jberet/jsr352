@@ -24,6 +24,10 @@
 
     <artifactId>jberet-core</artifactId>
 
+	<properties>
+		<automatic.module.name>${project.groupId}.core</automatic.module.name>
+	</properties>
+	
     <dependencies>
         <dependency>
             <groupId>org.mapstruct</groupId>
