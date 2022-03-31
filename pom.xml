@@ -116,7 +116,6 @@
         <!-- Modularized JDK support (various workarounds) - activated via profile -->
         <modular.jdk.args/>
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
-        <automatic.module.name>${project.groupId}.${project.artifactId}</automatic.module.name>
 
         <!-- Jberet EE BOM Dependencies -->
         <version.org.jberet.schedule>1.4.1.Final</version.org.jberet.schedule>
@@ -194,6 +193,29 @@
                         <keywords>true</keywords>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>add-regex-properties</id>
+                            <goals>
+                                <goal>regex-properties</goal>
+                            </goals>
+                            <configuration>
+                                <regexPropertySettings>
+                                    <regexPropertySetting>
+                                        <name>automatic.module.name</name>
+                                        <value>${project.groupId}.${project.artifactId}</value>
+                                        <regex>([a-z]+)\.\1-|-</regex>
+                                        <replacement>$1\.</replacement>
+                                        <failIfNoMatch>false</failIfNoMatch>
+                                    </regexPropertySetting>
+                                </regexPropertySettings>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -213,6 +235,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
