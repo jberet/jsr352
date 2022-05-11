@@ -14,10 +14,12 @@ import jakarta.batch.api.BatchProperty;
 import jakarta.batch.api.listener.JobListener;
 import jakarta.batch.operations.BatchRuntimeException;
 import jakarta.batch.runtime.context.JobContext;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named
+@Dependent
 public final class FailJobListener implements JobListener {
     @Inject
     @BatchProperty
