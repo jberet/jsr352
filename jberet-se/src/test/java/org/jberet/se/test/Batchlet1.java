@@ -10,6 +10,7 @@
 
 package org.jberet.se.test;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
@@ -22,6 +23,7 @@ import org.jberet.util.BatchUtil;
 import org.junit.Assert;
 
 @Named
+@Dependent
 public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     static final String ACTION = "action";
     static final String ACTION_STOP = "stop";

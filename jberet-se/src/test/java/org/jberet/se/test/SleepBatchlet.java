@@ -16,10 +16,12 @@ import jakarta.batch.api.Batchlet;
 import jakarta.batch.operations.BatchRuntimeException;
 import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.context.JobContext;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named
+@Dependent
 public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
     static final String SLEPT = "Slept";
 

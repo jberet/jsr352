@@ -10,6 +10,7 @@
  
 package org.jberet.se.test;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
@@ -18,6 +19,7 @@ import jakarta.batch.operations.BatchRuntimeException;
 import jakarta.batch.runtime.context.JobContext;
 
 @Named
+@Dependent
 public final class FailStepListener implements jakarta.batch.api.listener.StepListener {
     @Inject
     @BatchProperty
