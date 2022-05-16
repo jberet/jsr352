@@ -20,14 +20,20 @@ import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import jakarta.inject.Inject;
-
 import jakarta.batch.api.BatchProperty;
 import jakarta.batch.runtime.context.JobContext;
 import jakarta.batch.runtime.context.StepContext;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import org.jberet._private.BatchMessages;
+import org.jberet.job.model.BatchArtifacts;
 import org.jberet.job.model.Properties;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
@@ -52,6 +58,50 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
                 LOGGER.failToDestroyArtifact(e, instance);
             }
         }
+    }
+
+    /**
+     * Finds a CDI bean matching the batch artifact ref name, or batch.xml-configured
+     * class name, or direct use of FQCN.
+     *
+     * @param ref batch artifact ref name
+     * @param beanManager CDI BeanManager
+     * @param classLoader current classloader
+     * @return CDI bean found
+     */
+    protected static Bean<?> findBean(final String ref, final BeanManager beanManager, final ClassLoader classLoader) {
+        Set<Bean<?>> beans = beanManager.getBeans(ref);
+        if (beans == null || beans.isEmpty()) {
+            final Class<?> artifactClass = getClassFromBatchXmlOrClassLoader(ref, classLoader);
+            final Set<Bean<?>> beansByClass = beanManager.getBeans(artifactClass);
+            if (beansByClass != null) {
+                for (Iterator<Bean<?>> it = beansByClass.iterator(); it.hasNext();) {
+                    if (!it.next().getBeanClass().equals(artifactClass)) {
+                        it.remove();
+                    }
+                }
+                beans = beansByClass;
+            }
+        }
+        return beanManager.resolve(beans);
+    }
+
+    static Class<?> getClassFromBatchXmlOrClassLoader(final String ref, final ClassLoader classLoader) {
+        Class<?> cls = null;
+        BatchArtifacts batchArtifacts = ArtifactCreationContext.getCurrentArtifactCreationContext().jobContext.getBatchArtifacts();
+        String className = null;
+        if (batchArtifacts != null) {
+            className = batchArtifacts.getClassNameForRef(ref);
+        }
+        if (className == null) {
+            className = ref;
+        }
+        try {
+            cls = classLoader.loadClass(className);
+        } catch (ClassNotFoundException e) {
+            throw BatchMessages.MESSAGES.failToCreateArtifact(e, ref);
+        }
+        return cls;
     }
 
     protected void doInjection(final Object obj, Class<?> cls,
