@@ -11,9 +11,6 @@
 package org.jberet.creation;
 
 import jakarta.annotation.PostConstruct;
-
-import org.jberet._private.BatchMessages;
-import org.jberet.job.model.BatchArtifacts;
 import org.jberet.spi.ArtifactFactory;
 
 public final class ArtifactFactoryWrapper extends AbstractArtifactFactory {
@@ -50,23 +47,5 @@ public final class ArtifactFactoryWrapper extends AbstractArtifactFactory {
             }
         }
         return obj;
-    }
-
-    private Class<?> getClassFromBatchXmlOrClassLoader(final String ref, final ClassLoader classLoader) {
-        Class<?> cls = null;
-        BatchArtifacts batchArtifacts = ArtifactCreationContext.getCurrentArtifactCreationContext().jobContext.getBatchArtifacts();
-        String className = null;
-        if (batchArtifacts != null) {
-            className = batchArtifacts.getClassNameForRef(ref);
-        }
-        if (className == null) {
-            className = ref;
-        }
-        try {
-            cls = classLoader.loadClass(className);
-        } catch (ClassNotFoundException e) {
-            throw BatchMessages.MESSAGES.failToCreateArtifact(e, ref);
-        }
-        return cls;
     }
 }

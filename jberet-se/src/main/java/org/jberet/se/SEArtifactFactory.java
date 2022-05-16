@@ -12,7 +12,6 @@ package org.jberet.se;
 
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
-
 import org.jberet.creation.AbstractArtifactFactory;
 import org.jboss.weld.bootstrap.api.helpers.RegistrySingletonProvider;
 import org.jboss.weld.environment.se.Weld;
@@ -37,17 +36,13 @@ public final class SEArtifactFactory extends AbstractArtifactFactory {
 
     @Override
     public Class<?> getArtifactClass(final String ref, final ClassLoader classLoader) {
-        final Bean<?> bean = getBean(ref);
+        final Bean<?> bean = findBean(ref, beanManager, classLoader);
         return bean == null ? null : bean.getBeanClass();
     }
 
     @Override
     public Object create(final String ref, final Class<?> cls, final ClassLoader classLoader) throws Exception {
-        final Bean<?> bean = getBean(ref);
+        final Bean<?> bean = findBean(ref, beanManager, classLoader);
         return bean == null ? null : beanManager.getReference(bean, bean.getBeanClass(), beanManager.createCreationalContext(bean));
-    }
-
-    private Bean<?> getBean(final String ref) {
-        return beanManager.resolve(beanManager.getBeans(ref));
     }
 }
