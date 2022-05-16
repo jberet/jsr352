@@ -11,7 +11,10 @@
 package org.jberet.creation;
 
 import java.io.File;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.Inet4Address;
@@ -28,14 +31,17 @@ import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
+import javax.management.ObjectName;
+
 import jakarta.batch.api.BatchProperty;
 import jakarta.batch.runtime.context.JobContext;
 import jakarta.batch.runtime.context.StepContext;
 import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.Annotated;
+import jakarta.enterprise.inject.spi.AnnotatedParameter;
 import jakarta.enterprise.inject.spi.InjectionPoint;
-import javax.management.ObjectName;
-
 import org.jberet._private.BatchLogger;
+import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Properties;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
@@ -371,52 +377,71 @@ public class BatchBeanProducer {
     }
 
     private <T> T getProperty(final InjectionPoint injectionPoint) {
-        final BatchProperty batchProperty = injectionPoint.getAnnotated().getAnnotation(BatchProperty.class);
-        String propName = batchProperty.name();
-        final Field field = (Field) injectionPoint.getMember();
-
-        if (propName.length() == 0) {
-            propName = field.getName();
-        }
+        final Annotated annotated = injectionPoint.getAnnotated();
+        final BatchProperty batchProperty = annotated.getAnnotation(BatchProperty.class);
         final ArtifactCreationContext ac = ArtifactCreationContext.getCurrentArtifactCreationContext();
         final Properties properties = ac.properties;
-        final String rawVal = properties == null ? null : properties.get(propName);
-        if (rawVal == null) {
-            try {
-                final Class<?> beanClass = injectionPoint.getBean().getBeanClass();
+        String propName = batchProperty.name();
+        final Member injectionTarget = injectionPoint.getMember();
 
-                //best effort to get a default value
-                //no-arg constructor may not exist, in which case, we use null as its default value
-                //BatchLogger.LOGGER.infof("Injected batch property %s is not defined in job xml, will attempt to use the default value in class %s", propName, beanClass);
-                final Object o = beanClass.getDeclaredConstructor().newInstance();
-                final Object fieldVal;
-
-                if (WildFlySecurityManager.isChecking()) {
-                    fieldVal = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-                        @Override
-                        public Object run() throws Exception {
-                            if (!field.isAccessible()) {
-                                field.setAccessible(true);
-                            }
-                            return field.get(o);
-                        }
-                    });
-                } else {
-                    if (!field.isAccessible()) {
-                        field.setAccessible(true);
-                    }
-                    fieldVal = field.get(o);
-                }
-                return (T) fieldVal;
-            } catch (final Exception e) {
-                BatchLogger.LOGGER.tracef(e, "Failed to get the default value for undefined batch property %s, will use null.", propName);
-                return null;
+        String rawVal;
+        Class<?> paramOrFieldType;
+        AnnotatedElement paramOfField;
+        if (annotated instanceof AnnotatedParameter) {
+            if (propName == null) {
+                throw BatchMessages.MESSAGES.batchPropertyNameMissing(injectionTarget);
             }
-        } else if (rawVal.isEmpty()) {
+            rawVal = properties == null ? null : properties.get(propName);
+            final Parameter param = ((AnnotatedParameter<?>) annotated).getJavaParameter();
+            paramOrFieldType = param.getType();
+            paramOfField = param;
+        } else {
+            final Field field = (Field) injectionTarget;
+            paramOfField = field;
+            if (propName.length() == 0) {
+                propName = field.getName();
+            }
+            rawVal = properties == null ? null : properties.get(propName);
+
+            if (rawVal == null) {
+                try {
+                    final Class<?> beanClass = injectionPoint.getBean().getBeanClass();
+
+                    //best effort to get a default value
+                    //no-arg constructor may not exist, in which case, we use null as its default value
+                    //BatchLogger.LOGGER.infof("Injected batch property %s is not defined in job xml, will attempt to use the default value in class %s", propName, beanClass);
+                    final Object o = beanClass.getDeclaredConstructor().newInstance();
+                    final Object fieldVal;
+
+                    if (WildFlySecurityManager.isChecking()) {
+                        fieldVal = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                            @Override
+                            public Object run() throws Exception {
+                                if (!field.isAccessible()) {
+                                    field.setAccessible(true);
+                                }
+                                return field.get(o);
+                            }
+                        });
+                    } else {
+                        if (!field.isAccessible()) {
+                            field.setAccessible(true);
+                        }
+                        fieldVal = field.get(o);
+                    }
+                    return (T) fieldVal;
+                } catch (final Exception e) {
+                    BatchLogger.LOGGER.tracef(e, "Failed to get the default value for undefined batch property %s, will use null.", propName);
+                    return null;
+                }
+            }
+            paramOrFieldType = field.getType();
+        }
+
+        if (rawVal == null || rawVal.isEmpty()) {
             return null;
         }
-        final Class<?> fieldType = field.getType();
-        return fieldType.isAssignableFrom(String.class) ? (T) rawVal :
-                (T) ValueConverter.convertFieldValue(rawVal, fieldType, field, ac.jobContext.getClassLoader());
+        return paramOrFieldType.isAssignableFrom(String.class) ? (T) rawVal :
+                (T) ValueConverter.convertInjectionValue(rawVal, paramOrFieldType, paramOfField, ac.jobContext.getClassLoader());
     }
 }

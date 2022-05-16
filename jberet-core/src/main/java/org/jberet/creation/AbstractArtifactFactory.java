@@ -133,7 +133,7 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
                                     if (sVal.length() == 0) {
                                         fieldVal = null;
                                     } else if (!fType.isAssignableFrom(String.class)) {
-                                        fieldVal = ValueConverter.convertFieldValue(sVal, fType, f, classLoader);
+                                        fieldVal = ValueConverter.convertInjectionValue(sVal, fType, f, classLoader);
                                     } else {
                                         fieldVal = sVal;
                                     }
