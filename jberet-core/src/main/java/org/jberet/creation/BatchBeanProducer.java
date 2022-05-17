@@ -11,6 +11,7 @@
 package org.jberet.creation;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -377,13 +378,30 @@ public class BatchBeanProducer {
     }
 
     private <T> T getProperty(final InjectionPoint injectionPoint) {
-        final Annotated annotated = injectionPoint.getAnnotated();
-        final BatchProperty batchProperty = annotated.getAnnotation(BatchProperty.class);
         final ArtifactCreationContext ac = ArtifactCreationContext.getCurrentArtifactCreationContext();
         final Properties properties = ac.properties;
-        String propName = batchProperty.name();
+        final Annotated annotated = injectionPoint.getAnnotated();
         final Member injectionTarget = injectionPoint.getMember();
+        BatchProperty batchProperty;
+        String propName;
 
+        if (annotated == null) {
+            final Set<Annotation> qualifiers = injectionPoint.getQualifiers();
+            for (Annotation ann : qualifiers) {
+                if (ann instanceof BatchProperty) {
+                    batchProperty = (BatchProperty) ann;
+                    propName = batchProperty.name();
+                    if (propName == null) {
+                        throw BatchMessages.MESSAGES.batchPropertyNameMissing(injectionTarget);
+                    }
+                    return properties == null ? null : (T) properties.get(propName);
+                }
+            }
+            return null;
+        }
+
+        batchProperty = annotated.getAnnotation(BatchProperty.class);
+        propName = batchProperty.name();
         String rawVal;
         Class<?> paramOrFieldType;
         AnnotatedElement paramOfField;
