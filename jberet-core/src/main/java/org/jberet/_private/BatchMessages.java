@@ -1,8 +1,11 @@
 package org.jberet._private;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
 import java.util.List;
+import javax.xml.stream.Location;
+
 import jakarta.batch.operations.BatchRuntimeException;
 import jakarta.batch.operations.JobExecutionAlreadyCompleteException;
 import jakarta.batch.operations.JobExecutionIsRunningException;
@@ -14,8 +17,6 @@ import jakarta.batch.operations.NoSuchJobException;
 import jakarta.batch.operations.NoSuchJobExecutionException;
 import jakarta.batch.operations.NoSuchJobInstanceException;
 import jakarta.batch.runtime.BatchStatus;
-import javax.xml.stream.Location;
-
 import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
@@ -84,11 +85,11 @@ public interface BatchMessages {
     @Message(id = 617, value = "checkpoint-algorithm element is missing in step %s.  It is required for custom checkpoint-policy.")
     BatchRuntimeException checkpointAlgorithmMissing(String stepName);
 
-    @Message(id = 618, value = "Failed to inject value %s into field %s, because the field type %s is not supported for property injection.")
-    BatchRuntimeException unsupportedFieldType(String v, Field f, Class<?> t);
+    @Message(id = 618, value = "Failed to inject value %s into %s, because the type %s is not supported for property injection.")
+    BatchRuntimeException unsupportedInjectionType(String v, AnnotatedElement f, Class<?> t);
 
-    @Message(id = 619, value = "Failed to inject value %s into field %s")
-    BatchRuntimeException failToInjectProperty(@Cause Throwable th, String v, Field f);
+    @Message(id = 619, value = "Failed to inject value %s into %s")
+    BatchRuntimeException failToInjectProperty(@Cause Throwable th, String v, AnnotatedElement f);
 
     // @Message(id = 620, value = "Unrecognized job repository type %s")
     // BatchRuntimeException unrecognizedJobRepositoryType(String v);
@@ -206,5 +207,8 @@ public interface BatchMessages {
 
     @Message(id = 657, value = "Could not find the restart position %s in job %s")
     BatchRuntimeException couldNotFindRestartPoint(String restartPoint, String jobName);
+
+    @Message(id = 658, value = "Name attribute of @BatchProperty is missing in %s")
+    IllegalArgumentException batchPropertyNameMissing(Member injectionTarget);
 
 }

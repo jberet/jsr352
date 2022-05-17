@@ -10,8 +10,11 @@
 
 package org.jberet.creation;
 
+import static org.jberet._private.BatchMessages.MESSAGES;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -52,10 +55,9 @@ import java.util.zip.ZipFile;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import static org.jberet._private.BatchMessages.MESSAGES;
-
 /**
- * Converts a property string value to the target field type.  Supported field types for batch property injection:
+ * Converts a property string value to the target field or parameter type.
+ * Supported field or parameter types for batch property injection:
  * <ul>
  *     <li>String
  *     <li>StringBuffer
@@ -137,7 +139,7 @@ public final class ValueConverter {
     // order from longest to shortest to make sure input date strings are not truncated by shorter format styles.
     private static final int[] dateFormatCodes = {DateFormat.FULL, DateFormat.LONG, DateFormat.MEDIUM, DateFormat.SHORT};
 
-    public static Object convertFieldValue(final String rawValue, final Class<?> t, final Field f, final ClassLoader classLoader) {
+    public static Object convertInjectionValue(final String rawValue, final Class<?> t, final AnnotatedElement f, final ClassLoader classLoader) {
         final Object result = convertSingleValue(rawValue, t, f, classLoader);
         if (result != null) {
             return result;
@@ -161,27 +163,30 @@ public final class ValueConverter {
             return parseMap(v, p, String.class, f, classLoader);
         }
 
-        final Type genericType = f.getGenericType();
-        if (genericType instanceof ParameterizedType) {
-            final ParameterizedType pt = (ParameterizedType) genericType;
-            final Type[] actualTypeArguments = pt.getActualTypeArguments();
-            final Class<?>[] elementTypes = new Class<?>[actualTypeArguments.length];
-            for (int i = 0; i < actualTypeArguments.length; i++) {
-                if (actualTypeArguments[i] instanceof Class) {
-                    elementTypes[i] = (Class<?>) actualTypeArguments[i];
+        if (f instanceof Field) {
+            final Type genericType = ((Field) f).getGenericType();
+            if (genericType instanceof ParameterizedType) {
+                final ParameterizedType pt = (ParameterizedType) genericType;
+                final Type[] actualTypeArguments = pt.getActualTypeArguments();
+                final Class<?>[] elementTypes = new Class<?>[actualTypeArguments.length];
+                for (int i = 0; i < actualTypeArguments.length; i++) {
+                    if (actualTypeArguments[i] instanceof Class) {
+                        elementTypes[i] = (Class<?>) actualTypeArguments[i];
+                    }
+                    // can be ? or ? extends SomeType, which is sun.reflect.generics.reflectiveObjects.WildcardTypeImpl,
+                    // not Class type.
                 }
-                // can be ? or ? extends SomeType, which is sun.reflect.generics.reflectiveObjects.WildcardTypeImpl,
-                // not Class type.
-            }
-            switch (elementTypes.length) {
-                case 1:
-                    elementValueType = elementTypes[0];
-                    break;
-                case 2:
-                    elementValueType = elementTypes[1];
-                    break;
+                switch (elementTypes.length) {
+                    case 1:
+                        elementValueType = elementTypes[0];
+                        break;
+                    case 2:
+                        elementValueType = elementTypes[1];
+                        break;
+                }
             }
         }
+
         //can be List or Set (raw collection) so there is no elementValueType, set to String.class
         if (elementValueType == null) {
             elementValueType = String.class;
@@ -196,7 +201,7 @@ public final class ValueConverter {
             } else if (t == Vector.class) {
                 l = new Vector();
             } else {
-                throw MESSAGES.unsupportedFieldType(v, f, t);
+                throw MESSAGES.unsupportedInjectionType(v, f, t);
             }
             return parseList(v, l, elementValueType, f, classLoader);
         }
@@ -215,7 +220,7 @@ public final class ValueConverter {
             } else if (t == WeakHashMap.class) {
                 m = new WeakHashMap();
             } else {
-                throw MESSAGES.unsupportedFieldType(v, f, t);
+                throw MESSAGES.unsupportedInjectionType(v, f, t);
             }
             return parseMap(v, m, elementValueType, f, classLoader);
         }
@@ -228,16 +233,16 @@ public final class ValueConverter {
             } else if (t == LinkedHashSet.class) {
                 set = new LinkedHashSet();
             } else {
-                throw MESSAGES.unsupportedFieldType(v, f, t);
+                throw MESSAGES.unsupportedInjectionType(v, f, t);
             }
             set.addAll(parseList(v, new ArrayList(), elementValueType, f, classLoader));
             return set;
         }
 
-        throw MESSAGES.unsupportedFieldType(v, f, t);
+        throw MESSAGES.unsupportedInjectionType(v, f, t);
     }
 
-    private static Object convertSingleValue(final String rawValue, final Class<?> t, final Field f, final ClassLoader classLoader) {
+    private static Object convertSingleValue(final String rawValue, final Class<?> t, final AnnotatedElement f, final ClassLoader classLoader) {
         final String v = rawValue.trim();
         if (t == int.class || t == Integer.class) {
             return Integer.valueOf(v);
@@ -342,7 +347,7 @@ public final class ValueConverter {
         return null;
     }
 
-    private static Object parsePrimitiveArray(final String v, final Class<?> primitiveType, final Field f) {
+    private static Object parsePrimitiveArray(final String v, final Class<?> primitiveType, final AnnotatedElement f) {
         final StringTokenizer st = new StringTokenizer(v, delimiter);
         final int count = st.countTokens();
         final String[] sVal = new String[count];
@@ -407,7 +412,7 @@ public final class ValueConverter {
         throw MESSAGES.failToInjectProperty(null, v, f);
     }
 
-    private static List parseList(final String v, final List l, final Class<?> elementValueType, final Field f, final ClassLoader classLoader) {
+    private static List parseList(final String v, final List l, final Class<?> elementValueType, final AnnotatedElement f, final ClassLoader classLoader) {
         final StringTokenizer st = new StringTokenizer(v, delimiter);
         while (st.hasMoreTokens()) {
             final String s = st.nextToken().trim();
@@ -420,7 +425,7 @@ public final class ValueConverter {
         return l;
     }
 
-    private static Map parseMap(final String v, final Map map, final Class<?> elementValueType, final Field f, final ClassLoader classLoader) {
+    private static Map parseMap(final String v, final Map map, final Class<?> elementValueType, final AnnotatedElement f, final ClassLoader classLoader) {
         final StringTokenizer st = new StringTokenizer(v, delimiter);
         while (st.hasMoreTokens()) {
             final String pair = st.nextToken().trim();
@@ -473,10 +478,10 @@ public final class ValueConverter {
      * </ul>
      *
      * @param v input date string
-     * @param f the field in the batch artifact (the injection target field)
+     * @param f the field or parameter in the batch artifact (the injection target)
      * @return a java.util.Date object parsed from the input string v
      */
-    private static Date parseDate(final String v, final Field f) {
+    private static Date parseDate(final String v, final AnnotatedElement f) {
         DateFormat df;
         for (final int p : dateFormatCodes) {
             df = DateFormat.getDateTimeInstance(p, p);
