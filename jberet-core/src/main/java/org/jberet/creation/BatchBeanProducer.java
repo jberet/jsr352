@@ -391,7 +391,7 @@ public class BatchBeanProducer {
                 if (ann instanceof BatchProperty) {
                     batchProperty = (BatchProperty) ann;
                     propName = batchProperty.name();
-                    if (propName == null) {
+                    if (propName.isEmpty()) {
                         throw BatchMessages.MESSAGES.batchPropertyNameMissing(injectionTarget);
                     }
                     return properties == null ? null : (T) properties.get(propName);
@@ -406,7 +406,7 @@ public class BatchBeanProducer {
         Class<?> paramOrFieldType;
         AnnotatedElement paramOfField;
         if (annotated instanceof AnnotatedParameter) {
-            if (propName == null) {
+            if (propName.isEmpty()) {
                 throw BatchMessages.MESSAGES.batchPropertyNameMissing(injectionTarget);
             }
             rawVal = properties == null ? null : properties.get(propName);
