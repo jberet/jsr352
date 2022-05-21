@@ -15,7 +15,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
-import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.Inet4Address;
@@ -59,7 +58,7 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public Integer getInt(final InjectionPoint injectionPoint) {
-        Integer i = getProperty(injectionPoint);
+        Integer i = getProperty(injectionPoint, Integer.class);
         if (i == null) {
             Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
             return fType == Integer.class ? null : 0;
@@ -69,17 +68,17 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public int[] getIntArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, int[].class);
     }
 
     @Produces @BatchProperty
     public Integer[] getIntegerArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Integer[].class);
     }
 
     @Produces @BatchProperty
     public Long getLong(final InjectionPoint injectionPoint) {
-        Long l = getProperty(injectionPoint);
+        Long l = getProperty(injectionPoint, Long.class);
         if (l == null) {
             Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
             return fType == Long.class ? null : 0L;
@@ -89,17 +88,17 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public Long[] getBigLongArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Long[].class);
     }
 
     @Produces @BatchProperty
     public long[] getLongArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, long[].class);
     }
 
     @Produces @BatchProperty
     public Short getShort(final InjectionPoint injectionPoint) {
-        Short sh = getProperty(injectionPoint);
+        Short sh = getProperty(injectionPoint, Short.class);
         if (sh == null) {
             Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
             return fType == Short.class ? null : (short) 0;
@@ -109,17 +108,17 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public Short[] getBigShortArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Short[].class);
     }
 
     @Produces @BatchProperty
     public short[] getShortArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, short[].class);
     }
 
     @Produces @BatchProperty
     public Byte getByte(final InjectionPoint injectionPoint) {
-        Byte b = getProperty(injectionPoint);
+        Byte b = getProperty(injectionPoint, Byte.class);
         if (b == null) {
             Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
             return fType == Byte.class ? null : (byte) 0;
@@ -129,17 +128,17 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public Byte[] getBigByteArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Byte[].class);
     }
 
     @Produces @BatchProperty
     public byte[] getByteArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, byte[].class);
     }
 
     @Produces @BatchProperty
     public Character getCharacter(final InjectionPoint injectionPoint) {
-        Character ch = getProperty(injectionPoint);
+        Character ch = getProperty(injectionPoint, Character.class);
         if (ch == null) {
             Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
             return fType == Character.class ? null : '\u0000';
@@ -149,17 +148,17 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public Character[] getCharacterArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Character[].class);
     }
 
     @Produces @BatchProperty
     public char[] getCharArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, char[].class);
     }
 
     @Produces @BatchProperty
     public Float getFloat(final InjectionPoint injectionPoint) {
-        Float f = getProperty(injectionPoint);
+        Float f = getProperty(injectionPoint, Float.class);
         if (f == null) {
             Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
             return fType == Float.class ? null : 0F;
@@ -169,17 +168,17 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public Float[] getBigFloatArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Float[].class);
     }
 
     @Produces @BatchProperty
     public float[] getFloatArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, float[].class);
     }
 
     @Produces @BatchProperty
     public Double getDouble(final InjectionPoint injectionPoint) {
-        Double d = getProperty(injectionPoint);
+        Double d = getProperty(injectionPoint, Double.class);
         if (d == null) {
             Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
             return fType == Double.class ? null : 0D;
@@ -189,17 +188,17 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public Double[] getBigDoubleArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Double[].class);
     }
 
     @Produces @BatchProperty
     public double[] getDoubleArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, double[].class);
     }
 
     @Produces @BatchProperty
     public Boolean getBoolean(final InjectionPoint injectionPoint) {
-        Boolean b = getProperty(injectionPoint);
+        Boolean b = getProperty(injectionPoint, Boolean.class);
         if (b == null) {
             Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
             return fType == Boolean.class ? null : Boolean.FALSE;
@@ -209,175 +208,175 @@ public class BatchBeanProducer {
 
     @Produces @BatchProperty
     public Boolean[] getBigBooleanArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Boolean[].class);
     }
 
     @Produces @BatchProperty
     public boolean[] getBooleanArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, boolean[].class);
     }
 
     @Produces @BatchProperty
     public String getString(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, String.class);
     }
 
     @Produces @BatchProperty
     public String[] getStringArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, String[].class);
     }
 
     @Produces @BatchProperty
     public Date getDate(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Date.class);
     }
 
     @Produces @BatchProperty
     public Date[] getDateArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Date[].class);
     }
 
     @Produces @BatchProperty
     public Class getClazz(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Class.class);
     }
 
     @Produces @BatchProperty
     public Class[] getClazzArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Class[].class);
     }
 
     @Produces @BatchProperty
     public Inet4Address getInet4Address(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Inet4Address.class);
     }
 
     @Produces @BatchProperty
     public Inet6Address getInet6Address(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Inet6Address.class);
     }
 
     @Produces @BatchProperty
     public Map getMap(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Map.class);
     }
 
     @Produces @BatchProperty
     public Map<String, String> getStringMap(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Map.class);
     }
 
     @Produces @BatchProperty
     public Set getSet(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Set.class);
     }
 
     @Produces @BatchProperty
     public Set<String> getStringSet(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Set.class);
     }
 
     @Produces @BatchProperty
     public Logger getLogger(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Logger.class);
     }
 
     @Produces @BatchProperty
     public Pattern getPattern(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, Pattern.class);
     }
 
     @Produces @BatchProperty
     public ObjectName getObjectName(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, ObjectName.class);
     }
 
     @Produces @BatchProperty
     public List getList(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, List.class);
     }
 
     @Produces @BatchProperty
     public List<String> getStringList(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, List.class);
     }
 
     @Produces @BatchProperty
     public BigInteger getBigInteger(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, BigInteger.class);
     }
 
     @Produces @BatchProperty
     public BigInteger[] getBigIntegerArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, BigInteger[].class);
     }
 
     @Produces @BatchProperty
     public BigDecimal getBigDecimal(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, BigDecimal.class);
     }
 
     @Produces @BatchProperty
     public BigDecimal[] getBigDecimalArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, BigDecimal[].class);
     }
 
     @Produces @BatchProperty
     public URL getURL(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, URL.class);
     }
 
     @Produces @BatchProperty
     public URL[] getURLArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, URL[].class);
     }
 
     @Produces @BatchProperty
     public URI getURI(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, URI.class);
     }
 
     @Produces @BatchProperty
     public URI[] getURIArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, URI[].class);
     }
 
     @Produces @BatchProperty
     public File getFile(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, File.class);
     }
 
     @Produces @BatchProperty
     public File[] getFileArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, File[].class);
     }
 
     @Produces @BatchProperty
     public ZipFile[] getZipFileArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, ZipFile[].class);
     }
 
     @Produces @BatchProperty
     public JarFile getJarFile(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, JarFile.class);
     }
 
     @Produces @BatchProperty
     public JarFile[] getJarFileArray(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, JarFile[].class);
     }
 
     @Produces @BatchProperty
     public StringBuilder getStringBuilder(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, StringBuilder.class);
     }
 
     @Produces @BatchProperty
     public StringBuffer getStringBuffer(final InjectionPoint injectionPoint) {
-        return getProperty(injectionPoint);
+        return getProperty(injectionPoint, StringBuffer.class);
     }
 
-    private <T> T getProperty(final InjectionPoint injectionPoint) {
+    private <T> T getProperty(final InjectionPoint injectionPoint, final Class<T> injectionValueType) {
         final ArtifactCreationContext ac = ArtifactCreationContext.getCurrentArtifactCreationContext();
         final Properties properties = ac.properties;
         final Annotated annotated = injectionPoint.getAnnotated();
@@ -403,16 +402,13 @@ public class BatchBeanProducer {
         batchProperty = annotated.getAnnotation(BatchProperty.class);
         propName = batchProperty.name();
         String rawVal;
-        Class<?> paramOrFieldType;
         AnnotatedElement paramOfField;
         if (annotated instanceof AnnotatedParameter) {
             if (propName.isEmpty()) {
                 throw BatchMessages.MESSAGES.batchPropertyNameMissing(injectionTarget);
             }
             rawVal = properties == null ? null : properties.get(propName);
-            final Parameter param = ((AnnotatedParameter<?>) annotated).getJavaParameter();
-            paramOrFieldType = param.getType();
-            paramOfField = param;
+            paramOfField = ((AnnotatedParameter<?>) annotated).getJavaParameter();
         } else {
             final Field field = (Field) injectionTarget;
             paramOfField = field;
@@ -453,13 +449,12 @@ public class BatchBeanProducer {
                     return null;
                 }
             }
-            paramOrFieldType = field.getType();
         }
 
         if (rawVal == null || rawVal.isEmpty()) {
             return null;
         }
-        return paramOrFieldType.isAssignableFrom(String.class) ? (T) rawVal :
-                (T) ValueConverter.convertInjectionValue(rawVal, paramOrFieldType, paramOfField, ac.jobContext.getClassLoader());
+        return injectionValueType.isAssignableFrom(String.class) ? (T) rawVal :
+                (T) ValueConverter.convertInjectionValue(rawVal, injectionValueType, paramOfField, ac.jobContext.getClassLoader());
     }
 }
