@@ -27,15 +27,17 @@ import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
+import javax.management.ObjectName;
+
 import jakarta.batch.api.BatchProperty;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import javax.management.ObjectName;
-
 import org.jberet.testapps.common.BatchletNoNamed;
 
 @Named
 public class PropertyInjectionBatchlet extends BatchletNoNamed {
+    org.jboss.logging.Logger log = org.jboss.logging.Logger.getLogger(getClass().getName());
+    
     public enum Color {RED, WHITE, YELLOW}
 
     @Inject @BatchProperty(name = "int")
@@ -317,6 +319,22 @@ public class PropertyInjectionBatchlet extends BatchletNoNamed {
     @Inject @BatchProperty
     String path;
 
+    Integer mi;
+    
+    boolean mb;
+
+    @Inject
+    public void setMi(@BatchProperty(name="int") Integer i) {
+        this.mi = i;
+        log.infof("Injected into method this.mi: %s", this.mi);
+    }
+
+    @Inject
+    public void setMb(@BatchProperty(name = "boolean") boolean b) {
+        this.mb = b;
+        log.infof("Injected into method this.mb: %s", this.mb);
+    }
+
     @Override
     public String process() throws Exception {
         final Field[] declaredFields = this.getClass().getDeclaredFields();
@@ -324,7 +342,7 @@ public class PropertyInjectionBatchlet extends BatchletNoNamed {
             if (field.getAnnotation(BatchProperty.class) != null) {
                 final Class<?> fieldType = field.getType();
                 final Object fieldValue = field.get(this);
-                System.out.printf("Field injection: %s %s = %s;%n", fieldType, field.getName(), fieldValue);
+                log.infof("Field injection: %s %s = %s;%n", fieldType, field.getName(), fieldValue);
             }
         }
 
