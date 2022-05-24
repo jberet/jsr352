@@ -59,9 +59,8 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public Integer getInt(final InjectionPoint injectionPoint) {
         Integer i = getProperty(injectionPoint, Integer.class);
-        if (i == null) {
-            Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
-            return fType == Integer.class ? null : 0;
+        if (i == null && isPrimitive(injectionPoint)) {
+            return 0;
         }
         return i;
     }
@@ -79,9 +78,8 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public Long getLong(final InjectionPoint injectionPoint) {
         Long l = getProperty(injectionPoint, Long.class);
-        if (l == null) {
-            Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
-            return fType == Long.class ? null : 0L;
+        if (l == null && isPrimitive(injectionPoint)) {
+            return 0L;
         }
         return l;
     }
@@ -99,9 +97,8 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public Short getShort(final InjectionPoint injectionPoint) {
         Short sh = getProperty(injectionPoint, Short.class);
-        if (sh == null) {
-            Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
-            return fType == Short.class ? null : (short) 0;
+        if (sh == null && isPrimitive(injectionPoint)) {
+            return (short) 0;
         }
         return sh;
     }
@@ -119,9 +116,8 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public Byte getByte(final InjectionPoint injectionPoint) {
         Byte b = getProperty(injectionPoint, Byte.class);
-        if (b == null) {
-            Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
-            return fType == Byte.class ? null : (byte) 0;
+        if (b == null && isPrimitive(injectionPoint)) {
+            return (byte) 0;
         }
         return b;
     }
@@ -139,9 +135,8 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public Character getCharacter(final InjectionPoint injectionPoint) {
         Character ch = getProperty(injectionPoint, Character.class);
-        if (ch == null) {
-            Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
-            return fType == Character.class ? null : '\u0000';
+        if (ch == null && isPrimitive(injectionPoint)) {
+            return '\u0000';
         }
         return ch;
     }
@@ -159,9 +154,8 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public Float getFloat(final InjectionPoint injectionPoint) {
         Float f = getProperty(injectionPoint, Float.class);
-        if (f == null) {
-            Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
-            return fType == Float.class ? null : 0F;
+        if (f == null && isPrimitive(injectionPoint)) {
+            return 0F;
         }
         return f;
     }
@@ -179,9 +173,8 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public Double getDouble(final InjectionPoint injectionPoint) {
         Double d = getProperty(injectionPoint, Double.class);
-        if (d == null) {
-            Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
-            return fType == Double.class ? null : 0D;
+        if (d == null && isPrimitive(injectionPoint)) {
+            return 0D;
         }
         return d;
     }
@@ -199,9 +192,8 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public Boolean getBoolean(final InjectionPoint injectionPoint) {
         Boolean b = getProperty(injectionPoint, Boolean.class);
-        if (b == null) {
-            Class<?> fType = ((Field) (injectionPoint.getMember())).getType();
-            return fType == Boolean.class ? null : Boolean.FALSE;
+        if (b == null && isPrimitive(injectionPoint)) {
+            return Boolean.FALSE;
         }
         return b;
     }
@@ -374,6 +366,25 @@ public class BatchBeanProducer {
     @Produces @BatchProperty
     public StringBuffer getStringBuffer(final InjectionPoint injectionPoint) {
         return getProperty(injectionPoint, StringBuffer.class);
+    }
+
+    private static boolean isPrimitive(final InjectionPoint injectionPoint) {
+        final Member member = injectionPoint.getMember();
+        if (member != null) {
+            if (member instanceof Field) {
+                return ((Field) member).getType().isPrimitive();
+            } else {
+                final Annotated annotated = injectionPoint.getAnnotated();
+                if (annotated != null) {
+                    if (annotated instanceof AnnotatedParameter) {
+                        return ((AnnotatedParameter) annotated).getJavaParameter().getType().isPrimitive();
+                    }
+                    // other possible subtypes of Annotated:
+                    // AnnotatedMethod, AnnotatedConstructor, AnnotatedField are not applicable
+                }
+            }
+        }
+        return false;
     }
 
     private <T> T getProperty(final InjectionPoint injectionPoint, final Class<T> injectionValueType) {
