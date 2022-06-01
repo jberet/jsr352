@@ -25,6 +25,10 @@ public class PartitionScopedContextImpl implements Context {
     private PartitionScopedContextImpl() {
     }
 
+    public static PartitionScopedContextImpl getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public Class<? extends Annotation> getScope() {
         return PartitionScoped.class;
@@ -59,6 +63,10 @@ public class PartitionScopedContextImpl implements Context {
     public boolean isActive() {
         final StepContextImpl stepContext = ArtifactCreationContext.getCurrentArtifactCreationContext().stepContext;
         return stepContext != null && stepContext.getPartitionScopedBeans() != null;
+    }
+
+    public void destroy(Contextual<?> contextual) {
+        JobScopedContextImpl.ScopedInstance.destroy(getPartitionScopedBeans(), contextual);
     }
 
     private ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> getPartitionScopedBeans() {

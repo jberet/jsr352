@@ -25,6 +25,10 @@ public class StepScopedContextImpl implements Context {
     private StepScopedContextImpl() {
     }
 
+    public static StepScopedContextImpl getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public Class<? extends Annotation> getScope() {
         return StepScoped.class;
@@ -58,6 +62,10 @@ public class StepScopedContextImpl implements Context {
     @Override
     public boolean isActive() {
         return ArtifactCreationContext.getCurrentArtifactCreationContext().stepContext != null;
+    }
+
+    public void destroy(Contextual<?> contextual) {
+        JobScopedContextImpl.ScopedInstance.destroy(getStepScopedBeans(), contextual);
     }
 
     private ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> getStepScopedBeans() {
