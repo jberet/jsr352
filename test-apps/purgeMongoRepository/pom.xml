@@ -22,9 +22,6 @@
     </parent>
 
     <artifactId>purgeMongoRepository</artifactId>
-    <properties>
-        <jvmArgs>-Xmx32m</jvmArgs>
-    </properties>
 
     <dependencies>
         <dependency>

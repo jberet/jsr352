@@ -114,7 +114,6 @@
         <redirectTestOutput>false</redirectTestOutput>
         <javadoc.additional.params>-sourceclasspath ${project.build.outputDirectory}</javadoc.additional.params>
 
-        <!-- Modularized JDK support (various workarounds) - activated via profile -->
         <modular.jdk.args/>
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
         <insecure.repositories>WARN</insecure.repositories>
