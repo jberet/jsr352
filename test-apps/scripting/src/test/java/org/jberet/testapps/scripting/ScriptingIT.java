@@ -19,6 +19,7 @@ import javax.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -62,11 +63,13 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void batchletRubySrc() throws Exception {
+        Assume.assumeTrue(getJavaVersionMajor() <= 11);
         test0("batchletRubySrc");
     }
 
     @Test
     public void batchletRubyInline() throws Exception {
+        Assume.assumeTrue(getJavaVersionMajor() <= 11);
         test0("batchletRubyInline");
     }
 
@@ -119,6 +122,7 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void chunkRuby() throws Exception {
+        Assume.assumeTrue(getJavaVersionMajor() <= 11);
         test0("chunkRuby");
     }
 
@@ -134,5 +138,11 @@ public class ScriptingIT extends AbstractIT {
         Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
         Assert.assertTrue(jobExecution.getExitStatus().equals(testName) || jobExecution.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
         Assert.assertTrue(stepExecution0.getExitStatus().equals(testName) || stepExecution0.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
+    }
+
+    int getJavaVersionMajor() {
+        final String versionVal = System.getProperty("java.version");
+        final String[] split = versionVal.split("\\.");
+        return Integer.parseInt(split[0]);
     }
 }
