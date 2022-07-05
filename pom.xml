@@ -70,7 +70,7 @@
         <version.org.apache.xmlbeans>3.1.0</version.org.apache.xmlbeans>
 
         <version.org.codehaus.groovy>3.0.7</version.org.codehaus.groovy>
-        <version.org.jruby.jruby>9.0.0.0</version.org.jruby.jruby>
+        <version.org.jruby.jruby>9.3.6.0</version.org.jruby.jruby>
         <version.org.python.jython>2.7-b1</version.org.python.jython>
         <version.org.scala-lang.scala-dist>2.11.12</version.org.scala-lang.scala-dist>
         <version.com.caucho.resin-quercus>3.2.1</version.com.caucho.resin-quercus>
