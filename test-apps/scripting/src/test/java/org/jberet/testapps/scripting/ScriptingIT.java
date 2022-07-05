@@ -15,10 +15,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import jakarta.batch.runtime.BatchStatus;
 
+import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -62,11 +63,13 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void batchletRubySrc() throws Exception {
+        Assume.assumeTrue(Runtime.version().feature() <= 11);
         test0("batchletRubySrc");
     }
 
     @Test
     public void batchletRubyInline() throws Exception {
+        Assume.assumeTrue(Runtime.version().feature() <= 11);
         test0("batchletRubyInline");
     }
 
@@ -119,6 +122,7 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void chunkRuby() throws Exception {
+        Assume.assumeTrue(Runtime.version().feature() <= 11);
         test0("chunkRuby");
     }
 
