@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>35</version>
+        <version>39</version>
     </parent>
 
     <groupId>org.jberet</groupId>
@@ -117,6 +117,7 @@
         <!-- Modularized JDK support (various workarounds) - activated via profile -->
         <modular.jdk.args/>
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
+        <insecure.repositories>WARN</insecure.repositories>
 
         <!-- Jberet EE BOM Dependencies -->
         <version.org.jberet.schedule>1.4.1.Final</version.org.jberet.schedule>
