@@ -128,10 +128,16 @@
 
     <profiles>
         <profile>
-            <id>jdk10</id>
+            <id>jdk10-or-above</id>
             <activation>
-                <jdk>10</jdk>
+                <jdk>[10,]</jdk>
             </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjdk.nashorn</groupId>
+                    <artifactId>nashorn-core</artifactId>
+                </dependency>
+            </dependencies>
             <build>
                 <pluginManagement>
                     <plugins>
