@@ -90,7 +90,7 @@
         <version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>1.0.7.Final</version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>
         <version.org.glassfish.javax.el>3.0.1-b08</version.org.glassfish.javax.el>
 
-        <version.org.wildfly.security.wildfly-security-manager>1.1.2.Final</version.org.wildfly.security.wildfly-security-manager>
+        <version.org.wildfly.security.elytron>1.19.0.Final</version.org.wildfly.security.elytron>
 
         <version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.ws.jboss-jaxrs-api_2.0_spec>
         <version.org.jboss.spec.javax.ejb.jboss-ejb-api_3.2_spec>1.0.0.Final</version.org.jboss.spec.javax.ejb.jboss-ejb-api_3.2_spec>
@@ -401,8 +401,14 @@
 
             <dependency>
                 <groupId>org.wildfly.security</groupId>
-                <artifactId>wildfly-security-manager</artifactId>
-                <version>${version.org.wildfly.security.wildfly-security-manager}</version>
+                <artifactId>wildfly-elytron-security-manager</artifactId>
+                <version>${version.org.wildfly.security.elytron}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly.security</groupId>
+                <artifactId>wildfly-elytron-security-manager-action</artifactId>
+                <version>${version.org.wildfly.security.elytron}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -823,7 +829,11 @@
         </dependency>
         <dependency>
             <groupId>org.wildfly.security</groupId>
-            <artifactId>wildfly-security-manager</artifactId>
+            <artifactId>wildfly-elytron-security-manager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly.security</groupId>
+            <artifactId>wildfly-elytron-security-manager-action</artifactId>
         </dependency>
     </dependencies>
 
