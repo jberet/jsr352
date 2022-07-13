@@ -11,10 +11,6 @@
 
     <artifactId>scripting</artifactId>
 
-    <properties>
-        <jvmArgs>-Xms512m -Xmx1024m -XX:MaxPermSize=512m</jvmArgs>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.jberet.test-apps</groupId>
@@ -71,25 +67,5 @@
             <url>https://caucho.com/m2/</url>
         </repository>
     </repositories>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <argLine>${jvmArgs}</argLine>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
