@@ -90,7 +90,7 @@
         <version.jakarta.el-api>5.0.1</version.jakarta.el-api>
         <version.org.glassfish.jakarta.el>4.0.1</version.org.glassfish.jakarta.el>
 
-        <version.org.wildfly.security.wildfly-security-manager>1.1.2.Final</version.org.wildfly.security.wildfly-security-manager>
+        <version.org.wildfly.security.elytron>1.19.0.Final</version.org.wildfly.security.elytron>
 
         <version.jakarta.ws.rs-api>3.0.0</version.jakarta.ws.rs-api>
         <version.jakarta.ejb-api>4.0.1</version.jakarta.ejb-api>
@@ -402,8 +402,14 @@
 
             <dependency>
                 <groupId>org.wildfly.security</groupId>
-                <artifactId>wildfly-security-manager</artifactId>
-                <version>${version.org.wildfly.security.wildfly-security-manager}</version>
+                <artifactId>wildfly-elytron-security-manager</artifactId>
+                <version>${version.org.wildfly.security.elytron}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly.security</groupId>
+                <artifactId>wildfly-elytron-security-manager-action</artifactId>
+                <version>${version.org.wildfly.security.elytron}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -836,7 +842,11 @@
         </dependency>
         <dependency>
             <groupId>org.wildfly.security</groupId>
-            <artifactId>wildfly-security-manager</artifactId>
+            <artifactId>wildfly-elytron-security-manager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly.security</groupId>
+            <artifactId>wildfly-elytron-security-manager-action</artifactId>
         </dependency>
     </dependencies>
 
