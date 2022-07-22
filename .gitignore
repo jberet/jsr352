@@ -29,4 +29,5 @@ dependency-reduced-pom.xml
 # other files to ignore
 derby.log
 server.lock
+target-index
 
