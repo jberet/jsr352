@@ -10,44 +10,48 @@ which is available at https://www.eclipse.org/legal/epl-2.0/
 SPDX-License-Identifier: EPL-2.0
 -->
 
-<infinispan xmlns="urn:infinispan:config:11.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="urn:infinispan:config:11.0 http://infinispan.org/schemas/infinispan-config-11.0.xsd">
+<infinispan xmlns="urn:infinispan:config:13.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:infinispan:config:13.0 https://infinispan.org/schemas/infinispan-config-13.0.xsd">
 
     <cache-container name="jberet" default-cache="JOB_EXECUTION">
         <transport lock-timeout="60000"/>
 
         <serialization marshaller="org.infinispan.commons.marshall.JavaSerializationMarshaller">
-            <white-list>
+            <allow-list>
                 <class>org.jberet.runtime.JobInstanceImpl</class>
                 <class>org.jberet.runtime.JobExecutionImpl</class>
                 <class>org.jberet.runtime.StepExecutionImpl</class>
                 <class>org.jberet.runtime.PartitionExecutionImpl</class>
                 <class>java.util.concurrent.CopyOnWriteArrayList</class>
-            </white-list>
+            </allow-list>
         </serialization>
 
         <distributed-cache name="JOB_INSTANCE" mode="ASYNC" l1-lifespan="0">
             <persistence>
                 <file-store path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
+            <indexing enabled="false" />
         </distributed-cache>
 
         <distributed-cache name="JOB_EXECUTION" mode="ASYNC" l1-lifespan="0">
             <persistence>
                 <file-store path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
+            <indexing enabled="false" />
         </distributed-cache>
 
         <distributed-cache name="STEP_EXECUTION" mode="ASYNC" l1-lifespan="0">
             <persistence>
                 <file-store path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
+            <indexing enabled="false" />
         </distributed-cache>
 
         <distributed-cache name="PARTITION_EXECUTION" mode="ASYNC" l1-lifespan="0">
             <persistence>
                 <file-store path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
+            <indexing enabled="false" />
         </distributed-cache>
 
         <distributed-cache name="seq" mode="SYNC" l1-lifespan="0">
@@ -55,6 +59,7 @@ SPDX-License-Identifier: EPL-2.0
             <persistence>
                 <file-store preload="true" fetch-state="true" path="${jberet.infinispan.file.store:/tmp/jberet.infinispan.file.store}"/>
             </persistence>
+            <indexing enabled="false" />
         </distributed-cache>
     </cache-container>
 </infinispan>
