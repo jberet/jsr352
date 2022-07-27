@@ -56,7 +56,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>1.4.8.Final</version>
+        <version>1.4.9.Final-SNAPSHOT</version>
     </parent>
 
     <groupId>org.jberet.test-apps</groupId>
