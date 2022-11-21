@@ -206,12 +206,6 @@ the above dependencies are already available as JBoss modules, and should not be
              <scope>provided</scope>
          </dependency>
 
-        <!-- For Weld 2.2.2.Final or later, Jandex is required for annotation processing -->
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jandex</artifactId>
-        </dependency>
-        
         <!-- replace Java built-in StAX provider with aalto-xml or woodstox
              (woodstox dependencies not shown here)
         -->
