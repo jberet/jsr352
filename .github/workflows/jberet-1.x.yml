@@ -11,15 +11,15 @@ on:
 
 jobs:
   build-test-matrix:
-    name: ${{ matrix.impl}}-${{ matrix.jdk }}-${{ matrix.os }}
+    name: ${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         os: [ macos-latest, windows-latest ]
-        jdk: [ 8 ]
-        impl: [ hotspot ]
+        jdk-distribution: [ temurin ]
+        jdk-version: [ 8 ]
     steps:
       - name: Configure runner - Linux
         if: contains(matrix.os, 'macos')
@@ -32,16 +32,16 @@ jobs:
           echo '127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4' > %SystemRoot%\System32\drivers\etc\hosts
           echo '::1         localhost localhost.localdomain localhost6 localhost6.localdomain6' >> %SystemRoot%\System32\drivers\etc\hosts
         shell: cmd
-      - uses: actions/checkout@v2
-      - name: Set up JDK ${{ matrix.jdk }}
-        uses: AdoptOpenJDK/install-jdk@v1
+      - uses: actions/checkout@v3
+      - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
+        uses: actions/setup-java@v3
         with:
-          version: ${{ matrix.jdk }}
-          impl: ${{ matrix.impl }}
+          distribution: ${{ matrix.jdk-distribution }}
+          java-version: ${{ matrix.jdk-version }}
       - name: Run Tests
         run: mvn -ntp -U -B -fae clean install
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: surefire-reports-${{ matrix.openjdk}}-${{ matrix.jdk }}-${{ matrix.os }}
+          name: surefire-${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
           path: '**/surefire-reports/*.txt'
