@@ -153,7 +153,7 @@ the above dependencies are already available as JBoss modules, and should not be
             <dependency>
                 <groupId>org.jberet</groupId>
                 <artifactId>jberet-se-bom</artifactId>
-                <version>2.0.2.Final-SNAPSHOT</version>
+                <version>2.1.2.Final-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
