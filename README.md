@@ -29,13 +29,13 @@ Increase `ulimit` to avoid such errors. For example,
     ulimit -u 2048add
 
 #### JBeret Modules:
-* [jberet-core](https://github.com/jberet/jsr352/tree/master/jberet-core): core batch runtime engine
-* [jberet-se](https://github.com/jberet/jsr352/tree/master/jberet-se): impl classes specific to Java SE runtime environment
+* [jberet-core](https://github.com/jberet/jsr352/tree/main/jberet-core): core batch runtime engine
+* [jberet-se](https://github.com/jberet/jsr352/tree/main/jberet-se): impl classes specific to Java SE runtime environment
 * [jberet-support](https://github.com/jberet/jberet-support): a collection of reusable batch readers and writers (e.g., CSV, fixed length, Excel, Json, XML, Mongo, JDBC, JMS, HornetQ, PDF, etc) for batch applications, and JNDI support
 * [jberet-rest-api](https://github.com/jberet/jberet-rest): REST API for batch job management
 * [jberet-ui](https://github.com/jberet/jberet-ui): front-end UI web app for batch job management
-* [jberet-se-bom](https://github.com/jberet/jsr352/tree/master/jberet-se-bom): a maven BOM to encapsulate all the dependencies required by JBeret Java SE.
-* [test-apps](https://github.com/jberet/jsr352/tree/master/test-apps): test applications
+* [jberet-se-bom](https://github.com/jberet/jsr352/tree/main/jberet-se-bom): a maven BOM to encapsulate all the dependencies required by JBeret Java SE.
+* [test-apps](https://github.com/jberet/jsr352/tree/main/test-apps): test applications
 * [tck-porting-impl](https://github.com/jberet/jberet-tck-porting): support running [Jakarta Batch TCK](https://jakarta.ee/specifications/batch/) with JBeret in Java SE
 * [wildfly-jberet-samples](https://github.com/jberet/jberet-wildfly-samples): Sample batch processing apps that can be deployed to WildFly or JBoss EAP 7
 * [quarkus-jberet](https://github.com/quarkiverse/quarkus-jberet): The Quarkus JBeret Extension adds support for Jakarta Batch applications
@@ -57,7 +57,7 @@ Increase `ulimit` to avoid such errors. For example,
 * Download JBeret jars and distro zip from [JBoss.org nexus](https://repository.jboss.org/nexus/index.html#nexus-search;quick~jberet)
 
 #### Batch sample & test applications:
-  - <https://github.com/chengfang/wildfly-samples/tree/master/jberet>, web apps that demonstrate the following:
+  - <https://github.com/jberet/jberet-wildfly-samples>, web apps that demonstrate the following:
     + JsonItemReader, JsonItemWriter
     + CsvItemReader, CsvItemWriter
     + XmlItemReader, XmlItemWriter
@@ -66,7 +66,7 @@ Increase `ulimit` to avoid such errors. For example,
     + JNDI lookup of MongoClient in WildFly
     + job xml files showing the use of various reader/writer configuration properties
     + jberet-support module can be installed in WildFly and referenced by multiple apps via either MANIFEST.MF or jboss-deployment-structure.xml
-  - <https://github.com/jberet/jsr352/tree/master/test-apps>
+  - <https://github.com/jberet/jsr352/tree/main/test-apps>
     + test apps running in Java SE environment to verify core batch requirements
     + test apps running in Java SE environment to verify additional JBeret features (inheritance, scripting support, infinispan job repository, etc)
 
