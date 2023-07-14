@@ -82,7 +82,7 @@
         <version.jakarta.xml.ws-api>4.0.0</version.jakarta.xml.ws-api>
 
         <version.jakarta.jms-api>3.0.0</version.jakarta.jms-api>
-        <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>1.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
+        <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>2.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
         <version.io.netty>4.1.42.Final</version.io.netty>
 
         <version.jakarta.validation-api>3.0.0</version.jakarta.validation-api>
