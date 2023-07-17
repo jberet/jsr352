@@ -13,7 +13,7 @@ jobs:
   build-test-matrix:
     name: ${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -21,17 +21,6 @@ jobs:
         jdk-distribution: [ temurin ]
         jdk-version: [ 8 ]
     steps:
-      - name: Configure runner - Linux
-        if: contains(matrix.os, 'macos')
-        run: |
-          sudo bash -c "echo '127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4' > /etc/hosts"
-          sudo bash -c "echo '::1         localhost localhost.localdomain localhost6 localhost6.localdomain6' >> /etc/hosts"
-      - name: Configure Runner - Windows
-        if: contains(matrix.os, 'windows')
-        run: |
-          echo '127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4' > %SystemRoot%\System32\drivers\etc\hosts
-          echo '::1         localhost localhost.localdomain localhost6 localhost6.localdomain6' >> %SystemRoot%\System32\drivers\etc\hosts
-        shell: cmd
       - uses: actions/checkout@v3
       - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
         uses: actions/setup-java@v3
@@ -39,7 +28,7 @@ jobs:
           distribution: ${{ matrix.jdk-distribution }}
           java-version: ${{ matrix.jdk-version }}
       - name: Run Tests
-        run: mvn -ntp -U -B -fae clean install
+        run: mvn -ntp -U -B -fae clean verify
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
