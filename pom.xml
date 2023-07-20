@@ -81,7 +81,7 @@
         <version.jakarta.xml.bind-api>4.0.0</version.jakarta.xml.bind-api>
         <version.jakarta.xml.ws-api>4.0.0</version.jakarta.xml.ws-api>
 
-        <version.jakarta.jms-api>3.0.0</version.jakarta.jms-api>
+        <version.jakarta.jms-api>3.1.0</version.jakarta.jms-api>
         <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>2.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
         <version.io.netty>4.1.94.Final</version.io.netty>
 
