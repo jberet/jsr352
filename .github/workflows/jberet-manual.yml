@@ -1,0 +1,61 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Manual Unit Tests
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: 'OS'
+        required: false
+        default: 'ubuntu-latest'
+        type: choice
+        options:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+      jdk-distribution:
+        description: 'JDK Distribution'
+        required: false
+        default: 'temurin'
+        type: choice
+        options:
+          - temurin
+          - semeru
+          - microsoft
+          - oracle
+          - zulu
+          - corretto
+          - liberica
+      jdk-version:
+        description: 'JDK Version'
+        required: false
+        default: '11'
+        type: choice
+        options:
+          - 8
+          - 11
+          - 17
+
+jobs:
+  build-test:
+    name: ${{ inputs.jdk-distribution}}-${{ inputs.jdk-version }}-${{ inputs.os }}
+    runs-on: ${{ inputs.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK ${{ inputs.jdk-distribution }} ${{ inputs.jdk-version }}
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ inputs.jdk-distribution }}
+        java-version: ${{ inputs.jdk-version }}
+        cache: 'maven'
+    - name: Run Tests
+      run: mvn -ntp -U -B -fae clean verify
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: ${{ inputs.jdk-distribution }}-${{ inputs.jdk-version }}-${{ inputs.os }}
+        path: '**/surefire-reports/*.txt'
