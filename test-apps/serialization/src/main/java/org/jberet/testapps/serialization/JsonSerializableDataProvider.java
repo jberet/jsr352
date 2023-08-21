@@ -12,8 +12,8 @@ package org.jberet.testapps.serialization;
 
 import org.jberet.spi.SerializableDataProvider;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import java.io.Serializable;
 
 public class JsonSerializableDataProvider implements SerializableDataProvider {
