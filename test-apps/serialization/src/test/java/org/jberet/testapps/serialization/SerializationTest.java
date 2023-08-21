@@ -14,7 +14,7 @@ import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbBuilder;
 
 public class SerializationTest extends AbstractIT {
     @Test
