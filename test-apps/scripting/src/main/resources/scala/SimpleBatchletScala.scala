@@ -20,4 +20,4 @@ println("stepName: " + stepContext1.getStepName())
 val testName: String = batchProperties1.get("testName").asInstanceOf[String]
 jobContext1.setExitStatus(testName)
 
-return testName;
+testName
