@@ -21,7 +21,7 @@ jobs:
         jdk-distribution: [ temurin ]
         jdk-version: [ 8 ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
         uses: actions/setup-java@v3
         with:
