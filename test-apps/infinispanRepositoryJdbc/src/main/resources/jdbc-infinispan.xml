@@ -35,7 +35,7 @@ SPDX-License-Identifier: EPL-2.0
                                      username="sa" driver="org.h2.Driver"/>
                     <jdbc:string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
-                        <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
+                        <jdbc:data-column name="DATA_COLUMN" type="BINARY LARGE OBJECT"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
                         <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
@@ -50,7 +50,7 @@ SPDX-License-Identifier: EPL-2.0
                                      username="sa" driver="org.h2.Driver"/>
                     <jdbc:string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
-                        <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
+                        <jdbc:data-column name="DATA_COLUMN" type="BINARY LARGE OBJECT"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
                         <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
@@ -65,7 +65,7 @@ SPDX-License-Identifier: EPL-2.0
                                      username="sa" driver="org.h2.Driver"/>
                     <jdbc:string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
-                        <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
+                        <jdbc:data-column name="DATA_COLUMN" type="BINARY LARGE OBJECT"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
                         <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
@@ -80,7 +80,7 @@ SPDX-License-Identifier: EPL-2.0
                                      username="sa" driver="org.h2.Driver"/>
                     <jdbc:string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
-                        <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
+                        <jdbc:data-column name="DATA_COLUMN" type="BINARY LARGE OBJECT"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
                         <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
@@ -96,7 +96,7 @@ SPDX-License-Identifier: EPL-2.0
                                      username="sa" driver="org.h2.Driver"/>
                     <jdbc:string-keyed-table drop-on-exit="false" create-on-start="true" prefix="JBERET_ISPN">
                         <jdbc:id-column name="ID_COLUMN" type="VARCHAR(255)"/>
-                        <jdbc:data-column name="DATA_COLUMN" type="BINARY"/>
+                        <jdbc:data-column name="DATA_COLUMN" type="BINARY LARGE OBJECT"/>
                         <jdbc:timestamp-column name="TIMESTAMP_COLUMN" type="BIGINT"/>
                         <jdbc:segment-column name="SEGMENT_COLUMN" type="BIGINT"/>
                     </jdbc:string-keyed-table>
