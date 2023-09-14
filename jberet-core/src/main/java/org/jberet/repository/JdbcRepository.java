@@ -146,11 +146,23 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             this.dbUrl = dbUrl;
             final String dbUser = configProperties.getProperty(DB_USER_KEY);
             if (dbUser != null) {
-                dbProperties.setProperty("user", dbUser.trim());
+                if (dbUser.startsWith("${")){
+                    final String dbPasswordFromEnvVar = parseValuefromEnvVariables(dbUser);
+                    dbProperties.setProperty("user", dbPasswordFromEnvVar);
+                }
+                else {
+                    dbProperties.setProperty("user", dbUser.trim());
+                }
             }
             final String dbPassword = configProperties.getProperty(DB_PASSWORD_KEY);
             if (dbPassword != null) {
-                dbProperties.setProperty("password", dbPassword.trim());
+                if (dbPassword.startsWith("${")){
+                    final String dbPasswordFromEnvVar = parseValuefromEnvVariables(dbPassword);
+                    dbProperties.setProperty("password", dbPasswordFromEnvVar);
+                }
+                else {
+                    dbProperties.setProperty("password", dbPassword.trim());
+                }
             }
             final String s = configProperties.getProperty(DB_PROPERTIES_KEY);
             if (s != null) {
@@ -1236,5 +1248,20 @@ public final class JdbcRepository extends AbstractPersistentRepository {
 
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    /*
+    This method will take the raw value given in jberet.properties file such as
+    for ex. ${ENV_VAR_NAME:default_value} and return the value for the corresponding
+    Environment variable name given (eg. ENV_VAR_NAME from example) if it exists or
+    the default value (e.g default_value from example)
+     */
+    private String parseValuefromEnvVariables(String rawValue){
+        String[] valueList = rawValue.split(":",2);
+        String valueFromEnvVariable = System.getenv(valueList[0].replace("${","").trim());
+        if (valueFromEnvVariable == null){
+            return valueList[1].replace("}","").trim();
+        }
+        return valueFromEnvVariable;
     }
 }
