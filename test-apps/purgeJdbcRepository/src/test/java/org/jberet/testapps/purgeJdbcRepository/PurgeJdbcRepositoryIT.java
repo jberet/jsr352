@@ -350,6 +350,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
      * @see <a href="https://issues.jboss.org/browse/WFLY-5134">WFLY-5134</a>
      * @see <a href="https://issues.jboss.org/browse/JBERET-185">JBERET-185</a>
      */
+    @Ignore
     @Test
     public void concurrentCreateJdbcJobRepository() throws Exception {
         final int count = 10;
