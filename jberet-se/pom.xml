@@ -25,6 +25,10 @@ SPDX-License-Identifier: EPL-2.0
     <name>jberet-se</name>
     <description>Jakarta Batch implementation classes specific to Java SE environment</description>
 
+    <properties>
+        <powermock.version>2.0.2</powermock.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.jberet</groupId>
@@ -70,6 +74,18 @@ SPDX-License-Identifier: EPL-2.0
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito2</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

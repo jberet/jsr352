@@ -146,23 +146,11 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             this.dbUrl = dbUrl;
             final String dbUser = configProperties.getProperty(DB_USER_KEY);
             if (dbUser != null) {
-                if (dbUser.startsWith("${")){
-                    final String dbPasswordFromEnvVar = parseValuefromEnvVariables(dbUser);
-                    dbProperties.setProperty("user", dbPasswordFromEnvVar);
-                }
-                else {
-                    dbProperties.setProperty("user", dbUser.trim());
-                }
+                dbProperties.setProperty("user", dbUser.trim());
             }
             final String dbPassword = configProperties.getProperty(DB_PASSWORD_KEY);
             if (dbPassword != null) {
-                if (dbPassword.startsWith("${")){
-                    final String dbPasswordFromEnvVar = parseValuefromEnvVariables(dbPassword);
-                    dbProperties.setProperty("password", dbPasswordFromEnvVar);
-                }
-                else {
-                    dbProperties.setProperty("password", dbPassword.trim());
-                }
+                dbProperties.setProperty("password", dbPassword.trim());
             }
             final String s = configProperties.getProperty(DB_PROPERTIES_KEY);
             if (s != null) {

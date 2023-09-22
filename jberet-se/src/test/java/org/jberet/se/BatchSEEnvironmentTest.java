@@ -20,6 +20,7 @@ import jakarta.batch.operations.BatchRuntimeException;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Before;
 
 import static org.jberet.se.BatchSEEnvironment.THREAD_FACTORY;
 import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_ALLOW_CORE_THREAD_TIMEOUT;
@@ -32,8 +33,22 @@ import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_REJECTION_POLICY;
 import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_TYPE;
 import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_TYPE_CONFIGURED;
 import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_TYPE_FIXED;
+import static org.powermock.api.mockito.PowerMockito.when;
 
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.wildfly.security.manager.WildFlySecurityManager;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({WildFlySecurityManager.class})
 public class BatchSEEnvironmentTest {
+
+    @Before
+    public void setUp(){
+        System.setProperty("SOME_USERNAME", "USERNAME");
+    }
     private BatchSEEnvironment batchEnvironment = new BatchSEEnvironment();
 
     @Test
@@ -158,6 +173,27 @@ public class BatchSEEnvironmentTest {
         Assert.assertEquals(allowCoreThreadTimeout, threadPoolExecutor.allowsCoreThreadTimeOut());
         Assert.assertEquals(rejectionHandlerClass, threadPoolExecutor.getRejectedExecutionHandler().getClass());
         return threadPoolExecutor;
+    }
+
+    @Test
+    public void testResolveEnvironmentVariables() {
+
+        PowerMockito.mockStatic(WildFlySecurityManager.class);
+        when(WildFlySecurityManager.getEnvPropertyPrivileged("MOCK", "Mock")).thenReturn("USERNAME1");
+
+        Assert.assertEquals(System.getProperty("SOME_USERNAME"), "USERNAME");
+        BatchSEEnvironment testBatchEnvironment = new BatchSEEnvironment();
+        Properties loadedPropeties = testBatchEnvironment.getBatchConfigurationProperties();
+        Assert.assertEquals("USERNAME1", loadedPropeties.getProperty("db-user"));
+//        Assert.assertEquals(loadedPropeties.getProperty("db-password"), "DEFAULT_PASSWORD");
+
+    }
+
+    @Test
+    public void testResolveAttribute() {
+        Assert.assertEquals(BatchSEEnvironment.resolveAttribute("CLEAR_TEXT_USER_OR_PASS"), "CLEAR_TEXT_USER_OR_PASS");
+        Assert.assertEquals(BatchSEEnvironment.resolveAttribute("${CLEAR_TEXT_USER_OR_PASS"), "${CLEAR_TEXT_USER_OR_PASS");
+        Assert.assertEquals(BatchSEEnvironment.resolveAttribute("${ONLY_ENV_NAME_WO_DEFAULT}"), null);
     }
 
     static class SimpleThreadFactory implements ThreadFactory {

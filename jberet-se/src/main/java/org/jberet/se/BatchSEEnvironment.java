@@ -22,6 +22,9 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 import jakarta.transaction.TransactionManager;
 
 import org.jberet.repository.JobRepository;
@@ -35,6 +38,9 @@ import org.jberet.spi.JobXmlResolver;
 import org.jberet.tools.ChainedJobXmlResolver;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.jberet.tx.LocalTransactionManager;
+
+import org.wildfly.security.manager.WildFlySecurityManager;
+
 
 /**
  * Represents the Java SE batch runtime environment and its services.
@@ -87,6 +93,14 @@ public final class BatchSEEnvironment implements BatchEnvironment {
                     //ignore
                 }
             }
+
+            try {
+                this.resolveEnvironmentVariables(this.configProperties);
+            } catch (Exception e){
+                System.out.println("Exception is " + e);
+                throw SEBatchMessages.MESSAGES.failedToResolveConfig(e);
+            }
+
         } else {
             SEBatchLogger.LOGGER.useDefaultJBeretConfig(CONFIG_FILE_NAME);
         }
@@ -101,6 +115,31 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         };
         final ServiceLoader<JobXmlResolver> userJobXmlResolvers = ServiceLoader.load(JobXmlResolver.class, getClassLoader());
         this.jobXmlResolver = new ChainedJobXmlResolver(userJobXmlResolvers, DEFAULT_JOB_XML_RESOLVERS);
+    }
+
+    public static void resolveEnvironmentVariables(Properties configProperties){
+        String[] attributeNames = new String[]{"db-user", "db-password"};
+        for (String attribute:attributeNames){
+            configProperties.setProperty(attribute, resolveAttribute(configProperties.getProperty(attribute)));
+        }
+    }
+
+    public static String resolveAttribute(String rawValue){
+        Pattern configValuePattern = Pattern.compile("^\\$\\{(.+?)\\}$");
+        Matcher matcher = configValuePattern.matcher(rawValue);
+
+        if (!matcher.find()){
+            return rawValue;
+        }
+
+        String extractedValue = matcher.group(1);
+            if (extractedValue.contains(":")){
+                String[] splitValues = extractedValue.split(":");
+                return WildFlySecurityManager.getEnvPropertyPrivileged(splitValues[0], splitValues[1]);
+            }
+            else{
+                return WildFlySecurityManager.getEnvPropertyPrivileged(extractedValue, "");
+            }
     }
 
     @Override
