@@ -35,7 +35,4 @@ public interface SEBatchMessages {
 
     @Message(id = 50004, value = "The job %s did not complete with batch status %s, exit status %s.")
     BatchRuntimeException jobDidNotComplete(String jobId, BatchStatus batchStatus, String exitStatus);
-
-    @Message(id = 50005, value = "Exception occurred while trying to resolve configProperty values: ")
-    BatchRuntimeException failedToResolveConfig(@Cause Throwable th);
 }

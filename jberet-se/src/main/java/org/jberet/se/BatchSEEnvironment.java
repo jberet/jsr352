@@ -94,12 +94,8 @@ public final class BatchSEEnvironment implements BatchEnvironment {
                 }
             }
 
-            try {
-                this.resolveEnvironmentVariables(this.configProperties);
-            } catch (Exception e){
-                System.out.println("Exception is " + e);
-                throw SEBatchMessages.MESSAGES.failedToResolveConfig(e);
-            }
+            this.resolveEnvironmentVariables(this.configProperties);
+
 
         } else {
             SEBatchLogger.LOGGER.useDefaultJBeretConfig(CONFIG_FILE_NAME);
@@ -117,14 +113,20 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         this.jobXmlResolver = new ChainedJobXmlResolver(userJobXmlResolvers, DEFAULT_JOB_XML_RESOLVERS);
     }
 
-    public static void resolveEnvironmentVariables(Properties configProperties){
+    void resolveEnvironmentVariables(Properties configProperties){
         String[] attributeNames = new String[]{"db-user", "db-password"};
         for (String attribute:attributeNames){
-            configProperties.setProperty(attribute, resolveAttribute(configProperties.getProperty(attribute)));
+
+            String rawValue = configProperties.getProperty(attribute);
+            try{
+                configProperties.setProperty(attribute, this.resolveAttribute(rawValue));
+            } catch (Exception e){
+                SEBatchLogger.LOGGER.warnAboutConfigValResolution(attribute, e.toString());
+            }
         }
     }
 
-    public static String resolveAttribute(String rawValue){
+    String resolveAttribute(String rawValue){
         Pattern configValuePattern = Pattern.compile("^\\$\\{(.+?)\\}$");
         Matcher matcher = configValuePattern.matcher(rawValue);
 

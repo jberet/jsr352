@@ -75,18 +75,6 @@ SPDX-License-Identifier: EPL-2.0
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -99,6 +87,9 @@ SPDX-License-Identifier: EPL-2.0
                     <reuseForks>false</reuseForks>
                     <!-- This will work for now as Batlet1Test needs to run before JobDataTest, but this should be reworked -->
                     <runOrder>alphabetical</runOrder>
+                    <systemPropertyVariables>
+                        <SOME_USER>SOME_some</SOME_USER>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

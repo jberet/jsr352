@@ -34,4 +34,8 @@ public interface SEBatchLogger {
     @LogMessage(level = Logger.Level.ERROR)
     void usage(String[] args);
 
+    @Message(id = 50502,
+    value = "Following Exception Occured while resolving Config Values for variable %s, using raw values from Config file, Exception is as follows %s")
+    @LogMessage(level = Logger.Level.WARN)
+    void warnAboutConfigValResolution(String attribute, String e);
 }
