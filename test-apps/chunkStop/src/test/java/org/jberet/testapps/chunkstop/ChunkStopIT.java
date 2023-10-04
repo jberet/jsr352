@@ -40,7 +40,7 @@ public class ChunkStopIT extends AbstractIT {
 
     @Test
     public void chunkStopRestart() throws Exception {
-        params.setProperty("writer.sleep.time", "500");
+        params.setProperty("writer.sleep.time", "1000");
         params.setProperty("restartable", Boolean.TRUE.toString());
         startJob(jobXml);
         jobOperator.stop(jobExecutionId);
