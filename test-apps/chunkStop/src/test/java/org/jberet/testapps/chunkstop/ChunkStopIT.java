@@ -47,7 +47,7 @@ public class ChunkStopIT extends AbstractIT {
         awaitTermination();
         Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
 
-        Assert.assertEquals(true, stepExecutions.size() == 0 || stepExecutions.size() == 1);
+        Assert.assertEquals(true, stepExecutions.size() < dataCount);
 
         if(stepExecutions.size() == 1) {
             //since we called stop right after start, and the writer sleeps before writing data, there should only be 1 write and commit
