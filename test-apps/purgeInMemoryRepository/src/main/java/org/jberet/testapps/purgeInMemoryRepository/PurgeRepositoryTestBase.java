@@ -35,7 +35,7 @@ import org.jberet.spi.PropertyKey;
 import org.jberet.testapps.common.AbstractIT;
 
 public abstract class PurgeRepositoryTestBase extends AbstractIT {
-    protected static final long purgeSleepMillis = 2000;
+    protected static final long purgeSleepMillis = 2000 * 2;
     protected static final String prepurgeJobName = "prepurge";
     protected static final String prepurge2JobName = "prepurge2";
     protected static final String prepurgeAndPrepurge2JobNames = "prepurge, prepurge2";

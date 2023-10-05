@@ -61,6 +61,9 @@ public class IntegerArrayReader extends IntegerArrayReaderWriterProcessorBase im
         for (int i = 0; i < dataCount; i++) {
             data[i] = i;
         }
+
+        System.out.printf("init data: %s%n", Arrays.toString(data));
+
         //position the cursor according to partition start
         cursor = partitionStart;
         System.out.printf("Partition start = %s, end = %s in %s%n", partitionStart, partitionEnd, this);

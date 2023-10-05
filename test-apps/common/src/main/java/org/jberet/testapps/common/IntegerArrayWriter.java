@@ -47,6 +47,7 @@ public class IntegerArrayWriter extends IntegerArrayReaderWriterProcessorBase im
         }
 
         if (writerSleepTime > 0) {
+            System.out.printf("writerSleepTime: %s millis%n", writerSleepTime);
             Thread.sleep(writerSleepTime);
         }
 
