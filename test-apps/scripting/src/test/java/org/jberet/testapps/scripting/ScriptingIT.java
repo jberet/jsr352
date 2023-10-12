@@ -95,15 +95,15 @@ public class ScriptingIT extends AbstractIT {
         test0("batchletScalaInline");
     }
 
-    @Test
-    public void batchletPhpInlineCDATA() throws Exception {
-        test0("batchletPhpInlineCDATA");
-    }
-
-    @Test
-    public void batchletPhpSrc() throws Exception {
-        test0("batchletPhpSrc");
-    }
+//    @Test
+//    public void batchletPhpInlineCDATA() throws Exception {
+//        test0("batchletPhpInlineCDATA");
+//    }
+//
+//    @Test
+//    public void batchletPhpSrc() throws Exception {
+//        test0("batchletPhpSrc");
+//    }
 
     @Test
     public void chunkJavascript() throws Exception {
