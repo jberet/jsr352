@@ -640,9 +640,13 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
                     stepOrPartitionExecution.setReaderCheckpointInfo(itemReader.checkpointInfo());
                     stepOrPartitionExecution.setWriterCheckpointInfo(itemWriter.checkpointInfo());
 
-                    //usually the transaction should not be rolled back upon skippable exception, but if the transaction
-                    //is marked rollback only by other parties, it's no longer usable and so roll it back.
-                    if (tm.getStatus() == Status.STATUS_MARKED_ROLLBACK || tm.getStatus() == Status.STATUS_ROLLEDBACK) {
+                    //If the transaction is marked rollback only by other parties, it's no longer usable so roll it back.
+                    //
+                    //JBERET-597 (skippable exception thrown in ItemWriter triggers new chunk within the old transaction)
+                    //The skippable exception is from ItemWriter so the current chunk will be skipped.
+                    //There is no reason to keep active transactions as they may linger around after this skipped chunk.
+                    if (tm.getStatus() == Status.STATUS_ACTIVE ||
+                            tm.getStatus() == Status.STATUS_MARKED_ROLLBACK || tm.getStatus() == Status.STATUS_ROLLEDBACK) {
                         tm.rollback();
                     }
 
