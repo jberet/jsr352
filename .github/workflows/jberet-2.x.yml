@@ -9,6 +9,8 @@ on:
       - main
       - 2.*
     types: [ opened, synchronize, reopened, ready_for_review ]
+  push:
+    branches: [ main ]
 
 jobs:
   build-test-matrix:
