@@ -10,6 +10,7 @@
 
 package org.jberet.se;
 
+import java.lang.reflect.Field;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -18,6 +19,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import jakarta.batch.operations.BatchRuntimeException;
 
+import org.jberet.se.test.FailTaskSubmissionListener;
+import org.jberet.spi.JobTask;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,6 +37,7 @@ import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_TYPE_CONFIGURED;
 import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_TYPE_FIXED;
 
 public class BatchSEEnvironmentTest {
+	
     private BatchSEEnvironment batchEnvironment = new BatchSEEnvironment();
 
     @Test
@@ -139,6 +143,36 @@ public class BatchSEEnvironmentTest {
         } catch (BatchRuntimeException e) {
             System.out.printf("Got the expected %s%n", e);
         }
+    }
+    
+    @Test
+    public void verifyTaskSubmissionListener() throws Exception {
+    	
+    	final JobTask task = new JobTask() {
+			@Override
+			public void run() {
+				System.out.printf("Everything's fine%n");
+			}
+
+			@Override
+			public int getRequiredRemainingPermits() {
+				return 0;
+			}
+    	};
+    	
+    	final Field failTaskSubmissionListener = BatchSEEnvironment.class.getDeclaredField("taskSubmissionListener");
+    	failTaskSubmissionListener.setAccessible(true);
+    	failTaskSubmissionListener.set(batchEnvironment, new FailTaskSubmissionListener());
+    	
+       	try {
+	    	batchEnvironment.submitTask(task);
+	    	failTaskSubmissionListener.set(batchEnvironment, null);
+	    	Assert.fail("Expecting RuntimeException, got a correct execution");
+    	} catch (BatchRuntimeException e) {
+    		System.out.printf("Got the expected %s%n", e);
+    	}
+       	
+       	failTaskSubmissionListener.set(batchEnvironment, null);
     }
 
     private ThreadPoolExecutor verifyThreadPool(final int coreSize,
