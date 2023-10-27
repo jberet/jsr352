@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import jakarta.batch.operations.BatchRuntimeException;
 
+import org.jberet.repository.JdbcRepository;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -139,6 +140,46 @@ public class BatchSEEnvironmentTest {
         } catch (BatchRuntimeException e) {
             System.out.printf("Got the expected %s%n", e);
         }
+    }
+
+    @Test
+    public void testResolveDbProps() {
+        BatchSEEnvironment batchSEObject = new BatchSEEnvironment();
+            Assert.assertEquals("foopass",
+                batchSEObject
+                        .getBatchConfigurationProperties()
+                        .getProperty(org.jberet.repository.JdbcRepository.DB_PASSWORD_KEY));
+
+        Assert.assertEquals("foouser",
+                batchSEObject
+                        .getBatchConfigurationProperties()
+                        .getProperty(JdbcRepository.DB_USER_KEY));
+    }
+
+    @Test
+    public void testPropParsings() {
+        String p1 = "${FOO:bar}";
+        String p2 = "${FOO}";
+        String p3 = "${BAR:defaultVal}";
+        String p4 = "${INVALID";
+        String p5 = "$INVALID}";
+        String p6 = "${{INVALID}";
+        String p7 = "${INVALID}}";
+        String p8 = "${BAR:}";
+        String p9 = "${}";
+        String p10 = "${BAR}";
+
+
+        Assert.assertEquals("foo", BatchSEEnvironment.parseProp(p1));
+        Assert.assertEquals("foo", BatchSEEnvironment.parseProp(p2));
+        Assert.assertEquals("defaultVal", BatchSEEnvironment.parseProp(p3));
+        Assert.assertEquals("${INVALID", BatchSEEnvironment.parseProp(p4));
+        Assert.assertEquals("$INVALID}", BatchSEEnvironment.parseProp(p5));
+        Assert.assertEquals("${{INVALID}", BatchSEEnvironment.parseProp(p6));
+        Assert.assertEquals("${INVALID}}", BatchSEEnvironment.parseProp(p7));
+        Assert.assertEquals("", BatchSEEnvironment.parseProp(p8));
+        Assert.assertEquals("${}", BatchSEEnvironment.parseProp(p9));
+        Assert.assertNull(BatchSEEnvironment.parseProp(p10));
     }
 
     private ThreadPoolExecutor verifyThreadPool(final int coreSize,

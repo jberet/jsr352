@@ -22,6 +22,9 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import jakarta.transaction.TransactionManager;
 
 import org.jberet.repository.JobRepository;
@@ -35,6 +38,7 @@ import org.jberet.spi.JobXmlResolver;
 import org.jberet.tools.ChainedJobXmlResolver;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.jberet.tx.LocalTransactionManager;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
  * Represents the Java SE batch runtime environment and its services.
@@ -58,6 +62,10 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     private final JobXmlResolver jobXmlResolver;
     private final JobExecutor executor;
 
+    private static final String PROP_PATTERN_STR = "\\$\\{([0-9a-zA-Z_\\-]+)(:([0-9a-zA-Z_\\-]*))?\\}";
+
+    private static final Pattern PROP_PATTERN = Pattern.compile(PROP_PATTERN_STR);
+
     static final String THREAD_POOL_TYPE = "thread-pool-type";
     static final String THREAD_POOL_TYPE_CACHED = "Cached";
     static final String THREAD_POOL_TYPE_FIXED = "Fixed";
@@ -72,12 +80,29 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     static final String THREAD_POOL_REJECTION_POLICY = "thread-pool-rejection-policy";
     static final String THREAD_FACTORY = "thread-factory";
 
+    static final String DB_USER_KEY = "db-user";
+    static final String DB_PASSWORD_KEY = "db-password";
+
     public BatchSEEnvironment() {
         configProperties = new Properties();
         final InputStream configStream = getClassLoader().getResourceAsStream(CONFIG_FILE_NAME);
         if (configStream != null) {
             try {
                 configProperties.load(configStream);
+                if (configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY).equals(REPOSITORY_TYPE_JDBC) ||
+                    configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY).equals(REPOSITORY_TYPE_MONGODB)) {
+
+                    String dbUser = configProperties.getProperty(DB_USER_KEY);
+                    String dbPassword = configProperties.getProperty(DB_PASSWORD_KEY);
+
+                    if (dbUser != null) {
+                        configProperties.setProperty(DB_USER_KEY, parseProp(dbUser));
+                    }
+
+                    if (dbPassword != null) {
+                        configProperties.setProperty(DB_PASSWORD_KEY, parseProp(dbPassword));
+                    }
+                }
             } catch (final IOException e) {
                 throw SEBatchMessages.MESSAGES.failToLoadConfig(e, CONFIG_FILE_NAME);
             } finally {
@@ -101,6 +126,36 @@ public final class BatchSEEnvironment implements BatchEnvironment {
         };
         final ServiceLoader<JobXmlResolver> userJobXmlResolvers = ServiceLoader.load(JobXmlResolver.class, getClassLoader());
         this.jobXmlResolver = new ChainedJobXmlResolver(userJobXmlResolvers, DEFAULT_JOB_XML_RESOLVERS);
+    }
+
+
+    /**
+     * This method will parse the value like: {@code ${DB_PASS:xyz}}. It will try to fetch the value of the
+     * environment variable {@code DB_PASS} firstly, and if it does not exist, the method will return the
+     * default value {@code xyz}.
+     *
+     * @param propVal The property value to parse.
+     * @return Get the parsed value of the {@code propVal}.
+     */
+    static String parseProp(String propVal) {
+        Matcher matcher = PROP_PATTERN.matcher(propVal);
+        if (matcher.matches()) {
+            matcher.reset();
+            if (matcher.find()) {
+                String prop = matcher.group(1);
+                String defaultVal = matcher.group(3);
+                String retVal = WildFlySecurityManager.getEnvPropertyPrivileged(prop, defaultVal);
+                if (retVal == null && defaultVal != null) {
+                    return defaultVal;
+                } else {
+                    return retVal;
+                }
+            } else {
+                return propVal;
+            }
+        } else {
+            return propVal;
+        }
     }
 
     @Override
