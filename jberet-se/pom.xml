@@ -83,6 +83,10 @@ SPDX-License-Identifier: EPL-2.0
                     <reuseForks>false</reuseForks>
                     <!-- This will work for now as Batlet1Test needs to run before JobDataTest, but this should be reworked -->
                     <runOrder>alphabetical</runOrder>
+                    <environmentVariables>
+                        <DB_PASS>foopass</DB_PASS>
+                        <FOO>foo</FOO>
+                    </environmentVariables>
                 </configuration>
             </plugin>
         </plugins>
