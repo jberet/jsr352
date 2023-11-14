@@ -94,7 +94,7 @@
 
         <version.org.wildfly.security.elytron>2.2.2.Final</version.org.wildfly.security.elytron>
 
-        <version.jakarta.ws.rs-api>3.0.0</version.jakarta.ws.rs-api>
+        <version.jakarta.ws.rs-api>3.1.0</version.jakarta.ws.rs-api>
         <version.jakarta.ejb-api>4.0.1</version.jakarta.ejb-api>
 
         <version.org.apache.camel>3.21.2</version.org.apache.camel>
