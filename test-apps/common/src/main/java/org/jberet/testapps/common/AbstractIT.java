@@ -90,13 +90,25 @@ abstract public class AbstractIT {
     }
 
     protected void startJob(final String jobXml) {
-        jobExecutionId = jobOperator.start(jobXml, params);
-        jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        try {
+            termLock.lock();
+            jobExecutionId = jobOperator.start(jobXml, params);
+            jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        } finally {
+            termLock.unlock();
+        }
+
     }
 
     protected void startJob(final Job job) {
-        jobExecutionId = jobOperator.start(job, params);
-        jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        try {
+            termLock.lock();
+            jobExecutionId = jobOperator.start(job, params);
+            jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
+        } finally {
+            termLock.unlock();
+        }
+
     }
 
     private ReentrantLock termLock = new ReentrantLock();
