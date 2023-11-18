@@ -144,6 +144,7 @@
         <module>jberet-se-bom</module>
         <module>test-apps</module>
         <module>jberet-feature-pack</module>
+        <module>test-deployment</module>
     </modules>
 
     <build>
