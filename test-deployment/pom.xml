@@ -17,6 +17,7 @@
 
     <properties>
         <jboss.home>${project.build.directory}/test-server/wildfly-${server.version}</jboss.home>
+        <server.version>${version.org.wildfly}</server.version>
     </properties>
 
     <modules>
@@ -30,7 +31,7 @@
 
     <groupId>org.jberet.test</groupId>
     <artifactId>test-deployment</artifactId>
-    <packaging>pom</packaging>
+    <packaging>war</packaging>
 
     <dependencies>
         <dependency>
