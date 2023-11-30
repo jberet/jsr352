@@ -111,9 +111,9 @@
                             <goal>build-feature-pack</goal>
                         </goals>
                         <phase>prepare-package</phase>
-<!--                        <configuration>-->
-<!--                            <fork-embedded>${galleon.fork.embedded}</fork-embedded>-->
-<!--                        </configuration>-->
+                        <configuration>
+                            <fork-embedded>${galleon.fork.embedded}</fork-embedded>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

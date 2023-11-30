@@ -26,12 +26,6 @@
             <default-configs inherit="false"/>
         </dependency>
     </transitive>
-    <dependencies>
-        <dependency group-id="org.jberet" artifact-id="galleon-preview-feature-pack" translate-to-fpl="true">
-            <name>org.jberet:galleon-preview-feature-pack</name>
-            <default-configs inherit="false"/>
-        </dependency>
-    </dependencies>
     <default-packages>
         <package name="modules.all"/>
     </default-packages>
