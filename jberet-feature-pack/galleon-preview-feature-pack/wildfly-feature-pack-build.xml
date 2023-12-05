@@ -21,7 +21,7 @@
         <dependency group-id="org.wildfly" artifact-id="wildfly-preview-feature-pack" translate-to-fpl="true">
             <name>org.wildfly:wildfly-preview-feature-pack</name>
             <packages inherit="true">
-                <exclude name="org.jberet"/>
+                <exclude name="org.wildfly.extension.batch.jberet"/>
             </packages>
             <default-configs inherit="false"/>
         </dependency>
