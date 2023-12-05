@@ -22,6 +22,7 @@
             <name>org.wildfly:wildfly-preview-feature-pack</name>
             <packages inherit="true">
                 <exclude name="org.wildfly.extension.batch.jberet"/>
+                <exclude name="org.jberet.jberet-core"/>
             </packages>
             <default-configs inherit="false"/>
         </dependency>

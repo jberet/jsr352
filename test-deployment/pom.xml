@@ -112,9 +112,9 @@
                 <configuration>
                     <provisioning-dir>${jboss.home}</provisioning-dir>
                     <offline>${galleon.offline}</offline>
-                    <galleon-options>
-                        <jboss-fork-embedded>${galleon.fork.embedded}</jboss-fork-embedded>
-                    </galleon-options>
+<!--                    <galleon-options>-->
+<!--                        <jboss-fork-embedded>${galleon.fork.embedded}</jboss-fork-embedded>-->
+<!--                    </galleon-options>-->
                     <feature-packs>
                         <feature-pack>
                             <groupId>org.wildfly</groupId>

@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+
+<tasks xmlns="urn:wildfly:wildfly-feature-pack-tasks:2.0">
+    <copy-artifact artifact="org.jberet:jberet-core" to-location="modules/system/layers/base/org/jberet/jberet-core/main/overridden/jberet-core-jar/"/>
+</tasks>
