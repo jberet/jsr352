@@ -6,8 +6,10 @@ name: JBeret
 on:
   pull_request:
     branches:
-      - 2.*
+      - main
     types: [ opened, synchronize, reopened, ready_for_review ]
+  push:
+    branches: [ main ]
 
 jobs:
   build-test-matrix:
@@ -19,7 +21,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
         jdk-distribution: [ temurin ]
-        jdk-version: [ 11 ]
+        jdk-version: [ '11', '17', '21' ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
