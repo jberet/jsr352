@@ -29,11 +29,13 @@ jobs:
         with:
           distribution: ${{ matrix.jdk-distribution }}
           java-version: ${{ matrix.jdk-version }}
-          cache: 'maven'
-      - name: Run Tests
-        run: mvn -ntp -U -B -fae clean verify
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: surefire-${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
-          path: '**/surefire-reports/*.txt'
+#          cache: 'maven'
+      - name: quick build
+        run: mvn install -DskipTests
+      - name: full build
+        run: mvn install
+#      - uses: actions/upload-artifact@v3
+#        if: failure()
+#        with:
+#          name: surefire-${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
+#          path: '**/surefire-reports/*.txt'
