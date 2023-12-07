@@ -1,0 +1,8 @@
+schemaVersion: "1.0.0"
+name: "jberet-manifest"
+id: "org.jberet:jberet-channel-manifest"
+description: "A JBeret Channel manifest for upgrading components."
+streams:
+  - groupId: "org.jberet"
+    artifactId: "jberet-core"
+    version: "${project.version}"
