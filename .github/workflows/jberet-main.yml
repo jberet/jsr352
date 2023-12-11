@@ -29,7 +29,7 @@ jobs:
         with:
           distribution: ${{ matrix.jdk-distribution }}
           java-version: ${{ matrix.jdk-version }}
-#          cache: 'maven'
+          cache: 'maven'
       - name: quick build
         run: mvn install -DskipTests
       - name: full build
