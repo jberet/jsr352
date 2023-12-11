@@ -31,14 +31,41 @@
     </parent>
 
     <artifactId>test-deployment</artifactId>
+    <packaging>war</packaging>
+
     <properties>
         <jboss.home>${project.build.directory}${file.separator}wildfly</jboss.home>
         <version.org.wildfly>30.0.1.Final</version.org.wildfly>
         <galleon.fork.embedded>true</galleon.fork.embedded>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <warName>test-deployment</warName>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
@@ -87,6 +114,50 @@
                                 </channel>
                             </channels>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <id>wildfly-start</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                            <goal>deploy</goal>
+                        </goals>
+                        <configuration>
+                            <filename>test-deployment.war</filename>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <phase>post-integration-test</phase>
+                        <id>wildfly-stop</id>
+                        <goals>
+                            <goal>shutdown</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*ITest*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <testClassesDirectory>${project.build.testOutputDirectory}</testClassesDirectory>
+                    <includes>
+                        <include>**/*ITest*</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
