@@ -1,15 +1,15 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: JBeret 1.x
+name: JBeret 1.4.x
 
 on:
   pull_request:
     branches:
-      - 1.4.*
+      - 1.4.x
     types: [ opened, synchronize, reopened, ready_for_review ]
   push:
-    branches: [ 1.4.* ]
+    branches: [ 1.4.x ]
 jobs:
   build-test-matrix:
     name: ${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
