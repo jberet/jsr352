@@ -6,9 +6,10 @@ name: JBeret 1.x
 on:
   pull_request:
     branches:
-      - 1.*
+      - 1.4.*
     types: [ opened, synchronize, reopened, ready_for_review ]
-
+  push:
+    branches: [ 1.4.* ]
 jobs:
   build-test-matrix:
     name: ${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
