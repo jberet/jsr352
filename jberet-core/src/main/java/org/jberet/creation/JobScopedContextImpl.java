@@ -26,6 +26,10 @@ public class JobScopedContextImpl implements Context {
     private JobScopedContextImpl() {
     }
 
+    public static JobScopedContextImpl getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public Class<? extends Annotation> getScope() {
         return JobScoped.class;
@@ -61,6 +65,10 @@ public class JobScopedContextImpl implements Context {
         return ArtifactCreationContext.getCurrentArtifactCreationContext().jobContext != null;
     }
 
+    public void destroy(Contextual<?> contextual) {
+        JobScopedContextImpl.ScopedInstance.destroy(getJobScopedBeans(), contextual);
+    }
+
     private ConcurrentMap<Contextual<?>, ScopedInstance<?>> getJobScopedBeans() {
         final JobContextImpl jobContext = ArtifactCreationContext.getCurrentArtifactCreationContext().jobContext;
         return jobContext.getScopedBeans();
@@ -75,15 +83,27 @@ public class JobScopedContextImpl implements Context {
             this.creationalContext = creationalContext;
         }
 
-        @SuppressWarnings("unchecked")
         public static void destroy(final ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> scopedBeans) {
-            if (scopedBeans.size() > 0) {
-                for (final Map.Entry<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> e : scopedBeans.entrySet()) {
-                    final Contextual<?> contextual = e.getKey();
-                    final ScopedInstance<?> value = e.getValue();
+            destroy(scopedBeans, null);
+        }
+
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public static void destroy(final ConcurrentMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> scopedBeans,
+                                   final Contextual<?> contextual) {
+            if (contextual == null) {
+                if (scopedBeans.size() > 0) {
+                    for (final Map.Entry<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>> e : scopedBeans.entrySet()) {
+                        final Contextual<?> key = e.getKey();
+                        final ScopedInstance<?> value = e.getValue();
+                        ((Contextual) key).destroy(value.instance, value.creationalContext);
+                    }
+                    scopedBeans.clear();
+                }
+            } else {
+                final ScopedInstance<?> value = scopedBeans.remove(contextual);
+                if (value != null) {
                     ((Contextual) contextual).destroy(value.instance, value.creationalContext);
                 }
-                scopedBeans.clear();
             }
         }
     }
