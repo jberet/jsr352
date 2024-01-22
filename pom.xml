@@ -64,7 +64,7 @@
         <version.com.fasterxml.jackson>2.16.1</version.com.fasterxml.jackson>
         <version.org.mongodb.mongo-java-driver>3.12.14</version.org.mongodb.mongo-java-driver>
 
-        <version.org.infinispan>14.0.21.Final</version.org.infinispan>
+        <version.org.infinispan>14.0.22.Final</version.org.infinispan>
         <version.org.jgroups>5.3.1.Final</version.org.jgroups>
         <version.org.apache.poi>4.1.2</version.org.apache.poi>
         <version.commons-codec>1.16.0</version.commons-codec>
