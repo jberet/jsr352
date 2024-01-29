@@ -1112,7 +1112,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             try {
                 return DriverManager.getConnection(dbUrl, dbProperties);
             } catch (final Exception e) {
-                throw BatchMessages.MESSAGES.failToObtainConnection(e, dbUrl, dbProperties);
+                throw BatchMessages.MESSAGES.failToObtainConnection(e, dbUrl, "<db props> masked");
             }
         }
     }
