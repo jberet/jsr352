@@ -128,6 +128,10 @@
         <!-- Modularized JDK support (various workarounds) - activated via profile -->
         <modular.jdk.args/>
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
+
+        <maven.wagon.http.ssl.insecure>true</maven.wagon.http.ssl.insecure>
+        <maven.wagon.http.ssl.allowall>true</maven.wagon.http.ssl.allowall>
+        <maven.wagon.http.ssl.ignore.validity.dates>true</maven.wagon.http.ssl.ignore.validity.dates>
     </properties>
 
     <modules>
