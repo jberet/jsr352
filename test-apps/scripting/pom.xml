@@ -42,10 +42,10 @@
             <artifactId>scala-compiler</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.caucho</groupId>
-            <artifactId>resin-quercus</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.caucho</groupId>-->
+<!--            <artifactId>resin-quercus</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.jboss.spec.javax.servlet</groupId>
             <artifactId>jboss-servlet-api_3.1_spec</artifactId>
@@ -70,10 +70,10 @@
     </dependencies>
 
     <repositories>
-        <repository>
-            <id>caucho-repository</id>
-            <url>https://caucho.com/m2/</url>
-        </repository>
+<!--        <repository>-->
+<!--            <id>caucho-repository</id>-->
+<!--            <url>https://caucho.com/m2/</url>-->
+<!--        </repository>-->
 
         <!-- R and renjin repo -->
         <repository>
