@@ -24,7 +24,7 @@ import org.jberet.job.model.JobElement;
 import org.jberet.job.model.Step;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ExceptionClassFilterTest {
     @Test

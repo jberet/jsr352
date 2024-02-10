@@ -18,7 +18,7 @@ import jakarta.batch.runtime.Metric;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
 import static org.jberet.testapps.chunkskipretry.ChunkListener1.after;

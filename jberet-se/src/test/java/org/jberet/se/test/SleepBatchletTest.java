@@ -21,7 +21,7 @@ import jakarta.batch.runtime.StepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SleepBatchletTest {
     private final JobOperator operator = BatchRuntime.getJobOperator();

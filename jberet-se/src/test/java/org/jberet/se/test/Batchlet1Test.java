@@ -23,7 +23,7 @@ import jakarta.batch.runtime.BatchStatus;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class Batchlet1Test {
     static final String tmpdir = System.getProperty("jberet.tmp.dir");

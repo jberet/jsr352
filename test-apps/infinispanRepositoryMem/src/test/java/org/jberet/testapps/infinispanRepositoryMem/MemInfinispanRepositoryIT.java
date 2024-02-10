@@ -14,7 +14,7 @@ import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MemInfinispanRepositoryIT extends AbstractIT {
     @Test

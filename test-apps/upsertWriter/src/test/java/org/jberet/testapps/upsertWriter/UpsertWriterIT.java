@@ -25,7 +25,7 @@ import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests using {@code jdbcItemWriter} in jberet-support, and upsert / merge

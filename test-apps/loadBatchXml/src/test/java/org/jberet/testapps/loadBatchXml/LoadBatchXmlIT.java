@@ -13,7 +13,7 @@ package org.jberet.testapps.loadBatchXml;
 import java.io.File;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**

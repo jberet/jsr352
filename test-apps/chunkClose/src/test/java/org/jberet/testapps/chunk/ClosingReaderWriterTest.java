@@ -20,7 +20,7 @@ import jakarta.batch.runtime.StepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>

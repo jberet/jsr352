@@ -17,7 +17,7 @@ import jakarta.batch.runtime.BatchStatus;
 import com.google.common.io.Files;
 import org.jberet.spi.PropertyKey;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
 

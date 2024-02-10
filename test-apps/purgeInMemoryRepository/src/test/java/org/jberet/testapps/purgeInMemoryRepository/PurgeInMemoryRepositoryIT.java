@@ -14,7 +14,7 @@ import jakarta.batch.operations.NoSuchJobExecutionException;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeInMemoryRepositoryXml = "purgeInMemoryRepository.xml";

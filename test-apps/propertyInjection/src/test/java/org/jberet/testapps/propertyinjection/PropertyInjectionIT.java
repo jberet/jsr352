@@ -14,7 +14,7 @@ import org.jberet.testapps.common.AbstractIT;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PropertyInjectionIT extends AbstractIT {
     @BeforeClass
