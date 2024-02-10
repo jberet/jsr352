@@ -19,7 +19,7 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * The test job has a chunk-step with 10 partitions. When the test client starts many jobs one after another,

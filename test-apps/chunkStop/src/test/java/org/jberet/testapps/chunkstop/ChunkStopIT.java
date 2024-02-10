@@ -22,7 +22,7 @@ import org.jberet.testapps.common.AbstractIT;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ChunkStopIT extends AbstractIT {
     protected int dataCount = 30;

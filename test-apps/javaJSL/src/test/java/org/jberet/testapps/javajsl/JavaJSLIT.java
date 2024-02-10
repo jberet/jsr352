@@ -34,7 +34,7 @@ import org.jberet.job.model.StepBuilder;
 import org.jberet.runtime.metric.StepMetrics;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
 

@@ -17,7 +17,7 @@ import jakarta.batch.operations.JobStartException;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JobMergerTest {
     @Test

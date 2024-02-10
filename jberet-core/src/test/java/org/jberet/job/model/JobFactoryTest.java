@@ -14,7 +14,7 @@ import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.jboss.marshalling.cloner.ClonerConfiguration;
 import org.jboss.marshalling.cloner.ObjectCloner;
 import org.jboss.marshalling.cloner.ObjectCloners;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JobFactoryTest {
     private static final ObjectCloner cloner =

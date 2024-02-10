@@ -19,7 +19,7 @@ import jakarta.batch.runtime.JobInstance;
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
 import org.junit.Assert;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeMongoRepositoryJobName = "purgeMongoRepository";

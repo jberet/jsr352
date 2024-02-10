@@ -11,7 +11,7 @@
 package org.jberet.runtime.runner;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.jberet.runtime.runner.StepExecutionRunner.matches;
 

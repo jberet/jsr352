@@ -13,7 +13,7 @@ package org.jberet.job.model;
 import java.util.LinkedList;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StepMergerTest {
     @Test

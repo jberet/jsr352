@@ -27,7 +27,7 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @Ignore("This test class needs ActiveMQ Artemis standalone server running in a separate process.")
 public class AmqpIT extends AbstractIT {

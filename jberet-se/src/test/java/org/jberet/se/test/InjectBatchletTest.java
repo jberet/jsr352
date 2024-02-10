@@ -19,7 +19,7 @@ import jakarta.batch.operations.JobOperator;
 import jakarta.batch.runtime.BatchRuntime;
 import jakarta.batch.runtime.StepExecution;
 import org.jberet.runtime.JobExecutionImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class InjectBatchletTest {
     Logger logger = Logger.getLogger(getClass().getName());

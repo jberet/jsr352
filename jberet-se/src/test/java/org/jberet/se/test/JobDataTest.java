@@ -33,7 +33,7 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.spi.PropertyKey;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.jberet.se.test.Batchlet1Test.createParams;
 import static org.junit.Assert.assertEquals;

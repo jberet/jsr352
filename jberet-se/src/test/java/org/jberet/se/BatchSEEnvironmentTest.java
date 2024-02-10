@@ -20,7 +20,7 @@ import jakarta.batch.operations.BatchRuntimeException;
 
 import org.jberet.repository.JdbcRepository;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.jberet.se.BatchSEEnvironment.THREAD_FACTORY;
 import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_ALLOW_CORE_THREAD_TIMEOUT;

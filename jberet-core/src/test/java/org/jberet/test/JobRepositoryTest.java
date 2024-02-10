@@ -38,7 +38,7 @@ import org.jberet.spi.JobXmlResolver;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JobRepositoryTest {
 

@@ -11,7 +11,7 @@
 package org.jberet.testapps.flow;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Verifies the following:
