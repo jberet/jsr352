@@ -50,12 +50,6 @@
                 <version>${version.org.jboss.marshalling}</version>
             </dependency>
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <scope>compile</scope>
-                <version>${version.junit}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-core-impl</artifactId>
                 <version>${version.org.jboss.weld.weld}</version>
