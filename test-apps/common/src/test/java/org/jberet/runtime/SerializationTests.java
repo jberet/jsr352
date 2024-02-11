@@ -65,7 +65,7 @@ public class SerializationTests extends AbstractIT {
 
     protected void reflectiveEquals(final Object one, final Object two, final boolean recursive) throws IllegalAccessException {
         final Class<?> type = one.getClass();
-        Assertions.assertEquals(String.format("Type for %s doesn't match type for %s", one, two), type, two.getClass());
+        Assertions.assertEquals(type, two.getClass(), String.format("Type for %s doesn't match type for %s", one, two));
         // Get all the fields
         final Field[] fields = one.getClass().getDeclaredFields();
         for (Field field : fields) {
@@ -78,7 +78,7 @@ public class SerializationTests extends AbstractIT {
                 if (recursive && !(fieldType.isPrimitive() || fieldType.getName().startsWith("java"))) {
                     reflectiveEquals(valueOne, valueTwo, false);
                 }
-                Assertions.assertEquals(String.format("Value %s not equal to %s for field %s in class %s", valueOne, valueTwo, field, type), valueOne, valueTwo);
+                Assertions.assertEquals(valueOne, valueTwo, String.format("Value %s not equal to %s for field %s in class %s", valueOne, valueTwo, field, type));
             }
         }
     }

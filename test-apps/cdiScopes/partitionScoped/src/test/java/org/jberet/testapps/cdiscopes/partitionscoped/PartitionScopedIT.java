@@ -36,7 +36,7 @@ public class PartitionScopedIT extends AbstractIT {
         // There's not guarantee which orders threads will be processed in, just check the existStatus contains
         // each value from the expected data.
         for (String expected : PartitionScopePartitionAnalyzer.expectedData) {
-            Assertions.assertTrue("Missing expected data '" + expected + "' in '" + exitStatus + "'", exitStatus.contains(expected));
+            Assertions.assertTrue(exitStatus.contains(expected), "Missing expected data '" + expected + "' in '" + exitStatus + "'");
         }
     }
 

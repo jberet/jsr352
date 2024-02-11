@@ -81,9 +81,9 @@ public class ClosingReaderWriterTest {
 
         final StepExecution step0 = jobExecution.getStepExecutions().get(0);
         final ReaderWriterResult item = ReaderWriterResult.class.cast(step0.getPersistentUserData());
-        Assertions.assertTrue("Reader was not closed", item.isReaderClosed());
-        Assertions.assertTrue("Writer was not closed", item.isWriterClosed());
-        Assertions.assertEquals("Unexpected reader count.", expectedReaderCount, item.getReadCount());
-        Assertions.assertEquals("Unexpected writer count.", expectedWriterCount, item.getWriteCount());
+        Assertions.assertTrue(item.isReaderClosed(), "Reader was not closed");
+        Assertions.assertTrue(item.isWriterClosed(), "Writer was not closed");
+        Assertions.assertEquals(expectedReaderCount, item.getReadCount(), "Unexpected reader count.");
+        Assertions.assertEquals(expectedWriterCount, item.getWriteCount(), "Unexpected writer count.");
     }
 }
