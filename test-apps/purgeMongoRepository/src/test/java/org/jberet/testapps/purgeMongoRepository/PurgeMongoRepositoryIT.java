@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeMongoRepositoryJobName = "purgeMongoRepository";
@@ -209,13 +210,13 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
 
         try {
             final JobInstance ins = jobOperator.getJobInstance(prepurge1JobExecutionId);
-            org.junit.Assertions.fail("Expecting NoSuchJobExecutionException, but got " + ins);
+            fail("Expecting NoSuchJobExecutionException, but got " + ins);
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }
         try {
             final JobInstance ins = jobOperator.getJobInstance(prepurge2JobExecutionId);
-            org.junit.Assertions.fail("Expecting NoSuchJobException, but got " + ins);
+            fail("Expecting NoSuchJobException, but got " + ins);
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }
@@ -244,13 +245,13 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
 
         try {
             final int count = jobOperator.getJobInstanceCount(prepurgeJobName);
-            org.junit.Assertions.fail("Expecting NoSuchJobException, but got " + count);
+            fail("Expecting NoSuchJobException, but got " + count);
         } catch (final NoSuchJobException e) {
             System.out.printf("Got expected %s%n", e);
         }
         try {
             final int count = jobOperator.getJobInstanceCount(prepurge2JobName);
-            org.junit.Assertions.fail("Expecting NoSuchJobException, but got " + count);
+            fail("Expecting NoSuchJobException, but got " + count);
         } catch (final NoSuchJobException e) {
             System.out.printf("Got expected %s%n", e);
         }
