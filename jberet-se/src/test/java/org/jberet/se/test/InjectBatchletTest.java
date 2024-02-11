@@ -35,14 +35,14 @@ public class InjectBatchletTest {
         final String exitStatus = jobExecution.getExitStatus();
         logger.info("Job exit status: " + exitStatus);
         String expected = String.format("%s:%s:%s:", jobExecutionId, jobExecutionId, jobExecutionId);
-        assertEquals("Wrong job exit status", expected, exitStatus);
+        assertEquals(expected, exitStatus, "Wrong job exit status");
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
         final long stepExecutionId = stepExecution.getStepExecutionId();
         final String stepExecutionExitStatus = stepExecution.getExitStatus();
         logger.info("Step exit status: " + stepExecutionExitStatus);
         String expectedStepExitStatus = String.format("%s:%s:%s:", stepExecutionId, stepExecutionId, stepExecutionId);
-        assertEquals("Wrong step exit status", expectedStepExitStatus, stepExecutionExitStatus);
+        assertEquals(expectedStepExitStatus, stepExecutionExitStatus, "Wrong step exit status");
     }
 
 }
