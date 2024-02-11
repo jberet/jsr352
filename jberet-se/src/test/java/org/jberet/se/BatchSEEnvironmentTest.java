@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import jakarta.batch.operations.BatchRuntimeException;
 
 import org.jberet.repository.JdbcRepository;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.jberet.se.BatchSEEnvironment.THREAD_FACTORY;
@@ -85,7 +85,7 @@ public class BatchSEEnvironmentTest {
         configProperties.setProperty(THREAD_POOL_PRESTART_ALL_CORE_THREADS, String.valueOf(true));
         final ThreadPoolExecutor threadPoolExecutor =
                 verifyThreadPool(coreSize, maxSize, keepAliveTime, queueCapacity, threadFactoryClass, false, defaultRejectionHandlerClass, batchEnvironment.createThreadPoolExecutor());
-        Assert.assertEquals(coreSize, threadPoolExecutor.getPoolSize());
+        Assertions.assertEquals(coreSize, threadPoolExecutor.getPoolSize());
 
         //a Configured thread-pool, with custom rejection policy
         configProperties.setProperty(THREAD_POOL_REJECTION_POLICY, SimpleRejectionHandler.class.getName());
@@ -96,7 +96,7 @@ public class BatchSEEnvironmentTest {
         configProperties.remove(THREAD_POOL_CORE_SIZE);
         try {
             batchEnvironment.createThreadPoolExecutor();
-            Assert.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_CORE_SIZE);
+            Assertions.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_CORE_SIZE);
         } catch (BatchRuntimeException e) {
             System.out.printf("Got the expected %s%n", e);
         }
@@ -105,7 +105,7 @@ public class BatchSEEnvironmentTest {
         configProperties.remove(THREAD_POOL_MAX_SIZE);
         try {
             batchEnvironment.createThreadPoolExecutor();
-            Assert.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_MAX_SIZE);
+            Assertions.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_MAX_SIZE);
         } catch (BatchRuntimeException e) {
             System.out.printf("Got the expected %s%n", e);
         }
@@ -115,7 +115,7 @@ public class BatchSEEnvironmentTest {
         configProperties.remove(THREAD_POOL_KEEP_ALIVE_TIME);
         try {
             batchEnvironment.createThreadPoolExecutor();
-            Assert.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_KEEP_ALIVE_TIME);
+            Assertions.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_KEEP_ALIVE_TIME);
         } catch (BatchRuntimeException e) {
             System.out.printf("Got the expected %s%n", e);
         }
@@ -127,7 +127,7 @@ public class BatchSEEnvironmentTest {
         configProperties.remove(THREAD_POOL_QUEUE_CAPACITY);
         try {
             batchEnvironment.createThreadPoolExecutor();
-            Assert.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_QUEUE_CAPACITY);
+            Assertions.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_QUEUE_CAPACITY);
         } catch (BatchRuntimeException e) {
             System.out.printf("Got the expected %s%n", e);
         }
@@ -136,7 +136,7 @@ public class BatchSEEnvironmentTest {
         configProperties.setProperty(THREAD_POOL_TYPE, "xxx");
         try {
             batchEnvironment.createThreadPoolExecutor();
-            Assert.fail("Expecting exception, but got no exception when specifying invalid property " + THREAD_POOL_TYPE);
+            Assertions.fail("Expecting exception, but got no exception when specifying invalid property " + THREAD_POOL_TYPE);
         } catch (BatchRuntimeException e) {
             System.out.printf("Got the expected %s%n", e);
         }
@@ -145,12 +145,12 @@ public class BatchSEEnvironmentTest {
     @Test
     public void testResolveDbProps() {
         BatchSEEnvironment batchSEObject = new BatchSEEnvironment();
-            Assert.assertEquals("foopass",
+            Assertions.assertEquals("foopass",
                 batchSEObject
                         .getBatchConfigurationProperties()
                         .getProperty(org.jberet.repository.JdbcRepository.DB_PASSWORD_KEY));
 
-        Assert.assertEquals("foouser",
+        Assertions.assertEquals("foouser",
                 batchSEObject
                         .getBatchConfigurationProperties()
                         .getProperty(JdbcRepository.DB_USER_KEY));
@@ -170,16 +170,16 @@ public class BatchSEEnvironmentTest {
         String p10 = "${BAR}";
 
 
-        Assert.assertEquals("foo", BatchSEEnvironment.parseProp(p1));
-        Assert.assertEquals("foo", BatchSEEnvironment.parseProp(p2));
-        Assert.assertEquals("defaultVal", BatchSEEnvironment.parseProp(p3));
-        Assert.assertEquals("${INVALID", BatchSEEnvironment.parseProp(p4));
-        Assert.assertEquals("$INVALID}", BatchSEEnvironment.parseProp(p5));
-        Assert.assertEquals("${{INVALID}", BatchSEEnvironment.parseProp(p6));
-        Assert.assertEquals("${INVALID}}", BatchSEEnvironment.parseProp(p7));
-        Assert.assertEquals("", BatchSEEnvironment.parseProp(p8));
-        Assert.assertEquals("${}", BatchSEEnvironment.parseProp(p9));
-        Assert.assertNull(BatchSEEnvironment.parseProp(p10));
+        Assertions.assertEquals("foo", BatchSEEnvironment.parseProp(p1));
+        Assertions.assertEquals("foo", BatchSEEnvironment.parseProp(p2));
+        Assertions.assertEquals("defaultVal", BatchSEEnvironment.parseProp(p3));
+        Assertions.assertEquals("${INVALID", BatchSEEnvironment.parseProp(p4));
+        Assertions.assertEquals("$INVALID}", BatchSEEnvironment.parseProp(p5));
+        Assertions.assertEquals("${{INVALID}", BatchSEEnvironment.parseProp(p6));
+        Assertions.assertEquals("${INVALID}}", BatchSEEnvironment.parseProp(p7));
+        Assertions.assertEquals("", BatchSEEnvironment.parseProp(p8));
+        Assertions.assertEquals("${}", BatchSEEnvironment.parseProp(p9));
+        Assertions.assertNull(BatchSEEnvironment.parseProp(p10));
     }
 
     private ThreadPoolExecutor verifyThreadPool(final int coreSize,
@@ -191,13 +191,13 @@ public class BatchSEEnvironmentTest {
                                   final Class<? extends RejectedExecutionHandler> rejectionHandlerClass,
                                   final ExecutorService executorService) {
         final ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executorService;
-        Assert.assertEquals(coreSize, threadPoolExecutor.getCorePoolSize());
-        Assert.assertEquals(maxSize, threadPoolExecutor.getMaximumPoolSize());
-        Assert.assertEquals(keepAliveTime, threadPoolExecutor.getKeepAliveTime(TimeUnit.SECONDS));
-        Assert.assertEquals(queueCapacity, threadPoolExecutor.getQueue().remainingCapacity());
-        Assert.assertEquals(threadFactoryClass, threadPoolExecutor.getThreadFactory().getClass());
-        Assert.assertEquals(allowCoreThreadTimeout, threadPoolExecutor.allowsCoreThreadTimeOut());
-        Assert.assertEquals(rejectionHandlerClass, threadPoolExecutor.getRejectedExecutionHandler().getClass());
+        Assertions.assertEquals(coreSize, threadPoolExecutor.getCorePoolSize());
+        Assertions.assertEquals(maxSize, threadPoolExecutor.getMaximumPoolSize());
+        Assertions.assertEquals(keepAliveTime, threadPoolExecutor.getKeepAliveTime(TimeUnit.SECONDS));
+        Assertions.assertEquals(queueCapacity, threadPoolExecutor.getQueue().remainingCapacity());
+        Assertions.assertEquals(threadFactoryClass, threadPoolExecutor.getThreadFactory().getClass());
+        Assertions.assertEquals(allowCoreThreadTimeout, threadPoolExecutor.allowsCoreThreadTimeOut());
+        Assertions.assertEquals(rejectionHandlerClass, threadPoolExecutor.getRejectedExecutionHandler().getClass());
         return threadPoolExecutor;
     }
 

@@ -12,7 +12,7 @@ package org.jberet.job.model;
 
 import java.util.Properties;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +20,8 @@ import static org.jberet.job.model.PropertyResolver.jobParametersToken;
 import static org.jberet.job.model.PropertyResolver.jobPropertiesToken;
 import static org.jberet.job.model.PropertyResolver.partitionPlanToken;
 import static org.jberet.job.model.PropertyResolver.systemPropertiesToken;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class PropertyResolverTest {
     private static final String jobParam1 = "infile.path";
@@ -162,7 +162,7 @@ public class PropertyResolverTest {
             try {
                 val = resolver.resolve(e);
                 System.out.printf("%s -> %s%n", e, val);
-                Assert.fail();
+                Assertions.fail();
             } catch (IllegalArgumentException ex) {
                 System.out.printf("Got expected %s: %s%n", ex.getClass().getName(), ex.getMessage());
             }

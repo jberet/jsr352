@@ -13,7 +13,7 @@ package org.jberet.testapps.cdiscopes.partitionscoped;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -30,13 +30,13 @@ public class PartitionScopedIT extends AbstractIT {
         //different partition, injected Foo should be the different
 
         startJobAndWait(partitionScopedTest);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         final String exitStatus = stepExecution0.getExitStatus();
         System.out.printf("step exit status: %s%n", exitStatus);
         // There's not guarantee which orders threads will be processed in, just check the existStatus contains
         // each value from the expected data.
         for (String expected : PartitionScopePartitionAnalyzer.expectedData) {
-            Assert.assertTrue("Missing expected data '" + expected + "' in '" + exitStatus + "'", exitStatus.contains(expected));
+            Assertions.assertTrue("Missing expected data '" + expected + "' in '" + exitStatus + "'", exitStatus.contains(expected));
         }
     }
 
@@ -44,14 +44,14 @@ public class PartitionScopedIT extends AbstractIT {
     public void partitionScopedFailJobListener() throws Exception {
         //injecting @PartitionScoped Foo into a job listener will fail
         startJobAndWait(partitionScopedFailJobListenerTest);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
     public void partitionScopedFailStepListener() throws Exception {
         //injecting @PartitionScoped Foo into a step listener will fail
         startJobAndWait(partitionScopedFailStepListenerTest);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
 }

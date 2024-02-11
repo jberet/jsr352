@@ -17,7 +17,7 @@ import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.JobInstance;
 
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
@@ -207,13 +207,13 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
 
         try {
             final JobInstance ins = jobOperator.getJobInstance(prepurge1JobExecutionId);
-            org.junit.Assert.fail("Expecting NoSuchJobExecutionException, but got " + ins);
+            org.junit.Assertions.fail("Expecting NoSuchJobExecutionException, but got " + ins);
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }
         try {
             final JobInstance ins = jobOperator.getJobInstance(prepurge2JobExecutionId);
-            org.junit.Assert.fail("Expecting NoSuchJobException, but got " + ins);
+            org.junit.Assertions.fail("Expecting NoSuchJobException, but got " + ins);
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }
@@ -242,13 +242,13 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
 
         try {
             final int count = jobOperator.getJobInstanceCount(prepurgeJobName);
-            org.junit.Assert.fail("Expecting NoSuchJobException, but got " + count);
+            org.junit.Assertions.fail("Expecting NoSuchJobException, but got " + count);
         } catch (final NoSuchJobException e) {
             System.out.printf("Got expected %s%n", e);
         }
         try {
             final int count = jobOperator.getJobInstanceCount(prepurge2JobName);
-            org.junit.Assert.fail("Expecting NoSuchJobException, but got " + count);
+            org.junit.Assertions.fail("Expecting NoSuchJobException, but got " + count);
         } catch (final NoSuchJobException e) {
             System.out.printf("Got expected %s%n", e);
         }
@@ -264,7 +264,7 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
 
         startJob(purgeMongoRepositoryJobName);
         awaitTermination();
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     private void purgeJobExecutions() throws Exception {

@@ -33,10 +33,10 @@ import org.jberet.job.model.Step;
 import org.jberet.job.model.StepBuilder;
 import org.jberet.runtime.metric.StepMetrics;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JavaJSLIT extends AbstractIT {
     static final String batchlet1Name = "batchlet1";
@@ -216,7 +216,7 @@ public class JavaJSLIT extends AbstractIT {
         restartAndWait();
 
         if (stepExecutions.size() == 0) {
-            Assert.fail("No step executions in the restart job execution, which means the restart job execution did nothing.");
+            Assertions.fail("No step executions in the restart job execution, which means the restart job execution did nothing.");
         }
 
         System.out.printf("Completed restart job execution: %s, with exit status: %s%n", jobExecutionId, jobExecution.getExitStatus());
@@ -653,8 +653,8 @@ public class JavaJSLIT extends AbstractIT {
         assertEquals(3, stepExecutions.size());
 
         //step1 and step2 execution order may be random, so stepExecution0 may point to step1 or step2
-        //Assert.assertEquals(stepName, stepExecution0.getStepName());
-        //Assert.assertEquals(step2Name, stepExecutions.get(1).getStepName());
+        //Assertions.assertEquals(stepName, stepExecution0.getStepName());
+        //Assertions.assertEquals(step2Name, stepExecutions.get(1).getStepName());
         assertEquals(step3Name, stepExecutions.get(2).getStepName());
     }
 

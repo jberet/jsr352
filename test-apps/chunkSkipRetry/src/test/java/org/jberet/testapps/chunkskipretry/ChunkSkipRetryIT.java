@@ -24,7 +24,7 @@ import static java.util.Arrays.asList;
 import static org.jberet.testapps.chunkskipretry.ChunkListener1.after;
 import static org.jberet.testapps.chunkskipretry.ChunkListener1.before;
 import static org.jberet.testapps.chunkskipretry.ChunkListener1.error;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests to verify skip and retry behaviors by configuring {@code ArithmeticException} as {@code skippable-exception},

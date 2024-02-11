@@ -17,7 +17,7 @@ import jakarta.batch.runtime.context.JobContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -45,11 +45,11 @@ public class Decider1 implements Decider {
     @Override
     public String decide(final StepExecution[] stepExecutions) throws Exception {
         final StepExecution stepExecution = stepExecutions[0];
-        Assert.assertEquals("decision-prop", decisionProp);
-        Assert.assertEquals("job-prop", referencingJobProp);
-        Assert.assertThat(referencingStepProp, not(equalTo("step-prop")));
-        Assert.assertEquals(System.getProperty("java.version"), referencingSystemProp);
-        Assert.assertEquals("job-param", referencingJobParam);
+        Assertions.assertEquals("decision-prop", decisionProp);
+        Assertions.assertEquals("job-prop", referencingJobProp);
+        Assertions.assertThat(referencingStepProp, not(equalTo("step-prop")));
+        Assertions.assertEquals(System.getProperty("java.version"), referencingSystemProp);
+        Assertions.assertEquals("job-param", referencingJobParam);
 
         System.out.printf("Running %s, decisionProp=%s, job batch/exit status: %s/%s, previous step batch/exit status: %s/%s%n",
                 this, decisionProp, jobContext.getBatchStatus(), jobContext.getExitStatus(),

@@ -10,7 +10,7 @@
 
 package org.jberet.job.model;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class FlowMergerTest {
@@ -18,56 +18,56 @@ public class FlowMergerTest {
     public void parentSameFile() throws Exception {
         final Job childJob = JobMergerTest.loadJob("flow-child.xml");
         final Flow child = getFlow(childJob, "flow2");
-        Assert.assertEquals(null, child.getParent());
-        Assert.assertEquals(null, child.getJslName());
-        Assert.assertEquals(false, child.isAbstract());
-        Assert.assertEquals("step3", child.getAttributeNext());
+        Assertions.assertEquals(null, child.getParent());
+        Assertions.assertEquals(null, child.getJslName());
+        Assertions.assertEquals(false, child.isAbstract());
+        Assertions.assertEquals("step3", child.getAttributeNext());
 
-        Assert.assertEquals(3, child.getJobElements().size());
+        Assertions.assertEquals(3, child.getJobElements().size());
         final Step step1 = (Step) child.getJobElements().get(0);
-        Assert.assertEquals("flow1-step1", step1.id);
+        Assertions.assertEquals("flow1-step1", step1.id);
 
         final Step step2 = (Step) child.getJobElements().get(1);
-        Assert.assertEquals("flow1-step2", step2.id);
+        Assertions.assertEquals("flow1-step2", step2.id);
 
         final Decision decision1 = (Decision) child.getJobElements().get(2);
-        Assert.assertEquals("flow1-decision1", decision1.id);
+        Assertions.assertEquals("flow1-decision1", decision1.id);
 
 
-        Assert.assertEquals(2, child.getTransitionElements().size());
-        Assert.assertEquals(true, child.getTransitionElements().get(0) instanceof Transition.Fail);
-        Assert.assertEquals("FAIL", child.getTransitionElements().get(0).getOn());
+        Assertions.assertEquals(2, child.getTransitionElements().size());
+        Assertions.assertEquals(true, child.getTransitionElements().get(0) instanceof Transition.Fail);
+        Assertions.assertEquals("FAIL", child.getTransitionElements().get(0).getOn());
 
-        Assert.assertEquals(true, child.getTransitionElements().get(1) instanceof Transition.Stop);
-        Assert.assertEquals("STOP", child.getTransitionElements().get(1).getOn());
+        Assertions.assertEquals(true, child.getTransitionElements().get(1) instanceof Transition.Stop);
+        Assertions.assertEquals("STOP", child.getTransitionElements().get(1).getOn());
     }
 
     @Test
     public void parentOtherFile() throws Exception {
         final Job childJob = JobMergerTest.loadJob("flow-child.xml");
         final Flow child = getFlow(childJob, "flow3");
-        Assert.assertEquals(null, child.getParent());
-        Assert.assertEquals(null, child.getJslName());
-        Assert.assertEquals(false, child.isAbstract());
-        Assert.assertEquals("step4", child.getAttributeNext());
+        Assertions.assertEquals(null, child.getParent());
+        Assertions.assertEquals(null, child.getJslName());
+        Assertions.assertEquals(false, child.isAbstract());
+        Assertions.assertEquals("step4", child.getAttributeNext());
 
-        Assert.assertEquals(3, child.getJobElements().size());
+        Assertions.assertEquals(3, child.getJobElements().size());
         final Step step1 = (Step) child.getJobElements().get(0);
-        Assert.assertEquals("flow-parent-flow1-step1", step1.id);
+        Assertions.assertEquals("flow-parent-flow1-step1", step1.id);
 
         final Step step2 = (Step) child.getJobElements().get(1);
-        Assert.assertEquals("flow-parent-flow1-step2", step2.id);
+        Assertions.assertEquals("flow-parent-flow1-step2", step2.id);
 
         final Decision decision1 = (Decision) child.getJobElements().get(2);
-        Assert.assertEquals("flow-parent-flow1-decision1", decision1.id);
+        Assertions.assertEquals("flow-parent-flow1-decision1", decision1.id);
 
 
-        Assert.assertEquals(2, child.getTransitionElements().size());
-        Assert.assertEquals(true, child.getTransitionElements().get(0) instanceof Transition.Stop);
-        Assert.assertEquals("STOP", child.getTransitionElements().get(0).getOn());
+        Assertions.assertEquals(2, child.getTransitionElements().size());
+        Assertions.assertEquals(true, child.getTransitionElements().get(0) instanceof Transition.Stop);
+        Assertions.assertEquals("STOP", child.getTransitionElements().get(0).getOn());
 
-        Assert.assertEquals(true, child.getTransitionElements().get(1) instanceof Transition.Fail);
-        Assert.assertEquals("FAIL", child.getTransitionElements().get(1).getOn());
+        Assertions.assertEquals(true, child.getTransitionElements().get(1) instanceof Transition.Fail);
+        Assertions.assertEquals("FAIL", child.getTransitionElements().get(1).getOn());
     }
 
     protected static Flow getFlow(final Job job, final String flowId) {

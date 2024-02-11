@@ -12,7 +12,7 @@ package org.jberet.testapps.propertyinjection;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.AfterClass;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +30,6 @@ public class PropertyInjectionIT extends AbstractIT {
     @Test
     public void propertyInjection() throws Exception {
         startJobAndWait("propertyInjection.xml");
-        Assert.assertEquals("ab 2ab2 2default2 defaultValue", stepExecution0.getExitStatus());
+        Assertions.assertEquals("ab 2ab2 2default2 defaultValue", stepExecution0.getExitStatus());
     }
 }

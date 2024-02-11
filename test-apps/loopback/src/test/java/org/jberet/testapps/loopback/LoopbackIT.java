@@ -19,7 +19,7 @@ import org.jberet.spi.PropertyKey;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Verifies step loopbacks are detected and failed.

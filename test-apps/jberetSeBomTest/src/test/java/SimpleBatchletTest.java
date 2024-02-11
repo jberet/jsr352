@@ -2,7 +2,7 @@ import jakarta.batch.operations.JobOperator;
 import jakarta.batch.runtime.BatchRuntime;
 import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.JobExecution;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
@@ -21,7 +21,7 @@ public class SimpleBatchletTest {
 
         jobExecution = keepTestAlive(jobExecution);
 
-        Assert.assertEquals(jobExecution.getBatchStatus(), BatchStatus.COMPLETED);
+        Assertions.assertEquals(jobExecution.getBatchStatus(), BatchStatus.COMPLETED);
     }
 
     private JobExecution keepTestAlive(JobExecution jobExecution) throws InterruptedException {

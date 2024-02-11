@@ -22,7 +22,7 @@ import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class Batchlet1Test {
@@ -60,15 +60,15 @@ public class Batchlet1Test {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());
 
-        Assert.assertEquals(5, jobExecution.getStepExecutions().size());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(2).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(3).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(4).getBatchStatus());
+        Assertions.assertEquals(5, jobExecution.getStepExecutions().size());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(2).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(3).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(4).getBatchStatus());
         writeOutExecutionId(jobExecutionId, jobName2ExecutionIdSaveTo);
     }
 
@@ -99,12 +99,12 @@ public class Batchlet1Test {
         }
         for (final JobExecutionImpl e : jobExecutions) {
             System.out.printf("JobExecution id: %s%n", e.getExecutionId());
-            Assert.assertEquals(BatchStatus.FAILED, e.getBatchStatus());
-            Assert.assertEquals(BatchStatus.FAILED.name(), e.getExitStatus());
+            Assertions.assertEquals(BatchStatus.FAILED, e.getBatchStatus());
+            Assertions.assertEquals(BatchStatus.FAILED.name(), e.getExitStatus());
 
-            Assert.assertEquals(1, e.getStepExecutions().size());
-            Assert.assertEquals(BatchStatus.FAILED, e.getStepExecutions().get(0).getBatchStatus());
-            Assert.assertEquals(Batchlet1.ACTION_EXCEPTION, e.getStepExecutions().get(0).getExitStatus());
+            Assertions.assertEquals(1, e.getStepExecutions().size());
+            Assertions.assertEquals(BatchStatus.FAILED, e.getStepExecutions().get(0).getBatchStatus());
+            Assertions.assertEquals(Batchlet1.ACTION_EXCEPTION, e.getStepExecutions().get(0).getExitStatus());
         }
         writeOutExecutionId(jobExecutions[2].getExecutionId(), jobName3ExecutionIdSaveTo);
     }
@@ -122,16 +122,16 @@ public class Batchlet1Test {
         final long jobExecutionId = jobOperator.start(jobName4, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         final StepExecutionImpl stepExecution = (StepExecutionImpl) jobExecution.getStepExecutions().get(0);
-        Assert.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_LONG_EXCEPTION, stepExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_LONG_EXCEPTION, stepExecution.getExitStatus());
 
         final Exception exception = stepExecution.getException();
-        Assert.assertNotNull(exception);
+        Assertions.assertNotNull(exception);
         final String message = exception.getMessage();
         //System.out.printf("Step exception message: %s%n", message.substring(0, Math.min(message.length(), 1000)));
-        Assert.assertEquals(true, message.startsWith(Batchlet1.ACTION_LONG_EXCEPTION));
+        Assertions.assertEquals(true, message.startsWith(Batchlet1.ACTION_LONG_EXCEPTION));
     }
 
     static Properties createParams(final String key, final String val) {
@@ -150,14 +150,14 @@ public class Batchlet1Test {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
-        Assert.assertEquals(2, jobExecution.getStepExecutions().size());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getStepExecutions().get(0).getExitStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_OTHER, jobExecution.getStepExecutions().get(1).getExitStatus());
+        Assertions.assertEquals(2, jobExecution.getStepExecutions().size());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getStepExecutions().get(0).getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_OTHER, jobExecution.getStepExecutions().get(1).getExitStatus());
         return jobExecutionId;
     }
 
@@ -169,14 +169,14 @@ public class Batchlet1Test {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_END, jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_END, jobExecution.getExitStatus());
 
-        Assert.assertEquals(2, jobExecution.getStepExecutions().size());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getStepExecutions().get(0).getExitStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_END, jobExecution.getStepExecutions().get(1).getExitStatus());
+        Assertions.assertEquals(2, jobExecution.getStepExecutions().size());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getStepExecutions().get(0).getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_END, jobExecution.getStepExecutions().get(1).getExitStatus());
         return jobExecutionId;
     }
 
@@ -188,18 +188,18 @@ public class Batchlet1Test {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_FAIL, jobExecution.getExitStatus());  //set by <fail> element
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_FAIL, jobExecution.getExitStatus());  //set by <fail> element
 
-        Assert.assertEquals(2, jobExecution.getStepExecutions().size());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getStepExecutions().get(0).getExitStatus());
+        Assertions.assertEquals(2, jobExecution.getStepExecutions().size());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getStepExecutions().get(0).getExitStatus());
 
         // <fail> element does not affect the already-completed step batchlet execution.
         // Although the job FAILED, but step2 still COMPLETED
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(1).getBatchStatus());
         // step2 exit status from batchlet1.process method return value, not from <fail exit-status> element
-        Assert.assertEquals(Batchlet1.ACTION_FAIL, jobExecution.getStepExecutions().get(1).getExitStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_FAIL, jobExecution.getStepExecutions().get(1).getExitStatus());
         return jobExecutionId;
     }
 
@@ -212,15 +212,15 @@ public class Batchlet1Test {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
         System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
-        Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
-        Assert.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());
 
-        Assert.assertEquals(1, jobExecution.getStepExecutions().size());
+        Assertions.assertEquals(1, jobExecution.getStepExecutions().size());
         // <stop> element does not affect the already-completed step batchlet execution.
         // Although the job STOPPED, but step2 still COMPLETED
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStepExecutions().get(0).getBatchStatus());
         // step2 exit status from batchlet1.process method return value, not from <stop exit-status> element
-        Assert.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getStepExecutions().get(0).getExitStatus());
+        Assertions.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getStepExecutions().get(0).getExitStatus());
         return jobExecutionId;
     }
 

@@ -16,7 +16,7 @@ import jakarta.batch.runtime.context.JobContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 @Named("L2")
 public class JobListener2 implements JobListener {
@@ -35,11 +35,11 @@ public class JobListener2 implements JobListener {
     @Override
     public void beforeJob() throws Exception {
         System.out.printf("In beforeJob of %s%n", this);
-        //Assert.assertEquals("L2", jobProp);  should be null or "L2"?
-        Assert.assertEquals(null, listenerProp);
-        Assert.assertEquals(null, referencedProp);
-        Assert.assertEquals(2, jobContext.getProperties().size());
-        Assert.assertEquals("job-prop", jobContext.getProperties().get("job-prop"));
+        //Assertions.assertEquals("L2", jobProp);  should be null or "L2"?
+        Assertions.assertEquals(null, listenerProp);
+        Assertions.assertEquals(null, referencedProp);
+        Assertions.assertEquals(2, jobContext.getProperties().size());
+        Assertions.assertEquals("job-prop", jobContext.getProperties().get("job-prop"));
     }
 
     @Override
