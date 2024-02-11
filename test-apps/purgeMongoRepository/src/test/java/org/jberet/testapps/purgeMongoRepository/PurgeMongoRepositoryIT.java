@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeMongoRepositoryJobName = "purgeMongoRepository";
 
@@ -31,16 +33,16 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
         super.ctrlC();
     }
 
-    @Test(expected = JobRestartException.class)
+    @Test
     @Disabled("run after ctrlC_1 test has been killed with invalid restart mode, should fail")
     public void invalidRestartMode() throws Exception {
-        super.invalidRestartMode();
+        assertThrows(JobRestartException.class, super::invalidRestartMode);
     }
 
-    @Test(expected = JobRestartException.class)
+    @Test
     @Disabled("run after ctrlC_1 test has been killed, should fail")
     public void restartKilledStrict() throws Exception {
-        super.restartKilledStrict();
+        assertThrows(JobRestartException.class, super::restartKilledStrict);
     }
 
     /////////////////////////////////////////////////////
@@ -102,34 +104,34 @@ public class PurgeMongoRepositoryIT extends PurgeRepositoryTestBase {
         super.memoryTest();
     }
 
-    @Test(expected = NoSuchJobExecutionException.class)
-    public void restartNoSuchJobExecutionException() throws NoSuchJobExecutionException {
-        jobOperator.restart(-1, null);
+    @Test
+    public void restartNoSuchJobExecutionException() {
+        assertThrows(NoSuchJobExecutionException.class, () -> jobOperator.restart(-1, null));
     }
 
-    @Test(expected = NoSuchJobExecutionException.class)
-    public void stopNoSuchJobExecutionException() throws NoSuchJobExecutionException {
-        jobOperator.stop(-1);
+    @Test
+    public void stopNoSuchJobExecutionException() {
+        assertThrows(NoSuchJobExecutionException.class, () -> jobOperator.stop(-1));
     }
 
-    @Test(expected = NoSuchJobExecutionException.class)
-    public void abandonNoSuchJobExecutionException() throws NoSuchJobExecutionException {
-        jobOperator.abandon(-1);
+    @Test
+    public void abandonNoSuchJobExecutionException() {
+        assertThrows(NoSuchJobExecutionException.class, () -> jobOperator.abandon(-1));
     }
 
-    @Test(expected = NoSuchJobExecutionException.class)
-    public void getParametersNoSuchJobExecutionException() throws NoSuchJobExecutionException {
-        jobOperator.getParameters(-1);
+    @Test
+    public void getParametersNoSuchJobExecutionException() {
+        assertThrows(NoSuchJobExecutionException.class, () -> jobOperator.getParameters(-1));
     }
 
-    @Test(expected = NoSuchJobExecutionException.class)
-    public void getJobInstanceNoSuchJobExecutionException() throws NoSuchJobExecutionException {
-        jobOperator.getJobInstance(-1);
+    @Test
+    public void getJobInstanceNoSuchJobExecutionException() {
+        assertThrows(NoSuchJobExecutionException.class, () -> jobOperator.getJobInstance(-1));
     }
 
-    @Test(expected = NoSuchJobExecutionException.class)
-    public void getStepExecutionsNoSuchJobExecutionException() throws NoSuchJobExecutionException {
-        jobOperator.getStepExecutions(-1);
+    @Test
+    public void getStepExecutionsNoSuchJobExecutionException() {
+        assertThrows(NoSuchJobExecutionException.class, () -> jobOperator.getStepExecutions(-1));
     }
 
     @Test
