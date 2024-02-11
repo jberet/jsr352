@@ -19,24 +19,25 @@ import jakarta.batch.runtime.StepExecution;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.metric.MetricImpl;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestWatcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests in this class restart failed job executions in {@link ChunkPartitionIT}.
  */
+@ExtendWith(ChunkPartitionRestartIT.TestResultLoggerExtension.class)
 public class ChunkPartitionRestartIT extends AbstractIT {
-    @Rule
-    public TestRule watcher = new TestWatcher() {
-        protected void starting(final Description description) {
-            System.out.printf("%nStarting test: %s%n%n", description.getMethodName());
+    static class TestResultLoggerExtension implements TestWatcher, BeforeEachCallback {
+        @Override
+        public void beforeEach(ExtensionContext extensionContext) throws Exception {
+            extensionContext.getTestMethod().ifPresent(method -> System.out.printf("%nStarting test: %s%n%n", method.getName()));
         }
-    };
+    }
 
     /**
      * Restarts the job execution failed in {@link ChunkPartitionIT#complete2Fail1Partitions()}.
