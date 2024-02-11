@@ -19,9 +19,6 @@ import jakarta.inject.Named;
 
 import org.junit.jupiter.api.Assertions;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-
 @Named
 public class Decider1 implements Decider {
     @Inject @BatchProperty(name = "decision-prop")
@@ -47,7 +44,7 @@ public class Decider1 implements Decider {
         final StepExecution stepExecution = stepExecutions[0];
         Assertions.assertEquals("decision-prop", decisionProp);
         Assertions.assertEquals("job-prop", referencingJobProp);
-        Assertions.assertThat(referencingStepProp, not(equalTo("step-prop")));
+        Assertions.assertNotEquals("step-prop", referencingStepProp);
         Assertions.assertEquals(System.getProperty("java.version"), referencingSystemProp);
         Assertions.assertEquals("job-param", referencingJobParam);
 
