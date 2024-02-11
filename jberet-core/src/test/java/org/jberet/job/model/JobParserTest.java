@@ -17,7 +17,7 @@ import java.util.List;
 import jakarta.batch.operations.BatchRuntimeException;
 import javax.xml.stream.XMLStreamException;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
@@ -47,11 +47,11 @@ public final class JobParserTest {
         try {
             is = new ByteArrayInputStream(batchXml.getBytes());
             final BatchArtifacts batchArtifacts = JobParser.parseBatchArtifacts(is);
-            Assert.assertEquals(class1, batchArtifacts.getClassNameForRef(id1));
-            Assert.assertEquals(class2, batchArtifacts.getClassNameForRef(id2));
-            Assert.assertNull(batchArtifacts.getClassNameForRef(null));
-            Assert.assertNull(batchArtifacts.getClassNameForRef(""));
-            Assert.assertNull(batchArtifacts.getClassNameForRef("no such id"));
+            Assertions.assertEquals(class1, batchArtifacts.getClassNameForRef(id1));
+            Assertions.assertEquals(class2, batchArtifacts.getClassNameForRef(id2));
+            Assertions.assertNull(batchArtifacts.getClassNameForRef(null));
+            Assertions.assertNull(batchArtifacts.getClassNameForRef(""));
+            Assertions.assertNull(batchArtifacts.getClassNameForRef("no such id"));
         } finally {
             if (is != null) {
                 is.close();
@@ -181,8 +181,8 @@ public final class JobParserTest {
         try {
             is = new ByteArrayInputStream(jobXml.getBytes());
             final Job job = JobParser.parseJob(is, getClass().getClassLoader(), null);
-            Assert.assertEquals(true, job.getRestartableBoolean());
-            Assert.assertEquals(null, job.getRestartable());
+            Assertions.assertEquals(true, job.getRestartableBoolean());
+            Assertions.assertEquals(null, job.getRestartable());
         } finally {
             if (is != null) {
                 is.close();
@@ -203,8 +203,8 @@ public final class JobParserTest {
         try {
             is = new ByteArrayInputStream(jobXml.getBytes());
             final Job job = JobParser.parseJob(is, getClass().getClassLoader(), null);
-            Assert.assertEquals(false, job.getRestartableBoolean());
-            Assert.assertEquals(Boolean.FALSE.toString(), job.getRestartable());
+            Assertions.assertEquals(false, job.getRestartableBoolean());
+            Assertions.assertEquals(Boolean.FALSE.toString(), job.getRestartable());
         } finally {
             if (is != null) {
                 is.close();
@@ -221,8 +221,8 @@ public final class JobParserTest {
         } finally {
             is.close();
         }
-        Assert.assertEquals("job1", job.getId());
-        Assert.assertEquals(true, job.getRestartableBoolean());
+        Assertions.assertEquals("job1", job.getId());
+        Assertions.assertEquals(true, job.getRestartableBoolean());
         checkProperties(job.getProperties());
         checkListeners(job.getListeners());
         for (final JobElement element : job.getJobElements()) {
@@ -239,7 +239,7 @@ public final class JobParserTest {
                 final Split split = (Split) element;
                 checkSplit(split, null);
             } else {
-                Assert.fail("Unexpected job element type: " + element);
+                Assertions.fail("Unexpected job element type: " + element);
             }
         }
     }
@@ -249,7 +249,7 @@ public final class JobParserTest {
         try {
             is = new ByteArrayInputStream(xmlContent.getBytes());
             JobParser.parseBatchArtifacts(is);
-            Assert.fail("Exception should already have been thrown.");
+            Assertions.fail("Exception should already have been thrown.");
         } catch (XMLStreamException e) {
             System.out.printf("Got expected exception %s%n", e);
         } catch (BatchRuntimeException e) {
@@ -266,7 +266,7 @@ public final class JobParserTest {
         try {
             is = new ByteArrayInputStream(xmlContent.getBytes());
             JobParser.parseJob(is, getClass().getClassLoader(), null);
-            Assert.fail("Exception should already have been thrown.");
+            Assertions.fail("Exception should already have been thrown.");
         } catch (XMLStreamException e) {
             System.out.printf("Got expected exception %s%n", e);
         } catch (BatchRuntimeException e) {
@@ -280,19 +280,19 @@ public final class JobParserTest {
 
     private void checkProperties(final Properties properties, final String... partitionNumbers) throws Exception {
         final String partitionNumber = partitionNumbers.length == 0 ? "0" : partitionNumbers[0];
-        Assert.assertEquals(partitionNumber, properties.getPartition());
-        Assert.assertEquals(2, Properties.toJavaUtilProperties(properties).size());
-        Assert.assertEquals("value1", properties.get("name1"));
-        Assert.assertEquals("value2", properties.get("name2"));
-        Assert.assertNull(properties.get(""));
+        Assertions.assertEquals(partitionNumber, properties.getPartition());
+        Assertions.assertEquals(2, Properties.toJavaUtilProperties(properties).size());
+        Assertions.assertEquals("value1", properties.get("name1"));
+        Assertions.assertEquals("value2", properties.get("name2"));
+        Assertions.assertNull(properties.get(""));
     }
 
     private void checkListeners(final Listeners listeners) throws Exception {
         final List<RefArtifact> listenerList = listeners.getListeners();
-        Assert.assertEquals(2, listenerList.size());
-        Assert.assertEquals("ref1", listenerList.get(0).getRef());
+        Assertions.assertEquals(2, listenerList.size());
+        Assertions.assertEquals("ref1", listenerList.get(0).getRef());
         checkProperties(listenerList.get(0).getProperties());
-        Assert.assertEquals("ref2", listenerList.get(1).getRef());
+        Assertions.assertEquals("ref2", listenerList.get(1).getRef());
         checkProperties(listenerList.get(1).getProperties());
     }
 
@@ -301,8 +301,8 @@ public final class JobParserTest {
         if (parentId != null && parentId.length() > 0) {
             id = parentId + "." + id;
         }
-        Assert.assertEquals(id, decision.getId());
-        Assert.assertEquals("ref1", decision.getRef());
+        Assertions.assertEquals(id, decision.getId());
+        Assertions.assertEquals("ref1", decision.getRef());
         checkProperties(decision.getProperties());
         checkTransitionElements(decision.getTransitionElements(), null);
     }
@@ -312,8 +312,8 @@ public final class JobParserTest {
         if (parentId != null && parentId.length() > 0) {
             flowId = parentId + "." + flowId;
         }
-        Assert.assertEquals(flowId, flow.getId());
-//        Assert.assertEquals("next1", flow.getAttributeNext());    defer this check to checkTransitionElements
+        Assertions.assertEquals(flowId, flow.getId());
+//        Assertions.assertEquals("next1", flow.getAttributeNext());    defer this check to checkTransitionElements
         checkTransitionElements(flow.getTransitionElements(), flow.getAttributeNext());
 
         for (final JobElement e : flow.jobElements) {
@@ -327,7 +327,7 @@ public final class JobParserTest {
                 final Split split = (Split) e;
                 checkSplit(split, flowId);
             } else {
-                Assert.fail("Unexpected job element type inside flow: " + e);
+                Assertions.fail("Unexpected job element type inside flow: " + e);
             }
         }
     }
@@ -337,8 +337,8 @@ public final class JobParserTest {
         if (parentId != null && parentId.length() > 0) {
             id = parentId + "." + id;
         }
-        Assert.assertEquals(id, split.getId());
-        Assert.assertEquals("next1", split.getAttributeNext());
+        Assertions.assertEquals(id, split.getId());
+        Assertions.assertEquals("next1", split.getAttributeNext());
         for (final Flow f : split.getFlows()) {
             checkFlow(f, id);
         }
@@ -349,10 +349,10 @@ public final class JobParserTest {
         if (parentId != null && parentId.length() > 0) {
             stepId = parentId + "." + stepId;
         }
-        Assert.assertEquals(stepId, step.getId());
-        Assert.assertEquals(5, step.getStartLimitInt());
-        Assert.assertEquals(true, step.getAllowStartIfCompleteBoolean());
-//        Assert.assertEquals("next1", step.getAttributeNext());    defer this check to checkTransitionElements() along with next element
+        Assertions.assertEquals(stepId, step.getId());
+        Assertions.assertEquals(5, step.getStartLimitInt());
+        Assertions.assertEquals(true, step.getAllowStartIfCompleteBoolean());
+//        Assertions.assertEquals("next1", step.getAttributeNext());    defer this check to checkTransitionElements() along with next element
         checkProperties(step.getProperties());
         checkListeners(step.getListeners());
         checkPartition(step.getPartition());
@@ -370,15 +370,15 @@ public final class JobParserTest {
             }
             checkRefArtifact(step.getBatchlet(), batchletId);
         }
-        Assert.assertEquals(true, foundBatchletOrChunk);
+        Assertions.assertEquals(true, foundBatchletOrChunk);
     }
 
     private void checkChunk(final Chunk chunk) throws Exception {
-        Assert.assertEquals("custom", chunk.getCheckpointPolicy());
-        Assert.assertEquals(5, chunk.getItemCountInt());
-        Assert.assertEquals(5, chunk.getTimeLimitInt());
-        Assert.assertEquals(5, chunk.getSkipLimitInt());
-        Assert.assertEquals(5, chunk.getSkipLimitInt());
+        Assertions.assertEquals("custom", chunk.getCheckpointPolicy());
+        Assertions.assertEquals(5, chunk.getItemCountInt());
+        Assertions.assertEquals(5, chunk.getTimeLimitInt());
+        Assertions.assertEquals(5, chunk.getSkipLimitInt());
+        Assertions.assertEquals(5, chunk.getSkipLimitInt());
         checkRefArtifact(chunk.getReader(), "reader1");
         checkRefArtifact(chunk.getProcessor(), "processor1");
         checkRefArtifact(chunk.getWriter(), "writer1");
@@ -389,21 +389,21 @@ public final class JobParserTest {
     }
 
     private void checkRefArtifact(final RefArtifact a, final String ref) throws Exception {
-        Assert.assertEquals(ref, a.getRef());
+        Assertions.assertEquals(ref, a.getRef());
         checkProperties(a.getProperties());
     }
 
     private void checkExceptionClassFilter(final ExceptionClassFilter filter) throws Exception {
         final List<String> includes = filter.include;
         final List<String> excludes = filter.exclude;
-        Assert.assertEquals(2, includes.size());
-        Assert.assertEquals(true, includes.contains("include1"));
-        Assert.assertEquals(true, includes.contains("include2"));
-        Assert.assertEquals(false, includes.contains(""));
-        Assert.assertEquals(2, excludes.size());
-        Assert.assertEquals(true, excludes.contains("exclude1"));
-        Assert.assertEquals(true, excludes.contains("exclude2"));
-        Assert.assertEquals(false, excludes.contains(""));
+        Assertions.assertEquals(2, includes.size());
+        Assertions.assertEquals(true, includes.contains("include1"));
+        Assertions.assertEquals(true, includes.contains("include2"));
+        Assertions.assertEquals(false, includes.contains(""));
+        Assertions.assertEquals(2, excludes.size());
+        Assertions.assertEquals(true, excludes.contains("exclude1"));
+        Assertions.assertEquals(true, excludes.contains("exclude2"));
+        Assertions.assertEquals(false, excludes.contains(""));
     }
 
     private void checkPartition(final Partition partition) throws Exception {
@@ -418,12 +418,12 @@ public final class JobParserTest {
             foundMapperOrPlan = true;
             checkPlan(partition.getPlan());
         }
-        Assert.assertEquals(true, foundMapperOrPlan);
+        Assertions.assertEquals(true, foundMapperOrPlan);
     }
 
     private void checkPlan(final PartitionPlan plan) throws Exception {
-        Assert.assertEquals(5, plan.getPartitionsInt());
-        Assert.assertEquals(5, plan.getThreadsInt());
+        Assertions.assertEquals(5, plan.getPartitionsInt());
+        Assertions.assertEquals(5, plan.getThreadsInt());
 
         //partition attribute values are: "0", "1", etc
         for (int i = 0; i < plan.getPropertiesList().size(); i++) {
@@ -433,7 +433,7 @@ public final class JobParserTest {
 
     private void checkTransitionElements(final List<Transition> transitions, final String nextAttributeValue) throws Exception {
         final int transitionElementCount = nextAttributeValue == null ? 4 : 3;
-        Assert.assertEquals(transitionElementCount, transitions.size());
+        Assertions.assertEquals(transitionElementCount, transitions.size());
         boolean foundNext = false;
         boolean foundStop = false;
         boolean foundFail = false;
@@ -441,40 +441,40 @@ public final class JobParserTest {
         for (final Transition e : transitions) {
             if (e instanceof Transition.Next) {
                 if (nextAttributeValue != null) {
-                    Assert.fail("Cannot have both next attribute and next element. Next attribute is already set to " + nextAttributeValue);
+                    Assertions.fail("Cannot have both next attribute and next element. Next attribute is already set to " + nextAttributeValue);
                 }
                 final Transition.Next next = (Transition.Next) e;
-                Assert.assertEquals("on1", next.getOn());
-                Assert.assertEquals("to1", next.getTo());
+                Assertions.assertEquals("on1", next.getOn());
+                Assertions.assertEquals("to1", next.getTo());
                 foundNext = true;
             } else if (e instanceof Transition.Fail) {
                 final Transition.Fail fail = (Transition.Fail) e;
-                Assert.assertEquals("on1", fail.getOn());
-                Assert.assertEquals("exit-status1", fail.getExitStatus());
+                Assertions.assertEquals("on1", fail.getOn());
+                Assertions.assertEquals("exit-status1", fail.getExitStatus());
                 foundFail = true;
             } else if (e instanceof Transition.End) {
                 final Transition.End end = (Transition.End) e;
-                Assert.assertEquals("on1", end.getOn());
-                Assert.assertEquals("exit-status1", end.getExitStatus());
+                Assertions.assertEquals("on1", end.getOn());
+                Assertions.assertEquals("exit-status1", end.getExitStatus());
                 foundEnd = true;
             } else if (e instanceof Transition.Stop) {
                 final Transition.Stop stop = (Transition.Stop) e;
-                Assert.assertEquals("on1", stop.getOn());
-                Assert.assertEquals("exit-status1", stop.getExitStatus());
-                Assert.assertEquals("restart1", stop.getRestart());
+                Assertions.assertEquals("on1", stop.getOn());
+                Assertions.assertEquals("exit-status1", stop.getExitStatus());
+                Assertions.assertEquals("restart1", stop.getRestart());
                 foundStop = true;
             } else {
-                Assert.fail("Unexpected job transition type: " + e);
+                Assertions.fail("Unexpected job transition type: " + e);
             }
         }
         if (nextAttributeValue == null) {
-            Assert.assertEquals(true, foundNext);
+            Assertions.assertEquals(true, foundNext);
         } else {
-            Assert.assertEquals(false, foundNext);
-            Assert.assertEquals("next1", nextAttributeValue);
+            Assertions.assertEquals(false, foundNext);
+            Assertions.assertEquals("next1", nextAttributeValue);
         }
-        Assert.assertEquals(true, foundStop);
-        Assert.assertEquals(true, foundFail);
-        Assert.assertEquals(true, foundEnd);
+        Assertions.assertEquals(true, foundStop);
+        Assertions.assertEquals(true, foundFail);
+        Assertions.assertEquals(true, foundEnd);
     }
 }

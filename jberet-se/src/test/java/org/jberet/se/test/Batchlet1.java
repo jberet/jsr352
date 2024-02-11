@@ -20,7 +20,7 @@ import jakarta.batch.api.Batchlet;
 import jakarta.batch.runtime.context.JobContext;
 import jakarta.batch.runtime.context.StepContext;
 import org.jberet.util.BatchUtil;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 @Named
 @Dependent
@@ -82,20 +82,20 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
 
         //batchlet1 in step1 does not have "action" property
         if (stepName.equals("step1")) {
-            Assert.assertEquals("Batchlet1", prop1);
-            Assert.assertEquals("defaultName", defaultName);
-            Assert.assertEquals(null, noSuchProperty);
-            //Assert.assertEquals("defaultValue", defaultValue);
-            Assert.assertEquals("jobParamDefault", jobParam);
-            Assert.assertEquals("foo", foo);
-            Assert.assertEquals(1, intProp);
-            Assert.assertEquals(6, jobContext.getProperties().size());
-            Assert.assertEquals(4, stepContext.getProperties().size());
-            Assert.assertEquals("JSL.STOP", multiLevel);
+            Assertions.assertEquals("Batchlet1", prop1);
+            Assertions.assertEquals("defaultName", defaultName);
+            Assertions.assertEquals(null, noSuchProperty);
+            //Assertions.assertEquals("defaultValue", defaultValue);
+            Assertions.assertEquals("jobParamDefault", jobParam);
+            Assertions.assertEquals("foo", foo);
+            Assertions.assertEquals(1, intProp);
+            Assertions.assertEquals(6, jobContext.getProperties().size());
+            Assertions.assertEquals(4, stepContext.getProperties().size());
+            Assertions.assertEquals("JSL.STOP", multiLevel);
             //System.out.printf("Job properties from injected JobContext: %s%n", jobContext.getProperties());
             //System.out.printf("Step properties from injected StepContext: %s%n", stepContext.getProperties());
         } else if (stepName.equals("step2")) {
-            Assert.assertNotNull(action);
+            Assertions.assertNotNull(action);
         }
 
         //stepContext.setPersistentUserData(new Integer(1));  // integer works fine.

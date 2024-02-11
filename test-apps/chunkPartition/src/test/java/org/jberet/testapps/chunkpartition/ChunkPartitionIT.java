@@ -18,10 +18,10 @@ import jakarta.batch.runtime.Metric;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.metric.MetricImpl;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ChunkPartitionIT extends AbstractIT {
     static final String jobXml = "org.jberet.test.chunkPartition";
@@ -36,17 +36,17 @@ public class ChunkPartitionIT extends AbstractIT {
             params.setProperty("thread.count", String.valueOf(i));
             params.setProperty("writer.sleep.time", "100");
             startJobAndWait(jobXml);
-            Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+            Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
             final String exitStatus = stepExecution0.getExitStatus();
             System.out.printf("Step exit status: %s%n", exitStatus);
-            Assert.assertEquals(true, exitStatus.startsWith("PASS"));
+            Assertions.assertEquals(true, exitStatus.startsWith("PASS"));
         }
 
         params.setProperty("thread.count", "1");
         params.setProperty("skip.thread.check", "true");
         params.setProperty("writer.sleep.time", "0");
         startJobAndWait(jobXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -60,8 +60,8 @@ public class ChunkPartitionIT extends AbstractIT {
         startJobAndWait(jobChunkPartitionFailComplete);
 
         //no skippable or retryable exceptions are configured, so this job execution will just fail
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
         final List<PartitionExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
 
         //2 should completed and 1 should failed, but the order can be random
@@ -80,18 +80,18 @@ public class ChunkPartitionIT extends AbstractIT {
                 throw new RuntimeException("Unexpected partition execution batch status " + batchStatus);
             }
         }
-        Assert.assertEquals(2, completedPartitionCount);
-        Assert.assertEquals(1, failedPartitionCount);
+        Assertions.assertEquals(2, completedPartitionCount);
+        Assertions.assertEquals(1, failedPartitionCount);
         System.out.printf("StepExecution id: %s, metrics: %s%n", stepExecution0.getStepExecutionId(),
                 java.util.Arrays.toString(stepExecution0.getMetrics()));
-        Assert.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(9, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(26, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(23, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.FILTER_COUNT));
+        Assertions.assertEquals(1, MetricImpl.getMetric(stepExecution0, Metric.MetricType.ROLLBACK_COUNT));
+        Assertions.assertEquals(9, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
+        Assertions.assertEquals(26, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
+        Assertions.assertEquals(23, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.PROCESS_SKIP_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_SKIP_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_SKIP_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.FILTER_COUNT));
     }
 
     @Test
@@ -103,26 +103,26 @@ public class ChunkPartitionIT extends AbstractIT {
         this.params = new Properties();
         final int numOfPartitions = 20;
         startJobAndWait(jobChunkPartitionMetricsCombined);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
         final List<PartitionExecutionImpl> partitionExecutions = stepExecution0.getPartitionExecutions();
 
         for (final PartitionExecutionImpl e : partitionExecutions) {
             final BatchStatus batchStatus = e.getBatchStatus();
-            Assert.assertEquals(BatchStatus.COMPLETED, e.getBatchStatus());
+            Assertions.assertEquals(BatchStatus.COMPLETED, e.getBatchStatus());
         }
-        Assert.assertEquals(numOfPartitions, partitionExecutions.size());
+        Assertions.assertEquals(numOfPartitions, partitionExecutions.size());
 
         System.out.printf("StepExecution id: %s, metrics: %s%n", stepExecution0.getStepExecutionId(),
                 java.util.Arrays.toString(stepExecution0.getMetrics()));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.ROLLBACK_COUNT));
-        Assert.assertEquals(4 * numOfPartitions, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
-        Assert.assertEquals(200, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
-        Assert.assertEquals(200, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.PROCESS_SKIP_COUNT));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_SKIP_COUNT));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_SKIP_COUNT));
-        Assert.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.FILTER_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.ROLLBACK_COUNT));
+        Assertions.assertEquals(4 * numOfPartitions, MetricImpl.getMetric(stepExecution0, Metric.MetricType.COMMIT_COUNT));
+        Assertions.assertEquals(200, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_COUNT));
+        Assertions.assertEquals(200, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.PROCESS_SKIP_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.READ_SKIP_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.WRITE_SKIP_COUNT));
+        Assertions.assertEquals(0, MetricImpl.getMetric(stepExecution0, Metric.MetricType.FILTER_COUNT));
     }
 
     /**

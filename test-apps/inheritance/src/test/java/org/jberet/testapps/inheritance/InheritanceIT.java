@@ -14,7 +14,7 @@ import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class InheritanceIT extends AbstractIT {
@@ -26,14 +26,14 @@ public class InheritanceIT extends AbstractIT {
     @Test
     public void inheritance() throws Exception {
         startJobAndWait("inheritance.xml");
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(2, jobExecution.getStepExecutions().size());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(2, jobExecution.getStepExecutions().size());
 
-        Assert.assertEquals("step1", stepExecution0.getStepName());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        Assertions.assertEquals("step1", stepExecution0.getStepName());
+        Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
 
         final StepExecution stepExecution1 = jobExecution.getStepExecutions().get(1);
-        Assert.assertEquals("flow0.step1", stepExecution1.getStepName());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution1.getBatchStatus());
+        Assertions.assertEquals("flow0.step1", stepExecution1.getStepName());
+        Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution1.getBatchStatus());
     }
 }

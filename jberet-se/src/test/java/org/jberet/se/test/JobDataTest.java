@@ -32,11 +32,11 @@ import jakarta.batch.runtime.StepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.spi.PropertyKey;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.jberet.se.test.Batchlet1Test.createParams;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This test verifies the job data in jdbc job repository from executing the previous test class Batchlet1Test.
@@ -68,7 +68,7 @@ public class JobDataTest {
         System.out.printf("In testJobData, jobInstance: %s, id: %s%n", jobInstance, jobInstance.getInstanceId());
 
         assertEquals(Batchlet1Test.jobName, jobInstance.getJobName());
-        Assert.assertNotEquals(0, jobInstance.getInstanceId());
+        Assertions.assertNotEquals(0, jobInstance.getInstanceId());
 
         final List<JobExecution> jobExecutions = jobOperator.getJobExecutions(jobInstance);
         //the job was executed 2 times during Batchlet1Test for the latest job instance
@@ -85,14 +85,14 @@ public class JobDataTest {
         final Date startTime = jobExecution.getStartTime();
         final Properties jobParameters = jobExecution.getJobParameters();
         assertEquals(Batchlet1Test.jobName, jobExecution.getJobName());
-        Assert.assertNotEquals(0, jobExecution.getExecutionId());
+        Assertions.assertNotEquals(0, jobExecution.getExecutionId());
         assertEquals(BatchStatus.STOPPED, batchStatus);
         assertEquals(Batchlet1.ACTION_STOP, exitStatus);
-        Assert.assertNotNull(createTime);
-        Assert.assertNotNull(lastUpdatedTime);
-        Assert.assertNotNull(endTime);
-        Assert.assertNotNull(startTime);
-        Assert.assertNotNull(jobParameters);
+        Assertions.assertNotNull(createTime);
+        Assertions.assertNotNull(lastUpdatedTime);
+        Assertions.assertNotNull(endTime);
+        Assertions.assertNotNull(startTime);
+        Assertions.assertNotNull(jobParameters);
         System.out.printf("JobExecution id: %s, batchStatus: %s, exitStatus: %s, createTime: %s, endTime: %s, lastUpdatedTime: %s, startTime: %s, jobParameters: %s%n",
                 jobExecution.getExecutionId(), batchStatus, exitStatus, createTime, endTime, lastUpdatedTime, startTime, jobParameters);
 
@@ -111,15 +111,15 @@ public class JobDataTest {
                 stepExecution.getStepExecutionId(), stepName1, batchStatus1, exitStatus1, startTime1, endTime1, persistentUserData,
                 Arrays.toString(metrics));
 
-        Assert.assertNotNull(stepExecution.getStepExecutionId());
+        Assertions.assertNotNull(stepExecution.getStepExecutionId());
         assertEquals(stepName, stepName1);
         assertEquals(BatchStatus.COMPLETED, batchStatus1);
         assertEquals(Batchlet1.ACTION_STOP, exitStatus1);
-        Assert.assertNotNull(startTime1);
-        Assert.assertNotNull(endTime1);
-        //Assert.assertEquals(new Integer(1), persistentUserData);
+        Assertions.assertNotNull(startTime1);
+        Assertions.assertNotNull(endTime1);
+        //Assertions.assertEquals(new Integer(1), persistentUserData);
         assertEquals("Persistent User Data", persistentUserData);
-        Assert.assertNotNull(metrics);
+        Assertions.assertNotNull(metrics);
 
         restartJobMatchOther(jobExecution.getExecutionId());
     }

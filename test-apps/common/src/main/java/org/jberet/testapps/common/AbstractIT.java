@@ -27,7 +27,7 @@ import org.jberet.operations.JobOperatorImpl;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.spi.JobOperatorContext;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Before;
 
 abstract public class AbstractIT {
@@ -168,7 +168,7 @@ abstract public class AbstractIT {
         for (final Metric m : metrics) {
             if (m.getType() == metricType) {
                 metricFound = true;
-                Assert.assertEquals(value, m.getValue());
+                Assertions.assertEquals(value, m.getValue());
             }
         }
         if (!metricFound) {
@@ -179,7 +179,7 @@ abstract public class AbstractIT {
     protected void assertNoSuchJobExecution(final long i) {
         try {
             final JobExecution j = jobOperator.getJobExecution(i);
-            Assert.fail("Expecting NoSuchJobExecutionException, but got " + j);
+            Assertions.fail("Expecting NoSuchJobExecutionException, but got " + j);
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }

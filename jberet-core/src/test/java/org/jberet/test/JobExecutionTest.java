@@ -15,7 +15,8 @@ import jakarta.batch.runtime.BatchStatus;
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for {@code JobExecutionImpl}.

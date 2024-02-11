@@ -13,7 +13,7 @@ package org.jberet.testapps.jdbcBatchletReaderWriter;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
@@ -77,6 +77,6 @@ public class JdbcBatchletReaderWriterIT extends AbstractIT {
         params.setProperty("parameterTypes", parameterTypes);
 
         startJobAndWait(jdbcBatchletReaderWriterJob);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 }

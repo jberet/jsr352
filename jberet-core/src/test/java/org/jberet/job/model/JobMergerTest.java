@@ -16,7 +16,7 @@ import jakarta.batch.operations.JobStartException;
 
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class JobMergerTest {
@@ -59,12 +59,12 @@ public class JobMergerTest {
     private void jobStartException(final String jobName, final String failureMessage) {
         try {
             loadJob(jobName);
-            Assert.fail(failureMessage);
+            Assertions.fail(failureMessage);
         } catch (final JobStartException e) {
             e.printStackTrace();
             System.out.printf("Got expected %s%n", e);
         } catch (final Exception e) {
-            Assert.fail(failureMessage + ", but got " + e);
+            Assertions.fail(failureMessage + ", but got " + e);
         }
     }
 
@@ -72,9 +72,9 @@ public class JobMergerTest {
     public void propertiesListenersFromParentJob() throws Exception {
         //parent job-properties-listeners-parent.xml
         final Job child = loadJob("job-properties-listeners-child.xml");
-        Assert.assertEquals("true", child.getRestartable());
-        Assert.assertEquals(2, child.getProperties().getNameValues().size());
-        Assert.assertEquals(2, child.getListeners().getListeners().size());
+        Assertions.assertEquals("true", child.getRestartable());
+        Assertions.assertEquals(2, child.getProperties().getNameValues().size());
+        Assertions.assertEquals(2, child.getListeners().getListeners().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "parent2"});
     }
 
@@ -82,17 +82,17 @@ public class JobMergerTest {
     public void mergeFalse() throws Exception {
         //parent job-merge-false-parent.xml
         final Job child = loadJob("job-merge-false-child.xml");
-        Assert.assertEquals("false", child.getRestartable());
-        Assert.assertEquals(0, child.getProperties().getNameValues().size());
-        Assert.assertEquals(0, child.getListeners().getListeners().size());
+        Assertions.assertEquals("false", child.getRestartable());
+        Assertions.assertEquals(0, child.getProperties().getNameValues().size());
+        Assertions.assertEquals(0, child.getListeners().getListeners().size());
     }
 
     @Test
     public void mergeTrue() throws Exception {
         //parent job-merge-true-parent.xml
         final Job child = loadJob("job-merge-true-child.xml");
-        Assert.assertEquals(2, child.getProperties().getNameValues().size());
-        Assert.assertEquals(2, child.getListeners().getListeners().size());
+        Assertions.assertEquals(2, child.getProperties().getNameValues().size());
+        Assertions.assertEquals(2, child.getListeners().getListeners().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"});
     }
 
@@ -108,32 +108,32 @@ public class JobMergerTest {
         final String jobName = "job-with-xml-entities";
         Job job = loadJob(jobName);
 
-        Assert.assertEquals(jobName, job.getId());
-        Assert.assertEquals(true, job.getRestartableBoolean());
-        Assert.assertEquals(null, job.getRestartable());
-        Assert.assertEquals(null, job.getParent());
-        Assert.assertEquals(null, job.getJslName());
+        Assertions.assertEquals(jobName, job.getId());
+        Assertions.assertEquals(true, job.getRestartableBoolean());
+        Assertions.assertEquals(null, job.getRestartable());
+        Assertions.assertEquals(null, job.getParent());
+        Assertions.assertEquals(null, job.getJslName());
 
         final List<JobElement> jobElements = job.getJobElements();
-        Assert.assertEquals(1, jobElements.size());
+        Assertions.assertEquals(1, jobElements.size());
         final Step step = (Step) jobElements.get(0);
-        Assert.assertEquals(jobName + ".step1", step.getId());
-        Assert.assertEquals(null, step.getAttributeNext());
-        Assert.assertEquals(null, step.getChunk());
+        Assertions.assertEquals(jobName + ".step1", step.getId());
+        Assertions.assertEquals(null, step.getAttributeNext());
+        Assertions.assertEquals(null, step.getChunk());
 
         final RefArtifact batchlet = step.getBatchlet();
-        Assert.assertEquals("batchlet1", batchlet.getRef());
-        Assert.assertEquals(null, batchlet.getScript());
-        Assert.assertEquals(null, batchlet.getProperties());
+        Assertions.assertEquals("batchlet1", batchlet.getRef());
+        Assertions.assertEquals(null, batchlet.getScript());
+        Assertions.assertEquals(null, batchlet.getProperties());
 
         //check resolved XML entities
         final Properties properties = job.getProperties();
-        Assert.assertEquals(1, properties.size());
-        Assert.assertEquals("common.property.value", properties.get("common.property.key"));
+        Assertions.assertEquals(1, properties.size());
+        Assertions.assertEquals("common.property.value", properties.get("common.property.key"));
         final List<RefArtifact> listeners = job.getListeners().getListeners();
-        Assert.assertEquals(2, listeners.size());
-        Assert.assertEquals("EL1", listeners.get(0).getRef());
-        Assert.assertEquals("EL2", listeners.get(1).getRef());
+        Assertions.assertEquals(2, listeners.size());
+        Assertions.assertEquals("EL1", listeners.get(0).getRef());
+        Assertions.assertEquals("EL2", listeners.get(1).getRef());
     }
 
     /**

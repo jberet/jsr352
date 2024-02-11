@@ -17,7 +17,7 @@ import jakarta.batch.api.listener.AbstractStepListener;
 import jakarta.batch.api.listener.StepListener;
 import jakarta.batch.runtime.context.JobContext;
 import jakarta.batch.runtime.context.StepContext;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 public class StepListener3 extends AbstractStepListener implements StepListener {
     @Inject @BatchProperty(name="step-prop")
@@ -44,17 +44,17 @@ public class StepListener3 extends AbstractStepListener implements StepListener 
     @Override
     public void beforeStep() throws Exception {
         System.out.printf("In beforeStep of %s%n", this);
-        Assert.assertEquals(null, stepProp);
-        Assert.assertEquals("step-listener-prop", listenerProp);
-        Assert.assertEquals("job-prop", referencedProp);
-        Assert.assertEquals("step-prop", referencedStepProp);
-        Assert.assertEquals("step-prop-2", referenceJobProp2);
+        Assertions.assertEquals(null, stepProp);
+        Assertions.assertEquals("step-listener-prop", listenerProp);
+        Assertions.assertEquals("job-prop", referencedProp);
+        Assertions.assertEquals("step-prop", referencedStepProp);
+        Assertions.assertEquals("step-prop-2", referenceJobProp2);
 
-        Assert.assertEquals(2, jobContext.getProperties().size());
-        Assert.assertEquals("job-prop", jobContext.getProperties().get("job-prop"));
+        Assertions.assertEquals(2, jobContext.getProperties().size());
+        Assertions.assertEquals("job-prop", jobContext.getProperties().get("job-prop"));
 
-        Assert.assertEquals(2, stepContext.getProperties().size());
-        Assert.assertEquals("step-prop", stepContext.getProperties().get("step-prop"));
+        Assertions.assertEquals(2, stepContext.getProperties().size());
+        Assertions.assertEquals("step-prop", stepContext.getProperties().get("step-prop"));
 
     }
 

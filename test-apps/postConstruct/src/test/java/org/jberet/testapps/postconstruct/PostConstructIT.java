@@ -10,12 +10,12 @@
 
 package org.jberet.testapps.postconstruct;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.AfterClass;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
 
@@ -115,7 +115,7 @@ public class PostConstructIT extends AbstractIT {
     @Test
     public void wrongStepListenerName() throws Exception {
         startJobAndWait("wrongStepListenerName");
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         System.out.printf("Job exit status: %s%n", jobExecution.getExitStatus());
     }
 

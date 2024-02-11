@@ -20,7 +20,7 @@ import java.lang.reflect.Modifier;
 import jakarta.batch.runtime.JobInstance;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +45,7 @@ public class SerializationTests extends AbstractIT {
         final JobInstance serializedJobInstance = doSerialization(jobInstance, JobInstance.class);
 
         /// The job instance checks equals checks the id which should always be equal
-        Assert.assertEquals(jobInstance, serializedJobInstance);
+        Assertions.assertEquals(jobInstance, serializedJobInstance);
         // Check each field in the JobInstance only for equality, currently each field overrides equals which will work
         // for now. If this changes this test may break and this really could be removed.
         reflectiveEquals(jobInstance, serializedJobInstance, false);
@@ -65,7 +65,7 @@ public class SerializationTests extends AbstractIT {
 
     protected void reflectiveEquals(final Object one, final Object two, final boolean recursive) throws IllegalAccessException {
         final Class<?> type = one.getClass();
-        Assert.assertEquals(String.format("Type for %s doesn't match type for %s", one, two), type, two.getClass());
+        Assertions.assertEquals(String.format("Type for %s doesn't match type for %s", one, two), type, two.getClass());
         // Get all the fields
         final Field[] fields = one.getClass().getDeclaredFields();
         for (Field field : fields) {
@@ -78,7 +78,7 @@ public class SerializationTests extends AbstractIT {
                 if (recursive && !(fieldType.isPrimitive() || fieldType.getName().startsWith("java"))) {
                     reflectiveEquals(valueOne, valueTwo, false);
                 }
-                Assert.assertEquals(String.format("Value %s not equal to %s for field %s in class %s", valueOne, valueTwo, field, type), valueOne, valueTwo);
+                Assertions.assertEquals(String.format("Value %s not equal to %s for field %s in class %s", valueOne, valueTwo, field, type), valueOne, valueTwo);
             }
         }
     }

@@ -20,7 +20,7 @@ import org.jberet.testapps.common.AbstractIT;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Ignore("Need to manually run other Vert.x nodes first")
 public class ClusterIT extends AbstractIT {

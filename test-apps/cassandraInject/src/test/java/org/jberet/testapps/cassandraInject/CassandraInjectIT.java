@@ -15,7 +15,7 @@ import jakarta.batch.runtime.BatchStatus;
 import com.datastax.driver.core.Cluster;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.AfterClass;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
@@ -63,6 +63,6 @@ public class CassandraInjectIT extends AbstractIT {
         params.setProperty("beanType", java.util.List.class.getName());
         params.setProperty("cql", cql);
         startJobAndWait(simpleJob);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 }

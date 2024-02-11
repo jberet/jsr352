@@ -15,7 +15,7 @@ import jakarta.batch.api.Decider;
 import jakarta.batch.runtime.StepExecution;
 import jakarta.inject.Named;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * This decider follows a split, so there should be multiple StepExecution.
@@ -24,7 +24,7 @@ import org.junit.Assert;
 public class Decider2 implements Decider {
     @Override
     public String decide(final StepExecution[] executions) throws Exception {
-        Assert.assertEquals(2, executions.length);
+        Assertions.assertEquals(2, executions.length);
         System.out.printf("In decider2 StepExecution[]: %s%n", Arrays.toString(executions));
         for (final StepExecution e : executions) {
             System.out.printf("batch status: %s, exit status: %s%n", e.getBatchStatus(), e.getExitStatus());

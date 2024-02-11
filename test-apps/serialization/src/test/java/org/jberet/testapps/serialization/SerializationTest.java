@@ -11,7 +11,7 @@
 package org.jberet.testapps.serialization;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import jakarta.json.bind.JsonbBuilder;
@@ -24,8 +24,8 @@ public class SerializationTest extends AbstractIT {
         final String serialized = new String(stepExecution0.getPersistentUserDataSerialized());
         final SerializableBatchlet.User user =
             JsonbBuilder.newBuilder().build().fromJson(serialized, SerializableBatchlet.User.class);
-        Assert.assertEquals("Naruto", user.getFirstName());
-        Assert.assertEquals("Uzumaki", user.getLastName());
-        Assert.assertEquals(17, user.getAge());
+        Assertions.assertEquals("Naruto", user.getFirstName());
+        Assertions.assertEquals("Uzumaki", user.getLastName());
+        Assertions.assertEquals(17, user.getAge());
     }
 }

@@ -13,7 +13,7 @@ package org.jberet.testapps.cdiscopes.stepscoped;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -36,9 +36,9 @@ public class StepScopedIT extends AbstractIT {
         //same step, different artifact, injected Foo (into both batchlet and step listener) should be the same
 
         startJobAndWait(stepScopedTest);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(stepName1Repeat3, stepExecutions.get(0).getExitStatus());
-        Assert.assertEquals(stepName2, stepExecutions.get(1).getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(stepName1Repeat3, stepExecutions.get(0).getExitStatus());
+        Assertions.assertEquals(stepName2, stepExecutions.get(1).getExitStatus());
 
         stepExecutions.clear();
         jobExecution = null;
@@ -49,22 +49,22 @@ public class StepScopedIT extends AbstractIT {
 
         //run a different job (stepScoped2) to check that a different Foo instance is used within the scope of stepScoped2
         startJobAndWait(stepScopedTest2);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(job2StepName1, stepExecutions.get(0).getExitStatus());
-        Assert.assertEquals(job2StepName2, stepExecutions.get(1).getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(job2StepName1, stepExecutions.get(0).getExitStatus());
+        Assertions.assertEquals(job2StepName2, stepExecutions.get(1).getExitStatus());
     }
 
     @Test
     public void stepScopedPartitionedTest() throws Exception {
         startJobAndWait(stepScopedPartitionedTest);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
 
         //step2 exit status is set in analyzer, to foo.stepNames.
         final String stepExitStatus = stepExecution0.getExitStatus();
 
         //beforeStep, afterStep, batchlet * 3 partitioins = 5
         //and there are 3 injections: Foo, FooMethodTarget & FooFieldTarget
-        Assert.assertEquals(
+        Assertions.assertEquals(
 "stepScopedPartitioned.step1TYPE stepScopedPartitioned.step1TYPE stepScopedPartitioned.step1TYPE stepScopedPartitioned.step1TYPE stepScopedPartitioned.step1TYPE stepScopedPartitioned.step1METHOD stepScopedPartitioned.step1METHOD stepScopedPartitioned.step1METHOD stepScopedPartitioned.step1METHOD stepScopedPartitioned.step1METHOD stepScopedPartitioned.step1FIELD stepScopedPartitioned.step1FIELD stepScopedPartitioned.step1FIELD stepScopedPartitioned.step1FIELD stepScopedPartitioned.step1FIELD",
                 stepExitStatus);
     }
@@ -73,7 +73,7 @@ public class StepScopedIT extends AbstractIT {
     public void stepScopedFail() throws Exception {
         //injecting @StepScoped Foo into a job listener will fail
         startJobAndWait(stepScopedFailedTest);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
 }

@@ -13,7 +13,7 @@ package org.jberet.testapps.split;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -41,7 +41,7 @@ public class SplitIT extends AbstractIT {
         //batchlet2 sleep time, and so the split and job execution will timeout and fail
         params = null;
         startJobAndWait(splitTimeoutPropertyXml);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -50,8 +50,8 @@ public class SplitIT extends AbstractIT {
         //so the split and job execution will wait sufficiently long to complete
         params.setProperty("jberet.split.timeout.seconds", String.valueOf(7));
         startJobAndWait(splitTimeoutPropertyXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
     }
 
     @Test
@@ -59,8 +59,8 @@ public class SplitIT extends AbstractIT {
         //no split timeout value is configured anywhere, the split execution should wait for flow to complete
         params = null;
         startJobAndWait(splitWithoutTimeoutPropertyXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
     }
 
     @Test
@@ -69,8 +69,8 @@ public class SplitIT extends AbstractIT {
         //so the split and job execution will wait long enough and complete
         params.setProperty("jberet.split.timeout.seconds", String.valueOf(7));
         startJobAndWait(splitWithoutTimeoutPropertyXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
     }
 
     @Test
@@ -79,7 +79,7 @@ public class SplitIT extends AbstractIT {
         //so the split and job execution will just timeout and fail
         params.setProperty("jberet.split.timeout.seconds", String.valueOf(3));
         startJobAndWait(splitWithoutTimeoutPropertyXml);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
     }
 
     @Test
@@ -92,11 +92,11 @@ public class SplitIT extends AbstractIT {
         final String stepExitStatus = "stop";
         params.setProperty("stepExitStatus", stepExitStatus);
         startJobAndWait(splitTerminationStatusXml);
-        Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
-        Assert.assertEquals(stepExitStatus, jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(stepExitStatus, jobExecution.getExitStatus());
 
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(stepExitStatus, stepExecution0.getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        Assertions.assertEquals(stepExitStatus, stepExecution0.getExitStatus());
     }
 
     @Test
@@ -104,50 +104,50 @@ public class SplitIT extends AbstractIT {
         final String stepExitStatus = "fail";
         params.setProperty("stepExitStatus", stepExitStatus);
         startJobAndWait(splitTerminationStatusXml);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
 
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(stepExitStatus, stepExecution0.getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        Assertions.assertEquals(stepExitStatus, stepExecution0.getExitStatus());
     }
 
     @Test
     public void splitTerminationException() throws Exception {
         params.setProperty("fail", "true");
         startJobAndWait(splitTerminationStatusXml);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
 
-        Assert.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED.name(), stepExecution0.getExitStatus());
-        Assert.assertEquals(1, stepExecutions.size());
+        Assertions.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED.name(), stepExecution0.getExitStatus());
+        Assertions.assertEquals(1, stepExecutions.size());
     }
 
     @Test
     public void splitTerminationEnd() throws Exception {
         params.setProperty("endCondition", "*");
         startJobAndWait(splitTerminationStatusXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
-        Assert.assertEquals(1, stepExecutions.size());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), stepExecution0.getExitStatus());
+        Assertions.assertEquals(1, stepExecutions.size());
+        Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), stepExecution0.getExitStatus());
     }
 
     @Test
     public void splitTerminationNext() throws Exception {
         //params.setProperty("endCondition", "not set");
         startJobAndWait(splitTerminationStatusXml);
-        Assert.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
 
-        Assert.assertEquals(2, stepExecutions.size());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED.name(), stepExecution0.getExitStatus());
+        Assertions.assertEquals(2, stepExecutions.size());
+        Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED.name(), stepExecution0.getExitStatus());
 
-        Assert.assertEquals(BatchStatus.FAILED, stepExecutions.get(1).getBatchStatus());
-        Assert.assertEquals(BatchStatus.FAILED.name(), stepExecutions.get(1).getExitStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, stepExecutions.get(1).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED.name(), stepExecutions.get(1).getExitStatus());
     }
 
 }

@@ -13,7 +13,7 @@ package org.jberet.testapps.infinispanRepositoryFile;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class FileInfinispanRepositoryIT extends AbstractIT {
@@ -25,7 +25,7 @@ public class FileInfinispanRepositoryIT extends AbstractIT {
     @Test
     public void partitionWithInfinispanFile() throws Exception {
         startJobAndWait(infinispanRepositoryJobXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 
 }

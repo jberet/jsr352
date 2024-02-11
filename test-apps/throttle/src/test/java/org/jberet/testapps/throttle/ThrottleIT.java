@@ -17,7 +17,7 @@ import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
@@ -94,7 +94,7 @@ public class ThrottleIT extends AbstractIT {
         for (final Long id : jobExecutionIds) {
             final JobExecutionImpl exe = (JobExecutionImpl) jobOperator.getJobExecution(id);
             awaitTermination(exe);
-            Assert.assertEquals(BatchStatus.COMPLETED, exe.getBatchStatus());
+            Assertions.assertEquals(BatchStatus.COMPLETED, exe.getBatchStatus());
         }
         System.out.printf("%nJobExecution ids: %s%n", jobExecutionIds);
     }

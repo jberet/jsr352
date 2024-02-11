@@ -10,7 +10,7 @@
 
 package org.jberet.se.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;

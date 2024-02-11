@@ -20,13 +20,13 @@
 package org.jberet.test.deployment;
 
 import io.restassured.RestAssured;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class SimpleITest {
     @Test
     public void testSimple() throws Exception {
-        Assert.assertEquals("OK",
+        Assertions.assertEquals("OK",
                 RestAssured.given().baseUri("http://localhost/test-deployment").basePath("/simple").port(8080)
                         .get().asString());
     }

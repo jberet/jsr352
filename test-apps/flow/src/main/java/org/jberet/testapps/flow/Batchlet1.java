@@ -15,7 +15,7 @@ import jakarta.inject.Named;
 
 import jakarta.batch.api.BatchProperty;
 import org.jberet.testapps.common.Batchlet0;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 @Named
 public class Batchlet1 extends Batchlet0 {
@@ -29,7 +29,7 @@ public class Batchlet1 extends Batchlet0 {
 
         final String stepToVerify = "step1";
         if (stepContext.getStepName().equals(stepToVerify)) {
-            Assert.assertEquals("step-prop", referencingStepProp);
+            Assertions.assertEquals("step-prop", referencingStepProp);
         }
 
         return result;

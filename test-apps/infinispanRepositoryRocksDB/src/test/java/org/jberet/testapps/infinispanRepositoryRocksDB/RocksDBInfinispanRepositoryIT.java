@@ -13,7 +13,7 @@ package org.jberet.testapps.infinispanRepositoryRocksDB;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
@@ -29,6 +29,6 @@ public class RocksDBInfinispanRepositoryIT extends AbstractIT {
     @Test
     public void partitionWithInfinispanRocksDB() throws Exception {
         startJobAndWait(infinispanRepositoryJobXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 }

@@ -12,7 +12,7 @@ package org.jberet.job.model;
 
 import java.util.LinkedList;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class StepMergerTest {
@@ -20,26 +20,26 @@ public class StepMergerTest {
     public void propertiesListenersFromParentJob() throws Exception {
         final Job childJob = JobMergerTest.loadJob("step-properties-listeners-child.xml");
         final Step child = getStep(childJob, "step-properties-listeners-child-step");
-        Assert.assertEquals(2, child.getProperties().getNameValues().size());
+        Assertions.assertEquals(2, child.getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "parent2"});
-        Assert.assertEquals(2, child.getListeners().getListeners().size());
+        Assertions.assertEquals(2, child.getListeners().getListeners().size());
     }
 
     @Test
     public void mergeFalse() throws Exception {
         final Job childJob = JobMergerTest.loadJob("step-merge-false-child.xml");
         final Step child = getStep(childJob, "step-merge-false-child-step");
-        Assert.assertEquals(0, child.getProperties().getNameValues().size());
-        Assert.assertEquals(0, child.getListeners().getListeners().size());
+        Assertions.assertEquals(0, child.getProperties().getNameValues().size());
+        Assertions.assertEquals(0, child.getListeners().getListeners().size());
     }
 
     @Test
     public void mergeTrue() throws Exception {
         final Job childJob = JobMergerTest.loadJob("step-merge-true-child.xml");
         final Step child = getStep(childJob, "step-merge-true-child-step");
-        Assert.assertEquals(2, child.getProperties().getNameValues().size());
+        Assertions.assertEquals(2, child.getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"});
-        Assert.assertEquals(2, child.getListeners().getListeners().size());
+        Assertions.assertEquals(2, child.getListeners().getListeners().size());
     }
 
     @Test
@@ -49,21 +49,21 @@ public class StepMergerTest {
         Step child;
         for (final String c : child1And2) {
             child = getStep(childJob, c);
-            Assert.assertEquals(2, child.getProperties().getNameValues().size());
+            Assertions.assertEquals(2, child.getProperties().getNameValues().size());
             JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child"}, true);
-            //Assert.assertEquals(3, child.getListeners().getListeners().size());
-            Assert.assertEquals(2, child.getListeners().getListeners().size());  //remove dup listeners
+            //Assertions.assertEquals(3, child.getListeners().getListeners().size());
+            Assertions.assertEquals(2, child.getListeners().getListeners().size());  //remove dup listeners
             JobMergerTest.listenersContain(child.getListeners(), new String[]{"parent-listener", "child-listener"});
-            Assert.assertEquals("child-batchlet", child.getBatchlet().getRef());
+            Assertions.assertEquals("child-batchlet", child.getBatchlet().getRef());
         }
 
         child = getStep(childJob, "step-same-file-child-child");
-        Assert.assertEquals(3, child.getProperties().getNameValues().size());
+        Assertions.assertEquals(3, child.getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"parent", "child", "child-child"}, true);
-        //Assert.assertEquals(4, child.getListeners().getListeners().size());
-        Assert.assertEquals(3, child.getListeners().getListeners().size());  //remove dup listeners
+        //Assertions.assertEquals(4, child.getListeners().getListeners().size());
+        Assertions.assertEquals(3, child.getListeners().getListeners().size());  //remove dup listeners
         JobMergerTest.listenersContain(child.getListeners(), new String[]{"parent-listener", "child-listener", "child-child-listener"});
-        Assert.assertEquals("child-child-batchlet", child.getBatchlet().getRef());
+        Assertions.assertEquals("child-child-batchlet", child.getBatchlet().getRef());
     }
 
     @Test
@@ -81,11 +81,11 @@ public class StepMergerTest {
     }
 
     private void emptyStep(final Step child) throws Exception {
-        Assert.assertEquals(1, child.getProperties().getNameValues().size());
+        Assertions.assertEquals(1, child.getProperties().getNameValues().size());
         JobMergerTest.propertiesContain(child.getProperties(), new String[]{"child"}, true);
-        Assert.assertEquals(1, child.getListeners().getListeners().size());
+        Assertions.assertEquals(1, child.getListeners().getListeners().size());
         JobMergerTest.listenersContain(child.getListeners(), new String[]{"child-listener"});
-        Assert.assertEquals("child-batchlet", child.getBatchlet().getRef());
+        Assertions.assertEquals("child-batchlet", child.getBatchlet().getRef());
     }
 
     protected static LinkedList<Step> getSteps(final Job job) {

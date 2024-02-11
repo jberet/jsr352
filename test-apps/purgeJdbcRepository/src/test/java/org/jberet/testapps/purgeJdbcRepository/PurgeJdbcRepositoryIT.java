@@ -29,7 +29,7 @@ import jakarta.batch.runtime.BatchStatus;
 import org.jberet.repository.JdbcRepository;
 import org.jberet.se.BatchSEEnvironment;
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
@@ -195,14 +195,14 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     public void deleteJobInstancesWithSql() throws Exception {
         final long prepurge1JobExecutionId = prepurge();
         final long prepurge2JobExecutionId = prepurge(prepurge2JobName);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobOperator.getJobExecution(prepurge1JobExecutionId).getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, jobOperator.getJobExecution(prepurge2JobExecutionId).getBatchStatus());
-        Assert.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurgeJobName));
-        Assert.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurge2JobName));
-        Assert.assertNotNull(jobOperator.getJobInstances(prepurgeJobName, 0, 1).get(0));
-        Assert.assertNotNull(jobOperator.getJobInstances(prepurge2JobName, 0, 1).get(0));
-        Assert.assertEquals(0, jobOperator.getRunningExecutions(prepurgeJobName).size());
-        Assert.assertEquals(0, jobOperator.getRunningExecutions(prepurge2JobName).size());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobOperator.getJobExecution(prepurge1JobExecutionId).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobOperator.getJobExecution(prepurge2JobExecutionId).getBatchStatus());
+        Assertions.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurgeJobName));
+        Assertions.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurge2JobName));
+        Assertions.assertNotNull(jobOperator.getJobInstances(prepurgeJobName, 0, 1).get(0));
+        Assertions.assertNotNull(jobOperator.getJobInstances(prepurge2JobName, 0, 1).get(0));
+        Assertions.assertEquals(0, jobOperator.getRunningExecutions(prepurgeJobName).size());
+        Assertions.assertEquals(0, jobOperator.getRunningExecutions(prepurge2JobName).size());
 
         params.setProperty("sql",
                 "delete from STEP_EXECUTION where JOBEXECUTIONID in " +
@@ -221,12 +221,12 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
         assertNoSuchJobExecution(prepurge1JobExecutionId);
         assertNoSuchJobExecution(prepurge2JobExecutionId);
-        Assert.assertEquals(0, jobOperator.getJobInstanceCount(prepurgeJobName));
-        Assert.assertEquals(0, jobOperator.getJobInstanceCount(prepurge2JobName));
-        Assert.assertEquals(0, jobOperator.getJobInstances(prepurgeJobName, 0, 1).size());
-        Assert.assertEquals(0, jobOperator.getJobInstances(prepurge2JobName, 0, 1).size());
-        Assert.assertEquals(0, jobOperator.getRunningExecutions(prepurgeJobName).size());
-        Assert.assertEquals(0, jobOperator.getRunningExecutions(prepurge2JobName).size());
+        Assertions.assertEquals(0, jobOperator.getJobInstanceCount(prepurgeJobName));
+        Assertions.assertEquals(0, jobOperator.getJobInstanceCount(prepurge2JobName));
+        Assertions.assertEquals(0, jobOperator.getJobInstances(prepurgeJobName, 0, 1).size());
+        Assertions.assertEquals(0, jobOperator.getJobInstances(prepurge2JobName, 0, 1).size());
+        Assertions.assertEquals(0, jobOperator.getRunningExecutions(prepurgeJobName).size());
+        Assertions.assertEquals(0, jobOperator.getRunningExecutions(prepurge2JobName).size());
     }
 
     @Test
@@ -256,7 +256,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
 
         assertNoSuchJobExecution(prepurge1JobExecutionId);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobOperator.getJobExecution(prepurge2JobExecutionId).getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobOperator.getJobExecution(prepurge2JobExecutionId).getBatchStatus());
     }
 
     @Test
@@ -273,25 +273,25 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         assertNoSuchJobExecution(prepurge2JobExecutionId);
 
         try {
-            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstanceCount(prepurgeJobName));
+            Assertions.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstanceCount(prepurgeJobName));
         } catch (final NoSuchJobException e) {
             System.out.printf("Got expected %s%n", e);
         }
 
         try {
-            Assert.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstanceCount(prepurge2JobName));
+            Assertions.fail("Expecting NoSuchJobException, but got " + jobOperator.getJobInstanceCount(prepurge2JobName));
         } catch (final NoSuchJobException e) {
             System.out.printf("Got expected %s%n", e);
         }
 
         try {
-            Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge1JobExecutionId));
+            Assertions.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge1JobExecutionId));
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }
 
         try {
-            Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge2JobExecutionId));
+            Assertions.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge2JobExecutionId));
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }
@@ -313,17 +313,17 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         assertNoSuchJobExecution(prepurge1JobExecutionId);
         assertNoSuchJobExecution(prepurge2JobExecutionId);
 
-        Assert.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurgeJobName));
-        Assert.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurge2JobName));
+        Assertions.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurgeJobName));
+        Assertions.assertNotEquals(0, jobOperator.getJobInstanceCount(prepurge2JobName));
 
         try {
-            Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge1JobExecutionId));
+            Assertions.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge1JobExecutionId));
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }
 
         try {
-            Assert.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge2JobExecutionId));
+            Assertions.fail("Expecting NoSuchJobExecutionException, but got" + jobOperator.getStepExecutions(prepurge2JobExecutionId));
         } catch (final NoSuchJobExecutionException e) {
             System.out.printf("Got expected %s%n", e);
         }
@@ -410,7 +410,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         }
         executor.shutdown();
         if (failedCount > 0) {
-            Assert.fail("Trying to create tables concurrently with " + count + " threads, " + failedCount + " failed.");
+            Assertions.fail("Trying to create tables concurrently with " + count + " threads, " + failedCount + " failed.");
         }
     }
 

@@ -36,7 +36,7 @@ import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.JobTask;
 import org.jberet.spi.JobXmlResolver;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
 
@@ -170,10 +170,10 @@ public class JobRepositoryTest {
         repo.removeJob(job.getId());  //the job has not been added, but removeJob should still work
 
         repo.addJob(new ApplicationAndJobName(null, jobId), job);
-        Assert.assertTrue(repo.jobExists(jobId));
+        Assertions.assertTrue(repo.jobExists(jobId));
 
         repo.removeJob(jobId);
-        Assert.assertFalse(repo.jobExists(jobId));
+        Assertions.assertFalse(repo.jobExists(jobId));
 
         repo.removeJob(job.getId());
     }
@@ -184,7 +184,7 @@ public class JobRepositoryTest {
         final Job job = ArchiveXmlLoader.loadJobXml(jobId, this.getClass().getClassLoader(), new ArrayList<Job>(), new MetaInfBatchJobsJobXmlResolver());
 
         repo.addJob(new ApplicationAndJobName(null, jobId), job);
-        Assert.assertTrue(repo.jobExists(jobId));
+        Assertions.assertTrue(repo.jobExists(jobId));
 
         for (int i = 0; i < 3; i++) {
             JobInstanceImpl jobInstance = repo.createJobInstance(job, null, this.getClass().getClassLoader());
@@ -192,10 +192,10 @@ public class JobRepositoryTest {
         }
 
         List<Long> jobExecutions = repo.getJobExecutionsByJob(jobId);
-        Assert.assertEquals(3, jobExecutions.size());
+        Assertions.assertEquals(3, jobExecutions.size());
 
         jobExecutions = repo.getJobExecutionsByJob(jobId, 1);
-        Assert.assertEquals(1, jobExecutions.size());
+        Assertions.assertEquals(1, jobExecutions.size());
     }
 
 }

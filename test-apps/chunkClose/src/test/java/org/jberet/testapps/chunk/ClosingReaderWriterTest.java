@@ -18,7 +18,7 @@ import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
@@ -77,13 +77,13 @@ public class ClosingReaderWriterTest {
         final long jobId = jobOperator.start(XML_NAME, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobId);
         jobExecution.awaitTermination(10, TimeUnit.SECONDS);
-        Assert.assertEquals(expectedBatchStatus, jobExecution.getBatchStatus());
+        Assertions.assertEquals(expectedBatchStatus, jobExecution.getBatchStatus());
 
         final StepExecution step0 = jobExecution.getStepExecutions().get(0);
         final ReaderWriterResult item = ReaderWriterResult.class.cast(step0.getPersistentUserData());
-        Assert.assertTrue("Reader was not closed", item.isReaderClosed());
-        Assert.assertTrue("Writer was not closed", item.isWriterClosed());
-        Assert.assertEquals("Unexpected reader count.", expectedReaderCount, item.getReadCount());
-        Assert.assertEquals("Unexpected writer count.", expectedWriterCount, item.getWriteCount());
+        Assertions.assertTrue("Reader was not closed", item.isReaderClosed());
+        Assertions.assertTrue("Writer was not closed", item.isWriterClosed());
+        Assertions.assertEquals("Unexpected reader count.", expectedReaderCount, item.getReadCount());
+        Assertions.assertEquals("Unexpected writer count.", expectedWriterCount, item.getWriteCount());
     }
 }

@@ -18,7 +18,7 @@ import java.nio.file.StandardCopyOption;
 
 import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
@@ -134,9 +134,9 @@ public class ScriptingIT extends AbstractIT {
     void test0(final String testName) throws Exception {
         params.setProperty(testNameKey, testName);
         startJobAndWait(testName);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
-        Assert.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
-        Assert.assertTrue(jobExecution.getExitStatus().equals(testName) || jobExecution.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
-        Assert.assertTrue(stepExecution0.getExitStatus().equals(testName) || stepExecution0.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
+        Assertions.assertTrue(jobExecution.getExitStatus().equals(testName) || jobExecution.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
+        Assertions.assertTrue(stepExecution0.getExitStatus().equals(testName) || stepExecution0.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
     }
 }

@@ -13,13 +13,13 @@ package org.jberet.testapps.infinispanRepositoryMem;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class MemInfinispanRepositoryIT extends AbstractIT {
     @Test
     public void partitionWithInfinispanMem() throws Exception {
         startJobAndWait(infinispanRepositoryJobXml);
-        Assert.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
     }
 }
