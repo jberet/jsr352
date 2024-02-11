@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JavaJSLIT extends AbstractIT {
     static final String batchlet1Name = "batchlet1";
@@ -658,55 +659,52 @@ public class JavaJSLIT extends AbstractIT {
         assertEquals(step3Name, stepExecutions.get(2).getStepName());
     }
 
-    @Test(expected = BatchRuntimeException.class)
+    @Test
     public void duplicateStepId() throws Exception {
         final String jobName = "javaJSL-duplicateStepId";
-        final Job job = new JobBuilder(jobName)
+        JobBuilder jobBuilder = new JobBuilder(jobName)
                 .step(new StepBuilder(jobName)
                         .batchlet(batchlet1Name)
-                        .build())
-                .build();
-        startJob(job);
+                        .build());
+        assertThrows(BatchRuntimeException.class, jobBuilder::build);
     }
 
-    @Test(expected = BatchRuntimeException.class)
+    @Test
     public void duplicateDecisionId() throws Exception {
         final String jobName = "javaJSL-duplicateDecisionId";
         final String stepName = jobName + ".step1";
         final String decisionName = stepName;
-        final Job job = new JobBuilder(jobName)
+        JobBuilder jobBuilder = new JobBuilder(jobName)
                 .step(new StepBuilder(stepName)
                         .batchlet(batchlet1Name)
                         .next(decisionName)
                         .build())
                 .decision(new DecisionBuilder(decisionName, "decider2")
                         .endOn("*").exitStatus()
-                        .build())
-                .build();
-        startJob(job);
+                        .build());
+        assertThrows(BatchRuntimeException.class, jobBuilder::build);
     }
 
-    @Test(expected = BatchRuntimeException.class)
+    @Test
     public void duplicateFlowId() throws Exception {
         final String jobName = "javaJSL-duplicateFlowId";
         final String flowName = jobName + "flow1";
         final String stepName = jobName + ".step1";
         final String step2Name = jobName;
 
-        final Job job = new JobBuilder(jobName)
+        JobBuilder jobBuilder = new JobBuilder(jobName)
                 .flow(new FlowBuilder(flowName)
                         .step(new StepBuilder(stepName).batchlet(batchlet1Name)
                                 .next(step2Name)
                                 .build())
                         .step(new StepBuilder(step2Name).batchlet(batchlet1Name)
                                 .build())
-                        .build())
-                .build();
+                        .build());
 
-        startJob(job);
+        assertThrows(BatchRuntimeException.class, jobBuilder::build);
     }
 
-    @Test(expected = BatchRuntimeException.class)
+    @Test
     public void duplicateSplitId() throws Exception {
         final String jobName = "javaJSL-duplicateSplitId";
         final String splitName = jobName + ".split1";
@@ -716,7 +714,7 @@ public class JavaJSLIT extends AbstractIT {
         final String step2Name = jobName + ".step2";
         final String step3Name = flowName;
 
-        final Job job = new JobBuilder(jobName)
+        JobBuilder jobBuilder = new JobBuilder(jobName)
                 .split(new SplitBuilder(splitName)
                         .flow(new FlowBuilder(flowName)
                                 .step(new StepBuilder(stepName).batchlet(batchlet1Name).build())
@@ -728,10 +726,9 @@ public class JavaJSLIT extends AbstractIT {
                         .build())
                 .step(new StepBuilder(step3Name).batchlet(batchlet1Name)
                         .endOn("*").exitStatus(step3Name)
-                        .build())
-                .build();
+                        .build());
 
-        startJob(job);
+        assertThrows(BatchRuntimeException.class, jobBuilder::build);
     }
 
     @Test
