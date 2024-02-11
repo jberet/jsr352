@@ -20,7 +20,7 @@ import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class SleepBatchletTest {
@@ -32,7 +32,7 @@ public class SleepBatchletTest {
     private static final String transitionAttrJobName = "org.jberet.se.test.sleepBatchletTransitionAttr";
 
     @Test
-    @Ignore("It will pass but takes too long")
+    @Disabled("It will pass but takes too long")
     public void sleepComplete() throws Exception {
         final int sleepMinutes = 6;
         final Properties params = new Properties();

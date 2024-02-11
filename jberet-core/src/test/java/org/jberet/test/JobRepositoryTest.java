@@ -37,7 +37,7 @@ import org.jberet.spi.JobTask;
 import org.jberet.spi.JobXmlResolver;
 import org.jberet.tools.MetaInfBatchJobsJobXmlResolver;
 import org.junit.jupiter.api.Assertions;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class JobRepositoryTest {
@@ -77,7 +77,7 @@ public class JobRepositoryTest {
 
     private static JobRepository repo;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         final BatchEnvironment batchEnvironment = new BatchEnvironment() {
             @Override

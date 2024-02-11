@@ -21,7 +21,7 @@ import jakarta.batch.runtime.JobInstance;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
  */
 public class SerializationTests extends AbstractIT {
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         params.clear();
     }

@@ -28,7 +28,7 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.spi.JobOperatorContext;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 abstract public class AbstractIT {
     /**
@@ -62,7 +62,7 @@ abstract public class AbstractIT {
      *
      * @throws Exception
      */
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         if (jobOperator == null) {
             // org.jberet.spi.JobOperatorContext and org.jberet.operations.DelegatingJobOperator are introduced

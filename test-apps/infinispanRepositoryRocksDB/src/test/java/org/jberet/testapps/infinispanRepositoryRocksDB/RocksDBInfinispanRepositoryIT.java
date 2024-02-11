@@ -15,11 +15,11 @@ import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Assertions;
 import org.junit.Assume;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class RocksDBInfinispanRepositoryIT extends AbstractIT {
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         // skip this test on Windows, see JBERET-500
         // RocksDBInfinispanRepositoryIT.partitionWithInfinispanRocksDB failed on Windows

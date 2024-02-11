@@ -17,12 +17,12 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Ignore("Need to manually run other Vert.x nodes first")
+@Disabled("Need to manually run other Vert.x nodes first")
 public class ClusterIT extends AbstractIT {
     private static final String clusterJob = "clusterJob.xml";
     private static final String clusterJobStop = "clusterJobStop.xml";

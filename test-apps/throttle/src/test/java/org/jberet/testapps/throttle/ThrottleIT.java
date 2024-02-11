@@ -18,7 +18,7 @@ import jakarta.batch.runtime.BatchStatus;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -48,13 +48,13 @@ public class ThrottleIT extends AbstractIT {
         runTest(300, true);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void start1000() throws Exception {
         runTest(1000, true);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void start2100() throws Exception {
         runTest(2100, true);

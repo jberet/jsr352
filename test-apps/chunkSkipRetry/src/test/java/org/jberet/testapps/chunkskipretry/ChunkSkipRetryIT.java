@@ -16,8 +16,8 @@ import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.Metric;
 
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
@@ -73,13 +73,13 @@ public class ChunkSkipRetryIT extends AbstractIT {
     protected static final String chunkSkipRetryXml = "chunkSkipRetry.xml";
     protected static final String chunkListenerXml = "chunkListener.xml";
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         super.before();
         params.setProperty("data.count", String.valueOf(dataCount));
     }
 
-    @After
+    @AfterEach
     public void after() {
         params.clear();
     }

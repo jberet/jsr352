@@ -14,10 +14,10 @@ import jakarta.batch.runtime.BatchStatus;
 
 import com.datastax.driver.core.Cluster;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  *
  * @since 1.3.0.Final
  */
-@Ignore("Need to run Cassandra cluster in a separate process")
+@Disabled("Need to run Cassandra cluster in a separate process")
 public class CassandraInjectIT extends AbstractIT {
     static final String contactPoints = "localhost";
 
@@ -34,7 +34,7 @@ public class CassandraInjectIT extends AbstractIT {
 
     private static final String cql = "select key, cluster_name, listen_address, cql_version from system.local";
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         if (CassandraResourceProducer.session == null) {
             Cluster cluster = new Cluster.Builder().addContactPoint(contactPoints).build();
@@ -42,7 +42,7 @@ public class CassandraInjectIT extends AbstractIT {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         if (CassandraResourceProducer.session != null) {
             CassandraResourceProducer.session.close();

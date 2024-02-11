@@ -25,11 +25,11 @@ import jakarta.batch.runtime.BatchStatus;
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Ignore("This test class needs ActiveMQ Artemis standalone server running in a separate process.")
+@Disabled("This test class needs ActiveMQ Artemis standalone server running in a separate process.")
 public class AmqpIT extends AbstractIT {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String jberetTmpDir = System.getProperty("jberet.tmp.dir");
@@ -39,7 +39,7 @@ public class AmqpIT extends AbstractIT {
 
     static final String artemisUrl = "amqp://localhost:5672";
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         connectionFactory = new JmsConnectionFactory(artemisUrl);
     }

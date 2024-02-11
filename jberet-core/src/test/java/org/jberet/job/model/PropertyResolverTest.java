@@ -13,7 +13,7 @@ package org.jberet.job.model;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.jberet.job.model.PropertyResolver.jobParametersToken;
@@ -57,7 +57,7 @@ public class PropertyResolverTest {
     String javaVersion = sysProps.getProperty("java.version");
     String osName = sysProps.getProperty("os.name");
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         jobParams.setProperty(jobParam1, jobParam1Val);
         jobParams.setProperty(jobParam2, jobParam2Val);

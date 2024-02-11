@@ -14,18 +14,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class PostConstructIT extends AbstractIT {
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         switchToUSLocale();
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         restoreDefaultLocale();
     }
