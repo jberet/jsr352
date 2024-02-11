@@ -18,7 +18,7 @@ import jakarta.batch.operations.BatchRuntimeException;
 import javax.xml.stream.XMLStreamException;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.jberet.util.BatchUtil.NL;
@@ -126,7 +126,7 @@ public final class JobParserTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testJobXmlWrongAttribute() throws Exception {
         final String batchXml =
         "<job id=\"job1\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version=\"1.0\">" + NL +

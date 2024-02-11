@@ -19,22 +19,22 @@ import jakarta.batch.runtime.Metric;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.metric.MetricImpl;
 import org.jberet.testapps.common.AbstractIT;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ChunkStopIT extends AbstractIT {
     protected int dataCount = 30;
     protected static final String jobXml = "chunkStop.xml";
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         super.before();
         params.setProperty("data.count", String.valueOf(dataCount));
     }
 
-    @After
+    @AfterEach
     public void after() {
         params.clear();
     }

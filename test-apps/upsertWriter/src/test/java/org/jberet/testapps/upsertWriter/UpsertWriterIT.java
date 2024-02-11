@@ -23,15 +23,15 @@ import jakarta.batch.runtime.BatchStatus;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Assertions;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
  * Tests using {@code jdbcItemWriter} in jberet-support, and upsert / merge
  * sql statement.
  */
-@Ignore("Need to connect to db2 database server")
+@Disabled("Need to connect to db2 database server")
 public class UpsertWriterIT extends AbstractIT {
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
     static final String upsertWriterTestJob = "upsertWriterTest";
@@ -66,7 +66,7 @@ public class UpsertWriterIT extends AbstractIT {
      *
      * @throws Exception upon errors
      */
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         Connection connection = null;
         PreparedStatement preparedStatement = null;

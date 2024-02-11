@@ -20,7 +20,7 @@ import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Assertions;
 import org.junit.Assume;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class ScriptingIT extends AbstractIT {
@@ -31,7 +31,7 @@ public class ScriptingIT extends AbstractIT {
         //params.setProperty("job-param", "job-param");
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         copyResourceToTmpdir(numberCsvFilePath, numberCsvFilePath);
     }

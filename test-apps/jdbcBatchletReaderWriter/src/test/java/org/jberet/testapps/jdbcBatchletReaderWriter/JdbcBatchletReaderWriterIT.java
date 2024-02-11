@@ -14,7 +14,7 @@ import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
  *
  * @since 1.3.0.Final
  */
-@Ignore("Need to run database server first in a separate process")
+@Disabled("Need to run database server first in a separate process")
 public class JdbcBatchletReaderWriterIT extends AbstractIT {
     private static final String jdbcBatchletReaderWriterJob = "jdbcBatchletReaderWriter.xml";
 

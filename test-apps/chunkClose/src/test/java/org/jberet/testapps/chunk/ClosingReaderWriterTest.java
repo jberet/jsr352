@@ -19,7 +19,7 @@ import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -32,7 +32,7 @@ public class ClosingReaderWriterTest {
     private JobOperator jobOperator;
     private Properties params;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         jobOperator = BatchRuntime.getJobOperator();
         params = new Properties();

@@ -30,7 +30,7 @@ import org.jberet.repository.JdbcRepository;
 import org.jberet.se.BatchSEEnvironment;
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
@@ -38,78 +38,78 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
     /////////////////////////////////////////////////////
     @Test
-    @Ignore("run it manually, Ctrl-C before it completes")
+    @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_1() throws Exception {
         super.ctrlC();
     }
 
     @Test(expected = JobRestartException.class)
-    @Ignore("run after ctrlC_1 test has been killed with invalid restart mode, should fail")
+    @Disabled("run after ctrlC_1 test has been killed with invalid restart mode, should fail")
     public void invalidRestartMode() throws Exception {
         super.invalidRestartMode();
     }
 
     @Test(expected = JobRestartException.class)
-    @Ignore("run after ctrlC_1 test has been killed, should fail")
+    @Disabled("run after ctrlC_1 test has been killed, should fail")
     public void restartKilledStrict() throws Exception {
         super.restartKilledStrict();
     }
 
     /////////////////////////////////////////////////////
     @Test
-    @Ignore("run it manually, Ctrl-C before it completes")
+    @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_2() throws Exception {
         super.ctrlC();
     }
 
     @Test
-    @Ignore("run after ctrlC_2 test has been killed")
+    @Disabled("run after ctrlC_2 test has been killed")
     public void restartKilled() throws Exception {
         super.restartKilled();
     }
 
     /////////////////////////////////////////////////////
     @Test
-    @Ignore("run it manually, Ctrl-C before it completes")
+    @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_3() throws Exception {
         super.ctrlC();
     }
 
     @Test
-    @Ignore("run after ctrlC_3 test has been killed")
+    @Disabled("run after ctrlC_3 test has been killed")
     public void restartKilledDetect() throws Exception {
         super.restartKilledDetect();
     }
 
     /////////////////////////////////////////////////////
     @Test
-    @Ignore("run it manually, Ctrl-C before it completes")
+    @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_4() throws Exception {
         super.ctrlC();
     }
 
     @Test
-    @Ignore("run after ctrlC_4 test has been killed")
+    @Disabled("run after ctrlC_4 test has been killed")
     public void restartKilledForce() throws Exception {
         super.restartKilledForce();
     }
 
     /////////////////////////////////////////////////////
     @Test
-    @Ignore("run it manually, Ctrl-C before it completes")
+    @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_5() throws Exception {
         super.ctrlC();
     }
 
     @Test
-    @Ignore("run after ctrlC_5 test has been killed")
+    @Disabled("run after ctrlC_5 test has been killed")
     public void restartKilledStopAbandon() throws Exception {
         super.restartKilledStopAbandon();
     }
 
     /////////////////////////////////////////////////////
     @Test
-    @Ignore("run it manually")
+    @Disabled("run it manually")
     public void memoryTest() throws Exception {
         super.memoryTest();
     }

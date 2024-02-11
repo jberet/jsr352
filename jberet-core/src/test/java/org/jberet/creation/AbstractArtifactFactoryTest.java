@@ -10,7 +10,7 @@
 
 package org.jberet.creation;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class AbstractArtifactFactoryTest {
@@ -30,7 +30,7 @@ public class AbstractArtifactFactoryTest {
     private Class noPackageBatchletClass;
     private Object noPackageBatchlet;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         noPackageBatchletClass = Class.forName("NoPackageBatchlet");
         noPackageBatchlet = noPackageBatchletClass.getDeclaredConstructor().newInstance();
