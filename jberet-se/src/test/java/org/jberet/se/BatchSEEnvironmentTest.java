@@ -16,11 +16,16 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
 import jakarta.batch.operations.BatchRuntimeException;
 
 import org.jberet.repository.JdbcRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.jberet.se.BatchSEEnvironment.THREAD_FACTORY;
 import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_ALLOW_CORE_THREAD_TIMEOUT;
@@ -156,30 +161,29 @@ public class BatchSEEnvironmentTest {
                         .getProperty(JdbcRepository.DB_USER_KEY));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideValuesForTestingPropParsing")
+    public void testPropParsings(String propValue, String expectedAfterParsing) {
+        Assertions.assertEquals(expectedAfterParsing, BatchSEEnvironment.parseProp(propValue));
+    }
+
     @Test
-    public void testPropParsings() {
-        String p1 = "${FOO:bar}";
-        String p2 = "${FOO}";
-        String p3 = "${BAR:defaultVal}";
-        String p4 = "${INVALID";
-        String p5 = "$INVALID}";
-        String p6 = "${{INVALID}";
-        String p7 = "${INVALID}}";
-        String p8 = "${BAR:}";
-        String p9 = "${}";
-        String p10 = "${BAR}";
+    public void testPropParsingWhenEnvVarIsNull() {
+        Assertions.assertNull(BatchSEEnvironment.parseProp("${BAR}"));
+    }
 
-
-        Assertions.assertEquals("foo", BatchSEEnvironment.parseProp(p1));
-        Assertions.assertEquals("foo", BatchSEEnvironment.parseProp(p2));
-        Assertions.assertEquals("defaultVal", BatchSEEnvironment.parseProp(p3));
-        Assertions.assertEquals("${INVALID", BatchSEEnvironment.parseProp(p4));
-        Assertions.assertEquals("$INVALID}", BatchSEEnvironment.parseProp(p5));
-        Assertions.assertEquals("${{INVALID}", BatchSEEnvironment.parseProp(p6));
-        Assertions.assertEquals("${INVALID}}", BatchSEEnvironment.parseProp(p7));
-        Assertions.assertEquals("", BatchSEEnvironment.parseProp(p8));
-        Assertions.assertEquals("${}", BatchSEEnvironment.parseProp(p9));
-        Assertions.assertNull(BatchSEEnvironment.parseProp(p10));
+    private static Stream<Arguments> provideValuesForTestingPropParsing() {
+        return Stream.of(Arguments.of("${FOO:bar}", "foo"),
+                Arguments.of("${FOO}", "foo"),
+                Arguments.of("${BAR:defaultVal}", "defaultVal"),
+                Arguments.of("${INVALID", "${INVALID"),
+                Arguments.of("$INVALID}", "$INVALID}"),
+                Arguments.of("${{INVALID}", "${{INVALID}"),
+                Arguments.of("${INVALID}}", "${INVALID}}"),
+                Arguments.of("${BAR:}", ""),
+                Arguments.of("${}", "${}"),
+                Arguments.of("${DB_URL:jdbc:h2:./target/jberet-repo}", "jdbc:h2:./target/jberet-repo"),
+                Arguments.of("${DB_URL:jdbc:h2:mem:jberet;DB_CLOSE_DELAY=-1}", "jdbc:h2:mem:jberet;DB_CLOSE_DELAY=-1"));
     }
 
     private ThreadPoolExecutor verifyThreadPool(final int coreSize,
