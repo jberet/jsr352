@@ -12,6 +12,7 @@ package org.jberet.se;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.concurrent.BlockingQueue;
@@ -62,7 +63,7 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     private final JobXmlResolver jobXmlResolver;
     private final JobExecutor executor;
 
-    private static final String PROP_PATTERN_STR = "\\$\\{([0-9a-zA-Z_\\-]+)(:([0-9a-zA-Z_\\-]*))?\\}";
+    private static final String PROP_PATTERN_STR = "\\$\\{([0-9a-zA-Z_\\-]+)(:([0-9a-zA-Z_\\-;:=/.]*))?\\}";
 
     private static final Pattern PROP_PATTERN = Pattern.compile(PROP_PATTERN_STR);
 
@@ -80,8 +81,13 @@ public final class BatchSEEnvironment implements BatchEnvironment {
     static final String THREAD_POOL_REJECTION_POLICY = "thread-pool-rejection-policy";
     static final String THREAD_FACTORY = "thread-factory";
 
+    static final String DB_URL_KEY = "db-url";
     static final String DB_USER_KEY = "db-user";
     static final String DB_PASSWORD_KEY = "db-password";
+    static final String DB_TABLE_PREFIX_KEY = "db-table-prefix";
+    static final String DB_TABLE_SUFFIX_KEY = "db-table-suffix";
+
+    static final List<String> PROP_NAMES_THAT_COULD_HAVE_A_DEFAULT_VALUE = List.of(DB_URL_KEY, DB_USER_KEY, DB_PASSWORD_KEY, DB_TABLE_PREFIX_KEY, DB_TABLE_SUFFIX_KEY);
 
     public BatchSEEnvironment() {
         configProperties = new Properties();
@@ -91,16 +97,11 @@ public final class BatchSEEnvironment implements BatchEnvironment {
                 configProperties.load(configStream);
                 if (configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY).equals(REPOSITORY_TYPE_JDBC) ||
                     configProperties.getProperty(JOB_REPOSITORY_TYPE_KEY).equals(REPOSITORY_TYPE_MONGODB)) {
-
-                    String dbUser = configProperties.getProperty(DB_USER_KEY);
-                    String dbPassword = configProperties.getProperty(DB_PASSWORD_KEY);
-
-                    if (dbUser != null) {
-                        configProperties.setProperty(DB_USER_KEY, parseProp(dbUser));
-                    }
-
-                    if (dbPassword != null) {
-                        configProperties.setProperty(DB_PASSWORD_KEY, parseProp(dbPassword));
+                    for (String propName : PROP_NAMES_THAT_COULD_HAVE_A_DEFAULT_VALUE) {
+                        final String propVal = configProperties.getProperty(propName);
+                        if (propVal != null) {
+                            configProperties.setProperty(propName, parseProp(propVal));
+                        }
                     }
                 }
             } catch (final IOException e) {
