@@ -155,7 +155,7 @@ the above dependencies are already available as JBoss modules, and should not be
             <dependency>
                 <groupId>org.jberet</groupId>
                 <artifactId>jberet-se-bom</artifactId>
-                <version>1.4.5.Final-SNAPSHOT</version>
+                <version>1.4.6.Final-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -169,7 +169,7 @@ the above dependencies are already available as JBoss modules, and should not be
             <dependency>
                 <groupId>org.jberet</groupId>
                 <artifactId>jberet-ee-bom</artifactId>
-                <version>1.4.5.Final-SNAPSHOT</version>
+                <version>1.4.6.Final-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
