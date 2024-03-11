@@ -20,6 +20,7 @@ jobs:
   build-test-matrix:
     name: ${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    needs: wildfly-build
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -39,8 +40,8 @@ jobs:
       - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
         uses: actions/setup-java@v4
         with:
-          distribution: ${{ matrix.jdk-distribution }}
           java-version: ${{ matrix.jdk-version }}
+          distribution: ${{ matrix.jdk-distribution }}
           cache: 'maven'
       - name: quick build
         run: mvn install -DskipTests
