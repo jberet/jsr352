@@ -34,7 +34,7 @@ jobs:
         with:
           name: wildfly-maven-repository
           path: .
-      - name: Extract Maven Repo
+      - name: Extract WildFly Maven Repo
         shell: bash
         run: tar -xzf wildfly-maven-repository.tar.gz -C ~
       - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
