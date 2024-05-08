@@ -319,30 +319,30 @@
                 <version>${version.jakarta.inject-api}</version>
                 <scope>provided</scope>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>jakarta.enterprise</groupId>-->
-<!--                <artifactId>jakarta.enterprise.cdi-api</artifactId>-->
-<!--                <version>${version.jakarta.enterprise.cdi-api}</version>-->
-<!--                <scope>provided</scope>-->
-<!--                <exclusions>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>jakarta.inject</groupId>-->
-<!--                        <artifactId>jakarta.inject-api</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>jakarta.el</groupId>-->
-<!--                        <artifactId>jakarta.el-api</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>jakarta.interceptor</groupId>-->
-<!--                        <artifactId>jakarta.interceptor-api</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>jakarta.annotation</groupId>-->
-<!--                        <artifactId>jakarta.annotation-api</artifactId>-->
-<!--                    </exclusion>-->
-<!--                </exclusions>-->
-<!--            </dependency>-->
+            <dependency>
+                <groupId>jakarta.enterprise</groupId>
+                <artifactId>jakarta.enterprise.cdi-api</artifactId>
+                <version>${version.jakarta.enterprise.cdi-api}</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>jakarta.inject</groupId>
+                        <artifactId>jakarta.inject-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>jakarta.el</groupId>
+                        <artifactId>jakarta.el-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>jakarta.interceptor</groupId>
+                        <artifactId>jakarta.interceptor-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>jakarta.annotation</groupId>
+                        <artifactId>jakarta.annotation-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>jakarta.persistence</groupId>
                 <artifactId>jakarta.persistence-api</artifactId>
@@ -858,10 +858,10 @@
             <groupId>jakarta.inject</groupId>
             <artifactId>jakarta.inject-api</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>jakarta.enterprise</groupId>-->
-<!--            <artifactId>jakarta.enterprise.cdi-api</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging-processor</artifactId>
