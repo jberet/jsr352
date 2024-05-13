@@ -21,7 +21,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
         jdk-distribution: [ temurin ]
-        jdk-version: [ 11 ]
+        jdk-version: [ 11, 17, 21 ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
