@@ -105,7 +105,8 @@
 
         <version.com.datastax.cassandra>3.11.5</version.com.datastax.cassandra>
         <version.org.wildfly.plugins.wildfly-maven-plugin>5.0.0.Final</version.org.wildfly.plugins.wildfly-maven-plugin>
-
+<!--        <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId>-->
+        <server.test.feature.pack.artifactId>wildfly-preview-feature-pack</server.test.feature.pack.artifactId>
         <!-- Other properties -->
         <!-- Protocol to use for communication with remote maven repositories.
              You can set to 'http' if you are using a maven proxy and 'https'
