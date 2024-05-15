@@ -104,7 +104,7 @@
                             <feature-packs>
                                 <feature-pack>
                                     <groupId>org.wildfly</groupId>
-                                    <artifactId>wildfly-ee-galleon-pack</artifactId>
+                                    <artifactId>${server.test.feature.pack.artifactId}</artifactId>
                                     <version>${version.org.wildfly}</version>
                                     <inherit-configs>false</inherit-configs>
                                     <included-configs>
