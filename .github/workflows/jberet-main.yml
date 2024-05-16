@@ -28,6 +28,7 @@ jobs:
         os: [ ubuntu-latest, windows-latest ]
         jdk-distribution: [ temurin ]
         jdk-version: [ '11', '17', '21' ]
+        feature-pack: ['wildfly-preview-feature-pack', 'wildfly-ee-galleon-pack']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -46,7 +47,7 @@ jobs:
       - name: quick build
         run: mvn install -DskipTests
       - name: full build
-        run: mvn install '-Dserver.version=${{needs.wildfly-build.outputs.wildfly-version}}'
+        run: mvn install '-Dserver.version=${{needs.wildfly-build.outputs.wildfly-version}}' '-Dserver.test.feature.pack.artifactId=${{matrix.feature-pack}}'
 #      - uses: actions/upload-artifact@v3
 #        if: failure()
 #        with:
