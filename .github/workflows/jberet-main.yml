@@ -10,7 +10,7 @@ on:
     types: [ opened, synchronize, reopened, ready_for_review ]
   push:
     branches: [ main ]
-
+  workflow_dispatch:
 jobs:
   wildfly-build:
     uses: wildfly/wildfly/.github/workflows/shared-wildfly-build.yml@main
