@@ -44,7 +44,7 @@
         <version.com.fasterxml.aalto-xml>1.3.2</version.com.fasterxml.aalto-xml>
         <version.com.google.guava>33.1.0-jre</version.com.google.guava>
         <version.com.h2database>2.2.224</version.com.h2database>
-        <version.jakarta.enterprise.cdi-api>4.0.1</version.jakarta.enterprise.cdi-api>
+        <version.jakarta.enterprise.cdi-api>4.1.0</version.jakarta.enterprise.cdi-api>
         <version.jakarta.inject-api>2.0.1</version.jakarta.inject-api>
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
         <version.rest-assured>5.4.0</version.rest-assured>
