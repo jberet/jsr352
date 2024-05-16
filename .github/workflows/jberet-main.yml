@@ -44,9 +44,9 @@ jobs:
           java-version: ${{ matrix.jdk-version }}
           distribution: ${{ matrix.jdk-distribution }}
           cache: 'maven'
-      - name: quick build
+      - name: Quick Build
         run: mvn install -DskipTests
-      - name: full build
+      - name: Full Build With WildFly Version ${{needs.wildfly-build.outputs.wildfly-version}} With Feature Pack ${{matrix.feature-pack}}
         run: mvn install '-Dserver.version=${{needs.wildfly-build.outputs.wildfly-version}}' '-Dserver.test.feature.pack.artifactId=${{matrix.feature-pack}}'
 #      - uses: actions/upload-artifact@v3
 #        if: failure()
