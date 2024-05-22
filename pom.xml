@@ -87,7 +87,6 @@
         <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>2.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
         <version.io.netty>4.1.109.Final</version.io.netty>
 
-<!--        <version.jakarta.validation-api>3.0.2</version.jakarta.validation-api>-->
         <version.org.hibernate.validator>8.0.1.Final</version.org.hibernate.validator>
         <version.jakarta.el-api>5.0.1</version.jakarta.el-api>
         <version.org.glassfish.jakarta.el>4.0.2</version.org.glassfish.jakarta.el>
@@ -649,12 +648,6 @@
             </dependency>
 
             <!-- Bean Validation dependencies -->
-<!--            <dependency>-->
-<!--                <groupId>jakarta.validation</groupId>-->
-<!--                <artifactId>jakarta.validation-api</artifactId>-->
-<!--                <version>${version.jakarta.validation-api}</version>-->
-<!--                <scope>provided</scope>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
