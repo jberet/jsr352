@@ -85,7 +85,7 @@
 
         <version.jakarta.jms-api>3.1.0</version.jakarta.jms-api>
         <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>2.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
-        <version.io.netty>4.1.109.Final</version.io.netty>
+        <version.io.netty>4.1.110.Final</version.io.netty>
 
         <version.org.hibernate.validator>8.0.1.Final</version.org.hibernate.validator>
         <version.jakarta.el-api>5.0.1</version.jakarta.el-api>
