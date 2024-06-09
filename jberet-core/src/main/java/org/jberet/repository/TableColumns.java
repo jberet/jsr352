@@ -17,8 +17,9 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
+import java.util.ArrayList;
+import java.util.List;
 
-//import com.google.common.base.Throwables;
 import org.jberet.util.BatchUtil;
 
 /**
@@ -115,7 +116,9 @@ final class TableColumns {
             return null;
         }
 
-        String asString = getStackTraceAsString(exception);
+        String asString = toString(exception);
+
+
         final Charset charset = Charset.defaultCharset();
         byte[] asBytes = asString.getBytes(charset);
         if (asBytes.length <= EXECUTION_EXCEPTION_LENGTH_LIMIT) {
@@ -137,27 +140,31 @@ final class TableColumns {
         return new String(cb.array(), 0, cb.position());
     }
 
-    static String getStackTraceAsString(Throwable throwable) {
-        StringWriter stringWriter = new StringWriter();
-        throwable.printStackTrace(new PrintWriter(stringWriter));
-        return stringWriter.toString();
+    private static String toString(Throwable origin) {
+        try (StringWriter writer = new StringWriter()) {
+            origin.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        } catch (Throwable e) {
+            return origin.toString();
+        }
     }
 
-    public static Throwable getRootCause(Throwable throwable) {
-        Throwable slowPointer = throwable;
+    private static Throwable getRootCause(Throwable origin) {
+        final List<Throwable> list = getThrowableList(origin);
+        return list.isEmpty() ? null : list.get(list.size() - 1);
+    }
 
-        Throwable cause;
-        for(boolean advanceSlowPointer = false; (cause = throwable.getCause()) != null; advanceSlowPointer = !advanceSlowPointer) {
-            throwable = cause;
-            if (throwable == slowPointer) {
-                throw new IllegalArgumentException("Loop in causal chain detected.", throwable);
-            }
-
-            if (advanceSlowPointer) {
-                slowPointer = slowPointer.getCause();
+    private static List<Throwable> getThrowableList(Throwable throwable) {
+        final List<Throwable> list = new ArrayList<>();
+        while (throwable != null) {
+            if (!list.contains(throwable)) {
+                list.add(throwable);
+                throwable = throwable.getCause();
+            } else {
+                // loop detected
+                throw new IllegalArgumentException("Loop chain detected: ", throwable);
             }
         }
-
-        return throwable;
+        return list;
     }
 }
