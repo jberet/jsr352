@@ -78,7 +78,7 @@
         <version.org.scala-lang.scala-dist>2.13.14</version.org.scala-lang.scala-dist>
         <version.com.caucho.resin-quercus>3.2.1</version.com.caucho.resin-quercus>
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
-        <version.jakarta.servlet-api>6.0.0</version.jakarta.servlet-api>
+        <version.jakarta.servlet-api>6.1.0</version.jakarta.servlet-api>
         <version.javax.servlet-api>4.0.1</version.javax.servlet-api>
         <version.jakarta.xml.bind-api>4.0.2</version.jakarta.xml.bind-api>
         <version.jakarta.xml.ws-api>4.0.2</version.jakarta.xml.ws-api>
