@@ -47,7 +47,7 @@
         <version.jakarta.enterprise.cdi-api>4.1.0</version.jakarta.enterprise.cdi-api>
         <version.jakarta.inject-api>2.0.1</version.jakarta.inject-api>
         <junit-jupiter.version>5.10.3</junit-jupiter.version>
-        <version.rest-assured>5.4.0</version.rest-assured>
+        <version.rest-assured>5.5.0</version.rest-assured>
         <version.org.codehaus.woodstox.stax2-api>4.2.2</version.org.codehaus.woodstox.stax2-api>
         <version.org.hibernate>6.0.2.Final</version.org.hibernate>
         <version.org.jboss.logging.jboss-logging>3.6.0.Final</version.org.jboss.logging.jboss-logging>
