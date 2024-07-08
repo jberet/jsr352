@@ -60,7 +60,7 @@
         <version.org.jboss.weld.weld-se>5.1.2.Final</version.org.jboss.weld.weld-se>
         <version.org.mapstruct>1.5.5.Final</version.org.mapstruct>
         <version.net.sf.supercsv>2.4.0</version.net.sf.supercsv>
-        <version.com.fasterxml.jackson>2.17.1</version.com.fasterxml.jackson>
+        <version.com.fasterxml.jackson>2.17.2</version.com.fasterxml.jackson>
         <version.org.mongodb.mongo-java-driver>3.12.14</version.org.mongodb.mongo-java-driver>
 
         <version.org.infinispan>14.0.25.Final</version.org.infinispan>
