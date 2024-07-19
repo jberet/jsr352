@@ -88,7 +88,7 @@
         <version.io.netty>4.1.111.Final</version.io.netty>
 
         <version.org.hibernate.validator>8.0.1.Final</version.org.hibernate.validator>
-        <version.jakarta.el-api>5.0.1</version.jakarta.el-api>
+        <version.jakarta.el-api>6.0.1</version.jakarta.el-api>
         <version.org.glassfish.jakarta.el>4.0.2</version.org.glassfish.jakarta.el>
 
         <version.org.wildfly.security.elytron>2.4.1.Final</version.org.wildfly.security.elytron>
