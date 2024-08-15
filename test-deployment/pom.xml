@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0.Final</version>
     </parent>
 
     <artifactId>test-deployment</artifactId>
