@@ -91,7 +91,7 @@
         <version.jakarta.el-api>5.0.1</version.jakarta.el-api>
         <version.org.glassfish.jakarta.el>4.0.2</version.org.glassfish.jakarta.el>
 
-        <version.org.wildfly.security.elytron>2.5.0.Final</version.org.wildfly.security.elytron>
+        <version.org.wildfly.security.elytron>2.5.1.Final</version.org.wildfly.security.elytron>
 
         <version.jakarta.ws.rs-api>3.1.0</version.jakarta.ws.rs-api>
         <version.jakarta.ejb-api>4.0.1</version.jakarta.ejb-api>
