@@ -474,9 +474,9 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     static TransactionManager getTransactionManager(final JobContextImpl jobContext, final Step step) {
         // Determine which TransactionManager to use,
         if (useLocalTx(jobContext, step)) {
-            return LocalTransactionManager.geInstance();
+            return LocalTransactionManager.getInstance();
         }
-        return jobContext.getBatchEnvironment().getTranstactionManager();
+        return jobContext.getBatchEnvironment().getTransactionManager();
     }
 
     private static boolean useLocalTx(final JobContextImpl jobContext, final Step step) {
