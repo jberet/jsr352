@@ -151,6 +151,12 @@ public abstract class AbstractJobOperator implements JobOperator {
         }
     }
 
+    public void forceStop(final long executionId) {
+        final JobExecutionImpl jobExecution = getJobExecutionImpl(executionId);
+        jobExecution.setBatchStatus(BatchStatus.STOPPED);
+        getJobRepository().updateJobExecution(jobExecution, false, false);
+    }
+
     @Override
     public void stop(final long executionId) throws NoSuchJobExecutionException,
             JobExecutionNotRunningException, JobSecurityException {
