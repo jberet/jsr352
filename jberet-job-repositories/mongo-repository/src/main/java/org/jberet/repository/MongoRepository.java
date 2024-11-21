@@ -275,6 +275,12 @@ public final class MongoRepository extends AbstractPersistentRepository {
         return result;
     }
 
+    // todo
+    @Override
+    public List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds) {
+        return List.of();
+    }
+
     @Override
     public List<Long> getRunningExecutions(final String jobName) {
         final List<Long> result = new ArrayList<Long>();

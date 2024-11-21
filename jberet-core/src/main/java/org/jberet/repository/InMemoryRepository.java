@@ -217,6 +217,12 @@ public final class InMemoryRepository extends AbstractRepository {
         }
     }
 
+    // todo
+    @Override
+    public List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds) {
+        return List.of();
+    }
+
     @Override
     public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
         final JobExecutionImpl jobExecution = getJobExecution(jobExecutionId);

@@ -59,6 +59,8 @@ public interface JobRepository {
     JobExecution getJobExecution(long jobExecutionId);
     List<JobExecution> getJobExecutions(JobInstance jobInstance);
 
+    List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds);
+
     /**
      * Gets job execution ids belonging to the job identified by the {@code jobName}.
      * @param jobName the job name identifying the job
@@ -66,6 +68,8 @@ public interface JobRepository {
      * @since 1.3.9.Final, 1.4.3.Final
      */
     List<Long> getJobExecutionsByJob(String jobName);
+
+
 
     /**
      * Gets job execution ids belonging to the job identified by the {@code jobName}.

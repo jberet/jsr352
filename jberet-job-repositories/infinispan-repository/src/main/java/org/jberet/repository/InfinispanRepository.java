@@ -183,6 +183,12 @@ public final class InfinispanRepository extends AbstractRepository {
         return result;
     }
 
+    // todo
+    @Override
+    public List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds) {
+        return List.of();
+    }
+
     @Override
     public List<StepExecution> getStepExecutions(final long jobExecutionId, final ClassLoader classLoader) {
         final JobExecutionImpl jobExecution = jobExecutionCache.get(jobExecutionId);
