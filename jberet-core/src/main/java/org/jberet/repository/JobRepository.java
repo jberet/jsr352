@@ -18,6 +18,7 @@ import jakarta.batch.runtime.JobInstance;
 import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.job.model.Job;
+import org.jberet.operations.DefaultJobOperatorImpl;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
@@ -95,7 +96,7 @@ public interface JobRepository {
      * @return  a list of job execution ids
      *
      * @since 1.1.0.Final
-     * @see org.jberet.operations.JobOperatorImpl#getRunningExecutions(java.lang.String)
+     * @see DefaultJobOperatorImpl#getRunningExecutions(java.lang.String)
      */
     List<Long> getRunningExecutions(final String jobName);
 
