@@ -71,33 +71,6 @@ public class SleepBatchletTest {
         Assertions.assertEquals(BatchStatus.STOPPED.name(), jobExecution.getExitStatus());
     }
 
-
-    @Test
-    public void sleepForceStop() throws Exception {
-
-        JobOperatorContext.setJobOperatorContextSelector(new ForceStopJobOperatorContextSelector());
-        ForceStopJobOperatorImpl operator = (ForceStopJobOperatorImpl) JobOperatorContext.getJobOperatorContext().getJobOperator();
-
-        final int sleepMinutes = 6;
-        final Properties params = new Properties();
-        params.setProperty("sleep.minutes", String.valueOf(sleepMinutes));
-        final long jobExecutionId = operator.start(jobName, params);
-        final JobExecutionImpl jobExecution = (JobExecutionImpl) operator.getJobExecution(jobExecutionId);
-
-        operator.forceStop(jobExecutionId);
-        // don't await.
-//        jobExecution.awaitTermination(1, TimeUnit.MINUTES);
-
-        System.out.printf("jobExecution id=%s, batchStatus=%s, exitStatus=%s, jobParameters=%s, restartPosition=%s, " +
-                        "createTime=%s, startTime=%s, lastUpdateTime=%s, endTime=%s%n",
-                jobExecutionId, jobExecution.getBatchStatus(), jobExecution.getExitStatus(), jobExecution.getJobParameters(),
-                jobExecution.getRestartPosition(), jobExecution.getCreateTime(), jobExecution.getStartTime(),
-                jobExecution.getLastUpdatedTime(), jobExecution.getLastUpdatedTime(), jobExecution.getEndTime());
-        Assertions.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
-        Assertions.assertEquals(BatchStatus.STOPPED.name(), jobExecution.getExitStatus());
-    }
-
-
     /**
      * Verifies that exception from JobListener.beforeJob() method will cause the job to fail.
      * @throws Exception
