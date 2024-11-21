@@ -21,7 +21,7 @@ import org.jberet.repository.JobRepository;
 import org.jberet.spi.BatchEnvironment;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
-public class JobOperatorImpl extends AbstractJobOperator implements JobOperator {
+public class DefaultJobOperatorImpl extends AbstractJobOperator implements JobOperator {
 
     private static final PrivilegedAction<BatchEnvironment> loaderAction = new PrivilegedAction<BatchEnvironment>() {
         @Override
@@ -37,11 +37,11 @@ public class JobOperatorImpl extends AbstractJobOperator implements JobOperator 
     final JobRepository repository;
     private final BatchEnvironment batchEnvironment;
 
-    public JobOperatorImpl() throws BatchRuntimeException {
+    public DefaultJobOperatorImpl() throws BatchRuntimeException {
         this(WildFlySecurityManager.isChecking() ? AccessController.doPrivileged(loaderAction) : loaderAction.run());
     }
 
-    public JobOperatorImpl(final BatchEnvironment batchEnvironment) throws BatchRuntimeException {
+    public DefaultJobOperatorImpl(final BatchEnvironment batchEnvironment) throws BatchRuntimeException {
         if (batchEnvironment == null) {
             throw BatchMessages.MESSAGES.batchEnvironmentNotFound();
         }
