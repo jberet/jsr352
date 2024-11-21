@@ -650,6 +650,12 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         return result;
     }
 
+    // todo
+    @Override
+    public List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds) {
+        return List.of();
+    }
+
     private boolean isExecutionStale(final JobExecutionImpl jobExecution) {
         final BatchStatus jobStatus = jobExecution.getBatchStatus();
         if (jobStatus.equals(BatchStatus.COMPLETED) ||
