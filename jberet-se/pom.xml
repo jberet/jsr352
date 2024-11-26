@@ -32,6 +32,16 @@ SPDX-License-Identifier: EPL-2.0
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-infinispan-repository</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-mongo-repository</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
         </dependency>
