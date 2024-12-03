@@ -76,6 +76,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
 
     private static final String SELECT_ALL_JOB_EXECUTIONS = "select-all-job-executions";
     private static final String SELECT_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID = "select-job-executions-by-job-instance-id";
+    private static final String SELECT_JOB_EXECUTIONS_BY_TIMEOUT_SECONDS = "select-job-executions-by-timeout-seconds";
     private static final String SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME = "select-running-job-executions-by-job-name";
     private static final String SELECT_JOB_EXECUTIONS_BY_JOB_NAME = "select-job-executions-by-job-name";
     private static final String SELECT_JOB_EXECUTION = "select-job-execution";
@@ -653,6 +654,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     // todo
     @Override
     public List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds) {
+
+
         return List.of();
     }
 
