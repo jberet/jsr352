@@ -661,7 +661,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, String.format("%d seconds", timeoutSeconds));
+            preparedStatement.setLong(1, timeoutSeconds);
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 final long executionId = rs.getLong(TableColumns.JOBEXECUTIONID);
