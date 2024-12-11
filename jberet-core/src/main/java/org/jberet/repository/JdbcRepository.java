@@ -652,7 +652,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     }
 
     @Override
-    public List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds) {
+    public List<JobExecution> getTimeoutJobExecutions(Long timeoutSeconds) {
         final String query = sqls.getProperty(SELECT_JOB_EXECUTIONS_BY_TIMEOUT_SECONDS);
         long jobInstanceId = 0;
         final List<JobExecution> result = new ArrayList<JobExecution>();
@@ -668,9 +668,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
                 final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(executionId);
                 JobExecutionImpl jobExecution1 = (ref != null) ? ref.get() : null;
                 if (jobExecution1 == null) {
-                    if (jobInstance == null) {
-                        jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
-                    }
+                    jobInstanceId = rs.getLong(TableColumns.JOBINSTANCEID);
                     final Properties jobParameters1 = BatchUtil.stringToProperties(rs.getString(TableColumns.JOBPARAMETERS));
                     jobExecution1 =
                             new JobExecutionImpl(getJobInstance(jobInstanceId), executionId, jobParameters1,

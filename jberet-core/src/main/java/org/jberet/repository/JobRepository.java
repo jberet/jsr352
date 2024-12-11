@@ -59,7 +59,7 @@ public interface JobRepository {
     JobExecution getJobExecution(long jobExecutionId);
     List<JobExecution> getJobExecutions(JobInstance jobInstance);
 
-    List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds);
+    List<JobExecution> getTimeoutJobExecutions(Long timeoutSeconds);
 
     /**
      * Gets job execution ids belonging to the job identified by the {@code jobName}.
