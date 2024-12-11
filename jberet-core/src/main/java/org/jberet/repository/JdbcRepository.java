@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -661,7 +662,10 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setLong(1, timeoutSeconds);
+
+            Timestamp timeoutTime = Timestamp.from(Instant.now().plusSeconds(timeoutSeconds));
+
+            preparedStatement.setTimestamp(1, timeoutTime);
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 final long executionId = rs.getLong(TableColumns.JOBEXECUTIONID);
