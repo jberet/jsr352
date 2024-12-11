@@ -199,10 +199,4 @@ public class JobRepositoryTest {
         Assertions.assertEquals(1, jobExecutions.size());
     }
 
-//    @Test
-//    public void testGetTimeoutJobExecutions() throws Exception {
-//        List<JobExecution> executions = repo.getTimeoutJobExecutions(Long.valueOf(10));
-//        System.out.println(executions.size());
-//    }
-
 }
