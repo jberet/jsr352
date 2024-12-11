@@ -219,7 +219,7 @@ public final class InMemoryRepository extends AbstractRepository {
 
     // todo
     @Override
-    public List<JobExecution> getTimeoutJobExecutions(JobInstance jobInstance, Long timeoutSeconds) {
+    public List<JobExecution> getTimeoutJobExecutions(Long timeoutSeconds) {
         return List.of();
     }
 
