@@ -12,7 +12,7 @@ package org.jberet.spi;
 
 import jakarta.batch.operations.JobOperator;
 
-import org.jberet.operations.JobOperatorImpl;
+import org.jberet.operations.DefaultJobOperatorImpl;
 import org.jberet.util.Assertions;
 
 /**
@@ -58,7 +58,7 @@ public abstract class JobOperatorContext {
      * @return the new context
      */
     public static JobOperatorContext create(final BatchEnvironment batchEnvironment) {
-        final JobOperator jobOperator = new JobOperatorImpl(Assertions.notNull(batchEnvironment, "batchEnvironment"));
+        final JobOperator jobOperator = new DefaultJobOperatorImpl(Assertions.notNull(batchEnvironment, "batchEnvironment"));
         return new JobOperatorContext() {
             @Override
             public JobOperator getJobOperator() {
