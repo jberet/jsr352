@@ -158,6 +158,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     @Disabled
     @Test
     public void getTimeoutExecutions() throws Exception {
+        // todo: create a timeout job;
         purgeJobExecutions();
         super.getRunningExecutions();
         List<JobExecution> executions = jobOperator.getJobRepository().getTimeoutJobExecutions(Long.valueOf(0));
