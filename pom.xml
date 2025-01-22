@@ -73,7 +73,7 @@
 
         <version.org.openjdk.nashorn>15.6</version.org.openjdk.nashorn>
         <version.org.apache.groovy>4.0.24</version.org.apache.groovy>
-        <version.org.jruby.jruby>9.0.0.0</version.org.jruby.jruby>
+        <version.org.jruby.jruby>9.4.10.0</version.org.jruby.jruby>
         <version.org.python.jython>2.7.4</version.org.python.jython>
         <version.org.scala-lang.scala-dist>2.13.14</version.org.scala-lang.scala-dist>
         <version.com.caucho.resin-quercus>3.2.1</version.com.caucho.resin-quercus>
