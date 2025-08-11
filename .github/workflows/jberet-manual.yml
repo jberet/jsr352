@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Set up JDK ${{ inputs.jdk-distribution }} ${{ inputs.jdk-version }}
       uses: actions/setup-java@v4
       with:

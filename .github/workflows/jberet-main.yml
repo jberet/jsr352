@@ -30,7 +30,7 @@ jobs:
         jdk-version: [ '11', '17', '21' ]
         feature-pack: ['wildfly-preview-feature-pack', 'wildfly-ee-galleon-pack']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
           name: wildfly-maven-repository
