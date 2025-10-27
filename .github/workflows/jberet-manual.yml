@@ -54,7 +54,7 @@ jobs:
         cache: 'maven'
     - name: Run Tests
       run: mvn -ntp -U -B -fae clean verify
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       if: failure()
       with:
         name: ${{ inputs.jdk-distribution }}-${{ inputs.jdk-version }}-${{ inputs.os }}
