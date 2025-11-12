@@ -258,7 +258,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             rs = countPartitionExecutionStatement.executeQuery();
         } catch (final SQLException e) {
             final String ddlFile = getDDLLocation(databaseProductName);
-            ddlResource = getClassLoader(false).getResourceAsStream(ddlFile);
+            ddlResource = getClassLoader(true).getResourceAsStream(ddlFile);
             if (ddlResource == null) {
                 throw BatchMessages.MESSAGES.failToLoadDDL(ddlFile);
             }
