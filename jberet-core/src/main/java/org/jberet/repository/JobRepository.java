@@ -18,6 +18,7 @@ import jakarta.batch.runtime.JobInstance;
 import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.job.model.Job;
+import org.jberet.operations.DefaultJobOperatorImpl;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
@@ -58,6 +59,8 @@ public interface JobRepository {
     JobExecution getJobExecution(long jobExecutionId);
     List<JobExecution> getJobExecutions(JobInstance jobInstance);
 
+    List<JobExecution> getTimeoutJobExecutions(Long timeoutSeconds);
+
     /**
      * Gets job execution ids belonging to the job identified by the {@code jobName}.
      * @param jobName the job name identifying the job
@@ -65,6 +68,8 @@ public interface JobRepository {
      * @since 1.3.9.Final, 1.4.3.Final
      */
     List<Long> getJobExecutionsByJob(String jobName);
+
+
 
     /**
      * Gets job execution ids belonging to the job identified by the {@code jobName}.
@@ -95,7 +100,7 @@ public interface JobRepository {
      * @return  a list of job execution ids
      *
      * @since 1.1.0.Final
-     * @see org.jberet.operations.JobOperatorImpl#getRunningExecutions(java.lang.String)
+     * @see DefaultJobOperatorImpl#getRunningExecutions(java.lang.String)
      */
     List<Long> getRunningExecutions(final String jobName);
 
