@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>test-deployment</artifactId>
@@ -35,7 +35,7 @@
 
     <properties>
         <jboss.home>${project.build.directory}${file.separator}wildfly</jboss.home>
-        <version.org.wildfly>30.0.1.Final</version.org.wildfly>
+        <version.org.wildfly/>
         <galleon.fork.embedded>true</galleon.fork.embedded>
     </properties>
 
@@ -48,11 +48,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -128,6 +123,16 @@
                                 </feature-pack>
                             </feature-packs>
                             <channels>
+                                <!-- If the server.version is blank the newest version of WildFly will be used. Otherwise, be
+                                     explicit.
+                                 -->
+                                <channel>
+                                    <manifest>
+                                        <groupId>${wildfly.channel.manifest.groupId}</groupId>
+                                        <artifactId>${wildfly.channel.manifest.artifactId}</artifactId>
+                                        <version>${version.org.wildfly}</version>
+                                    </manifest>
+                                </channel>
                                 <channel>
                                     <manifest>
                                         <groupId>org.jberet</groupId>
