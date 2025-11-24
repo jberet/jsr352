@@ -19,16 +19,24 @@
 
 package org.jberet.test.deployment;
 
-import io.restassured.RestAssured;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class SimpleITest {
     @Test
     public void testSimple() throws Exception {
-        Assertions.assertEquals("OK",
-                RestAssured.given().baseUri("http://localhost/test-deployment").basePath("/simple").port(8080)
-                        .get().asString());
+        final HttpClient client = HttpClient.newHttpClient();
+        final HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:8080/test-deployment/simple"))
+                .GET()
+                .build();
+        final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals("OK", response.body());
     }
 
 }

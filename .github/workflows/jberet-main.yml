@@ -7,47 +7,33 @@ on:
   pull_request:
     branches:
       - main
-    types: [ opened, synchronize, reopened, ready_for_review ]
   push:
     branches: [ main ]
   workflow_dispatch:
 jobs:
-  wildfly-build:
-    uses: wildfly/wildfly/.github/workflows/shared-wildfly-build.yml@main
-    with:
-      wildfly-branch: "main"
-      wildfly-repo: "wildfly/wildfly"
   build-test-matrix:
     name: ${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: wildfly-build
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        jdk-distribution: [ temurin ]
-        jdk-version: [ '11', '17', '21' ]
+        jdk-distribution: [ 'temurin' ]
+        jdk-version: [ '17', '21', '25' ]
         feature-pack: ['wildfly-preview-feature-pack', 'wildfly-ee-galleon-pack']
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v6
-        with:
-          name: wildfly-maven-repository
-          path: .
-      - name: Extract WildFly Maven Repo
-        shell: bash
-        run: tar -xzf wildfly-maven-repository.tar.gz -C ~
       - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.jdk-version }}
-          distribution: ${{ matrix.jdk-distribution }}
+          distribution: temurin
           cache: 'maven'
       - name: Quick Build
-        run: mvn install -DskipTests
-      - name: Full Build With WildFly Version ${{needs.wildfly-build.outputs.wildfly-version}} With Feature Pack ${{matrix.feature-pack}}
-        run: mvn install '-Dserver.version=${{needs.wildfly-build.outputs.wildfly-version}}' '-Dserver.test.feature.pack.artifactId=${{matrix.feature-pack}}'
+        run: mvn -V -B -ntp install -DskipTests
+      - name: Full Build With WildFly With Feature Pack ${{matrix.feature-pack}}
+        run: mvn -V -B -ntp install  '-Dserver.test.feature.pack.artifactId=${{matrix.feature-pack}}'
 #      - uses: actions/upload-artifact@v3
 #        if: failure()
 #        with:
