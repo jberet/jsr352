@@ -23,7 +23,7 @@ jobs:
         jdk-version: [ '17', '21', '25' ]
         feature-pack: ['wildfly-preview-feature-pack', 'wildfly-ee-galleon-pack']
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
         uses: actions/setup-java@v5
         with:
