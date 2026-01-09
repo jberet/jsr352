@@ -928,7 +928,6 @@ public final class ChunkRunner extends AbstractRunner<StepContextImpl> implement
         TO_END_RETRY, //need to end retrying the current chunk
         TO_START_NEW, //the current chunk is done and need to start a new chunk next
         DEPLETED,      //no more input items, the processing can still go to next iteration so this last item can be retried
-
         JOB_STOPPING,  //the job has been requested to stop
         JOB_STOPPED
     }

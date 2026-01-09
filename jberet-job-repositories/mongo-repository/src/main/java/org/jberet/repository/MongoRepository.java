@@ -16,11 +16,13 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+
 import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.JobExecution;
 import jakarta.batch.runtime.JobInstance;
 import jakarta.batch.runtime.Metric;
 import jakarta.batch.runtime.StepExecution;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -241,7 +243,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         long jobInstanceId = jobInstance == null ? 0 : jobInstance.getInstanceId();
 
         FindIterable<DBObject> findIterable = jobInstance == null ?
-                db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find():
+                db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find() :
                 db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(
                         new BasicDBObject(TableColumns.JOBINSTANCEID, jobInstance.getInstanceId()));
 
@@ -273,6 +275,12 @@ public final class MongoRepository extends AbstractPersistentRepository {
             result.add(jobExecution1);
         }
         return result;
+    }
+
+    // todo
+    @Override
+    public List<JobExecution> getTimeoutJobExecutions(Long timeoutSeconds) {
+        return List.of();
     }
 
     @Override
@@ -471,7 +479,7 @@ public final class MongoRepository extends AbstractPersistentRepository {
         final BasicDBObject keys = new BasicDBObject(TableColumns.JOBEXECUTIONID, 1);
         keys.put(TableColumns._id, 0);
         final MongoCursor<DBObject> cursor = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class).find(
-                new BasicDBObject(TableColumns.JOBINSTANCEID, jobExecutionToRestart.getJobInstance().getInstanceId()))
+                        new BasicDBObject(TableColumns.JOBINSTANCEID, jobExecutionToRestart.getJobInstance().getInstanceId()))
                 .projection(keys).iterator();
         final BasicDBList basicDBList = new BasicDBList();
         while (cursor.hasNext()) {

@@ -21,11 +21,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import jakarta.batch.operations.JobRestartException;
 import jakarta.batch.operations.NoSuchJobException;
 import jakarta.batch.operations.NoSuchJobExecutionException;
 import jakarta.batch.runtime.BatchStatus;
 
+import jakarta.batch.runtime.JobExecution;
 import org.jberet.repository.JdbcRepository;
 import org.jberet.se.BatchSEEnvironment;
 import org.jberet.testapps.purgeInMemoryRepository.PurgeRepositoryTestBase;
@@ -38,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeJdbcRepositoryJobName = "purgeJdbcRepository";
 
-    /////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////
     @Test
     @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_1() throws Exception {
@@ -57,7 +59,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         assertThrows(JobRestartException.class, super::restartKilledStrict);
     }
 
-    /////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////
     @Test
     @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_2() throws Exception {
@@ -70,7 +72,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         super.restartKilled();
     }
 
-    /////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////
     @Test
     @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_3() throws Exception {
@@ -83,7 +85,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         super.restartKilledDetect();
     }
 
-    /////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////
     @Test
     @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_4() throws Exception {
@@ -96,7 +98,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         super.restartKilledForce();
     }
 
-    /////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////
     @Test
     @Disabled("run it manually, Ctrl-C before it completes")
     public void ctrlC_5() throws Exception {
@@ -109,14 +111,14 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         super.restartKilledStopAbandon();
     }
 
-    /////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////
     @Test
     @Disabled("run it manually")
     public void memoryTest() throws Exception {
         super.memoryTest();
     }
 
-    /////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////
     @Test
     public void restartNoSuchJobExecutionException() {
         assertThrows(NoSuchJobExecutionException.class, () -> jobOperator.restart(-1, null));
@@ -152,6 +154,17 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         purgeJobExecutions();
         super.getRunningExecutions();
     }
+
+    @Disabled
+    @Test
+    public void getTimeoutExecutions() throws Exception {
+        // todo: create a timeout job;
+        purgeJobExecutions();
+        super.getRunningExecutions();
+        List<JobExecution> executions = jobOperator.getJobRepository().getTimeoutJobExecutions(Long.valueOf(0));
+        System.out.println(executions.size());
+    }
+
 
     @Test
     public void getRunningExecutions2() throws Exception {
@@ -306,7 +319,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
 
         params.setProperty("sql",
                 "delete from JOB_EXECUTION where JOBINSTANCEID in " +
-                    "(select DISTINCT JOBINSTANCEID from JOB_INSTANCE where JOBNAME like 'prepurge%'); ");
+                        "(select DISTINCT JOBINSTANCEID from JOB_INSTANCE where JOBNAME like 'prepurge%'); ");
 
         params.setProperty("jobExecutionsByJobNames", prepurgeAndPrepurge2JobNames);
 
@@ -429,7 +442,7 @@ public class PurgeJdbcRepositoryIT extends PurgeRepositoryTestBase {
         params.setProperty("purgeJobsByNames", prepurgeAndPrepurge2JobNames);
         startAndVerifyPurgeJob(purgeJdbcRepositoryJobName);
         final JdbcRepository jdbcRepository = (JdbcRepository) jobOperator.getJobRepository();
-        jdbcRepository.executeStatements( "delete from PARTITION_EXECUTION; delete from STEP_EXECUTION; delete from JOB_EXECUTION; delete from JOB_INSTANCE", null);
+        jdbcRepository.executeStatements("delete from PARTITION_EXECUTION; delete from STEP_EXECUTION; delete from JOB_EXECUTION; delete from JOB_INSTANCE", null);
 
     }
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Properties;
 import javax.transaction.xa.XAResource;
 
+import jakarta.batch.runtime.JobExecution;
 import jakarta.transaction.HeuristicMixedException;
 import jakarta.transaction.HeuristicRollbackException;
 import jakarta.transaction.InvalidTransactionException;
