@@ -96,7 +96,7 @@
 
         <version.org.apache.camel>3.22.2</version.org.apache.camel>
 
-        <version.io.vertx>4.5.11</version.io.vertx>
+        <version.io.vertx>4.5.24</version.io.vertx>
         <version.org.jberet.jberet-vertx-cluster>1.3.9.SP3</version.org.jberet.jberet-vertx-cluster>
 
         <version.com.datastax.cassandra>3.11.5</version.com.datastax.cassandra>
