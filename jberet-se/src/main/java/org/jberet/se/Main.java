@@ -24,12 +24,12 @@ public class Main {
     public static void main(final String[] args) throws BatchRuntimeException {
         if (args.length == 0) {
             usage(args);
-            return;
+            System.exit(1);
         }
         final String jobXml = args[0];
         if (jobXml == null || jobXml.isEmpty()) {
             usage(args);
-            return;
+            System.exit(1);
         }
 
         final java.util.Properties jobParameters = new java.util.Properties();
@@ -37,7 +37,7 @@ public class Main {
             final int equalSignPos = args[i].indexOf('=');
             if (equalSignPos <= 0) {
                 usage(args);
-                return;
+                System.exit(1);
             }
             final String key = args[i].substring(0, equalSignPos).trim();
             final String val = args[i].substring(equalSignPos + 1).trim();
@@ -62,5 +62,6 @@ public class Main {
 
     private static void usage(final String[] args) {
         SEBatchLogger.LOGGER.usage(args);
+        return;
     }
 }
