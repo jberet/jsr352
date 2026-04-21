@@ -24,14 +24,40 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import org.jboss.shrinkwrap.api.asset.StringAsset;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.wildfly.testing.junit.extension.annotation.GenerateDeployment;
+import org.wildfly.testing.junit.extension.annotation.RequestPath;
+import org.wildfly.testing.junit.extension.annotation.ServerResource;
+import org.wildfly.testing.junit.extension.annotation.WildFlyTest;
 
+@WildFlyTest
 public class SimpleITest {
+
+    private static final StringAsset BEANS_XML = new StringAsset("""
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!-- Marker file indicating CDI should be enabled -->
+            <beans xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="
+                     https://jakarta.ee/xml/ns/jakartaee
+                     https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
+                   bean-discovery-mode="all">
+            </beans>
+            """);
+
+    @GenerateDeployment()
+    public static void createDeployment(final WebArchive war) {
+        war.addClasses(SimpleApp.class, SimpleBatchlet.class, SimpleResource.class)
+                .addAsWebInfResource("simple.xml", "classes/META-INF/batch-jobs/simple.xml")
+                .addAsWebInfResource(BEANS_XML, "beans.xml");
+    }
+
     @Test
-    public void testSimple() throws Exception {
+    public void testSimple(@ServerResource @RequestPath("simple") final URI uri) throws Exception {
         final HttpClient client = HttpClient.newHttpClient();
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:8080/test-deployment/simple"))
+        final HttpRequest request = HttpRequest.newBuilder(uri)
                 .GET()
                 .build();
         final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());

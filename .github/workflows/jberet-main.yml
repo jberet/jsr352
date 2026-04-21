@@ -10,32 +10,51 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+# Only run the latest job
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+env:
+  MVN_CMD: './mvnw -V -B -ntp'
+
 jobs:
   build-test-matrix:
-    name: ${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
+    name: ${{ matrix.os }}${{ matrix.profile }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        jdk-distribution: [ 'temurin' ]
-        jdk-version: [ '17', '21', '25' ]
-        feature-pack: ['wildfly-preview-feature-pack', 'wildfly-ee-galleon-pack']
+        profile: ['', '-Pee10']
     steps:
       - uses: actions/checkout@v6
-      - name: Set up JDK ${{ matrix.jdk-distribution }} ${{ matrix.jdk-version }}
+      - name: Set up JDKs
         uses: actions/setup-java@v5
         with:
-          java-version: ${{ matrix.jdk-version }}
           distribution: temurin
           cache: 'maven'
-      - name: Quick Build
-        run: mvn -V -B -ntp install -DskipTests
-      - name: Full Build With WildFly With Feature Pack ${{matrix.feature-pack}}
-        run: mvn -V -B -ntp install  '-Dserver.test.feature.pack.artifactId=${{matrix.feature-pack}}'
-#      - uses: actions/upload-artifact@v3
-#        if: failure()
-#        with:
-#          name: surefire-${{ matrix.jdk-distribution }}-${{ matrix.jdk-version }}-${{ matrix.os }}
-#          path: '**/surefire-reports/*.txt'
+          java-version: |
+            17
+            21
+            26
+            25
+      - name: Build and Test on ${{ matrix.os }} - Java 25
+        run: ${{ env.MVN_CMD }} clean install ${{ matrix.profile }}
+      - name: Build and Test on ${{ matrix.os }} - Java 26
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_26_X64}}${{env.JAVA_HOME_26_ARM64}}' '-Dtest.report.dir=java26' ${{ matrix.profile }}
+      - name: Build and Test on ${{ matrix.os }} - Java 21
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_21_X64}}${{env.JAVA_HOME_21_ARM64}}' '-Dtest.report.dir=java21' ${{ matrix.profile }}
+      - name: Build and Test on ${{ matrix.os }} - Java 17
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_17_X64}}${{env.JAVA_HOME_17_ARM64}}' '-Dtest.report.dir=java17' ${{ matrix.profile }}
+      - name: Upload test logs for failed run
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: test-reports-${{ matrix.os }}${{matrix.profile}}
+          path: |
+            **/*.log
+            **/surefire-reports/**
+            **/failsafe-reports/**

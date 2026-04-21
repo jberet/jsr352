@@ -150,16 +150,7 @@
         <version.com.datastax.cassandra>3.11.5</version.com.datastax.cassandra>
 
         <!-- Testing -->
-        <junit-jupiter.version>5.11.4</junit-jupiter.version>
-
-        <!-- WildFly and Build Plugins -->
-        <version.org.wildfly.plugins.wildfly-maven-plugin>5.1.1.Final</version.org.wildfly.plugins.wildfly-maven-plugin>
-        <server.test.feature.pack.groupId>org.wildfly</server.test.feature.pack.groupId>
-        <!-- WildFly Preview is currently targeting Jakarta EE 11 and we should use it by default
-        <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId> -->
-        <server.test.feature.pack.artifactId>wildfly-preview-feature-pack</server.test.feature.pack.artifactId>
-        <wildfly.channel.manifest.groupId>org.wildfly.channels</wildfly.channel.manifest.groupId>
-        <wildfly.channel.manifest.artifactId>wildfly-preview</wildfly.channel.manifest.artifactId>
+        <junit-jupiter.version>6.0.3</junit-jupiter.version>
 
         <!-- Maven Repository Configuration -->
         <!-- Protocol to use for communication with remote maven repositories.
@@ -171,9 +162,17 @@
         <maven.repository.url>${maven.repository.protocol}://repository.jboss.org/nexus/repository/public/</maven.repository.url>
 
         <!-- Build Configuration -->
-        <redirectTestOutput>false</redirectTestOutput>
+        <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+        <redirectTestOutput>${maven.test.redirectTestOutputToFile}</redirectTestOutput>
         <modular.jdk.args/>
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
+        <test.java.home>${java.home}</test.java.home>
+        <!-- Used to allow overriding the directory where reports are written. For example in CI, passing -Dtest.report.dir=java25
+             to allow test reports to not overwrite each other.
+         -->
+        <test.report.dir/>
+        <surefire.reportsDirectory>${project.build.directory}/surefire-reports/${test.report.dir}</surefire.reportsDirectory>
+        <failsafe.reportsDirectory>${project.build.directory}/failsafe-reports/${test.report.dir}</failsafe.reportsDirectory>
 
         <!-- Java Version Requirements -->
         <maven.compiler.release>17</maven.compiler.release>
@@ -795,6 +794,8 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
+                        <jvm>${test.java.home}${file.separator}bin${file.separator}java</jvm>
+                        <reportsDirectory>${surefire.reportsDirectory}</reportsDirectory>
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
                         <argLine>${surefire.system.args}</argLine>
                         <systemPropertyVariables>
@@ -814,6 +815,8 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <jvm>${test.java.home}${file.separator}bin${file.separator}java</jvm>
+                        <reportsDirectory>${failsafe.reportsDirectory}</reportsDirectory>
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
                         <argLine>${surefire.system.args}</argLine>
                         <systemPropertyVariables>
