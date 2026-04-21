@@ -71,6 +71,7 @@
     <properties>
         <!-- Project Configuration -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skipTests>false</skipTests>
 
         <!-- Core JBeret and JBoss Dependencies -->
         <version.org.jberet.support>3.0.0.Final</version.org.jberet.support>

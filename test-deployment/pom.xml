@@ -89,6 +89,7 @@
                 <version>${version.org.wildfly.plugins.wildfly-maven-plugin}</version>
                 <configuration>
                     <jboss-home>${jboss.home}</jboss-home>
+                    <skip>${skipTests}</skip>
                     <system-properties>
                         <maven.repo.local>${settings.localRepository}</maven.repo.local>
                     </system-properties>
