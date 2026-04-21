@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>51</version>
+        <version>53</version>
     </parent>
 
     <groupId>org.jberet</groupId>
@@ -126,6 +126,7 @@
 
         <!-- Require Java 17 -->
         <maven.compiler.release>17</maven.compiler.release>
+        <jdk.min.version>${maven.compiler.release}</jdk.min.version>
         <insecure.repositories>WARN</insecure.repositories>
     </properties>
 
