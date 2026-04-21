@@ -171,7 +171,6 @@
 
         <!-- Build Configuration -->
         <redirectTestOutput>false</redirectTestOutput>
-        <javadoc.additional.params>-sourceclasspath ${project.build.outputDirectory}</javadoc.additional.params>
         <modular.jdk.args/>
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
 
@@ -824,29 +823,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${version.javadoc.plugin}</version>
                     <configuration>
-                        <reportOutputDirectory>${project.reporting.outputDirectory}/${project.version}/javadoc/</reportOutputDirectory>
-                        <destDir>${project.name}</destDir>
-                        <additionalJOptions>
-                            <additionalJOption>-Xdoclint:none</additionalJOption>
-                        </additionalJOptions>
+                        <doclint>none</doclint>
+                        <sourcepath>${project.build.sourceDirectory}</sourcepath>
                         <excludePackageNames>*._private.*</excludePackageNames>
-
-                        <doclet>org.jboss.apiviz.APIviz</doclet>
-                        <docletArtifact>
-                            <groupId>org.jboss.apiviz</groupId>
-                            <artifactId>apiviz</artifactId>
-                            <version>${version.org.jboss.apiviz}</version>
-                        </docletArtifact>
-                        <useStandardDocletOptions>true</useStandardDocletOptions>
-                        <charset>UTF-8</charset>
-                        <encoding>UTF-8</encoding>
-                        <docencoding>UTF-8</docencoding>
-                        <breakiterator>true</breakiterator>
-                        <version>true</version>
-                        <author>true</author>
-                        <keywords>true</keywords>
                     </configuration>
                 </plugin>
                 <plugin>
