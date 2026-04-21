@@ -25,6 +25,9 @@
 
     <artifactId>jberet-job-repository-batchlet</artifactId>
 
+    <name>JBeret: Batchlet Job Repository Utility</name>
+    <description>A utility batchlet that allows purging job repositories.</description>
+
     <dependencies>
         <dependency>
             <groupId>org.jberet</groupId>

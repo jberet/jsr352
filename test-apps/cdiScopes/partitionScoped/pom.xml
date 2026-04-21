@@ -19,6 +19,7 @@
         <artifactId>cdiScopes</artifactId>
         <groupId>org.jberet.test-apps</groupId>
         <version>3.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>partitionScoped</artifactId>

@@ -18,16 +18,21 @@
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
         <version>53</version>
+        <relativePath/>
     </parent>
 
     <groupId>org.jberet</groupId>
     <artifactId>jberet-parent</artifactId>
     <version>3.2.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <name>jberet-parent</name>
     <description>Implementation of Jakarta Batch</description>
-    <packaging>pom</packaging>
-
+    <url>https://jberet.org</url>
+    <organization>
+        <name>JBeret</name>
+        <url>https://jberet.org</url>
+    </organization>
     <licenses>
         <license>
             <name>Eclipse Public License 2.0</name>
@@ -35,6 +40,33 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <mailingLists>
+        <mailingList>
+            <name>GitHub Discussions</name>
+            <post>https://github.com/orgs/jberet/discussions</post>
+        </mailingList>
+    </mailingLists>
+
+    <modules>
+        <module>jberet-core</module>
+        <module>jberet-se</module>
+        <module>jberet-job-repositories</module>
+        <module>jberet-se-bom</module>
+        <module>jberet-manifest</module>
+        <module>test-apps</module>
+        <module>test-deployment</module>
+    </modules>
+
+    <scm>
+        <connection>scm:git:https://github.com/jberet/jsr352.git</connection>
+        <url>scm:git:https://github.com/jberet/jsr352.git</url>
+        <developerConnection>scm:git:https://github.com/jberet/jsr352.git</developerConnection>
+    </scm>
+    <issueManagement>
+        <system>Jira</system>
+        <url>https://issues.jboss.org/browse/JBERET</url>
+    </issueManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -115,7 +147,7 @@
              to non-snapshot public maven repos -->
         <maven.repository.protocol>https</maven.repository.protocol>
         <!-- The full remote maven repo URL; can be overridden via -D for special use cases -->
-        <maven.repository.url>${maven.repository.protocol}://repository.jboss.org/nexus/content/groups/public/</maven.repository.url>
+        <maven.repository.url>${maven.repository.protocol}://repository.jboss.org/nexus/repository/public/</maven.repository.url>
 
         <redirectTestOutput>false</redirectTestOutput>
         <javadoc.additional.params>-sourceclasspath ${project.build.outputDirectory}</javadoc.additional.params>
@@ -128,182 +160,24 @@
         <maven.compiler.release>17</maven.compiler.release>
         <jdk.min.version>${maven.compiler.release}</jdk.min.version>
         <insecure.repositories>WARN</insecure.repositories>
+
+        <!-- maven-release-plugin configuration -->
+        <autoVersionSubmodules>true</autoVersionSubmodules>
+        <preparationGoals>clean install</preparationGoals>
+        <releaseProfiles>jboss-release</releaseProfiles>
+        <signTag>true</signTag>
+        <tagNameFormat>@{project.version}</tagNameFormat>
+        <arguments>-DskipTests -DpushChanges=${pushChanges}</arguments>
+        <!-- Do not push changes by default when using the maven-release-plugin:prepare -->
+        <pushChanges>true</pushChanges>
+        <!-- Use the local directory when using perform -->
+        <localCheckout>true</localCheckout>
+        <!-- Nexus release properties -->
+        <nexus.repository.release>jberet</nexus.repository.release>
+        <nexus.staging.tag>jberet-${project.version}</nexus.staging.tag>
+        <maven.deploy.skip>false</maven.deploy.skip>
+        <nexus.skipPublishing>${maven.deploy.skip}</nexus.skipPublishing>
     </properties>
-
-    <modules>
-        <module>jberet-core</module>
-        <module>jberet-se</module>
-        <module>jberet-job-repositories</module>
-        <module>jberet-se-bom</module>
-        <module>jberet-manifest</module>
-        <module>test-apps</module>
-        <module>test-deployment</module>
-    </modules>
-
-
-    <distributionManagement>
-        <repository>
-            <id>jboss-releases-repository</id>
-            <name>JBoss Releases Repository</name>
-            <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <configuration>
-                        <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
-                        <argLine>${surefire.system.args}</argLine>
-                        <systemPropertyVariables>
-                            <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
-                        </systemPropertyVariables>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
-                        <argLine>${surefire.system.args}</argLine>
-                        <systemPropertyVariables>
-                            <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
-                        </systemPropertyVariables>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${version.javadoc.plugin}</version>
-                    <configuration>
-                        <reportOutputDirectory>${project.reporting.outputDirectory}/${project.version}/javadoc/</reportOutputDirectory>
-                        <destDir>${project.name}</destDir>
-                        <additionalJOptions>
-                            <additionalJOption>-Xdoclint:none</additionalJOption>
-                        </additionalJOptions>
-                        <excludePackageNames>*._private.*</excludePackageNames>
-
-                        <doclet>org.jboss.apiviz.APIviz</doclet>
-                        <docletArtifact>
-                            <groupId>org.jboss.apiviz</groupId>
-                            <artifactId>apiviz</artifactId>
-                            <version>${version.org.jboss.apiviz}</version>
-                        </docletArtifact>
-                        <useStandardDocletOptions>true</useStandardDocletOptions>
-                        <charset>UTF-8</charset>
-                        <encoding>UTF-8</encoding>
-                        <docencoding>UTF-8</docencoding>
-                        <breakiterator>true</breakiterator>
-                        <version>true</version>
-                        <author>true</author>
-                        <keywords>true</keywords>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>add-regex-properties</id>
-                            <goals>
-                                <goal>regex-properties</goal>
-                            </goals>
-                            <configuration>
-                                <regexPropertySettings>
-                                    <regexPropertySetting>
-                                        <name>automatic.module.name</name>
-                                        <value>${project.groupId}.${project.artifactId}</value>
-                                        <regex>([a-z]+)\.\1-|-</regex>
-                                        <replacement>$1\.</replacement>
-                                        <failIfNoMatch>false</failIfNoMatch>
-                                    </regexPropertySetting>
-                                </regexPropertySettings>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.jboss.logging</groupId>
-                            <artifactId>jboss-logging-processor</artifactId>
-                            <version>${version.org.jboss.logging.jboss-logging-tools}</version>
-                        </path>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${version.org.mapstruct}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                    <!-- Only generate skeleton properties for INFO or higher -->
-                    <compilerArgument>-Aorg.jboss.logging.tools.level=INFO</compilerArgument>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
-                        </manifestEntries>
-                    </archive>
-                    <excludes>
-                        <!-- Exclude i18n properties files -->
-                        <exclude>**/*.i18n.properties</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <configuration>
-                    <skipSource>true</skipSource>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencyManagement>
         <dependencies>
@@ -897,45 +771,159 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <configuration>
-                            <skipSource>false</skipSource>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
+                        <argLine>${surefire.system.args}</argLine>
+                        <systemPropertyVariables>
+                            <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
+                        <argLine>${surefire.system.args}</argLine>
+                        <systemPropertyVariables>
+                            <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${version.javadoc.plugin}</version>
+                    <configuration>
+                        <reportOutputDirectory>${project.reporting.outputDirectory}/${project.version}/javadoc/</reportOutputDirectory>
+                        <destDir>${project.name}</destDir>
+                        <additionalJOptions>
+                            <additionalJOption>-Xdoclint:none</additionalJOption>
+                        </additionalJOptions>
+                        <excludePackageNames>*._private.*</excludePackageNames>
 
-    <scm>
-        <connection>scm:git:https://github.com/jberet/jsr352.git</connection>
-        <url>scm:git:https://github.com/jberet/jsr352.git</url>
-        <developerConnection>scm:git:https://github.com/jberet/jsr352.git</developerConnection>
-    </scm>
+                        <doclet>org.jboss.apiviz.APIviz</doclet>
+                        <docletArtifact>
+                            <groupId>org.jboss.apiviz</groupId>
+                            <artifactId>apiviz</artifactId>
+                            <version>${version.org.jboss.apiviz}</version>
+                        </docletArtifact>
+                        <useStandardDocletOptions>true</useStandardDocletOptions>
+                        <charset>UTF-8</charset>
+                        <encoding>UTF-8</encoding>
+                        <docencoding>UTF-8</docencoding>
+                        <breakiterator>true</breakiterator>
+                        <version>true</version>
+                        <author>true</author>
+                        <keywords>true</keywords>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>add-regex-properties</id>
+                            <goals>
+                                <goal>regex-properties</goal>
+                            </goals>
+                            <configuration>
+                                <regexPropertySettings>
+                                    <regexPropertySetting>
+                                        <name>automatic.module.name</name>
+                                        <value>${project.groupId}.${project.artifactId}</value>
+                                        <regex>([a-z]+)\.\1-|-</regex>
+                                        <replacement>$1\.</replacement>
+                                        <failIfNoMatch>false</failIfNoMatch>
+                                    </regexPropertySetting>
+                                </regexPropertySettings>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 
-    <issueManagement>
-        <system>Jira</system>
-        <url>https://issues.jboss.org/browse/JBERET</url>
-    </issueManagement>
-
-    <mailingLists>
-        <mailingList>
-            <name>jberet-dev@lists.jboss.org</name>
-            <archive>http://lists.jboss.org/pipermail/jberet-dev/</archive>
-            <post>jberet-dev@lists.jboss.org</post>
-            <subscribe>https://lists.jboss.org/mailman/listinfo/jberet-dev</subscribe>
-            <unsubscribe>https://lists.jboss.org/mailman/listinfo/jberet-dev</unsubscribe>
-        </mailingList>
-    </mailingLists>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.jboss.logging</groupId>
+                            <artifactId>jboss-logging-processor</artifactId>
+                            <version>${version.org.jboss.logging.jboss-logging-tools}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${version.org.mapstruct}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <!-- Only generate skeleton properties for INFO or higher -->
+                    <compilerArgument>-Aorg.jboss.logging.tools.level=INFO</compilerArgument>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                    <excludes>
+                        <!-- Exclude i18n properties files -->
+                        <exclude>**/*.i18n.properties</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <skipSource>true</skipSource>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

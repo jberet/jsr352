@@ -14,11 +14,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jberet</groupId>
+        <artifactId>jberet-parent</artifactId>
+        <version>3.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-    <properties>
-        <version.org.codehaus.woodstox.woodstox-core-asl>4.4.1</version.org.codehaus.woodstox.woodstox-core-asl>
-        <version.org.apache.qpid>0.10.0</version.org.apache.qpid>
-    </properties>
+    <groupId>org.jberet.test-apps</groupId>
+    <artifactId>test-apps</artifactId>
+    <packaging>pom</packaging>
 
     <modules>
         <module>common</module>
@@ -52,15 +57,13 @@
         <module>serialization</module>
         <module>jberetSeBomTest</module>
     </modules>
-    <parent>
-        <groupId>org.jberet</groupId>
-        <artifactId>jberet-parent</artifactId>
-        <version>3.2.0-SNAPSHOT</version>
-    </parent>
 
-    <groupId>org.jberet.test-apps</groupId>
-    <artifactId>test-apps</artifactId>
-    <packaging>pom</packaging>
+    <properties>
+        <version.org.codehaus.woodstox.woodstox-core-asl>4.4.1</version.org.codehaus.woodstox.woodstox-core-asl>
+        <version.org.apache.qpid>0.10.0</version.org.apache.qpid>
+        <!-- Do not release -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -168,30 +171,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>jdk10</id>
-            <activation>
-                <jdk>10</jdk>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <artifactId>maven-failsafe-plugin</artifactId>
-                            <configuration>
-                                <excludes>
-                                    <exclude>**/FileInfinispanRepositoryIT.java</exclude>
-                                    <exclude>**/RocksDBInfinispanRepositoryIT.java</exclude>
-                                    <exclude>**/JdbcInfinispanRepositoryIT.java</exclude>
-                                </excludes>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-    </profiles>
 
 </project>

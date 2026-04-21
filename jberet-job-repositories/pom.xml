@@ -26,6 +26,9 @@
     <artifactId>jberet-job-repositories</artifactId>
     <packaging>pom</packaging>
 
+    <name>JBeret: Repositories Parent</name>
+    <description>The parent for the JBeret Job Repositories</description>
+
     <modules>
         <module>mongo-repository</module>
         <module>infinispan-repository</module>

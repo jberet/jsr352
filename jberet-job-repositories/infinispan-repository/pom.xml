@@ -25,6 +25,9 @@
 
     <artifactId>jberet-infinispan-repository</artifactId>
 
+    <name>JBeret: Infinispan Job Repository</name>
+    <description>A job repository for Infinispan</description>
+
     <dependencies>
         <dependency>
             <groupId>org.infinispan</groupId>

@@ -19,10 +19,11 @@ SPDX-License-Identifier: EPL-2.0
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
         <version>3.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>jberet-se</artifactId>
-    <name>jberet-se</name>
+    <name>JBeret: JBeret SE</name>
     <description>Jakarta Batch implementation classes specific to Java SE environment</description>
 
     <dependencies>

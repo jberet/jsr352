@@ -28,11 +28,14 @@
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
         <version>3.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>jberet-channel-manifest</artifactId>
-
     <packaging>pom</packaging>
+
+    <name>JBeret: WildFly Manifest</name>
+    <description>A WildFly Manifest for JBeret when provisioning using WildFly Channels</description>
 
     <build>
         <plugins>
