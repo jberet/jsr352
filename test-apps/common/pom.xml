@@ -24,6 +24,9 @@
 
     <artifactId>common</artifactId>
 
+    <name>JBeret Test Apps: Common</name>
+    <description>Common test utilities for JBeret test applications</description>
+
     <build>
         <plugins>
             <plugin>
