@@ -34,7 +34,7 @@ public class Batchlet1Test {
     static final File jobName2ExecutionIdSaveTo = new File(tmpdir, jobName2 + ".executionId");
     static final File jobName3ExecutionIdSaveTo = new File(tmpdir, jobName3 + ".executionId");
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
-    static final int waitTimeoutMinutes = 0;
+    static final int waitTimeoutMinutes = Integer.parseInt(System.getProperty("org.jberet.se.test.waitTimoutMinutes", "1"));
 
     @Test
     public void testBatchlet1() throws Exception {
