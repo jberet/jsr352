@@ -20,11 +20,13 @@ import jakarta.batch.api.Batchlet;
 import jakarta.batch.runtime.context.JobContext;
 import jakarta.batch.runtime.context.StepContext;
 import org.jberet.util.BatchUtil;
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
 
 @Named
 @Dependent
 public class Batchlet1 extends AbstractBatchlet implements Batchlet {
+    private static final Logger LOGGER = Logger.getLogger(Batchlet1.class);
     static final String ACTION = "action";
     static final String ACTION_STOP = "stop";
     static final String ACTION_FAIL = "fail";
@@ -78,7 +80,7 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
     @Override
     public String process() throws Exception {
         final String stepName = stepContext.getStepName();
-        System.out.printf("For %s action in %s: %s%n", stepName, this, action);
+        LOGGER.infof("For %s action in %s: %s", stepName, this, action);
 
         //batchlet1 in step1 does not have "action" property
         if (stepName.equals("step1")) {
@@ -112,7 +114,7 @@ public class Batchlet1 extends AbstractBatchlet implements Batchlet {
 
     @Override
     public void stop() throws Exception {
-        System.out.printf("in @Stop, %s%n", Thread.currentThread());
+        LOGGER.infof("in @Stop, %s", Thread.currentThread());
     }
 
     private static Exception generateLongNestedException() {

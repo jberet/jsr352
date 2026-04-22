@@ -151,6 +151,7 @@
 
         <!-- Testing -->
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
+        <version.org.jboss.logmanager>3.2.2.Final</version.org.jboss.logmanager>
 
         <!-- Maven Repository Configuration -->
         <!-- Protocol to use for communication with remote maven repositories.
@@ -718,6 +719,12 @@
                 <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.jboss.logmanager</groupId>
+                <artifactId>jboss-logmanager</artifactId>
+                <version>${version.org.jboss.logmanager}</version>
+                <scope>test</scope>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -754,6 +761,12 @@
         <dependency>
             <groupId>org.wildfly.security</groupId>
             <artifactId>wildfly-elytron-security-manager-action</artifactId>
+        </dependency>
+        <!-- Used to log test output -->
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -799,6 +812,11 @@
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
                         <argLine>${surefire.system.args}</argLine>
                         <systemPropertyVariables>
+                            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                            <!-- Please note this is an undocumented and fragile property as it may not work in the future.
+                                 However, for now it is all we have to find the root project directory. -->
+                            <logging.configuration>file:///${maven.multiModuleProjectDirectory}/logging.properties</logging.configuration>
+                            <client.log.dir>${project.build.directory}</client.log.dir>
                             <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
                         </systemPropertyVariables>
                     </configuration>
@@ -820,6 +838,11 @@
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
                         <argLine>${surefire.system.args}</argLine>
                         <systemPropertyVariables>
+                            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                            <!-- Please note this is an undocumented and fragile property as it may not work in the future.
+                                 However, for now it is all we have to find the root project directory. -->
+                            <logging.configuration>file:///${maven.multiModuleProjectDirectory}/logging.properties</logging.configuration>
+                            <client.log.dir>${project.build.directory}</client.log.dir>
                             <jberet.tmp.dir>${project.build.directory}</jberet.tmp.dir>
                         </systemPropertyVariables>
                     </configuration>

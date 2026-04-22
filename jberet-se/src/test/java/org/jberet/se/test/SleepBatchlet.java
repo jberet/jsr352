@@ -19,10 +19,12 @@ import jakarta.batch.runtime.context.JobContext;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.jboss.logging.Logger;
 
 @Named
 @Dependent
 public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
+    private static final Logger LOGGER = Logger.getLogger(SleepBatchlet.class);
     static final String SLEPT = "Slept";
 
     @Inject
@@ -52,7 +54,7 @@ public class SleepBatchlet extends AbstractBatchlet implements Batchlet {
 
     @Override
     public void stop() throws Exception {
-        System.out.printf("in @Stop, %s%n", Thread.currentThread());
+        LOGGER.infof("in @Stop, %s", Thread.currentThread());
         processThread.interrupt();
     }
 
