@@ -379,6 +379,9 @@ public abstract class AbstractJobOperator implements JobOperator {
             throw MESSAGES.noSuchJobInstance(null);
         }
         final List<JobExecution> executions = getJobExecutions(jobInstance);
+        if (executions.isEmpty()) {
+            throw MESSAGES.noJobExecutionsFoundForRestart(originalToRestart.getJobName(), originalToRestart.getExitStatus(), executionId);
+        }
         final JobExecution mostRecentExecution = executions.get(executions.size() - 1);
         if (executionId != mostRecentExecution.getExecutionId()) {
             throw MESSAGES.jobExecutionNotMostRecentException(executionId, jobInstance.getInstanceId(), mostRecentExecution.getExecutionId());
