@@ -17,6 +17,7 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -28,6 +29,7 @@ import jakarta.batch.runtime.JobExecution;
 import jakarta.batch.runtime.StepExecution;
 
 import org.jberet._private.BatchLogger;
+import org.jberet._private.BatchMessages;
 import org.jberet.creation.ArtifactCreationContext;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobFactory;
@@ -65,7 +67,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
      */
     private String user;
 
-    private transient CountDownLatch jobTerminationLatch = new CountDownLatch(1);
+    private final transient CountDownLatch jobTerminationLatch = new CountDownLatch(1);
     private final AtomicBoolean stopRequested = new AtomicBoolean();
     private transient List<JobStopNotificationListener> jobStopNotificationListeners = new ArrayList<JobStopNotificationListener>();
 
@@ -132,16 +134,19 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         return result;
     }
 
-    //It's possible the (fast) job is already terminated and the latch nulled when this method is called
+
     public void awaitTermination(final long timeout, final TimeUnit timeUnit) throws InterruptedException {
-        try {
+        // Will be null when deserialized
+        if (jobTerminationLatch != null) {
             if (timeout <= 0) {
                 jobTerminationLatch.await();
             } else {
-                jobTerminationLatch.await(timeout, timeUnit);
+                if (!jobTerminationLatch.await(timeout, timeUnit)) {
+                    throw BatchMessages.MESSAGES.jobExecutionAwaitTimeout(id, timeout, timeUnit.name().toLowerCase(Locale.ROOT));
+                }
             }
-        } catch (NullPointerException npe) {
-            //ignore, as the job execution has terminated.
+        } else {
+            BatchLogger.LOGGER.debugf("Invoking awaitTermination() on a deserialized JobExecution %d", id);
         }
     }
 
@@ -340,7 +345,6 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
         ArtifactCreationContext.removeCurrentArtifactCreationContext();
         jobTerminationLatch.countDown();
-        jobTerminationLatch = null;
     }
 
     @Override
