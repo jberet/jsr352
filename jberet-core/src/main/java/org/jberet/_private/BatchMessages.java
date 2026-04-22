@@ -211,4 +211,10 @@ public interface BatchMessages {
     @Message(id = 658, value = "Name attribute of @BatchProperty is missing in %s")
     IllegalArgumentException batchPropertyNameMissing(Member injectionTarget);
 
+    @Message(id = 659, value = "Job execution %s did not complete within %s %s")
+    BatchRuntimeException jobExecutionAwaitTimeout(long id, long timeout, String timeUnitName);
+
+    @Message(id = 660, value = "No job executions found for %s with status of %s for execution id %d.")
+    NoSuchJobException noJobExecutionsFoundForRestart(String jobName, String jobStatus, long id);
+
 }

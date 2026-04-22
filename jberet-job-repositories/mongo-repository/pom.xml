@@ -25,6 +25,9 @@
 
     <artifactId>jberet-mongo-repository</artifactId>
 
+    <name>JBeret: MongoDB Job Repository</name>
+    <description>A job repository for MongoDB</description>
+
     <dependencies>
         <dependency>
             <groupId>org.mongodb</groupId>

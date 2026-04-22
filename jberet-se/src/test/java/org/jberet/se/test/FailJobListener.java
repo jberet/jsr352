@@ -17,10 +17,13 @@ import jakarta.batch.runtime.context.JobContext;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.jboss.logging.Logger;
 
 @Named
 @Dependent
 public final class FailJobListener implements JobListener {
+    private static final Logger LOGGER = Logger.getLogger(FailJobListener.class);
+
     @Inject
     @BatchProperty
     private boolean failBeforeJob;
@@ -38,7 +41,7 @@ public final class FailJobListener implements JobListener {
         if (failBeforeJob) {
             throw new BatchRuntimeException("failBeforeJob is set to " + failBeforeJob);
         }
-        System.out.printf("In beforeJob method of %s%n", this);
+        LOGGER.infof("In beforeJob method of %s", this);
     }
 
     @Override
@@ -47,6 +50,6 @@ public final class FailJobListener implements JobListener {
         if (failAfterJob) {
             throw new BatchRuntimeException("failAfterJob is set to " + failAfterJob);
         }
-        System.out.printf("In afterJob method of %s%n", this);
+        LOGGER.infof("In afterJob method of %s", this);
     }
 }

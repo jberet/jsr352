@@ -28,59 +28,71 @@
         <groupId>org.jberet</groupId>
         <artifactId>jberet-parent</artifactId>
         <version>3.2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>jberet-channel-manifest</artifactId>
-
     <packaging>pom</packaging>
+
+    <name>JBeret: WildFly Manifest</name>
+    <description>A WildFly Manifest for JBeret when provisioning using WildFly Channels</description>
+
+    <properties>
+        <generated.manifest.file>${project.build.directory}/jberet-channel-manifest-${project.version}-manifest.yaml</generated.manifest.file>
+        <!-- Plugin versions -->
+        <version.org.wildfly.wildfly-channel-maven-plugin>1.0.32</version.org.wildfly.wildfly-channel-maven-plugin>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jberet</groupId>
+            <artifactId>jberet-core</artifactId>
+            <version>3.2.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
-            <!-- Use the resources plugin to apply expression replacement filtering to the channel.yaml -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
+                <groupId>org.wildfly</groupId>
+                <artifactId>wildfly-channel-maven-plugin</artifactId>
+                <version>${version.org.wildfly.wildfly-channel-maven-plugin}</version>
                 <executions>
                     <execution>
-                        <id>copy-channel-resources</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.basedir}/target/resources</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/src/main/resources</directory>
-                                    <includes>
-                                        <include>jberet-channel-manifest.yaml</include>
-                                    </includes>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <!-- Attach the manifest.yaml to the build -->
-                    <execution>
-                        <id>attach-manifest</id>
+                        <id>generate-channel</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>attach-artifact</goal>
+                            <goal>create-manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <manifestName>JBeret manifest version ${project.version}</manifestName>
+                    <manifestId>${project.groupId}:${project.artifactId}</manifestId>
+                    <manifestDescription>Manifest for JBeret.</manifestDescription>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-files-exist</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>enforce</goal>
                         </goals>
                         <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/resources/jberet-channel-manifest.yaml</file>
-                                    <type>yaml</type>
-                                    <classifier>manifest</classifier>
-                                </artifact>
-                            </artifacts>
+                            <rules>
+                                <requireFilesExist>
+                                    <message>
+                                        Expected file ${generated.manifest.file} to exist.
+                                    </message>
+                                    <files>
+                                        <file>${generated.manifest.file}</file>
+                                    </files>
+                                </requireFilesExist>
+                            </rules>
+                            <fail>true</fail>
                         </configuration>
                     </execution>
                 </executions>

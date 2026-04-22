@@ -17,10 +17,13 @@ import jakarta.inject.Named;
 import jakarta.batch.api.BatchProperty;
 import jakarta.batch.operations.BatchRuntimeException;
 import jakarta.batch.runtime.context.JobContext;
+import org.jboss.logging.Logger;
 
 @Named
 @Dependent
 public final class FailStepListener implements jakarta.batch.api.listener.StepListener {
+    private static final Logger LOGGER = Logger.getLogger(FailStepListener.class);
+
     @Inject
     @BatchProperty
     private boolean failBeforeStep;
@@ -38,7 +41,7 @@ public final class FailStepListener implements jakarta.batch.api.listener.StepLi
         if (failBeforeStep) {
             throw new BatchRuntimeException("failBeforeStep is set to " + failBeforeStep);
         }
-        System.out.println("In beforeStep method of " + this);
+        LOGGER.info("In beforeStep method of " + this);
     }
 
     @Override
@@ -47,6 +50,6 @@ public final class FailStepListener implements jakarta.batch.api.listener.StepLi
         if (failAfterStep) {
             throw new BatchRuntimeException("failAfterStep is set to " + failAfterStep);
         }
-        System.out.println("In afterStep method of " + this);
+        LOGGER.info("In afterStep method of " + this);
     }
 }

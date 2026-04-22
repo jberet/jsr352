@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 import jakarta.batch.operations.BatchRuntimeException;
 
 import org.jberet.repository.JdbcRepository;
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,6 +41,7 @@ import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_TYPE_CONFIGURED;
 import static org.jberet.se.BatchSEEnvironment.THREAD_POOL_TYPE_FIXED;
 
 public class BatchSEEnvironmentTest {
+    private static final Logger LOGGER = Logger.getLogger(BatchSEEnvironmentTest.class);
     private BatchSEEnvironment batchEnvironment = new BatchSEEnvironment();
 
     @Test
@@ -103,7 +105,7 @@ public class BatchSEEnvironmentTest {
             batchEnvironment.createThreadPoolExecutor();
             Assertions.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_CORE_SIZE);
         } catch (BatchRuntimeException e) {
-            System.out.printf("Got the expected %s%n", e);
+            LOGGER.infof("Got the expected %s", e);
         }
         //a Configured thread-pool, with missing maxSize
         configProperties.setProperty(THREAD_POOL_CORE_SIZE, String.valueOf(coreSize));
@@ -112,7 +114,7 @@ public class BatchSEEnvironmentTest {
             batchEnvironment.createThreadPoolExecutor();
             Assertions.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_MAX_SIZE);
         } catch (BatchRuntimeException e) {
-            System.out.printf("Got the expected %s%n", e);
+            LOGGER.infof("Got the expected %s", e);
         }
         //a Configured thread-pool, with missing keepAliveTime
         configProperties.setProperty(THREAD_POOL_CORE_SIZE, String.valueOf(coreSize));
@@ -122,7 +124,7 @@ public class BatchSEEnvironmentTest {
             batchEnvironment.createThreadPoolExecutor();
             Assertions.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_KEEP_ALIVE_TIME);
         } catch (BatchRuntimeException e) {
-            System.out.printf("Got the expected %s%n", e);
+            LOGGER.infof("Got the expected %s", e);
         }
 
         //a Configured thread-pool, with missing queueCapacity
@@ -134,7 +136,7 @@ public class BatchSEEnvironmentTest {
             batchEnvironment.createThreadPoolExecutor();
             Assertions.fail("Expecting exception, but got no exception when missing property " + THREAD_POOL_QUEUE_CAPACITY);
         } catch (BatchRuntimeException e) {
-            System.out.printf("Got the expected %s%n", e);
+            LOGGER.infof("Got the expected %s", e);
         }
 
         //invalid thread-pool type
@@ -143,7 +145,7 @@ public class BatchSEEnvironmentTest {
             batchEnvironment.createThreadPoolExecutor();
             Assertions.fail("Expecting exception, but got no exception when specifying invalid property " + THREAD_POOL_TYPE);
         } catch (BatchRuntimeException e) {
-            System.out.printf("Got the expected %s%n", e);
+            LOGGER.infof("Got the expected %s", e);
         }
     }
 
@@ -215,7 +217,7 @@ public class BatchSEEnvironmentTest {
     static class SimpleRejectionHandler implements RejectedExecutionHandler {
         @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
-            System.out.printf("In %s, runnalbe is %s, executor is %s%n", this, r, executor);
+            LOGGER.infof("In %s, runnalbe is %s, executor is %s", this, r, executor);
         }
     }
 }

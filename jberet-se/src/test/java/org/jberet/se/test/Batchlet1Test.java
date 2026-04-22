@@ -22,10 +22,12 @@ import jakarta.batch.runtime.BatchStatus;
 
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class Batchlet1Test {
+    private static final Logger LOGGER = Logger.getLogger(Batchlet1Test.class);
     static final String tmpdir = System.getProperty("jberet.tmp.dir");
     static final String jobName = "org.jberet.se.test.batchlet1";
     static final String jobName2 = "org-jberet-se-test-batchlet2";
@@ -34,7 +36,7 @@ public class Batchlet1Test {
     static final File jobName2ExecutionIdSaveTo = new File(tmpdir, jobName2 + ".executionId");
     static final File jobName3ExecutionIdSaveTo = new File(tmpdir, jobName3 + ".executionId");
     private final JobOperator jobOperator = BatchRuntime.getJobOperator();
-    static final int waitTimeoutMinutes = 0;
+    static final int waitTimeoutMinutes = Integer.parseInt(System.getProperty("org.jberet.se.test.waitTimoutMinutes", "1"));
 
     @Test
     public void testBatchlet1() throws Exception {
@@ -55,11 +57,11 @@ public class Batchlet1Test {
     @Test
     public void testStopWithRestartPoint() throws Exception {
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_STOP);
-        System.out.printf("Start with params %s%n", params);
+        LOGGER.infof("Start with params %s%n", params);
         final long jobExecutionId = jobOperator.start(jobName2, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        LOGGER.infof("JobExecution id: %s", jobExecution.getExecutionId());
         Assertions.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
         Assertions.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());
 
@@ -79,19 +81,19 @@ public class Batchlet1Test {
         final JobExecutionImpl[] jobExecutions = new JobExecutionImpl[3];
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_EXCEPTION);
         {
-            System.out.printf("Start with params %s%n", params);
+            LOGGER.infof("Start with params %s", params);
             long jobExecutionId = jobOperator.start(jobName3, params);
             JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
             jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
             jobExecutions[0] = jobExecution;
 
-            System.out.printf("Restart with params %s%n", params);
+            LOGGER.infof("Restart with params %s", params);
             jobExecutionId = jobOperator.restart(jobExecutionId, params);
             jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
             jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
             jobExecutions[1] = jobExecution;
 
-            System.out.printf("Restart with params %s%n", params);
+            LOGGER.infof("Restart with params %s", params);
             jobExecutionId = jobOperator.restart(jobExecutionId, params);
             jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
             jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
@@ -118,7 +120,7 @@ public class Batchlet1Test {
     @Test
     public void testStepFailWithLongException() throws Exception {
         final Properties params = Batchlet1Test.createParams(Batchlet1.ACTION, Batchlet1.ACTION_LONG_EXCEPTION);
-        System.out.printf("Start with params %s%n", params);
+        LOGGER.infof("Start with params %s", params);
         final long jobExecutionId = jobOperator.start(jobName4, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
@@ -145,11 +147,11 @@ public class Batchlet1Test {
     private long startJobMatchOther() throws Exception {
         final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_OTHER);
         //start the job and complete step1 and step2, not matching any transition element in step2
-        System.out.printf("Start with params %s%n", params);
+        LOGGER.infof("Start with params %s", params);
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        LOGGER.infof("JobExecution id: %s", jobExecution.getExecutionId());
         Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
@@ -164,11 +166,11 @@ public class Batchlet1Test {
     private long startJobMatchEnd() throws Exception {
         //start the job and complete step1 and step2, matching <end> element in step2
         final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_END);
-        System.out.printf("Start with params %s%n", params);
+        LOGGER.infof("Start with params %s", params);
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        LOGGER.infof("JobExecution id: %s", jobExecution.getExecutionId());
         Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getBatchStatus());
         Assertions.assertEquals(Batchlet1.ACTION_END, jobExecution.getExitStatus());
 
@@ -183,11 +185,11 @@ public class Batchlet1Test {
     private long startJobMatchFail() throws Exception {
         //start the job and fail at the end of step2, matching <fail> element in step2
         final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_FAIL);
-        System.out.printf("Start with params %s%n", params);
+        LOGGER.infof("Start with params %s", params);
         final long jobExecutionId = jobOperator.start(jobName, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        LOGGER.infof("JobExecution id: %s", jobExecution.getExecutionId());
         Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         Assertions.assertEquals(Batchlet1.ACTION_FAIL, jobExecution.getExitStatus());  //set by <fail> element
 
@@ -207,11 +209,11 @@ public class Batchlet1Test {
         //restart the job and stop at the end of step2, matching <stop> element in step2.
         //next time this job execution is restarted, it should restart from restart-point step2
         final Properties params = createParams(Batchlet1.ACTION, Batchlet1.ACTION_STOP);
-        System.out.printf("Restart with params %s%n", params);
+        LOGGER.infof("Restart with params %s", params);
         final long jobExecutionId = jobOperator.restart(previousJobExecutionId, params);
         final JobExecutionImpl jobExecution = (JobExecutionImpl) jobOperator.getJobExecution(jobExecutionId);
         jobExecution.awaitTermination(waitTimeoutMinutes, TimeUnit.MINUTES);
-        System.out.printf("JobExecution id: %s%n", jobExecution.getExecutionId());
+        LOGGER.infof("JobExecution id: %s", jobExecution.getExecutionId());
         Assertions.assertEquals(BatchStatus.STOPPED, jobExecution.getBatchStatus());
         Assertions.assertEquals(Batchlet1.ACTION_STOP, jobExecution.getExitStatus());
 
@@ -229,7 +231,7 @@ public class Batchlet1Test {
         final String s = String.valueOf(executionId);
         try {
             bw.write(s, 0, s.length());
-            System.out.printf("Wrote out job execution id to: %s%n", file.getPath());
+            LOGGER.infof("Wrote out job execution id to: %s", file.getPath());
         } finally {
             try {
                 bw.close();

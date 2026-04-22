@@ -9,41 +9,23 @@ on:
         description: 'OS'
         required: false
         default: 'ubuntu-latest'
-        type: choice
-        options:
-          - ubuntu-latest
-          - windows-latest
-          - ubuntu-latest
+        type: string
       jdk-distribution:
         description: 'JDK Distribution'
         required: false
         default: 'temurin'
-        type: choice
-        options:
-          - temurin
-          - semeru
-          - microsoft
-          - oracle
-          - zulu
-          - corretto
-          - liberica
+        type: string
       jdk-version:
         description: 'JDK Version'
         required: false
-        default: '11'
-        type: choice
-        options:
-          - 8
-          - 11
-          - 17
+        default: '17'
+        type: string
 
 jobs:
   build-test:
     name: ${{ inputs.jdk-distribution}}-${{ inputs.jdk-version }}-${{ inputs.os }}
     runs-on: ${{ inputs.os }}
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@v6
     - name: Set up JDK ${{ inputs.jdk-distribution }} ${{ inputs.jdk-version }}
@@ -53,9 +35,12 @@ jobs:
         java-version: ${{ inputs.jdk-version }}
         cache: 'maven'
     - name: Run Tests
-      run: mvn -ntp -U -B -fae clean verify
+      run: ./mvnw -V -ntp -U -B -fae clean install
     - uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: ${{ inputs.jdk-distribution }}-${{ inputs.jdk-version }}-${{ inputs.os }}
-        path: '**/surefire-reports/*.txt'
+        path: |
+          **/*.log
+          **/surefire-reports/**
+          **/failsafe-reports/**

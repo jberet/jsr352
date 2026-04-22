@@ -19,11 +19,13 @@ import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.runtime.JobExecutionImpl;
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class SleepBatchletTest {
+    private static final Logger LOGGER = Logger.getLogger(SleepBatchletTest.class);
     private final JobOperator operator = BatchRuntime.getJobOperator();
     private static final String jobName = "org.jberet.se.test.sleepBatchlet";
     private static final String listenerJobName = "org.jberet.se.test.sleepBatchletListeners";
@@ -44,7 +46,7 @@ public class SleepBatchletTest {
         Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution.getBatchStatus());
         Assertions.assertEquals(SleepBatchlet.SLEPT, stepExecution.getExitStatus());
@@ -59,7 +61,7 @@ public class SleepBatchletTest {
         final JobExecutionImpl jobExecution = (JobExecutionImpl) operator.getJobExecution(jobExecutionId);
         operator.stop(jobExecutionId);
         jobExecution.awaitTermination(1, TimeUnit.MINUTES);
-        System.out.printf("jobExecution id=%s, batchStatus=%s, exitStatus=%s, jobParameters=%s, restartPosition=%s, " +
+        LOGGER.infof("jobExecution id=%s, batchStatus=%s, exitStatus=%s, jobParameters=%s, restartPosition=%s, " +
                         "createTime=%s, startTime=%s, lastUpdateTime=%s, endTime=%s%n",
                 jobExecutionId, jobExecution.getBatchStatus(), jobExecution.getExitStatus(), jobExecution.getJobParameters(),
                 jobExecution.getRestartPosition(), jobExecution.getCreateTime(), jobExecution.getStartTime(),
@@ -102,7 +104,7 @@ public class SleepBatchletTest {
         Assertions.assertEquals("beforeJob beforeStep afterStep afterJob", jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution.getBatchStatus());
         Assertions.assertEquals(SleepBatchlet.SLEPT, stepExecution.getExitStatus());
@@ -123,7 +125,7 @@ public class SleepBatchletTest {
         Assertions.assertEquals("beforeJob beforeStep afterStep afterJob", jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
         Assertions.assertEquals(BatchStatus.FAILED.name(), stepExecution.getExitStatus());
@@ -145,7 +147,7 @@ public class SleepBatchletTest {
         Assertions.assertEquals("beforeJob beforeStep afterStep afterJob", jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
         Assertions.assertEquals(SleepBatchlet.SLEPT, stepExecution.getExitStatus());
@@ -167,7 +169,7 @@ public class SleepBatchletTest {
         Assertions.assertEquals("beforeJob beforeStep afterStep afterJob", jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
         Assertions.assertEquals(BatchStatus.FAILED.name(), stepExecution.getExitStatus());
@@ -183,13 +185,13 @@ public class SleepBatchletTest {
         Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
         StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
         Assertions.assertEquals(BatchStatus.FAILED.name(), stepExecution.getExitStatus());
 
         stepExecution = jobExecution.getStepExecutions().get(1);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution.getBatchStatus());
         Assertions.assertEquals(SleepBatchlet.SLEPT, stepExecution.getExitStatus());
@@ -205,7 +207,7 @@ public class SleepBatchletTest {
         Assertions.assertEquals(BatchStatus.FAILED.name(), jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.FAILED, stepExecution.getBatchStatus());
         Assertions.assertEquals(BatchStatus.FAILED.name(), stepExecution.getExitStatus());
@@ -222,7 +224,7 @@ public class SleepBatchletTest {
         Assertions.assertEquals(BatchStatus.COMPLETED.name(), jobExecution.getExitStatus());
 
         final StepExecution stepExecution = jobExecution.getStepExecutions().get(0);
-        System.out.printf("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s%n",
+        LOGGER.infof("stepExecution id=%s, name=%s, batchStatus=%s, exitStatus=%s",
                 stepExecution.getStepExecutionId(), stepExecution.getStepName(), stepExecution.getBatchStatus(), stepExecution.getExitStatus());
         Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution.getBatchStatus());
         Assertions.assertEquals(SleepBatchlet.SLEPT, stepExecution.getExitStatus());

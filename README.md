@@ -3,22 +3,22 @@
 </p>
 
 
-JBeret is an implementation of [Jakarta Batch](https://jakarta.ee/specifications/batch/). It is also included in [WildFly, the new and improved JBoss Application Server](https://wildfly.org/) to provide portable batch processing support in Jakarta EE environment. 
+JBeret is an implementation of [Jakarta Batch](https://jakarta.ee/specifications/batch/). It is also included in [WildFly, the new and improved JBoss Application Server](https://wildfly.org/) to provide portable batch processing support in Jakarta EE environment.
 
 #### Build JBeret
 To build and run default set of tests:
-    
+
     mvn install
 
 Some tests require additional steps and thus are not included in the default run. For instance, MongoDB-related tests
 need to start MongoDB first. To build and run all tests:
-    
+
     # start MongoDB database
     mongod
-    
+
     # build JBeret, activate allTests maven profile to run all tests
     mvn install -DallTests
-    
+
 Some tests involves very large data set (e.g., over 1 million rows of CSV or Excel data), and may
 cause memory errors in some machines:
 
@@ -140,12 +140,12 @@ Increase `ulimit` to avoid such errors. For example,
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-        
+
 A note on webapp or Jakarta EE application packaging: Jakarta EE API jars
 are already available in the appserver, and should not be included in WAR, JAR, or EAR files. Their maven dependency
 scope should be set to `provided`. In addition, if the application is deployed to JBoss EAP or WildFly, almost all of
 the above dependencies are already available as JBoss modules, and should not be duplicated in application package.
-        
+
 ##### maven BOM dependency used to encapsulate all the dependencies required by JBeret Java SE.
 
     <dependencyManagement>
@@ -159,7 +159,7 @@ the above dependencies are already available as JBoss modules, and should not be
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
 ##### The following is also required for Java SE batch applications (h2 can be omitted when using in-memory batch job repository):
         <dependency>
             <groupId>org.jberet</groupId>
@@ -173,7 +173,7 @@ the above dependencies are already available as JBoss modules, and should not be
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
-        
+
 ##### Optional application dependencies depending on application usage:
         <!-- any JDBC driver jars, e.g., h2, when using jdbc batch job repository -->
         <dependency>
@@ -217,13 +217,43 @@ the above dependencies are already available as JBoss modules, and should not be
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>stax2-api</artifactId>
         </dependency>
-        
+
         <!-- jberet-support includes common reusable batch ItemReader & ItemWriter classes for
              various data types such as CSV, XML, JSON, Fixed length, Excel, MongoDB, JDBC, JMS, HornetQ, etc.
-             The application should further provide appropriate transitive dependencies from 
+             The application should further provide appropriate transitive dependencies from
              jberet-support, depending on its usage.
         -->
         <dependency>
             <groupId>org.jberet</groupId>
             <artifactId>jberet-support</artifactId>
         </dependency>
+
+## Releasing
+
+Releasing the project requires permission to deploy to [JBoss Nexus](https://repository.jboss.org/nexus).
+Once everything is setup, you simply need to run the `./release.sh` script. There are two required parameters:
+
+1. `-r` or `--release` which is the version you want to release
+2. `-d` or `--development` which is the next development version.
+
+By default the release version cannot contain `SNAPSHOT` and the development version must contain `SNAPSHOT`.
+
+```bash
+./release -r 1.0.0.Final -d 1.0.1.Final-SNAPSHOT
+```
+
+### Supported Arguments
+
+| Argument |  Requires Value  | Description |
+|----------|:----------------:|-------------|
+| `-d`, `--development` | Yes | The next version for the development cycle. |
+| `-f`, `--force` | No | Forces to allow a SNAPSHOT suffix in release version and not require one for the development version. |
+| `-h`, `--help` | N/A | Displays this help |
+| `--notes-start-tag` | Unused | Passes the `--notes-from-tag` and the argument to the `gh create release` command. |
+| `-p`, `--prerelease` | Unused | Passes the `--prerelease` to the `gh create release` command. |
+| `-r`, `--release` | Yes | The version to be released. Also used for the tag. |
+| `--dry-run` | No | Executes the release in as a dry-run. Nothing will be updated or pushed. |
+| `-v`, `--verbose` | No | Prints verbose output. |
+
+
+Any additional arguments are considered arguments for the Maven command.
