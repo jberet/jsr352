@@ -140,7 +140,7 @@
         <version.org.glassfish.jakarta.el>4.0.2</version.org.glassfish.jakarta.el>
 
         <!-- Security -->
-        <version.org.wildfly.security.elytron>2.6.0.Final</version.org.wildfly.security.elytron>
+        <version.org.wildfly.security.elytron>2.8.4.Final</version.org.wildfly.security.elytron>
 
         <!-- Integration Frameworks -->
         <version.org.apache.camel>3.22.2</version.org.apache.camel>
