@@ -101,7 +101,7 @@
         <version.org.jboss.weld.weld-se>5.1.3.Final</version.org.jboss.weld.weld-se>
 
         <!-- Utilities -->
-        <version.com.google.guava>33.4.0-jre</version.com.google.guava>
+        <version.com.google.guava>33.6.0-jre</version.com.google.guava>
         <version.org.mapstruct>1.6.3</version.org.mapstruct>
 
         <!-- Data Format and Processing Libraries -->
