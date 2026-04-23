@@ -93,7 +93,6 @@
         <version.jakarta.ejb-api>4.0.1</version.jakarta.ejb-api>
 
         <!-- Legacy javax APIs (for backwards compatibility in some test modules) -->
-        <version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>1.1.1.Final</version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec>
         <version.javax.servlet-api>4.0.1</version.javax.servlet-api>
 
         <!-- CDI Implementation -->
@@ -132,7 +131,6 @@
 
         <!-- JMS and Messaging -->
         <version.jakarta.jms-api>3.1.0</version.jakarta.jms-api>
-        <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>2.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
         <version.io.netty>4.2.12.Final</version.io.netty>
 
         <!-- Validation -->
@@ -517,20 +515,6 @@
                 <artifactId>jakarta.jms-api</artifactId>
                 <version>${version.jakarta.jms-api}</version>
                 <scope>provided</scope>
-            </dependency>
-
-            <!-- Some tests (e.g., test-apps/amqp) still uses javax.jms and javax.transaction-api -->
-            <dependency>
-                <groupId>org.jboss.spec.javax.jms</groupId>
-                <artifactId>jboss-jms-api_2.0_spec</artifactId>
-                <version>${version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.spec.javax.transaction</groupId>
-                <artifactId>jboss-transaction-api_1.2_spec</artifactId>
-                <version>${version.org.jboss.spec.javax.transaction.jboss-transaction-api_1.2_spec}</version>
-                <scope>test</scope>
             </dependency>
 
             <dependency>
