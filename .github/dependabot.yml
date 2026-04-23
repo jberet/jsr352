@@ -43,6 +43,9 @@ updates:
         update-types: ['version-update:semver-major', 'version-update:semver-minor']
       - dependency-name: 'org.jboss.weld*'
         update-types: ['version-update:semver-major', 'version-update:semver-minor']
+        # Derby 10.16 is the latest version to support Java 17
+      - dependency-name: 'org.apache.derby*'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
     open-pull-requests-limit: 10
     registries:
       - maven-central
