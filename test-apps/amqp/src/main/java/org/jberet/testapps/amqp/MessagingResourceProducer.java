@@ -10,9 +10,9 @@
 
 package org.jberet.testapps.amqp;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.Queue;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
+import jakarta.jms.Queue;
 
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Named;
