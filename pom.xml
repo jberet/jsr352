@@ -88,12 +88,8 @@
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
         <version.jakarta.xml.bind-api>4.0.2</version.jakarta.xml.bind-api>
         <version.jakarta.xml.ws-api>4.0.2</version.jakarta.xml.ws-api>
-        <version.jakarta.servlet-api>6.1.0</version.jakarta.servlet-api>
         <version.jakarta.ws.rs-api>3.1.0</version.jakarta.ws.rs-api>
         <version.jakarta.ejb-api>4.0.1</version.jakarta.ejb-api>
-
-        <!-- Legacy javax APIs (for backwards compatibility in some test modules) -->
-        <version.javax.servlet-api>4.0.1</version.javax.servlet-api>
 
         <!-- CDI Implementation -->
         <version.org.jboss.weld.weld>5.1.7.Final</version.org.jboss.weld.weld>
@@ -599,20 +595,6 @@
                 <version>${version.com.caucho.resin-quercus}</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>jakarta.servlet</groupId>
-                <artifactId>jakarta.servlet-api</artifactId>
-                <version>${version.jakarta.servlet-api}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <!-- some tests (e.g., ScriptingIT) still depends on javax.servlet -->
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${version.javax.servlet-api}</version>
-                <scope>test</scope>
-            </dependency>
 
             <!-- rest-api dependencies -->
             <dependency>
@@ -693,16 +675,11 @@
 
             <!-- For testing -->
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
                 <version>${junit-jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit-jupiter.version}</version>
-                <scope>test</scope>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logmanager</groupId>

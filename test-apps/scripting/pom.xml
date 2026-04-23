@@ -50,10 +50,6 @@
 <!--            <groupId>com.caucho</groupId>-->
 <!--            <artifactId>resin-quercus</artifactId>-->
 <!--        </dependency>-->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-        </dependency>
 
         <!-- use woodstox xml parser, which supports resolving custom xml external entities -->
         <!-- aalto-xml from the parent pom does not support it -->
