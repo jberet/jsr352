@@ -36,7 +36,7 @@
     <properties>
         <version.org.wildfly.testing.tools>1.0.0.Alpha3</version.org.wildfly.testing.tools>
         <!-- WildFly and Build Plugins -->
-        <version.org.wildfly.plugins.wildfly-maven-plugin>5.1.1.Final</version.org.wildfly.plugins.wildfly-maven-plugin>
+        <version.org.wildfly.plugins.wildfly-maven-plugin>5.1.5.Final</version.org.wildfly.plugins.wildfly-maven-plugin>
         <server.test.feature.pack.groupId>org.wildfly</server.test.feature.pack.groupId>
         <!-- WildFly Preview is currently targeting Jakarta EE 11 and we should use it by default
         <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId> -->
