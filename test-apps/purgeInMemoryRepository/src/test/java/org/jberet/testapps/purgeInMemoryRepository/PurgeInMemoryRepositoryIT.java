@@ -14,12 +14,10 @@ import jakarta.batch.operations.NoSuchJobExecutionException;
 import jakarta.batch.runtime.BatchStatus;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Disabled
 public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
     static final String purgeInMemoryRepositoryXml = "purgeInMemoryRepository.xml";
     static final String transientUserDataXml = "transient-user-data.xml";
@@ -168,7 +166,7 @@ public class PurgeInMemoryRepositoryIT extends PurgeRepositoryTestBase {
         //include running job executions
         params.setProperty("keepRunningJobExecutions", String.valueOf(false));
 
-        startJob(purgeInMemoryRepositoryXml);
+        startJobToBePurgedImmediately(purgeInMemoryRepositoryXml);
         Thread.sleep(purgeSleepMillis);
         final long purgeJobExecutionId = prepurge2JobExecutionId + 1;
         assertNoSuchJobExecution(purgeJobExecutionId);
