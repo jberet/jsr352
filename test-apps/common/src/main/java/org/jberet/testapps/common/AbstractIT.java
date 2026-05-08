@@ -111,6 +111,15 @@ abstract public class AbstractIT {
 
     }
 
+    protected void startJobToBePurgedImmediately(final String jobXml) {
+        try {
+            termLock.lock();
+            jobExecutionId = jobOperator.start(jobXml, params);
+        } finally {
+            termLock.unlock();
+        }
+    }
+
     private ReentrantLock termLock = new ReentrantLock();
 
     protected void awaitTermination(final JobExecutionImpl... exes) throws InterruptedException {
