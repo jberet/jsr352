@@ -124,7 +124,7 @@
         <version.org.hibernate>6.0.2.Final</version.org.hibernate>
 
         <!-- Security -->
-        <version.org.wildfly.security.elytron>2.8.4.Final</version.org.wildfly.security.elytron>
+        <version.org.wildfly.security.elytron>2.9.0.Final</version.org.wildfly.security.elytron>
 
         <!-- Integration Frameworks -->
         <version.com.datastax.cassandra>3.11.5</version.com.datastax.cassandra>
