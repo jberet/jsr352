@@ -27,6 +27,7 @@ import jakarta.batch.runtime.StepExecution;
 import org.infinispan.Cache;
 import org.infinispan.CacheStream;
 import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.configuration.parsing.ConfigurationBuilderHolder;
 import org.infinispan.context.Flag;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -52,6 +53,7 @@ public final class InfinispanRepository extends AbstractRepository {
 
     private final EmbeddedCacheManager cacheManager;
 
+
     public static InfinispanRepository create(final Configuration infinispanConfig) {
         return new InfinispanRepository(infinispanConfig);
     }
@@ -65,7 +67,9 @@ public final class InfinispanRepository extends AbstractRepository {
     }
 
     public InfinispanRepository(final Configuration infinispanConfig) {
-        cacheManager = new DefaultCacheManager(infinispanConfig);
+        ConfigurationBuilderHolder holder = new ConfigurationBuilderHolder();
+        holder.newConfigurationBuilder("default").read(infinispanConfig);
+        cacheManager = new DefaultCacheManager(holder, true);
         initCaches();
     }
 
