@@ -46,6 +46,9 @@ updates:
         # Derby 10.16 is the latest version to support Java 17
       - dependency-name: 'org.apache.derby*'
         update-types: ['version-update:semver-major', 'version-update:semver-minor']
+        # JRuby 9.x supports Java 17. Once 21 is required as a minimum, we can move to JRuby 10.
+      - dependency-name: 'org.jruby*'
+        update-types: ['version-update:semver-major']
     open-pull-requests-limit: 10
     registries:
       - maven-central
