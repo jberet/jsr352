@@ -21,14 +21,54 @@ env:
 
 jobs:
   build-test-matrix:
-    name: ${{ matrix.os }}${{ matrix.profile }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        profile: ['', '-Pee10']
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up JDKs
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          cache: 'maven'
+          java-version: |
+            17
+            21
+            26
+            25
+      - name: Build and Test on ${{ matrix.os }} - Java 25
+        run: ${{ env.MVN_CMD }} clean install
+      - name: Build and Test on ${{ matrix.os }} - Java 26
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_26_X64}}${{env.JAVA_HOME_26_ARM64}}' '-Dtest.report.dir=java26'
+      - name: Build and Test on ${{ matrix.os }} - Java 21
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_21_X64}}${{env.JAVA_HOME_21_ARM64}}' '-Dtest.report.dir=java21'
+      - name: Build and Test on ${{ matrix.os }} - Java 17
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_17_X64}}${{env.JAVA_HOME_17_ARM64}}' '-Dtest.report.dir=java17'
+      - name: Upload test logs for failed run
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: test-reports-${{ matrix.os }}
+          path: |
+            **/*.log
+            **/surefire-reports/**
+            **/failsafe-reports/**
+
+  build-test-wildfly-matrix:
+    name: Test WildFly Integration-${{ matrix.os }}${{ matrix.profile }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      MVN_CMD: './mvnw -V -B -ntp -am -pl jberet-manifest,test-deployment'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        profile: ['', '-Pee10', '-Ppreview']
     steps:
       - uses: actions/checkout@v6
       - name: Set up JDKs
@@ -54,6 +94,40 @@ jobs:
         if: failure()
         with:
           name: test-reports-${{ matrix.os }}${{matrix.profile}}
+          path: |
+            **/*.log
+            **/surefire-reports/**
+            **/failsafe-reports/**
+
+  build-test-wildfly-secmgr-matrix:
+    name: Test WildFly Security Manager Integration-${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      MVN_CMD: './mvnw -V -B -ntp -am -pl jberet-manifest,test-deployment'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up JDKs
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          cache: 'maven'
+          java-version: |
+            17
+            21
+      - name: Build and Test on ${{ matrix.os }} - Java 21
+        run: ${{ env.MVN_CMD }} clean install '-Dsecurity.manager'
+      - name: Build and Test on ${{ matrix.os }} - Java 17
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_17_X64}}${{env.JAVA_HOME_17_ARM64}}' '-Dtest.report.dir=java17' '-Dsecurity.manager'
+      - name: Upload test logs for failed run
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: test-reports-${{ matrix.os }}
           path: |
             **/*.log
             **/surefire-reports/**

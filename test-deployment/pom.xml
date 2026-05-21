@@ -34,18 +34,17 @@
     <artifactId>test-deployment</artifactId>
 
     <properties>
-        <version.org.wildfly.testing.tools>1.0.0.Alpha3</version.org.wildfly.testing.tools>
+        <version.org.wildfly.testing.tools>1.0.0.Alpha4</version.org.wildfly.testing.tools>
         <!-- WildFly and Build Plugins -->
         <version.org.wildfly.plugins.wildfly-maven-plugin>6.0.0.Final</version.org.wildfly.plugins.wildfly-maven-plugin>
         <server.test.feature.pack.groupId>org.wildfly</server.test.feature.pack.groupId>
-        <!-- WildFly Preview is currently targeting Jakarta EE 11 and we should use it by default
-        <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId> -->
-        <server.test.feature.pack.artifactId>wildfly-preview-feature-pack</server.test.feature.pack.artifactId>
+        <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId>
         <wildfly.channel.manifest.groupId>org.wildfly.channels</wildfly.channel.manifest.groupId>
-        <wildfly.channel.manifest.artifactId>wildfly-preview</wildfly.channel.manifest.artifactId>
+        <wildfly.channel.manifest.artifactId>wildfly-ee</wildfly.channel.manifest.artifactId>
 
         <jboss.home>${project.build.directory}${file.separator}wildfly</jboss.home>
         <version.org.wildfly/>
+        <wildfly.server.args/>
         <galleon.fork.embedded>true</galleon.fork.embedded>
         <!-- Do not release -->
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -157,6 +156,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <jboss.home>${jboss.home}</jboss.home>
+                        <wildfly.server.args>${wildfly.server.args}</wildfly.server.args>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -167,8 +167,28 @@
         <profile>
             <id>ee10</id>
             <properties>
-                <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId>
-                <wildfly.channel.manifest.artifactId>wildfly-ee</wildfly.channel.manifest.artifactId>
+                <server.test.feature.pack.artifactId>wildfly-ee-10-feature-pack</server.test.feature.pack.artifactId>
+                <wildfly.channel.manifest.artifactId>wildfly-ee-10</wildfly.channel.manifest.artifactId>
+            </properties>
+        </profile>
+        <profile>
+            <id>preview</id>
+            <properties>
+                <server.test.feature.pack.artifactId>wildfly-preview-feature-pack</server.test.feature.pack.artifactId>
+                <wildfly.channel.manifest.artifactId>wildfly-preview</wildfly.channel.manifest.artifactId>
+            </properties>
+        </profile>
+        <profile>
+            <id>security-manager</id>
+            <activation>
+                <property>
+                    <name>security.manager</name>
+                </property>
+            </activation>
+            <properties>
+                <server.test.feature.pack.artifactId>wildfly-ee-10-feature-pack</server.test.feature.pack.artifactId>
+                <wildfly.channel.manifest.artifactId>wildfly-ee-10</wildfly.channel.manifest.artifactId>
+                <wildfly.server.args>-secmgr</wildfly.server.args>
             </properties>
         </profile>
     </profiles>
