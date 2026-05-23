@@ -572,6 +572,7 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
+                        <useManifestOnlyJar>true</useManifestOnlyJar>
                         <jvm>${test.java.home}${file.separator}bin${file.separator}java</jvm>
                         <reportsDirectory>${surefire.reportsDirectory}</reportsDirectory>
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
@@ -598,6 +599,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <useManifestOnlyJar>true</useManifestOnlyJar>
                         <jvm>${test.java.home}${file.separator}bin${file.separator}java</jvm>
                         <reportsDirectory>${failsafe.reportsDirectory}</reportsDirectory>
                         <redirectTestOutputToFile>${redirectTestOutput}</redirectTestOutputToFile>
@@ -671,6 +673,18 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>17</release>
+                        </configuration>
+                    </execution>
+                </executions>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>

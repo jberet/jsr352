@@ -21,8 +21,6 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.URI;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +41,6 @@ import jakarta.enterprise.inject.spi.InjectionPoint;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Properties;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 public class BatchBeanProducer {
     @Produces
@@ -436,24 +433,7 @@ public class BatchBeanProducer {
                     //no-arg constructor may not exist, in which case, we use null as its default value
                     //BatchLogger.LOGGER.infof("Injected batch property %s is not defined in job xml, will attempt to use the default value in class %s", propName, beanClass);
                     final Object o = beanClass.getDeclaredConstructor().newInstance();
-                    final Object fieldVal;
-
-                    if (WildFlySecurityManager.isChecking()) {
-                        fieldVal = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-                            @Override
-                            public Object run() throws Exception {
-                                if (!field.isAccessible()) {
-                                    field.setAccessible(true);
-                                }
-                                return field.get(o);
-                            }
-                        });
-                    } else {
-                        if (!field.isAccessible()) {
-                            field.setAccessible(true);
-                        }
-                        fieldVal = field.get(o);
-                    }
+                    final Object fieldVal = SecurityActions.getField(field, o);
                     return (T) fieldVal;
                 } catch (final Exception e) {
                     BatchLogger.LOGGER.tracef(e, "Failed to get the default value for undefined batch property %s, will use null.", propName);
