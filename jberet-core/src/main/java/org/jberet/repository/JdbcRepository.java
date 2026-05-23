@@ -12,8 +12,6 @@ package org.jberet.repository;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -45,7 +43,6 @@ import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class JdbcRepository extends AbstractPersistentRepository {
     //keys used in jberet.properties
@@ -1193,17 +1190,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     }
 
     private static ClassLoader getClassLoader(final boolean isContextClassLoader) {
-        if (WildFlySecurityManager.isChecking()) {
-            return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-                @Override
-                public ClassLoader run() {
-                    return isContextClassLoader ? Thread.currentThread().getContextClassLoader() :
-                            JdbcRepository.class.getClassLoader();
-                }
-            });
-        }
-        return isContextClassLoader ? Thread.currentThread().getContextClassLoader() :
-                JdbcRepository.class.getClassLoader();
+        return isContextClassLoader ? SecurityActions.getContextClassLoader() :
+              SecurityActions.getClassLoader(JdbcRepository.class);
     }
 
     private static Timestamp createTimestamp(final Date date) {

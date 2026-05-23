@@ -14,12 +14,9 @@ import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
 
 import java.io.Serializable;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -52,7 +49,6 @@ import org.jberet.spi.PartitionHandler;
 import org.jberet.spi.PartitionHandlerFactory;
 import org.jberet.spi.PropertyKey;
 import org.jberet.tx.LocalTransactionManager;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> implements JobTask {
     Step step;
@@ -73,14 +69,6 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     final StepExecutionImpl stepExecution;
 
     private boolean analyzerTxEnabled = true;
-
-    private static PrivilegedAction<PartitionHandlerFactory> loaderAction = () -> {
-        final ServiceLoader<PartitionHandlerFactory> serviceLoader = ServiceLoader.load(PartitionHandlerFactory.class);
-        if (serviceLoader.iterator().hasNext()) {
-            return serviceLoader.iterator().next();
-        }
-        return null;
-    };
 
     public StepExecutionRunner(final StepContextImpl stepContext, final CompositeExecutionRunner enclosingRunner) {
         super(stepContext, enclosingRunner);
@@ -517,8 +505,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
     }
 
     private static PartitionHandlerFactory getPartitionHandlerFactory() {
-        final PartitionHandlerFactory partitionHandlerFactory = WildFlySecurityManager.isChecking() ?
-                AccessController.doPrivileged(loaderAction) : loaderAction.run();
+        final PartitionHandlerFactory partitionHandlerFactory = SecurityActions.loadPartitionHandlerFactory();
         return partitionHandlerFactory != null ?
                 partitionHandlerFactory : ThreadPartitionHandlerFactory.getInstance();
     }
