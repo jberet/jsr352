@@ -56,7 +56,7 @@ public class ContextClassLoaderJobOperatorContextSelector implements JobOperator
     @Override
     public JobOperatorContext getJobOperatorContext() {
         if (WildFlySecurityManager.isChecking()) {
-            return AccessController.doPrivileged(action);
+            return WildFlySecurityManager.doChecked(action);
         }
         return action.run();
     }

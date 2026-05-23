@@ -75,7 +75,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
         if (WildFlySecurityManager.isChecking()) {
-            this.substitutedJob = AccessController.doPrivileged(new PrivilegedAction<Job>() {
+            this.substitutedJob = WildFlySecurityManager.doChecked(new PrivilegedAction<Job>() {
                 @Override
                 public Job run() {
                     return JobFactory.cloneJob(jobInstance.unsubstitutedJob);

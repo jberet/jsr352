@@ -44,7 +44,7 @@ public class SerializableData implements Serializable {
     };
 
     private static final SerializableDataProvider provider =
-        WildFlySecurityManager.isChecking() ? AccessController.doPrivileged(loaderAction) : loaderAction.run();
+        WildFlySecurityManager.isChecking() ? WildFlySecurityManager.doChecked(loaderAction) : loaderAction.run();
 
     private final byte[] serialized;
     private final Serializable raw;

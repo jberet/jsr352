@@ -38,7 +38,7 @@ public class JobOperatorImpl extends AbstractJobOperator implements JobOperator 
     private final BatchEnvironment batchEnvironment;
 
     public JobOperatorImpl() throws BatchRuntimeException {
-        this(WildFlySecurityManager.isChecking() ? AccessController.doPrivileged(loaderAction) : loaderAction.run());
+        this(WildFlySecurityManager.isChecking() ? WildFlySecurityManager.doChecked(loaderAction) : loaderAction.run());
     }
 
     public JobOperatorImpl(final BatchEnvironment batchEnvironment) throws BatchRuntimeException {

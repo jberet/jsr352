@@ -89,7 +89,7 @@ public final class FlowMerger extends AbstractMerger<Flow> {
         }
         child.jobElements.clear();
         if (WildFlySecurityManager.isChecking()) {
-            child.jobElements = AccessController.doPrivileged(new PrivilegedAction<List<JobElement>>() {
+            child.jobElements = WildFlySecurityManager.doChecked(new PrivilegedAction<List<JobElement>>() {
                 @Override
                 public List<JobElement> run() {
                     return JobFactory.cloneJobElements(parent.jobElements);
