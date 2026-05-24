@@ -13,10 +13,10 @@ package org.jberet.creation;
 import static org.jberet._private.BatchLogger.LOGGER;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -190,24 +190,22 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
         }
         for(final Method m : lifecycleMethods) {
             if (WildFlySecurityManager.isChecking()) {
-                AccessController.doPrivileged(new InvokeMethodPrivilegedExceptionAction(m, obj));
+                WildFlySecurityManager.doChecked(new InvokeMethodPrivilegedExceptionAction(m, obj));
             } else {
-                if (!m.isAccessible()) {
-                    m.setAccessible(true);
+                if (m.trySetAccessible()) {
+                    m.invoke(obj);
                 }
-                m.invoke(obj);
             }
         }
     }
 
     private void doInjection(final Object obj, final Field field, final Object val) throws Exception {
         if (WildFlySecurityManager.isChecking()) {
-            AccessController.doPrivileged(new SetFieldPrivilegedExceptionAction(field, obj, val));
+            WildFlySecurityManager.doChecked(new SetFieldPrivilegedExceptionAction(field, obj, val));
         } else {
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
+            if (field.trySetAccessible()) {
+                field.set(obj, val);
             }
-            field.set(obj, val);
         }
     }
 
@@ -224,10 +222,9 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
 
         @Override
         public Void run() throws Exception {
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
+            if (field.trySetAccessible()) {
+                field.set(obj, val);
             }
-            field.set(obj, val);
             return null;
         }
     }
@@ -243,10 +240,10 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
 
         @Override
         public Object run() throws Exception {
-            if (!method.isAccessible()) {
-                method.setAccessible(true);
+            if (method.trySetAccessible()) {
+                return method.invoke(obj);
             }
-            return method.invoke(obj);
+            return null;
         }
     }
 }

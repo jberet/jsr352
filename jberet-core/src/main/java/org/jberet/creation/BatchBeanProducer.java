@@ -439,20 +439,21 @@ public class BatchBeanProducer {
                     final Object fieldVal;
 
                     if (WildFlySecurityManager.isChecking()) {
-                        fieldVal = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                        fieldVal = WildFlySecurityManager.doChecked(new PrivilegedExceptionAction<Object>() {
                             @Override
                             public Object run() throws Exception {
-                                if (!field.isAccessible()) {
-                                    field.setAccessible(true);
+                                if (field.trySetAccessible()) {
+                                    return field.get(o);
                                 }
-                                return field.get(o);
+                                return null;
                             }
                         });
                     } else {
-                        if (!field.isAccessible()) {
-                            field.setAccessible(true);
+                        if (field.trySetAccessible()) {
+                            fieldVal = field.get(o);
+                        }   else {
+                            fieldVal = null;
                         }
-                        fieldVal = field.get(o);
                     }
                     return (T) fieldVal;
                 } catch (final Exception e) {

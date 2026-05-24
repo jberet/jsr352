@@ -518,7 +518,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     private static PartitionHandlerFactory getPartitionHandlerFactory() {
         final PartitionHandlerFactory partitionHandlerFactory = WildFlySecurityManager.isChecking() ?
-                AccessController.doPrivileged(loaderAction) : loaderAction.run();
+                WildFlySecurityManager.doChecked(loaderAction) : loaderAction.run();
         return partitionHandlerFactory != null ?
                 partitionHandlerFactory : ThreadPartitionHandlerFactory.getInstance();
     }

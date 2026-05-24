@@ -106,7 +106,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
                 c.outerContexts[i] = outerContexts[i];
             }
             if (WildFlySecurityManager.isChecking()) {
-                c.step = AccessController.doPrivileged(new PrivilegedAction<Step>() {
+                c.step = WildFlySecurityManager.doChecked(new PrivilegedAction<Step>() {
                     @Override
                     public Step run() {
                         return JobFactory.cloneStep(step);

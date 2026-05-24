@@ -348,15 +348,15 @@ public class PurgeBatchlet implements Batchlet {
 
         try {
             final Method getDelegateMethod = repo.getClass().getDeclaredMethod("getDelegate");
-            if (!getDelegateMethod.isAccessible()) {
-                getDelegateMethod.setAccessible(true);
+            if (getDelegateMethod.trySetAccessible()) {
+                final Object result = getDelegateMethod.invoke(repo);
+                return (result instanceof JdbcRepository) ? (JdbcRepository) result : null;
             }
-            final Object result = getDelegateMethod.invoke(repo);
-            return (result instanceof JdbcRepository) ? (JdbcRepository) result : null;
         } catch (final NoSuchMethodException e) {
             return null;
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failedToGetJdbcRepository(e);
         }
+        return null;
     }
 }

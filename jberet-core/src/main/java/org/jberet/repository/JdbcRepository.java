@@ -1194,7 +1194,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
 
     private static ClassLoader getClassLoader(final boolean isContextClassLoader) {
         if (WildFlySecurityManager.isChecking()) {
-            return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+            return WildFlySecurityManager.doChecked(new PrivilegedAction<ClassLoader>() {
                 @Override
                 public ClassLoader run() {
                     return isContextClassLoader ? Thread.currentThread().getContextClassLoader() :
