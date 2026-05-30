@@ -10,7 +10,7 @@
 
 package org.jberet.spi;
 
-import org.jberet.operations.JobOperatorImpl;
+import org.jberet.operations.DefaultJobOperatorImpl;
 
 /**
  * A default context selector.
@@ -29,7 +29,7 @@ public class DefaultJobOperatorContextSelector implements JobOperatorContextSele
      * Creates a new default context selector
      */
     public DefaultJobOperatorContextSelector() {
-        jobOperatorContext = JobOperatorContext.create(new JobOperatorImpl());
+        jobOperatorContext = JobOperatorContext.create(new DefaultJobOperatorImpl());
     }
 
     @Override

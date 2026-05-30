@@ -23,7 +23,7 @@ import jakarta.batch.runtime.Metric;
 import jakarta.batch.runtime.StepExecution;
 
 import org.jberet.job.model.Job;
-import org.jberet.operations.JobOperatorImpl;
+import org.jberet.operations.DefaultJobOperatorImpl;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.spi.JobOperatorContext;
@@ -52,7 +52,7 @@ abstract public class AbstractIT {
 
     //delay bootstrapping JobOperator, since some tests may need to adjust jberet configuration, such as
     //infinispanRepository tests.
-    protected JobOperatorImpl jobOperator;
+    protected DefaultJobOperatorImpl jobOperator;
 
     /**
      * Initializes and bootstraps {@code JobOperator}.
@@ -81,7 +81,7 @@ abstract public class AbstractIT {
             // Casting to JobOperatorImpl works in Java SE environment, but does not work in WildFly Jakarta EE
             // environment, which has a different JobOperator implementation class.
             //
-            jobOperator = (JobOperatorImpl) JobOperatorContext.getJobOperatorContext().getJobOperator();
+            jobOperator = (DefaultJobOperatorImpl) JobOperatorContext.getJobOperatorContext().getJobOperator();
         }
     }
 
