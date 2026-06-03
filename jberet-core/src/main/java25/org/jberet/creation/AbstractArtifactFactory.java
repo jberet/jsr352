@@ -1,0 +1,196 @@
+/*
+ * Copyright (c) 2013 Red Hat, Inc. and/or its affiliates.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
+package org.jberet.creation;
+
+import static org.jberet._private.BatchLogger.LOGGER;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.batch.api.BatchProperty;
+import jakarta.batch.runtime.context.JobContext;
+import jakarta.batch.runtime.context.StepContext;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import org.jberet._private.BatchMessages;
+import org.jberet.job.model.BatchArtifacts;
+import org.jberet.job.model.Properties;
+import org.jberet.runtime.context.JobContextImpl;
+import org.jberet.runtime.context.StepContextImpl;
+import org.jberet.spi.ArtifactFactory;
+
+/**
+ * An abstract implementation of an {@link ArtifactFactory} which contains some helper methods for dealing injecting
+ * data if CDI is not available or the class was created from the job XML using the fully qualified class name.
+ * <p>
+ * Note that if subclasses over the {@link #destroy(Object)} method, they should invoke {@code super.destroy(instance)}
+ * if the instance was not destroyed by another means, e.g. releasing the CDI context.
+ * </p>
+ */
+public abstract class AbstractArtifactFactory implements ArtifactFactory {
+    @Override
+    public void destroy(final Object instance) {
+        if (instance != null) {
+            try {
+                invokeAnnotatedLifecycleMethod(instance, instance.getClass(), PreDestroy.class);
+            } catch (Exception e) {
+                LOGGER.failToDestroyArtifact(e, instance);
+            }
+        }
+    }
+
+    /**
+     * Finds a CDI bean matching the batch artifact ref name, or batch.xml-configured
+     * class name, or direct use of FQCN.
+     *
+     * @param ref batch artifact ref name
+     * @param beanManager CDI BeanManager
+     * @param classLoader current classloader
+     * @return CDI bean found
+     */
+    protected static Bean<?> findBean(final String ref, final BeanManager beanManager, final ClassLoader classLoader) {
+        Set<Bean<?>> beans = beanManager.getBeans(ref);
+        if (beans == null || beans.isEmpty()) {
+            final Class<?> artifactClass = getClassFromBatchXmlOrClassLoader(ref, classLoader);
+            final Set<Bean<?>> beansByClass = beanManager.getBeans(artifactClass);
+            if (beansByClass != null) {
+                for (Iterator<Bean<?>> it = beansByClass.iterator(); it.hasNext();) {
+                    if (!it.next().getBeanClass().equals(artifactClass)) {
+                        it.remove();
+                    }
+                }
+                beans = beansByClass;
+            }
+        }
+        return beanManager.resolve(beans);
+    }
+
+    static Class<?> getClassFromBatchXmlOrClassLoader(final String ref, final ClassLoader classLoader) {
+        Class<?> cls = null;
+        BatchArtifacts batchArtifacts = ArtifactCreationContext.getCurrentArtifactCreationContext().jobContext.getBatchArtifacts();
+        String className = null;
+        if (batchArtifacts != null) {
+            className = batchArtifacts.getClassNameForRef(ref);
+        }
+        if (className == null) {
+            className = ref;
+        }
+        try {
+            cls = classLoader.loadClass(className);
+        } catch (ClassNotFoundException e) {
+            throw BatchMessages.MESSAGES.failToCreateArtifact(e, ref);
+        }
+        return cls;
+    }
+
+    protected void doInjection(final Object obj, Class<?> cls,
+                             final ClassLoader classLoader,
+                             final JobContextImpl jobContext,
+                             final StepContextImpl stepContext,
+                             final Properties batchProps) throws Exception {
+        final boolean hasBatchProps = batchProps != null && batchProps.size() > 0;
+        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("jakarta.batch")) {
+            for (final Field f : cls.getDeclaredFields()) {
+                if (!f.isSynthetic()) {
+                    Object fieldVal = null;
+                    if (f.getAnnotation(Inject.class) != null) {
+                        final Class<?> fType = f.getType();
+                        if (fType == JobContext.class) {
+                            fieldVal = jobContext;
+                        } else if (fType == StepContext.class) {
+                            //fieldVal may be null when StepContext was not stored in data map, as in job listeners
+                            fieldVal = stepContext;
+                        } else if (hasBatchProps) {
+                            final BatchProperty batchPropertyAnn = f.getAnnotation(BatchProperty.class);
+                            if (batchPropertyAnn != null) {
+                                String propName = batchPropertyAnn.name();
+                                if (propName.equals("")) {
+                                    propName = f.getName();
+                                }
+                                final String sVal = batchProps.get(propName);
+                                if (sVal != null) {
+                                    if (sVal.length() == 0) {
+                                        fieldVal = null;
+                                    } else if (!fType.isAssignableFrom(String.class)) {
+                                        fieldVal = ValueConverter.convertInjectionValue(sVal, fType, f, classLoader);
+                                    } else {
+                                        fieldVal = sVal;
+                                    }
+                                }
+                            }
+                        }
+                        if (fieldVal != null) {
+                            doInjection(obj, f, fieldVal);
+                        }
+                    }
+                }
+            }
+            cls = cls.getSuperclass();
+        }
+    }
+
+    protected void invokeAnnotatedLifecycleMethod(final Object obj, Class<?> cls, final Class<? extends Annotation> annCls) throws Exception{
+        final List<Method> lifecycleMethods = new ArrayList<Method>();
+        while (cls != null && cls != Object.class && cls.getPackage() != null && !cls.getPackage().getName().startsWith("jakarta.batch")) {
+            final Method[] methods = cls.getDeclaredMethods();
+            for (final Method m : methods) {
+                if (m.getAnnotation(annCls) != null) {  //the lifecyle annotation is present
+                    final int modifiers = m.getModifiers();
+                    final String mName = m.getName();
+                    if (Modifier.isPrivate(modifiers)) {
+                        lifecycleMethods.add(m);
+                    } else {
+                        boolean alreadyAdded = false;
+                        for (final Method lm : lifecycleMethods) {
+                            if (lm.getName().equals(mName)) {
+                                if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
+                                    alreadyAdded = true;
+                                    break;
+                                } else { // package default access
+                                    if (m.getDeclaringClass().getPackage().getName().equals(lm.getDeclaringClass().getPackage().getName())) {
+                                        alreadyAdded = true;
+                                        break;
+                                    }
+                                    //there can be multiple methods of the same name in lifecycleMethods, some are its
+                                    //super method and some are not.  So need to continue.
+                                }
+                            }
+                        }
+                        if (!alreadyAdded) {
+                            lifecycleMethods.add(m);
+                        }
+                    }
+                }
+            }
+            cls = cls.getSuperclass();
+        }
+        if (annCls == PostConstruct.class) {
+            Collections.reverse(lifecycleMethods);
+        }
+        for(final Method m : lifecycleMethods) {
+            SecurityActions.invokeMethod(m, obj);
+        }
+    }
+
+    private void doInjection(final Object obj, final Field field, final Object val) throws Exception {
+        SecurityActions.setFieldValue(field, obj, val);
+    }
+}
