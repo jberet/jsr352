@@ -12,8 +12,6 @@ package org.jberet.runtime;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,9 +30,6 @@ import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.creation.ArtifactCreationContext;
 import org.jberet.job.model.Job;
-import org.jberet.job.model.JobFactory;
-import org.jberet.util.BatchUtil;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution, Cloneable {
     private static final long serialVersionUID = 3706885354351337764L;
@@ -74,16 +69,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
     public JobExecutionImpl(final JobInstanceImpl jobInstance, final Properties jobParameters) throws JobStartException {
         this.jobInstance = jobInstance;
         this.jobParameters = jobParameters;
-        if (WildFlySecurityManager.isChecking()) {
-            this.substitutedJob = AccessController.doPrivileged(new PrivilegedAction<Job>() {
-                @Override
-                public Job run() {
-                    return JobFactory.cloneJob(jobInstance.unsubstitutedJob);
-                }
-            });
-        } else {
-            this.substitutedJob = JobFactory.cloneJob(jobInstance.unsubstitutedJob);
-        }
+        this.substitutedJob = SecurityActions.cloneJob(jobInstance.unsubstitutedJob);
         this.createTime = System.currentTimeMillis();
         setBatchStatus(BatchStatus.STARTING);
     }

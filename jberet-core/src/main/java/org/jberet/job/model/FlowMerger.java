@@ -10,8 +10,6 @@
 
 package org.jberet.job.model;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.List;
 import jakarta.batch.operations.JobStartException;
 
@@ -89,12 +87,7 @@ public final class FlowMerger extends AbstractMerger<Flow> {
         }
         child.jobElements.clear();
         if (WildFlySecurityManager.isChecking()) {
-            child.jobElements = AccessController.doPrivileged(new PrivilegedAction<List<JobElement>>() {
-                @Override
-                public List<JobElement> run() {
-                    return JobFactory.cloneJobElements(parent.jobElements);
-                }
-            });
+            child.jobElements = SecurityActions.cloneJobElements(parent.jobElements);
         } else {
             child.jobElements = JobFactory.cloneJobElements(parent.jobElements);
         }

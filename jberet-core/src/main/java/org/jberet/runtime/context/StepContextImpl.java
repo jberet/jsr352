@@ -11,8 +11,6 @@
 package org.jberet.runtime.context;
 
 import java.io.Serializable;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -23,13 +21,11 @@ import jakarta.enterprise.context.spi.Contextual;
 
 import org.jberet._private.BatchLogger;
 import org.jberet.creation.JobScopedContextImpl;
-import org.jberet.job.model.JobFactory;
 import org.jberet.job.model.Step;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
  * Represents the execution context for either a step execution or partition execution.
@@ -105,16 +101,7 @@ public class StepContextImpl extends AbstractContext implements StepContext, Clo
             for (int i = 1; i < c.outerContexts.length; i++) {
                 c.outerContexts[i] = outerContexts[i];
             }
-            if (WildFlySecurityManager.isChecking()) {
-                c.step = AccessController.doPrivileged(new PrivilegedAction<Step>() {
-                    @Override
-                    public Step run() {
-                        return JobFactory.cloneStep(step);
-                    }
-                });
-            } else {
-                c.step = JobFactory.cloneStep(step);
-            }
+            c.step = SecurityActions.cloneStep(step);
             c.partitionScopedBeans = new ConcurrentHashMap<Contextual<?>, JobScopedContextImpl.ScopedInstance<?>>();
         } catch (CloneNotSupportedException e) {
             BatchLogger.LOGGER.failToClone(e, this, getJobContext().getJobName(), getStepName());

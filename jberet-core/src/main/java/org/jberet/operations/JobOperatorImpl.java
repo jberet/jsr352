@@ -10,35 +10,20 @@
 
 package org.jberet.operations;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.ServiceLoader;
 import jakarta.batch.operations.BatchRuntimeException;
 import jakarta.batch.operations.JobOperator;
 
 import org.jberet._private.BatchMessages;
 import org.jberet.repository.JobRepository;
 import org.jberet.spi.BatchEnvironment;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 public class JobOperatorImpl extends AbstractJobOperator implements JobOperator {
-
-    private static final PrivilegedAction<BatchEnvironment> loaderAction = new PrivilegedAction<BatchEnvironment>() {
-        @Override
-        public BatchEnvironment run() {
-            final ServiceLoader<BatchEnvironment> serviceLoader = ServiceLoader.load(BatchEnvironment.class);
-            if (serviceLoader.iterator().hasNext()) {
-                return serviceLoader.iterator().next();
-            }
-            return null;
-        }
-    };
 
     final JobRepository repository;
     private final BatchEnvironment batchEnvironment;
 
     public JobOperatorImpl() throws BatchRuntimeException {
-        this(WildFlySecurityManager.isChecking() ? AccessController.doPrivileged(loaderAction) : loaderAction.run());
+        this(SecurityActions.loadBatchEnvironment());
     }
 
     public JobOperatorImpl(final BatchEnvironment batchEnvironment) throws BatchRuntimeException {
