@@ -671,6 +671,33 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-compile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <release>17</release>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>compile-java25</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <release>25</release>
+                                <compileSourceRoots>
+                                    <compileSourceRoot>${project.basedir}/src/main/java25</compileSourceRoot>
+                                </compileSourceRoots>
+                                <multiReleaseOutput>true</multiReleaseOutput>
+                                <proc>none</proc>
+                            </configuration>
+                        </execution>
+                    </executions>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
@@ -694,6 +721,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
                             <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
