@@ -1,20 +1,14 @@
 package org.jberet.runtime.runner;
 
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
 
 import org.jberet.spi.PartitionHandlerFactory;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 class SecurityActions {
 
     static PartitionHandlerFactory loadPartitionHandlerFactory() {
-        if (WildFlySecurityManager.isChecking()) {
-            return AccessController.doPrivileged(LOADER_ACTION);
-        } else {
-            return LOADER_ACTION.run();
-        }
+        return LOADER_ACTION.run();
     }
 
     private static final PrivilegedAction<PartitionHandlerFactory> LOADER_ACTION = () -> {

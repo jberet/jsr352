@@ -7,17 +7,11 @@ import java.util.ServiceLoader;
 import org.jberet.job.model.Job;
 import org.jberet.job.model.JobFactory;
 import org.jberet.spi.SerializableDataProvider;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 class SecurityActions {
 
     static Job cloneJob(final Job job) {
-        if (WildFlySecurityManager.isChecking()) {
-            return AccessController.doPrivileged(
-                    (PrivilegedAction<Job>) () -> JobFactory.cloneJob(job));
-        } else {
-            return JobFactory.cloneJob(job);
-        }
+        return JobFactory.cloneJob(job);
     }
 
     static SerializableDataProvider loadSerializableDataProvider() {
@@ -29,7 +23,6 @@ class SecurityActions {
             }
             return new SerializableDataProvider.DefaultSerializableDataProvider();
         };
-        return WildFlySecurityManager.isChecking()
-                ? AccessController.doPrivileged(action) : action.run();
+        return action.run();
     }
 }

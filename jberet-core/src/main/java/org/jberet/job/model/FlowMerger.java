@@ -16,7 +16,6 @@ import jakarta.batch.operations.JobStartException;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.spi.BatchEnvironment;
 import org.jberet.spi.JobXmlResolver;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
  * Responsible for merging a child flow and its parent job, and resolving its JSL inheritance.
@@ -86,11 +85,7 @@ public final class FlowMerger extends AbstractMerger<Flow> {
             child.next= parent.next;
         }
         child.jobElements.clear();
-        if (WildFlySecurityManager.isChecking()) {
-            child.jobElements = SecurityActions.cloneJobElements(parent.jobElements);
-        } else {
-            child.jobElements = JobFactory.cloneJobElements(parent.jobElements);
-        }
+        child.jobElements = JobFactory.cloneJobElements(parent.jobElements);
 
         child.setParentAndJslName(null, null);
     }

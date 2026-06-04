@@ -1,11 +1,9 @@
 package org.jberet.operations;
 
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
 
 import org.jberet.spi.BatchEnvironment;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 class SecurityActions {
     static BatchEnvironment loadBatchEnvironment() {
@@ -16,7 +14,6 @@ class SecurityActions {
             }
             return null;
         };
-        return WildFlySecurityManager.isChecking()
-                ? AccessController.doPrivileged(action) : action.run();
+        return action.run();
     }
 }

@@ -2,10 +2,6 @@ package org.jberet.creation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
-
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 /*
  * This class is used to perform privileged actions when security manager is enabled.
@@ -20,57 +16,22 @@ import org.wildfly.security.manager.WildFlySecurityManager;
 class SecurityActions {
 
     static void setFieldValue(final Field field, final Object obj, final Object value) throws Exception {
-        if(WildFlySecurityManager.isChecking()){
-            AccessController.doPrivileged(
-                (PrivilegedExceptionAction <Void>) () -> {
-                    if(field.trySetAccessible()){
-                        field.set(obj,value);
-                    }
-                    return null; 
-                });
-        }
-        else {
-            if(field.trySetAccessible()){
-                field.set(obj,value);
-            }
+        if(field.trySetAccessible()){
+            field.set(obj,value);
         }
     }
 
     static Object getField(final Field field, final Object obj) throws Exception {
-        if(WildFlySecurityManager.isChecking()){
-            return AccessController.doPrivileged(
-                (PrivilegedExceptionAction<Object>) () -> {
-                if(field.trySetAccessible()){
-                    return field.get(obj);
-                }
-                return null;
-            }
-            );
+        if(field.trySetAccessible()){
+            return field.get(obj);
         }
-        else {
-            if(field.trySetAccessible()){
-                return field.get(obj);
-            }
-            return null;
-        }
+        return null;
     }
 
     static Object invokeMethod(final Method method, final Object obj) throws Exception {
-        if(WildFlySecurityManager.isChecking()){
-            return AccessController.doPrivileged(
-                (PrivilegedExceptionAction<Object>) () -> {
-                    if(method.trySetAccessible()){
-                        return method.invoke(obj);
-                    }
-                    return null;
-                }
-            );
+        if(method.trySetAccessible()){
+            return method.invoke(obj);
         }
-        else {
-            if(method.trySetAccessible()){
-                return method.invoke(obj);
-            }
-            return null;
-        }
+        return null;
     }
 }
