@@ -106,7 +106,7 @@
         <!-- Job Repository Implementations -->
         <version.com.h2database>2.4.240</version.com.h2database>
         <version.org.mongodb.mongo-java-driver>3.12.14</version.org.mongodb.mongo-java-driver>
-        <version.org.infinispan>16.1.4</version.org.infinispan>
+        <version.org.infinispan>16.2.1</version.org.infinispan>
         <version.org.jgroups>5.5.5.Final</version.org.jgroups>
 
         <!-- Scripting Language Support -->
