@@ -1,0 +1,106 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: JBeret Jakarta Batch TCK
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'pom.xml'
+      - 'jberet-core/**'
+      - 'jberet-manifest/**'
+      - 'jberet-se/**'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - '.github/workflows/jberet-tck.yml'
+      - 'pom.xml'
+      - 'jberet-core/**'
+      - 'jberet-manifest/**'
+      - 'jberet-se/**'
+
+  schedule:
+    - cron: '0 0 * * *' # Every day at 00:00 UTC
+  workflow_dispatch:
+    inputs:
+      os:
+        description: "Runner OS"
+        required: true
+        default: "ubuntu-latest"
+        type: string
+      javaVersion:
+        description: "Java Version"
+        required: true
+        default: "17"
+        type: string
+
+# Only run the latest job
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MVN_CMD: './mvnw -V -B -fae'
+
+jobs:
+  run-tck:
+    name: Jakarta Batch TCK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout JBeret
+        uses: actions/checkout@v6
+        with:
+          path: jsr352
+      - name: Checkout JBeret TCK Runner
+        uses: actions/checkout@v6
+        with:
+          repository: jberet/jberet-tck-runner
+          path: jberet-tck-runner
+      - name: Set up JDKs
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          cache: 'maven'
+          # Please note the order here of having 25 last as that is the version we want to compile with
+          java-version: |
+            17
+            21
+            26
+            25
+      - name: Build JBeret
+        id: jberet-build
+        run:  |
+          cd jsr352
+          ${{ env.MVN_CMD }} clean install -DskipTests
+          JBERET_VERSION="$(mvn -B help:evaluate -Dexpression=project.version -DforceStdout -q)"
+          echo "JBERET_VERSION=$JBERET_VERSION"
+          echo "JBERET_VERSION=$JBERET_VERSION" >> "$GITHUB_OUTPUT"
+      - name: Build and Test with Java 25
+        run: |
+          cd jberet-tck-runner
+          ${{ env.MVN_CMD }} clean install -Dversion.org.jberet.channel="${{ steps.jberet-build.outputs.JBERET_VERSION }}"
+      - name: Build and Test with Java 26
+        run: |
+          cd jberet-tck-runner
+          ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_26_X64}}' '-Dtest.report.dir=java26' -Dversion.org.jberet.channel="${{ steps.jberet-build.outputs.JBERET_VERSION }}"
+      - name: Build and Test with Java 21
+        run: |
+          cd jberet-tck-runner
+          ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_21_X64}}' '-Dtest.report.dir=java21' -Dversion.org.jberet.channel="${{ steps.jberet-build.outputs.JBERET_VERSION }}"
+      - name: Build and Test with Java 17
+        run: |
+          cd jberet-tck-runner
+          ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_17_X64}}' '-Dtest.report.dir=java17' -Dversion.org.jberet.channel="${{ steps.jberet-build.outputs.JBERET_VERSION }}"
+      - name: Upload test logs for failed run
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: failure-reports
+          path: |
+            **/surefire-reports/**
+            **/failsafe-reports/**
+            **/*.log
+
