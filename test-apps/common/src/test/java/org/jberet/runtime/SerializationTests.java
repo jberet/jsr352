@@ -70,7 +70,7 @@ public class SerializationTests extends AbstractIT {
         final Field[] fields = one.getClass().getDeclaredFields();
         for (Field field : fields) {
             if (!Modifier.isTransient(field.getModifiers())) {
-                if (!field.isAccessible()) field.setAccessible(true);
+                Assertions.assertTrue(field.trySetAccessible(), () -> "Failed to make field %s accessible".formatted(field.getName()));
                 final Class<?> fieldType = field.getType();
                 final Object valueOne = field.get(one);
                 final Object valueTwo = field.get(two);

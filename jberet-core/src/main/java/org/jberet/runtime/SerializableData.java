@@ -14,10 +14,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
-import java.util.ServiceLoader;
 import jakarta.batch.operations.BatchRuntimeException;
 
 import org.jberet._private.BatchLogger;
@@ -32,20 +29,7 @@ import org.wildfly.security.manager.WildFlySecurityManager;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 public class SerializableData implements Serializable {
-    private static final PrivilegedAction<SerializableDataProvider> loaderAction = new PrivilegedAction<SerializableDataProvider>() {
-        @Override
-        public SerializableDataProvider run() {
-            final ServiceLoader<SerializableDataProvider> serviceLoader = ServiceLoader.load(SerializableDataProvider.class);
-            if (serviceLoader.iterator().hasNext()) {
-                return serviceLoader.iterator().next();
-            }
-            return new SerializableDataProvider.DefaultSerializableDataProvider();
-        }
-    };
-
-    private static final SerializableDataProvider provider =
-        WildFlySecurityManager.isChecking() ? AccessController.doPrivileged(loaderAction) : loaderAction.run();
-
+    private static final SerializableDataProvider provider = SecurityActions.loadSerializableDataProvider();
     private final byte[] serialized;
     private final Serializable raw;
     private final Class<?> klass;
