@@ -127,7 +127,7 @@
         <version.org.wildfly.security.elytron>2.9.1.Final</version.org.wildfly.security.elytron>
 
         <!-- Integration Frameworks -->
-        <version.com.datastax.cassandra>3.11.5</version.com.datastax.cassandra>
+        <version.com.datastax.cassandra>4.0.0</version.com.datastax.cassandra>
 
         <!-- Testing -->
         <junit-jupiter.version>6.1.0</junit-jupiter.version>
@@ -470,8 +470,8 @@
 
             <!-- Cassandra dependencies -->
             <dependency>
-                <groupId>com.datastax.cassandra</groupId>
-                <artifactId>cassandra-driver-core</artifactId>
+                <groupId>com.datastax.oss</groupId>
+                <artifactId>java-driver-core</artifactId>
                 <version>${version.com.datastax.cassandra}</version>
                 <scope>provided</scope>
             </dependency>

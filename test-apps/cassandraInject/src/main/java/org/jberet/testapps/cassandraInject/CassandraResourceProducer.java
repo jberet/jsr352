@@ -13,7 +13,7 @@ package org.jberet.testapps.cassandraInject;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Named;
 
-import com.datastax.driver.core.Session;
+import com.datastax.oss.driver.api.core.CqlSession;
 
 /**
  * A CDI producer class for Cassandra cluster session resource.
@@ -22,10 +22,10 @@ import com.datastax.driver.core.Session;
  */
 @Named
 public class CassandraResourceProducer {
-    static Session session;
+    static CqlSession session;
 
     @Produces
-    public Session getSession() {
+    public CqlSession getSession() {
         return session;
     }
 }

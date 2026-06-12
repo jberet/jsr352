@@ -10,15 +10,18 @@
 
 package org.jberet.testapps.cassandraInject;
 
-import jakarta.batch.runtime.BatchStatus;
+import java.net.InetSocketAddress;
 
-import com.datastax.driver.core.Cluster;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import com.datastax.oss.driver.api.core.CqlSession;
+
+import jakarta.batch.runtime.BatchStatus;
 
 /**
  * Tests using {@code cassandraItemReader} and {@code mockItemWriter} in jberet-support.
@@ -37,8 +40,10 @@ public class CassandraInjectIT extends AbstractIT {
     @BeforeAll
     public static void beforeClass() {
         if (CassandraResourceProducer.session == null) {
-            Cluster cluster = new Cluster.Builder().addContactPoint(contactPoints).build();
-            CassandraResourceProducer.session = cluster.newSession();
+            CassandraResourceProducer.session = CqlSession.builder()
+                .addContactPoint(new InetSocketAddress(contactPoints, 9042))
+                .withLocalDatacenter("datacenter1")
+                .build();            
         }
     }
 
