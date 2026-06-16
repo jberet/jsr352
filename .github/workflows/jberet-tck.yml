@@ -49,6 +49,7 @@ jobs:
   run-tck:
     name: Jakarta Batch TCK
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-ci') }}
     steps:
       - name: Checkout JBeret
         uses: actions/checkout@v6
