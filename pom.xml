@@ -10,20 +10,19 @@
  SPDX-License-Identifier: EPL-2.0
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
         <version>53</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>org.jberet</groupId>
     <artifactId>jberet-parent</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.2.0.Beta1</version>
     <packaging>pom</packaging>
 
     <name>jberet-parent</name>
@@ -62,7 +61,8 @@
         <connection>scm:git:https://github.com/jberet/jsr352.git</connection>
         <url>scm:git:https://github.com/jberet/jsr352.git</url>
         <developerConnection>scm:git:https://github.com/jberet/jsr352.git</developerConnection>
-    </scm>
+      <tag>3.2.0.Beta1</tag>
+  </scm>
     <issueManagement>
         <system>Jira</system>
         <url>https://issues.jboss.org/browse/JBERET</url>
@@ -145,13 +145,13 @@
         <!-- Build Configuration -->
         <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
         <redirectTestOutput>${maven.test.redirectTestOutputToFile}</redirectTestOutput>
-        <modular.jdk.args/>
+        <modular.jdk.args />
         <surefire.system.args>${modular.jdk.args}</surefire.system.args>
         <test.java.home>${java.home}</test.java.home>
         <!-- Used to allow overriding the directory where reports are written. For example in CI, passing -Dtest.report.dir=java25
              to allow test reports to not overwrite each other.
          -->
-        <test.report.dir/>
+        <test.report.dir />
         <surefire.reportsDirectory>${project.build.directory}/surefire-reports/${test.report.dir}</surefire.reportsDirectory>
         <failsafe.reportsDirectory>${project.build.directory}/failsafe-reports/${test.report.dir}</failsafe.reportsDirectory>
 
