@@ -45,9 +45,9 @@ jobs:
       - name: Build and Test on ${{ matrix.os }} - Java 26
         run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_26_X64}}${{env.JAVA_HOME_26_ARM64}}' '-Dtest.report.dir=java26'
       - name: Build and Test on ${{ matrix.os }} - Java 21
-        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_21_X64}}${{env.JAVA_HOME_21_ARM64}}' '-Dtest.report.dir=java21'
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_21_X64}}${{env.JAVA_HOME_21_ARM64}}' '-Dtest.report.dir=java21' '-P-java25-test-classpath'
       - name: Build and Test on ${{ matrix.os }} - Java 17
-        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_17_X64}}${{env.JAVA_HOME_17_ARM64}}' '-Dtest.report.dir=java17'
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_17_X64}}${{env.JAVA_HOME_17_ARM64}}' '-Dtest.report.dir=java17' '-P-java25-test-classpath'
       - name: Upload test logs for failed run
         uses: actions/upload-artifact@v7
         if: failure()
@@ -86,9 +86,9 @@ jobs:
       - name: Build and Test on ${{ matrix.os }} - Java 26
         run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_26_X64}}${{env.JAVA_HOME_26_ARM64}}' '-Dtest.report.dir=java26' ${{ matrix.profile }}
       - name: Build and Test on ${{ matrix.os }} - Java 21
-        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_21_X64}}${{env.JAVA_HOME_21_ARM64}}' '-Dtest.report.dir=java21' ${{ matrix.profile }}
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_21_X64}}${{env.JAVA_HOME_21_ARM64}}' '-Dtest.report.dir=java21' ${{ matrix.profile }} '-P-java25-test-classpath'
       - name: Build and Test on ${{ matrix.os }} - Java 17
-        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_17_X64}}${{env.JAVA_HOME_17_ARM64}}' '-Dtest.report.dir=java17' ${{ matrix.profile }}
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_17_X64}}${{env.JAVA_HOME_17_ARM64}}' '-Dtest.report.dir=java17' ${{ matrix.profile }} '-P-java25-test-classpath'
       - name: Upload test logs for failed run
         uses: actions/upload-artifact@v7
         if: failure()

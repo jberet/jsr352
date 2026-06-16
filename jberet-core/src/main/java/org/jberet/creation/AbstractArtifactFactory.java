@@ -16,8 +16,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -38,7 +36,6 @@ import org.jberet.job.model.Properties;
 import org.jberet.runtime.context.JobContextImpl;
 import org.jberet.runtime.context.StepContextImpl;
 import org.jberet.spi.ArtifactFactory;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
  * An abstract implementation of an {@link ArtifactFactory} which contains some helper methods for dealing injecting
@@ -189,64 +186,11 @@ public abstract class AbstractArtifactFactory implements ArtifactFactory {
             Collections.reverse(lifecycleMethods);
         }
         for(final Method m : lifecycleMethods) {
-            if (WildFlySecurityManager.isChecking()) {
-                AccessController.doPrivileged(new InvokeMethodPrivilegedExceptionAction(m, obj));
-            } else {
-                if (!m.isAccessible()) {
-                    m.setAccessible(true);
-                }
-                m.invoke(obj);
-            }
+            SecurityActions.invokeMethod(m, obj);
         }
     }
 
     private void doInjection(final Object obj, final Field field, final Object val) throws Exception {
-        if (WildFlySecurityManager.isChecking()) {
-            AccessController.doPrivileged(new SetFieldPrivilegedExceptionAction(field, obj, val));
-        } else {
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
-            field.set(obj, val);
-        }
-    }
-
-    private static class SetFieldPrivilegedExceptionAction implements PrivilegedExceptionAction<Void> {
-        private final Field field;
-        private final Object obj;
-        private final Object val;
-
-        public SetFieldPrivilegedExceptionAction(final Field field, final Object obj, final Object val) {
-            this.field = field;
-            this.obj = obj;
-            this.val = val;
-        }
-
-        @Override
-        public Void run() throws Exception {
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
-            field.set(obj, val);
-            return null;
-        }
-    }
-
-    private static class InvokeMethodPrivilegedExceptionAction implements PrivilegedExceptionAction<Object> {
-        private final Method method;
-        private final Object obj;
-
-        public InvokeMethodPrivilegedExceptionAction(final Method method, final Object obj) {
-            this.method = method;
-            this.obj = obj;
-        }
-
-        @Override
-        public Object run() throws Exception {
-            if (!method.isAccessible()) {
-                method.setAccessible(true);
-            }
-            return method.invoke(obj);
-        }
+        SecurityActions.setFieldValue(field, obj, val);
     }
 }

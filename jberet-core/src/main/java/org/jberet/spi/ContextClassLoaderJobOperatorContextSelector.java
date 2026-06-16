@@ -10,14 +10,11 @@
 
 package org.jberet.spi;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.jberet._private.BatchMessages;
 import org.jberet.util.Assertions;
-import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
  * Uses the {@linkplain Thread#getContextClassLoader() context class loader} to find the {@link JobOperatorContext} for.
@@ -30,19 +27,6 @@ import org.wildfly.security.manager.WildFlySecurityManager;
 public class ContextClassLoaderJobOperatorContextSelector implements JobOperatorContextSelector {
     private final JobOperatorContextSelector defaultSelector;
     private final ConcurrentMap<ClassLoader, JobOperatorContext> contexts = new ConcurrentHashMap<>();
-    private final PrivilegedAction<JobOperatorContext> action = new PrivilegedAction<JobOperatorContext>() {
-        @Override
-        public JobOperatorContext run() {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            if (cl != null) {
-                final JobOperatorContext context = contexts.get(cl);
-                if (context != null) {
-                    return context;
-                }
-            }
-            return defaultSelector.getJobOperatorContext();
-        }
-    };
 
     /**
      * Creates a new selector.
@@ -55,10 +39,14 @@ public class ContextClassLoaderJobOperatorContextSelector implements JobOperator
 
     @Override
     public JobOperatorContext getJobOperatorContext() {
-        if (WildFlySecurityManager.isChecking()) {
-            return AccessController.doPrivileged(action);
+        final ClassLoader cl = SecurityActions.getContextClassLoader();
+        if (cl != null) {
+            final JobOperatorContext context = contexts.get(cl);
+            if (context != null) {
+                return context;
+            }
         }
-        return action.run();
+        return defaultSelector.getJobOperatorContext();
     }
 
     /**
