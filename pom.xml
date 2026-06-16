@@ -22,7 +22,7 @@
 
     <groupId>org.jberet</groupId>
     <artifactId>jberet-parent</artifactId>
-    <version>3.2.0.Beta2</version>
+    <version>3.2.0.Final-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>jberet-parent</name>
@@ -61,7 +61,7 @@
         <connection>scm:git:git@github.com:jberet/jsr352.git</connection>
         <url>https://github.com/jberet/jsr352.git</url>
         <developerConnection>scm:git:git@github.com:jberet/jsr352.git</developerConnection>
-      <tag>3.2.0.Beta2</tag>
+      <tag>HEAD</tag>
   </scm>
     <issueManagement>
         <system>Jira</system>
