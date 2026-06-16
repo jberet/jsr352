@@ -1,7 +1,9 @@
 package org.jberet._private;
 
 import java.io.Serializable;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Member;
 import java.util.List;
 import javax.xml.stream.Location;
@@ -217,4 +219,6 @@ public interface BatchMessages {
     @Message(id = 660, value = "No job executions found for %s with status of %s for execution id %d.")
     NoSuchJobException noJobExecutionsFoundForRestart(String jobName, String jobStatus, long id);
 
+    @Message(id = 661, value = "Unable to make %s accessible: %s")
+    InaccessibleObjectException unableToMakeFieldorMethodAccessible(String objType, AccessibleObject obj);
 }
