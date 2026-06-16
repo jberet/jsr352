@@ -163,7 +163,8 @@
         <!-- maven-release-plugin configuration -->
         <autoVersionSubmodules>true</autoVersionSubmodules>
         <preparationGoals>clean install</preparationGoals>
-        <releaseProfiles>jboss-release</releaseProfiles>
+        <preparationProfiles>jboss-release</preparationProfiles>
+        <releaseProfiles>${preparationProfiles}</releaseProfiles>
         <signTag>true</signTag>
         <tagNameFormat>@{project.version}</tagNameFormat>
         <arguments>-DskipTests -DpushChanges=${pushChanges}</arguments>
