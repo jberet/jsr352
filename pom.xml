@@ -58,9 +58,9 @@
     </modules>
 
     <scm>
-        <connection>scm:git:https://github.com/jberet/jsr352.git</connection>
-        <url>scm:git:https://github.com/jberet/jsr352.git</url>
-        <developerConnection>scm:git:https://github.com/jberet/jsr352.git</developerConnection>
+        <connection>scm:git:git@github.com:jberet/jsr352.git</connection>
+        <url>https://github.com/jberet/jsr352.git</url>
+        <developerConnection>scm:git:git@github.com:jberet/jsr352.git</developerConnection>
       <tag>HEAD</tag>
   </scm>
     <issueManagement>
@@ -168,7 +168,7 @@
         <signTag>true</signTag>
         <tagNameFormat>@{project.version}</tagNameFormat>
         <arguments>-DskipTests -DpushChanges=${pushChanges}</arguments>
-        <pushChanges>true</pushChanges>
+        <pushChanges>false</pushChanges>
         <!-- Use the local directory when using perform -->
         <localCheckout>true</localCheckout>
         <!-- Nexus release properties -->
