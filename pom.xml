@@ -127,7 +127,7 @@
         <version.org.wildfly.security.elytron>2.9.2.Final</version.org.wildfly.security.elytron>
 
         <!-- Integration Frameworks -->
-        <version.com.datastax.cassandra>4.0.0</version.com.datastax.cassandra>
+        <version.com.datastax.cassandra>4.17.0</version.com.datastax.cassandra>
 
         <!-- Testing -->
         <junit-jupiter.version>6.1.0</junit-jupiter.version>
