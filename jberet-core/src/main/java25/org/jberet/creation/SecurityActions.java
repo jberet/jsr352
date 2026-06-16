@@ -13,13 +13,14 @@ package org.jberet.creation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import org.jberet._private.BatchMessages;
 class SecurityActions {
 
     static void setFieldValue(final Field field, final Object obj, final Object value) throws Exception {            
         if(field.trySetAccessible()){
             field.set(obj,value);
         } else {
-            throw new java.lang.reflect.InaccessibleObjectException("Unable to make field accessible: " + field);
+            throw BatchMessages.MESSAGES.unableToMakeFieldorMethodAccessible("Field", field);
         }
     }
 
@@ -27,7 +28,7 @@ class SecurityActions {
         if(field.trySetAccessible()){
             return field.get(obj);
         } else {
-            throw new java.lang.reflect.InaccessibleObjectException("Unable to make field accessible: " + field);
+            throw BatchMessages.MESSAGES.unableToMakeFieldorMethodAccessible("Field", field);
         }
     }
 
@@ -35,7 +36,7 @@ class SecurityActions {
         if(method.trySetAccessible()){
             return method.invoke(obj);
         } else {
-                throw new java.lang.reflect.InaccessibleObjectException("Unable to make method accessible: " + method);
+            throw BatchMessages.MESSAGES.unableToMakeFieldorMethodAccessible("Method", method);
         }
     }
 }
