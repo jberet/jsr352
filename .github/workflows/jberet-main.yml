@@ -24,6 +24,7 @@ jobs:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-ci') }}
     strategy:
       fail-fast: false
       matrix:
@@ -62,6 +63,7 @@ jobs:
     name: Test WildFly Integration-${{ matrix.os }}${{ matrix.profile }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-ci') }}
     env:
       MVN_CMD: './mvnw -V -B -ntp -am -pl jberet-manifest,test-deployment'
     strategy:
@@ -103,6 +105,7 @@ jobs:
     name: Test WildFly Security Manager Integration-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-ci') }}
     env:
       MVN_CMD: './mvnw -V -B -ntp -am -pl jberet-manifest,test-deployment'
     strategy:

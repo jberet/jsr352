@@ -39,6 +39,7 @@ printHelp() {
     printArgHelp "-f" "--force" "Forces to allow a SNAPSHOT suffix in release version and not require one for the development version."
     printArgHelp "-h" "--help" "Displays this help."
     printArgHelp "" "--notes-start-tag" "When doing a GitHub release, indicates the tag to use as the starting point for generating release notes."
+    printArgHelp "" "--no-push" "Performs the release locally but does not push changes or create a GitHub release."
     printArgHelp "-p" "--prerelease" "Indicates this is a prerelease and the GitHub release should be marked as such."
     printArgHelp "-r" "--release" "The version to be released. Also used for the tag."
     printArgHelp "" "--dry-run" "Executes the release in as a dry-run. Nothing will be updated or pushed."
@@ -61,6 +62,7 @@ if [[ -t 1 ]] && [[ -z "${NO_COLOR-}" ]]; then
 fi
 
 DRY_RUN=false
+NO_PUSH=false
 FORCE=false
 DEVEL_VERSION=""
 RELEASE_VERSION=""
@@ -94,6 +96,9 @@ while [ "$#" -gt 0 ]; do
         --notes-start-tag)
             START_TAG=("--notes-from-tag" "${2}")
             shift
+            ;;
+        --no-push)
+            NO_PUSH=true
             ;;
         -p|--prerelease)
             GH_RELEASE_TYPE="--prerelease"
@@ -154,7 +159,7 @@ MVN_FLAGS=()
 
 if ${DRY_RUN}; then
     echo "This will be a dry run and nothing will be updated or pushed."
-    MVN_FLAGS+=("-DdryRun" "-DpushChanges=false")
+    MVN_FLAGS+=("-DdryRun")
 fi
 
 # Clean up local repo
@@ -203,23 +208,62 @@ fi
 # "${CMD[@]}" expands the array respecting spaces within arguments
 "${CMD[@]}"
 
+SCM_URL=$("${MVN}" help:evaluate -Dexpression=project.scm.developerConnection -q -DforceStdout "${MAVEN_ARGS[@]}")
+# Strip the scm:git: prefix if present
+SCM_URL="${SCM_URL#scm:git:}"
+
+# Find matching remote
+GIT_REMOTE=""
+while IFS=$'\t' read -r remote_name remote_url; do
+    if [[ "${remote_url}" == *"${SCM_URL}"* ]] || [[ "${SCM_URL}" == *"${remote_url}"* ]]; then
+        GIT_REMOTE="${remote_name}"
+        break
+    fi
+done < <(git remote -v | grep "(push)" | awk '{print $1"\t"$2}')
+
+if [ -z "${GIT_REMOTE}" ]; then
+    failNoHelp "Could not find a git remote matching SCM URL: ${SCM_URL}"
+fi
+
+# Get the current branch name
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Push changes to remote (skipped during dry-run or no-push)
+if ! ${DRY_RUN} && ! ${NO_PUSH}; then
+    if ${VERBOSE}; then
+        printf "Pushing to remote '%s' branch '%s' (matched from SCM URL: %s)\n" "${GIT_REMOTE}" "${CURRENT_BRANCH}" "${SCM_URL}"
+    fi
+
+    git push "${GIT_REMOTE}" "${CURRENT_BRANCH}" --follow-tags
+else
+    if ${DRY_RUN}; then
+        printf "${YELLOW}Dry run would execute:${CLEAR}\ngit push %s %s --follow-tags\n" "${GIT_REMOTE}" "${CURRENT_BRANCH}"
+    else
+        printf "${YELLOW}Skipping push (--no-push mode). To push manually, run:${CLEAR}\ngit push %s %s --follow-tags\n" "${GIT_REMOTE}" "${CURRENT_BRANCH}"
+    fi
+fi
+
 # GitHub Release Handling
 
-if command -v gh &>/dev/null; then
-    # Check for default repo quietly
-    if ! gh repo set-default --view &>/dev/null; then
-        echo ""
-        echo -e "${RED}No default repository has been set. You must use 'gh repo set-default' to set a default repository before executing the following commands.${CLEAR}"
-        echo ""
-        echo "gh release create --generate-notes ${START_TAG[*]} ${GH_RELEASE_TYPE} --verify-tag ${TAG_NAME}"
-    else
-        if ${DRY_RUN}; then
-            printf "${YELLOW}Dry run would execute:${CLEAR}\ngh release create --generate-notes %s %s --verify-tag %s\n" "${START_TAG[*]}" "${GH_RELEASE_TYPE}" "${TAG_NAME}"
+if ! ${NO_PUSH}; then
+    if command -v gh &>/dev/null; then
+        # Check for default repo quietly
+        if ! gh repo set-default --view &>/dev/null; then
+            echo ""
+            echo -e "${RED}No default repository has been set. You must use 'gh repo set-default' to set a default repository before executing the following commands.${CLEAR}"
+            echo ""
+            echo "gh release create --generate-notes ${START_TAG[*]} ${GH_RELEASE_TYPE} --verify-tag ${TAG_NAME}"
         else
-            gh release create --generate-notes "${START_TAG[@]}" "${GH_RELEASE_TYPE}" --verify-tag "${TAG_NAME}"
+            if ${DRY_RUN}; then
+                printf "${YELLOW}Dry run would execute:${CLEAR}\ngh release create --generate-notes %s %s --verify-tag %s\n" "${START_TAG[*]}" "${GH_RELEASE_TYPE}" "${TAG_NAME}"
+            else
+                gh release create --generate-notes "${START_TAG[@]}" "${GH_RELEASE_TYPE}" --verify-tag "${TAG_NAME}"
+            fi
         fi
+    else
+        echo ""
+        echo "The gh commands are not available. You must manually create a release for the GitHub tag ${TAG_NAME}."
     fi
 else
-    echo ""
-    echo "The gh commands are not available. You must manually create a release for the GitHub tag ${TAG_NAME}."
+    printf "${YELLOW}Skipping GitHub release creation (--no-push mode).${CLEAR}\n"
 fi

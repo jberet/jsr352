@@ -58,9 +58,9 @@
     </modules>
 
     <scm>
-        <connection>scm:git:https://github.com/jberet/jsr352.git</connection>
-        <url>scm:git:https://github.com/jberet/jsr352.git</url>
-        <developerConnection>scm:git:https://github.com/jberet/jsr352.git</developerConnection>
+        <connection>scm:git:git@github.com:jberet/jsr352.git</connection>
+        <url>https://github.com/jberet/jsr352.git</url>
+        <developerConnection>scm:git:git@github.com:jberet/jsr352.git</developerConnection>
       <tag>HEAD</tag>
   </scm>
     <issueManagement>
@@ -163,11 +163,12 @@
         <!-- maven-release-plugin configuration -->
         <autoVersionSubmodules>true</autoVersionSubmodules>
         <preparationGoals>clean install</preparationGoals>
-        <releaseProfiles>jboss-release</releaseProfiles>
+        <preparationProfiles>jboss-release</preparationProfiles>
+        <releaseProfiles>${preparationProfiles}</releaseProfiles>
         <signTag>true</signTag>
         <tagNameFormat>@{project.version}</tagNameFormat>
         <arguments>-DskipTests -DpushChanges=${pushChanges}</arguments>
-        <pushChanges>true</pushChanges>
+        <pushChanges>false</pushChanges>
         <!-- Use the local directory when using perform -->
         <localCheckout>true</localCheckout>
         <!-- Nexus release properties -->
@@ -702,17 +703,6 @@
                         <exclude>**/*.i18n.properties</exclude>
                     </excludes>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <configuration>
-                    <skipSource>true</skipSource>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
