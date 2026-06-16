@@ -4,7 +4,7 @@
     <parent>
         <artifactId>test-apps</artifactId>
         <groupId>org.jberet.test-apps</groupId>
-        <version>3.2.0.Final-SNAPSHOT</version>
+        <version>3.2.0.Beta2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
