@@ -52,11 +52,11 @@ jobs:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-ci') }}
     steps:
       - name: Checkout JBeret
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: jsr352
       - name: Checkout JBeret TCK Runner
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: jberet/jberet-tck-runner
           path: jberet-tck-runner
