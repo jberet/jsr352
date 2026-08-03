@@ -34,7 +34,7 @@
     <properties>
         <version.org.wildfly.testing.tools>1.0.0.Alpha4</version.org.wildfly.testing.tools>
         <!-- WildFly and Build Plugins -->
-        <version.org.wildfly.plugins.wildfly-maven-plugin>6.0.0.Final</version.org.wildfly.plugins.wildfly-maven-plugin>
+        <version.org.wildfly.plugins.wildfly-maven-plugin>6.0.1.Final</version.org.wildfly.plugins.wildfly-maven-plugin>
         <server.test.feature.pack.groupId>org.wildfly</server.test.feature.pack.groupId>
         <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId>
         <wildfly.channel.manifest.groupId>org.wildfly.channels</wildfly.channel.manifest.groupId>
