@@ -180,6 +180,7 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
         }
 
         batchContext.getJobContext().getJobRepository().updateStepExecution(stepExecution);
+        batchContext.getJobContext().getJobRepository().updateJobExecution(jobContext.getJobExecution(), false, false);
         batchContext.setTransientUserData(null);
 
         switch (batchContext.getBatchStatus()) {

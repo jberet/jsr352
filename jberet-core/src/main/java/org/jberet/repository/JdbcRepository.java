@@ -42,7 +42,9 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchUtil;
+import org.jboss.logging.Logger;
 
 public final class JdbcRepository extends AbstractPersistentRepository {
     //keys used in jberet.properties
@@ -111,6 +113,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private boolean isOracle;
     private int[] idIndexInOracle;
 
+    private static final Logger LOGGER = Logger.getLogger(JdbcRepository.class);
     public static JdbcRepository create(final Properties configProperties) {
         return new JdbcRepository(configProperties);
     }
@@ -315,17 +318,30 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         final Connection connection = getConnection();
         ResultSet rs = null;
         PreparedStatement preparedStatement = null;
-        int i = 0;
+//        int i = 0;
         try {
             preparedStatement = connection.prepareStatement(select);
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 final long executionId = rs.getLong(TableColumns.JOBEXECUTIONID);
                 final String batchStatus = rs.getString(TableColumns.BATCHSTATUS);
-                if (batchStatus.equals(BatchStatus.STARTED.toString()) || batchStatus.equals(BatchStatus.STOPPING.toString())) {
-                    JobExecutionImpl jobexec = getJobExecution(executionId);
-                    updateCrashedJobExecution(jobexec);
-                }                
+                final String exitStatus = rs.getString(TableColumns.EXITSTATUS);
+                JobExecutionImpl jobexec = getJobExecution(executionId);
+                getCachedJobExecutions(jobexec.getJobName(), true);
+                if ((batchStatus.equals(BatchStatus.STARTED.toString()) || batchStatus.equals(BatchStatus.STOPPING.toString())) && (exitStatus == null)) {
+                    LOGGER.debug("Found crashed jobs");
+                    LOGGER.debug(
+                        "Execution id: "+executionId+
+                        "Batch status: "+batchStatus+
+                        "Exit status " +exitStatus+
+                        "JobXml " +jobexec.getJobName()
+                    );
+                    LOGGER.debug("=============\n\n\n");
+                    LOGGER.debug("Attempting to correct it");
+                    //Aug18
+                    updateJobExecution(jobexec, true, true);
+                    //updateCrashedJobExecution(jobexec);
+                }
             }
         } catch (Exception e) {
             BatchLogger.LOGGER.debugf("Caught exception in findCrashedJobs %s",e.getMessage());

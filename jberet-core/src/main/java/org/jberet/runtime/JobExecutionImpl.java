@@ -298,6 +298,7 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
         synchronized (jobStopNotificationListeners) {
             if (stopRequested.compareAndSet(false, true)) {
                 setBatchStatus(BatchStatus.STOPPING);
+//                setExitStatus(exitStatus);
                 BatchLogger.LOGGER.stoppingJobExecution(id);
                 for (final JobStopNotificationListener l : jobStopNotificationListeners) {
                     l.stopRequested(id);
