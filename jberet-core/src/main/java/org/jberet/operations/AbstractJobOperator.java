@@ -444,6 +444,7 @@ public abstract class AbstractJobOperator implements JobOperator {
 
     private long startJobExecution(final JobInstanceImpl jobInstance, final Properties jobParameters, final JobExecutionImpl originalToRestart, final String user) throws JobStartException, JobSecurityException {
         final BatchEnvironment batchEnvironment = getBatchEnvironment();
+        String applicationName = batchEnvironment.getApplicationName();
         final JobRepository repository = getJobRepository();
         final JobExecutionImpl jobExecution = repository.createJobExecution(jobInstance, jobParameters);
         jobExecution.setUser(user);
