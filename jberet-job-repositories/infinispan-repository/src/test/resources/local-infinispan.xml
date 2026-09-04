@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright (c) 2026 Red Hat, Inc. and/or its affiliates.
+
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+
+SPDX-License-Identifier: EPL-2.0
+-->
+
+<!--
+Non-transactional, in-memory, single-JVM Infinispan configuration used by InfinispanRepositoryCheckpointTest.
+There is no <transport/>, so the caches are local and no external Infinispan server is needed.
+
+Entries are stored with the "application/x-java-serialized-object" media type so that a cache read returns a
+deserialized copy rather than the very instance that was put in. That makes the tests assert on what was really
+written to the cache instead of on an object they still hold a reference to.
+-->
+<infinispan xmlns="urn:infinispan:config:16.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:infinispan:config:16.0 https://infinispan.org/schemas/infinispan-config-16.0.xsd">
+
+    <cache-container name="jberet-test" default-cache="JOB_EXECUTION">
+
+        <serialization marshaller="org.infinispan.commons.marshall.JavaSerializationMarshaller">
+            <allow-list>
+                <!-- the execution objects and everything they reference (SerializableData, metrics, ...) -->
+                <regex>org\.jberet\..*</regex>
+                <regex>java\..*</regex>
+                <regex>jakarta\.batch\..*</regex>
+            </allow-list>
+        </serialization>
+
+        <local-cache name="JOB_INSTANCE">
+            <encoding media-type="application/x-java-serialized-object"/>
+        </local-cache>
+
+        <local-cache name="JOB_EXECUTION">
+            <encoding media-type="application/x-java-serialized-object"/>
+        </local-cache>
+
+        <local-cache name="STEP_EXECUTION">
+            <encoding media-type="application/x-java-serialized-object"/>
+        </local-cache>
+
+        <local-cache name="PARTITION_EXECUTION">
+            <encoding media-type="application/x-java-serialized-object"/>
+        </local-cache>
+
+        <local-cache name="seq"/>
+    </cache-container>
+</infinispan>

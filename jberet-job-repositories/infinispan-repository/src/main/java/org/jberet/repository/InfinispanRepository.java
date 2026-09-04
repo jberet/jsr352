@@ -24,6 +24,8 @@ import jakarta.batch.runtime.BatchStatus;
 import jakarta.batch.runtime.JobExecution;
 import jakarta.batch.runtime.JobInstance;
 import jakarta.batch.runtime.StepExecution;
+import jakarta.transaction.Status;
+import jakarta.transaction.TransactionManager;
 import org.infinispan.Cache;
 import org.infinispan.CacheStream;
 import org.infinispan.configuration.cache.Configuration;
@@ -50,6 +52,15 @@ public final class InfinispanRepository extends AbstractRepository {
     private Cache<Long, JobExecutionImpl> jobExecutionCache;
     private Cache<Long, StepExecutionImpl> stepExecutionCache;
     private Cache<String, PartitionExecutionImpl> partitionExecutionCache;
+
+    /**
+     * The {@link TransactionManager} shared by {@link #stepExecutionCache} and {@link #jobExecutionCache}, or
+     * {@code null} when those caches are not transactional (or are not backed by the same transaction manager).
+     * It is used to make the checkpoint update of the step execution and of the enclosing job execution atomic.
+     *
+     * @see #runAtomically(Runnable)
+     */
+    private TransactionManager transactionManager;
 
     private final EmbeddedCacheManager cacheManager;
 
@@ -206,6 +217,47 @@ public final class InfinispanRepository extends AbstractRepository {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return 1 if the execution data was saved; 0 if the saved copy of the step or partition execution is
+     *         already {@code STOPPING}, in which case nothing is written
+     */
+    @Override
+    public int savePersistentDataIfNotStopping(final JobExecution jobExecution,
+                                               final AbstractStepExecution stepOrPartitionExecution) {
+        //super.savePersistentData() serialize persistent data and checkpoint info to avoid further modification
+        super.savePersistentData(jobExecution, stepOrPartitionExecution);
+
+        if (stepOrPartitionExecution instanceof StepExecutionImpl) {
+            //stepExecution is for the main step, and should map to the STEP_EXECUTION cache
+            final StepExecutionImpl stepExecution = (StepExecutionImpl) stepOrPartitionExecution;
+            final StepExecutionImpl saved = stepExecutionCache.get(stepExecution.getStepExecutionId());
+            if (isStopping(saved)) {
+                return 0;
+            }
+            final JobExecutionImpl jobExecutionImpl = resolveJobExecution(jobExecution);
+            runAtomically(() -> {
+                stepExecutionCache.put(stepExecution.getStepExecutionId(), stepExecution);
+                if (jobExecutionImpl != null) {
+                    jobExecutionImpl.setLastUpdatedTime(System.currentTimeMillis());
+                    jobExecutionCache.put(jobExecutionImpl.getExecutionId(), jobExecutionImpl);
+                }
+            });
+            return 1;
+        }
+
+        //stepOrPartitionExecution is a partition execution, and should map to the PARTITION_EXECUTION cache
+        final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) stepOrPartitionExecution;
+        final String partitionExecutionId =
+                concatPartitionExecutionId(partitionExecution.getStepExecutionId(), partitionExecution.getPartitionId());
+        if (isStopping(partitionExecutionCache.get(partitionExecutionId))) {
+            return 0;
+        }
+        partitionExecutionCache.put(partitionExecutionId, partitionExecution);
+        return 1;
+    }
+
     @Override
     public void updateStepExecution(final StepExecution stepExecution) {
         stepExecutionCache.put(stepExecution.getStepExecutionId(), (StepExecutionImpl) stepExecution);
@@ -356,6 +408,104 @@ public final class InfinispanRepository extends AbstractRepository {
 
         partitionExecutionCache = cacheManager.getCache(TableColumns.PARTITION_EXECUTION, true);
         partitionExecutionCache.getAdvancedCache().withFlags(Flag.SKIP_REMOTE_LOOKUP, Flag.SKIP_CACHE_LOAD);
+
+        transactionManager = resolveSharedTransactionManager();
+    }
+
+    /**
+     * Returns the {@link TransactionManager} that both the step execution cache and the job execution cache are
+     * enlisted with, or {@code null} if they are non-transactional or use different transaction managers.
+     */
+    private TransactionManager resolveSharedTransactionManager() {
+        try {
+            final TransactionManager stepTm = stepExecutionCache.getAdvancedCache().getTransactionManager();
+            final TransactionManager jobTm = jobExecutionCache.getAdvancedCache().getTransactionManager();
+            return stepTm != null && stepTm == jobTm ? stepTm : null;
+        } catch (final Exception e) {
+            //a non-transactional cache is not required to expose a transaction manager at all
+            BatchLogger.LOGGER.tracef(e, "No shared transaction manager for caches %s and %s%n",
+                    TableColumns.STEP_EXECUTION, TableColumns.JOB_EXECUTION);
+            return null;
+        }
+    }
+
+    /**
+     * Runs {@code updates} inside a single JTA transaction when the step execution cache and the job execution
+     * cache share a {@link TransactionManager}; otherwise runs it directly.
+     * If this repository is already running inside a transaction, {@code updates} simply joins it and the caller
+     * decides when to commit.
+     */
+    private void runAtomically(final Runnable updates) {
+        if (transactionManager == null) {
+            updates.run();
+            return;
+        }
+        boolean startedHere = false;
+        try {
+            if (transactionManager.getStatus() == Status.STATUS_NO_TRANSACTION) {
+                transactionManager.begin();
+                startedHere = true;
+            }
+            updates.run();
+            if (startedHere) {
+                startedHere = false;
+                transactionManager.commit();
+            }
+        } catch (final Exception e) {
+            if (startedHere) {
+                try {
+                    transactionManager.rollback();
+                } catch (final Exception rollbackFailure) {
+                    e.addSuppressed(rollbackFailure);
+                }
+            }
+            throw BatchMessages.MESSAGES.failToRunQuery(e, "savePersistentDataIfNotStopping");
+        }
+    }
+
+    /**
+     * Returns the {@link JobExecutionImpl} to update the {@code lastUpdatedTime} on, preferring the live instance
+     * passed in by the runtime and falling back to the copy held in the cache.
+     */
+    private JobExecutionImpl resolveJobExecution(final JobExecution jobExecution) {
+        if (jobExecution instanceof JobExecutionImpl) {
+            return (JobExecutionImpl) jobExecution;
+        }
+        return jobExecution == null ? null : jobExecutionCache.get(jobExecution.getExecutionId());
+    }
+
+    /**
+     * Tells whether a previously saved step or partition execution has already been marked {@code STOPPING}, in
+     * which case a checkpoint must not overwrite it. A {@code null} argument means nothing has been saved yet,
+     * which is not a stopping condition: the caches are written with {@code put}, so the checkpoint is simply
+     * inserted.
+     */
+    private static boolean isStopping(final AbstractStepExecution savedExecution) {
+        return savedExecution != null && savedExecution.getBatchStatus() == BatchStatus.STOPPING;
+    }
+
+    /**
+     * Returns the cache holding the step executions, so that tests can assert on what was actually written to
+     * the cache rather than on the instance they passed in.
+     */
+    Cache<Long, StepExecutionImpl> getStepExecutionCache() {
+        return stepExecutionCache;
+    }
+
+    /**
+     * Returns the transaction manager that checkpoint writes are enlisted with, or {@code null} when the caches
+     * are not transactional. Used by tests to tell the two modes of {@link #runAtomically(Runnable)} apart.
+     */
+    TransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
+    /**
+     * Stops the cache manager created by this repository and releases its resources. Used by tests to tear down
+     * an embedded cache manager; a deployed repository lives for as long as its cache manager does.
+     */
+    void stopCacheManager() {
+        cacheManager.stop();
     }
 
     private long getNextIdFor(final String key) {
