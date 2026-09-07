@@ -10,6 +10,8 @@
 
 package org.jberet.repository;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -88,6 +90,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String INSERT_STEP_EXECUTION = "insert-step-execution";
     private static final String UPDATE_STEP_EXECUTION = "update-step-execution";
     private static final String UPDATE_STEP_EXECUTION_IF_NOT_STOPPING = "update-step-execution-if-not-stopping";
+    private static final String UPDATE_STEP_EXECUTION_AND_JOB_EXECUTION_LASTUPDATETIME = "update-step-execution-and-job-execution-lastupdatetime";
     private static final String STOP_STEP_EXECUTION = "stop-step-execution";
 
     private static final String FIND_ORIGINAL_STEP_EXECUTION = "find-original-step-execution";
@@ -457,7 +460,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
 
     @Override
     public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate, final boolean saveJobParameters) {
-        super.updateJobExecution(jobExecution, fullUpdate, saveJobParameters);
+         super.updateJobExecution(jobExecution, fullUpdate, saveJobParameters);
         final String update;
         if (fullUpdate) {
             if (saveJobParameters) {
@@ -712,8 +715,10 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     @Override
     public int savePersistentDataIfNotStopping(final JobExecution jobExecution, final AbstractStepExecution stepOrPartitionExecution) {
         if (stepOrPartitionExecution instanceof StepExecutionImpl) {
-            //stepExecution is for the main step, and should map to the STEP_EXECUTIOIN table
-            return updateStepExecution0(stepOrPartitionExecution, sqls.getProperty(UPDATE_STEP_EXECUTION_IF_NOT_STOPPING));
+            //stepExecution is for the main step, and should map to the STEP_EXECUTION table
+            return updateStepAndJobExecution0(stepOrPartitionExecution,
+                    sqls.getProperty(UPDATE_STEP_EXECUTION_AND_JOB_EXECUTION_LASTUPDATETIME),
+                    jobExecution.getExecutionId());
         } else {
             //stepExecutionId is for a partition execution, and should map to the PARTITION_EXECUTION table
             return updatePartitionExecution((PartitionExecutionImpl) stepOrPartitionExecution, sqls.getProperty(UPDATE_PARTITION_EXECUTION_IF_NOT_STOPPING));
@@ -898,6 +903,70 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             throw BatchMessages.MESSAGES.failToRunQuery(e, updateSql);
         } finally {
             close(connection, preparedStatement, null, null);
+        }
+    }
+
+    /**
+     * Updates the step execution and the parent job execution's {@code LASTUPDATEDTIME} in a single database
+     * connection.  The combined SQL property value contains two semicolon-separated statements:
+     * <ol>
+     *   <li>UPDATE STEP_EXECUTION … WHERE STEPEXECUTIONID=? AND BATCHSTATUS&lt;&gt;'STOPPING'</li>
+     *   <li>UPDATE JOB_EXECUTION SET LASTUPDATEDTIME=CURRENT_TIMESTAMP WHERE JOBEXECUTIONID=?</li>
+     * </ol>
+     * The job execution timestamp is only updated when the step execution row was actually written
+     * (i.e. the step was not in STOPPING state), keeping both rows consistent.
+     *
+     * @param stepExecution   the step execution to persist
+     * @param combinedSql     the two-statement SQL value loaded from the SQL properties file
+     * @param jobExecutionId  the ID of the enclosing job execution
+     * @return the number of rows affected by the step execution UPDATE (0 when the step is STOPPING)
+     */
+    private int updateStepAndJobExecution0(final StepExecution stepExecution,
+                                           final String combinedSql,
+                                           final long jobExecutionId) {
+        // The properties value is two SQL statements separated by "; " — split on the semicolon.
+        final String[] sqls = combinedSql.split(";\\s*", 2);
+        final String stepSql = sqls[0].trim();
+        final String jobSql  = sqls[1].trim();
+
+        final Connection connection = getConnection();
+        final StepExecutionImpl stepExecutionImpl = (StepExecutionImpl) stepExecution;
+        PreparedStatement stepStmt = null;
+        PreparedStatement jobStmt  = null;
+        try {
+            stepStmt = connection.prepareStatement(stepSql);
+            stepStmt.setTimestamp(1,  createTimestamp(stepExecution.getEndTime()));
+            stepStmt.setString(2,     stepExecution.getBatchStatus().name());
+            stepStmt.setString(3,     stepExecution.getExitStatus());
+            stepStmt.setString(4,     TableColumns.formatException(stepExecutionImpl.getException()));
+            stepStmt.setBytes(5,      stepExecutionImpl.getPersistentUserDataSerialized());
+            stepStmt.setLong(6,       stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
+            stepStmt.setLong(7,       stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
+            stepStmt.setLong(8,       stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
+            stepStmt.setLong(9,       stepExecutionImpl.getStepMetrics().get(Metric.MetricType.ROLLBACK_COUNT));
+            stepStmt.setLong(10,      stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_SKIP_COUNT));
+            stepStmt.setLong(11,      stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
+            stepStmt.setLong(12,      stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
+            stepStmt.setLong(13,      stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
+            stepStmt.setBytes(14,     stepExecutionImpl.getReaderCheckpointInfoSerialized());
+            stepStmt.setBytes(15,     stepExecutionImpl.getWriterCheckpointInfoSerialized());
+            stepStmt.setLong(16,      stepExecution.getStepExecutionId());
+
+            final int savedCount = stepStmt.executeUpdate();
+
+            // Only update LASTUPDATEDTIME when the step row was actually written.
+            // If savedCount == 0 the step was in STOPPING state and nothing was persisted.
+            if (savedCount > 0) {
+                jobStmt = connection.prepareStatement(jobSql);
+                jobStmt.setLong(1, jobExecutionId);
+                jobStmt.executeUpdate();
+            }
+
+            return savedCount;
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, combinedSql);
+        } finally {
+            close(connection, stepStmt, jobStmt, null);
         }
     }
 

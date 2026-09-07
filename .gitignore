@@ -31,3 +31,4 @@ derby.log
 server.lock
 target-index
 
+jberet-core/src/main/java/org/jberet/repository/JdbcRepository.java
