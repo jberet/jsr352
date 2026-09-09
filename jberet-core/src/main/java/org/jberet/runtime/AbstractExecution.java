@@ -10,6 +10,8 @@
 
 package org.jberet.runtime;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+
 import java.io.Serializable;
 import java.util.Date;
 import jakarta.batch.runtime.BatchStatus;
@@ -66,17 +68,22 @@ public abstract class AbstractExecution implements Cloneable, Serializable {
     }
 
     public void setBatchStatus(final BatchStatus batchStatus) {
+        LOGGER.debugf("###Inside %s.%s (called from an inheriting class with a call to super())",this.getClass().getName(),Thread.currentThread().getStackTrace()[1].getMethodName());
         this.batchStatus = batchStatus;
         switch (batchStatus) {
             case STARTED:
+                LOGGER.debugf("Setting batch status to STARTED");
                 startTime = System.currentTimeMillis();
                 break;
             case COMPLETED:
             case FAILED:
             case STOPPED:
                 endTime = System.currentTimeMillis();
+                LOGGER.debugf("Set endTime to NOW because batchStatus is %s",batchStatus);
                 break;
+
         }
+        LOGGER.debug("###Exiting the method");
     }
 
 }

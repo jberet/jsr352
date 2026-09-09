@@ -10,6 +10,7 @@
 
 package org.jberet.operations;
 
+import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
 
 import java.util.ArrayList;
@@ -201,11 +202,16 @@ public abstract class AbstractJobOperator implements JobOperator {
 
     @Override
     public List<Long> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+        LOGGER.debugf("###Inside %s.%s",this.getClass().getName(),methodName);
+        LOGGER.debugf("###Looking for job with the name: %s",jobName);
         if (jobName == null) {
             throw MESSAGES.noSuchJobException(null);
         }
         final JobRepository repository = getJobRepository();
         final List<Long> result = repository.getRunningExecutions(jobName);
+        LOGGER.debugf("###Found no of running executions to be: %s",result.size());
+        LOGGER.debugf("###And job exists to be:%s",repository.jobExists(jobName));
         if (result.size() == 0 && !repository.jobExists(jobName)) {
             throw MESSAGES.noSuchJobException(jobName);
         }
