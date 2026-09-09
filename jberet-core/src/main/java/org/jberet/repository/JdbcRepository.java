@@ -42,7 +42,9 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.spi.BatchEnvironment;
 import org.jberet.util.BatchUtil;
+import org.jboss.logging.Logger;
 
 public final class JdbcRepository extends AbstractPersistentRepository {
     //keys used in jberet.properties
@@ -88,6 +90,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String INSERT_STEP_EXECUTION = "insert-step-execution";
     private static final String UPDATE_STEP_EXECUTION = "update-step-execution";
     private static final String UPDATE_STEP_EXECUTION_IF_NOT_STOPPING = "update-step-execution-if-not-stopping";
+    private static final String UPDATE_CRASHED_JOB_EXECUTION_FIELDS = "update-crashed-job-execution-fields";
+
     private static final String STOP_STEP_EXECUTION = "stop-step-execution";
 
     private static final String FIND_ORIGINAL_STEP_EXECUTION = "find-original-step-execution";
@@ -109,6 +113,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private boolean isOracle;
     private int[] idIndexInOracle;
 
+    private static final Logger LOGGER = Logger.getLogger(JdbcRepository.class);
     public static JdbcRepository create(final Properties configProperties) {
         return new JdbcRepository(configProperties);
     }
@@ -253,6 +258,8 @@ public final class JdbcRepository extends AbstractPersistentRepository {
         try {
             countPartitionExecutionStatement = connection1.prepareStatement(countPartitionExecutions);
             rs = countPartitionExecutionStatement.executeQuery();
+            // At this point we are sure about the existence of tables, so check for crashed jobs
+            findCrashedJobs();
         } catch (final SQLException e) {
             final String ddlFile = getDDLLocation(databaseProductName);
             ddlResource = getClassLoader(true).getResourceAsStream(ddlFile);
@@ -303,6 +310,65 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             } catch (final Exception e) {
                 BatchLogger.LOGGER.failToClose(e, InputStream.class, ddlResource);
             }
+        }
+    }
+
+    private void findCrashedJobs() {
+        final String select = sqls.getProperty(SELECT_ALL_JOB_EXECUTIONS);
+        final Connection connection = getConnection();
+        ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+//        int i = 0;
+        try {
+            preparedStatement = connection.prepareStatement(select);
+            rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                final long executionId = rs.getLong(TableColumns.JOBEXECUTIONID);
+                final String batchStatus = rs.getString(TableColumns.BATCHSTATUS);
+                final String exitStatus = rs.getString(TableColumns.EXITSTATUS);
+                JobExecutionImpl jobexec = getJobExecution(executionId);
+                getCachedJobExecutions(jobexec.getJobName(), true);
+                if ((batchStatus.equals(BatchStatus.STARTED.toString()) || batchStatus.equals(BatchStatus.STOPPING.toString())) && (exitStatus == null)) {
+                    LOGGER.debug("Found crashed jobs");
+                    LOGGER.debug(
+                        "Execution id: "+executionId+
+                        "Batch status: "+batchStatus+
+                        "Exit status " +exitStatus+
+                        "JobXml " +jobexec.getJobName()
+                    );
+                    LOGGER.debug("=============\n\n\n");
+                    LOGGER.debug("Attempting to correct it");
+                    //Aug18
+                    updateJobExecution(jobexec, true, true);
+                    //updateCrashedJobExecution(jobexec);
+                }
+            }
+        } catch (Exception e) {
+            BatchLogger.LOGGER.debugf("Caught exception in findCrashedJobs %s",e.getMessage());
+        }
+    }
+
+    void updateCrashedJobExecution(final JobExecutionImpl jobExecution) {
+        jobExecution.setLastUpdatedTime(System.currentTimeMillis());
+        final String[] stopExecutionSqls = {
+                sqls.getProperty(UPDATE_CRASHED_JOB_EXECUTION_FIELDS),
+                sqls.getProperty(STOP_STEP_EXECUTION),
+                sqls.getProperty(STOP_PARTITION_EXECUTION)
+        };
+        final String jobExecutionIdString = String.valueOf(jobExecution.getExecutionId());
+        final Connection connection = getConnection();
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            for (String sql : stopExecutionSqls) {
+                stmt.addBatch(sql.replace("?", jobExecutionIdString));
+                BatchLogger.LOGGER.debugf("UPDATE JOB_EXECUTION SET BATCHSTATUS='STOPPED' WHERE JOBEXECUTIONID=%s",jobExecutionIdString);
+            }
+            stmt.executeBatch();
+        } catch (Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, Arrays.toString(stopExecutionSqls));
+        } finally {
+            close(connection, stmt, null, null);
         }
     }
 
