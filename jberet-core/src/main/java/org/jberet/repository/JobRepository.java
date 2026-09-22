@@ -99,6 +99,8 @@ public interface JobRepository {
      */
     List<Long> getRunningExecutions(final String jobName);
 
+    List<Long> getStoppingExecutions(final String jobName);
+
     /**
      * Removes JobExecutions based on the criteria specified in {@code jobExecutionSelector}.
      *

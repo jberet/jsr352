@@ -10,6 +10,7 @@
 
 package org.jberet.operations;
 
+import static org.jberet._private.BatchLogger.LOGGER;
 import static org.jberet._private.BatchMessages.MESSAGES;
 
 import java.util.ArrayList;
@@ -156,12 +157,18 @@ public abstract class AbstractJobOperator implements JobOperator {
             JobExecutionNotRunningException, JobSecurityException {
         final JobExecutionImpl jobExecution = getJobExecutionImpl(executionId);
         final BatchStatus s = jobExecution.getBatchStatus();
+        LOGGER.debug("\n*** In AbstractJobOperator. Stop called ***");
+        LOGGER.debugf("\n*** Batch Staus is: %s ***", s);
         if (s == BatchStatus.STOPPED || s == BatchStatus.FAILED || s == BatchStatus.ABANDONED ||
                 s == BatchStatus.COMPLETED) {
             throw MESSAGES.jobExecutionNotRunningException(executionId, s);
         } else if (s != BatchStatus.STOPPING) {
+            LOGGER.debug("\n*** Calling JobExecutionImpl ***");
             jobExecution.stop();
-            if (jobExecution.getStepExecutions().size() == 0) {
+            int noOfJobExecutions = jobExecution.getStepExecutions().size();
+            LOGGER.debugf("\n*** Number of Job executions: %s ***",noOfJobExecutions);
+            if (noOfJobExecutions == 0) {
+                LOGGER.debug("\n*** Calling stopExecution in jobrepository ***");
                 getJobRepository().stopJobExecution(jobExecution);
             }
         }
@@ -211,6 +218,16 @@ public abstract class AbstractJobOperator implements JobOperator {
         }
         return result;
     }
+
+        public List<Long> getStoppingExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
+        if (jobName == null) {
+            throw MESSAGES.noSuchJobException(null);
+        }
+        final JobRepository repository = getJobRepository();
+        final List<Long> result = repository.getStoppingExecutions(jobName);
+        return result;
+    }
+
 
     @Override
     public Properties getParameters(final long executionId) throws NoSuchJobExecutionException, JobSecurityException {

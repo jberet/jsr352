@@ -74,6 +74,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String SELECT_ALL_JOB_EXECUTIONS = "select-all-job-executions";
     private static final String SELECT_JOB_EXECUTIONS_BY_JOB_INSTANCE_ID = "select-job-executions-by-job-instance-id";
     private static final String SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME = "select-running-job-executions-by-job-name";
+    private static final String SELECT_STOPPING_JOB_EXECUTIONS_BY_JOB_NAME = "select-stopping-job-executions-by-job-name";
     private static final String SELECT_JOB_EXECUTIONS_BY_JOB_NAME = "select-job-executions-by-job-name";
     private static final String SELECT_JOB_EXECUTION = "select-job-execution";
     private static final String INSERT_JOB_EXECUTION = "insert-job-execution";
@@ -662,7 +663,13 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     @Override
     public List<Long> getRunningExecutions(final String jobName) {
         final String select = sqls.getProperty(SELECT_RUNNING_JOB_EXECUTIONS_BY_JOB_NAME);
-        return getJobExecutions0(select, jobName, true, null);
+        return getJobExecutions0(select, jobName, true, false, null);
+    }
+
+    @Override
+    public List<Long> getStoppingExecutions(final String jobName) {
+        final String select = sqls.getProperty(SELECT_STOPPING_JOB_EXECUTIONS_BY_JOB_NAME);
+        return getJobExecutions0(select, jobName, false, true, null);
     }
 
     /**
@@ -676,7 +683,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     @Override
     public List<Long> getJobExecutionsByJob(String jobName, Integer limit) {
         final String select = sqls.getProperty(SELECT_JOB_EXECUTIONS_BY_JOB_NAME);
-        return getJobExecutions0(select, jobName, false, limit);
+        return getJobExecutions0(select, jobName, false, false, limit);
     }
 
     @Override
@@ -1055,14 +1062,18 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     }
 
     private List<Long> getJobExecutions0(final String selectSql, final String jobName, final boolean runningExecutionsOnly,
-            final Integer limit) {
+            final boolean stoppingExecutionsOnly, final Integer limit) {
         final List<Long> result = new ArrayList<>();
         Connection connection = null;
         ResultSet rs = null;
         PreparedStatement preparedStatement = null;
         try {
             connection = getConnection();
-            preparedStatement = connection.prepareStatement(selectSql);
+            if (stoppingExecutionsOnly) {
+                preparedStatement = connection.prepareStatement(selectSql);
+            }else {
+                preparedStatement = connection.prepareStatement(selectSql);
+            }
             preparedStatement.setString(1, jobName);
             BatchLogger.LOGGER.debugf("Executing query to load job executions: %s", selectSql);
             rs = preparedStatement.executeQuery();
@@ -1085,7 +1096,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
             }
             BatchLogger.LOGGER.debugf("Number of job execution records read: %d", result.size());
         } catch (final Exception e) {
-            final List<Long> cachedExecutionIds = getCachedJobExecutions(jobName, runningExecutionsOnly);
+            final List<Long> cachedExecutionIds = getCachedJobExecutions(jobName, runningExecutionsOnly, stoppingExecutionsOnly);
             for (Long i : cachedExecutionIds) {
                 if (!result.contains(i)) {
                     result.add(i);

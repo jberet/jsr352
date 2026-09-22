@@ -270,6 +270,21 @@ public final class InMemoryRepository extends AbstractRepository {
         return result;
     }
 
+        @Override
+    public List<Long> getStoppingExecutions(final String jobName) {
+        final List<Long> result = new ArrayList<Long>();
+
+        for (final Map.Entry<Long, JobExecutionImpl> e : jobExecutions.entrySet()) {
+            if (e.getValue().getJobName().equals(jobName)) {
+                final BatchStatus s = e.getValue().getBatchStatus();
+                if (s == BatchStatus.STOPPING || s == BatchStatus.STOPPED) {
+                    result.add(e.getKey());
+                }
+            }
+        }
+        return result;
+    }
+
     /**
      * {@inheritDoc}
      */

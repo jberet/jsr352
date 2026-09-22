@@ -46,6 +46,7 @@ public final class BatchletRunner extends AbstractRunner<StepContextImpl> implem
             batchContext.setBatchStatus(BatchStatus.STOPPING);
             if (batchletObj != null) {
                 try {
+                    LOGGER.debug("\n*** In BatchletRUnner stopRequested() ***");
                     batchletObj.stop();
                 } catch (final Exception e) {
                     BatchLogger.LOGGER.failToStopJob(e, jobContext.getJobName(), batchContext.getStepName(), batchletObj);

@@ -10,6 +10,8 @@
 
 package org.jberet.runtime;
 
+import static org.jberet._private.BatchLogger.LOGGER;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.creation.ArtifactCreationContext;
 import org.jberet.job.model.Job;
+import org.jboss.logging.Logger;
 
 public final class JobExecutionImpl extends AbstractExecution implements JobExecution, Cloneable {
     private static final long serialVersionUID = 3706885354351337764L;
@@ -296,8 +299,10 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     public void stop() {
         synchronized (jobStopNotificationListeners) {
+            LOGGER.debug("\n*** In JobExecutionImpl stop() ***");
             if (stopRequested.compareAndSet(false, true)) {
                 setBatchStatus(BatchStatus.STOPPING);
+                LOGGER.debug("\n*** In JobExecutionImpl stop() ***");
                 BatchLogger.LOGGER.stoppingJobExecution(id);
                 for (final JobStopNotificationListener l : jobStopNotificationListeners) {
                     l.stopRequested(id);

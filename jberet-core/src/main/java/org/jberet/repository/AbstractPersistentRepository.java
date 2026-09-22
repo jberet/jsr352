@@ -184,18 +184,23 @@ public abstract class AbstractPersistentRepository extends AbstractRepository im
      * @param runningExecutionsOnly if true, only running executions are returned
      * @return list of job execution ids
      */
-    List<Long> getCachedJobExecutions(final String jobName, final boolean runningExecutionsOnly) {
+    List<Long> getCachedJobExecutions(final String jobName, final boolean runningExecutionsOnly, final boolean stoppingExecutionsOnly) {
         final List<Long> result = new ArrayList<Long>();
 
         for (final Map.Entry<Long, SoftReference<JobExecutionImpl, Long>> e : jobExecutions.entrySet()) {
             final JobExecutionImpl jobExecution = e.getValue().get();
             if (jobExecution != null) {
+                final BatchStatus s = jobExecution.getBatchStatus();
                 if (jobExecution.getJobName().equals(jobName)) {
                     if (runningExecutionsOnly) {
-                        final BatchStatus s = jobExecution.getBatchStatus();
                         if (s == BatchStatus.STARTING || s == BatchStatus.STARTED) {
                             result.add(e.getKey());
                         }
+                    else if (stoppingExecutionsOnly) {
+                        if (s == BatchStatus.STOPPING) {
+                            result.add(e.getKey());
+                        }
+                    }
                     } else {
                         result.add(e.getKey());
                     }

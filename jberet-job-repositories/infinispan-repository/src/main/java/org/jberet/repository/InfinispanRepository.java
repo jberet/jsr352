@@ -296,6 +296,20 @@ public final class InfinispanRepository extends AbstractRepository {
         return result;
     }
 
+        @Override
+    public List<Long> getStoppingExecutions(final String jobName) {
+        final List<Long> result = new ArrayList<Long>();
+
+        for (final Map.Entry<Long, JobExecutionImpl> e : jobExecutionCache.entrySet()) {
+            if (e.getValue().getJobName().equals(jobName)) {
+                final BatchStatus s = e.getValue().getBatchStatus();
+                if (s == BatchStatus.STOPPING) {
+                    result.add(e.getKey());
+                }
+            }
+        }
+        return result;
+    }
     /**
      * {@inheritDoc}
      */
