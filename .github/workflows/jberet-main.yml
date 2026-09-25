@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Set up JDKs
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           cache: 'maven'
@@ -74,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Set up JDKs
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           cache: 'maven'
@@ -115,7 +115,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Set up JDKs
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           cache: 'maven'
