@@ -460,7 +460,7 @@ public final class JdbcRepository extends AbstractPersistentRepository {
 
     @Override
     public void updateJobExecution(final JobExecutionImpl jobExecution, final boolean fullUpdate, final boolean saveJobParameters) {
-         super.updateJobExecution(jobExecution, fullUpdate, saveJobParameters);
+        super.updateJobExecution(jobExecution, fullUpdate, saveJobParameters);
         final String update;
         if (fullUpdate) {
             if (saveJobParameters) {
