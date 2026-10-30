@@ -31,13 +31,7 @@ final class ScriptBatchlet extends ScriptArtifactBase implements Batchlet {
     public String process() throws Exception {
         Object result = compiledScript == null ? engine.eval(scriptContent) : compiledScript.eval();
         if (engine instanceof Invocable) {
-            final Invocable invocable = (Invocable) engine;
-
-            try {
-                result = invocable.invokeFunction(getFunctionName("process"));
-            } catch (final NoSuchMethodException e) {
-                //ignore
-            }
+            result = invokeOptionalFunction((Invocable) engine, result, "process");
         }
 
         return result == null ? null : result.toString();
@@ -46,11 +40,7 @@ final class ScriptBatchlet extends ScriptArtifactBase implements Batchlet {
     @Override
     public void stop() throws Exception {
         if (engine instanceof Invocable) {
-            try {
-                ((Invocable) engine).invokeFunction(getFunctionName("stop"));
-            } catch (final NoSuchMethodException e) {
-                //ignore
-            }
+            invokeOptionalFunction((Invocable) engine, null, "stop");
         }
     }
 }
