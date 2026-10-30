@@ -164,7 +164,8 @@ public class ScriptingIT extends AbstractIT {
         startJobAndWait(testName);
         Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
         Assertions.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
-        Assertions.assertInstanceOf(NoSuchMethodException.class, stepExecution0.getException());
+        //the exception type is not checked, since a non-serializable exception (e.g., from JRuby)
+        //is replaced with a BatchRuntimeException that keeps its message
         Assertions.assertTrue(stepExecution0.getException().getMessage().contains("undefinedMethod"),
                 stepExecution0.getException().getMessage());
     }
