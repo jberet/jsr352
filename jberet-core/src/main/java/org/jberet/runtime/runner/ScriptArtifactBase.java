@@ -66,11 +66,21 @@ abstract class ScriptArtifactBase {
     void setEngineScopeAttributes() {
         final ScriptContext scriptContext = this.engine.getContext();
         try {
-            scriptContext.setAttribute("jobContext", stepContext.getJobContext(), ScriptContext.ENGINE_SCOPE);
-            scriptContext.setAttribute("stepContext", stepContext, ScriptContext.ENGINE_SCOPE);
-            scriptContext.setAttribute("batchProperties", Properties.toJavaUtilProperties(artifactProperties), ScriptContext.ENGINE_SCOPE);
+            setEngineScopeAttribute(scriptContext, "jobContext", stepContext.getJobContext());
+            setEngineScopeAttribute(scriptContext, "stepContext", stepContext);
+            setEngineScopeAttribute(scriptContext, "batchProperties", Properties.toJavaUtilProperties(artifactProperties));
         } catch (final Exception e) {
             BatchLogger.LOGGER.failToSetAttributesToScriptContext(e, engine.toString(), script.getType());
+        }
+    }
+
+    private void setEngineScopeAttribute(final ScriptContext scriptContext, final String name, final Object value) {
+        scriptContext.setAttribute(name, value, ScriptContext.ENGINE_SCOPE);
+
+        //by default, JRuby exposes the attribute as a top-level local variable, which is not visible
+        //inside Ruby methods, so also expose it as a global variable ($jobContext, etc.)
+        if (engine.getClass().getSimpleName().indexOf("JRuby") > -1) {
+            scriptContext.setAttribute("$" + name, value, ScriptContext.ENGINE_SCOPE);
         }
     }
 
