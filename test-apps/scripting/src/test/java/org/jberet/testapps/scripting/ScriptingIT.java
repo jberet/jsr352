@@ -19,7 +19,6 @@ import java.nio.file.StandardCopyOption;
 import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -63,13 +62,11 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void batchletRubySrc() throws Exception {
-        Assumptions.assumeTrue(Runtime.version().feature() <= 11);
         test0("batchletRubySrc");
     }
 
     @Test
     public void batchletRubyInline() throws Exception {
-        Assumptions.assumeTrue(Runtime.version().feature() <= 11);
         test0("batchletRubyInline");
     }
 
@@ -122,7 +119,6 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void chunkRuby() throws Exception {
-        Assumptions.assumeTrue(Runtime.version().feature() <= 11);
         test0("chunkRuby");
     }
 
