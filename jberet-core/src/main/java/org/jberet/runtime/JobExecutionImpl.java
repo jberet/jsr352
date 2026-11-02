@@ -10,8 +10,6 @@
 
 package org.jberet.runtime;
 
-import static org.jberet._private.BatchLogger.LOGGER;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -144,10 +142,8 @@ public final class JobExecutionImpl extends AbstractExecution implements JobExec
 
     @Override
     public void setBatchStatus(final BatchStatus batchStatus) {
-        LOGGER.debugf("###Inside %s.%s",this.getClass().getName(),Thread.currentThread().getStackTrace()[1].getMethodName());
         super.setBatchStatus(batchStatus);
         lastUpdatedTime = System.currentTimeMillis();
-        LOGGER.debug("Set the 'lastUpdatedTime'\n###Exiting the method");
     }
 
     @Override

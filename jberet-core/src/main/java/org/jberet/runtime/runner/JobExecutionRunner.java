@@ -10,8 +10,6 @@
 
 package org.jberet.runtime.runner;
 
-import static org.jberet._private.BatchLogger.LOGGER;
-
 import java.util.List;
 import jakarta.batch.api.listener.JobListener;
 import jakarta.batch.runtime.BatchStatus;
@@ -42,14 +40,9 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
     @Override
     public void run() {
         final JobExecutionImpl jobExecution = batchContext.getJobExecution();
-
-        LOGGER.debugf("###JobExecutionRunner.run() method called for execution id %s",batchContext.getExecutionId());
-        LOGGER.debugf("Current state of batchContext is %s", batchContext.toString());
         // the job may be stopped right after starting
         if (jobExecution.getBatchStatus() != BatchStatus.STOPPING) {
-            LOGGER.debugf("The batch status is not STOPPING, so I will attempt to set its status to STARTED");
             jobExecution.setBatchStatus(BatchStatus.STARTED);
-            LOGGER.debug("Now attempting to persist the job execution");
             batchContext.getJobRepository().updateJobExecution(jobExecution, false, false);
 
             JobListener[] jobListeners = null;
@@ -58,10 +51,8 @@ public final class JobExecutionRunner extends CompositeExecutionRunner<JobContex
             try {
                 jobListeners = createJobListeners();
                 for (; i < jobListeners.length; i++) {
-                    LOGGER.debug("Executing job listeners");
                     jobListeners[i].beforeJob();
                 }
-                LOGGER.debugf("Job execution restart position is %s",jobExecution.getRestartPosition());
                 runFromHeadOrRestartPoint(jobExecution.getRestartPosition());
 
                 if (jobExecution.isStopRequested()) {

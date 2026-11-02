@@ -10,8 +10,6 @@
 
 package org.jberet.runtime.runner;
 
-import static org.jberet._private.BatchLogger.LOGGER;
-
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import jakarta.batch.api.Decider;
@@ -87,7 +85,6 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
             }
         } else {
             // the head of the composite job element is the first non-abstract element (step, flow, or split)
-            LOGGER.debugf("The restart position is %s therefore starting from the head",restartPoint);
             for (final JobElement e : getJobElements()) {
                 if (e instanceof Step) {
                     final Step step = (Step) e;
@@ -162,8 +159,6 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
     }
 
     protected void runStep(final Step step) {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        LOGGER.debugf("###Inside %s.%s",this.getClass().getName(),methodName);
         final StepContextImpl stepContext = new StepContextImpl(step,
                 AbstractContext.addToContextArray(batchContext.getOuterContexts(), batchContext));
         final StepExecutionRunner stepExecutionRunner = new StepExecutionRunner(stepContext, this);
@@ -173,7 +168,6 @@ public abstract class CompositeExecutionRunner<C extends AbstractContext> extend
         }
 
         stepExecutionRunner.run();
-        LOGGER.debugf("###Exiting %s.%s",this.getClass().getName(),methodName);
     }
 
     protected void runDecision(final Decision decision, final StepExecution... precedingStepExecutions) {
