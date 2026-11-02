@@ -201,6 +201,7 @@ public abstract class AbstractJobOperator implements JobOperator {
 
     @Override
     public List<Long> getRunningExecutions(final String jobName) throws NoSuchJobException, JobSecurityException {
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         if (jobName == null) {
             throw MESSAGES.noSuchJobException(null);
         }

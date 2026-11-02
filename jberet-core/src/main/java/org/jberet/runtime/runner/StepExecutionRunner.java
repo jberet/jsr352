@@ -86,6 +86,10 @@ public final class StepExecutionRunner extends AbstractRunner<StepContextImpl> i
 
     @Override
     public void run() {
+        String threadName = Thread.currentThread().getName();
+        LOGGER.debugf("&&&Started a new thread %s",threadName);
+        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+        LOGGER.debugf("###Inside %s.%s",this.getClass().getName(),methodName);
         final Boolean allowStartIfComplete = batchContext.getAllowStartIfComplete();
         if (allowStartIfComplete != Boolean.FALSE) {
             boolean enterBeforeStep = false;

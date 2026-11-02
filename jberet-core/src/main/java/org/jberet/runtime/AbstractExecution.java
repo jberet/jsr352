@@ -76,6 +76,7 @@ public abstract class AbstractExecution implements Cloneable, Serializable {
             case STOPPED:
                 endTime = System.currentTimeMillis();
                 break;
+
         }
     }
 
