@@ -10,13 +10,17 @@
 
 package org.jberet.repository;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import jakarta.batch.runtime.JobExecution;
 import jakarta.batch.runtime.JobInstance;
 import jakarta.batch.runtime.StepExecution;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.job.model.Job;
 import org.jberet.runtime.AbstractStepExecution;
 import org.jberet.runtime.JobExecutionImpl;
@@ -131,4 +135,73 @@ public interface JobRepository {
      * @since 1.3.8.Final
      */
     int savePersistentDataIfNotStopping(JobExecution jobExecution, AbstractStepExecution stepOrPartitionExecution);
+
+    /**
+     * Counts job executions of {@code jobName} in {@code STARTED} or {@code STOPPING} whose
+     * effective last-updated time is strictly before {@code notUpdatedSince}. The effective
+     * last-updated time is the last-updated time, falling back to the start time and then the
+     * create time, so an execution that died before its first progress update is still counted.
+     * <p>
+     * This method is {@code default} and throws, so that existing third-party implementations of
+     * this interface keep compiling and linking. Implementations that can support the
+     * administrative operations on {@link org.jberet.operations.ExtendedJobOperator} override it.
+     *
+     * @param jobName         the job name; must not be {@code null}
+     * @param notUpdatedSince the exclusive upper bound on the effective last-updated time,
+     *                        computed from the caller's clock
+     *
+     * @return the number of matching job executions
+     *
+     * @throws UnsupportedOperationException if this repository cannot support the query
+     * @since 2.2.0
+     */
+    default long countStaleExecutions(String jobName, Date notUpdatedSince) {
+        throw BatchMessages.MESSAGES.adminOperationNotSupported(getClass().getName());
+    }
+
+    /**
+     * Returns up to {@code count} job execution ids, skipping the first {@code start}, ordered by
+     * ascending execution id, matching the same predicate as
+     * {@link #countStaleExecutions(String, Date)}.
+     *
+     * @param jobName         the job name; must not be {@code null}
+     * @param notUpdatedSince the exclusive upper bound on the effective last-updated time
+     * @param start           zero-based offset of the first id to return; must be {@code >= 0}
+     * @param count           maximum number of ids to return; must be {@code > 0}
+     *
+     * @return the matching execution ids in ascending order; never {@code null}, possibly empty
+     *
+     * @throws UnsupportedOperationException if this repository cannot support the query
+     * @since 2.2.0
+     */
+    default List<Long> findStaleExecutionIds(String jobName, Date notUpdatedSince,
+                                             int start, int count) {
+        throw BatchMessages.MESSAGES.adminOperationNotSupported(getClass().getName());
+    }
+
+    /**
+     * Fails the given executions and cascades to their non-terminal step and partition executions
+     * in a single transaction.
+     * <p>
+     * Implementations must be all-or-nothing: either every eligible execution in
+     * {@code executionIds} is transitioned, or none is. Executions that are not eligible are
+     * reported through the returned map rather than aborting the operation.
+     *
+     * @param executionIds ids to attempt, already de-duplicated and capped by the caller
+     * @param jobName      if non-null, an execution not belonging to this job yields
+     *                     {@link FailOutcome.Kind#NOT_IN_SCOPE}
+     * @param exitStatus   exit status to record on everything changed
+     * @param now          timestamp for end time and last-updated time, from the caller's clock
+     *
+     * @return one outcome per requested id; never {@code null}
+     *
+     * @throws jakarta.batch.operations.BatchRuntimeException if the transaction could not be
+     *         committed, in which case nothing was changed
+     * @throws UnsupportedOperationException if this repository cannot support the operation
+     * @since 2.2.0
+     */
+    default Map<Long, FailOutcome> failJobExecutions(Collection<Long> executionIds, String jobName,
+                                                     String exitStatus, Date now) {
+        throw BatchMessages.MESSAGES.adminOperationNotSupported(getClass().getName());
+    }
 }

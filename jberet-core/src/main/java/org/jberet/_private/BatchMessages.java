@@ -5,6 +5,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Member;
+import java.util.Collection;
 import java.util.List;
 import javax.xml.stream.Location;
 
@@ -221,4 +222,37 @@ public interface BatchMessages {
 
     @Message(id = 661, value = "Unable to make %s accessible: %s")
     InaccessibleObjectException unableToMakeFieldorMethodAccessible(String objType, AccessibleObject obj);
+
+    @Message(id = 662, value = "Invalid number of minutes: %s. It must be greater than or equal to 0.")
+    IllegalArgumentException invalidStaleMinutes(int minutes);
+
+    @Message(id = 663, value = "Invalid pagination: start=%s, count=%s. start must be greater than or equal to 0, and count must be greater than 0.")
+    IllegalArgumentException invalidPagination(int start, int count);
+
+    @Message(id = 664, value = "Too many job executions to fail in one operation: %s. The maximum is %s.")
+    IllegalArgumentException tooManyExecutionsToFail(int requested, int maxBatchSize);
+
+    @Message(id = 665, value = "Job repository %s does not support this administrative operation.")
+    UnsupportedOperationException adminOperationNotSupported(String jobRepositoryClassName);
+
+    @Message(id = 666, value = "Failed to transition job executions %s to FAILED; the transaction was rolled back and no executions were changed.")
+    BatchRuntimeException failToFailJobExecutions(@Cause Throwable cause, Collection<Long> executionIds);
+
+    @Message(id = Message.NONE, value = "Invalid maximum batch size: %s. It must be greater than 0.")
+    IllegalArgumentException invalidMaxBatchSize(int maxBatchSize);
+
+    @Message(id = Message.NONE, value = "Job execution %s does not exist")
+    String skipReasonNotFound(long executionId);
+
+    @Message(id = Message.NONE, value = "Job execution %s belongs to another job")
+    String skipReasonNotInScope(long executionId);
+
+    @Message(id = Message.NONE, value = "Job execution %s is in %s state")
+    String skipReasonInvalidBatchStatus(long executionId, BatchStatus observedStatus);
+
+    @Message(id = Message.NONE, value = "Job execution %s is still running in this JVM")
+    String skipReasonRunningLocally(long executionId);
+
+    @Message(id = Message.NONE, value = "Job execution %s changed state concurrently")
+    String skipReasonConcurrentlyModified(long executionId);
 }

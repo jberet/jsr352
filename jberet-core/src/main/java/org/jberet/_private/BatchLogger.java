@@ -11,6 +11,7 @@
 package org.jberet._private;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.List;
 import jakarta.batch.runtime.BatchStatus;
 
@@ -162,4 +163,16 @@ public interface BatchLogger extends BasicLogger {
     @Message(id = 34, value = "The number of job executions read from the job repository is limited to %d.")
     @LogMessage(level = Logger.Level.DEBUG)
     void jobExecutionRecordsLimited(Integer limit);
+
+    @Message(id = 35, value = "Administratively failed job executions %s with exit status %s, requested by user %s; %d execution(s) were skipped.")
+    @LogMessage(level = Logger.Level.INFO)
+    void failedExecutionsAdministratively(List<Long> failedExecutionIds, String exitStatus, String user, int skippedCount);
+
+    @Message(id = 36, value = "Skipped job execution %s: it is still running in this JVM.")
+    @LogMessage(level = Logger.Level.WARN)
+    void skippedLocallyRunningExecution(long jobExecutionId);
+
+    @Message(id = 37, value = "Failed to transition job executions %s to FAILED on behalf of user %s; the transaction was rolled back and no executions were changed.")
+    @LogMessage(level = Logger.Level.ERROR)
+    void failJobExecutionsTransactionFailed(@Cause Throwable cause, Collection<Long> requestedExecutionIds, String user);
 }

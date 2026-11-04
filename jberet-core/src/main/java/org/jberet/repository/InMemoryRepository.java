@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -288,5 +289,52 @@ public final class InMemoryRepository extends AbstractRepository {
             stream = stream.limit(limit);
         }
         return stream.collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Everything this repository knows lives in one JVM, so the count is exact as of the moment it
+     * is taken.
+     */
+    @Override
+    public long countStaleExecutions(final String jobName, final Date notUpdatedSince) {
+        return InMemoryAdminOperations.countStaleExecutions(jobExecutions.values(), jobName, notUpdatedSince);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Long> findStaleExecutionIds(final String jobName, final Date notUpdatedSince,
+                                            final int start, final int count) {
+        return InMemoryAdminOperations.findStaleExecutionIds(jobExecutions.values(), jobName,
+                notUpdatedSince, start, count);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The write phase is serialised on this repository instance, which is the atomicity a
+     * single-JVM map-backed store can offer. There is no rollback: under the lock, every change
+     * that is attempted succeeds.
+     */
+    @Override
+    public Map<Long, FailOutcome> failJobExecutions(final Collection<Long> executionIds,
+                                                    final String jobName, final String exitStatus,
+                                                    final Date now) {
+        return failJobExecutions0(executionIds, jobName, exitStatus, now, null);
+    }
+
+    /**
+     * Test seam for {@link #failJobExecutions(Collection, String, String, Date)}: {@code afterRead}
+     * runs between the classification pass and the guarded write pass, which is the window a
+     * concurrent change has to be detected in.
+     */
+    Map<Long, FailOutcome> failJobExecutions0(final Collection<Long> executionIds, final String jobName,
+                                              final String exitStatus, final Date now,
+                                              final Runnable afterRead) {
+        return InMemoryAdminOperations.failJobExecutions(this, jobExecutions::get, executionIds,
+                jobName, exitStatus, now, afterRead);
     }
 }

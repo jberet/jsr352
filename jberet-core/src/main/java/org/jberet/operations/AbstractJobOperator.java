@@ -14,7 +14,11 @@ import static org.jberet._private.BatchMessages.MESSAGES;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import jakarta.transaction.InvalidTransactionException;
@@ -41,7 +45,9 @@ import org.jberet._private.BatchLogger;
 import org.jberet.creation.ArchiveXmlLoader;
 import org.jberet.creation.ArtifactFactoryWrapper;
 import org.jberet.job.model.Job;
+import org.jberet.operations.FailExecutionsResult.SkippedExecution;
 import org.jberet.repository.ApplicationAndJobName;
+import org.jberet.repository.FailOutcome;
 import org.jberet.repository.JobRepository;
 import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
@@ -57,7 +63,7 @@ import org.jberet.spi.PropertyKey;
  * @author SPDX-License-Identifier: EPL-2.0
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-public abstract class AbstractJobOperator implements JobOperator {
+public abstract class AbstractJobOperator implements ExtendedJobOperator {
 
     /**
      * Returns the batch environment that should be used for this JobOperator. Implementations should never return
@@ -210,6 +216,164 @@ public abstract class AbstractJobOperator implements JobOperator {
             throw MESSAGES.noSuchJobException(jobName);
         }
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StaleExecutionsPage listExecutionsNotUpdatedInMinutes(final String jobName, final int minutes,
+                                                                 final int start, final int count)
+            throws NoSuchJobException, JobSecurityException {
+        if (jobName == null) {
+            throw MESSAGES.noSuchJobException(null);
+        }
+        if (minutes < 0) {
+            throw MESSAGES.invalidStaleMinutes(minutes);
+        }
+        if (start < 0 || count <= 0) {
+            throw MESSAGES.invalidPagination(start, count);
+        }
+
+        final JobRepository repository = getJobRepository();
+        //the cut-off comes from this JVM's clock because that is the clock lastUpdatedTime is written from
+        final Date notUpdatedSince = new Date(System.currentTimeMillis() - minutes * 60_000L);
+
+        final long total = repository.countStaleExecutions(jobName, notUpdatedSince);
+        final List<Long> ids = total == 0 ? Collections.<Long>emptyList()
+                : repository.findStaleExecutionIds(jobName, notUpdatedSince, start, count);
+
+        if (total == 0 && ids.isEmpty() && !repository.jobExists(jobName)) {
+            //same contract as getRunningExecutions(): an unknown job name is an error, not an empty page
+            throw MESSAGES.noSuchJobException(jobName);
+        }
+        BatchLogger.LOGGER.debugf(
+                "Listed stale executions of job %s not updated in %s minutes: start=%s, count=%s, returned=%s, total=%s",
+                jobName, minutes, start, count, ids.size(), total);
+        return new StaleExecutionsPage(ids, total, start, ids.size());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FailExecutionsResult failJobExecutions(final List<Long> executionIds) throws JobSecurityException {
+        return failJobExecutions(executionIds, FailOptions.defaults());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FailExecutionsResult failJobExecutions(final List<Long> executionIds, final FailOptions options)
+            throws JobSecurityException {
+        if (executionIds == null) {
+            throw MESSAGES.nullVar("executionIds");
+        }
+        final FailOptions opts = options == null ? FailOptions.defaults() : options;
+
+        // 1. normalise: preserve caller order, collapse duplicates, enforce the cap
+        final LinkedHashSet<Long> requested = new LinkedHashSet<Long>(executionIds);
+        requested.remove(null);
+        if (requested.size() > opts.getMaxBatchSize()) {
+            throw MESSAGES.tooManyExecutionsToFail(requested.size(), opts.getMaxBatchSize());
+        }
+        if (requested.isEmpty()) {
+            return FailExecutionsResult.empty();
+        }
+
+        final JobRepository repository = getJobRepository();
+        final List<SkippedExecution> skipped = new ArrayList<SkippedExecution>();
+        final List<Long> candidates = new ArrayList<Long>(requested.size());
+
+        // 2. pre-screen for executions alive in THIS JVM.
+        for (final Long id : requested) {
+            if (opts.isSkipLocallyRunning() && isRunningLocally(repository, id)) {
+                skipped.add(SkippedExecution.runningLocally(id));
+                BatchLogger.LOGGER.skippedLocallyRunningExecution(id);
+            } else {
+                candidates.add(id);
+            }
+        }
+        if (candidates.isEmpty()) {
+            return new FailExecutionsResult(Collections.<Long>emptyList(), skipped);
+        }
+
+        // 3. the single transaction lives entirely inside the repository
+        final Map<Long, FailOutcome> outcomes;
+        try {
+            outcomes = repository.failJobExecutions(candidates, scopeJobName(), opts.getExitStatus(), new Date());
+        } catch (final UnsupportedOperationException e) {
+            //a repository that cannot do this at all is a configuration problem, not a transaction failure
+            throw e;
+        } catch (final RuntimeException e) {
+            BatchLogger.LOGGER.failJobExecutionsTransactionFailed(e, candidates, opts.getUser());
+            throw new FailJobExecutionsException(candidates, e);
+        }
+
+        // 4. translate outcomes into the caller-facing result
+        final List<Long> failed = new ArrayList<Long>();
+        for (final Long id : candidates) {
+            final FailOutcome outcome = FailOutcome.of(outcomes, id);
+            switch (outcome.kind()) {
+                case FAILED:
+                    failed.add(id);
+                    break;
+                case NOT_IN_SCOPE:
+                    skipped.add(SkippedExecution.notInScope(id));
+                    break;
+                case INVALID_STATUS:
+                    skipped.add(SkippedExecution.invalidStatus(id, outcome.observedStatus()));
+                    break;
+                case CONCURRENTLY_MODIFIED:
+                    skipped.add(SkippedExecution.concurrentlyModified(id, outcome.observedStatus()));
+                    break;
+                case NOT_FOUND:
+                default:
+                    skipped.add(SkippedExecution.notFound(id));
+                    break;
+            }
+        }
+        BatchLogger.LOGGER.failedExecutionsAdministratively(failed, opts.getExitStatus(), opts.getUser(),
+                skipped.size());
+        return new FailExecutionsResult(failed, skipped);
+    }
+
+    /**
+     * Returns the job name this operator is scoped to, limiting which executions
+     * {@link #failJobExecutions(List, FailOptions)} may touch.
+     * <p>
+     * In core this is {@code null}, meaning no job-name filter. It is the extension point a
+     * container uses to confine an administrative call to the job named in its management address,
+     * so that a caller can never fail an execution belonging to a different job.
+     *
+     * @return the job name to filter on, or {@code null} for an unscoped operator
+     *
+     * @since 3.2.1
+     */
+    protected String scopeJobName() {
+        return null;
+    }
+
+    /**
+     * Applies the same liveness heuristic {@link #restart(long, Properties)} uses: a job instance
+     * still holding its unsubstituted job model is one whose runtime is live in this JVM.
+     * <p>
+     * This detects liveness in the current JVM only. An execution running on another node sharing
+     * the job repository is indistinguishable from a crashed one from here.
+     *
+     * @param repository  the job repository
+     * @param executionId the job execution id
+     *
+     * @return true when the execution is detectably running in this JVM
+     */
+    private boolean isRunningLocally(final JobRepository repository, final long executionId) {
+        final JobExecution jobExecution = repository.getJobExecution(executionId);
+        if (!(jobExecution instanceof JobExecutionImpl)) {
+            return false;
+        }
+        final JobInstanceImpl jobInstance = ((JobExecutionImpl) jobExecution).getJobInstance();
+        return jobInstance != null && jobInstance.getUnsubstitutedJob() != null;
     }
 
     @Override
