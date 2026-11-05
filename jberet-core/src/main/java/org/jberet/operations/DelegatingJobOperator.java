@@ -28,6 +28,7 @@ import jakarta.batch.runtime.JobExecution;
 import jakarta.batch.runtime.JobInstance;
 import jakarta.batch.runtime.StepExecution;
 
+import org.jberet._private.BatchMessages;
 import org.jberet.spi.JobOperatorContext;
 
 /**
@@ -36,7 +37,7 @@ import org.jberet.spi.JobOperatorContext;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-public class DelegatingJobOperator implements JobOperator {
+public class DelegatingJobOperator implements ExtendedJobOperator {
 
     @Override
     public Set<String> getJobNames() throws JobSecurityException {
@@ -104,6 +105,33 @@ public class DelegatingJobOperator implements JobOperator {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StaleExecutionsPage listExecutionsNotUpdatedInMinutes(final String jobName, final int minutes,
+                                                                 final int start, final int count)
+            throws NoSuchJobException, JobSecurityException {
+        return getExtendedDelegate().listExecutionsNotUpdatedInMinutes(jobName, minutes, start, count);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FailExecutionsResult failJobExecutions(final List<Long> executionIds) throws JobSecurityException {
+        return getExtendedDelegate().failJobExecutions(executionIds);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FailExecutionsResult failJobExecutions(final List<Long> executionIds, final FailOptions options)
+            throws JobSecurityException {
+        return getExtendedDelegate().failJobExecutions(executionIds, options);
+    }
+
+    /**
      * Returns the delegate {@link JobOperator}. This cannot return {@code null}.
      *
      * @return the delegate job operator
@@ -111,5 +139,27 @@ public class DelegatingJobOperator implements JobOperator {
     @SuppressWarnings("WeakerAccess")
     public JobOperator getDelegate() {
         return JobOperatorContext.getJobOperatorContext().getJobOperator();
+    }
+
+    /**
+     * Returns the delegate as an {@link ExtendedJobOperator}.
+     * <p>
+     * This class is the operator {@code BatchRuntime.getJobOperator()} hands out, so it has to
+     * implement {@code ExtendedJobOperator} for the documented
+     * {@code (ExtendedJobOperator) BatchRuntime.getJobOperator()} cast to work at all. The delegate
+     * behind it is chosen by the environment, and nothing guarantees that a custom one supports
+     * the administrative operations, so that is checked here rather than assumed.
+     *
+     * @return the delegate, as an extended job operator
+     *
+     * @throws UnsupportedOperationException if the delegate is not an {@code ExtendedJobOperator}
+     * @since 2.2.0
+     */
+    protected ExtendedJobOperator getExtendedDelegate() {
+        final JobOperator delegate = getDelegate();
+        if (delegate instanceof ExtendedJobOperator) {
+            return (ExtendedJobOperator) delegate;
+        }
+        throw BatchMessages.MESSAGES.adminOperationNotSupported(delegate.getClass().getName());
     }
 }

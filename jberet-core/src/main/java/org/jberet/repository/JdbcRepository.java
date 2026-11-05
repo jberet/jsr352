@@ -21,8 +21,12 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +39,9 @@ import jakarta.batch.runtime.JobExecution;
 import jakarta.batch.runtime.JobInstance;
 import jakarta.batch.runtime.Metric;
 import jakarta.batch.runtime.StepExecution;
+import jakarta.transaction.Status;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionManager;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.runtime.AbstractStepExecution;
@@ -42,6 +49,7 @@ import org.jberet.runtime.JobExecutionImpl;
 import org.jberet.runtime.JobInstanceImpl;
 import org.jberet.runtime.PartitionExecutionImpl;
 import org.jberet.runtime.StepExecutionImpl;
+import org.jberet.tx.LocalTransactionManager;
 import org.jberet.util.BatchUtil;
 
 public final class JdbcRepository extends AbstractPersistentRepository {
@@ -101,6 +109,20 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private static final String UPDATE_PARTITION_EXECUTION_IF_NOT_STOPPING = "update-partition-execution-if-not-stopping";
     private static final String STOP_PARTITION_EXECUTION = "stop-partition-execution";
 
+    //keys used by the administrative stale-execution operations
+    private static final String COUNT_STALE_JOB_EXECUTIONS = "count-stale-job-executions";
+    private static final String SELECT_STALE_JOB_EXECUTIONS = "select-stale-job-executions";
+    private static final String SELECT_JOB_EXECUTIONS_FOR_FAIL = "select-job-executions-for-fail";
+    private static final String FAIL_JOB_EXECUTION = "fail-job-execution";
+    private static final String FAIL_STEP_EXECUTIONS_OF_JOB_EXECUTION = "fail-step-executions-of-job-execution";
+    private static final String FAIL_PARTITION_EXECUTIONS_OF_JOB_EXECUTION = "fail-partition-executions-of-job-execution";
+
+    /**
+     * Maximum number of values bound into one {@code IN (...)} list. Oracle rejects more than 1000;
+     * staying well under that keeps the statement cache from being flooded with distinct shapes too.
+     */
+    private static final int IN_LIST_CHUNK = 500;
+
     private final DataSource dataSource;
     private final String dbUrl;
     private final String userDefinedDdlFile;
@@ -108,6 +130,21 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     private final Properties sqls = new Properties();
     private boolean isOracle;
     private int[] idIndexInOracle;
+
+    /**
+     * Set by the wiring layer when a real {@code TransactionManager} is available. Null in plain
+     * Java SE, in which case this repository drives its own local JDBC transaction.
+     *
+     * @see #setTransactionManager(TransactionManager)
+     */
+    private volatile TransactionManager transactionManager;
+
+    /**
+     * Whether the configured {@code select-stale-job-executions} does its own offsetting. Worked
+     * out from the statement the first time it is prepared; see
+     * {@link #hasOffsetParameters(PreparedStatement)}.
+     */
+    private volatile Boolean staleSelectTakesOffsetParameters;
 
     public static JdbcRepository create(final Properties configProperties) {
         return new JdbcRepository(configProperties);
@@ -677,6 +714,408 @@ public final class JdbcRepository extends AbstractPersistentRepository {
     public List<Long> getJobExecutionsByJob(String jobName, Integer limit) {
         final String select = sqls.getProperty(SELECT_JOB_EXECUTIONS_BY_JOB_NAME);
         return getJobExecutions0(select, jobName, false, limit);
+    }
+
+    /**
+     * Supplies the transaction manager this repository should consult before deciding whether to
+     * drive its own JDBC transaction.
+     * <p>
+     * Call this from the wiring layer when the environment has a real JTA transaction manager and a
+     * JTA-aware data source. When it is unset — or set to {@link LocalTransactionManager}, whose
+     * {@code begin}/{@code commit} only move a {@code ThreadLocal} and touch no connection — this
+     * repository manages {@code autoCommit}, {@code commit} and {@code rollback} itself, which is
+     * the correct behaviour outside a container.
+     *
+     * @param transactionManager the transaction manager, or {@code null} for none
+     *
+     * @since 3.2.1
+     */
+    public void setTransactionManager(final TransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long countStaleExecutions(final String jobName, final Date notUpdatedSince) {
+        if (jobName == null) {
+            throw BatchMessages.MESSAGES.nullVar("jobName");
+        }
+        if (notUpdatedSince == null) {
+            throw BatchMessages.MESSAGES.nullVar("notUpdatedSince");
+        }
+        final String select = sqls.getProperty(COUNT_STALE_JOB_EXECUTIONS);
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        try {
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(select);
+            preparedStatement.setString(1, jobName);
+            preparedStatement.setTimestamp(2, new Timestamp(notUpdatedSince.getTime()));
+            rs = preparedStatement.executeQuery();
+            return rs.next() ? rs.getLong(1) : 0L;
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null, rs);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * A deployment that wants true server-side offsetting overrides
+     * {@code select-stale-job-executions} in its own {@code sql-file} with a statement taking two
+     * extra parameters, for example
+     * {@code ... ORDER BY JOBEXECUTIONID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY}. That is detected
+     * here from the statement's parameter count and the offset and row count are bound instead of
+     * being applied client-side.
+     */
+    @Override
+    public List<Long> findStaleExecutionIds(final String jobName, final Date notUpdatedSince,
+                                            final int start, final int count) {
+        if (jobName == null) {
+            throw BatchMessages.MESSAGES.nullVar("jobName");
+        }
+        if (notUpdatedSince == null) {
+            throw BatchMessages.MESSAGES.nullVar("notUpdatedSince");
+        }
+        if (start < 0 || count <= 0) {
+            throw BatchMessages.MESSAGES.invalidPagination(start, count);
+        }
+        final String select = sqls.getProperty(SELECT_STALE_JOB_EXECUTIONS);
+        final List<Long> result = new ArrayList<Long>(Math.min(count, 1000));
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        try {
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(select,
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement.setString(1, jobName);
+            preparedStatement.setTimestamp(2, new Timestamp(notUpdatedSince.getTime()));
+
+            final boolean serverSideOffset = hasOffsetParameters(preparedStatement);
+            final int clientSideSkip;
+            if (serverSideOffset) {
+                preparedStatement.setInt(3, start);
+                preparedStatement.setInt(4, count);
+                clientSideSkip = 0;
+            } else {
+                clientSideSkip = start;
+                final long ceiling = (long) start + (long) count;
+                preparedStatement.setMaxRows(ceiling > Integer.MAX_VALUE ? 0 : (int) ceiling);
+            }
+            preparedStatement.setFetchSize(Math.min(count, 1000));
+
+            rs = preparedStatement.executeQuery();
+            int seen = 0;
+            while (rs.next()) {
+                if (seen++ < clientSideSkip) {
+                    continue;
+                }
+                result.add(rs.getLong(1));
+                if (result.size() == count) {
+                    break;
+                }
+            }
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, select);
+        } finally {
+            close(connection, preparedStatement, null, rs);
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Writes go children first: partitions, then steps, then the job execution (matching the lock
+     * order the runtime's own completion path takes, so an administrative fail racing a step that
+     * is finishing cannot deadlock against it). Every {@code UPDATE} carries its own
+     * {@code BATCHSTATUS} guard, which makes the affected-row count the optimistic-concurrency
+     * check: 1 means this call won the race, 0 means the execution moved and the id is reported as
+     * {@link FailOutcome.Kind#CONCURRENTLY_MODIFIED} rather than being silently dropped.
+     */
+    @Override
+    public Map<Long, FailOutcome> failJobExecutions(final Collection<Long> executionIds,
+                                                    final String jobName, final String exitStatus,
+                                                    final Date now) {
+        final Map<Long, FailOutcome> outcomes = new LinkedHashMap<Long, FailOutcome>();
+        if (executionIds == null || executionIds.isEmpty()) {
+            return outcomes;
+        }
+        final Timestamp ts = new Timestamp((now == null ? new Date() : now).getTime());
+        Connection connection = null;
+        Boolean priorAutoCommit = null;
+        try {
+            connection = getConnection();
+            final boolean manageTx = !isContainerTransactionActive();
+            if (manageTx) {
+                priorAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+            }
+
+            // --- phase 1: read the current state of every requested id ---
+            final Map<Long, BatchStatus> observed = new HashMap<Long, BatchStatus>();
+            final Map<Long, String> owners = new HashMap<Long, String>();
+            readExecutionsForFail(connection, executionIds, observed, owners);
+
+            // --- phase 2: classify, and batch the writes for the ones that qualify ---
+            final List<Long> toFail = new ArrayList<Long>();
+            for (final Long id : executionIds) {
+                final BatchStatus status = observed.get(id);
+                if (status == null) {
+                    outcomes.put(id, FailOutcome.notFound());
+                } else if (jobName != null && !jobName.equals(owners.get(id))) {
+                    outcomes.put(id, FailOutcome.notInScope());
+                } else if (status != BatchStatus.STARTED && status != BatchStatus.STOPPING) {
+                    outcomes.put(id, FailOutcome.invalidStatus(status));
+                } else {
+                    toFail.add(id);
+                }
+            }
+
+            if (!toFail.isEmpty()) {
+                writeFailures(connection, toFail, observed, outcomes, exitStatus, ts);
+            }
+
+            if (manageTx) {
+                connection.commit();
+            }
+
+            // --- phase 3: write through to the in-memory cache, AFTER the commit ---
+            applyFailureToCache(outcomes, exitStatus, ts.getTime());
+            return outcomes;
+        } catch (final Exception e) {
+            if (priorAutoCommit != null && connection != null) {
+                try {
+                    connection.rollback();
+                } catch (final SQLException re) {
+                    e.addSuppressed(re);
+                }
+            }
+            throw BatchMessages.MESSAGES.failToFailJobExecutions(e, executionIds);
+        } finally {
+            if (priorAutoCommit != null && connection != null) {
+                try {
+                    connection.setAutoCommit(priorAutoCommit);
+                } catch (final SQLException ignore) {
+                    //the connection is about to be closed; nothing useful to do here
+                }
+            }
+            close(connection, null, null, null);
+        }
+    }
+
+    /**
+     * Reads the batch status and owning job name of every requested execution, chunking the
+     * {@code IN} list so that no single statement exceeds {@link #IN_LIST_CHUNK} values.
+     */
+    private void readExecutionsForFail(final Connection connection, final Collection<Long> executionIds,
+                                       final Map<Long, BatchStatus> observed,
+                                       final Map<Long, String> owners) throws SQLException {
+        final String template = sqls.getProperty(SELECT_JOB_EXECUTIONS_FOR_FAIL);
+        for (final List<Long> chunk : partition(executionIds, IN_LIST_CHUNK)) {
+            final String sql = String.format(template, placeholders(chunk.size()));
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                int i = 1;
+                for (final Long id : chunk) {
+                    ps.setLong(i++, id);
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        final long id = rs.getLong(1);
+                        observed.put(id, BatchStatus.valueOf(rs.getString(2)));
+                        owners.put(id, rs.getString(3));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Issues the three guarded {@code UPDATE} groups, children first, and derives each id's outcome
+     * from the affected-row count of the job execution update.
+     */
+    private void writeFailures(final Connection connection, final List<Long> toFail,
+                               final Map<Long, BatchStatus> observed,
+                               final Map<Long, FailOutcome> outcomes,
+                               final String exitStatus, final Timestamp ts) throws SQLException {
+        try (PreparedStatement failPartitions =
+                     connection.prepareStatement(sqls.getProperty(FAIL_PARTITION_EXECUTIONS_OF_JOB_EXECUTION));
+             PreparedStatement failSteps =
+                     connection.prepareStatement(sqls.getProperty(FAIL_STEP_EXECUTIONS_OF_JOB_EXECUTION));
+             PreparedStatement failJob =
+                     connection.prepareStatement(sqls.getProperty(FAIL_JOB_EXECUTION))) {
+
+            for (final Long id : toFail) {
+                //PARTITION_EXECUTION has no ENDTIME column, so only status and exit status are set
+                failPartitions.setString(1, exitStatus);
+                failPartitions.setLong(2, id);
+                failPartitions.addBatch();
+
+                failSteps.setString(1, exitStatus);
+                failSteps.setTimestamp(2, ts);
+                failSteps.setLong(3, id);
+                failSteps.addBatch();
+
+                failJob.setString(1, exitStatus);
+                failJob.setTimestamp(2, ts);
+                failJob.setTimestamp(3, ts);
+                failJob.setLong(4, id);
+                failJob.addBatch();
+            }
+            failPartitions.executeBatch();
+            failSteps.executeBatch();
+            final int[] jobCounts = failJob.executeBatch();
+
+            boolean countsUnknown = jobCounts.length != toFail.size();
+            if (!countsUnknown) {
+                for (int k = 0; k < toFail.size(); k++) {
+                    if (jobCounts[k] == Statement.SUCCESS_NO_INFO) {
+                        countsUnknown = true;
+                        break;
+                    }
+                }
+            }
+            if (countsUnknown) {
+                //some drivers do not report per-row counts; re-read inside the same transaction
+                verifyByReRead(connection, toFail, observed, outcomes);
+            } else {
+                for (int k = 0; k < toFail.size(); k++) {
+                    final Long id = toFail.get(k);
+                    outcomes.put(id, jobCounts[k] == 1 ? FailOutcome.failed()
+                            : FailOutcome.concurrentlyModified(observed.get(id)));
+                }
+            }
+        }
+    }
+
+    /**
+     * Fallback for drivers that return {@link Statement#SUCCESS_NO_INFO} from {@code executeBatch}:
+     * re-reads the attempted ids inside the still-open transaction and classifies each by whether
+     * it now reads back as {@code FAILED}.
+     */
+    private void verifyByReRead(final Connection connection, final List<Long> toFail,
+                                final Map<Long, BatchStatus> observed,
+                                final Map<Long, FailOutcome> outcomes) throws SQLException {
+        final Map<Long, BatchStatus> current = new HashMap<Long, BatchStatus>();
+        readExecutionsForFail(connection, toFail, current, new HashMap<Long, String>());
+        for (final Long id : toFail) {
+            outcomes.put(id, current.get(id) == BatchStatus.FAILED ? FailOutcome.failed()
+                    : FailOutcome.concurrentlyModified(observed.get(id)));
+        }
+    }
+
+    /**
+     * Decides whether a real JTA transaction owns this unit of work.
+     * @return true when transaction control must be left to the container
+     */
+    private boolean isContainerTransactionActive() {
+        final TransactionManager tm = transactionManager;
+        if (tm == null || tm instanceof LocalTransactionManager) {
+            return false;
+        }
+        try {
+            return tm.getStatus() == Status.STATUS_ACTIVE;
+        } catch (final SystemException e) {
+            BatchLogger.LOGGER.tracef(e, "Failed to read transaction status from %s", tm);
+            return false;
+        }
+    }
+
+    /**
+     * Applies a committed administrative failure to the cached execution objects.
+     * <p>
+     * This is not optional. {@link #getJobExecution(long)} returns the cached object without
+     * re-reading as soon as the execution has at least one step execution, so a bulk {@code UPDATE}
+     * that touched only the database would leave {@code getJobExecution(id)} reporting
+     * {@code STARTED} for the lifetime of the cached soft reference.
+     */
+    private void applyFailureToCache(final Map<Long, FailOutcome> outcomes, final String exitStatus,
+                                     final long now) {
+        for (final Map.Entry<Long, FailOutcome> entry : outcomes.entrySet()) {
+            if (entry.getValue().kind() != FailOutcome.Kind.FAILED) {
+                continue;
+            }
+            final SoftReference<JobExecutionImpl, Long> ref = jobExecutions.get(entry.getKey());
+            final JobExecutionImpl jobExecution = ref == null ? null : ref.get();
+            if (jobExecution == null) {
+                continue;
+            }
+            try {
+                InMemoryAdminOperations.applyFailure(jobExecution, exitStatus, new Date(now));
+            } catch (final RuntimeException e) {
+                //the database change is already committed; refreshing the cache is best-effort and
+                //must not turn a successful operation into a reported rollback
+                BatchLogger.LOGGER.warnf(e,
+                        "Failed to refresh the cached job execution %s after failing it administratively",
+                        entry.getKey());
+            }
+        }
+    }
+
+    /**
+     * Splits a collection into consecutive sub-lists of at most {@code size} elements.
+     *
+     * @param values the values to split, not null
+     * @param size   the maximum size of each chunk, greater than 0
+     *
+     * @return the chunks, in iteration order of {@code values}
+     */
+    private static List<List<Long>> partition(final Collection<Long> values, final int size) {
+        final List<List<Long>> chunks = new ArrayList<List<Long>>();
+        List<Long> chunk = new ArrayList<Long>(Math.min(size, values.size()));
+        for (final Long value : values) {
+            chunk.add(value);
+            if (chunk.size() == size) {
+                chunks.add(chunk);
+                chunk = new ArrayList<Long>(size);
+            }
+        }
+        if (!chunk.isEmpty()) {
+            chunks.add(chunk);
+        }
+        return chunks;
+    }
+
+    /**
+     * @param count the number of placeholders needed, greater than 0
+     *
+     * @return a comma-separated run of {@code count} JDBC parameter markers
+     */
+    private static String placeholders(final int count) {
+        final StringBuilder sb = new StringBuilder(count * 2);
+        for (int i = 0; i < count; i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append('?');
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Detects a user-supplied {@code select-stale-job-executions} that does its own offsetting,
+     * which it signals by taking two parameters beyond the job name and the cut-off.
+     *
+     * @return true when the statement accepts offset and row-count parameters
+     */
+    private boolean hasOffsetParameters(final PreparedStatement preparedStatement) {
+        Boolean cached = staleSelectTakesOffsetParameters;
+        if (cached == null) {
+            try {
+                cached = preparedStatement.getParameterMetaData().getParameterCount() >= 4;
+            } catch (final Throwable e) {
+                //ParameterMetaData is optional and some drivers throw rather than answer
+                cached = Boolean.FALSE;
+            }
+            staleSelectTakesOffsetParameters = cached;
+        }
+        return cached;
     }
 
     @Override

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2026 Red Hat, Inc. and/or its affiliates.
+
+ This program and the accompanying materials are made
+ available under the terms of the Eclipse Public License 2.0
+ which is available at https://www.eclipse.org/legal/epl-2.0/
+
+ SPDX-License-Identifier: EPL-2.0
+-->
+
+<!--
+ Runs AdminOperationsBatchlet, the worked reaper example. Pointing targetJobName at this job's own
+ name is the self-protection scenario: the reaper finds its own execution among the stale ones and
+ must not fail itself.
+-->
+<job id="org.jberet.se.test.adminOpsReaper" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
+    <step id="reapStep">
+        <batchlet ref="adminOperationsBatchlet">
+            <properties>
+                <property name="targetJobName" value="#{jobParameters['targetJobName']}"/>
+                <property name="staleMinutes" value="#{jobParameters['staleMinutes']}?:0;"/>
+                <property name="pageSize" value="#{jobParameters['pageSize']}?:100;"/>
+                <property name="restartAfterFail" value="#{jobParameters['restartAfterFail']}?:false;"/>
+                <property name="exitStatusOnFail" value="#{jobParameters['exitStatusOnFail']}?:FAILED_BY_REAPER;"/>
+                <property name="selfProtect" value="#{jobParameters['selfProtect']}?:true;"/>
+            </properties>
+        </batchlet>
+    </step>
+</job>

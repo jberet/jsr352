@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2026 Red Hat, Inc. and/or its affiliates.
+
+ This program and the accompanying materials are made
+ available under the terms of the Eclipse Public License 2.0
+ which is available at https://www.eclipse.org/legal/epl-2.0/
+
+ SPDX-License-Identifier: EPL-2.0
+-->
+
+<!--
+ Target job for FailJobExecutionsSETest. It has its own job name, separate from
+ org.jberet.se.test.adminOps, so that two test classes sharing the H2 job repository cannot
+ see each other's executions, and separate from batchlet1 and friends, whose job instances
+ JobDataTest asserts against.
+-->
+<job id="org.jberet.se.test.adminOpsFail" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
+    <step id="adminOpsStep">
+        <batchlet ref="adminOpsTargetBatchlet">
+            <properties>
+                <property name="block" value="#{jobParameters['block']}?:false;"/>
+            </properties>
+        </batchlet>
+    </step>
+</job>

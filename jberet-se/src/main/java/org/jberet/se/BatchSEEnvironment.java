@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import jakarta.transaction.TransactionManager;
 
+import org.jberet.repository.JdbcRepository;
 import org.jberet.repository.JobRepository;
 import org.jberet.se._private.SEBatchLogger;
 import org.jberet.se._private.SEBatchMessages;
@@ -185,7 +186,14 @@ public final class BatchSEEnvironment implements BatchEnvironment {
 
     @Override
     public JobRepository getJobRepository() {
-        return JobRepositoryFactory.getJobRepository(configProperties);
+        final JobRepository jobRepository = JobRepositoryFactory.getJobRepository(configProperties);
+        if (jobRepository instanceof JdbcRepository) {
+            //tells the jdbc repository which transaction manager it is running under. In Java SE
+            //that is LocalTransactionManager, which the repository recognises and ignores, driving
+            //its own JDBC transactions instead.
+            ((JdbcRepository) jobRepository).setTransactionManager(tm);
+        }
+        return jobRepository;
     }
 
     @Override

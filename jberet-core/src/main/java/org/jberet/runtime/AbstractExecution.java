@@ -61,6 +61,22 @@ public abstract class AbstractExecution implements Cloneable, Serializable {
         return batchStatus;
     }
 
+    /**
+     * Sets the end time of this execution, in milliseconds since the epoch.
+     * <p>
+     * {@link #setBatchStatus(BatchStatus)} already stamps the end time with the current time when
+     * it moves to a terminal status. This setter exists for the cases that must record a time
+     * chosen by the caller instead, so that an in-memory execution object agrees with what was
+     * written to the job repository.
+     *
+     * @param endTime the end time in milliseconds since the epoch; {@code 0} or less clears it
+     *
+     * @since 2.2.0
+     */
+    public void setEndTime(final long endTime) {
+        this.endTime = endTime;
+    }
+
     public void setExitStatus(final String exitStatus) {
         this.exitStatus = exitStatus;
     }
