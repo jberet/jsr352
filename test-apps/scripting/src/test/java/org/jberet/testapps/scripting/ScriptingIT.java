@@ -63,13 +63,11 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void batchletRubySrc() throws Exception {
-        Assumptions.assumeTrue(Runtime.version().feature() <= 11);
         test0("batchletRubySrc");
     }
 
     @Test
     public void batchletRubyInline() throws Exception {
-        Assumptions.assumeTrue(Runtime.version().feature() <= 11);
         test0("batchletRubyInline");
     }
 
@@ -122,7 +120,8 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void chunkRuby() throws Exception {
-        Assumptions.assumeTrue(Runtime.version().feature() <= 11);
+        // On JDK 17, JRuby fails to load stringio (required by csv) with UnsupportedClassVersionError
+        Assumptions.assumeTrue(Runtime.version().feature() >= 21, "JRuby fails to load stringio on JDK 17");
         test0("chunkRuby");
     }
 
