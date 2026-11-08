@@ -19,6 +19,7 @@ import java.nio.file.StandardCopyOption;
 import jakarta.batch.runtime.BatchStatus;
 import org.jberet.testapps.common.AbstractIT;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -119,6 +120,8 @@ public class ScriptingIT extends AbstractIT {
 
     @Test
     public void chunkRuby() throws Exception {
+        // On JDK 17, JRuby fails to load stringio (required by csv) with UnsupportedClassVersionError
+        Assumptions.assumeTrue(Runtime.version().feature() >= 21, "JRuby fails to load stringio on JDK 17");
         test0("chunkRuby");
     }
 
