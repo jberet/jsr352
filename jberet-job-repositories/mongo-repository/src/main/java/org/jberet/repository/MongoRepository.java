@@ -29,11 +29,15 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientException;
 import com.mongodb.MongoClientURI;
+import com.mongodb.MongoCommandException;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import org.jberet._private.BatchLogger;
 import org.jberet._private.BatchMessages;
 import org.jberet.runtime.AbstractStepExecution;
@@ -44,11 +48,27 @@ import org.jberet.runtime.StepExecutionImpl;
 import org.jberet.util.BatchUtil;
 
 public final class MongoRepository extends AbstractPersistentRepository {
+    /**
+     * Matches any document whose {@code BATCHSTATUS} has not been set to {@code STOPPING}.
+     */
+    private static final BasicDBObject NOT_STOPPING =
+            new BasicDBObject("$ne", BatchStatus.STOPPING.name());
+
     private String dataSourceName;
     private String dbUrl;
     private MongoClient mongoClient;
     private MongoDatabase db;
     private MongoCollection<DBObject> seqCollection;
+
+    /**
+     * Whether the connected MongoDB deployment can run multi-document transactions. Transactions require a
+     * replica set or a sharded cluster running MongoDB 4.0 or later; standalone servers and servers older than
+     * 4.0 reject them. The capability is discovered on first use and remembered, so that a deployment without
+     * transaction support is not probed on every checkpoint.
+     *
+     * @see #saveStepAndJobExecution(StepExecutionImpl, long)
+     */
+    private volatile boolean transactionsSupported = true;
 
     public static MongoRepository create(final Properties configProperties) {
         return new MongoRepository(configProperties);
@@ -364,31 +384,49 @@ public final class MongoRepository extends AbstractPersistentRepository {
 
     @Override
     public void updateStepExecution(final StepExecution stepExecution) {
-        final StepExecutionImpl stepExecutionImpl = (StepExecutionImpl) stepExecution;
         try {
-            final DBObject update = new BasicDBObject(TableColumns.ENDTIME, stepExecution.getEndTime());
-            update.put(TableColumns.BATCHSTATUS, stepExecution.getBatchStatus().name());
-            update.put(TableColumns.EXITSTATUS, stepExecution.getExitStatus());
-            update.put(TableColumns.EXECUTIONEXCEPTION, TableColumns.formatException(stepExecutionImpl.getException()));
-            update.put(TableColumns.PERSISTENTUSERDATA, stepExecutionImpl.getPersistentUserDataSerialized());
-            update.put(TableColumns.READCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
-            update.put(TableColumns.WRITECOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
-            update.put(TableColumns.COMMITCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
-            update.put(TableColumns.ROLLBACKCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.ROLLBACK_COUNT));
-            update.put(TableColumns.READSKIPCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_SKIP_COUNT));
-            update.put(TableColumns.PROCESSSKIPCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
-            update.put(TableColumns.FILTERCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
-            update.put(TableColumns.WRITESKIPCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
-            update.put(TableColumns.READERCHECKPOINTINFO, stepExecutionImpl.getReaderCheckpointInfoSerialized());
-            update.put(TableColumns.WRITERCHECKPOINTINFO, stepExecutionImpl.getWriterCheckpointInfoSerialized());
-
             db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class).updateOne(
                     new BasicDBObject(TableColumns.STEPEXECUTIONID, stepExecution.getStepExecutionId()),
-                    new BasicDBObject("$set", update));
+                    new BasicDBObject("$set", stepExecutionUpdate((StepExecutionImpl) stepExecution)));
 
         } catch (final Exception e) {
             throw BatchMessages.MESSAGES.failToRunQuery(e, "updateStepExecution");
         }
+    }
+
+    /**
+     * Builds the {@code $set} document that persists the mutable state of a step execution.
+     */
+    private static DBObject stepExecutionUpdate(final StepExecutionImpl stepExecutionImpl) {
+        final DBObject update = new BasicDBObject(TableColumns.ENDTIME, stepExecutionImpl.getEndTime());
+        update.put(TableColumns.BATCHSTATUS, stepExecutionImpl.getBatchStatus().name());
+        update.put(TableColumns.EXITSTATUS, stepExecutionImpl.getExitStatus());
+        update.put(TableColumns.EXECUTIONEXCEPTION, TableColumns.formatException(stepExecutionImpl.getException()));
+        update.put(TableColumns.PERSISTENTUSERDATA, stepExecutionImpl.getPersistentUserDataSerialized());
+        update.put(TableColumns.READCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_COUNT));
+        update.put(TableColumns.WRITECOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_COUNT));
+        update.put(TableColumns.COMMITCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.COMMIT_COUNT));
+        update.put(TableColumns.ROLLBACKCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.ROLLBACK_COUNT));
+        update.put(TableColumns.READSKIPCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.READ_SKIP_COUNT));
+        update.put(TableColumns.PROCESSSKIPCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.PROCESS_SKIP_COUNT));
+        update.put(TableColumns.FILTERCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.FILTER_COUNT));
+        update.put(TableColumns.WRITESKIPCOUNT, stepExecutionImpl.getStepMetrics().get(Metric.MetricType.WRITE_SKIP_COUNT));
+        update.put(TableColumns.READERCHECKPOINTINFO, stepExecutionImpl.getReaderCheckpointInfoSerialized());
+        update.put(TableColumns.WRITERCHECKPOINTINFO, stepExecutionImpl.getWriterCheckpointInfoSerialized());
+        return update;
+    }
+
+    /**
+     * Builds the {@code $set} document that persists the mutable state of a partition execution.
+     */
+    private static DBObject partitionExecutionUpdate(final PartitionExecutionImpl partitionExecution) {
+        final DBObject update = new BasicDBObject(TableColumns.BATCHSTATUS, partitionExecution.getBatchStatus().name());
+        update.put(TableColumns.EXITSTATUS, partitionExecution.getExitStatus());
+        update.put(TableColumns.EXECUTIONEXCEPTION, TableColumns.formatException(partitionExecution.getException()));
+        update.put(TableColumns.PERSISTENTUSERDATA, partitionExecution.getPersistentUserDataSerialized());
+        update.put(TableColumns.READERCHECKPOINTINFO, partitionExecution.getReaderCheckpointInfoSerialized());
+        update.put(TableColumns.WRITERCHECKPOINTINFO, partitionExecution.getWriterCheckpointInfoSerialized());
+        return update;
     }
 
     @Override
@@ -408,18 +446,152 @@ public final class MongoRepository extends AbstractPersistentRepository {
                 final BasicDBObject query = new BasicDBObject(TableColumns.STEPEXECUTIONID, partitionExecution.getStepExecutionId());
                 query.put(TableColumns.PARTITIONEXECUTIONID, partitionExecution.getPartitionId());
 
-                final DBObject update = new BasicDBObject(TableColumns.BATCHSTATUS, partitionExecution.getBatchStatus().name());
-                update.put(TableColumns.EXITSTATUS, partitionExecution.getExitStatus());
-                update.put(TableColumns.EXECUTIONEXCEPTION, TableColumns.formatException(partitionExecution.getException()));
-                update.put(TableColumns.PERSISTENTUSERDATA, partitionExecution.getPersistentUserDataSerialized());
-                update.put(TableColumns.READERCHECKPOINTINFO, partitionExecution.getReaderCheckpointInfoSerialized());
-                update.put(TableColumns.WRITERCHECKPOINTINFO, partitionExecution.getWriterCheckpointInfoSerialized());
-
-                db.getCollection(TableColumns.PARTITION_EXECUTION, DBObject.class).updateOne(query, new BasicDBObject("$set", update));
+                db.getCollection(TableColumns.PARTITION_EXECUTION, DBObject.class).updateOne(query,
+                        new BasicDBObject("$set", partitionExecutionUpdate(partitionExecution)));
             } catch (final Exception e) {
                 throw BatchMessages.MESSAGES.failToRunQuery(e, "savePersistentData");
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * In addition to saving the step execution, this method also refreshes the enclosing job execution's
+     * {@code LASTUPDATEDTIME}, so that the progress of a long-running job is visible after every checkpoint
+     * instead of only when the job ends. This mirrors the behaviour of
+     * {@link JdbcRepository#savePersistentDataIfNotStopping}.
+     * <p>
+     * A partition execution only updates its own document; the enclosing job execution is left alone, since the
+     * partitioned step itself reports the job's progress.
+     *
+     * @return 1 if the execution data was saved; 0 if the stored step or partition execution is already
+     *         {@code STOPPING}, in which case nothing is written
+     */
+    @Override
+    public int savePersistentDataIfNotStopping(final JobExecution jobExecution,
+                                               final AbstractStepExecution stepOrPartitionExecution) {
+        //super.savePersistentData() serialize persistent data and checkpoint info to avoid further modification
+        super.savePersistentData(jobExecution, stepOrPartitionExecution);
+
+        try {
+            if (stepOrPartitionExecution instanceof StepExecutionImpl) {
+                //stepExecution is for the main step, and should map to the STEP_EXECUTION collection
+                return saveStepAndJobExecution((StepExecutionImpl) stepOrPartitionExecution,
+                        jobExecution.getExecutionId());
+            }
+
+            //stepOrPartitionExecution is a partition execution, and should map to the PARTITION_EXECUTION collection
+            final PartitionExecutionImpl partitionExecution = (PartitionExecutionImpl) stepOrPartitionExecution;
+            final BasicDBObject query = new BasicDBObject(TableColumns.STEPEXECUTIONID, partitionExecution.getStepExecutionId());
+            query.put(TableColumns.PARTITIONEXECUTIONID, partitionExecution.getPartitionId());
+            query.put(TableColumns.BATCHSTATUS, NOT_STOPPING);
+
+            final UpdateResult result = db.getCollection(TableColumns.PARTITION_EXECUTION, DBObject.class)
+                    .updateOne(query, new BasicDBObject("$set", partitionExecutionUpdate(partitionExecution)));
+            return result.getMatchedCount() > 0 ? 1 : 0;
+        } catch (final Exception e) {
+            throw BatchMessages.MESSAGES.failToRunQuery(e, "savePersistentDataIfNotStopping");
+        }
+    }
+
+    /**
+     * Saves a step execution checkpoint and refreshes the enclosing job execution's {@code LASTUPDATEDTIME}.
+     * <p>
+     * Both writes are performed in a single multi-document transaction so that the job execution's
+     * {@code LASTUPDATEDTIME} can never advance without the matching step execution checkpoint having been
+     * saved. Transactions require a replica set or sharded cluster on MongoDB 4.0 or later; against a standalone
+     * server, or a server older than 4.0, the driver rejects the transaction and the two updates are applied
+     * sequentially instead. In that degraded mode the writes are not atomic, which is harmless because
+     * {@code LASTUPDATEDTIME} is progress metadata only, and the step execution is written first so the job
+     * execution never claims progress that was not saved.
+     *
+     * @param stepExecution  the step execution to save
+     * @param jobExecutionId the id of the enclosing job execution
+     * @return 1 if the step execution was saved, 0 if the stored step execution is already {@code STOPPING}
+     */
+    private int saveStepAndJobExecution(final StepExecutionImpl stepExecution, final long jobExecutionId) {
+        if (transactionsSupported) {
+            try (ClientSession session = mongoClient.startSession()) {
+                return session.withTransaction(() -> updateStepAndJobExecution(session, stepExecution, jobExecutionId));
+            } catch (final RuntimeException e) {
+                if (!isTransactionUnsupported(e)) {
+                    throw e;
+                }
+                //remember that this deployment cannot run transactions, so later checkpoints do not retry
+                transactionsSupported = false;
+                BatchLogger.LOGGER.tracef(e,
+                        "MongoDB deployment does not support transactions; " +
+                                "step execution and job execution checkpoints will be saved non-atomically%n");
+            }
+        }
+        return updateStepAndJobExecution(null, stepExecution, jobExecutionId);
+    }
+
+    /**
+     * Updates the {@code STEP_EXECUTION} document and, only if that document was not already {@code STOPPING},
+     * the {@code LASTUPDATEDTIME} of the enclosing {@code JOB_EXECUTION} document.
+     *
+     * @param session        the session to run both updates in, or {@code null} to run them without a session
+     * @param stepExecution  the step execution to save
+     * @param jobExecutionId the id of the enclosing job execution
+     * @return 1 if the step execution was saved, 0 if the stored step execution is already {@code STOPPING}
+     */
+    private int updateStepAndJobExecution(final ClientSession session,
+                                          final StepExecutionImpl stepExecution,
+                                          final long jobExecutionId) {
+        final BasicDBObject stepQuery = new BasicDBObject(TableColumns.STEPEXECUTIONID, stepExecution.getStepExecutionId());
+        stepQuery.put(TableColumns.BATCHSTATUS, NOT_STOPPING);
+        final BasicDBObject stepUpdate = new BasicDBObject("$set", stepExecutionUpdate(stepExecution));
+
+        final MongoCollection<DBObject> stepExecutions = db.getCollection(TableColumns.STEP_EXECUTION, DBObject.class);
+        final UpdateResult stepResult = session == null ?
+                stepExecutions.updateOne(stepQuery, stepUpdate) :
+                stepExecutions.updateOne(session, stepQuery, stepUpdate);
+
+        //only touch the job execution when the step execution row was actually written;
+        //a matched count of 0 means the step execution is STOPPING and nothing was persisted
+        if (stepResult.getMatchedCount() == 0) {
+            return 0;
+        }
+
+        final BasicDBObject jobQuery = new BasicDBObject(TableColumns.JOBEXECUTIONID, jobExecutionId);
+        final BasicDBObject jobUpdate = new BasicDBObject("$set",
+                new BasicDBObject(TableColumns.LASTUPDATEDTIME, new Date()));
+
+        final MongoCollection<DBObject> jobExecutions = db.getCollection(TableColumns.JOB_EXECUTION, DBObject.class);
+        if (session == null) {
+            jobExecutions.updateOne(jobQuery, jobUpdate);
+        } else {
+            jobExecutions.updateOne(session, jobQuery, jobUpdate);
+        }
+        return 1;
+    }
+
+    /**
+     * Tells whether {@code e} was raised because the connected MongoDB deployment cannot run multi-document
+     * transactions, as opposed to a genuine failure of the checkpoint itself.
+     */
+    private static boolean isTransactionUnsupported(final Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof MongoClientException) {
+                //"Sessions are not supported by ..." / "Transactions are not supported by ..."
+                return true;
+            }
+            if (t instanceof MongoCommandException) {
+                final int code = ((MongoCommandException) t).getErrorCode();
+                //20 IllegalOperation: "Transaction numbers are only allowed on a replica set member or mongos"
+                //59 CommandNotFound: the server predates the transaction commands
+                //263 OperationNotSupportedInTransaction
+                if (code == 20 || code == 59 || code == 263) {
+                    return true;
+                }
+            }
+            if (t.getCause() == t) {
+                break;
+            }
+        }
+        return false;
     }
 
     /*

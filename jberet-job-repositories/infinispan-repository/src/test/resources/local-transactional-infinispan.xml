@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright (c) 2026 Red Hat, Inc. and/or its affiliates.
+
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+
+SPDX-License-Identifier: EPL-2.0
+-->
+
+<!--
+The transactional counterpart of local-infinispan.xml, used by InfinispanRepositoryCheckpointTest to exercise the
+code path where InfinispanRepository wraps the STEP_EXECUTION and JOB_EXECUTION checkpoint writes in a single JTA
+transaction. Infinispan's own EmbeddedTransactionManager is used, so no application server is needed.
+-->
+<infinispan xmlns="urn:infinispan:config:16.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:infinispan:config:16.0 https://infinispan.org/schemas/infinispan-config-16.0.xsd">
+
+    <cache-container name="jberet-test-tx" default-cache="JOB_EXECUTION">
+
+        <serialization marshaller="org.infinispan.commons.marshall.JavaSerializationMarshaller">
+            <allow-list>
+                <!-- the execution objects and everything they reference (SerializableData, metrics, ...) -->
+                <regex>org\.jberet\..*</regex>
+                <regex>java\..*</regex>
+                <regex>jakarta\.batch\..*</regex>
+            </allow-list>
+        </serialization>
+
+        <local-cache name="JOB_INSTANCE">
+            <encoding media-type="application/x-java-serialized-object"/>
+            <transaction mode="FULL_XA" locking="PESSIMISTIC"
+                         transaction-manager-lookup="org.infinispan.transaction.lookup.EmbeddedTransactionManagerLookup"/>
+        </local-cache>
+
+        <local-cache name="JOB_EXECUTION">
+            <encoding media-type="application/x-java-serialized-object"/>
+            <transaction mode="FULL_XA" locking="PESSIMISTIC"
+                         transaction-manager-lookup="org.infinispan.transaction.lookup.EmbeddedTransactionManagerLookup"/>
+        </local-cache>
+
+        <local-cache name="STEP_EXECUTION">
+            <encoding media-type="application/x-java-serialized-object"/>
+            <transaction mode="FULL_XA" locking="PESSIMISTIC"
+                         transaction-manager-lookup="org.infinispan.transaction.lookup.EmbeddedTransactionManagerLookup"/>
+        </local-cache>
+
+        <local-cache name="PARTITION_EXECUTION">
+            <encoding media-type="application/x-java-serialized-object"/>
+            <transaction mode="FULL_XA" locking="PESSIMISTIC"
+                         transaction-manager-lookup="org.infinispan.transaction.lookup.EmbeddedTransactionManagerLookup"/>
+        </local-cache>
+
+        <local-cache name="seq">
+            <transaction mode="BATCH" locking="PESSIMISTIC"/>
+        </local-cache>
+    </cache-container>
+</infinispan>

@@ -35,6 +35,21 @@
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-commons</artifactId>
         </dependency>
+
+        <!-- InfinispanRepositoryCheckpointTest runs against embedded, local caches, so the Infinispan
+             dependencies above (provided scope) are all the "server" it needs. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- jgroups is excluded from infinispan-core, but Infinispan's configuration parser refers to it even
+             for a local cache with no <transport/>, so it has to be present when the tests parse a config. -->
+        <dependency>
+            <groupId>org.jgroups</groupId>
+            <artifactId>jgroups</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
