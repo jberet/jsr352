@@ -126,6 +126,22 @@ public class ScriptingIT extends AbstractIT {
         test0("chunkRuby");
     }
 
+    @Test
+    public void batchletGroovyUndefinedMethod() throws Exception {
+        testUndefinedMethod("batchletGroovyUndefinedMethod");
+    }
+
+    @Test
+    public void chunkGroovyUndefinedMethod() throws Exception {
+        testUndefinedMethod("chunkGroovyUndefinedMethod");
+    }
+
+    @Test
+    public void chunkRubyUndefinedMethod() throws Exception {
+        Assumptions.assumeTrue(Runtime.version().feature() <= 11);
+        testUndefinedMethod("chunkRubyUndefinedMethod");
+    }
+
     private static void copyResourceToTmpdir(final String resourcePath, final String targetFileName) throws IOException {
         final InputStream resourceAsStream = ScriptingIT.class.getClassLoader().getResourceAsStream(resourcePath);
         Files.copy(resourceAsStream, new File(System.getProperty("java.io.tmpdir"), targetFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -138,5 +154,19 @@ public class ScriptingIT extends AbstractIT {
         Assertions.assertEquals(BatchStatus.COMPLETED, stepExecution0.getBatchStatus());
         Assertions.assertTrue(jobExecution.getExitStatus().equals(testName) || jobExecution.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
         Assertions.assertTrue(stepExecution0.getExitStatus().equals(testName) || stepExecution0.getExitStatus().equals(BatchStatus.COMPLETED.toString()));
+    }
+
+    /**
+     * Verifies that a call to an undefined method inside a script function fails the step,
+     * instead of being treated as the function not being implemented.
+     */
+    void testUndefinedMethod(final String testName) throws Exception {
+        startJobAndWait(testName);
+        Assertions.assertEquals(BatchStatus.FAILED, jobExecution.getBatchStatus());
+        Assertions.assertEquals(BatchStatus.FAILED, stepExecution0.getBatchStatus());
+        //the exception type is not checked, since a non-serializable exception (e.g., from JRuby)
+        //is replaced with a BatchRuntimeException that keeps its message
+        Assertions.assertTrue(stepExecution0.getException().getMessage().contains("undefinedMethod"),
+                stepExecution0.getException().getMessage());
     }
 }
