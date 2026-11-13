@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2026 Red Hat, Inc. and/or its affiliates.
+
+ This program and the accompanying materials are made
+ available under the terms of the Eclipse Public License 2.0
+ which is available at https://www.eclipse.org/legal/epl-2.0/
+
+ SPDX-License-Identifier: EPL-2.0
+-->
+
+<job id="chunkGroovyUndefinedMethod" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd"
+     version="1.0">
+    <step id="chunkGroovyUndefinedMethod.step1">
+        <chunk item-count="3">
+            <reader>
+                <properties>
+                    <property name="resource" value="numbers.csv"/>
+                </properties>
+                <script type="groovy" src="groovy/ItemReader.groovy"/>
+            </reader>
+            <processor>
+                <script type="groovy">
+                    <![CDATA[
+                    //processItem calls an undefined method, which should fail the step
+                    //instead of being treated as processItem not being implemented.
+                    def processItem(item) {
+                        undefinedMethod(item);
+                        return item;
+                    }
+                ]]>
+                </script>
+            </processor>
+            <writer>
+                <script type="groovy">
+                    <![CDATA[
+                    def writeItems(items) {
+                        println('items to write: ' + items + '\n');
+                    }
+                ]]>
+                </script>
+            </writer>
+        </chunk>
+    </step>
+</job>
